@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
-import { BusinessCard, businessCardSchema } from "@shared/schema";
+import { BusinessCard, businessCardSchema, PageElement } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import { storage, fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { logEvent } from "@/lib/share";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
+import { PageBuilder } from "./page-builder";
 
 interface FormBuilderProps {
   cardData: BusinessCard;
@@ -461,6 +462,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 Add Social Platform
               </Button>
             </div>
+          </div>
+
+          {/* Page Builder */}
+          <div className="space-y-4">
+            <PageBuilder
+              elements={form.watch("pageElements") || []}
+              onElementsChange={(elements: PageElement[]) => {
+                form.setValue("pageElements", elements);
+              }}
+            />
           </div>
 
           {/* Branding */}

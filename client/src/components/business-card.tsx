@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { QRCodeSVG } from "qrcode.react";
 import { generateShareUrl } from "@/lib/share";
+import { PageElementRenderer } from "./page-element";
 
 interface BusinessCardProps {
   data: BusinessCard;
@@ -103,7 +104,23 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               {data.title || "Your Title"}
             </p>
             
-            {/* Contact Icons */}
+            {/* Dynamic Page Elements */}
+            {data.pageElements && data.pageElements.length > 0 ? (
+              <div className="mb-6">
+                {data.pageElements
+                  .sort((a, b) => a.order - b.order)
+                  .map((element) => (
+                    <PageElementRenderer
+                      key={element.id}
+                      element={element}
+                      isEditing={false}
+                    />
+                  ))
+                }
+              </div>
+            ) : (
+              <>
+            {/* Legacy Contact Icons - show only if no page elements */}
             <div className="flex justify-center space-x-3 mb-6 flex-wrap gap-y-3">
               {data.phone && (
                 <div className="flex flex-col items-center">
@@ -262,6 +279,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 <i className="fas fa-calendar mr-2"></i>Book Now
               </button>
             </div>
+              </>
+            )}
             
             {/* Expandable Sections */}
             <div className="space-y-2 mb-6">
