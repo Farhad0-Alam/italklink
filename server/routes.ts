@@ -10,10 +10,18 @@ import {
   insertTeamMemberSchema
 } from '@shared/schema';
 import { z } from 'zod';
+import { setupAIRoutes } from './ai-routes';
+
+
+
+
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   setupAuth(app);
+  
+  // Setup AI routes
+  setupAIRoutes(app);
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {
