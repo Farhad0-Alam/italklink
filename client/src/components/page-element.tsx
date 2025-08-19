@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
+import { generateFieldId } from "@/lib/card-data";
 
 // Image Slider Component
 interface ImageSliderComponentProps {
@@ -594,6 +595,408 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             ) : (
               element.data.images.length > 0 && (
                 <ImageSliderComponent images={element.data.images} />
+              )
+            )}
+          </div>
+        );
+
+      case "testimonials":
+        return (
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-4 text-center">
+              {element.data.title}
+            </h3>
+            {isEditing ? (
+              <div className="space-y-4">
+                <Input
+                  value={element.data.title}
+                  onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                  placeholder="Section title"
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+                <select
+                  value={element.data.displayStyle}
+                  onChange={(e) => handleDataUpdate({ displayStyle: e.target.value })}
+                  className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1 w-full"
+                >
+                  <option value="cards">Cards</option>
+                  <option value="slider">Slider</option>
+                  <option value="grid">Grid</option>
+                </select>
+                {element.data.testimonials.map((testimonial, index) => (
+                  <div key={testimonial.id} className="p-3 bg-slate-800 rounded border space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-white text-sm">Testimonial {index + 1}</span>
+                      <Button
+                        onClick={() => {
+                          const newTestimonials = element.data.testimonials.filter(t => t.id !== testimonial.id);
+                          handleDataUpdate({ testimonials: newTestimonials });
+                        }}
+                        variant="destructive"
+                        size="sm"
+                        className="w-6 h-6 p-0"
+                      >
+                        <i className="fas fa-times text-xs"></i>
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        value={testimonial.name}
+                        onChange={(e) => {
+                          const newTestimonials = element.data.testimonials.map(t => 
+                            t.id === testimonial.id ? { ...t, name: e.target.value } : t
+                          );
+                          handleDataUpdate({ testimonials: newTestimonials });
+                        }}
+                        placeholder="Customer name"
+                        className="bg-slate-700 border-slate-600 text-white"
+                      />
+                      <Input
+                        value={testimonial.title || ''}
+                        onChange={(e) => {
+                          const newTestimonials = element.data.testimonials.map(t => 
+                            t.id === testimonial.id ? { ...t, title: e.target.value } : t
+                          );
+                          handleDataUpdate({ testimonials: newTestimonials });
+                        }}
+                        placeholder="Job title"
+                        className="bg-slate-700 border-slate-600 text-white"
+                      />
+                    </div>
+                    <Input
+                      value={testimonial.company || ''}
+                      onChange={(e) => {
+                        const newTestimonials = element.data.testimonials.map(t => 
+                          t.id === testimonial.id ? { ...t, company: e.target.value } : t
+                        );
+                        handleDataUpdate({ testimonials: newTestimonials });
+                      }}
+                      placeholder="Company name"
+                      className="bg-slate-700 border-slate-600 text-white"
+                    />
+                    <Textarea
+                      value={testimonial.content}
+                      onChange={(e) => {
+                        const newTestimonials = element.data.testimonials.map(t => 
+                          t.id === testimonial.id ? { ...t, content: e.target.value } : t
+                        );
+                        handleDataUpdate({ testimonials: newTestimonials });
+                      }}
+                      placeholder="Testimonial text"
+                      className="bg-slate-700 border-slate-600 text-white"
+                    />
+                    <div className="flex items-center space-x-2">
+                      <span className="text-white text-sm">Rating:</span>
+                      <select
+                        value={testimonial.rating}
+                        onChange={(e) => {
+                          const newTestimonials = element.data.testimonials.map(t => 
+                            t.id === testimonial.id ? { ...t, rating: parseInt(e.target.value) } : t
+                          );
+                          handleDataUpdate({ testimonials: newTestimonials });
+                        }}
+                        className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
+                      >
+                        <option value={1}>1 Star</option>
+                        <option value={2}>2 Stars</option>
+                        <option value={3}>3 Stars</option>
+                        <option value={4}>4 Stars</option>
+                        <option value={5}>5 Stars</option>
+                      </select>
+                    </div>
+                  </div>
+                ))}
+                <Button
+                  onClick={() => {
+                    const newTestimonial = {
+                      id: generateFieldId(),
+                      name: "Customer Name",
+                      title: "Job Title",
+                      company: "Company Name",
+                      content: "Great service and experience!",
+                      rating: 5
+                    };
+                    handleDataUpdate({ testimonials: [...element.data.testimonials, newTestimonial] });
+                  }}
+                  className="w-full"
+                >
+                  <i className="fas fa-plus mr-2"></i>
+                  Add Testimonial
+                </Button>
+              </div>
+            ) : (
+              <div className={`grid gap-4 ${
+                element.data.displayStyle === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'
+              }`}>
+                {element.data.testimonials.map((testimonial) => (
+                  <div key={testimonial.id} className="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                    <div className="flex mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <i key={i} className={`fas fa-star text-sm ${
+                          i < testimonial.rating ? 'text-yellow-400' : 'text-slate-300'
+                        }`}></i>
+                      ))}
+                    </div>
+                    <p className="text-slate-600 mb-4 italic">"{testimonial.content}"</p>
+                    <div className="flex items-center space-x-3">
+                      {testimonial.avatar && (
+                        <img src={testimonial.avatar} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover" />
+                      )}
+                      <div>
+                        <p className="font-semibold text-slate-800">{testimonial.name}</p>
+                        {testimonial.title && <p className="text-sm text-slate-600">{testimonial.title}</p>}
+                        {testimonial.company && <p className="text-sm text-slate-500">{testimonial.company}</p>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
+      case "googleMaps":
+        return (
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-4 text-center">
+              {element.data.title}
+            </h3>
+            {isEditing ? (
+              <div className="space-y-4">
+                <Input
+                  value={element.data.title}
+                  onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                  placeholder="Map section title"
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+                <Input
+                  value={element.data.address}
+                  onChange={(e) => handleDataUpdate({ address: e.target.value })}
+                  placeholder="Address or location"
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-white text-sm mb-1 block">Zoom Level</label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="20"
+                      value={element.data.zoom}
+                      onChange={(e) => handleDataUpdate({ zoom: parseInt(e.target.value) || 15 })}
+                      className="bg-slate-700 border-slate-600 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-white text-sm mb-1 block">Map Type</label>
+                    <select
+                      value={element.data.mapType}
+                      onChange={(e) => handleDataUpdate({ mapType: e.target.value })}
+                      className="bg-slate-700 border-slate-600 text-white rounded px-2 py-2 w-full"
+                    >
+                      <option value="roadmap">Roadmap</option>
+                      <option value="satellite">Satellite</option>
+                      <option value="hybrid">Hybrid</option>
+                      <option value="terrain">Terrain</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={element.data.showMarker}
+                    onChange={(e) => handleDataUpdate({ showMarker: e.target.checked })}
+                    className="rounded"
+                  />
+                  <span className="text-white text-sm">Show location marker</span>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-slate-100 rounded-lg overflow-hidden">
+                <iframe
+                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dO7NoY0FzaYdtM&q=${encodeURIComponent(element.data.address)}&zoom=${element.data.zoom}&maptype=${element.data.mapType}`}
+                  width="100%"
+                  height={element.data.height}
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="w-full"
+                ></iframe>
+              </div>
+            )}
+          </div>
+        );
+
+      case "aiChatbot":
+        return (
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-4 text-center">
+              {element.data.title}
+            </h3>
+            {isEditing ? (
+              <div className="space-y-4">
+                <Input
+                  value={element.data.title}
+                  onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                  placeholder="Chatbot section title"
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+                <Input
+                  value={element.data.welcomeMessage}
+                  onChange={(e) => handleDataUpdate({ welcomeMessage: e.target.value })}
+                  placeholder="Welcome message"
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+                <div className="space-y-2">
+                  <label className="text-white text-sm">Knowledge Base Content:</label>
+                  <Textarea
+                    value={element.data.knowledgeBase.textContent || ''}
+                    onChange={(e) => handleDataUpdate({ 
+                      knowledgeBase: { 
+                        ...element.data.knowledgeBase, 
+                        textContent: e.target.value 
+                      } 
+                    })}
+                    placeholder="Enter knowledge base content..."
+                    rows={4}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+                <Input
+                  value={element.data.knowledgeBase.websiteUrl || ''}
+                  onChange={(e) => handleDataUpdate({ 
+                    knowledgeBase: { 
+                      ...element.data.knowledgeBase, 
+                      websiteUrl: e.target.value 
+                    } 
+                  })}
+                  placeholder="Website URL for knowledge extraction"
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+                <div className="space-y-2">
+                  <label className="text-white text-sm">PDF Documents:</label>
+                  <Input
+                    type="file"
+                    accept=".pdf"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      files.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          const newPdf = {
+                            id: generateFieldId(),
+                            name: file.name,
+                            content: event.target?.result as string,
+                            uploadedAt: new Date()
+                          };
+                          const currentPdfs = element.data.knowledgeBase.pdfFiles || [];
+                          handleDataUpdate({ 
+                            knowledgeBase: { 
+                              ...element.data.knowledgeBase, 
+                              pdfFiles: [...currentPdfs, newPdf] 
+                            } 
+                          });
+                        };
+                        reader.readAsDataURL(file);
+                      });
+                    }}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                  {element.data.knowledgeBase.pdfFiles.map((pdf) => (
+                    <div key={pdf.id} className="flex items-center justify-between bg-slate-800 p-2 rounded">
+                      <span className="text-white text-sm">{pdf.name}</span>
+                      <Button
+                        onClick={() => {
+                          const newPdfs = element.data.knowledgeBase.pdfFiles.filter(p => p.id !== pdf.id);
+                          handleDataUpdate({ 
+                            knowledgeBase: { 
+                              ...element.data.knowledgeBase, 
+                              pdfFiles: newPdfs 
+                            } 
+                          });
+                        }}
+                        variant="destructive"
+                        size="sm"
+                        className="w-6 h-6 p-0"
+                      >
+                        <i className="fas fa-times text-xs"></i>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-white text-sm mb-1 block">Position</label>
+                    <select
+                      value={element.data.appearance.position}
+                      onChange={(e) => handleDataUpdate({ 
+                        appearance: { 
+                          ...element.data.appearance, 
+                          position: e.target.value as any 
+                        } 
+                      })}
+                      className="bg-slate-700 border-slate-600 text-white rounded px-2 py-2 w-full"
+                    >
+                      <option value="bottom-right">Bottom Right</option>
+                      <option value="bottom-left">Bottom Left</option>
+                      <option value="embedded">Embedded</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-white text-sm mb-1 block">Primary Color</label>
+                    <Input
+                      type="color"
+                      value={element.data.appearance.primaryColor}
+                      onChange={(e) => handleDataUpdate({ 
+                        appearance: { 
+                          ...element.data.appearance, 
+                          primaryColor: e.target.value 
+                        } 
+                      })}
+                      className="bg-slate-700 border-slate-600 text-white h-10"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={element.data.isEnabled}
+                    onChange={(e) => handleDataUpdate({ isEnabled: e.target.checked })}
+                    className="rounded"
+                  />
+                  <span className="text-white text-sm">Enable chatbot</span>
+                </div>
+              </div>
+            ) : (
+              element.data.isEnabled && (
+                <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div 
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white"
+                      style={{ backgroundColor: element.data.appearance.primaryColor }}
+                    >
+                      <i className="fas fa-robot"></i>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-800">{element.data.title}</h4>
+                      <p className="text-sm text-slate-600">AI Assistant</p>
+                    </div>
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-lg mb-4">
+                    <p className="text-slate-700 text-sm">{element.data.welcomeMessage}</p>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-slate-500">
+                    <span>Knowledge Base: {element.data.knowledgeBase.textContent ? 'Text' : ''} {element.data.knowledgeBase.websiteUrl ? 'Website' : ''} {element.data.knowledgeBase.pdfFiles.length > 0 ? `${element.data.knowledgeBase.pdfFiles.length} PDFs` : ''}</span>
+                    <button 
+                      className="px-3 py-1 rounded text-white text-xs"
+                      style={{ backgroundColor: element.data.appearance.primaryColor }}
+                    >
+                      Start Chat
+                    </button>
+                  </div>
+                </div>
               )
             )}
           </div>

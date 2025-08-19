@@ -276,6 +276,62 @@ export const socialSectionElementSchema = baseElementSchema.extend({
   }),
 });
 
+export const testimonialsElementSchema = baseElementSchema.extend({
+  type: z.literal("testimonials"),
+  data: z.object({
+    title: z.string().default("What Our Clients Say"),
+    testimonials: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      title: z.string().optional(),
+      company: z.string().optional(),
+      content: z.string(),
+      avatar: z.string().optional(), // base64 image
+      rating: z.number().min(1).max(5).default(5),
+    })).default([]),
+    displayStyle: z.enum(["cards", "slider", "grid"]).default("cards"),
+  }),
+});
+
+export const googleMapsElementSchema = baseElementSchema.extend({
+  type: z.literal("googleMaps"),
+  data: z.object({
+    title: z.string().default("Find Us"),
+    address: z.string(),
+    latitude: z.number().optional(),
+    longitude: z.number().optional(),
+    zoom: z.number().min(1).max(20).default(15),
+    mapType: z.enum(["roadmap", "satellite", "hybrid", "terrain"]).default("roadmap"),
+    showMarker: z.boolean().default(true),
+    height: z.number().default(300), // in pixels
+  }),
+});
+
+export const aiChatbotElementSchema = baseElementSchema.extend({
+  type: z.literal("aiChatbot"),
+  data: z.object({
+    title: z.string().default("AI Assistant"),
+    welcomeMessage: z.string().default("Hi! How can I help you today?"),
+    knowledgeBase: z.object({
+      textContent: z.string().optional(),
+      websiteUrl: z.string().url().optional().or(z.literal("")),
+      pdfFiles: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        content: z.string(), // extracted text content
+        uploadedAt: z.date().optional(),
+      })).default([]),
+    }),
+    appearance: z.object({
+      position: z.enum(["bottom-right", "bottom-left", "embedded"]).default("bottom-right"),
+      primaryColor: z.string().default("#22c55e"),
+      chatHeight: z.number().default(400),
+      chatWidth: z.number().default(350),
+    }),
+    isEnabled: z.boolean().default(true),
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   headingElementSchema,
@@ -289,6 +345,9 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   imageSliderElementSchema,
   contactSectionElementSchema,
   socialSectionElementSchema,
+  testimonialsElementSchema,
+  googleMapsElementSchema,
+  aiChatbotElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;

@@ -74,6 +74,27 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       icon: "fas fa-images",
       color: "bg-pink-100",
       description: "Image carousel"
+    },
+    {
+      type: "testimonials",
+      title: "Testimonials",
+      icon: "fas fa-quote-right",
+      color: "bg-emerald-100",
+      description: "Customer reviews"
+    },
+    {
+      type: "googleMaps",
+      title: "Google Maps",
+      icon: "fas fa-map-marker-alt",
+      color: "bg-cyan-100",
+      description: "Embedded map location"
+    },
+    {
+      type: "aiChatbot",
+      title: "AI Chatbot",
+      icon: "fas fa-robot",
+      color: "bg-violet-100",
+      description: "Knowledge base assistant"
     }
   ];
 
@@ -192,6 +213,68 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           order: Date.now(),
           data: {
             images: []
+          }
+        };
+        break;
+      
+      case "testimonials":
+        element = {
+          id,
+          type: "testimonials",
+          order: Date.now(),
+          data: {
+            title: "What Our Clients Say",
+            testimonials: [
+              {
+                id: generateFieldId(),
+                name: "John Doe",
+                title: "CEO",
+                company: "Tech Corp",
+                content: "This service exceeded our expectations. Highly recommended!",
+                rating: 5
+              }
+            ],
+            displayStyle: "cards" as const
+          }
+        };
+        break;
+      
+      case "googleMaps":
+        element = {
+          id,
+          type: "googleMaps",
+          order: Date.now(),
+          data: {
+            title: "Find Us",
+            address: "New York, NY, USA",
+            zoom: 15,
+            mapType: "roadmap" as const,
+            showMarker: true,
+            height: 300
+          }
+        };
+        break;
+      
+      case "aiChatbot":
+        element = {
+          id,
+          type: "aiChatbot",
+          order: Date.now(),
+          data: {
+            title: "AI Assistant",
+            welcomeMessage: "Hi! How can I help you today?",
+            knowledgeBase: {
+              textContent: "",
+              websiteUrl: "",
+              pdfFiles: []
+            },
+            appearance: {
+              position: "bottom-right" as const,
+              primaryColor: "#22c55e",
+              chatHeight: 400,
+              chatWidth: 350
+            },
+            isEnabled: true
           }
         };
         break;
