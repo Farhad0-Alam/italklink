@@ -1,0 +1,110 @@
+Project: AI Digital Business Card Preview (Lead Magnet for 2TalkLink)
+
+Goal:
+Build a production-ready web app that lets users instantly preview a digital business card from a small form (name, title, phone, email, socials, logo, brand color, template). Users can export the preview as PNG and share a link. The app funnels users to 2TalkLink sign-up with a strong CTA.
+
+Stack:
+- Frontend: React + Vite + Tailwind CSS
+- Backend: Node.js + Express (only for healthcheck and optional webhook logging)
+- Libraries: 
+  - qrcode (or qrcode.react) for QR generation
+  - html-to-image for PNG export of the preview card
+  - zod for form validation
+  - i18next for en/bn localization
+- Storage: No DB. All user inputs stay in browser (localStorage). Do not upload user files to server.
+
+Pages & UX:
+1) /  (Home)
+   - Hero with headline: “Create a Free Digital Business Card Preview in 60 Seconds”
+   - Subtext: “Perfect preview. Save as PNG. Share a link. Upgrade to a full smart card with 2TalkLink.”
+   - Primary CTA button: “Create Your Card”
+   - Secondary CTA: “What is 2TalkLink?” → opens https://2talklink.com in new tab
+   - Trust badges (No sign-up, No credit card, Free)
+2) /builder
+   - Left column: Card form
+     Fields: Full Name, Title/Role, Company, About (short), Phone, Email, Website, Location
+     Socials: WhatsApp, Facebook, Instagram, LinkedIn, X/Twitter, YouTube, Telegram
+     Branding: Brand color (color picker), Accent color, Font (select 3 choices), Template (Minimal / Bold / Photo)
+     Media: Upload Logo + Profile Photo (client-side only; preview in-memory)
+     Controls: “Generate QR” (links to share URL), “Save Settings” (localStorage)
+   - Right column: Live card preview (responsive, 3 templates)
+     - Tappable phone/email/social icons
+     - QR code (links to the app’s share URL for this data)
+   - Actions under preview:
+     - “Download PNG” (use html-to-image to export the preview node)
+     - “Share Link” (copies a URL with a compact, base64-encoded JSON payload in the hash)
+     - Prominent CTA: “Get a Full Smart Card on 2TalkLink →” 
+       Link: https://2talklink.com/?utm_source=preview-app&utm_medium=cta&utm_campaign=free-tool
+3) /share
+   - Reads hash payload from URL, reconstructs the card, renders a read-only preview with QR
+   - CTA banner to 2TalkLink as above
+
+Functionality details:
+- Form validation with zod; show friendly inline errors
+- All form state persists to localStorage (key: “tl_preview_state”)
+- Image uploads are never sent to server; show preview via object URLs
+- Generate QR from the /share URL (with encoded payload)
+- PNG export: export only the card container for a clean image
+- Language toggle (EN/Bangla). Default EN, remember choice in localStorage.
+- Simple dark/light theme toggle
+
+Brand & UI:
+- Clean, modern, mobile-first. Use Tailwind.
+- Card templates:
+  1) Minimal: left-aligned text, subtle border, round avatar/logo
+  2) Bold: full-bleed brand color header, white card body
+  3) Photo: background image/gradient overlay with prominent name/title
+- Buttons: rounded-2xl, soft shadows, clear hierarchy of CTAs
+- Footer: tiny privacy note (“Your data lives in your browser. We do not upload files.”)
+
+Backend:
+- Express server with only:
+  - GET /health → { ok: true }
+  - POST /event (optional): if WEBHOOK_URL is set, forward minimal event logs (e.g., cta_click, export_png) to that webhook; otherwise no-op
+- Never store PII on the server
+
+SEO & Meta:
+- Title, meta description, Open Graph tags
+- Schema.org SoftwareApplication JSON-LD
+- Favicon & basic OG image
+- Robots.txt + sitemap (single-page friendly)
+
+Analytics (optional, privacy-first):
+- Lightweight, no cookies. Just console logs by default.
+- If WEBHOOK_URL present, POST minimal anonymized events (action, timestamp)
+
+Accessibility:
+- Contrast-checked palette
+- Labels for all inputs, aria-* where relevant
+- Keyboard navigation friendly
+
+Internationalization:
+- i18next with en and bn namespaces for common text (hero, buttons, labels)
+- Provide sample translations for all visible strings
+
+Security & Privacy:
+- No server-side storage of user content
+- Content Security Policy headers for basic protection
+- File size limits on uploads (e.g., 1.5MB)
+- Clear Privacy page/modal summarizing local-only processing
+
+Project structure:
+- /server (express)
+- /client (React + Vite + Tailwind)
+- Root scripts: 
+  - "dev": concurrently run client and server
+  - "build": build client, prepare server
+  - "start": serve built client via express static + API routes
+
+Deliverables:
+- Complete working code with README
+- README covers: install, dev, build, env vars (WEBHOOK_URL), and deployment on Replit
+- At least 5 unit tests for critical utilities (e.g., payload encode/decode, zod schema)
+
+Acceptance criteria:
+- I can run `npm install` then `npm run dev` on Replit and open the preview URL
+- I can fill the form, see live preview, generate QR, copy share link, and open /share that rebuilds the card
+- “Download PNG” produces a clean image of the card
+- Prominent CTA to 2TalkLink exists on / and /builder and /share with the given UTM
+- All data stays local unless I explicitly set WEBHOOK_URL
+- Language toggle between EN and Bangla works
