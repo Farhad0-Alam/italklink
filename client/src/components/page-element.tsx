@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { generateFieldId } from "@/lib/card-data";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // Image Slider Component
 interface ImageSliderComponentProps {
@@ -47,15 +48,88 @@ function ImageSliderComponent({ images }: ImageSliderComponentProps) {
                 />
               ))}
             </div>
-            <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
-              {currentSlide + 1} / {images.length}
-            </div>
           </>
         )}
       </div>
     </div>
   );
 }
+
+// Testimonials Slider Component
+interface TestimonialsSliderProps {
+  testimonials: any[];
+}
+
+function TestimonialsSlider({ testimonials }: TestimonialsSliderProps) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  
+  return (
+    <div className="relative">
+      <div className="overflow-hidden">
+        <div 
+          className="flex transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        >
+          {testimonials.map((testimonial, index) => (
+            <div key={testimonial.id} className="w-full flex-shrink-0 px-2">
+              <div className="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                <div className="flex items-center mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <i key={i} className="fas fa-star text-yellow-400"></i>
+                  ))}
+                </div>
+                <p className="text-slate-700 mb-4 italic">"{testimonial.content}"</p>
+                <div className="flex items-center">
+                  <div>
+                    <p className="font-semibold text-slate-800">{testimonial.name}</p>
+                    {testimonial.title && (
+                      <p className="text-sm text-slate-600">{testimonial.title}</p>
+                    )}
+                    {testimonial.company && (
+                      <p className="text-sm text-slate-500">{testimonial.company}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {testimonials.length > 1 && (
+        <>
+          <button
+            onClick={() => setCurrentSlide(prev => prev > 0 ? prev - 1 : testimonials.length - 1)}
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-lg text-slate-600 p-2 rounded-full hover:bg-slate-50 transition-colors"
+            data-testid="testimonials-prev"
+          >
+            <i className="fas fa-chevron-left text-sm"></i>
+          </button>
+          <button
+            onClick={() => setCurrentSlide(prev => prev < testimonials.length - 1 ? prev + 1 : 0)}
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-lg text-slate-600 p-2 rounded-full hover:bg-slate-50 transition-colors"
+            data-testid="testimonials-next"
+          >
+            <i className="fas fa-chevron-right text-sm"></i>
+          </button>
+          <div className="flex justify-center mt-4 space-x-2">
+            {testimonials.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-3 h-3 rounded-full transition-colors ${
+                  index === currentSlide ? 'bg-green-500' : 'bg-slate-300'
+                }`}
+                data-testid={`testimonials-dot-${index}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 
 interface PageElementProps {
   element: PageElement;
@@ -65,6 +139,8 @@ interface PageElementProps {
 }
 
 export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete }: PageElementProps) {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  
   const handleDataUpdate = (newData: any) => {
     if (onUpdate) {
       onUpdate({ ...element, data: { ...element.data, ...newData } });
@@ -725,32 +801,36 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 </Button>
               </div>
             ) : (
-              <div className={`grid gap-4 ${
-                element.data.displayStyle === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'
-              }`}>
-                {element.data.testimonials.map((testimonial) => (
-                  <div key={testimonial.id} className="bg-white p-6 rounded-lg shadow-md border border-slate-200">
-                    <div className="flex mb-3">
-                      {[...Array(5)].map((_, i) => (
-                        <i key={i} className={`fas fa-star text-sm ${
-                          i < testimonial.rating ? 'text-yellow-400' : 'text-slate-300'
-                        }`}></i>
-                      ))}
-                    </div>
-                    <p className="text-slate-600 mb-4 italic">"{testimonial.content}"</p>
-                    <div className="flex items-center space-x-3">
-                      {testimonial.avatar && (
-                        <img src={testimonial.avatar} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover" />
-                      )}
-                      <div>
-                        <p className="font-semibold text-slate-800">{testimonial.name}</p>
-                        {testimonial.title && <p className="text-sm text-slate-600">{testimonial.title}</p>}
-                        {testimonial.company && <p className="text-sm text-slate-500">{testimonial.company}</p>}
+              element.data.displayStyle === 'slider' ? (
+                <TestimonialsSlider testimonials={element.data.testimonials} />
+              ) : (
+                <div className={`grid gap-4 ${
+                  element.data.displayStyle === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'
+                }`}>
+                  {element.data.testimonials.map((testimonial) => (
+                    <div key={testimonial.id} className="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                      <div className="flex mb-3">
+                        {[...Array(5)].map((_, i) => (
+                          <i key={i} className={`fas fa-star text-sm ${
+                            i < testimonial.rating ? 'text-yellow-400' : 'text-slate-300'
+                          }`}></i>
+                        ))}
+                      </div>
+                      <p className="text-slate-600 mb-4 italic">"{testimonial.content}"</p>
+                      <div className="flex items-center space-x-3">
+                        {testimonial.avatar && (
+                          <img src={testimonial.avatar} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover" />
+                        )}
+                        <div>
+                          <p className="font-semibold text-slate-800">{testimonial.name}</p>
+                          {testimonial.title && <p className="text-sm text-slate-600">{testimonial.title}</p>}
+                          {testimonial.company && <p className="text-sm text-slate-500">{testimonial.company}</p>}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )
             )}
           </div>
         );
@@ -990,14 +1070,57 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   <div className="flex items-center justify-between text-sm text-slate-500">
                     <span>Knowledge Base: {element.data.knowledgeBase.textContent ? 'Text' : ''} {element.data.knowledgeBase.websiteUrl ? 'Website' : ''} {element.data.knowledgeBase.pdfFiles.length > 0 ? `${element.data.knowledgeBase.pdfFiles.length} PDFs` : ''}</span>
                     <button 
-                      className="px-3 py-1 rounded text-white text-xs"
+                      className="px-3 py-1 rounded text-white text-xs hover:opacity-90 transition-opacity"
                       style={{ backgroundColor: element.data.appearance.primaryColor }}
+                      onClick={() => setIsChatOpen(true)}
+                      data-testid="button-start-chat"
                     >
                       Start Chat
                     </button>
                   </div>
                 </div>
               )
+            )}
+            
+            {/* AI Chat Dialog */}
+            {element.type === "aiAssistant" && (
+              <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>AI Assistant</DialogTitle>
+                  </DialogHeader>
+                  <div className="p-4">
+                    <div className="bg-slate-50 p-3 rounded-lg mb-4">
+                      <p className="text-slate-700 text-sm">{element.data.welcomeMessage}</p>
+                    </div>
+                    <div className="text-sm text-slate-600 mb-4">
+                      <strong>Knowledge Base:</strong>
+                      <ul className="mt-2 space-y-1">
+                        {element.data.knowledgeBase.textContent && (
+                          <li>• Text content available</li>
+                        )}
+                        {element.data.knowledgeBase.websiteUrl && (
+                          <li>• Website: {element.data.knowledgeBase.websiteUrl}</li>
+                        )}
+                        {element.data.knowledgeBase.pdfFiles?.length > 0 && (
+                          <li>• {element.data.knowledgeBase.pdfFiles.length} PDF file(s) uploaded</li>
+                        )}
+                      </ul>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-slate-500 text-sm mb-4">Full AI chat with voice features coming soon!</p>
+                      <button 
+                        className="px-4 py-2 rounded text-white text-sm hover:opacity-90 transition-opacity"
+                        style={{ backgroundColor: element.data.appearance.primaryColor }}
+                        onClick={() => setIsChatOpen(false)}
+                        data-testid="button-close-chat"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             )}
           </div>
         );
