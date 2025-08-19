@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { storage, fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { logEvent } from "@/lib/share";
+import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
 
 interface FormBuilderProps {
   cardData: BusinessCard;
@@ -215,6 +216,108 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             </div>
           </div>
 
+          {/* Contact Information Additional */}
+          <div className="space-y-4">
+            <h4 className="text-md font-medium text-talklink-300">Additional Contact Methods</h4>
+            {form.watch("customContacts")?.map((contact, index) => (
+              <div key={contact.id} className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <Label className="text-white">Label</Label>
+                  <Input
+                    value={contact.label}
+                    onChange={(e) => {
+                      const newContacts = [...(form.watch("customContacts") || [])];
+                      newContacts[index] = { ...contact, label: e.target.value };
+                      form.setValue("customContacts", newContacts);
+                    }}
+                    className="bg-slate-700 border-slate-600 text-white"
+                    placeholder="Contact label"
+                  />
+                </div>
+                <div className="flex-1">
+                  <Label className="text-white">Value</Label>
+                  <Input
+                    value={contact.value}
+                    onChange={(e) => {
+                      const newContacts = [...(form.watch("customContacts") || [])];
+                      newContacts[index] = { ...contact, value: e.target.value };
+                      form.setValue("customContacts", newContacts);
+                    }}
+                    className="bg-slate-700 border-slate-600 text-white"
+                    placeholder="Contact value"
+                  />
+                </div>
+                <div className="w-32">
+                  <Label className="text-white">Icon</Label>
+                  <Select
+                    value={contact.icon}
+                    onValueChange={(value) => {
+                      const newContacts = [...(form.watch("customContacts") || [])];
+                      const selectedIcon = getAvailableIcons().find(icon => icon.icon === value);
+                      newContacts[index] = { 
+                        ...contact, 
+                        icon: value,
+                        type: selectedIcon?.category === 'contact' ? 
+                          (selectedIcon.name.toLowerCase().includes('phone') ? 'phone' as const : 
+                           selectedIcon.name.toLowerCase().includes('email') ? 'email' as const : 
+                           selectedIcon.name.toLowerCase().includes('website') ? 'website' as const : 'other' as const) : 'other' as const
+                      };
+                      form.setValue("customContacts", newContacts);
+                    }}
+                  >
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue>
+                        {contact.icon && <i className={`${contact.icon} mr-2`}></i>}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getAvailableIcons().filter(icon => icon.category === 'contact').map(icon => (
+                        <SelectItem key={icon.icon} value={icon.icon}>
+                          <div className="flex items-center">
+                            <i className={`${icon.icon} mr-2`}></i>
+                            {icon.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    const newContacts = form.watch("customContacts")?.filter((_, i) => i !== index) || [];
+                    form.setValue("customContacts", newContacts);
+                  }}
+                  className="mb-0"
+                >
+                  <i className="fas fa-trash text-xs"></i>
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const newContact = {
+                  id: generateFieldId(),
+                  label: "",
+                  value: "",
+                  icon: "fas fa-phone",
+                  type: "other" as const
+                };
+                const currentContacts = form.watch("customContacts") || [];
+                form.setValue("customContacts", [...currentContacts, newContact]);
+              }}
+              className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+            >
+              <i className="fas fa-plus mr-2"></i>
+              Add Contact Method
+            </Button>
+          </div>
+
           {/* Social Media */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-talklink-400">{t('form.socialMedia')}</h3>
@@ -263,6 +366,100 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   data-testid="input-twitter"
                 />
               </div>
+            </div>
+            
+            {/* Custom Social Media Fields */}
+            <div className="space-y-4">
+              <h4 className="text-md font-medium text-talklink-300">Additional Social Platforms</h4>
+              {form.watch("customSocials")?.map((social, index) => (
+                <div key={social.id} className="flex gap-2 items-end">
+                  <div className="flex-1">
+                    <Label className="text-white">Platform</Label>
+                    <Input
+                      value={social.platform}
+                      onChange={(e) => {
+                        const newSocials = [...(form.watch("customSocials") || [])];
+                        newSocials[index] = { ...social, platform: e.target.value };
+                        form.setValue("customSocials", newSocials);
+                      }}
+                      className="bg-slate-700 border-slate-600 text-white"
+                      placeholder="Platform name"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Label className="text-white">Username/URL</Label>
+                    <Input
+                      value={social.value}
+                      onChange={(e) => {
+                        const newSocials = [...(form.watch("customSocials") || [])];
+                        newSocials[index] = { ...social, value: e.target.value };
+                        form.setValue("customSocials", newSocials);
+                      }}
+                      className="bg-slate-700 border-slate-600 text-white"
+                      placeholder="@username or URL"
+                    />
+                  </div>
+                  <div className="w-32">
+                    <Label className="text-white">Icon</Label>
+                    <Select
+                      value={social.icon}
+                      onValueChange={(value) => {
+                        const newSocials = [...(form.watch("customSocials") || [])];
+                        newSocials[index] = { ...social, icon: value };
+                        form.setValue("customSocials", newSocials);
+                      }}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                        <SelectValue>
+                          {social.icon && <i className={`${social.icon} mr-2`}></i>}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getAvailableIcons().filter(icon => icon.category === 'social').map(icon => (
+                          <SelectItem key={icon.icon} value={icon.icon}>
+                            <div className="flex items-center">
+                              <i className={`${icon.icon} mr-2`}></i>
+                              {icon.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      const newSocials = form.watch("customSocials")?.filter((_, i) => i !== index) || [];
+                      form.setValue("customSocials", newSocials);
+                    }}
+                    className="mb-0"
+                  >
+                    <i className="fas fa-trash text-xs"></i>
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const newSocial = {
+                    id: generateFieldId(),
+                    label: "",
+                    value: "",
+                    icon: "fab fa-facebook",
+                    platform: ""
+                  };
+                  const currentSocials = form.watch("customSocials") || [];
+                  form.setValue("customSocials", [...currentSocials, newSocial]);
+                }}
+                className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+              >
+                <i className="fas fa-plus mr-2"></i>
+                Add Social Platform
+              </Button>
             </div>
           </div>
 

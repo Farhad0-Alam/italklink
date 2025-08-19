@@ -104,7 +104,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             </p>
             
             {/* Contact Icons */}
-            <div className="flex justify-center space-x-4 mb-6">
+            <div className="flex justify-center space-x-3 mb-6 flex-wrap gap-y-3">
               {data.phone && (
                 <div className="flex flex-col items-center">
                   <button 
@@ -148,10 +148,25 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   <span className="text-xs text-slate-600">WhatsApp</span>
                 </div>
               )}
+              {/* Custom Contact Methods */}
+              {data.customContacts?.map((contact) => (
+                contact.value && (
+                  <div key={contact.id} className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction(contact.type, contact.value)}
+                      className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                      data-testid={`button-custom-contact-${contact.id}`}
+                    >
+                      <i className={`${contact.icon} text-sm`}></i>
+                    </button>
+                    <span className="text-xs text-slate-600">{contact.label || 'Contact'}</span>
+                  </div>
+                )
+              ))}
             </div>
             
             {/* Social Icons */}
-            <div className="flex justify-center space-x-3 mb-6">
+            <div className="flex justify-center space-x-3 mb-6 flex-wrap gap-y-2">
               {data.linkedin && (
                 <button 
                   onClick={() => handleContactAction('linkedin', data.linkedin)}
@@ -188,6 +203,24 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   <i className="fab fa-facebook-f text-xs"></i>
                 </button>
               )}
+              {/* Custom Social Media */}
+              {data.customSocials?.map((social) => (
+                social.value && (
+                  <button 
+                    key={social.id}
+                    onClick={() => {
+                      if (!isInteractive || !social.value) return;
+                      const url = social.value.startsWith('http') ? social.value : `https://${social.platform.toLowerCase()}.com/${social.value.replace('@', '')}`;
+                      window.open(url, '_blank');
+                    }}
+                    className="w-8 h-8 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors"
+                    data-testid={`button-social-${social.id}`}
+                    title={social.platform}
+                  >
+                    <i className={`${social.icon} text-xs`}></i>
+                  </button>
+                )
+              ))}
             </div>
             
             {/* Action Buttons */}

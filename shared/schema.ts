@@ -13,7 +13,7 @@ export const businessCardSchema = z.object({
   website: z.string().url("Invalid website URL").optional().or(z.literal("")),
   location: z.string().optional(),
   
-  // Social Media
+  // Social Media (legacy fields for backward compatibility)
   whatsapp: z.string().optional(),
   linkedin: z.string().optional(),
   instagram: z.string().optional(),
@@ -21,6 +21,24 @@ export const businessCardSchema = z.object({
   facebook: z.string().optional(),
   youtube: z.string().optional(),
   telegram: z.string().optional(),
+  
+  // Dynamic contact fields
+  customContacts: z.array(z.object({
+    id: z.string(),
+    label: z.string(),
+    value: z.string(),
+    icon: z.string(),
+    type: z.enum(["phone", "email", "website", "text", "other"])
+  })).default([]),
+  
+  // Dynamic social media fields
+  customSocials: z.array(z.object({
+    id: z.string(),
+    label: z.string(),
+    value: z.string(),
+    icon: z.string(),
+    platform: z.string()
+  })).default([]),
   
   // Branding
   brandColor: z.string().default("#22c55e"),
@@ -32,6 +50,13 @@ export const businessCardSchema = z.object({
   profilePhoto: z.string().optional(),
   logo: z.string().optional(),
   galleryImages: z.array(z.string()).default([]),
+  
+  // Available icons for selection
+  availableIcons: z.array(z.object({
+    name: z.string(),
+    icon: z.string(),
+    category: z.string()
+  })).default([]),
   
   // Extended content
   vision: z.string().optional(),
