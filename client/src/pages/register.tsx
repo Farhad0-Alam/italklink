@@ -76,7 +76,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-talklink-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-talklink-50 flex items-center justify-center p-4 py-8">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -91,14 +91,14 @@ export default function Register() {
           <p className="text-slate-600">Start your digital networking journey</p>
         </div>
 
-        <Card className="shadow-xl">
+        <Card className="shadow-xl max-h-[90vh] overflow-y-auto">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
             <CardDescription className="text-center">
               Join thousands of professionals who've gone digital
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4">
             {/* Google Signup Button */}
             <Button
               variant="outline"
@@ -119,7 +119,7 @@ export default function Register() {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
@@ -210,7 +210,7 @@ export default function Register() {
 
               <Button 
                 type="submit" 
-                className="w-full bg-talklink-500 hover:bg-talklink-600"
+                className="w-full bg-talklink-500 hover:bg-talklink-600 h-12 text-base font-medium mt-6"
                 disabled={isLoading || !formData.acceptTerms}
               >
                 {isLoading ? (

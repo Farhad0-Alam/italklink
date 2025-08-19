@@ -46,7 +46,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-talklink-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-talklink-50 flex items-center justify-center p-4 py-8">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -61,14 +61,14 @@ export default function Login() {
           <p className="text-slate-600">Welcome back to the future of networking</p>
         </div>
 
-        <Card className="shadow-xl">
+        <Card className="shadow-xl max-h-[90vh] overflow-y-auto">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
             <CardDescription className="text-center">
               Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4">
             {/* Google Login Button */}
             <Button
               variant="outline"
@@ -123,7 +123,7 @@ export default function Login() {
 
               <Button 
                 type="submit" 
-                className="w-full bg-talklink-500 hover:bg-talklink-600"
+                className="w-full bg-talklink-500 hover:bg-talklink-600 h-12 text-base font-medium mt-6"
                 disabled={isLoading}
               >
                 {isLoading ? (
