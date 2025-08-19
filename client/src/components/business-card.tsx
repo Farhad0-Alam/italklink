@@ -104,37 +104,49 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             </p>
             
             {/* Contact Icons */}
-            <div className="flex justify-center space-x-3 mb-6">
+            <div className="flex justify-center space-x-4 mb-6">
               {data.phone && (
-                <button 
-                  onClick={() => handleContactAction('phone', data.phone)}
-                  className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors"
-                  data-testid="button-contact-phone"
-                >
-                  <i className="fas fa-phone text-sm"></i>
-                </button>
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction('phone', data.phone)}
+                    className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                    data-testid="button-contact-phone"
+                  >
+                    <i className="fas fa-phone text-sm"></i>
+                  </button>
+                  <span className="text-xs text-slate-600">Phone</span>
+                </div>
               )}
               {data.email && (
-                <button 
-                  onClick={() => handleContactAction('email', data.email)}
-                  className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors"
-                  data-testid="button-contact-email"
-                >
-                  <i className="fas fa-envelope text-sm"></i>
-                </button>
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction('email', data.email)}
+                    className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                    data-testid="button-contact-email"
+                  >
+                    <i className="fas fa-envelope text-sm"></i>
+                  </button>
+                  <span className="text-xs text-slate-600">Email</span>
+                </div>
               )}
-              <button className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors">
-                <i className="fas fa-comment text-sm"></i>
-              </button>
-              {data.whatsapp && (
-                <button 
-                  onClick={() => handleContactAction('whatsapp', data.whatsapp)}
-                  className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-talklink-600 transition-colors"
-                  style={{ backgroundColor: data.brandColor || '#22c55e' }}
-                  data-testid="button-contact-whatsapp"
-                >
-                  <i className="fab fa-whatsapp text-sm"></i>
+              <div className="flex flex-col items-center">
+                <button className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1">
+                  <i className="fas fa-comment text-sm"></i>
                 </button>
+                <span className="text-xs text-slate-600">Text</span>
+              </div>
+              {data.whatsapp && (
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction('whatsapp', data.whatsapp)}
+                    className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-talklink-600 transition-colors mb-1"
+                    style={{ backgroundColor: data.brandColor || '#22c55e' }}
+                    data-testid="button-contact-whatsapp"
+                  >
+                    <i className="fab fa-whatsapp text-sm"></i>
+                  </button>
+                  <span className="text-xs text-slate-600">WhatsApp</span>
+                </div>
               )}
             </div>
             
@@ -350,9 +362,9 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 <p className="text-sm text-slate-600 mb-2">Scan me</p>
                 <div className="inline-block p-2 bg-white border border-slate-200 rounded-lg">
                   <QRCodeSVG 
-                    value={shareUrl}
+                    value={shareUrl.length > 200 ? shareUrl.substring(0, 200) : shareUrl}
                     size={80}
-                    level="M"
+                    level="L"
                     includeMargin={false}
                   />
                 </div>
