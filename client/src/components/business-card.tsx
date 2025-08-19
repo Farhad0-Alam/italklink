@@ -166,59 +166,72 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             </div>
             
             {/* Social Icons */}
-            <div className="flex justify-center space-x-3 mb-6 flex-wrap gap-y-2">
+            <div className="flex justify-center space-x-4 mb-6 flex-wrap gap-y-3">
               {data.linkedin && (
-                <button 
-                  onClick={() => handleContactAction('linkedin', data.linkedin)}
-                  className="w-8 h-8 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors"
-                  data-testid="button-social-linkedin"
-                >
-                  <i className="fab fa-linkedin-in text-xs"></i>
-                </button>
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction('linkedin', data.linkedin)}
+                    className="w-10 h-10 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
+                    data-testid="button-social-linkedin"
+                  >
+                    <i className="fab fa-linkedin-in text-sm"></i>
+                  </button>
+                  <span className="text-xs text-slate-600">LinkedIn</span>
+                </div>
               )}
               {data.instagram && (
-                <button 
-                  onClick={() => handleContactAction('instagram', data.instagram)}
-                  className="w-8 h-8 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-pink-500 transition-colors"
-                  data-testid="button-social-instagram"
-                >
-                  <i className="fab fa-instagram text-xs"></i>
-                </button>
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction('instagram', data.instagram)}
+                    className="w-10 h-10 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-pink-500 transition-colors mb-1"
+                    data-testid="button-social-instagram"
+                  >
+                    <i className="fab fa-instagram text-sm"></i>
+                  </button>
+                  <span className="text-xs text-slate-600">Instagram</span>
+                </div>
               )}
               {data.twitter && (
-                <button 
-                  onClick={() => handleContactAction('twitter', data.twitter)}
-                  className="w-8 h-8 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-black transition-colors"
-                  data-testid="button-social-twitter"
-                >
-                  <i className="fab fa-twitter text-xs"></i>
-                </button>
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction('twitter', data.twitter)}
+                    className="w-10 h-10 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-black transition-colors mb-1"
+                    data-testid="button-social-twitter"
+                  >
+                    <i className="fab fa-twitter text-sm"></i>
+                  </button>
+                  <span className="text-xs text-slate-600">Twitter</span>
+                </div>
               )}
               {data.facebook && (
-                <button 
-                  onClick={() => handleContactAction('facebook', data.facebook)}
-                  className="w-8 h-8 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-blue-800 transition-colors"
-                  data-testid="button-social-facebook"
-                >
-                  <i className="fab fa-facebook-f text-xs"></i>
-                </button>
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction('facebook', data.facebook)}
+                    className="w-10 h-10 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-blue-800 transition-colors mb-1"
+                    data-testid="button-social-facebook"
+                  >
+                    <i className="fab fa-facebook-f text-sm"></i>
+                  </button>
+                  <span className="text-xs text-slate-600">Facebook</span>
+                </div>
               )}
               {/* Custom Social Media */}
               {data.customSocials?.map((social) => (
                 social.value && (
-                  <button 
-                    key={social.id}
-                    onClick={() => {
-                      if (!isInteractive || !social.value) return;
-                      const url = social.value.startsWith('http') ? social.value : `https://${social.platform.toLowerCase()}.com/${social.value.replace('@', '')}`;
-                      window.open(url, '_blank');
-                    }}
-                    className="w-8 h-8 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors"
-                    data-testid={`button-social-${social.id}`}
-                    title={social.platform}
-                  >
-                    <i className={`${social.icon} text-xs`}></i>
-                  </button>
+                  <div key={social.id} className="flex flex-col items-center">
+                    <button 
+                      onClick={() => {
+                        if (!isInteractive || !social.value) return;
+                        const url = social.value.startsWith('http') ? social.value : `https://${social.platform.toLowerCase()}.com/${social.value.replace('@', '')}`;
+                        window.open(url, '_blank');
+                      }}
+                      className="w-10 h-10 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors mb-1"
+                      data-testid={`button-social-${social.id}`}
+                    >
+                      <i className={`${social.icon} text-sm`}></i>
+                    </button>
+                    <span className="text-xs text-slate-600">{social.platform || social.label || 'Social'}</span>
+                  </div>
                 )
               ))}
             </div>
