@@ -1,43 +1,66 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      setLocation('/dashboard');
+    }
+  }, [isAuthenticated, setLocation]);
+
+  const loginMutation = useMutation({
+    mutationFn: async (loginData: { email: string; password: string }) => {
+      const response = await apiRequest('POST', '/api/auth/login', loginData);
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Login Successful',
+        description: 'Welcome back!',
+      });
+      // Invalidate user query to refetch user data
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      // Redirect to dashboard
+      setLocation('/dashboard');
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Login Failed',
+        description: error.message || 'Invalid email or password',
+        variant: 'destructive',
+      });
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      // TODO: Implement actual login logic
-      console.log("Login attempt:", { email, password });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+    
+    if (!email.trim() || !password.trim()) {
       toast({
-        title: "Login Successful",
-        description: "Welcome back!",
-      });
-      
-      // TODO: Redirect to dashboard
-    } catch (error) {
-      toast({
-        title: "Login Failed",
-        description: "Please check your credentials and try again.",
+        title: "Required Fields Missing",
+        description: "Please fill in both email and password.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+      return;
     }
+    
+    loginMutation.mutate({ email: email.trim(), password });
   };
 
   const handleGoogleLogin = () => {
@@ -74,7 +97,7 @@ export default function Login() {
               variant="outline"
               className="w-full"
               onClick={handleGoogleLogin}
-              disabled={isLoading}
+              disabled={loginMutation.isPending}
             >
               <i className="fab fa-google mr-2 text-red-500"></i>
               Continue with Google
@@ -99,7 +122,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  disabled={isLoading}
+                  disabled={loginMutation.isPending}
                 />
               </div>
               
@@ -117,16 +140,16 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={isLoading}
+                  disabled={loginMutation.isPending}
                 />
               </div>
 
               <Button 
                 type="submit" 
                 className="w-full bg-talklink-500 hover:bg-talklink-600 h-12 text-base font-medium mt-6"
-                disabled={isLoading}
+                disabled={loginMutation.isPending}
               >
-                {isLoading ? (
+                {loginMutation.isPending ? (
                   <>
                     <i className="fas fa-spinner fa-spin mr-2"></i>
                     Signing In...

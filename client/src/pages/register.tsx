@@ -1,11 +1,14 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -16,20 +19,72 @@ export default function Register() {
     confirmPassword: "",
     acceptTerms: false
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      setLocation('/dashboard');
+    }
+  }, [isAuthenticated, setLocation]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const registerMutation = useMutation({
+    mutationFn: async (registerData: { firstName: string; lastName: string; email: string; password: string }) => {
+      const response = await apiRequest('POST', '/api/auth/register', registerData);
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Account Created Successfully!',
+        description: 'Welcome to CardFlow! You can now start creating digital business cards.',
+      });
+      // Invalidate user query to refetch user data
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      // Redirect to dashboard
+      setLocation('/dashboard');
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Registration Failed',
+        description: error.message || 'Something went wrong. Please try again.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation
+    if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.password.trim()) {
+      toast({
+        title: "Required Fields Missing",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Password Mismatch",
         description: "Passwords don't match. Please check and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 8 characters long.",
         variant: "destructive",
       });
       return;
@@ -43,31 +98,13 @@ export default function Register() {
       });
       return;
     }
-
-    setIsLoading(true);
-
-    try {
-      // TODO: Implement actual registration logic
-      console.log("Registration attempt:", formData);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Account Created Successfully!",
-        description: "Welcome to CardFlow! You can now start creating digital business cards.",
-      });
-      
-      // TODO: Redirect to onboarding or dashboard
-    } catch (error) {
-      toast({
-        title: "Registration Failed",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    
+    registerMutation.mutate({
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim(),
+      password: formData.password,
+    });
   };
 
   const handleGoogleSignup = () => {
@@ -104,7 +141,7 @@ export default function Register() {
               variant="outline"
               className="w-full"
               onClick={handleGoogleSignup}
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
             >
               <i className="fab fa-google mr-2 text-red-500"></i>
               Sign up with Google
@@ -130,7 +167,7 @@ export default function Register() {
                     value={formData.firstName}
                     onChange={(e) => handleInputChange("firstName", e.target.value)}
                     required
-                    disabled={isLoading}
+                    disabled={registerMutation.isPending}
                   />
                 </div>
                 <div className="space-y-2">
@@ -142,7 +179,7 @@ export default function Register() {
                     value={formData.lastName}
                     onChange={(e) => handleInputChange("lastName", e.target.value)}
                     required
-                    disabled={isLoading}
+                    disabled={registerMutation.isPending}
                   />
                 </div>
               </div>
@@ -156,7 +193,7 @@ export default function Register() {
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   required
-                  disabled={isLoading}
+                  disabled={registerMutation.isPending}
                 />
               </div>
               
@@ -169,7 +206,7 @@ export default function Register() {
                   value={formData.password}
                   onChange={(e) => handleInputChange("password", e.target.value)}
                   required
-                  disabled={isLoading}
+                  disabled={registerMutation.isPending}
                 />
                 <p className="text-xs text-slate-500">
                   Must be at least 8 characters with letters and numbers
@@ -185,7 +222,7 @@ export default function Register() {
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                   required
-                  disabled={isLoading}
+                  disabled={registerMutation.isPending}
                 />
               </div>
 
@@ -194,7 +231,7 @@ export default function Register() {
                   id="acceptTerms"
                   checked={formData.acceptTerms}
                   onCheckedChange={(checked) => handleInputChange("acceptTerms", checked as boolean)}
-                  disabled={isLoading}
+                  disabled={registerMutation.isPending}
                 />
                 <Label htmlFor="acceptTerms" className="text-sm text-slate-600">
                   I agree to the{" "}
@@ -211,9 +248,9 @@ export default function Register() {
               <Button 
                 type="submit" 
                 className="w-full bg-talklink-500 hover:bg-talklink-600 h-12 text-base font-medium mt-6"
-                disabled={isLoading || !formData.acceptTerms}
+                disabled={registerMutation.isPending || !formData.acceptTerms}
               >
-                {isLoading ? (
+                {registerMutation.isPending ? (
                   <>
                     <i className="fas fa-spinner fa-spin mr-2"></i>
                     Creating Account...

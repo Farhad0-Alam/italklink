@@ -39,6 +39,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  password: varchar("password"), // For email/password authentication (null for OAuth users)
   role: userRoleEnum("role").default('user'),
   
   // Subscription fields

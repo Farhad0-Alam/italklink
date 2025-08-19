@@ -1,9 +1,11 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import passport from 'passport';
+import bcrypt from 'bcryptjs';
 import { setupAuth, requireAuth, optionalAuth, requireAdmin } from './auth';
 import { storage } from './storage';
 import type { User } from '@shared/schema';
+import { insertUserSchema } from '@shared/schema';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -48,6 +50,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(req.user);
     } else {
       res.status(401).json({ message: 'Not authenticated' });
+    }
+  });
+
+  // Email/password registration
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const { firstName, lastName, email, password } = req.body;
+      
+      // Validate required fields
+      if (!email || !password || !firstName || !lastName) {
+        return res.status(400).json({ 
+          message: 'All fields are required: firstName, lastName, email, password' 
+        });
+      }
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: 'Invalid email format' });
+      }
+      
+      // Validate password strength
+      if (password.length < 8) {
+        return res.status(400).json({ 
+          message: 'Password must be at least 8 characters long' 
+        });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ 
+          message: 'An account with this email already exists' 
+        });
+      }
+      
+      // Hash password
+      const saltRounds = 12;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      
+      // Create user
+      const newUser = await storage.createUser({
+        email,
+        firstName,
+        lastName,
+        password: hashedPassword,
+        planType: 'free',
+        businessCardsLimit: 1,
+        businessCardsCount: 0,
+      });
+      
+      // Log the user in
+      req.login(newUser, (err) => {
+        if (err) {
+          console.error('Auto-login after registration failed:', err);
+          return res.status(201).json({ 
+            message: 'Account created successfully. Please log in.',
+            userId: newUser.id 
+          });
+        }
+        
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = newUser as any;
+        res.status(201).json({ 
+          message: 'Account created and logged in successfully',
+          user: userWithoutPassword 
+        });
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ message: 'Failed to create account' });
+    }
+  });
+
+  // Email/password login
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Validate required fields
+      if (!email || !password) {
+        return res.status(400).json({ 
+          message: 'Email and password are required' 
+        });
+      }
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ 
+          message: 'Invalid email or password' 
+        });
+      }
+      
+      // Check if user has a password (Google OAuth users might not)
+      if (!user.password) {
+        return res.status(401).json({ 
+          message: 'This account was created with Google. Please use Google Sign-In.' 
+        });
+      }
+      
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ 
+          message: 'Invalid email or password' 
+        });
+      }
+      
+      // Log the user in
+      req.login(user, (err) => {
+        if (err) {
+          console.error('Login error:', err);
+          return res.status(500).json({ message: 'Login failed' });
+        }
+        
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = user as any;
+        res.json({ 
+          message: 'Login successful',
+          user: userWithoutPassword 
+        });
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Login failed' });
     }
   });
 
