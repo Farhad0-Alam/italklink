@@ -10,6 +10,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Landing from "./pages/landing";
 import Login from "./pages/login";
 import Register from "./pages/register";
+import Dashboard from "./pages/dashboard";
 import { Builder } from "./pages/builder";
 import { Share } from "./pages/share";
 import NotFound from "@/pages/not-found";
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/landing" component={Landing} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/builder" component={Builder} />
       <Route path="/share" component={Share} />
       <Route component={NotFound} />
