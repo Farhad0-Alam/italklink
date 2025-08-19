@@ -191,171 +191,195 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-24 pb-12 lg:pt-32 lg:pb-20 bg-gradient-to-br from-slate-50 to-talklink-50">
+      <section className="pt-24 pb-20 lg:pt-32 lg:pb-32 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <Badge className="mb-4 bg-talklink-100 text-talklink-700 hover:bg-talklink-200">
-                🚀 Transform Your Networking
-              </Badge>
-              <h1 className="text-4xl lg:text-6xl font-bold text-slate-900 mb-6 leading-tight">
-                Digital Business Cards 
-                <span className="text-talklink-500"> of the Future</span>
-              </h1>
-              <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-                Create stunning, interactive digital business cards that generate real leads. 
-                Share instantly, track engagement, and never run out of cards again.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <Button size="lg" className="bg-talklink-500 hover:bg-talklink-600" asChild>
-                  <Link href="/register">
-                    <i className="fas fa-rocket mr-2"></i>
-                    Start Creating Free
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link href="/builder">
-                    <i className="fas fa-play mr-2"></i>
-                    View Demo
-                  </Link>
-                </Button>
-              </div>
-              
-              <div className="flex items-center space-x-6 text-sm text-slate-500">
-                <div className="flex items-center">
-                  <i className="fas fa-check-circle text-talklink-500 mr-2"></i>
-                  No credit card required
-                </div>
-                <div className="flex items-center">
-                  <i className="fas fa-check-circle text-talklink-500 mr-2"></i>
-                  Free forever plan
-                </div>
-                <div className="flex items-center">
-                  <i className="fas fa-check-circle text-talklink-500 mr-2"></i>
-                  Setup in 60 seconds
-                </div>
-              </div>
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center px-4 py-2 bg-talklink-50 rounded-full mb-8">
+              <div className="w-2 h-2 bg-talklink-500 rounded-full mr-3 animate-pulse"></div>
+              <span className="text-talklink-700 font-medium text-sm">Transform Your Professional Network</span>
             </div>
             
-            <div className="relative">
-              <div className="relative z-10">
-                <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm mx-auto transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                  <div className="text-center">
-                    <div className="w-20 h-20 bg-gradient-to-br from-talklink-400 to-talklink-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <i className="fas fa-user text-white text-2xl"></i>
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">John Smith</h3>
-                    <p className="text-slate-600 mb-4">Digital Marketing Expert</p>
-                    
-                    <div className="space-y-2">
-                      <button className="w-full bg-slate-800 text-white py-2 rounded-lg text-sm">
-                        <i className="fas fa-address-book mr-2"></i>Save Contact
-                      </button>
-                      <button className="w-full bg-talklink-500 text-white py-2 rounded-lg text-sm">
-                        <i className="fas fa-calendar mr-2"></i>Book Meeting
-                      </button>
-                    </div>
-                    
-                    <div className="flex justify-center space-x-3 mt-4">
-                      <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
-                        <i className="fab fa-linkedin-in text-white text-xs"></i>
-                      </div>
-                      <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
-                        <i className="fab fa-twitter text-white text-xs"></i>
-                      </div>
-                      <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
-                        <i className="fas fa-envelope text-white text-xs"></i>
-                      </div>
-                    </div>
+            <h1 className="text-5xl lg:text-7xl font-black text-slate-900 mb-8 leading-[0.9] tracking-tight">
+              Digital Cards.
+              <br />
+              <span className="text-talklink-500">Real Results.</span>
+            </h1>
+            
+            <p className="text-xl lg:text-2xl text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
+              Create stunning digital business cards in 60 seconds.
+              <br className="hidden sm:block" />
+              Share instantly. Track everything. Never run out.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button size="lg" className="bg-talklink-500 hover:bg-talklink-600 text-lg px-8 py-4 h-auto" asChild>
+                <Link href="/register">
+                  Create Your Card Free
+                  <i className="fas fa-arrow-right ml-2"></i>
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" className="text-lg px-8 py-4 h-auto border-2" asChild>
+                <Link href="/builder">
+                  <i className="fas fa-play mr-2"></i>
+                  Watch Demo
+                </Link>
+              </Button>
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-slate-500">
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-talklink-500 rounded-full mr-3"></div>
+                No credit card
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-talklink-500 rounded-full mr-3"></div>
+                Free forever
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-talklink-500 rounded-full mr-3"></div>
+                60-second setup
+              </div>
+            </div>
+          </div>
+          
+          {/* Interactive Card Preview */}
+          <div className="relative max-w-md mx-auto">
+            <div className="absolute inset-0 bg-gradient-to-r from-talklink-400 to-blue-500 rounded-3xl blur-2xl opacity-20 scale-110"></div>
+            <div className="relative bg-white rounded-3xl shadow-2xl p-8 border border-slate-100">
+              <div className="text-center">
+                <div className="relative inline-block mb-6">
+                  <div className="w-20 h-20 bg-gradient-to-br from-talklink-500 to-talklink-600 rounded-2xl flex items-center justify-center">
+                    <i className="fas fa-user text-white text-2xl"></i>
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                    <i className="fas fa-check text-white text-xs"></i>
+                  </div>
+                </div>
+                
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">Alex Rivera</h3>
+                <p className="text-slate-600 mb-6">Product Designer</p>
+                
+                <div className="space-y-3 mb-6">
+                  <button className="w-full bg-slate-900 text-white py-3 rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors">
+                    <i className="fas fa-download mr-2"></i>Save Contact
+                  </button>
+                  <button className="w-full bg-talklink-500 text-white py-3 rounded-xl text-sm font-medium hover:bg-talklink-600 transition-colors">
+                    <i className="fas fa-calendar mr-2"></i>Schedule Meeting
+                  </button>
+                </div>
+                
+                <div className="flex justify-center space-x-4">
+                  <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer">
+                    <i className="fab fa-linkedin-in text-slate-600"></i>
+                  </div>
+                  <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer">
+                    <i className="fab fa-twitter text-slate-600"></i>
+                  </div>
+                  <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer">
+                    <i className="fas fa-envelope text-slate-600"></i>
+                  </div>
+                  <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer">
+                    <i className="fas fa-globe text-slate-600"></i>
                   </div>
                 </div>
               </div>
-              
-              {/* Floating elements */}
-              <div className="absolute top-10 -left-4 w-16 h-16 bg-talklink-200 rounded-full opacity-60 animate-pulse"></div>
-              <div className="absolute bottom-10 -right-4 w-20 h-20 bg-blue-200 rounded-full opacity-40 animate-pulse delay-300"></div>
-              <div className="absolute top-1/2 -right-8 w-12 h-12 bg-purple-200 rounded-full opacity-50 animate-pulse delay-700"></div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-white">
+      <section id="features" className="py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-              Everything You Need to Stand Out
+          <div className="text-center mb-20">
+            <h2 className="text-4xl lg:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+              Built for Modern
+              <span className="text-talklink-500"> Professionals</span>
             </h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-              Powerful features designed to help you create professional digital business cards 
-              that convert prospects into customers.
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto font-light">
+              Everything you need to create, share, and track your digital presence.
             </p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-talklink-500 to-talklink-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i className={`${feature.icon} text-white text-xl`}></i>
+              <div key={index} className="group">
+                <div className="bg-white rounded-2xl p-8 h-full hover:shadow-xl transition-all duration-300 border border-slate-100 hover:-translate-y-1">
+                  <div className="w-14 h-14 bg-talklink-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-talklink-500 transition-colors duration-300">
+                    <i className={`${feature.icon} text-talklink-500 group-hover:text-white text-xl transition-colors duration-300`}></i>
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 mb-4">{feature.title}</h3>
                   <p className="text-slate-600 leading-relaxed">{feature.description}</p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
+          </div>
+          
+          <div className="text-center mt-16">
+            <Button size="lg" className="bg-talklink-500 hover:bg-talklink-600 text-lg px-8 py-4 h-auto" asChild>
+              <Link href="/register">
+                Start Building Your Card
+                <i className="fas fa-arrow-right ml-2"></i>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 bg-gradient-to-br from-slate-50 to-talklink-50">
+      <section id="pricing" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-              Simple, Transparent Pricing
+          <div className="text-center mb-20">
+            <h2 className="text-4xl lg:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+              Choose Your
+              <span className="text-talklink-500"> Growth Plan</span>
             </h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-              Choose the perfect plan for your needs. Upgrade or downgrade at any time.
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto font-light">
+              Start free. Scale as you grow. Cancel anytime.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {pricingPlans.map((plan, index) => (
-              <Card key={index} className={`relative ${plan.popular ? 'border-2 border-talklink-500 shadow-xl scale-105' : 'border border-slate-200'}`}>
+              <div key={index} className={`relative ${plan.popular ? 'scale-105' : ''}`}>
                 {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-talklink-500 text-white">
-                    Most Popular
-                  </Badge>
-                )}
-                <CardHeader className="text-center pb-8">
-                  <CardTitle className="text-2xl font-bold text-slate-900">{plan.name}</CardTitle>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold text-slate-900">{plan.price}</span>
-                    <span className="text-slate-500">{plan.period}</span>
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                    <div className="bg-talklink-500 text-white px-6 py-2 rounded-full text-sm font-medium">
+                      Most Popular
+                    </div>
                   </div>
-                  <CardDescription className="text-slate-600 mt-2">{plan.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <ul className="space-y-3">
+                )}
+                <div className={`bg-white rounded-3xl p-8 h-full ${plan.popular ? 'border-2 border-talklink-500 shadow-2xl' : 'border border-slate-200 shadow-lg'} hover:shadow-xl transition-all duration-300`}>
+                  <div className="text-center mb-8">
+                    <h3 className="text-2xl font-bold text-slate-900 mb-2">{plan.name}</h3>
+                    <div className="mb-4">
+                      <span className="text-5xl font-black text-slate-900">{plan.price}</span>
+                      <span className="text-slate-500 text-lg">{plan.period}</span>
+                    </div>
+                    <p className="text-slate-600">{plan.description}</p>
+                  </div>
+                  
+                  <ul className="space-y-4 mb-8">
                     {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center">
-                        <i className="fas fa-check text-talklink-500 mr-3"></i>
+                      <li key={featureIndex} className="flex items-start">
+                        <div className="w-5 h-5 bg-talklink-100 rounded-full flex items-center justify-center mt-0.5 mr-3 flex-shrink-0">
+                          <i className="fas fa-check text-talklink-500 text-xs"></i>
+                        </div>
                         <span className="text-slate-700">{feature}</span>
                       </li>
                     ))}
                   </ul>
+                  
                   <Button 
-                    className={`w-full ${plan.popular ? 'bg-talklink-500 hover:bg-talklink-600' : ''}`}
-                    variant={plan.buttonVariant}
-                    size="lg"
+                    className={`w-full h-12 text-base font-medium ${plan.popular ? 'bg-talklink-500 hover:bg-talklink-600 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white'}`}
+                    asChild
                   >
-                    {plan.buttonText}
+                    <Link href="/register">
+                      {plan.buttonText}
+                    </Link>
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -447,34 +471,46 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-talklink-500 to-talklink-600">
+      <section className="py-24 bg-slate-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
-            Ready to Transform Your Networking?
+          <h2 className="text-4xl lg:text-5xl font-black text-white mb-8 tracking-tight">
+            Ready to Go
+            <span className="text-talklink-400"> Digital?</span>
           </h2>
-          <p className="text-xl text-talklink-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of professionals who've ditched paper cards forever. 
-            Create your first digital business card in under 60 seconds.
+          <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto font-light">
+            Join thousands of professionals creating their digital presence.
+            <br />Get started in 60 seconds.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-talklink-600 hover:bg-slate-100" asChild>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <Button size="lg" className="bg-talklink-500 hover:bg-talklink-600 text-lg px-8 py-4 h-auto" asChild>
               <Link href="/register">
-                <i className="fas fa-rocket mr-2"></i>
-                Start Free Today
+                Create Your Card Free
+                <i className="fas fa-arrow-right ml-2"></i>
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-talklink-600" asChild>
+            <Button size="lg" variant="outline" className="border-2 border-slate-600 text-slate-300 hover:bg-slate-800 text-lg px-8 py-4 h-auto" asChild>
               <Link href="/builder">
                 <i className="fas fa-play mr-2"></i>
-                Try Demo
+                Watch Demo
               </Link>
             </Button>
           </div>
           
-          <p className="text-talklink-200 mt-6 text-sm">
-            No credit card required • Free forever plan • Cancel anytime
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-slate-400">
+            <div className="flex items-center">
+              <div className="w-2 h-2 bg-talklink-500 rounded-full mr-3"></div>
+              No credit card required
+            </div>
+            <div className="flex items-center">
+              <div className="w-2 h-2 bg-talklink-500 rounded-full mr-3"></div>
+              Free forever plan
+            </div>
+            <div className="flex items-center">
+              <div className="w-2 h-2 bg-talklink-500 rounded-full mr-3"></div>
+              Cancel anytime
+            </div>
+          </div>
         </div>
       </section>
 
