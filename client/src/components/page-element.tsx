@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { generateFieldId } from "@/lib/card-data";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AIChat } from "@/components/ai-chat";
 
 // Image Slider Component
 interface ImageSliderComponentProps {
@@ -1083,44 +1083,14 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             )}
             
             {/* AI Chat Dialog */}
-            {element.type === "aiAssistant" && (
-              <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>AI Assistant</DialogTitle>
-                  </DialogHeader>
-                  <div className="p-4">
-                    <div className="bg-slate-50 p-3 rounded-lg mb-4">
-                      <p className="text-slate-700 text-sm">{element.data.welcomeMessage}</p>
-                    </div>
-                    <div className="text-sm text-slate-600 mb-4">
-                      <strong>Knowledge Base:</strong>
-                      <ul className="mt-2 space-y-1">
-                        {element.data.knowledgeBase.textContent && (
-                          <li>• Text content available</li>
-                        )}
-                        {element.data.knowledgeBase.websiteUrl && (
-                          <li>• Website: {element.data.knowledgeBase.websiteUrl}</li>
-                        )}
-                        {element.data.knowledgeBase.pdfFiles?.length > 0 && (
-                          <li>• {element.data.knowledgeBase.pdfFiles.length} PDF file(s) uploaded</li>
-                        )}
-                      </ul>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-slate-500 text-sm mb-4">Full AI chat with voice features coming soon!</p>
-                      <button 
-                        className="px-4 py-2 rounded text-white text-sm hover:opacity-90 transition-opacity"
-                        style={{ backgroundColor: element.data.appearance.primaryColor }}
-                        onClick={() => setIsChatOpen(false)}
-                        data-testid="button-close-chat"
-                      >
-                        Close
-                      </button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+            {element.type === "aiChatbot" && (
+              <AIChat
+                isOpen={isChatOpen}
+                onClose={() => setIsChatOpen(false)}
+                knowledgeBase={element.data.knowledgeBase}
+                welcomeMessage={element.data.welcomeMessage}
+                primaryColor={element.data.appearance.primaryColor}
+              />
             )}
           </div>
         );
