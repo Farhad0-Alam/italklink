@@ -104,22 +104,6 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               {data.title || "Your Title"}
             </p>
             
-            {/* Dynamic Page Elements */}
-            {data.pageElements && data.pageElements.length > 0 && (
-              <div className="mb-6">
-                {data.pageElements
-                  .sort((a, b) => a.order - b.order)
-                  .map((element) => (
-                    <PageElementRenderer
-                      key={element.id}
-                      element={element}
-                      isEditing={false}
-                    />
-                  ))
-                }
-              </div>
-            )}
-            
             {/* Contact Icons - Always Show */}
             <div className="flex justify-center space-x-3 mb-6 flex-wrap gap-y-3">
               {data.phone && (
@@ -279,6 +263,22 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 <i className="fas fa-calendar mr-2"></i>Book Now
               </button>
             </div>
+            
+            {/* Dynamic Page Elements */}
+            {data.pageElements && data.pageElements.length > 0 && (
+              <div className="mb-6">
+                {data.pageElements
+                  .sort((a, b) => a.order - b.order)
+                  .map((element) => (
+                    <PageElementRenderer
+                      key={element.id}
+                      element={element}
+                      isEditing={false}
+                    />
+                  ))
+                }
+              </div>
+            )}
             
             {/* Expandable Sections */}
             <div className="space-y-2 mb-6">
