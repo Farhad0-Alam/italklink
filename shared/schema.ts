@@ -1,4 +1,164 @@
 import { z } from "zod";
+import { sql } from 'drizzle-orm';
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+
+// Database Enums
+export const subscriptionStatusEnum = pgEnum('subscription_status', ['active', 'canceled', 'past_due', 'incomplete']);
+export const planTypeEnum = pgEnum('plan_type', ['free', 'pro', 'enterprise']);
+export const userRoleEnum = pgEnum('user_role', ['user', 'admin']);
+
+// Database Tables
+
+// Session storage table
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// Users table
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").unique().notNull(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  role: userRoleEnum("role").default('user'),
+  
+  // Subscription fields
+  stripeCustomerId: varchar("stripe_customer_id"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  subscriptionStatus: subscriptionStatusEnum("subscription_status").default('active'),
+  planType: planTypeEnum("plan_type").default('free'),
+  subscriptionEndsAt: timestamp("subscription_ends_at"),
+  
+  // Usage limits
+  businessCardsCount: integer("business_cards_count").default(0),
+  businessCardsLimit: integer("business_cards_limit").default(1), // Free plan limit
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Subscription plans table
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  planType: planTypeEnum("plan_type").notNull(),
+  price: integer("price").notNull(), // in cents
+  currency: varchar("currency").default('usd'),
+  interval: varchar("interval").notNull(), // month, year
+  businessCardsLimit: integer("business_cards_limit").notNull(),
+  features: jsonb("features").notNull(), // array of feature strings
+  stripePriceId: varchar("stripe_price_id"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Business cards table
+export const businessCards = pgTable("business_cards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }),
+  
+  // Card data (matching the BusinessCard schema)
+  fullName: varchar("full_name").notNull(),
+  title: varchar("title").notNull(),
+  company: varchar("company"),
+  about: text("about"),
+  
+  // Contact info
+  phone: varchar("phone"),
+  email: varchar("email"),
+  website: varchar("website"),
+  location: varchar("location"),
+  
+  // Social media
+  whatsapp: varchar("whatsapp"),
+  linkedin: varchar("linkedin"),
+  instagram: varchar("instagram"),
+  twitter: varchar("twitter"),
+  facebook: varchar("facebook"),
+  youtube: varchar("youtube"),
+  telegram: varchar("telegram"),
+  
+  // Dynamic fields
+  customContacts: jsonb("custom_contacts"),
+  customSocials: jsonb("custom_socials"),
+  pageElements: jsonb("page_elements"),
+  
+  // Branding
+  brandColor: varchar("brand_color").default('#22c55e'),
+  accentColor: varchar("accent_color").default('#16a34a'),
+  font: varchar("font").default('inter'),
+  template: varchar("template").default('minimal'),
+  
+  // Media
+  profilePhoto: text("profile_photo"), // base64
+  logo: text("logo"), // base64
+  galleryImages: jsonb("gallery_images"),
+  
+  // Extended content
+  vision: text("vision"),
+  mission: text("mission"),
+  
+  // Settings
+  isPublic: boolean("is_public").default(true),
+  shareSlug: varchar("share_slug").unique(),
+  
+  // Stats
+  viewCount: integer("view_count").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Payment history table
+export const payments = pgTable("payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  amount: integer("amount").notNull(), // in cents
+  currency: varchar("currency").default('usd'),
+  status: varchar("status").notNull(), // succeeded, failed, pending
+  planType: planTypeEnum("plan_type"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Database Types
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+export type UpsertUser = typeof users.$inferInsert;
+
+export type DbBusinessCard = typeof businessCards.$inferSelect;
+export type InsertDbBusinessCard = typeof businessCards.$inferInsert;
+
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type InsertSubscriptionPlan = typeof subscriptionPlans.$inferInsert;
+
+export type Payment = typeof payments.$inferSelect;
+export type InsertPayment = typeof payments.$inferInsert;
+
+// Zod schemas for database
+export const insertUserSchema = createInsertSchema(users);
+export const insertDbBusinessCardSchema = createInsertSchema(businessCards);
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans);
+export const insertPaymentSchema = createInsertSchema(payments);
 
 // Base element schema for drag-and-drop page builder
 export const baseElementSchema = z.object({
@@ -216,3 +376,27 @@ export type InsertBusinessCard = z.infer<typeof insertBusinessCardSchema>;
 // Language schema for i18n
 export const languageSchema = z.enum(["en", "bn"]);
 export type Language = z.infer<typeof languageSchema>;
+
+// Plan features interface
+export interface PlanFeatures {
+  businessCards: number;
+  customBranding: boolean;
+  analytics: boolean;
+  customDomains: boolean;
+  prioritySupport: boolean;
+  apiAccess: boolean;
+  teamCollaboration?: boolean;
+}
+
+// Plan features schema
+export const PlanFeaturesSchema = z.object({
+  businessCards: z.number(),
+  customBranding: z.boolean(),
+  analytics: z.boolean(),
+  customDomains: z.boolean(),
+  prioritySupport: z.boolean(),
+  apiAccess: z.boolean(),
+  teamCollaboration: z.boolean().optional(),
+});
+
+export type PlanFeaturesData = z.infer<typeof PlanFeaturesSchema>;
