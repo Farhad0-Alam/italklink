@@ -441,11 +441,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as User;
       const cardData = req.body;
       
-      // Check if user has reached their limit
+      // Check if user has reached their limit (Pro and Enterprise users have unlimited cards)
       const userCards = await storage.getUserBusinessCards(user.id);
-      if (userCards.length >= (user.businessCardsLimit || 1)) {
+      if (user.planType === 'free' && userCards.length >= (user.businessCardsLimit || 1)) {
         return res.status(403).json({ 
-          message: `You have reached your business card limit (${user.businessCardsLimit}). Upgrade your plan to create more cards.` 
+          message: `You have reached your business card limit (${user.businessCardsLimit}). Upgrade to Pro for unlimited cards.` 
         });
       }
       
