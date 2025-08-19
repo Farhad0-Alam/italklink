@@ -4,8 +4,12 @@ import passport from 'passport';
 import bcrypt from 'bcryptjs';
 import { setupAuth, requireAuth, optionalAuth, requireAdmin } from './auth';
 import { storage } from './storage';
-import type { User } from '@shared/schema';
-import { insertUserSchema } from '@shared/schema';
+import type { User, Team, TeamMember } from '@shared/schema';
+import { 
+  insertUserSchema, teamInvitationSchema, teamSettingsSchema,
+  insertTeamMemberSchema
+} from '@shared/schema';
+import { z } from 'zod';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -102,7 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Log the user in
-      req.login(newUser, (err) => {
+      req.login(newUser as any, (err) => {
         if (err) {
           console.error('Auto-login after registration failed:', err);
           return res.status(201).json({ 
@@ -160,7 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Log the user in
-      req.login(user, (err) => {
+      req.login(user as any, (err) => {
         if (err) {
           console.error('Login error:', err);
           return res.status(500).json({ message: 'Login failed' });
@@ -176,6 +180,217 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Login error:', error);
       res.status(500).json({ message: 'Login failed' });
+    }
+  });
+
+  // Teams API  
+  app.get('/api/teams', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const teams = await storage.getUserTeams(user.id);
+      res.json(teams);
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+      res.status(500).json({ message: 'Failed to fetch teams' });
+    }
+  });
+
+  app.post('/api/teams', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const teamData = teamSettingsSchema.parse(req.body);
+      const team = await storage.createTeam({
+        ...teamData,
+        ownerId: user.id,
+      });
+      
+      res.status(201).json(team);
+    } catch (error) {
+      console.error('Error creating team:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid team data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Failed to create team' });
+    }
+  });
+
+  app.get('/api/teams/:teamId/members', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const { teamId } = req.params;
+      
+      // Check if user has access to this team
+      const userTeams = await storage.getUserTeams(user.id);
+      const hasAccess = userTeams.some(t => t.id === teamId);
+      
+      if (!hasAccess) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+
+      const members = await storage.getTeamMembers(teamId);
+      res.json(members);
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+      res.status(500).json({ message: 'Failed to fetch team members' });
+    }
+  });
+
+  app.post('/api/teams/:teamId/members', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const { teamId } = req.params;
+      
+      const team = await storage.getTeam(teamId);
+      if (!team) {
+        return res.status(404).json({ message: 'Team not found' });
+      }
+
+      // Check if user is team owner or admin
+      const isOwner = team.ownerId === user.id;
+      
+      if (!isOwner) {
+        return res.status(403).json({ message: 'Only team owner can invite members' });
+      }
+
+      const invitationData = teamInvitationSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(invitationData.email);
+      
+      const member = await storage.createTeamMember({
+        teamId,
+        userId: existingUser?.id,
+        email: invitationData.email,
+        firstName: invitationData.firstName,
+        lastName: invitationData.lastName,
+        title: invitationData.title,
+        department: invitationData.department,
+        phone: invitationData.phone,
+        role: invitationData.role,
+        status: existingUser ? 'active' : 'invited',
+        invitedBy: user.id,
+      });
+      
+      res.status(201).json(member);
+    } catch (error) {
+      console.error('Error inviting team member:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid invitation data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Failed to invite team member' });
+    }
+  });
+
+  app.post('/api/teams/:teamId/bulk-generate', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const { teamId } = req.params;
+      
+      const team = await storage.getTeam(teamId);
+      if (!team) {
+        return res.status(404).json({ message: 'Team not found' });
+      }
+
+      // Check if user is team owner
+      const isOwner = team.ownerId === user.id;
+      
+      if (!isOwner) {
+        return res.status(403).json({ message: 'Only team owner can perform bulk generation' });
+      }
+
+      const { jobName, members, templateCard } = req.body;
+      
+      if (!Array.isArray(members) || members.length === 0) {
+        return res.status(400).json({ message: 'Members array is required' });
+      }
+      
+      // Create bulk generation job
+      const job = await storage.createBulkGenerationJob({
+        teamId,
+        createdBy: user.id,
+        jobName,
+        memberCount: members.length,
+        templateData: templateCard || {},
+        status: 'processing',
+        startedAt: new Date(),
+      });
+      
+      // Process bulk generation
+      let completedCount = 0;
+      let failedCount = 0;
+      
+      for (const member of members) {
+        try {
+          // Check if user already exists
+          const existingUser = await storage.getUserByEmail(member.email);
+          
+          const teamMember = await storage.createTeamMember({
+            teamId,
+            userId: existingUser?.id,
+            email: member.email,
+            firstName: member.firstName,
+            lastName: member.lastName,
+            title: member.title,
+            department: member.department,
+            phone: member.phone,
+            role: member.role || 'member',
+            status: existingUser ? 'active' : 'invited',
+            invitedBy: user.id,
+          });
+          
+          // Create business card for member
+          const cardData = {
+            fullName: `${member.firstName} ${member.lastName}`,
+            title: member.title,
+            email: member.email,
+            phone: member.phone || '',
+            company: team.companyName || templateCard?.company || '',
+            website: team.companyWebsite || templateCard?.website || '',
+            location: team.companyAddress || templateCard?.location || '',
+            brandColor: team.defaultBrandColor,
+            accentColor: team.defaultAccentColor,
+            font: team.defaultFont,
+            template: team.defaultTemplate,
+            logo: team.teamLogo || templateCard?.logo || '',
+            shareSlug: `${member.firstName.toLowerCase()}-${member.lastName.toLowerCase()}-${teamId.slice(0, 8)}-${Date.now()}`,
+            ...(templateCard || {}),
+          };
+          
+          const businessCard = await storage.createBusinessCard({
+            ...cardData,
+            userId: existingUser?.id || null,
+          });
+          
+          // Update team member with business card reference
+          await storage.updateTeamMember(teamMember.id, {
+            businessCardId: businessCard.id,
+          });
+          
+          completedCount++;
+        } catch (memberError) {
+          console.error(`Error creating card for ${member.email}:`, memberError);
+          failedCount++;
+        }
+      }
+      
+      // Update job status
+      await storage.updateBulkGenerationJob(job.id, {
+        status: 'completed',
+        completedCount,
+        failedCount,
+        completedAt: new Date(),
+      });
+      
+      res.json({ 
+        message: 'Bulk generation completed',
+        jobId: job.id,
+        completed: completedCount,
+        failed: failedCount,
+        total: members.length
+      });
+    } catch (error) {
+      console.error('Error in bulk generation:', error);
+      res.status(500).json({ message: 'Failed to perform bulk generation' });
     }
   });
 

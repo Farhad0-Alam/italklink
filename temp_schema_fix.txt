@@ -1,0 +1,10 @@
+export type CsvMember = z.infer<typeof csvMemberSchema>;
+
+// Simplified team member schema for UI
+export const simplifiedTeamMemberSchema = z.object({
+  firstName: z.string().min(1, 'First name required'),
+  lastName: z.string().min(1, 'Last name required'),
+  email: z.string().email('Valid email required'),
+  title: z.string().min(1, 'Job title required'),
+  role: z.enum(['admin', 'member']).default('member'),
+});

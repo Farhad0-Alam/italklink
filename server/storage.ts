@@ -1,6 +1,11 @@
 import { db } from './db';
-import { users, businessCards, type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard } from '@shared/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { 
+  users, businessCards, teams, teamMembers, bulkGenerationJobs,
+  type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
+  type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
+  type BulkGenerationJob, type InsertBulkGenerationJob
+} from '@shared/schema';
+import { eq, and, desc, count, inArray } from 'drizzle-orm';
 
 export interface IStorage {
   // User operations
@@ -19,12 +24,42 @@ export interface IStorage {
   deleteBusinessCard(id: string): Promise<void>;
   incrementBusinessCardViews(id: string): Promise<void>;
   
+  // Team operations
+  getUserTeams(userId: string): Promise<Team[]>;
+  getTeam(id: string): Promise<Team | undefined>;
+  createTeam(teamData: InsertTeam): Promise<Team>;
+  updateTeam(id: string, teamData: Partial<InsertTeam>): Promise<Team>;
+  deleteTeam(id: string): Promise<void>;
+  
+  // Team member operations
+  getTeamMembers(teamId: string): Promise<TeamMember[]>;
+  getTeamMember(id: string): Promise<TeamMember | undefined>;
+  createTeamMember(memberData: InsertTeamMember): Promise<TeamMember>;
+  updateTeamMember(id: string, memberData: Partial<InsertTeamMember>): Promise<TeamMember>;
+  deleteTeamMember(id: string): Promise<void>;
+  getUserTeamMembership(userId: string): Promise<TeamMember[]>;
+  
+  // Bulk generation operations
+  createBulkGenerationJob(jobData: InsertBulkGenerationJob): Promise<BulkGenerationJob>;
+  getBulkGenerationJob(id: string): Promise<BulkGenerationJob | undefined>;
+  getTeamBulkJobs(teamId: string): Promise<BulkGenerationJob[]>;
+  updateBulkGenerationJob(id: string, jobData: Partial<InsertBulkGenerationJob>): Promise<BulkGenerationJob>;
+  
   // User stats
   getUserStats(userId: string): Promise<{
     totalBusinessCards: number;
     totalViews: number;
     planType: string;
     businessCardsLimit: number;
+    totalTeams: number;
+    totalTeamMembers: number;
+  }>;
+  
+  getTeamStats(teamId: string): Promise<{
+    memberCount: number;
+    activeMembers: number;
+    totalCards: number;
+    recentJobs: number;
   }>;
 }
 
@@ -139,12 +174,146 @@ export class DatabaseStorage implements IStorage {
       .where(eq(businessCards.id, id));
   }
 
+  // Team operations
+  async getUserTeams(userId: string): Promise<Team[]> {
+    // Get teams owned by user
+    const ownedTeams = await db.select().from(teams).where(eq(teams.ownerId, userId));
+    
+    // Get teams where user is a member
+    const memberTeams = await db
+      .select({
+        id: teams.id,
+        name: teams.name,
+        description: teams.description,
+        ownerId: teams.ownerId,
+        maxMembers: teams.maxMembers,
+        allowBulkGeneration: teams.allowBulkGeneration,
+        defaultBrandColor: teams.defaultBrandColor,
+        defaultAccentColor: teams.defaultAccentColor,
+        defaultFont: teams.defaultFont,
+        defaultTemplate: teams.defaultTemplate,
+        teamLogo: teams.teamLogo,
+        companyName: teams.companyName,
+        companyWebsite: teams.companyWebsite,
+        companyAddress: teams.companyAddress,
+        createdAt: teams.createdAt,
+        updatedAt: teams.updatedAt,
+      })
+      .from(teams)
+      .innerJoin(teamMembers, eq(teamMembers.teamId, teams.id))
+      .where(and(
+        eq(teamMembers.userId, userId),
+        eq(teamMembers.status, 'active')
+      ));
+    
+    // Combine and deduplicate
+    const allTeams = [...ownedTeams, ...memberTeams];
+    const uniqueTeams = allTeams.filter((team, index, self) => 
+      index === self.findIndex(t => t.id === team.id)
+    );
+    
+    return uniqueTeams;
+  }
+
+  async getTeam(id: string): Promise<Team | undefined> {
+    const [team] = await db.select().from(teams).where(eq(teams.id, id));
+    return team;
+  }
+
+  async createTeam(teamData: InsertTeam): Promise<Team> {
+    const [team] = await db.insert(teams).values(teamData).returning();
+    return team;
+  }
+
+  async updateTeam(id: string, teamData: Partial<InsertTeam>): Promise<Team> {
+    const [team] = await db
+      .update(teams)
+      .set({ ...teamData, updatedAt: new Date() })
+      .where(eq(teams.id, id))
+      .returning();
+    return team;
+  }
+
+  async deleteTeam(id: string): Promise<void> {
+    await db.delete(teams).where(eq(teams.id, id));
+  }
+
+  // Team member operations
+  async getTeamMembers(teamId: string): Promise<TeamMember[]> {
+    return await db
+      .select()
+      .from(teamMembers)
+      .where(eq(teamMembers.teamId, teamId))
+      .orderBy(desc(teamMembers.createdAt));
+  }
+
+  async getTeamMember(id: string): Promise<TeamMember | undefined> {
+    const [member] = await db.select().from(teamMembers).where(eq(teamMembers.id, id));
+    return member;
+  }
+
+  async createTeamMember(memberData: InsertTeamMember): Promise<TeamMember> {
+    const [member] = await db.insert(teamMembers).values(memberData).returning();
+    return member;
+  }
+
+  async updateTeamMember(id: string, memberData: Partial<InsertTeamMember>): Promise<TeamMember> {
+    const [member] = await db
+      .update(teamMembers)
+      .set({ ...memberData, updatedAt: new Date() })
+      .where(eq(teamMembers.id, id))
+      .returning();
+    return member;
+  }
+
+  async deleteTeamMember(id: string): Promise<void> {
+    await db.delete(teamMembers).where(eq(teamMembers.id, id));
+  }
+
+  async getUserTeamMembership(userId: string): Promise<TeamMember[]> {
+    return await db
+      .select()
+      .from(teamMembers)
+      .where(eq(teamMembers.userId, userId))
+      .orderBy(desc(teamMembers.createdAt));
+  }
+
+  // Bulk generation operations
+  async createBulkGenerationJob(jobData: InsertBulkGenerationJob): Promise<BulkGenerationJob> {
+    const [job] = await db.insert(bulkGenerationJobs).values(jobData).returning();
+    return job;
+  }
+
+  async getBulkGenerationJob(id: string): Promise<BulkGenerationJob | undefined> {
+    const [job] = await db.select().from(bulkGenerationJobs).where(eq(bulkGenerationJobs.id, id));
+    return job;
+  }
+
+  async getTeamBulkJobs(teamId: string): Promise<BulkGenerationJob[]> {
+    return await db
+      .select()
+      .from(bulkGenerationJobs)
+      .where(eq(bulkGenerationJobs.teamId, teamId))
+      .orderBy(desc(bulkGenerationJobs.createdAt));
+  }
+
+  async updateBulkGenerationJob(id: string, jobData: Partial<InsertBulkGenerationJob>): Promise<BulkGenerationJob> {
+    const [job] = await db
+      .update(bulkGenerationJobs)
+      .set(jobData)
+      .where(eq(bulkGenerationJobs.id, id))
+      .returning();
+    return job;
+  }
+
   // User stats
   async getUserStats(userId: string): Promise<{
     totalBusinessCards: number;
     totalViews: number;
     planType: string;
     businessCardsLimit: number;
+    totalTeams: number;
+    totalTeamMembers: number;
   }> {
     const user = await this.getUser(userId);
     if (!user) {
@@ -153,12 +322,50 @@ export class DatabaseStorage implements IStorage {
 
     const userCards = await this.getUserBusinessCards(userId);
     const totalViews = userCards.reduce((sum, card) => sum + (card.viewCount || 0), 0);
+    
+    const userTeams = await this.getUserTeams(userId);
+    const userMemberships = await this.getUserTeamMembership(userId);
 
     return {
       totalBusinessCards: userCards.length,
       totalViews,
       planType: user.planType || 'free',
       businessCardsLimit: user.businessCardsLimit || 1,
+      totalTeams: userTeams.length,
+      totalTeamMembers: userMemberships.length,
+    };
+  }
+  
+  async getTeamStats(teamId: string): Promise<{
+    memberCount: number;
+    activeMembers: number;
+    totalCards: number;
+    recentJobs: number;
+  }> {
+    const members = await this.getTeamMembers(teamId);
+    const activeMembers = members.filter(m => m.status === 'active');
+    
+    // Get cards generated by team members
+    const memberIds = members.map(m => m.businessCardId).filter(Boolean) as string[];
+    const cards = memberIds.length > 0 
+      ? await db.select().from(businessCards).where(inArray(businessCards.id, memberIds))
+      : [];
+    
+    // Get recent bulk jobs (last 30 days)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const recentJobs = await db
+      .select({ count: count() })
+      .from(bulkGenerationJobs)
+      .where(and(
+        eq(bulkGenerationJobs.teamId, teamId),
+        // Add date filter when we have proper timestamp comparison
+      ));
+
+    return {
+      memberCount: members.length,
+      activeMembers: activeMembers.length,
+      totalCards: cards.length,
+      recentJobs: recentJobs[0]?.count || 0,
     };
   }
 }

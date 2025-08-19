@@ -1005,7 +1005,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
       default:
         return (
           <div className="mb-4 p-4 bg-slate-100 rounded-lg text-center text-slate-600">
-            Element type "{element.type}" not implemented yet
+            Element type not implemented yet
           </div>
         );
     }

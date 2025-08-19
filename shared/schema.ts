@@ -18,6 +18,8 @@ import { createInsertSchema } from "drizzle-zod";
 export const subscriptionStatusEnum = pgEnum('subscription_status', ['active', 'canceled', 'past_due', 'incomplete']);
 export const planTypeEnum = pgEnum('plan_type', ['free', 'pro', 'enterprise']);
 export const userRoleEnum = pgEnum('user_role', ['user', 'admin']);
+export const teamRoleEnum = pgEnum('team_role', ['owner', 'admin', 'member']);
+export const teamMemberStatusEnum = pgEnum('team_member_status', ['active', 'invited', 'suspended']);
 
 // Database Tables
 
@@ -141,6 +143,87 @@ export const payments = pgTable("payments", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Teams table
+export const teams = pgTable("teams", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  ownerId: varchar("owner_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Team settings
+  maxMembers: integer("max_members").default(10),
+  allowBulkGeneration: boolean("allow_bulk_generation").default(true),
+  
+  // Branding defaults for team cards
+  defaultBrandColor: varchar("default_brand_color").default('#22c55e'),
+  defaultAccentColor: varchar("default_accent_color").default('#16a34a'),
+  defaultFont: varchar("default_font").default('inter'),
+  defaultTemplate: varchar("default_template").default('minimal'),
+  
+  // Team logo and branding
+  teamLogo: text("team_logo"), // base64
+  companyName: varchar("company_name"),
+  companyWebsite: varchar("company_website"),
+  companyAddress: varchar("company_address"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Team members table
+export const teamMembers = pgTable("team_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamId: varchar("team_id").references(() => teams.id, { onDelete: 'cascade' }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }),
+  
+  // Member info (for invited users who haven't joined yet)
+  email: varchar("email"),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  title: varchar("title"),
+  department: varchar("department"),
+  phone: varchar("phone"),
+  
+  // Role and status
+  role: teamRoleEnum("role").default('member'),
+  status: teamMemberStatusEnum("status").default('invited'),
+  
+  // Invitation
+  invitedBy: varchar("invited_by").references(() => users.id),
+  invitedAt: timestamp("invited_at").defaultNow(),
+  joinedAt: timestamp("joined_at"),
+  
+  // Generated card reference
+  businessCardId: varchar("business_card_id").references(() => businessCards.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Bulk generation jobs table
+export const bulkGenerationJobs = pgTable("bulk_generation_jobs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamId: varchar("team_id").references(() => teams.id, { onDelete: 'cascade' }).notNull(),
+  createdBy: varchar("created_by").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Job details
+  jobName: varchar("job_name").notNull(),
+  status: varchar("status").default('pending'), // pending, processing, completed, failed
+  
+  // Template and settings
+  templateData: jsonb("template_data").notNull(), // Base card template
+  memberCount: integer("member_count").default(0),
+  completedCount: integer("completed_count").default(0),
+  failedCount: integer("failed_count").default(0),
+  
+  // Processing info
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  errorMessage: text("error_message"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Database Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -155,11 +238,87 @@ export type InsertSubscriptionPlan = typeof subscriptionPlans.$inferInsert;
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = typeof payments.$inferInsert;
 
+export type Team = typeof teams.$inferSelect;
+export type InsertTeam = typeof teams.$inferInsert;
+
+export type TeamMember = typeof teamMembers.$inferSelect;
+export type InsertTeamMember = typeof teamMembers.$inferInsert;
+
+export type BulkGenerationJob = typeof bulkGenerationJobs.$inferSelect;
+export type InsertBulkGenerationJob = typeof bulkGenerationJobs.$inferInsert;
+
 // Zod schemas for database
 export const insertUserSchema = createInsertSchema(users);
 export const insertDbBusinessCardSchema = createInsertSchema(businessCards);
 export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans);
 export const insertPaymentSchema = createInsertSchema(payments);
+export const insertTeamSchema = createInsertSchema(teams);
+export const insertTeamMemberSchema = createInsertSchema(teamMembers);
+export const insertBulkGenerationJobSchema = createInsertSchema(bulkGenerationJobs);
+
+// Team invitation schema
+export const teamInvitationSchema = z.object({
+  email: z.string().email('Valid email required'),
+  firstName: z.string().min(1, 'First name required'),
+  lastName: z.string().min(1, 'Last name required'),
+  title: z.string().min(1, 'Job title required'),
+  department: z.string().optional(),
+  phone: z.string().optional(),
+  role: z.enum(['admin', 'member']).default('member'),
+});
+
+export type TeamInvitation = z.infer<typeof teamInvitationSchema>;
+
+// Bulk card generation schema
+export const bulkCardGenerationSchema = z.object({
+  jobName: z.string().min(1, 'Job name required'),
+  members: z.array(teamInvitationSchema).min(1, 'At least one member required'),
+  templateCard: z.record(z.any()), // Will reference businessCardSchema later
+  useTeamBranding: z.boolean().default(true),
+});
+
+export type BulkCardGeneration = z.infer<typeof bulkCardGenerationSchema>;
+
+// CSV import schema
+export const csvMemberSchema = z.object({
+  firstName: z.string().min(1, 'First name required'),
+  lastName: z.string().min(1, 'Last name required'), 
+  email: z.string().email('Valid email required'),
+  title: z.string().min(1, 'Job title required'),
+  department: z.string().optional(),
+  phone: z.string().optional(),
+  personalWebsite: z.string().optional(),
+  linkedin: z.string().optional(),
+  twitter: z.string().optional(),
+});
+
+export type CsvMember = z.infer<typeof csvMemberSchema>;
+
+// Simplified team member schema for UI
+export const simplifiedTeamMemberSchema = z.object({
+  firstName: z.string().min(1, 'First name required'),
+  lastName: z.string().min(1, 'Last name required'),
+  email: z.string().email('Valid email required'),
+  title: z.string().min(1, 'Job title required'),
+  role: z.enum(['admin', 'member']).default('member'),
+});
+
+// Team settings schema
+export const teamSettingsSchema = z.object({
+  name: z.string().min(1, 'Team name required'),
+  description: z.string().optional(),
+  maxMembers: z.number().min(1).max(1000).default(10),
+  allowBulkGeneration: z.boolean().default(true),
+  defaultBrandColor: z.string().default('#22c55e'),
+  defaultAccentColor: z.string().default('#16a34a'),
+  defaultFont: z.enum(['inter', 'roboto', 'poppins']).default('inter'),
+  defaultTemplate: z.enum(['minimal', 'bold', 'photo']).default('minimal'),
+  companyName: z.string().optional(),
+  companyWebsite: z.string().url().optional().or(z.literal('')),
+  companyAddress: z.string().optional(),
+});
+
+export type TeamSettings = z.infer<typeof teamSettingsSchema>;
 
 // Base element schema for drag-and-drop page builder
 export const baseElementSchema = z.object({
@@ -430,6 +589,9 @@ export const insertBusinessCardSchema = businessCardSchema.omit({
   createdAt: true,
   updatedAt: true,
 });
+
+
+export type SimplifiedTeamMember = z.infer<typeof simplifiedTeamMemberSchema>;
 
 export type InsertBusinessCard = z.infer<typeof insertBusinessCardSchema>;
 
