@@ -258,6 +258,30 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   <i className="fas fa-globe mr-2"></i>Website
                 </button>
               )}
+              {data.customUrl && (
+                <div className="w-full border-2 rounded-lg p-3"
+                     style={{ borderColor: data.brandColor || '#22c55e' }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-xs text-slate-600 mb-1">My Card URL</p>
+                      <p className="text-sm font-medium text-slate-800" data-testid="text-custom-url">
+                        yoursite.com/{data.customUrl}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        if (!isInteractive) return;
+                        navigator.clipboard.writeText(`yoursite.com/${data.customUrl}`);
+                      }}
+                      className="text-white py-2 px-3 rounded text-xs font-medium hover:opacity-80 transition-colors"
+                      style={{ backgroundColor: data.brandColor || '#22c55e' }}
+                      data-testid="button-copy-url"
+                    >
+                      <i className="fas fa-copy mr-1"></i>Copy
+                    </button>
+                  </div>
+                </div>
+              )}
               <button className="w-full text-white py-2 px-4 rounded-lg text-sm font-medium hover:opacity-80 transition-colors"
                       style={{ backgroundColor: data.brandColor || '#22c55e' }}>
                 <i className="fas fa-calendar mr-2"></i>Book Now

@@ -168,6 +168,39 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             </div>
           </div>
 
+          {/* Custom URL Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-talklink-400">Card URL</h3>
+            
+            <div>
+              <Label htmlFor="customUrl" className="text-white">Custom URL</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-white text-sm px-3 py-2 bg-slate-600 rounded-l border border-slate-600">
+                  yoursite.com/
+                </span>
+                <Input
+                  id="customUrl"
+                  {...form.register("customUrl")}
+                  placeholder="yourname"
+                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500 rounded-l-none"
+                  data-testid="input-custom-url"
+                />
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Create a custom URL for your card (e.g., yoursite.com/yourname)
+              </p>
+            </div>
+            
+            <Button
+              type="button"
+              className="bg-talklink-500 hover:bg-talklink-600 text-white"
+              data-testid="button-claim-url"
+            >
+              <i className="fas fa-link mr-2"></i>
+              Claim your URL
+            </Button>
+          </div>
+
           {/* Contact Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-talklink-400">{t('form.contactInfo')}</h3>

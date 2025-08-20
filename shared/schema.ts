@@ -120,6 +120,9 @@ export const businessCards = pgTable("business_cards", {
   vision: text("vision"),
   mission: text("mission"),
   
+  // Custom URL for sharing
+  customUrl: varchar("custom_url"),
+  
   // Settings
   isPublic: boolean("is_public").default(true),
   shareSlug: varchar("share_slug").unique(),
@@ -575,6 +578,9 @@ export const businessCardSchema = z.object({
   // Extended content
   vision: z.string().optional(),
   mission: z.string().optional(),
+  
+  // Custom URL for user card sharing
+  customUrl: z.string().optional(),
   
   // Metadata
   id: z.string().optional(),
