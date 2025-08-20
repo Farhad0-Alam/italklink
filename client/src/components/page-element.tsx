@@ -141,9 +141,12 @@ interface PageElementProps {
 export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   
+  // Helper function to safely access element data
+  const getData = () => element.data || {};
+  
   const handleDataUpdate = (newData: any) => {
     if (onUpdate) {
-      onUpdate({ ...element, data: { ...element.data, ...newData } });
+      onUpdate({ ...element, data: { ...(element.data || {}), ...newData } });
     }
   };
 

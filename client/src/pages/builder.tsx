@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { toPng } from "html-to-image";
 import { BusinessCard } from "@shared/schema";
@@ -28,9 +28,9 @@ export const Builder = () => {
     return () => clearTimeout(saveTimer);
   }, [cardData]);
 
-  const handleDataChange = (newData: BusinessCard) => {
+  const handleDataChange = useCallback((newData: BusinessCard) => {
     setCardData(newData);
-  };
+  }, []);
 
   const handleGenerateQR = () => {
     setShowQR(true);

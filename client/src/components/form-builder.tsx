@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
@@ -35,10 +35,17 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     defaultValues: cardData,
   });
 
+  // Update parent when form values change, but only when actually different
   const watchedValues = form.watch();
-
+  const prevDataRef = useRef<string>("");
+  
   useEffect(() => {
-    onDataChange(watchedValues);
+    const currentData = JSON.stringify(watchedValues);
+    
+    if (currentData !== prevDataRef.current) {
+      prevDataRef.current = currentData;
+      onDataChange(watchedValues);
+    }
   }, [watchedValues, onDataChange]);
 
   const handleFileUpload = async (
