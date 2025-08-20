@@ -75,13 +75,17 @@ export function setupAIRoutes(app: Express) {
         }
       }
 
-      // Create messages for OpenAI
+      // Create messages for OpenAI - filter out any null/empty content
+      const filteredHistory = (conversationHistory || []).filter(
+        (msg: any) => msg && msg.content && msg.content.trim()
+      );
+      
       const messages = [
         {
           role: 'system' as const,
           content: `You are a helpful AI assistant. You have access to the following knowledge base information:\n\n${context}\n\nPlease use this information to answer questions accurately. If the user asks about something not in the knowledge base, you can use your general knowledge but mention that it's not from the provided knowledge base.`
         },
-        ...(conversationHistory || []),
+        ...filteredHistory,
         {
           role: 'user' as const,
           content: message
@@ -115,8 +119,9 @@ export function setupAIRoutes(app: Express) {
         return res.status(400).json({ message: 'Audio file is required' });
       }
 
+      // Convert to a supported format - use wav as filename
       const transcription = await openai.audio.transcriptions.create({
-        file: new File([req.file.buffer], 'audio.webm', { type: req.file.mimetype }),
+        file: new File([req.file.buffer], 'audio.wav', { type: 'audio/wav' }),
         model: 'whisper-1',
       });
 

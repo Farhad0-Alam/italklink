@@ -109,7 +109,18 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      
+      // Try to use a supported format for OpenAI Whisper
+      let mimeType = 'audio/webm';
+      if (MediaRecorder.isTypeSupported('audio/wav')) {
+        mimeType = 'audio/wav';
+      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+      } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        mimeType = 'audio/webm;codecs=opus';
+      }
+      
+      const recorder = new MediaRecorder(stream, { mimeType });
       
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -118,7 +129,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
       };
 
       recorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunks, { type: mimeType });
         await transcribeAudio(audioBlob);
         setAudioChunks([]);
       };
@@ -148,7 +159,12 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
   const transcribeAudio = async (audioBlob: Blob) => {
     try {
       const formData = new FormData();
-      formData.append('audio', audioBlob, 'audio.webm');
+      // Use appropriate filename based on blob type
+      let filename = 'audio.wav';
+      if (audioBlob.type.includes('mp4')) filename = 'audio.mp4';
+      else if (audioBlob.type.includes('webm')) filename = 'audio.webm';
+      
+      formData.append('audio', audioBlob, filename);
 
       const response = await fetch('/api/ai/transcribe', {
         method: 'POST',
