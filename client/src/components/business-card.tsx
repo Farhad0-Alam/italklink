@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from "react";
+import { forwardRef, useState } from "react";
 import { BusinessCard } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";

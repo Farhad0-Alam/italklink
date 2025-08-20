@@ -1,11 +1,10 @@
-import React from "react";
 import { Link, useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import { storage } from "@/lib/storage";
 
-export const Navigation: React.FC = () => {
+export const Navigation = () => {
   const [location] = useLocation();
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();

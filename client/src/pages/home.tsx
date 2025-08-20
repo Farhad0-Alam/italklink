@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";

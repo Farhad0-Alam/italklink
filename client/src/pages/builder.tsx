@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toPng } from "html-to-image";
 import { BusinessCard } from "@shared/schema";
@@ -11,7 +11,7 @@ import { generateShareUrl, copyToClipboard, logEvent } from "@/lib/share";
 import { useToast } from "@/hooks/use-toast";
 import { defaultCardData } from "@/lib/card-data";
 
-export const Builder: React.FC = () => {
+export const Builder = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const cardRef = useRef<HTMLDivElement>(null);

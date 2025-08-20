@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
@@ -37,7 +37,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
   const watchedValues = form.watch();
 
-  React.useEffect(() => {
+  useEffect(() => {
     onDataChange(watchedValues);
   }, [watchedValues, onDataChange]);
 
