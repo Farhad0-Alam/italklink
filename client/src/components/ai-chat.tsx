@@ -110,16 +110,17 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Try to use a supported format for OpenAI Whisper
+      // Try formats that work better with OpenAI Whisper
       let mimeType = 'audio/webm';
-      if (MediaRecorder.isTypeSupported('audio/wav')) {
-        mimeType = 'audio/wav';
-      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+      if (MediaRecorder.isTypeSupported('audio/mp4')) {
         mimeType = 'audio/mp4';
       } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
         mimeType = 'audio/webm;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+        mimeType = 'audio/ogg;codecs=opus';
       }
       
+      console.log('Recording with mimetype:', mimeType);
       const recorder = new MediaRecorder(stream, { mimeType });
       
       recorder.ondataavailable = (event) => {
@@ -130,6 +131,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
 
       recorder.onstop = async () => {
         const audioBlob = new Blob(audioChunks, { type: mimeType });
+        console.log('Created audio blob:', { type: audioBlob.type, size: audioBlob.size });
         await transcribeAudio(audioBlob);
         setAudioChunks([]);
       };
@@ -159,11 +161,12 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
   const transcribeAudio = async (audioBlob: Blob) => {
     try {
       const formData = new FormData();
-      // Use appropriate filename based on blob type
-      let filename = 'audio.wav';
+      // Force to mp3 format for better compatibility with OpenAI
+      let filename = 'audio.mp3';
       if (audioBlob.type.includes('mp4')) filename = 'audio.mp4';
-      else if (audioBlob.type.includes('webm')) filename = 'audio.webm';
+      else if (audioBlob.type.includes('ogg')) filename = 'audio.ogg';
       
+      console.log('Sending audio file:', { filename, type: audioBlob.type, size: audioBlob.size });
       formData.append('audio', audioBlob, filename);
 
       const response = await fetch('/api/ai/transcribe', {
@@ -190,11 +193,22 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
 
   const speakText = async (text: string) => {
     try {
+      console.log('Speaking text:', { text, length: text?.length });
+      
+      if (!text || text.trim().length === 0) {
+        toast({
+          title: 'Speech Error',
+          description: 'No text to speak',
+          variant: 'destructive'
+        });
+        return;
+      }
+      
       setIsSpeaking(true);
       const response = await fetch('/api/ai/speak', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text: text.trim() }),
         credentials: 'include'
       });
 

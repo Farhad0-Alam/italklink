@@ -119,9 +119,15 @@ export function setupAIRoutes(app: Express) {
         return res.status(400).json({ message: 'Audio file is required' });
       }
 
-      // Convert to a supported format - use wav as filename
+      console.log('Received audio file:', {
+        originalName: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.buffer.length
+      });
+
+      // Force to mp3 format for better compatibility
       const transcription = await openai.audio.transcriptions.create({
-        file: new File([req.file.buffer], 'audio.wav', { type: 'audio/wav' }),
+        file: new File([req.file.buffer], 'audio.mp3', { type: 'audio/mp3' }),
         model: 'whisper-1',
       });
 
@@ -135,16 +141,18 @@ export function setupAIRoutes(app: Express) {
   // Text to speech endpoint
   app.post('/api/ai/speak', requireAuth, async (req, res) => {
     try {
+      console.log('TTS request body:', req.body);
       const { text } = req.body;
       
-      if (!text) {
+      if (!text || typeof text !== 'string' || text.trim().length === 0) {
+        console.log('Invalid text parameter:', { text, type: typeof text });
         return res.status(400).json({ message: 'Text is required' });
       }
 
       const mp3 = await openai.audio.speech.create({
         model: 'tts-1',
         voice: 'alloy',
-        input: text,
+        input: text.trim(),
       });
 
       const buffer = Buffer.from(await mp3.arrayBuffer());
