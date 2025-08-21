@@ -163,31 +163,44 @@ export default function CardEditor() {
               </div>
             </div>
             
-            {shareUrl && (
-              <div className="flex items-center space-x-2">
-                <div className="bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-600 max-w-xs truncate">
-                  {shareUrl}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={copyShareUrl}
-                  className="bg-gray-100 hover:bg-gray-200"
-                  data-testid="button-copy-url"
-                >
-                  <Copy className="w-4 h-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleShare}
-                  className="bg-orange-500 hover:bg-orange-600 text-white"
-                  data-testid="button-share"
-                >
-                  <Share2 className="w-4 h-4 mr-1" />
-                  Share
-                </Button>
-              </div>
-            )}
+            <div className="flex items-center space-x-3">
+              {shareUrl && (
+                <>
+                  <div className="bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-600 max-w-xs truncate">
+                    {shareUrl}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={copyShareUrl}
+                    className="bg-blue-100 hover:bg-blue-200 text-blue-700"
+                    data-testid="button-copy-url"
+                  >
+                    <Copy className="w-4 h-4 mr-1" />
+                    Copy
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleShare}
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                    data-testid="button-share"
+                  >
+                    <Share2 className="w-4 h-4 mr-1" />
+                    Share
+                  </Button>
+                </>
+              )}
+              
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700"
+                data-testid="button-settings"
+              >
+                <Settings className="w-4 h-4 mr-1" />
+                Settings
+              </Button>
+            </div>
           </div>
         </div>
       </div>

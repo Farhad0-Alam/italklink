@@ -50,7 +50,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
-    field: "profilePhoto" | "logo"
+    field: "profilePhoto" | "logo" | "backgroundImage"
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -112,6 +112,48 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Profile Photo Upload */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-talklink-400">Profile</h3>
+            
+            <div className="flex items-center space-x-4">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center">
+                {watchedValues.profilePhoto ? (
+                  <img 
+                    src={watchedValues.profilePhoto} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <i className="fas fa-user text-slate-400 text-2xl"></i>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="profilePhoto" className="text-white">Profile Image</Label>
+                <div className="flex items-center space-x-2 mt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                    onClick={() => document.getElementById('profile-photo-input')?.click()}
+                    disabled={isUploading}
+                  >
+                    <i className="fas fa-upload mr-2"></i>
+                    {isUploading ? "Uploading..." : "Upload"}
+                  </Button>
+                  <input
+                    id="profile-photo-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, 'profilePhoto')}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-talklink-400">{t('form.basicInfo')}</h3>
@@ -165,6 +207,83 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
                 data-testid="textarea-about"
               />
+            </div>
+          </div>
+
+          {/* Logo/Cover Photo Upload */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-talklink-400">Cover & Logo</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="logo" className="text-white">Logo</Label>
+                <div className="mt-2">
+                  <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                    {watchedValues.logo ? (
+                      <img 
+                        src={watchedValues.logo} 
+                        alt="Logo" 
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <i className="fas fa-image text-slate-400 text-xl"></i>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full"
+                    onClick={() => document.getElementById('logo-input')?.click()}
+                    disabled={isUploading}
+                  >
+                    <i className="fas fa-upload mr-2"></i>
+                    Upload Logo
+                  </Button>
+                  <input
+                    id="logo-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, 'logo')}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="backgroundImage" className="text-white">Cover Photo</Label>
+                <div className="mt-2">
+                  <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                    {watchedValues.backgroundImage ? (
+                      <img 
+                        src={watchedValues.backgroundImage} 
+                        alt="Cover" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <i className="fas fa-image text-slate-400 text-xl"></i>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full"
+                    onClick={() => document.getElementById('background-input')?.click()}
+                    disabled={isUploading}
+                  >
+                    <i className="fas fa-upload mr-2"></i>
+                    Upload Cover
+                  </Button>
+                  <input
+                    id="background-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, 'backgroundImage')}
+                    className="hidden"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

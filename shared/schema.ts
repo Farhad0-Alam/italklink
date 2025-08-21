@@ -114,6 +114,7 @@ export const businessCards = pgTable("business_cards", {
   // Media
   profilePhoto: text("profile_photo"), // base64
   logo: text("logo"), // base64
+  backgroundImage: text("background_image"), // base64
   galleryImages: jsonb("gallery_images"),
   
   // Extended content
@@ -706,6 +707,7 @@ export const businessCardSchema = z.object({
   // Media (base64 encoded)
   profilePhoto: z.string().optional(),
   logo: z.string().optional(),
+  backgroundImage: z.string().optional(),
   galleryImages: z.array(z.string()).default([]),
   
   // Available icons for selection
