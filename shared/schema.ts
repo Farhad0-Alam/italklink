@@ -529,6 +529,7 @@ export const contactFormElementSchema = baseElementSchema.extend({
   data: z.object({
     title: z.string().default("Contact Me"),
     fields: z.array(z.string()).default(["name", "email", "message"]),
+    receiverEmail: z.string().optional().default(""),
   }),
 });
 

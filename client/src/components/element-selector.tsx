@@ -184,7 +184,8 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           order: Date.now(),
           data: {
             title: "Contact Me",
-            fields: ["name", "email", "message"]
+            fields: ["name", "email", "message"],
+            receiverEmail: ""
           }
         };
         break;

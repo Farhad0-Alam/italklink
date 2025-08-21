@@ -471,6 +471,13 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Form title"
                 />
+                <Input
+                  value={element.data.receiverEmail || ""}
+                  onChange={(e) => handleDataUpdate({ receiverEmail: e.target.value })}
+                  className="bg-slate-700 border-slate-600 text-white"
+                  placeholder="receiver@example.com (where form submissions will be sent)"
+                  type="email"
+                />
                 <div className="text-white text-sm">Fields: {element.data.fields.join(', ')}</div>
                 <div className="grid grid-cols-3 gap-2">
                   {['name', 'email', 'phone', 'company', 'message'].map(field => (
