@@ -528,13 +528,6 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       className="bg-slate-700 border-slate-600 text-white"
                       placeholder="Form title"
                     />
-                    <Input
-                      value={element.data.receiverEmail || ""}
-                      onChange={(e) => handleDataUpdate({ receiverEmail: e.target.value })}
-                      className="bg-slate-700 border-slate-600 text-white"
-                      placeholder="receiver@example.com (where form submissions will be sent)"
-                      type="email"
-                    />
                   </CollapsibleContent>
                 </Collapsible>
 
@@ -603,17 +596,32 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         <i className="fas fa-info-circle text-blue-400 mr-2"></i>
                         Choose how you want to receive form submissions:
                       </div>
-                      <div className="flex items-center space-x-2 p-2 bg-slate-700 rounded mb-2">
-                        <input
-                          type="checkbox"
-                          checked={element.data.emailNotifications !== false}
-                          onChange={(e) => handleDataUpdate({ emailNotifications: e.target.checked })}
-                          className="rounded"
-                        />
-                        <label className="text-white text-sm font-medium flex-1">
-                          <i className="fas fa-envelope text-blue-400 mr-2"></i>
-                          Email notifications to receiver address
-                        </label>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="text-white text-sm mb-2">Receiver Email Address:</div>
+                          <Input
+                            value={element.data.receiverEmail || ""}
+                            onChange={(e) => handleDataUpdate({ receiverEmail: e.target.value })}
+                            className="bg-slate-700 border-slate-600 text-white"
+                            placeholder="your@email.com"
+                            type="email"
+                          />
+                          <div className="text-xs text-slate-300 mt-1">
+                            Where form submissions will be sent
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 p-2 bg-slate-700 rounded">
+                          <input
+                            type="checkbox"
+                            checked={element.data.emailNotifications !== false}
+                            onChange={(e) => handleDataUpdate({ emailNotifications: e.target.checked })}
+                            className="rounded"
+                          />
+                          <label className="text-white text-sm font-medium flex-1">
+                            <i className="fas fa-envelope text-blue-400 mr-2"></i>
+                            Email notifications to receiver address
+                          </label>
+                        </div>
                       </div>
                       <div className="text-xs text-slate-300 p-2 bg-slate-700 rounded">
                         <div className="font-medium mb-1">How it works:</div>
