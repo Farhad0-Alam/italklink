@@ -29,11 +29,26 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
+  const [collapsedSections, setCollapsedSections] = useState<{[key: string]: boolean}>({
+    coverLogo: false,
+    basicInfo: false,
+    contactInfo: false,
+    socialMedia: false,
+    customization: false,
+    pageBuilder: false
+  });
 
   const form = useForm<BusinessCard>({
     resolver: zodResolver(businessCardSchema),
     defaultValues: cardData,
   });
+
+  const toggleSection = (sectionKey: string) => {
+    setCollapsedSections(prev => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey]
+    }));
+  };
 
   // Update parent when form values change, but only when actually different
   const watchedValues = form.watch();
@@ -112,10 +127,203 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Cover & Logo Upload */}
+          <div className="space-y-4">
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => toggleSection('coverLogo')}
+            >
+              <h3 className="text-lg font-semibold text-talklink-400">Cover & Logo</h3>
+              <i className={`fas ${collapsedSections.coverLogo ? 'fa-chevron-down' : 'fa-chevron-up'} text-talklink-400`}></i>
+            </div>
+            {!collapsedSections.coverLogo && (
+            <div>
+            {/* Header Design Options */}
+            <div className="space-y-3">
+              <Label className="text-white">Header Design</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <div 
+                  className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                    watchedValues.headerDesign === 'cover-logo' || !watchedValues.headerDesign 
+                      ? 'border-talklink-500 bg-talklink-500/10' 
+                      : 'border-slate-600 bg-slate-700'
+                  }`}
+                  onClick={() => form.setValue('headerDesign', 'cover-logo')}
+                >
+                  <div className="text-center">
+                    <div className="h-8 bg-gradient-to-r from-green-400 to-green-600 rounded mb-1 relative">
+                      <div className="absolute top-1 left-1 w-2 h-2 bg-white rounded"></div>
+                    </div>
+                    <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2 border border-green-400"></div>
+                    <p className="text-xs text-white mt-1">Cover + Logo</p>
+                  </div>
+                </div>
+                
+                <div 
+                  className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                    watchedValues.headerDesign === 'profile-center' 
+                      ? 'border-talklink-500 bg-talklink-500/10' 
+                      : 'border-slate-600 bg-slate-700'
+                  }`}
+                  onClick={() => form.setValue('headerDesign', 'profile-center')}
+                >
+                  <div className="text-center">
+                    <div className="h-8 bg-gradient-to-r from-blue-400 to-blue-600 rounded mb-1"></div>
+                    <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2"></div>
+                    <p className="text-xs text-white mt-1">Profile Center</p>
+                  </div>
+                </div>
+                
+                <div 
+                  className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                    watchedValues.headerDesign === 'split-design' 
+                      ? 'border-talklink-500 bg-talklink-500/10' 
+                      : 'border-slate-600 bg-slate-700'
+                  }`}
+                  onClick={() => form.setValue('headerDesign', 'split-design')}
+                >
+                  <div className="text-center">
+                    <div className="h-8 bg-gradient-to-r from-purple-400 to-purple-600 rounded mb-1 flex">
+                      <div className="flex-1"></div>
+                      <div className="w-2 bg-white rounded-full my-auto mr-1"></div>
+                    </div>
+                    <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2"></div>
+                    <p className="text-xs text-white mt-1">Split Layout</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <Label htmlFor="profilePhoto" className="text-white text-sm">Profile Photo</Label>
+                <div className="mt-1">
+                  <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                    {watchedValues.profilePhoto ? (
+                      <img 
+                        src={watchedValues.profilePhoto} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center">
+                        <i className="fas fa-user text-slate-400 text-sm"></i>
+                        <p className="text-slate-400 text-xs mt-1">Profile</p>
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
+                    onClick={() => document.getElementById('profile-photo-input')?.click()}
+                    disabled={isUploading}
+                  >
+                    <i className="fas fa-upload mr-1"></i>
+                    Upload
+                  </Button>
+                  <input
+                    id="profile-photo-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, 'profilePhoto')}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="backgroundImage" className="text-white text-sm">Cover Photo</Label>
+                <div className="mt-1">
+                  <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                    {watchedValues.backgroundImage ? (
+                      <img 
+                        src={watchedValues.backgroundImage} 
+                        alt="Cover" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center">
+                        <i className="fas fa-image text-slate-400 text-sm"></i>
+                        <p className="text-slate-400 text-xs mt-1">Cover</p>
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
+                    onClick={() => document.getElementById('background-input')?.click()}
+                    disabled={isUploading}
+                  >
+                    <i className="fas fa-upload mr-1"></i>
+                    Upload
+                  </Button>
+                  <input
+                    id="background-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, 'backgroundImage')}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="logo" className="text-white text-sm">Logo</Label>
+                <div className="mt-1">
+                  <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                    {watchedValues.logo ? (
+                      <img 
+                        src={watchedValues.logo} 
+                        alt="Logo" 
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <div className="text-center">
+                        <i className="fas fa-image text-slate-400 text-sm"></i>
+                        <p className="text-slate-400 text-xs mt-1">Logo</p>
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
+                    onClick={() => document.getElementById('logo-input')?.click()}
+                    disabled={isUploading}
+                  >
+                    <i className="fas fa-upload mr-1"></i>
+                    Upload
+                  </Button>
+                  <input
+                    id="logo-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, 'logo')}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+            </div>
+            </div>
+            )}
+          </div>
 
           {/* Basic Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-talklink-400">{t('form.basicInfo')}</h3>
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => toggleSection('basicInfo')}
+            >
+              <h3 className="text-lg font-semibold text-talklink-400">{t('form.basicInfo')}</h3>
+              <i className={`fas ${collapsedSections.basicInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-talklink-400`}></i>
+            </div>
+            {!collapsedSections.basicInfo && (
+            <div>
             
             <div>
               <Label htmlFor="fullName" className="text-white">{t('field.fullName')} *</Label>
@@ -167,45 +375,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 data-testid="textarea-about"
               />
             </div>
-          </div>
-
-
-          {/* Custom URL Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-talklink-400">Card URL</h3>
-            
-            <div>
-              <Label htmlFor="customUrl" className="text-white">Custom URL</Label>
-              <div className="flex items-center gap-2">
-                <span className="text-white text-sm px-3 py-2 bg-slate-600 rounded-l border border-slate-600">
-                  yoursite.com/
-                </span>
-                <Input
-                  id="customUrl"
-                  {...form.register("customUrl")}
-                  placeholder="yourname"
-                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500 rounded-l-none"
-                  data-testid="input-custom-url"
-                />
-              </div>
-              <p className="text-xs text-slate-400 mt-1">
-                Create a custom URL for your card (e.g., yoursite.com/yourname)
-              </p>
             </div>
-            
-            <Button
-              type="button"
-              className="bg-talklink-500 hover:bg-talklink-600 text-white"
-              data-testid="button-claim-url"
-            >
-              <i className="fas fa-link mr-2"></i>
-              Claim your URL
-            </Button>
+            )}
           </div>
 
           {/* Contact Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-talklink-400">{t('form.contactInfo')}</h3>
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => toggleSection('contactInfo')}
+            >
+              <h3 className="text-lg font-semibold text-talklink-400">{t('form.contactInfo')}</h3>
+              <i className={`fas ${collapsedSections.contactInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-talklink-400`}></i>
+            </div>
+            {!collapsedSections.contactInfo && (
+            <div>
             
             <div>
               <Label htmlFor="phone" className="text-white">{t('field.phone')}</Label>
@@ -257,11 +441,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 data-testid="input-location"
               />
             </div>
+            </div>
+            )}
           </div>
 
           {/* Contact Information Additional */}
           <div className="space-y-4">
-            <h4 className="text-md font-medium text-talklink-300">Additional Contact Methods</h4>
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => toggleSection('socialMedia')}
+            >
+              <h4 className="text-md font-medium text-talklink-300">Additional Contact Methods</h4>
+              <i className={`fas ${collapsedSections.socialMedia ? 'fa-chevron-down' : 'fa-chevron-up'} text-talklink-300`}></i>
+            </div>
+            {!collapsedSections.socialMedia && (
+            <div>
             {form.watch("customContacts")?.map((contact, index) => (
               <div key={contact.id} className="flex gap-2 items-end">
                 <div className="flex-1">
@@ -359,11 +553,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className="fas fa-plus mr-2"></i>
               Add Contact Method
             </Button>
+            </div>
+            )}
           </div>
 
           {/* Social Media */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-talklink-400">{t('form.socialMedia')}</h3>
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => toggleSection('customization')}
+            >
+              <h3 className="text-lg font-semibold text-talklink-400">{t('form.socialMedia')}</h3>
+              <i className={`fas ${collapsedSections.customization ? 'fa-chevron-down' : 'fa-chevron-up'} text-talklink-400`}></i>
+            </div>
+            {!collapsedSections.customization && (
+            <div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>

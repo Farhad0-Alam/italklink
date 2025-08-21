@@ -192,6 +192,16 @@ export default function CardEditor() {
               )}
               
               <Button
+                variant="outline" 
+                size="sm"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700"
+                data-testid="button-card-url"
+              >
+                <i className="fas fa-link w-4 h-4 mr-1"></i>
+                Card URL
+              </Button>
+              
+              <Button
                 variant="outline"
                 size="sm"
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700"
