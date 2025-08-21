@@ -117,7 +117,10 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             <div 
               className="h-32 relative"
               style={{ 
-                backgroundColor: data.brandColor || '#22c55e'
+                backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
+                backgroundColor: !data.backgroundImage ? data.brandColor || '#22c55e' : undefined,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
               }}
             >
               {/* Large Profile Photo */}
