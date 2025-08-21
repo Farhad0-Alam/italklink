@@ -1,15 +1,13 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { BusinessCardComponent } from "@/components/business-card";
+import { FormBuilder } from "@/components/form-builder";
 import { Copy, Share2, Settings, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import type { BusinessCard } from "@shared/schema";
@@ -83,31 +81,27 @@ export default function CardEditor() {
       }
       return await response.json();
     },
-    onSuccess: (savedCard: BusinessCard) => {
-      toast({
-        title: "Card saved successfully!",
-        description: "Your business card has been saved.",
-      });
-      updateShareUrl(savedCard);
+    onSuccess: (savedCard) => {
       queryClient.invalidateQueries({ queryKey: ['/api/business-cards'] });
+      toast({
+        title: "Success",
+        description: params.id ? "Card updated successfully!" : "Card created successfully!",
+      });
       
-      // Redirect to edit mode if this was a new card
+      // Update share URL and redirect to edit mode if creating
+      updateShareUrl(savedCard);
       if (!params.id && savedCard.id) {
         setLocation(`/cards/${savedCard.id}/edit`);
       }
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
-        title: "Save failed",
-        description: error.message || "Failed to save business card.",
+        title: "Error",
+        description: "Failed to save card. Please try again.",
         variant: "destructive",
       });
     },
   });
-
-  const handleInputChange = (field: keyof BusinessCard, value: string) => {
-    setCardData(prev => ({ ...prev, [field]: value }));
-  };
 
   const handleSave = () => {
     saveMutation.mutate(cardData);
@@ -200,237 +194,85 @@ export default function CardEditor() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left Panel - Form */}
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-6 space-y-6">
-                <div className="flex items-center space-x-2 text-lg font-semibold">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Profile</span>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="fullName">Full Name *</Label>
-                    <Input
-                      id="fullName"
-                      value={cardData.fullName}
-                      onChange={(e) => handleInputChange('fullName', e.target.value)}
-                      placeholder="Enter your full name"
-                      data-testid="input-full-name"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="title">Title *</Label>
-                    <Input
-                      id="title"
-                      value={cardData.title}
-                      onChange={(e) => handleInputChange('title', e.target.value)}
-                      placeholder="Your job title"
-                      data-testid="input-title"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="company">Company</Label>
-                  <Input
-                    id="company"
-                    value={cardData.company || ''}
-                    onChange={(e) => handleInputChange('company', e.target.value)}
-                    placeholder="Company name"
-                    data-testid="input-company"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="about">About Me</Label>
-                  <Textarea
-                    id="about"
-                    value={cardData.about || ''}
-                    onChange={(e) => handleInputChange('about', e.target.value)}
-                    placeholder="Tell people about yourself..."
-                    className="min-h-[100px]"
-                    data-testid="textarea-about"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6 space-y-6">
-                <div className="flex items-center space-x-2 text-lg font-semibold">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>Contact Information</span>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input
-                      id="phone"
-                      value={cardData.phone || ''}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      placeholder="+1 234 567 8900"
-                      data-testid="input-phone"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={cardData.email || ''}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      placeholder="your@email.com"
-                      data-testid="input-email"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="website">Website</Label>
-                    <Input
-                      id="website"
-                      value={cardData.website || ''}
-                      onChange={(e) => handleInputChange('website', e.target.value)}
-                      placeholder="https://yourwebsite.com"
-                      data-testid="input-website"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      value={cardData.location || ''}
-                      onChange={(e) => handleInputChange('location', e.target.value)}
-                      placeholder="City, Country"
-                      data-testid="input-location"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6 space-y-6">
-                <div className="flex items-center space-x-2 text-lg font-semibold">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span>Social Media</span>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="linkedin">LinkedIn</Label>
-                    <Input
-                      id="linkedin"
-                      value={cardData.linkedin || ''}
-                      onChange={(e) => handleInputChange('linkedin', e.target.value)}
-                      placeholder="LinkedIn profile URL"
-                      data-testid="input-linkedin"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="twitter">Twitter</Label>
-                    <Input
-                      id="twitter"
-                      value={cardData.twitter || ''}
-                      onChange={(e) => handleInputChange('twitter', e.target.value)}
-                      placeholder="@username"
-                      data-testid="input-twitter"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="instagram">Instagram</Label>
-                    <Input
-                      id="instagram"
-                      value={cardData.instagram || ''}
-                      onChange={(e) => handleInputChange('instagram', e.target.value)}
-                      placeholder="@username"
-                      data-testid="input-instagram"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="whatsapp">WhatsApp</Label>
-                    <Input
-                      id="whatsapp"
-                      value={cardData.whatsapp || ''}
-                      onChange={(e) => handleInputChange('whatsapp', e.target.value)}
-                      placeholder="+1234567890"
-                      data-testid="input-whatsapp"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex space-x-4">
-              <Button
+          {/* Left Panel - Form Builder */}
+          <div>
+            <FormBuilder
+              cardData={cardData}
+              onDataChange={(data) => setCardData(data)}
+              onGenerateQR={() => {
+                toast({
+                  title: "QR Code Generated",
+                  description: "QR code has been generated for your card",
+                });
+              }}
+            />
+            
+            <div className="mt-6 flex gap-3">
+              <Button 
                 onClick={handleSave}
-                disabled={saveMutation.isPending || !cardData.fullName || !cardData.title}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                className="bg-orange-500 hover:bg-orange-600 text-white flex-1"
+                disabled={saveMutation.isPending}
                 data-testid="button-save-card"
               >
-                {saveMutation.isPending ? (
-                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                ) : null}
-                {params.id ? 'Update Card' : 'Create Card'}
-              </Button>
-              <Button
-                variant="outline"
-                className="px-6"
-                data-testid="button-settings"
-              >
-                <Settings className="w-4 h-4" />
+                {saveMutation.isPending ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </div>
 
           {/* Right Panel - Mobile Preview */}
-          <div className="flex justify-center">
-            <div className="relative">
-              {/* Mobile Phone Frame */}
-              <div className="relative bg-black rounded-[3rem] p-2 shadow-2xl">
-                <div className="bg-white rounded-[2.5rem] overflow-hidden" style={{ width: '320px', height: '640px' }}>
-                  {/* Phone Status Bar */}
-                  <div className="bg-black text-white text-xs px-4 py-2 flex justify-between items-center">
-                    <span>9:41</span>
-                    <div className="flex space-x-1">
-                      <div className="w-4 h-2 bg-white rounded-sm opacity-60"></div>
-                      <div className="w-1 h-2 bg-white rounded-sm"></div>
-                    </div>
-                  </div>
-                  
-                  {/* Card Preview Container */}
-                  <div className="h-full overflow-y-auto bg-gray-50 p-4">
-                    <div ref={cardRef} className="transform scale-[0.85] origin-top">
-                      <BusinessCardComponent
-                        data={{
-                          ...cardData,
-                          pageElements: [],
-                          galleryImages: [],
-                          customContacts: [],
-                          customSocials: [],
-                          availableIcons: [],
+          <div className="lg:sticky lg:top-8 lg:h-fit">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Live Preview</h3>
+              <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span>Updates in real-time</span>
+              </div>
+            </div>
+            
+            {/* Mobile Phone Mockup */}
+            <div className="relative mx-auto max-w-sm">
+              {/* Phone Frame */}
+              <div className="relative bg-gray-900 rounded-[3rem] p-2 shadow-2xl">
+                <div className="bg-black rounded-[2.5rem] p-1">
+                  <div className="bg-white rounded-[2rem] overflow-hidden">
+                    {/* Phone Screen */}
+                    <div className="relative h-[640px] overflow-y-auto scrollbar-hide">
+                      {/* Status Bar */}
+                      <div className="absolute top-0 left-0 right-0 h-8 bg-black rounded-t-[2rem] z-10">
+                        <div className="flex items-center justify-between px-6 h-full text-white text-xs">
+                          <span className="font-semibold">9:41</span>
+                          <div className="flex items-center space-x-1">
+                            <div className="w-4 h-2 border border-white rounded-sm">
+                              <div className="w-3 h-1 bg-white rounded-sm m-0.5"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Card Content */}
+                      <div 
+                        ref={cardRef}
+                        className="pt-8 pb-4 px-4 h-full"
+                        style={{
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                         }}
-                        showQR={false}
-                        isInteractive={true}
-                      />
+                      >
+                        <BusinessCardComponent data={cardData} />
+                      </div>
                     </div>
                   </div>
                 </div>
+                
+                {/* Home Indicator */}
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gray-600 rounded-full"></div>
               </div>
-              
-              {/* Preview Label */}
-              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
-                <Badge variant="outline" className="bg-white">
-                  Live Preview
-                </Badge>
-              </div>
+            </div>
+            
+            <div className="mt-6 text-center">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                <span className="w-2 h-2 bg-blue-500 rounded-full inline-block mr-2"></span>
+                Mobile Optimized
+              </Badge>
             </div>
           </div>
         </div>
