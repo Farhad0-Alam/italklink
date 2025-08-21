@@ -709,6 +709,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               </Button>
             </div>
           </div>
+          )}
+          </div>
 
           {/* Page Builder */}
           <div className="space-y-4">
