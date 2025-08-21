@@ -2,7 +2,6 @@ import { PageElement } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { generateFieldId } from "@/lib/card-data";
@@ -142,7 +141,6 @@ interface PageElementProps {
 
 export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
   
   // Helper function to safely access element data
   const getData = () => element.data || {};
@@ -150,29 +148,6 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
   const handleDataUpdate = (newData: any) => {
     if (onUpdate) {
       onUpdate({ ...element, data: { ...(element.data || {}), ...newData } });
-    }
-  };
-
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  const getElementTitle = () => {
-    switch (element.type) {
-      case "heading": return element.data.text || "Heading";
-      case "paragraph": return "Paragraph";
-      case "link": return element.data.text || "Link";
-      case "image": return "Image";
-      case "qrcode": return "QR Code";
-      case "contactSection": return "Contact Section";
-      case "socialSection": return "Social Section";
-      case "video": return "Video";
-      case "contactForm": return element.data.title || "Contact Form";
-      case "accordion": return "Accordion";
-      case "testimonials": return element.data.title || "Testimonials";
-      case "googleMaps": return element.data.title || "Google Maps";
-      case "aiChatbot": return element.data.title || "AI Chatbot";
-      default: return "Page Element";
     }
   };
 
@@ -1135,35 +1110,13 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
 
   return (
     <div className="relative group">
-      <Collapsible open={isExpanded}>
-        <CollapsibleTrigger 
-          onClick={toggleExpanded}
-          className="w-full mb-2"
-          data-testid={`toggle-${element.type}-${element.id}`}
-        >
-          <div className="flex items-center justify-between p-2 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                {getElementTitle()}
-              </span>
-              <span className="text-xs text-slate-500 bg-slate-200 dark:bg-slate-600 px-2 py-1 rounded">
-                {element.type}
-              </span>
-            </div>
-            <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-xs text-slate-500`}></i>
-          </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          {renderElement()}
-        </CollapsibleContent>
-      </Collapsible>
+      {renderElement()}
       {isEditing && onDelete && (
         <Button
           onClick={() => onDelete(element.id)}
           variant="destructive"
           size="sm"
-          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-          data-testid={`delete-${element.type}-${element.id}`}
+          className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <i className="fas fa-trash text-xs"></i>
         </Button>
