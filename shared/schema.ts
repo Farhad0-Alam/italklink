@@ -17,7 +17,7 @@ import { createInsertSchema } from "drizzle-zod";
 // Database Enums
 export const subscriptionStatusEnum = pgEnum('subscription_status', ['active', 'canceled', 'past_due', 'incomplete']);
 export const planTypeEnum = pgEnum('plan_type', ['free', 'pro', 'enterprise']);
-export const userRoleEnum = pgEnum('user_role', ['user', 'admin']);
+export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'super_admin']);
 export const teamRoleEnum = pgEnum('team_role', ['owner', 'admin', 'member']);
 export const teamMemberStatusEnum = pgEnum('team_member_status', ['active', 'invited', 'suspended']);
 
@@ -227,6 +227,41 @@ export const bulkGenerationJobs = pgTable("bulk_generation_jobs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Admin logs table
+export const adminLogs = pgTable("admin_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  actorId: varchar("actor_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  action: varchar("action").notNull(), // create, update, delete, suspend, etc.
+  targetType: varchar("target_type").notNull(), // user, template, organization, etc.
+  targetId: varchar("target_id"),
+  details: jsonb("details"), // Additional context
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Analytics events table
+export const analyticsEvents = pgTable("analytics_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cardId: varchar("card_id").references(() => businessCards.id, { onDelete: 'cascade' }),
+  type: varchar("type").notNull(), // view, click, qr_scan, share
+  metadata: jsonb("metadata"), // device info, utm params, etc.
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Global templates table
+export const globalTemplates = pgTable("global_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  templateData: jsonb("template_data").notNull(), // The template configuration
+  previewImage: text("preview_image"), // base64 preview
+  isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Database Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -250,6 +285,15 @@ export type InsertTeamMember = typeof teamMembers.$inferInsert;
 export type BulkGenerationJob = typeof bulkGenerationJobs.$inferSelect;
 export type InsertBulkGenerationJob = typeof bulkGenerationJobs.$inferInsert;
 
+export type AdminLog = typeof adminLogs.$inferSelect;
+export type InsertAdminLog = typeof adminLogs.$inferInsert;
+
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+export type InsertAnalyticsEvent = typeof analyticsEvents.$inferInsert;
+
+export type GlobalTemplate = typeof globalTemplates.$inferSelect;
+export type InsertGlobalTemplate = typeof globalTemplates.$inferInsert;
+
 // Zod schemas for database
 export const insertUserSchema = createInsertSchema(users);
 export const insertDbBusinessCardSchema = createInsertSchema(businessCards);
@@ -258,6 +302,9 @@ export const insertPaymentSchema = createInsertSchema(payments);
 export const insertTeamSchema = createInsertSchema(teams);
 export const insertTeamMemberSchema = createInsertSchema(teamMembers);
 export const insertBulkGenerationJobSchema = createInsertSchema(bulkGenerationJobs);
+export const insertAdminLogSchema = createInsertSchema(adminLogs);
+export const insertAnalyticsEventSchema = createInsertSchema(analyticsEvents);
+export const insertGlobalTemplateSchema = createInsertSchema(globalTemplates);
 
 // Team invitation schema
 export const teamInvitationSchema = z.object({

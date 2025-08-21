@@ -12,6 +12,7 @@ import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
 import { Builder } from "./pages/builder";
 import { Share } from "./pages/share";
+import Admin from "./pages/admin";
 import NotFound from "@/pages/not-found";
 import i18n from "./lib/i18n";
 
@@ -25,6 +26,8 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/builder" component={Builder} />
       <Route path="/share" component={Share} />
+      <Route path="/admin/:rest*" component={Admin} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );

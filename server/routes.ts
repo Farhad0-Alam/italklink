@@ -11,6 +11,7 @@ import {
 } from '@shared/schema';
 import { z } from 'zod';
 import { setupAIRoutes } from './ai-routes';
+import adminRoutes from './admin-routes';
 
 
 
@@ -22,6 +23,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup AI routes
   setupAIRoutes(app);
+  
+  // Setup admin routes
+  app.use('/api/admin', adminRoutes);
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {
