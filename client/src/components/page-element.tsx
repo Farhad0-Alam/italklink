@@ -486,8 +486,11 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             const result = await response.json();
 
             if (result.success) {
-              setSubmitStatus('✅ Message sent successfully!');
+              setSubmitStatus(element.data.successMessage || '✅ Message sent successfully!');
               setFormData({}); // Reset form
+              // Reset file input
+              const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+              if (fileInput) fileInput.value = '';
             } else {
               setSubmitStatus('❌ Failed to send message. Please try again.');
             }
@@ -578,16 +581,16 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   </CollapsibleContent>
                 </Collapsible>
 
-                {/* Google Sheets Integration */}
+                {/* Delivery Options */}
                 <Collapsible>
                   <CollapsibleTrigger className="w-full">
                     <div className="flex items-center justify-between w-full p-3 bg-emerald-500/20 rounded-lg border border-emerald-400/30 hover:bg-emerald-500/30 transition-colors">
                       <div className="flex items-center space-x-2">
-                        <i className="fab fa-google text-emerald-400"></i>
-                        <span className="text-emerald-300 font-medium">Google Sheets Integration</span>
-                        {element.data.googleSheets?.enabled && (
+                        <i className="fas fa-paper-plane text-emerald-400"></i>
+                        <span className="text-emerald-300 font-medium">Delivery Options</span>
+                        {element.data.emailNotifications && (
                           <span className="bg-emerald-500 text-emerald-900 text-xs px-2 py-1 rounded font-medium">
-                            ENABLED
+                            EMAIL ENABLED
                           </span>
                         )}
                       </div>
@@ -595,65 +598,32 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-2 space-y-3">
-                    <div className="flex items-center space-x-2 p-3 bg-slate-600 rounded">
-                      <input
-                        type="checkbox"
-                        checked={element.data.googleSheets?.enabled || false}
-                        onChange={(e) => handleDataUpdate({ 
-                          googleSheets: { 
-                            ...element.data.googleSheets, 
-                            enabled: e.target.checked 
-                          } 
-                        })}
-                        className="rounded"
-                      />
-                      <label className="text-white text-sm font-medium">
-                        Automatically save submissions to Google Sheets
-                      </label>
-                    </div>
-                    {element.data.googleSheets?.enabled && (
-                      <div className="space-y-3 p-3 bg-slate-600 rounded">
-                        <div className="text-white text-sm mb-2">
-                          <i className="fas fa-info-circle text-blue-400 mr-2"></i>
-                          Configure your Google Sheets connection:
-                        </div>
-                        <Input
-                          value={element.data.googleSheets?.spreadsheetId || ""}
-                          onChange={(e) => handleDataUpdate({ 
-                            googleSheets: { 
-                              ...element.data.googleSheets, 
-                              spreadsheetId: e.target.value 
-                            } 
-                          })}
-                          className="bg-slate-700 border-slate-600 text-white"
-                          placeholder="Paste Google Sheets ID from URL"
-                        />
-                        <Input
-                          value={element.data.googleSheets?.sheetName || "Sheet1"}
-                          onChange={(e) => handleDataUpdate({ 
-                            googleSheets: { 
-                              ...element.data.googleSheets, 
-                              sheetName: e.target.value 
-                            } 
-                          })}
-                          className="bg-slate-700 border-slate-600 text-white"
-                          placeholder="Sheet name (e.g., Sheet1, Contacts, Leads)"
-                        />
-                        <div className="text-xs text-slate-300 p-2 bg-slate-700 rounded">
-                          <div className="flex items-start space-x-2">
-                            <i className="fas fa-lightbulb text-yellow-400 mt-0.5"></i>
-                            <div>
-                              <div className="font-medium mb-1">Setup Instructions:</div>
-                              <ol className="list-decimal list-inside space-y-1 text-xs">
-                                <li>Copy the Spreadsheet ID from your Google Sheets URL</li>
-                                <li>Make sure the sheet is shared with the service account</li>
-                                <li>Data will be automatically added with timestamps</li>
-                              </ol>
-                            </div>
-                          </div>
-                        </div>
+                    <div className="p-3 bg-slate-600 rounded">
+                      <div className="text-white text-sm mb-3">
+                        <i className="fas fa-info-circle text-blue-400 mr-2"></i>
+                        Choose how you want to receive form submissions:
                       </div>
-                    )}
+                      <div className="flex items-center space-x-2 p-2 bg-slate-700 rounded mb-2">
+                        <input
+                          type="checkbox"
+                          checked={element.data.emailNotifications !== false}
+                          onChange={(e) => handleDataUpdate({ emailNotifications: e.target.checked })}
+                          className="rounded"
+                        />
+                        <label className="text-white text-sm font-medium flex-1">
+                          <i className="fas fa-envelope text-blue-400 mr-2"></i>
+                          Email notifications to receiver address
+                        </label>
+                      </div>
+                      <div className="text-xs text-slate-300 p-2 bg-slate-700 rounded">
+                        <div className="font-medium mb-1">How it works:</div>
+                        <ul className="list-disc list-inside space-y-1 text-xs">
+                          <li>Form submissions will be sent to the receiver email above</li>
+                          <li>Instant notifications when someone fills out your form</li>
+                          <li>Includes all form field data in a formatted email</li>
+                        </ul>
+                      </div>
+                    </div>
                   </CollapsibleContent>
                 </Collapsible>
 
@@ -691,15 +661,25 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         />
                         <span className="text-white text-xs">Auto-reply to sender</span>
                       </label>
-                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer opacity-50">
-                        <input type="checkbox" className="rounded" disabled />
+                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="rounded" 
+                          checked={element.data.fileAttachments || false}
+                          onChange={(e) => handleDataUpdate({ fileAttachments: e.target.checked })}
+                        />
                         <span className="text-white text-xs">File attachments</span>
-                        <span className="text-purple-300 text-xs">(Coming Soon)</span>
+                        <span className="bg-purple-500 text-purple-900 text-xs px-2 py-1 rounded ml-2">NEW</span>
                       </label>
-                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer opacity-50">
-                        <input type="checkbox" className="rounded" disabled />
+                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="rounded" 
+                          checked={element.data.spamProtection || false}
+                          onChange={(e) => handleDataUpdate({ spamProtection: e.target.checked })}
+                        />
                         <span className="text-white text-xs">Spam protection</span>
-                        <span className="text-purple-300 text-xs">(Coming Soon)</span>
+                        <span className="bg-purple-500 text-purple-900 text-xs px-2 py-1 rounded ml-2">NEW</span>
                       </label>
                     </div>
                     <div className="p-3 bg-slate-600 rounded">
@@ -788,6 +768,49 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       rows={3}
                       required
                     />
+                  )}
+
+                  {/* File Attachments */}
+                  {element.data.fileAttachments && (
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-slate-700">
+                        <i className="fas fa-paperclip mr-2"></i>
+                        Attach Files (optional)
+                      </label>
+                      <input
+                        type="file"
+                        multiple
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.zip"
+                        className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500 text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-talklink-50 file:text-talklink-700 hover:file:bg-talklink-100"
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          handleInputChange('attachments', files.map(f => f.name).join(', '));
+                        }}
+                      />
+                      <div className="text-xs text-slate-500">
+                        Supported formats: PDF, Word, Images, ZIP (Max 10MB per file)
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Spam Protection */}
+                  {element.data.spamProtection && (
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-slate-700">
+                        <i className="fas fa-shield-alt mr-2"></i>
+                        Security Check
+                      </label>
+                      <div className="flex items-center space-x-2 p-3 bg-slate-100 rounded border">
+                        <input
+                          type="checkbox"
+                          required
+                          className="rounded"
+                        />
+                        <span className="text-sm text-slate-700">
+                          I am not a robot and agree to the form submission
+                        </span>
+                      </div>
+                    </div>
                   )}
                   
                   {submitStatus && (
