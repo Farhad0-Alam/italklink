@@ -172,11 +172,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               </div>
             </div>
             
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-3 gap-3">
               <div>
-                <Label htmlFor="profilePhoto" className="text-white">Profile Photo</Label>
-                <div className="mt-2">
-                  <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                <Label htmlFor="profilePhoto" className="text-white text-sm">Profile Photo</Label>
+                <div className="mt-1">
+                  <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
                     {watchedValues.profilePhoto ? (
                       <img 
                         src={watchedValues.profilePhoto} 
@@ -185,8 +185,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       />
                     ) : (
                       <div className="text-center">
-                        <i className="fas fa-user text-slate-400 text-xl mb-2"></i>
-                        <p className="text-slate-400 text-sm">Profile Photo Preview</p>
+                        <i className="fas fa-user text-slate-400 text-sm"></i>
+                        <p className="text-slate-400 text-xs mt-1">Profile</p>
                       </div>
                     )}
                   </div>
@@ -194,12 +194,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
                     onClick={() => document.getElementById('profile-photo-input')?.click()}
                     disabled={isUploading}
                   >
-                    <i className="fas fa-upload mr-2"></i>
-                    {isUploading ? "Uploading Profile..." : "Upload Profile Photo"}
+                    <i className="fas fa-upload mr-1"></i>
+                    Upload
                   </Button>
                   <input
                     id="profile-photo-input"
@@ -212,9 +212,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               </div>
               
               <div>
-                <Label htmlFor="backgroundImage" className="text-white">Cover Photo</Label>
-                <div className="mt-2">
-                  <div className="w-full h-32 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                <Label htmlFor="backgroundImage" className="text-white text-sm">Cover Photo</Label>
+                <div className="mt-1">
+                  <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
                     {watchedValues.backgroundImage ? (
                       <img 
                         src={watchedValues.backgroundImage} 
@@ -223,8 +223,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       />
                     ) : (
                       <div className="text-center">
-                        <i className="fas fa-image text-slate-400 text-2xl mb-2"></i>
-                        <p className="text-slate-400 text-sm">Cover Photo Preview</p>
+                        <i className="fas fa-image text-slate-400 text-sm"></i>
+                        <p className="text-slate-400 text-xs mt-1">Cover</p>
                       </div>
                     )}
                   </div>
@@ -232,12 +232,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
                     onClick={() => document.getElementById('background-input')?.click()}
                     disabled={isUploading}
                   >
-                    <i className="fas fa-upload mr-2"></i>
-                    {isUploading ? "Uploading Cover..." : "Upload Cover Photo"}
+                    <i className="fas fa-upload mr-1"></i>
+                    Upload
                   </Button>
                   <input
                     id="background-input"
@@ -250,9 +250,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               </div>
 
               <div>
-                <Label htmlFor="logo" className="text-white">Logo</Label>
-                <div className="mt-2">
-                  <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                <Label htmlFor="logo" className="text-white text-sm">Logo</Label>
+                <div className="mt-1">
+                  <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
                     {watchedValues.logo ? (
                       <img 
                         src={watchedValues.logo} 
@@ -261,8 +261,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       />
                     ) : (
                       <div className="text-center">
-                        <i className="fas fa-image text-slate-400 text-xl mb-2"></i>
-                        <p className="text-slate-400 text-sm">Logo Preview</p>
+                        <i className="fas fa-image text-slate-400 text-sm"></i>
+                        <p className="text-slate-400 text-xs mt-1">Logo</p>
                       </div>
                     )}
                   </div>
@@ -270,12 +270,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
                     onClick={() => document.getElementById('logo-input')?.click()}
                     disabled={isUploading}
                   >
-                    <i className="fas fa-upload mr-2"></i>
-                    {isUploading ? "Uploading Logo..." : "Upload Logo"}
+                    <i className="fas fa-upload mr-1"></i>
+                    Upload
                   </Button>
                   <input
                     id="logo-input"
