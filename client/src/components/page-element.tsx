@@ -642,11 +642,9 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       <div className="flex items-center space-x-2">
                         <i className="fab fa-google text-green-400"></i>
                         <span className="text-green-300 font-medium">Google Sheets Integration</span>
-                        {element.data.googleSheets?.enabled && (
-                          <span className="bg-green-500 text-green-900 text-xs px-2 py-1 rounded font-medium">
-                            PRO
-                          </span>
-                        )}
+                        <span className="bg-green-500 text-green-900 text-xs px-2 py-1 rounded font-medium">
+                          PRO
+                        </span>
                       </div>
                       <i className="fas fa-chevron-down text-green-400 text-xs"></i>
                     </div>
@@ -784,8 +782,8 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
 
                 {/* Contact Form Title Display */}
                 <div className="p-4 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border border-slate-500 shadow-lg">
-                  <h3 className="text-white font-semibold text-xl tracking-wide">{element.data.title}</h3>
-                  <div className="text-slate-300 text-sm font-medium mt-1 opacity-75">contactForm</div>
+                  <h3 className="text-white font-semibold text-xl tracking-wide opacity-100">{element.data.title}</h3>
+                  <div className="text-slate-300 text-sm font-medium mt-1 opacity-100">contactForm</div>
                 </div>
 
                 {/* Form Preview */}
@@ -803,7 +801,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
               </div>
             ) : (
               <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <h3 className="font-bold mb-4 text-slate-800 text-xl tracking-wide">{element.data.title}</h3>
+                <h3 className="font-bold mb-4 text-slate-800 text-xl tracking-wide opacity-100">{element.data.title}</h3>
                 <form onSubmit={handleFormSubmit} className="space-y-3">
                   {element.data.fields.includes('name') && (
                     <input
