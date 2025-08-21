@@ -310,7 +310,7 @@ export default function Dashboard() {
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-900">Newly Created Links</h2>
             <Button className="bg-orange-500 hover:bg-orange-600 text-white" asChild>
-              <Link href="/builder" data-testid="button-create-link">
+              <Link href="/templates" data-testid="button-create-link">
                 <i className="fas fa-plus mr-2"></i>
                 Create New Link
               </Link>
@@ -332,7 +332,7 @@ export default function Dashboard() {
                 Create your first digital business card link to get started.
               </p>
               <Button className="bg-orange-500 hover:bg-orange-600 text-white" asChild>
-                <Link href="/builder">
+                <Link href="/templates">
                   <i className="fas fa-plus mr-2"></i>
                   Create Your First Link
                 </Link>
