@@ -15,7 +15,6 @@ interface BusinessCardProps {
 export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProps>(
   ({ data, showQR = false, isInteractive = true }, ref) => {
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     const toggleSection = (section: string) => {
       if (!isInteractive) return;
@@ -63,14 +62,6 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     // Use sample image for preview when no profile photo
     const profileImageSrc = data.profilePhoto || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300";
     
-    // Sample gallery images when none provided
-    const galleryImages = data.galleryImages && data.galleryImages.length > 0 ? data.galleryImages : [
-      "https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
-      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60",
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60",
-      "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60",
-      "https://images.unsplash.com/photo-1549923746-c502d488b3ea?ixlib=rb-4.0.3&auto=format&fit=crop&w=60&h=60"
-    ];
 
     return (
       <div ref={ref} className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-sm mx-auto card-shadow">
@@ -387,63 +378,6 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             </Collapsible>
           )}
 
-          {/* Gallery */}
-          {galleryImages.length > 0 && (
-            <Collapsible open={expandedSections.gallery}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('gallery')}
-                className="w-full mb-4"
-              >
-                <div className="flex items-center justify-center space-x-2">
-                  <span 
-                    className="text-sm font-medium"
-                    style={{ color: data.brandColor || '#22c55e' }}
-                  >
-                    Gallery
-                  </span>
-                  <i className={`fas fa-chevron-${expandedSections.gallery ? 'up' : 'down'} text-xs`}></i>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="mb-6">
-                <div className="grid grid-cols-4 gap-2">
-                  {galleryImages.slice(0, 8).map((img, index) => (
-                    <img 
-                      key={index}
-                      src={img} 
-                      alt={`Gallery ${index + 1}`}
-                      className="w-full h-12 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => setCurrentImageIndex(index)}
-                      data-testid={`img-gallery-${index}`}
-                    />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          )}
-
-          {/* Contact Form */}
-          <div className="mb-6">
-            <div 
-              className="text-white py-3 px-4 rounded-lg mb-4"
-              style={{ backgroundColor: data.brandColor || '#22c55e' }}
-            >
-              <p className="text-sm font-medium mb-2">Get in touch</p>
-              <div className="flex space-x-2">
-                <input 
-                  type="text" 
-                  placeholder="Your message..." 
-                  className="flex-1 px-3 py-2 text-sm bg-white/20 placeholder-white/70 border border-white/30 rounded text-white"
-                />
-                <button 
-                  className="w-full text-white py-2 rounded font-medium hover:opacity-80 transition-colors"
-                  style={{ backgroundColor: data.brandColor || '#22c55e' }}
-                  data-testid="button-send-message"
-                >
-                  Send Message
-                </button>
-              </div>
-            </div>
-          </div>
           
           {/* QR Code */}
           {showQR && (
