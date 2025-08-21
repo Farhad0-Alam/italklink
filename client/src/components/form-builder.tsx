@@ -116,7 +116,101 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-talklink-400">Cover & Logo</h3>
             
+            {/* Header Design Options */}
+            <div className="space-y-3">
+              <Label className="text-white">Header Design</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <div 
+                  className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                    watchedValues.headerDesign === 'cover-logo' || !watchedValues.headerDesign 
+                      ? 'border-talklink-500 bg-talklink-500/10' 
+                      : 'border-slate-600 bg-slate-700'
+                  }`}
+                  onClick={() => form.setValue('headerDesign', 'cover-logo')}
+                >
+                  <div className="text-center">
+                    <div className="h-8 bg-gradient-to-r from-green-400 to-green-600 rounded mb-1 relative">
+                      <div className="absolute top-1 left-1 w-2 h-2 bg-white rounded"></div>
+                    </div>
+                    <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2 border border-green-400"></div>
+                    <p className="text-xs text-white mt-1">Cover + Logo</p>
+                  </div>
+                </div>
+                
+                <div 
+                  className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                    watchedValues.headerDesign === 'profile-center' 
+                      ? 'border-talklink-500 bg-talklink-500/10' 
+                      : 'border-slate-600 bg-slate-700'
+                  }`}
+                  onClick={() => form.setValue('headerDesign', 'profile-center')}
+                >
+                  <div className="text-center">
+                    <div className="h-8 bg-gradient-to-r from-blue-400 to-blue-600 rounded mb-1"></div>
+                    <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2"></div>
+                    <p className="text-xs text-white mt-1">Profile Center</p>
+                  </div>
+                </div>
+                
+                <div 
+                  className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                    watchedValues.headerDesign === 'split-design' 
+                      ? 'border-talklink-500 bg-talklink-500/10' 
+                      : 'border-slate-600 bg-slate-700'
+                  }`}
+                  onClick={() => form.setValue('headerDesign', 'split-design')}
+                >
+                  <div className="text-center">
+                    <div className="h-8 bg-gradient-to-r from-purple-400 to-purple-600 rounded mb-1 flex">
+                      <div className="flex-1"></div>
+                      <div className="w-2 bg-white rounded-full my-auto mr-1"></div>
+                    </div>
+                    <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2"></div>
+                    <p className="text-xs text-white mt-1">Split Layout</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-1 gap-6">
+              <div>
+                <Label htmlFor="profilePhoto" className="text-white">Profile Photo</Label>
+                <div className="mt-2">
+                  <div className="w-full h-24 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                    {watchedValues.profilePhoto ? (
+                      <img 
+                        src={watchedValues.profilePhoto} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center">
+                        <i className="fas fa-user text-slate-400 text-xl mb-2"></i>
+                        <p className="text-slate-400 text-sm">Profile Photo Preview</p>
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full"
+                    onClick={() => document.getElementById('profile-photo-input')?.click()}
+                    disabled={isUploading}
+                  >
+                    <i className="fas fa-upload mr-2"></i>
+                    {isUploading ? "Uploading Profile..." : "Upload Profile Photo"}
+                  </Button>
+                  <input
+                    id="profile-photo-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, 'profilePhoto')}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+              
               <div>
                 <Label htmlFor="backgroundImage" className="text-white">Cover Photo</Label>
                 <div className="mt-2">

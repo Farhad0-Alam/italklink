@@ -110,6 +110,7 @@ export const businessCards = pgTable("business_cards", {
   accentColor: varchar("accent_color").default('#16a34a'),
   font: varchar("font").default('inter'),
   template: varchar("template").default('minimal'),
+  headerDesign: varchar("header_design").default('cover-logo'),
   
   // Media
   profilePhoto: text("profile_photo"), // base64
@@ -703,6 +704,7 @@ export const businessCardSchema = z.object({
   accentColor: z.string().default("#16a34a"),
   font: z.enum(["inter", "roboto", "poppins"]).default("inter"),
   template: z.enum(["minimal", "bold", "photo"]).default("minimal"),
+  headerDesign: z.enum(["cover-logo", "profile-center", "split-design"]).default("cover-logo"),
   
   // Media (base64 encoded)
   profilePhoto: z.string().optional(),
