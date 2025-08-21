@@ -52,19 +52,17 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Check if user is authenticated
+  // All hooks must be called unconditionally at the top level
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
     queryKey: ['/api/auth/user'],
     retry: false,
   });
 
-  // Fetch user's business cards
   const { data: businessCards = [], isLoading: cardsLoading } = useQuery<BusinessCard[]>({
     queryKey: ['/api/business-cards'],
     enabled: !!user,
   });
 
-  // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: () => apiRequest('POST', '/api/auth/logout'),
     onSuccess: () => {
@@ -84,7 +82,6 @@ export default function Dashboard() {
     },
   });
 
-  // Delete business card mutation
   const deleteCardMutation = useMutation({
     mutationFn: (id: string) => apiRequest('DELETE', `/api/business-cards/${id}`),
     onSuccess: () => {
@@ -102,54 +99,6 @@ export default function Dashboard() {
       });
     },
   });
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!userLoading && (userError || !user)) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to access your dashboard.",
-        variant: "destructive",
-      });
-      setLocation('/login');
-    }
-  }, [user, userLoading, userError, setLocation, toast]);
-
-  if (userLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-talklink-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null; // Will redirect to login
-  }
-
-  const getPlanBadgeColor = (planType: string) => {
-    switch (planType) {
-      case 'pro': return 'bg-blue-100 text-blue-700';
-      case 'enterprise': return 'bg-purple-100 text-purple-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
-
-  const getPlanFeatures = (planType: string) => {
-    switch (planType) {
-      case 'pro': return ['Unlimited Cards', 'Analytics', 'Custom Branding', 'Priority Support'];
-      case 'enterprise': return ['Everything in Pro', 'Team Features', 'API Access', 'White-label'];
-      default: return ['1 Business Card', 'Basic Templates', 'QR Code Generation'];
-    }
-  };
-
-  const itemsPerPage = 10;
-  const totalPages = Math.ceil(businessCards.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedCards = businessCards.slice(startIndex, startIndex + itemsPerPage);
 
   const toggleCardStatus = useMutation({
     mutationFn: ({ id, isPublic }: { id: string, isPublic: boolean }) => 
@@ -170,6 +119,19 @@ export default function Dashboard() {
     },
   });
 
+  // Effects after hooks
+  useEffect(() => {
+    if (!userLoading && (userError || !user)) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to access your dashboard.",
+        variant: "destructive",
+      });
+      setLocation('/login');
+    }
+  }, [user, userLoading, userError, setLocation, toast]);
+
+  // Helper functions
   const copyUrl = async (shareSlug: string) => {
     const url = `${window.location.origin}/share/${shareSlug}`;
     await navigator.clipboard.writeText(url);
@@ -178,6 +140,44 @@ export default function Dashboard() {
       description: "Share URL has been copied to clipboard.",
     });
   };
+
+  const getPlanBadgeColor = (planType: string) => {
+    switch (planType) {
+      case 'pro': return 'bg-blue-100 text-blue-700';
+      case 'enterprise': return 'bg-purple-100 text-purple-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getPlanFeatures = (planType: string) => {
+    switch (planType) {
+      case 'pro': return ['Unlimited Cards', 'Analytics', 'Custom Branding', 'Priority Support'];
+      case 'enterprise': return ['Everything in Pro', 'Team Features', 'API Access', 'White-label'];
+      default: return ['1 Business Card', 'Basic Templates', 'QR Code Generation'];
+    }
+  };
+
+  // Conditional rendering after all hooks
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect to login
+  }
+
+  // Calculate pagination after ensuring we have data
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(businessCards.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedCards = businessCards.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="min-h-screen bg-gray-50">
