@@ -78,7 +78,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           {/* Header Design - Cover + Logo */}
           {(data.headerDesign === 'cover-logo' || !data.headerDesign) && (
             <div 
-              className="h-40 relative overflow-hidden"
+              className="h-40 relative"
               style={{ 
                 backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
                 backgroundColor: !data.backgroundImage ? data.brandColor || '#22c55e' : undefined,
@@ -151,7 +151,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             <div className="h-40 relative flex">
               {/* Left side - Cover */}
               <div 
-                className="flex-1 relative overflow-hidden"
+                className="flex-1 relative"
                 style={{ 
                   backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
                   backgroundColor: !data.backgroundImage ? data.brandColor || '#22c55e' : undefined,
