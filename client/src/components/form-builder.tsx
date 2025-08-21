@@ -128,13 +128,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Cover & Logo Upload */}
-          <div className="space-y-4">
+          <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
             <div 
               className="flex items-center justify-between cursor-pointer"
               onClick={() => toggleSection('coverLogo')}
             >
-              <h3 className="text-lg font-semibold text-talklink-400">Cover & Logo</h3>
-              <i className={`fas ${collapsedSections.coverLogo ? 'fa-chevron-down' : 'fa-chevron-up'} text-talklink-400`}></i>
+              <h3 className="text-lg font-semibold text-blue-300">Cover & Logo</h3>
+              <i className={`fas ${collapsedSections.coverLogo ? 'fa-chevron-down' : 'fa-chevron-up'} text-blue-300`}></i>
             </div>
             {!collapsedSections.coverLogo && (
             <div>
@@ -314,13 +314,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </div>
 
           {/* Basic Information */}
-          <div className="space-y-4">
+          <div className="bg-green-900/30 border border-green-600/30 rounded-lg p-4 space-y-4">
             <div 
               className="flex items-center justify-between cursor-pointer"
               onClick={() => toggleSection('basicInfo')}
             >
-              <h3 className="text-lg font-semibold text-talklink-400">{t('form.basicInfo')}</h3>
-              <i className={`fas ${collapsedSections.basicInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-talklink-400`}></i>
+              <h3 className="text-lg font-semibold text-green-300">{t('form.basicInfo')}</h3>
+              <i className={`fas ${collapsedSections.basicInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-green-300`}></i>
             </div>
             {!collapsedSections.basicInfo && (
             <div>
@@ -380,13 +380,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </div>
 
           {/* Contact Information */}
-          <div className="space-y-4">
+          <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
             <div 
               className="flex items-center justify-between cursor-pointer"
               onClick={() => toggleSection('contactInfo')}
             >
-              <h3 className="text-lg font-semibold text-talklink-400">{t('form.contactInfo')}</h3>
-              <i className={`fas ${collapsedSections.contactInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-talklink-400`}></i>
+              <h3 className="text-lg font-semibold text-purple-300">{t('form.contactInfo')}</h3>
+              <i className={`fas ${collapsedSections.contactInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-purple-300`}></i>
             </div>
             {!collapsedSections.contactInfo && (
             <div>
@@ -446,13 +446,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </div>
 
           {/* Contact Information Additional */}
-          <div className="space-y-4">
+          <div className="bg-orange-900/30 border border-orange-600/30 rounded-lg p-4 space-y-4">
             <div 
               className="flex items-center justify-between cursor-pointer"
               onClick={() => toggleSection('socialMedia')}
             >
-              <h4 className="text-md font-medium text-talklink-300">Additional Contact Methods</h4>
-              <i className={`fas ${collapsedSections.socialMedia ? 'fa-chevron-down' : 'fa-chevron-up'} text-talklink-300`}></i>
+              <h4 className="text-md font-medium text-orange-300">Additional Contact Methods</h4>
+              <i className={`fas ${collapsedSections.socialMedia ? 'fa-chevron-down' : 'fa-chevron-up'} text-orange-300`}></i>
             </div>
             {!collapsedSections.socialMedia && (
             <div>
@@ -558,13 +558,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </div>
 
           {/* Social Media */}
-          <div className="space-y-4">
+          <div className="bg-pink-900/30 border border-pink-600/30 rounded-lg p-4 space-y-4">
             <div 
               className="flex items-center justify-between cursor-pointer"
               onClick={() => toggleSection('customization')}
             >
-              <h3 className="text-lg font-semibold text-talklink-400">{t('form.socialMedia')}</h3>
-              <i className={`fas ${collapsedSections.customization ? 'fa-chevron-down' : 'fa-chevron-up'} text-talklink-400`}></i>
+              <h3 className="text-lg font-semibold text-pink-300">{t('form.socialMedia')}</h3>
+              <i className={`fas ${collapsedSections.customization ? 'fa-chevron-down' : 'fa-chevron-up'} text-pink-300`}></i>
             </div>
             {!collapsedSections.customization && (
             <div>
@@ -713,7 +713,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </div>
 
           {/* Page Builder */}
-          <div className="space-y-4">
+          <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
             <PageBuilder
               elements={form.watch("pageElements") || []}
               onElementsChange={(elements: PageElement[]) => {
