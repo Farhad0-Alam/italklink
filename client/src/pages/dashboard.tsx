@@ -335,7 +335,7 @@ export default function Dashboard() {
                 Create your first digital business card link to get started.
               </p>
               <Button className="bg-orange-500 hover:bg-orange-600 text-white" asChild>
-                <Link href="/templates">
+                <Link href="/cards/create">
                   <i className="fas fa-plus mr-2"></i>
                   Create Your First Link
                 </Link>
@@ -387,7 +387,7 @@ export default function Dashboard() {
                         className="text-orange-500 border-orange-200 hover:bg-orange-50"
                         asChild
                       >
-                        <Link href={`/builder?id=${card.id}`} data-testid={`button-edit-${card.id}`}>
+                        <Link href={`/cards/${card.id}/edit`} data-testid={`button-edit-${card.id}`}>
                           Edit
                         </Link>
                       </Button>

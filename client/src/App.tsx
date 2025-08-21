@@ -14,6 +14,7 @@ import Templates from "./pages/templates";
 import Collections from "./pages/collections";
 import { Builder } from "./pages/builder";
 import { Share } from "./pages/share";
+import CardEditor from "./pages/card-editor";
 import Admin from "./pages/admin";
 import NotFound from "@/pages/not-found";
 import i18n from "./lib/i18n";
@@ -30,6 +31,8 @@ function Router() {
       <Route path="/collections/:rest*" component={Collections} />
       <Route path="/collections" component={Collections} />
       <Route path="/builder" component={Builder} />
+      <Route path="/cards/create" component={CardEditor} />
+      <Route path="/cards/:id/edit" component={CardEditor} />
       <Route path="/share" component={Share} />
       <Route path="/admin/:rest*" component={Admin} />
       <Route path="/admin" component={Admin} />
