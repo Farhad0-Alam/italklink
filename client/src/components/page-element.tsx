@@ -510,6 +510,17 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
           <div className="mb-4">
             {isEditing ? (
               <div className="space-y-4">
+                {/* Contact Form Title Display */}
+                <div className="p-4 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border border-slate-500 shadow-lg">
+                  <Input
+                    value={element.data.title}
+                    onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                    className="bg-transparent border-0 text-white font-semibold text-xl tracking-wide opacity-100 p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+                    placeholder="Form Title here"
+                  />
+                  <div className="text-slate-300 text-sm font-medium mt-1 opacity-100">contactForm</div>
+                </div>
+
                 {/* Form Fields */}
                 <Collapsible defaultOpen={true}>
                   <CollapsibleTrigger className="w-full">
@@ -758,17 +769,6 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
-
-                {/* Contact Form Title Display */}
-                <div className="p-4 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border border-slate-500 shadow-lg">
-                  <Input
-                    value={element.data.title}
-                    onChange={(e) => handleDataUpdate({ title: e.target.value })}
-                    className="bg-transparent border-0 text-white font-semibold text-xl tracking-wide opacity-100 p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
-                    placeholder="Contact Me"
-                  />
-                  <div className="text-slate-300 text-sm font-medium mt-1 opacity-100">contactForm</div>
-                </div>
 
                 {/* Form Preview */}
                 <div className="p-3 bg-slate-600 rounded-lg border border-slate-500">
