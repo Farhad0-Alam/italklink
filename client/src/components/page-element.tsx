@@ -510,27 +510,6 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
           <div className="mb-4">
             {isEditing ? (
               <div className="space-y-4">
-                {/* Basic Settings */}
-                <Collapsible defaultOpen={true}>
-                  <CollapsibleTrigger className="w-full">
-                    <div className="flex items-center justify-between w-full p-3 bg-blue-500/20 rounded-lg border border-blue-400/30 hover:bg-blue-500/30 transition-colors">
-                      <div className="flex items-center space-x-2">
-                        <i className="fas fa-cog text-blue-400"></i>
-                        <span className="text-blue-300 font-medium">Basic Settings</span>
-                      </div>
-                      <i className="fas fa-chevron-down text-blue-400 text-xs"></i>
-                    </div>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-2 space-y-2">
-                    <Input
-                      value={element.data.title}
-                      onChange={(e) => handleDataUpdate({ title: e.target.value })}
-                      className="bg-slate-700 border-slate-600 text-white"
-                      placeholder="Form title"
-                    />
-                  </CollapsibleContent>
-                </Collapsible>
-
                 {/* Form Fields */}
                 <Collapsible defaultOpen={true}>
                   <CollapsibleTrigger className="w-full">
@@ -782,7 +761,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
 
                 {/* Contact Form Title Display */}
                 <div className="p-4 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border border-slate-500 shadow-lg">
-                  <h3 className="text-white font-semibold text-xl tracking-wide opacity-100">{element.data.title}</h3>
+                  <Input
+                    value={element.data.title}
+                    onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                    className="bg-transparent border-0 text-white font-semibold text-xl tracking-wide opacity-100 p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+                    placeholder="Contact Me"
+                  />
                   <div className="text-slate-300 text-sm font-medium mt-1 opacity-100">contactForm</div>
                 </div>
 
