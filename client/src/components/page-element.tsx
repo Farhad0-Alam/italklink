@@ -567,17 +567,17 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 {/* Delivery Options */}
                 <Collapsible>
                   <CollapsibleTrigger className="w-full">
-                    <div className="flex items-center justify-between w-full p-3 bg-emerald-500/20 rounded-lg border border-emerald-400/30 hover:bg-emerald-500/30 transition-colors">
+                    <div className="flex items-center justify-between w-full p-3 rounded-lg border transition-colors" style={{backgroundColor: '#06b6d420', borderColor: '#06b6d450'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#06b6d430'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#06b6d420'}>
                       <div className="flex items-center space-x-2">
-                        <i className="fas fa-paper-plane text-emerald-400"></i>
-                        <span className="text-emerald-300 font-medium">Delivery Options</span>
+                        <i className="fas fa-paper-plane" style={{color: '#06b6d4'}}></i>
+                        <span className="font-medium" style={{color: '#06b6d4'}}>Delivery Options</span>
                         {element.data.emailNotifications && (
-                          <span className="bg-emerald-500 text-emerald-900 text-xs px-2 py-1 rounded font-medium">
+                          <span className="text-xs px-2 py-1 rounded font-medium text-white" style={{backgroundColor: '#06b6d4'}}>
                             EMAIL ENABLED
                           </span>
                         )}
                       </div>
-                      <i className="fas fa-chevron-down text-emerald-400 text-xs"></i>
+                      <i className="fas fa-chevron-down text-xs" style={{color: '#06b6d4'}}></i>
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-2 space-y-3">
@@ -628,15 +628,15 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 {/* Google Sheets Integration */}
                 <Collapsible>
                   <CollapsibleTrigger className="w-full">
-                    <div className="flex items-center justify-between w-full p-3 bg-green-500/20 rounded-lg border border-green-400/30 hover:bg-green-500/30 transition-colors">
+                    <div className="flex items-center justify-between w-full p-3 rounded-lg border transition-colors" style={{backgroundColor: '#22c55e20', borderColor: '#22c55e50'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#22c55e30'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#22c55e20'}>
                       <div className="flex items-center space-x-2">
-                        <i className="fab fa-google text-green-400"></i>
-                        <span className="text-green-300 font-medium">Google Sheets Integration</span>
-                        <span className="bg-green-500 text-green-900 text-xs px-2 py-1 rounded font-medium">
+                        <i className="fab fa-google" style={{color: '#22c55e'}}></i>
+                        <span className="font-medium" style={{color: '#22c55e'}}>Google Sheets Integration</span>
+                        <span className="text-xs px-2 py-1 rounded font-medium text-white" style={{backgroundColor: '#22c55e'}}>
                           PRO
                         </span>
                       </div>
-                      <i className="fas fa-chevron-down text-green-400 text-xs"></i>
+                      <i className="fas fa-chevron-down text-xs" style={{color: '#22c55e'}}></i>
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-2 space-y-3">
