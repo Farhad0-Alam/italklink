@@ -644,7 +644,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         <span className="text-green-300 font-medium">Google Sheets Integration</span>
                         {element.data.googleSheets?.enabled && (
                           <span className="bg-green-500 text-green-900 text-xs px-2 py-1 rounded font-medium">
-                            ENABLED
+                            PRO
                           </span>
                         )}
                       </div>
@@ -782,6 +782,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   </CollapsibleContent>
                 </Collapsible>
 
+                {/* Contact Form Title Display */}
+                <div className="p-4 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border border-slate-500 shadow-lg">
+                  <h3 className="text-white font-semibold text-xl tracking-wide">{element.data.title}</h3>
+                  <div className="text-slate-300 text-sm font-medium mt-1 opacity-75">contactForm</div>
+                </div>
+
                 {/* Form Preview */}
                 <div className="p-3 bg-slate-600 rounded-lg border border-slate-500">
                   <div className="flex items-center space-x-2 mb-2">
@@ -797,7 +803,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
               </div>
             ) : (
               <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <h3 className="font-bold mb-3 text-slate-800">{element.data.title}</h3>
+                <h3 className="font-bold mb-4 text-slate-800 text-xl tracking-wide">{element.data.title}</h3>
                 <form onSubmit={handleFormSubmit} className="space-y-3">
                   {element.data.fields.includes('name') && (
                     <input
