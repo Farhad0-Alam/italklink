@@ -507,6 +507,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PATCH endpoint for partial updates
+  app.patch('/api/business-cards/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const card = await storage.getBusinessCard(req.params.id);
+      
+      if (!card || card.userId !== user.id) {
+        return res.status(404).json({ message: 'Business card not found' });
+      }
+      
+      const updatedCard = await storage.updateBusinessCard(req.params.id, req.body);
+      res.json(updatedCard);
+    } catch (error) {
+      console.error('Error updating business card:', error);
+      res.status(500).json({ message: 'Failed to update business card' });
+    }
+  });
+
   app.delete('/api/business-cards/:id', requireAuth, async (req, res) => {
     try {
       const user = req.user as User;
