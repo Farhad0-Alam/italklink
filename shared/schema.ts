@@ -262,6 +262,58 @@ export const globalTemplates = pgTable("global_templates", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Template collections table
+export const templateCollections = pgTable("template_collections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  createdBy: varchar("created_by").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Collection settings
+  isPublic: boolean("is_public").default(false),
+  shareSlug: varchar("share_slug").unique(),
+  
+  // Collection metadata
+  templateCount: integer("template_count").default(0),
+  viewCount: integer("view_count").default(0),
+  tags: jsonb("tags"), // array of strings for categorization
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Template collection items table (many-to-many relationship)
+export const templateCollectionItems = pgTable("template_collection_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  collectionId: varchar("collection_id").references(() => templateCollections.id, { onDelete: 'cascade' }).notNull(),
+  templateId: varchar("template_id").notNull(), // Reference to template (could be global or user template)
+  templateType: varchar("template_type").notNull(), // 'global' or 'business_card'
+  
+  // Item metadata
+  order: integer("order").default(0), // For custom ordering within collection
+  addedBy: varchar("added_by").references(() => users.id, { onDelete: 'set null' }),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Collection likes/favorites table
+export const templateCollectionLikes = pgTable("template_collection_likes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  collectionId: varchar("collection_id").references(() => templateCollections.id, { onDelete: 'cascade' }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Collection comments table
+export const templateCollectionComments = pgTable("template_collection_comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  collectionId: varchar("collection_id").references(() => templateCollections.id, { onDelete: 'cascade' }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Database Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -294,6 +346,18 @@ export type InsertAnalyticsEvent = typeof analyticsEvents.$inferInsert;
 export type GlobalTemplate = typeof globalTemplates.$inferSelect;
 export type InsertGlobalTemplate = typeof globalTemplates.$inferInsert;
 
+export type TemplateCollection = typeof templateCollections.$inferSelect;
+export type InsertTemplateCollection = typeof templateCollections.$inferInsert;
+
+export type TemplateCollectionItem = typeof templateCollectionItems.$inferSelect;
+export type InsertTemplateCollectionItem = typeof templateCollectionItems.$inferInsert;
+
+export type TemplateCollectionLike = typeof templateCollectionLikes.$inferSelect;
+export type InsertTemplateCollectionLike = typeof templateCollectionLikes.$inferInsert;
+
+export type TemplateCollectionComment = typeof templateCollectionComments.$inferSelect;
+export type InsertTemplateCollectionComment = typeof templateCollectionComments.$inferInsert;
+
 // Zod schemas for database
 export const insertUserSchema = createInsertSchema(users);
 export const insertDbBusinessCardSchema = createInsertSchema(businessCards);
@@ -305,6 +369,10 @@ export const insertBulkGenerationJobSchema = createInsertSchema(bulkGenerationJo
 export const insertAdminLogSchema = createInsertSchema(adminLogs);
 export const insertAnalyticsEventSchema = createInsertSchema(analyticsEvents);
 export const insertGlobalTemplateSchema = createInsertSchema(globalTemplates);
+export const insertTemplateCollectionSchema = createInsertSchema(templateCollections);
+export const insertTemplateCollectionItemSchema = createInsertSchema(templateCollectionItems);
+export const insertTemplateCollectionLikeSchema = createInsertSchema(templateCollectionLikes);
+export const insertTemplateCollectionCommentSchema = createInsertSchema(templateCollectionComments);
 
 // Team invitation schema
 export const teamInvitationSchema = z.object({
@@ -328,6 +396,31 @@ export const bulkCardGenerationSchema = z.object({
 });
 
 export type BulkCardGeneration = z.infer<typeof bulkCardGenerationSchema>;
+
+// Template collection schemas
+export const createTemplateCollectionSchema = z.object({
+  name: z.string().min(1, 'Collection name is required').max(100, 'Name too long'),
+  description: z.string().max(500, 'Description too long').optional(),
+  isPublic: z.boolean().default(false),
+  tags: z.array(z.string()).default([]),
+  templateIds: z.array(z.string()).min(1, 'At least one template is required'),
+});
+
+export const updateTemplateCollectionSchema = z.object({
+  name: z.string().min(1, 'Collection name is required').max(100, 'Name too long').optional(),
+  description: z.string().max(500, 'Description too long').optional(),
+  isPublic: z.boolean().optional(),
+  tags: z.array(z.string()).optional(),
+});
+
+export const addTemplateToCollectionSchema = z.object({
+  templateId: z.string(),
+  templateType: z.enum(['global', 'business_card']),
+});
+
+export type CreateTemplateCollection = z.infer<typeof createTemplateCollectionSchema>;
+export type UpdateTemplateCollection = z.infer<typeof updateTemplateCollectionSchema>;
+export type AddTemplateToCollection = z.infer<typeof addTemplateToCollectionSchema>;
 
 // CSV import schema
 export const csvMemberSchema = z.object({

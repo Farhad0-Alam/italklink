@@ -12,6 +12,7 @@ import {
 import { z } from 'zod';
 import { setupAIRoutes } from './ai-routes';
 import adminRoutes from './admin-routes';
+import { templateCollectionsRoutes } from './template-collections-routes';
 
 
 
@@ -26,6 +27,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup admin routes
   app.use('/api/admin', adminRoutes);
+  
+  // Setup template collections routes
+  app.use('/api/collections', requireAuth, templateCollectionsRoutes);
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {

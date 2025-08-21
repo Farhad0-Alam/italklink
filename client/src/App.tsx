@@ -11,6 +11,7 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
 import Templates from "./pages/templates";
+import Collections from "./pages/collections";
 import { Builder } from "./pages/builder";
 import { Share } from "./pages/share";
 import Admin from "./pages/admin";
@@ -26,6 +27,8 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/templates" component={Templates} />
+      <Route path="/collections/:rest*" component={Collections} />
+      <Route path="/collections" component={Collections} />
       <Route path="/builder" component={Builder} />
       <Route path="/share" component={Share} />
       <Route path="/admin/:rest*" component={Admin} />
