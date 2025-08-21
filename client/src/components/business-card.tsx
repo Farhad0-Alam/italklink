@@ -88,7 +88,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             >
               {/* Logo in top left corner */}
               {data.logo && (
-                <div className="absolute top-4 left-4">
+                <div className="absolute top-4 left-4 z-10">
                   <img 
                     src={data.logo}
                     alt="Logo"
@@ -99,7 +99,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               )}
               
               {/* Profile Photo with White Border */}
-              <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+              <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 z-20">
                 <div className="w-24 h-24 rounded-full bg-white p-1">
                   <img 
                     src={profileImageSrc}
@@ -121,7 +121,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               }}
             >
               {/* Large Profile Photo */}
-              <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
+              <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-20">
                 <div className="w-32 h-32 rounded-full bg-white p-2">
                   <img 
                     src={profileImageSrc}
@@ -134,7 +134,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               
               {/* Logo in top right */}
               {data.logo && (
-                <div className="absolute top-4 right-4">
+                <div className="absolute top-4 right-4 z-10">
                   <img 
                     src={data.logo}
                     alt="Logo"
@@ -160,7 +160,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 }}
               >
                 {/* Profile Photo on left side */}
-                <div className="absolute -bottom-12 right-4">
+                <div className="absolute -bottom-12 right-4 z-20">
                   <div className="w-20 h-20 rounded-full bg-white p-1">
                     <img 
                       src={profileImageSrc}
@@ -174,7 +174,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               
               {/* Right side - Logo space */}
               <div 
-                className="w-24 flex items-center justify-center"
+                className="w-24 flex items-center justify-center z-10"
                 style={{ backgroundColor: data.accentColor || '#16a34a' }}
               >
                 {data.logo && (

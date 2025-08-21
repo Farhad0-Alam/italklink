@@ -136,6 +136,7 @@ interface PageElementProps {
   isEditing?: boolean;
   onUpdate?: (element: PageElement) => void;
   onDelete?: (elementId: string) => void;
+  isInteractive?: boolean;
 }
 
 export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete }: PageElementProps) {
