@@ -190,7 +190,12 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             autoReply: false,
             fileAttachments: false,
             spamProtection: false,
-            successMessage: "Thank you! We'll get back to you soon."
+            successMessage: "Thank you! We'll get back to you soon.",
+            googleSheets: {
+              enabled: false,
+              spreadsheetId: "",
+              sheetName: "Sheet1"
+            }
           }
         };
         break;

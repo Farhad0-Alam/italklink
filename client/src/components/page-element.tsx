@@ -627,6 +627,85 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   </CollapsibleContent>
                 </Collapsible>
 
+                {/* Google Sheets Integration */}
+                <Collapsible>
+                  <CollapsibleTrigger className="w-full">
+                    <div className="flex items-center justify-between w-full p-3 bg-green-500/20 rounded-lg border border-green-400/30 hover:bg-green-500/30 transition-colors">
+                      <div className="flex items-center space-x-2">
+                        <i className="fab fa-google text-green-400"></i>
+                        <span className="text-green-300 font-medium">Google Sheets Integration</span>
+                        {element.data.googleSheets?.enabled && (
+                          <span className="bg-green-500 text-green-900 text-xs px-2 py-1 rounded font-medium">
+                            ENABLED
+                          </span>
+                        )}
+                      </div>
+                      <i className="fas fa-chevron-down text-green-400 text-xs"></i>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2 space-y-3">
+                    <div className="flex items-center space-x-2 p-3 bg-slate-600 rounded">
+                      <input
+                        type="checkbox"
+                        checked={element.data.googleSheets?.enabled || false}
+                        onChange={(e) => handleDataUpdate({ 
+                          googleSheets: { 
+                            ...element.data.googleSheets, 
+                            enabled: e.target.checked 
+                          } 
+                        })}
+                        className="rounded"
+                      />
+                      <label className="text-white text-sm font-medium">
+                        Automatically save submissions to Google Sheets
+                      </label>
+                    </div>
+                    {element.data.googleSheets?.enabled && (
+                      <div className="space-y-3 p-3 bg-slate-600 rounded">
+                        <div className="text-white text-sm mb-2">
+                          <i className="fas fa-info-circle text-blue-400 mr-2"></i>
+                          Configure your Google Sheets connection:
+                        </div>
+                        <Input
+                          value={element.data.googleSheets?.spreadsheetId || ""}
+                          onChange={(e) => handleDataUpdate({ 
+                            googleSheets: { 
+                              ...element.data.googleSheets, 
+                              spreadsheetId: e.target.value 
+                            } 
+                          })}
+                          className="bg-slate-700 border-slate-600 text-white"
+                          placeholder="Paste Google Sheets ID from URL"
+                        />
+                        <Input
+                          value={element.data.googleSheets?.sheetName || "Sheet1"}
+                          onChange={(e) => handleDataUpdate({ 
+                            googleSheets: { 
+                              ...element.data.googleSheets, 
+                              sheetName: e.target.value 
+                            } 
+                          })}
+                          className="bg-slate-700 border-slate-600 text-white"
+                          placeholder="Sheet1"
+                        />
+                        <div className="text-xs text-slate-300 p-2 bg-slate-700 rounded">
+                          <div className="flex items-start space-x-2">
+                            <i className="fas fa-lightbulb text-yellow-400 mt-0.5"></i>
+                            <div>
+                              <div className="font-medium mb-1">Setup Instructions:</div>
+                              <ol className="list-decimal list-inside space-y-1 text-xs">
+                                <li>Copy the Spreadsheet ID from your Google Sheets URL</li>
+                                <li>Make sure the sheet is shared with the service account</li>
+                                <li>Data will be automatically added with timestamps</li>
+                              </ol>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+
                 {/* Advanced Options */}
                 <Collapsible>
                   <CollapsibleTrigger className="w-full">

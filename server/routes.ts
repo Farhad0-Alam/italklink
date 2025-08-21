@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { setupAIRoutes } from './ai-routes';
 import adminRoutes from './admin-routes';
 import { templateCollectionsRoutes } from './template-collections-routes';
-// Removed Google Sheets integration
+import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 
 
 
@@ -598,9 +598,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const results: {
         email: boolean;
+        googleSheets: boolean;
         errors: string[];
       } = {
         email: false,
+        googleSheets: false,
         errors: []
       };
 
@@ -630,8 +632,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Return success if email was processed or if no email is required
-      if (results.email || !formConfig.receiverEmail) {
+      // Send to Google Sheets if configured
+      if (formConfig.googleSheets?.enabled && formConfig.googleSheets.spreadsheetId) {
+        try {
+          if (!isGoogleSheetsConfigured()) {
+            throw new Error('Google Sheets not configured on server');
+          }
+
+          await addToGoogleSheet(
+            {
+              spreadsheetId: formConfig.googleSheets.spreadsheetId,
+              sheetName: formConfig.googleSheets.sheetName || 'Sheet1'
+            },
+            formData
+          );
+          results.googleSheets = true;
+          console.log('📊 Google Sheets: Data saved successfully');
+        } catch (error) {
+          console.error('Google Sheets submission failed:', error);
+          results.errors.push('Failed to save to Google Sheets');
+        }
+      }
+
+      // Return success if at least one method worked or if no receivers are configured
+      if (results.email || results.googleSheets || (!formConfig.receiverEmail && !formConfig.googleSheets?.enabled)) {
         res.json({ 
           success: true, 
           message: formConfig.successMessage || 'Form submitted successfully!',

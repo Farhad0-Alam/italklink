@@ -535,6 +535,11 @@ export const contactFormElementSchema = baseElementSchema.extend({
     fileAttachments: z.boolean().optional().default(false),
     spamProtection: z.boolean().optional().default(false),
     successMessage: z.string().optional().default("Thank you! We'll get back to you soon."),
+    googleSheets: z.object({
+      enabled: z.boolean().default(false),
+      spreadsheetId: z.string().optional().default(""),
+      sheetName: z.string().optional().default("Sheet1"),
+    }).optional().default({ enabled: false, spreadsheetId: "", sheetName: "Sheet1" }),
   }),
 });
 
