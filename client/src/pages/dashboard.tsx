@@ -50,6 +50,7 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Check if user is authenticated
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
@@ -145,7 +146,6 @@ export default function Dashboard() {
     }
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(businessCards.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
