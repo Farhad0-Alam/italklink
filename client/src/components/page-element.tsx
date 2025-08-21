@@ -505,89 +505,212 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
         return (
           <div className="mb-4">
             {isEditing ? (
-              <div className="space-y-2">
-                <Input
-                  value={element.data.title}
-                  onChange={(e) => handleDataUpdate({ title: e.target.value })}
-                  className="bg-slate-700 border-slate-600 text-white"
-                  placeholder="Form title"
-                />
-                <Input
-                  value={element.data.receiverEmail || ""}
-                  onChange={(e) => handleDataUpdate({ receiverEmail: e.target.value })}
-                  className="bg-slate-700 border-slate-600 text-white"
-                  placeholder="receiver@example.com (where form submissions will be sent)"
-                  type="email"
-                />
-                
-                {/* Google Sheets Integration */}
-                <div className="bg-slate-600 p-3 rounded-lg border border-slate-500">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <input
-                      type="checkbox"
-                      checked={element.data.googleSheets?.enabled || false}
-                      onChange={(e) => handleDataUpdate({ 
-                        googleSheets: { 
-                          ...element.data.googleSheets, 
-                          enabled: e.target.checked 
-                        } 
-                      })}
-                      className="rounded"
-                    />
-                    <label className="text-white text-sm font-medium">
-                      <i className="fab fa-google text-green-400 mr-2"></i>
-                      Send to Google Sheets
-                    </label>
-                  </div>
-                  {element.data.googleSheets?.enabled && (
-                    <div className="space-y-2">
-                      <Input
-                        value={element.data.googleSheets?.spreadsheetId || ""}
-                        onChange={(e) => handleDataUpdate({ 
-                          googleSheets: { 
-                            ...element.data.googleSheets, 
-                            spreadsheetId: e.target.value 
-                          } 
-                        })}
-                        className="bg-slate-700 border-slate-600 text-white text-xs"
-                        placeholder="Google Sheets ID (from URL)"
-                      />
-                      <Input
-                        value={element.data.googleSheets?.sheetName || "Sheet1"}
-                        onChange={(e) => handleDataUpdate({ 
-                          googleSheets: { 
-                            ...element.data.googleSheets, 
-                            sheetName: e.target.value 
-                          } 
-                        })}
-                        className="bg-slate-700 border-slate-600 text-white text-xs"
-                        placeholder="Sheet name (e.g., Sheet1)"
-                      />
-                      <div className="text-xs text-slate-300">
-                        Copy the Spreadsheet ID from your Google Sheets URL. Make sure the sheet is shared with the service account.
+              <div className="space-y-4">
+                {/* Basic Settings */}
+                <Collapsible defaultOpen={true}>
+                  <CollapsibleTrigger className="w-full">
+                    <div className="flex items-center justify-between w-full p-3 bg-blue-500/20 rounded-lg border border-blue-400/30 hover:bg-blue-500/30 transition-colors">
+                      <div className="flex items-center space-x-2">
+                        <i className="fas fa-cog text-blue-400"></i>
+                        <span className="text-blue-300 font-medium">Basic Settings</span>
                       </div>
+                      <i className="fas fa-chevron-down text-blue-400 text-xs"></i>
                     </div>
-                  )}
-                </div>
-                
-                <div className="text-white text-sm">Fields: {element.data.fields.join(', ')}</div>
-                <div className="grid grid-cols-3 gap-2">
-                  {['name', 'email', 'phone', 'company', 'message'].map(field => (
-                    <label key={field} className="flex items-center text-white text-xs">
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2 space-y-2">
+                    <Input
+                      value={element.data.title}
+                      onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                      className="bg-slate-700 border-slate-600 text-white"
+                      placeholder="Form title"
+                    />
+                    <Input
+                      value={element.data.receiverEmail || ""}
+                      onChange={(e) => handleDataUpdate({ receiverEmail: e.target.value })}
+                      className="bg-slate-700 border-slate-600 text-white"
+                      placeholder="receiver@example.com (where form submissions will be sent)"
+                      type="email"
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Form Fields */}
+                <Collapsible defaultOpen={true}>
+                  <CollapsibleTrigger className="w-full">
+                    <div className="flex items-center justify-between w-full p-3 bg-green-500/20 rounded-lg border border-green-400/30 hover:bg-green-500/30 transition-colors">
+                      <div className="flex items-center space-x-2">
+                        <i className="fas fa-list text-green-400"></i>
+                        <span className="text-green-300 font-medium">Form Fields</span>
+                      </div>
+                      <i className="fas fa-chevron-down text-green-400 text-xs"></i>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2 space-y-3">
+                    <div className="text-white text-sm mb-2">Select fields to include:</div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { field: 'name', label: 'Full Name', icon: 'fas fa-user', required: true },
+                        { field: 'email', label: 'Email Address', icon: 'fas fa-envelope', required: true },
+                        { field: 'phone', label: 'Phone Number', icon: 'fas fa-phone', required: false },
+                        { field: 'company', label: 'Company', icon: 'fas fa-building', required: false },
+                        { field: 'website', label: 'Website', icon: 'fas fa-globe', required: false },
+                        { field: 'message', label: 'Message', icon: 'fas fa-comment', required: true }
+                      ].map(({ field, label, icon, required }) => (
+                        <label key={field} className="flex items-center space-x-2 p-2 bg-slate-600 rounded border hover:bg-slate-500 transition-colors cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={element.data.fields.includes(field)}
+                            onChange={(e) => {
+                              const fields = e.target.checked 
+                                ? [...element.data.fields, field]
+                                : element.data.fields.filter(f => f !== field);
+                              handleDataUpdate({ fields });
+                            }}
+                            className="rounded"
+                          />
+                          <i className={`${icon} text-white text-xs w-4`}></i>
+                          <span className="text-white text-xs flex-1">{label}</span>
+                          {required && <span className="text-red-400 text-xs">*</span>}
+                        </label>
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Google Sheets Integration */}
+                <Collapsible>
+                  <CollapsibleTrigger className="w-full">
+                    <div className="flex items-center justify-between w-full p-3 bg-emerald-500/20 rounded-lg border border-emerald-400/30 hover:bg-emerald-500/30 transition-colors">
+                      <div className="flex items-center space-x-2">
+                        <i className="fab fa-google text-emerald-400"></i>
+                        <span className="text-emerald-300 font-medium">Google Sheets Integration</span>
+                        {element.data.googleSheets?.enabled && (
+                          <span className="bg-emerald-500 text-emerald-900 text-xs px-2 py-1 rounded font-medium">
+                            ENABLED
+                          </span>
+                        )}
+                      </div>
+                      <i className="fas fa-chevron-down text-emerald-400 text-xs"></i>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2 space-y-3">
+                    <div className="flex items-center space-x-2 p-3 bg-slate-600 rounded">
                       <input
                         type="checkbox"
-                        checked={element.data.fields.includes(field)}
-                        onChange={(e) => {
-                          const fields = e.target.checked 
-                            ? [...element.data.fields, field]
-                            : element.data.fields.filter(f => f !== field);
-                          handleDataUpdate({ fields });
-                        }}
-                        className="mr-1"
+                        checked={element.data.googleSheets?.enabled || false}
+                        onChange={(e) => handleDataUpdate({ 
+                          googleSheets: { 
+                            ...element.data.googleSheets, 
+                            enabled: e.target.checked 
+                          } 
+                        })}
+                        className="rounded"
                       />
-                      {field}
-                    </label>
-                  ))}
+                      <label className="text-white text-sm font-medium">
+                        Automatically save submissions to Google Sheets
+                      </label>
+                    </div>
+                    {element.data.googleSheets?.enabled && (
+                      <div className="space-y-3 p-3 bg-slate-600 rounded">
+                        <div className="text-white text-sm mb-2">
+                          <i className="fas fa-info-circle text-blue-400 mr-2"></i>
+                          Configure your Google Sheets connection:
+                        </div>
+                        <Input
+                          value={element.data.googleSheets?.spreadsheetId || ""}
+                          onChange={(e) => handleDataUpdate({ 
+                            googleSheets: { 
+                              ...element.data.googleSheets, 
+                              spreadsheetId: e.target.value 
+                            } 
+                          })}
+                          className="bg-slate-700 border-slate-600 text-white"
+                          placeholder="Paste Google Sheets ID from URL"
+                        />
+                        <Input
+                          value={element.data.googleSheets?.sheetName || "Sheet1"}
+                          onChange={(e) => handleDataUpdate({ 
+                            googleSheets: { 
+                              ...element.data.googleSheets, 
+                              sheetName: e.target.value 
+                            } 
+                          })}
+                          className="bg-slate-700 border-slate-600 text-white"
+                          placeholder="Sheet name (e.g., Sheet1, Contacts, Leads)"
+                        />
+                        <div className="text-xs text-slate-300 p-2 bg-slate-700 rounded">
+                          <div className="flex items-start space-x-2">
+                            <i className="fas fa-lightbulb text-yellow-400 mt-0.5"></i>
+                            <div>
+                              <div className="font-medium mb-1">Setup Instructions:</div>
+                              <ol className="list-decimal list-inside space-y-1 text-xs">
+                                <li>Copy the Spreadsheet ID from your Google Sheets URL</li>
+                                <li>Make sure the sheet is shared with the service account</li>
+                                <li>Data will be automatically added with timestamps</li>
+                              </ol>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Advanced Options */}
+                <Collapsible>
+                  <CollapsibleTrigger className="w-full">
+                    <div className="flex items-center justify-between w-full p-3 bg-purple-500/20 rounded-lg border border-purple-400/30 hover:bg-purple-500/30 transition-colors">
+                      <div className="flex items-center space-x-2">
+                        <i className="fas fa-sliders-h text-purple-400"></i>
+                        <span className="text-purple-300 font-medium">Advanced Options</span>
+                        <span className="bg-purple-500 text-purple-900 text-xs px-2 py-1 rounded font-medium">
+                          PRO
+                        </span>
+                      </div>
+                      <i className="fas fa-chevron-down text-purple-400 text-xs"></i>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2 space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
+                        <input type="checkbox" className="rounded" defaultChecked />
+                        <span className="text-white text-xs">Email notifications</span>
+                      </label>
+                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
+                        <input type="checkbox" className="rounded" />
+                        <span className="text-white text-xs">Auto-reply to sender</span>
+                      </label>
+                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
+                        <input type="checkbox" className="rounded" />
+                        <span className="text-white text-xs">File attachments</span>
+                      </label>
+                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
+                        <input type="checkbox" className="rounded" />
+                        <span className="text-white text-xs">Spam protection</span>
+                      </label>
+                    </div>
+                    <div className="p-3 bg-slate-600 rounded">
+                      <div className="text-white text-sm mb-2">Success Message:</div>
+                      <Textarea
+                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                        placeholder="Thank you! We'll get back to you soon."
+                        rows={2}
+                      />
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Form Preview */}
+                <div className="p-3 bg-slate-600 rounded-lg border border-slate-500">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <i className="fas fa-eye text-slate-400"></i>
+                    <span className="text-slate-300 text-sm font-medium">Active Fields Preview</span>
+                  </div>
+                  <div className="text-xs text-slate-400">
+                    {element.data.fields.length > 0 
+                      ? `Form includes: ${element.data.fields.join(', ')}`
+                      : 'No fields selected'}
+                  </div>
                 </div>
               </div>
             ) : (
