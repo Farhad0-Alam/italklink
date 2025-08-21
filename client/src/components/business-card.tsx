@@ -97,18 +97,6 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   />
                 </div>
               )}
-              
-              {/* Profile Photo with White Border */}
-              <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 z-20">
-                <div className="w-24 h-24 rounded-full bg-white p-1">
-                  <img 
-                    src={profileImageSrc}
-                    alt={data.fullName || "Profile photo"}
-                    className="w-full h-full rounded-full object-cover"
-                    data-testid="img-profile-photo"
-                  />
-                </div>
-              </div>
             </div>
           )}
 
@@ -159,17 +147,6 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   backgroundPosition: 'center'
                 }}
               >
-                {/* Profile Photo on left side */}
-                <div className="absolute -bottom-12 right-4 z-20">
-                  <div className="w-20 h-20 rounded-full bg-white p-1">
-                    <img 
-                      src={profileImageSrc}
-                      alt={data.fullName || "Profile photo"}
-                      className="w-full h-full rounded-full object-cover"
-                      data-testid="img-profile-photo"
-                    />
-                  </div>
-                </div>
               </div>
               
               {/* Right side - Logo space */}
@@ -192,8 +169,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           
         {/* Content */}
         <div className={`pb-8 px-6 text-center text-slate-800 ${
-          data.headerDesign === 'profile-center' ? 'pt-20' : 
-          data.headerDesign === 'split-design' ? 'pt-16' : 'pt-16'
+          data.headerDesign === 'profile-center' ? 'pt-20' : 'pt-8'
         }`}>
           {/* Name & Title */}
           <h3 className="text-xl font-bold text-slate-800 mb-1" data-testid="text-name">
