@@ -674,25 +674,39 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   <CollapsibleContent className="mt-2 space-y-3">
                     <div className="grid grid-cols-2 gap-3">
                       <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
-                        <input type="checkbox" className="rounded" defaultChecked />
+                        <input 
+                          type="checkbox" 
+                          className="rounded" 
+                          checked={element.data.emailNotifications !== false}
+                          onChange={(e) => handleDataUpdate({ emailNotifications: e.target.checked })}
+                        />
                         <span className="text-white text-xs">Email notifications</span>
                       </label>
                       <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
-                        <input type="checkbox" className="rounded" />
+                        <input 
+                          type="checkbox" 
+                          className="rounded" 
+                          checked={element.data.autoReply || false}
+                          onChange={(e) => handleDataUpdate({ autoReply: e.target.checked })}
+                        />
                         <span className="text-white text-xs">Auto-reply to sender</span>
                       </label>
-                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
-                        <input type="checkbox" className="rounded" />
+                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer opacity-50">
+                        <input type="checkbox" className="rounded" disabled />
                         <span className="text-white text-xs">File attachments</span>
+                        <span className="text-purple-300 text-xs">(Coming Soon)</span>
                       </label>
-                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
-                        <input type="checkbox" className="rounded" />
+                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer opacity-50">
+                        <input type="checkbox" className="rounded" disabled />
                         <span className="text-white text-xs">Spam protection</span>
+                        <span className="text-purple-300 text-xs">(Coming Soon)</span>
                       </label>
                     </div>
                     <div className="p-3 bg-slate-600 rounded">
-                      <div className="text-white text-sm mb-2">Success Message:</div>
+                      <div className="text-white text-sm mb-2">Custom Success Message:</div>
                       <Textarea
+                        value={element.data.successMessage || ""}
+                        onChange={(e) => handleDataUpdate({ successMessage: e.target.value })}
                         className="bg-slate-700 border-slate-600 text-white text-xs"
                         placeholder="Thank you! We'll get back to you soon."
                         rows={2}
@@ -753,6 +767,15 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       placeholder="Company Name"
                       value={formData.company || ''}
                       onChange={(e) => handleInputChange('company', e.target.value)}
+                      className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
+                    />
+                  )}
+                  {element.data.fields.includes('website') && (
+                    <input
+                      type="url"
+                      placeholder="Website URL"
+                      value={formData.website || ''}
+                      onChange={(e) => handleInputChange('website', e.target.value)}
                       className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
                     />
                   )}

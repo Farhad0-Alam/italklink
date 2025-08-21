@@ -528,7 +528,7 @@ export const contactFormElementSchema = baseElementSchema.extend({
   type: z.literal("contactForm"),
   data: z.object({
     title: z.string().default("Contact Me"),
-    fields: z.array(z.string()).default(["name", "email", "message"]),
+    fields: z.array(z.string()).default(["name", "email", "phone", "company", "message"]),
     receiverEmail: z.string().optional().default(""),
     googleSheets: z.object({
       enabled: z.boolean().default(false),
