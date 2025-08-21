@@ -6,13 +6,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface User {
   id: string;
@@ -33,83 +41,75 @@ interface Template {
 
 const templates: Template[] = [
   {
-    id: "euphoria",
-    name: "Euphoria Theme",
-    category: "Business",
-    previewImage: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=300&h=400&fit=crop",
-    backgroundColor: "#8B5CF6",
-    textColor: "#FFFFFF"
-  },
-  {
-    id: "freedom",
-    name: "Freedom Theme", 
-    category: "Creative",
-    previewImage: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&h=400&fit=crop",
+    id: "tangeria",
+    name: "Tangeria Theme",
+    category: "Modern",
+    previewImage: "",
     backgroundColor: "#10B981",
     textColor: "#FFFFFF"
   },
   {
-    id: "venus",
-    name: "Venus Theme",
+    id: "theme1",
+    name: "Theme 1", 
     category: "Professional",
-    previewImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop", 
-    backgroundColor: "#F59E0B",
+    previewImage: "",
+    backgroundColor: "#10B981",
     textColor: "#FFFFFF"
   },
   {
-    id: "arcturus",
-    name: "Arcturus Theme",
-    category: "Modern",
-    previewImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop",
+    id: "theme2",
+    name: "Theme 2",
+    category: "Dark",
+    previewImage: "",
     backgroundColor: "#1F2937",
     textColor: "#FFFFFF"
   },
   {
-    id: "inca",
-    name: "Inca Theme",
+    id: "theme3",
+    name: "Theme 3",
     category: "Warm",
-    previewImage: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=400&fit=crop",
+    previewImage: "",
     backgroundColor: "#F97316", 
     textColor: "#FFFFFF"
   },
   {
-    id: "flannel",
-    name: "Flannel Theme",
-    category: "Classic",
-    previewImage: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=400&fit=crop",
-    backgroundColor: "#374151",
-    textColor: "#FFFFFF"
-  },
-  {
-    id: "scarlet",
-    name: "Scarlet Theme", 
-    category: "Bold",
-    previewImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=400&fit=crop",
-    backgroundColor: "#DC2626",
-    textColor: "#FFFFFF"
-  },
-  {
-    id: "thalassa",
-    name: "Thalassa Theme",
-    category: "Ocean",
-    previewImage: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=300&h=400&fit=crop",
+    id: "theme4",
+    name: "Theme 4",
+    category: "Blue",
+    previewImage: "",
     backgroundColor: "#0891B2",
     textColor: "#FFFFFF"
   },
   {
-    id: "ipanema",
-    name: "Ipanema Theme",
-    category: "Beach",
-    previewImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=400&fit=crop",
-    backgroundColor: "#06B6D4",
+    id: "engels",
+    name: "Engels De Leon",
+    category: "Classic",
+    previewImage: "",
+    backgroundColor: "#1E3A8A",
     textColor: "#FFFFFF"
   },
   {
-    id: "dingo",
-    name: "Dingo Theme",
-    category: "Vibrant",
-    previewImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=400&fit=crop",
-    backgroundColor: "#A855F7",
+    id: "danyell",
+    name: "Danyell R Means",
+    category: "Teal",
+    previewImage: "",
+    backgroundColor: "#0D9488",
+    textColor: "#FFFFFF"
+  },
+  {
+    id: "rubie",
+    name: "Rubie Joy",
+    category: "Light",
+    previewImage: "",
+    backgroundColor: "#E5F3FF",
+    textColor: "#1F2937"
+  },
+  {
+    id: "emma",
+    name: "Emma Rose",
+    category: "Bold",
+    previewImage: "",
+    backgroundColor: "#DC2626",
     textColor: "#FFFFFF"
   }
 ];
@@ -120,6 +120,9 @@ export default function Templates() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [showUrlModal, setShowUrlModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [customUrl, setCustomUrl] = useState("");
 
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
     queryKey: ['/api/auth/user'],
@@ -160,8 +163,187 @@ export default function Templates() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleTemplateSelect = (templateId: string) => {
-    setLocation(`/builder?template=${templateId}`);
+  const handleTemplateSelect = (template: Template) => {
+    setSelectedTemplate(template);
+    setShowUrlModal(true);
+  };
+
+  const handleContinue = () => {
+    if (selectedTemplate) {
+      const params = new URLSearchParams();
+      params.set('template', selectedTemplate.id);
+      if (customUrl.trim()) {
+        params.set('url', customUrl.trim());
+      }
+      setLocation(`/builder?${params.toString()}`);
+    }
+  };
+
+  const renderTemplatePreview = (template: Template) => {
+    switch (template.id) {
+      case "tangeria":
+        return (
+          <div className="w-full h-full relative bg-emerald-500 rounded-lg overflow-hidden">
+            <div className="absolute top-4 left-4">
+              <div className="w-12 h-12 bg-orange-400 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg">N</span>
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 bg-white p-4">
+              <h3 className="font-bold text-gray-800">Nancy Martin</h3>
+              <p className="text-sm text-gray-600">Your Title Goes Here</p>
+              <div className="flex space-x-1 mt-2">
+                {[1,2,3,4,5,6].map(i => (
+                  <div key={i} className="w-6 h-6 bg-orange-400 rounded"></div>
+                ))}
+              </div>
+              <div className="mt-2 space-y-1">
+                <div className="h-6 bg-orange-400 rounded text-xs flex items-center justify-center text-white">Call Now To Book Service</div>
+                <div className="h-6 bg-orange-400 rounded text-xs flex items-center justify-center text-white">Save In Your Contacts</div>
+              </div>
+            </div>
+          </div>
+        );
+      case "theme1":
+        return (
+          <div className="w-full h-full relative bg-emerald-500 rounded-lg overflow-hidden">
+            <div className="p-4 text-center text-white">
+              <div className="w-16 h-16 bg-purple-600 rounded-full mx-auto mb-2"></div>
+              <h3 className="font-bold">Farhad Alam</h3>
+              <p className="text-sm">Pro Freelancer</p>
+              <div className="flex justify-center space-x-2 mt-4">
+                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+                  <i className="fas fa-phone text-white text-xs"></i>
+                </div>
+                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+                  <i className="fas fa-envelope text-white text-xs"></i>
+                </div>
+                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+                  <i className="fas fa-globe text-white text-xs"></i>
+                </div>
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <i className="fab fa-whatsapp text-white text-xs"></i>
+                </div>
+              </div>
+              <div className="flex justify-center space-x-2 mt-2">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <i className="fab fa-linkedin text-white text-xs"></i>
+                </div>
+                <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center">
+                  <i className="fab fa-instagram text-white text-xs"></i>
+                </div>
+                <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center">
+                  <i className="fab fa-twitter text-white text-xs"></i>
+                </div>
+                <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center">
+                  <i className="fab fa-facebook text-white text-xs"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case "theme2":
+        return (
+          <div className="w-full h-full relative bg-gray-900 rounded-lg overflow-hidden">
+            <div className="p-4 text-center text-white">
+              <h3 className="font-bold mb-1">Siham El Yacoub</h3>
+              <div className="mb-4">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-4 py-1 rounded-full">
+                  Preview
+                </Button>
+              </div>
+              <div className="mb-4">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-6 py-2 rounded-full">
+                  Get Name
+                </Button>
+              </div>
+              <div className="text-xs text-gray-400 space-y-1">
+                <div>Contact Info</div>
+                <div>Social Links</div>
+              </div>
+            </div>
+          </div>
+        );
+      case "theme3":
+        return (
+          <div className="w-full h-full relative bg-orange-100 rounded-lg overflow-hidden">
+            <div className="p-4">
+              <div className="bg-orange-400 w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center">
+                <span className="text-white font-bold">Y</span>
+              </div>
+              <div className="text-center">
+                <h3 className="font-bold text-gray-800">Your Name</h3>
+                <p className="text-xs text-gray-600 mb-3">Text Tag Line</p>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-6 h-4 bg-orange-400 rounded text-xs text-white flex items-center justify-center">Home</div>
+                    <div className="w-6 h-4 bg-orange-400 rounded text-xs text-white flex items-center justify-center">About</div>
+                    <div className="w-6 h-4 bg-orange-400 rounded text-xs text-white flex items-center justify-center">Service</div>
+                    <div className="w-6 h-4 bg-orange-400 rounded text-xs text-white flex items-center justify-center">Contact</div>
+                  </div>
+                  <div className="text-xs text-gray-600">555-647-3732</div>
+                  <div className="text-xs text-gray-600">yourname@gmail.com</div>
+                  <div className="text-xs text-gray-600">www.websitename.com</div>
+                  <div className="text-xs text-gray-600">Your Location here</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case "theme4":
+        return (
+          <div className="w-full h-full relative bg-sky-500 rounded-lg overflow-hidden">
+            <div className="p-4 text-center text-white">
+              <h3 className="font-bold">Test</h3>
+              <p className="text-xs mb-3">Test Tag Line</p>
+              <div className="space-y-1 text-xs">
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="bg-white text-sky-500 px-2 py-1 rounded text-xs">About</div>
+                  <div className="bg-white text-sky-500 px-2 py-1 rounded text-xs">Beauty</div>
+                  <div className="bg-white text-sky-500 px-2 py-1 rounded text-xs">Contact</div>
+                </div>
+                <div className="flex items-center justify-center">
+                  <i className="fas fa-phone mr-1"></i>
+                  <span>055-456-5478</span>
+                </div>
+                <div className="flex items-center justify-center">
+                  <i className="fas fa-envelope mr-1"></i>
+                  <span>yourname@gmail.com</span>
+                </div>
+                <div className="flex items-center justify-center">
+                  <i className="fas fa-globe mr-1"></i>
+                  <span>acrobat.com</span>
+                </div>
+                <div className="flex items-center justify-center">
+                  <i className="fas fa-map-marker mr-1"></i>
+                  <span>Your address goes here</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div 
+            className="w-full h-full flex flex-col items-center justify-center text-white rounded-lg"
+            style={{ backgroundColor: template.backgroundColor }}
+          >
+            <div className="w-32 h-20 bg-white/20 rounded-lg backdrop-blur-sm p-3 mb-4">
+              <div className="w-6 h-6 bg-white/30 rounded-full mb-2"></div>
+              <div className="space-y-1">
+                <div className="h-2 bg-white/60 rounded w-20"></div>
+                <div className="h-1.5 bg-white/40 rounded w-16"></div>
+                <div className="h-1.5 bg-white/40 rounded w-12"></div>
+              </div>
+            </div>
+            <div className="flex space-x-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="w-4 h-4 bg-white/30 rounded"></div>
+              ))}
+            </div>
+          </div>
+        );
+    }
   };
 
   return (
@@ -276,39 +458,18 @@ export default function Templates() {
             <Card 
               key={template.id} 
               className="bg-white shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => handleTemplateSelect(template.id)}
+              onClick={() => handleTemplateSelect(template)}
               data-testid={`template-${template.id}`}
             >
               <CardContent className="p-0">
                 {/* Template Preview */}
                 <div className="aspect-[3/4] relative overflow-hidden rounded-t-lg">
-                  <div 
-                    className="w-full h-full flex flex-col items-center justify-center text-white"
-                    style={{ backgroundColor: template.backgroundColor }}
-                  >
-                    {/* Mock Business Card Preview */}
-                    <div className="w-32 h-20 bg-white/20 rounded-lg backdrop-blur-sm p-3 mb-4">
-                      <div className="w-6 h-6 bg-white/30 rounded-full mb-2"></div>
-                      <div className="space-y-1">
-                        <div className="h-2 bg-white/60 rounded w-20"></div>
-                        <div className="h-1.5 bg-white/40 rounded w-16"></div>
-                        <div className="h-1.5 bg-white/40 rounded w-12"></div>
-                      </div>
-                    </div>
-                    
-                    {/* Social Icons */}
-                    <div className="flex space-x-2">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="w-4 h-4 bg-white/30 rounded"></div>
-                      ))}
-                    </div>
-                  </div>
+                  {renderTemplatePreview(template)}
                 </div>
                 
                 {/* Template Info */}
                 <div className="p-4">
                   <h3 className="font-medium text-gray-900 text-sm">{template.name}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{template.category}</p>
                 </div>
               </CardContent>
             </Card>
@@ -327,6 +488,56 @@ export default function Templates() {
           </div>
         )}
       </div>
+
+      {/* Custom URL Modal */}
+      <Dialog open={showUrlModal} onOpenChange={setShowUrlModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl font-semibold text-gray-700">
+                Create New 2TalkLink
+              </DialogTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowUrlModal(false)}
+                className="h-6 w-6 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <DialogDescription className="text-gray-500">
+              Enter Your URL Below to Continue
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+              <div className="px-3 py-2 bg-gray-100 text-gray-600 text-sm">
+                https://2talklink.com/
+              </div>
+              <Input
+                value={customUrl}
+                onChange={(e) => setCustomUrl(e.target.value)}
+                placeholder="Your URL"
+                className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                data-testid="input-custom-url"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="mt-6">
+            <Button 
+              onClick={handleContinue}
+              className="bg-orange-500 hover:bg-orange-600 text-white w-full"
+              data-testid="button-continue"
+            >
+              Continue
+              <i className="fas fa-arrow-right ml-2"></i>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
