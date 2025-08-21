@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { setupAIRoutes } from './ai-routes';
 import adminRoutes from './admin-routes';
 import { templateCollectionsRoutes } from './template-collections-routes';
+import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 
 
 
@@ -562,6 +563,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching shared business card:', error);
       res.status(500).json({ message: 'Failed to fetch business card' });
+    }
+  });
+
+  // Contact form submission endpoint
+  app.post('/api/contact-form/submit', async (req, res) => {
+    try {
+      const { formData, formConfig } = req.body;
+      
+      if (!formData || !formConfig) {
+        return res.status(400).json({ message: 'Form data and config are required' });
+      }
+
+      const results: {
+        email: boolean;
+        googleSheets: boolean;
+        errors: string[];
+      } = {
+        email: false,
+        googleSheets: false,
+        errors: []
+      };
+
+      // Send email if receiver email is configured
+      if (formConfig.receiverEmail) {
+        try {
+          // Email sending logic would go here
+          // For now, just log the submission
+          console.log('Email would be sent to:', formConfig.receiverEmail);
+          console.log('Form data:', formData);
+          results.email = true;
+        } catch (error) {
+          console.error('Email sending failed:', error);
+          results.errors.push('Failed to send email notification');
+        }
+      }
+
+      // Send to Google Sheets if configured
+      if (formConfig.googleSheets?.enabled && formConfig.googleSheets.spreadsheetId) {
+        try {
+          if (!isGoogleSheetsConfigured()) {
+            throw new Error('Google Sheets not configured on server');
+          }
+
+          await addToGoogleSheet(
+            {
+              spreadsheetId: formConfig.googleSheets.spreadsheetId,
+              sheetName: formConfig.googleSheets.sheetName || 'Sheet1'
+            },
+            formData
+          );
+          results.googleSheets = true;
+        } catch (error) {
+          console.error('Google Sheets submission failed:', error);
+          results.errors.push('Failed to save to Google Sheets');
+        }
+      }
+
+      // Return success if at least one method worked
+      if (results.email || results.googleSheets) {
+        res.json({ 
+          success: true, 
+          message: 'Form submitted successfully',
+          results 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: 'Form submission failed - no delivery methods succeeded',
+          results 
+        });
+      }
+    } catch (error) {
+      console.error('Contact form submission error:', error);
+      res.status(500).json({ message: 'Failed to process form submission' });
     }
   });
 

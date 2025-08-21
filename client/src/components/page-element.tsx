@@ -461,6 +461,47 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
         );
 
       case "contactForm":
+        const [formData, setFormData] = useState<Record<string, string>>({});
+        const [isSubmitting, setIsSubmitting] = useState(false);
+        const [submitStatus, setSubmitStatus] = useState<string>('');
+
+        const handleFormSubmit = async (e: React.FormEvent) => {
+          e.preventDefault();
+          setIsSubmitting(true);
+          setSubmitStatus('');
+
+          try {
+            const response = await fetch('/api/contact-form/submit', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                formData,
+                formConfig: element.data
+              }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              setSubmitStatus('✅ Message sent successfully!');
+              setFormData({}); // Reset form
+            } else {
+              setSubmitStatus('❌ Failed to send message. Please try again.');
+            }
+          } catch (error) {
+            console.error('Form submission error:', error);
+            setSubmitStatus('❌ Failed to send message. Please try again.');
+          } finally {
+            setIsSubmitting(false);
+          }
+        };
+
+        const handleInputChange = (field: string, value: string) => {
+          setFormData(prev => ({ ...prev, [field]: value }));
+        };
+
         return (
           <div className="mb-4">
             {isEditing ? (
@@ -478,6 +519,57 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   placeholder="receiver@example.com (where form submissions will be sent)"
                   type="email"
                 />
+                
+                {/* Google Sheets Integration */}
+                <div className="bg-slate-600 p-3 rounded-lg border border-slate-500">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <input
+                      type="checkbox"
+                      checked={element.data.googleSheets?.enabled || false}
+                      onChange={(e) => handleDataUpdate({ 
+                        googleSheets: { 
+                          ...element.data.googleSheets, 
+                          enabled: e.target.checked 
+                        } 
+                      })}
+                      className="rounded"
+                    />
+                    <label className="text-white text-sm font-medium">
+                      <i className="fab fa-google text-green-400 mr-2"></i>
+                      Send to Google Sheets
+                    </label>
+                  </div>
+                  {element.data.googleSheets?.enabled && (
+                    <div className="space-y-2">
+                      <Input
+                        value={element.data.googleSheets?.spreadsheetId || ""}
+                        onChange={(e) => handleDataUpdate({ 
+                          googleSheets: { 
+                            ...element.data.googleSheets, 
+                            spreadsheetId: e.target.value 
+                          } 
+                        })}
+                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                        placeholder="Google Sheets ID (from URL)"
+                      />
+                      <Input
+                        value={element.data.googleSheets?.sheetName || "Sheet1"}
+                        onChange={(e) => handleDataUpdate({ 
+                          googleSheets: { 
+                            ...element.data.googleSheets, 
+                            sheetName: e.target.value 
+                          } 
+                        })}
+                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                        placeholder="Sheet name (e.g., Sheet1)"
+                      />
+                      <div className="text-xs text-slate-300">
+                        Copy the Spreadsheet ID from your Google Sheets URL. Make sure the sheet is shared with the service account.
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
                 <div className="text-white text-sm">Fields: {element.data.fields.join(', ')}</div>
                 <div className="grid grid-cols-3 gap-2">
                   {['name', 'email', 'phone', 'company', 'message'].map(field => (
@@ -501,52 +593,71 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             ) : (
               <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
                 <h3 className="font-bold mb-3 text-slate-800">{element.data.title}</h3>
-                <div className="space-y-3">
+                <form onSubmit={handleFormSubmit} className="space-y-3">
                   {element.data.fields.includes('name') && (
                     <input
                       type="text"
                       placeholder="Your Name"
+                      value={formData.name || ''}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
                       className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
-                      readOnly
+                      required
                     />
                   )}
                   {element.data.fields.includes('email') && (
                     <input
                       type="email"
                       placeholder="Your Email"
+                      value={formData.email || ''}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
                       className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
-                      readOnly
+                      required
                     />
                   )}
                   {element.data.fields.includes('phone') && (
                     <input
                       type="tel"
                       placeholder="Your Phone"
+                      value={formData.phone || ''}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
                       className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
-                      readOnly
                     />
                   )}
                   {element.data.fields.includes('company') && (
                     <input
                       type="text"
                       placeholder="Company Name"
+                      value={formData.company || ''}
+                      onChange={(e) => handleInputChange('company', e.target.value)}
                       className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
-                      readOnly
                     />
                   )}
                   {element.data.fields.includes('message') && (
                     <textarea
                       placeholder="Your Message"
+                      value={formData.message || ''}
+                      onChange={(e) => handleInputChange('message', e.target.value)}
                       className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
                       rows={3}
-                      readOnly
+                      required
                     />
                   )}
-                  <Button className="bg-talklink-500 hover:bg-talklink-600 text-white w-full">
-                    <i className="fas fa-paper-plane mr-2"></i>
-                    Send Message
+                  
+                  {submitStatus && (
+                    <div className="text-sm text-center py-2">
+                      {submitStatus}
+                    </div>
+                  )}
+                  
+                  <Button 
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-talklink-500 hover:bg-talklink-600 text-white w-full disabled:opacity-50"
+                  >
+                    <i className={`fas ${isSubmitting ? 'fa-spinner fa-spin' : 'fa-paper-plane'} mr-2`}></i>
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
                   </Button>
-                </div>
+                </form>
               </div>
             )}
           </div>

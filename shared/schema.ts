@@ -530,6 +530,11 @@ export const contactFormElementSchema = baseElementSchema.extend({
     title: z.string().default("Contact Me"),
     fields: z.array(z.string()).default(["name", "email", "message"]),
     receiverEmail: z.string().optional().default(""),
+    googleSheets: z.object({
+      enabled: z.boolean().default(false),
+      spreadsheetId: z.string().optional().default(""),
+      sheetName: z.string().optional().default("Sheet1"),
+    }).optional().default({ enabled: false, spreadsheetId: "", sheetName: "Sheet1" }),
   }),
 });
 

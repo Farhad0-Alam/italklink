@@ -185,7 +185,12 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           data: {
             title: "Contact Me",
             fields: ["name", "email", "message"],
-            receiverEmail: ""
+            receiverEmail: "",
+            googleSheets: {
+              enabled: false,
+              spreadsheetId: "",
+              sheetName: "Sheet1"
+            }
           }
         };
         break;
