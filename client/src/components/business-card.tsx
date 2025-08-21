@@ -75,22 +75,39 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     return (
       <div ref={ref} className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-sm mx-auto card-shadow">
         <div className="relative">
-          {/* Background Header */}
+          {/* Cover Photo with Logo */}
           <div 
-            className="h-32 relative"
+            className="h-40 relative overflow-hidden"
             style={{ 
-              background: `linear-gradient(135deg, ${data.brandColor || '#22c55e'}, ${data.accentColor || '#16a34a'})` 
+              background: data.backgroundImage 
+                ? `url(${data.backgroundImage})` 
+                : `linear-gradient(135deg, ${data.brandColor || '#22c55e'}, ${data.accentColor || '#16a34a'})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
             }}
           >
-            {/* Profile Photo with Green Border */}
+            {/* Logo in top left corner */}
+            {data.logo && (
+              <div className="absolute top-4 left-4">
+                <img 
+                  src={data.logo}
+                  alt="Logo"
+                  className="h-8 w-auto max-w-20 object-contain"
+                  data-testid="img-logo"
+                />
+              </div>
+            )}
+            
+            {/* Profile Photo with White Border */}
             <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
-              <img 
-                src={profileImageSrc}
-                alt={data.fullName || "Profile photo"}
-                className="w-24 h-24 rounded-full object-cover bg-white"
-                style={{ borderColor: data.brandColor || '#22c55e', borderWidth: '4px' }}
-                data-testid="img-profile-photo"
-              />
+              <div className="w-24 h-24 rounded-full bg-white p-1">
+                <img 
+                  src={profileImageSrc}
+                  alt={data.fullName || "Profile photo"}
+                  className="w-full h-full rounded-full object-cover"
+                  data-testid="img-profile-photo"
+                />
+              </div>
             </div>
           </div>
           
