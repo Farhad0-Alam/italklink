@@ -98,24 +98,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     }
   };
 
-  const handleSaveSettings = () => {
-    const data = form.getValues();
-    storage.saveCardData(data);
-    logEvent("save_settings");
-    toast({
-      title: t("message.settingsSaved"),
-      description: "Your card data has been saved locally",
-    });
-  };
-
-  const handleGenerateQR = () => {
-    onGenerateQR();
-    logEvent("generate_qr");
-    toast({
-      title: t("message.qrGenerated"),
-      description: "QR code has been generated for your card",
-    });
-  };
 
   return (
     <div className="space-y-6">
@@ -722,26 +704,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             />
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={handleGenerateQR}
-              className="bg-talklink-500 hover:bg-talklink-600 text-white"
-              data-testid="button-generate-qr"
-            >
-              <i className="fas fa-qrcode mr-2"></i>
-              {t('action.generateQR')}
-            </Button>
-            
-            <Button
-              onClick={handleSaveSettings}
-              variant="secondary"
-              className="bg-slate-600 hover:bg-slate-500 text-white"
-              data-testid="button-save-settings"
-            >
-              <i className="fas fa-save mr-2"></i>
-              {t('action.saveSettings')}
-            </Button>
+          {/* Auto Save Status */}
+          <div className="flex items-center justify-center p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+            <div className="flex items-center space-x-2 text-slate-300">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm">Auto-saving changes...</span>
+            </div>
           </div>
         </CardContent>
       </Card>

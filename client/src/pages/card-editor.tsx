@@ -44,6 +44,7 @@ export default function CardEditor() {
   });
 
   const [shareUrl, setShareUrl] = useState("");
+  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   
   // Load existing card if editing
   const { data: existingCard, isLoading } = useQuery({
@@ -64,6 +65,33 @@ export default function CardEditor() {
     }
   }, [existingCard]);
 
+  // Auto-save functionality
+  useEffect(() => {
+    // Don't auto-save if this is the initial load or if we don't have required fields
+    if (!cardData.fullName || !cardData.title || !params.id) {
+      return;
+    }
+
+    // Clear existing timeout
+    if (autoSaveTimeout) {
+      clearTimeout(autoSaveTimeout);
+    }
+
+    // Set new timeout for auto-save (2 seconds after last change)
+    const timeout = setTimeout(() => {
+      saveMutation.mutate(cardData);
+    }, 2000);
+
+    setAutoSaveTimeout(timeout);
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [cardData, params.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const updateShareUrl = (card: any) => {
     if (card.shareSlug) {
       setShareUrl(`${window.location.origin}/cards/${card.shareSlug}`);
@@ -83,10 +111,6 @@ export default function CardEditor() {
     },
     onSuccess: (savedCard) => {
       queryClient.invalidateQueries({ queryKey: ['/api/business-cards'] });
-      toast({
-        title: "Success",
-        description: params.id ? "Card updated successfully!" : "Card created successfully!",
-      });
       
       // Update share URL and redirect to edit mode if creating
       updateShareUrl(savedCard);
@@ -97,15 +121,12 @@ export default function CardEditor() {
     onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to save card. Please try again.",
+        description: "Failed to auto-save card. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  const handleSave = () => {
-    saveMutation.mutate(cardData);
-  };
 
   const copyShareUrl = async () => {
     if (shareUrl) {
@@ -222,23 +243,17 @@ export default function CardEditor() {
             <FormBuilder
               cardData={cardData}
               onDataChange={(data) => setCardData(data)}
-              onGenerateQR={() => {
-                toast({
-                  title: "QR Code Generated",
-                  description: "QR code has been generated for your card",
-                });
-              }}
+              onGenerateQR={() => {}}
             />
             
-            <div className="mt-6 flex gap-3">
-              <Button 
-                onClick={handleSave}
-                className="bg-orange-500 hover:bg-orange-600 text-white flex-1"
-                disabled={saveMutation.isPending}
-                data-testid="button-save-card"
-              >
-                {saveMutation.isPending ? "Saving..." : "Save Changes"}
-              </Button>
+            {/* Auto-save indicator */}
+            <div className="mt-6 flex justify-center">
+              <div className="flex items-center space-x-2 text-slate-600 bg-slate-100 px-4 py-2 rounded-lg">
+                <div className={`w-2 h-2 rounded-full ${saveMutation.isPending ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}></div>
+                <span className="text-sm">
+                  {saveMutation.isPending ? 'Saving...' : 'All changes saved'}
+                </span>
+              </div>
             </div>
           </div>
 
