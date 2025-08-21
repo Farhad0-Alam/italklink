@@ -524,12 +524,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 {/* Form Fields */}
                 <Collapsible defaultOpen={true}>
                   <CollapsibleTrigger className="w-full">
-                    <div className="flex items-center justify-between w-full p-3 bg-green-500/20 rounded-lg border border-green-400/30 hover:bg-green-500/30 transition-colors">
+                    <div className="flex items-center justify-between w-full p-3 rounded-lg border transition-colors" style={{backgroundColor: '#22c55e20', borderColor: '#22c55e50'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#22c55e30'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#22c55e20'}>
                       <div className="flex items-center space-x-2">
-                        <i className="fas fa-list text-green-400"></i>
-                        <span className="text-green-300 font-medium">Form Fields</span>
+                        <i className="fas fa-list" style={{color: '#22c55e'}}></i>
+                        <span className="font-medium" style={{color: '#22c55e'}}>Form Fields</span>
                       </div>
-                      <i className="fas fa-chevron-down text-green-400 text-xs"></i>
+                      <i className="fas fa-chevron-down text-xs" style={{color: '#22c55e'}}></i>
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-2 space-y-3">
@@ -705,15 +705,15 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 {/* Advanced Options */}
                 <Collapsible>
                   <CollapsibleTrigger className="w-full">
-                    <div className="flex items-center justify-between w-full p-3 bg-purple-500/20 rounded-lg border border-purple-400/30 hover:bg-purple-500/30 transition-colors">
+                    <div className="flex items-center justify-between w-full p-3 rounded-lg border transition-colors" style={{backgroundColor: '#a855f720', borderColor: '#a855f750'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#a855f730'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#a855f720'}>
                       <div className="flex items-center space-x-2">
-                        <i className="fas fa-sliders-h text-purple-400"></i>
-                        <span className="text-purple-300 font-medium">Advanced Options</span>
-                        <span className="bg-purple-500 text-purple-900 text-xs px-2 py-1 rounded font-medium">
+                        <i className="fas fa-sliders-h" style={{color: '#a855f7'}}></i>
+                        <span className="font-medium" style={{color: '#a855f7'}}>Advanced Options</span>
+                        <span className="text-xs px-2 py-1 rounded font-medium text-white" style={{backgroundColor: '#a855f7'}}>
                           PRO
                         </span>
                       </div>
-                      <i className="fas fa-chevron-down text-purple-400 text-xs"></i>
+                      <i className="fas fa-chevron-down text-xs" style={{color: '#a855f7'}}></i>
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-2 space-y-3">
