@@ -29,6 +29,181 @@ export function PageElementRenderer({ element, onUpdate, onDelete, isEditing }: 
 
   const renderElement = () => {
     switch (element.type) {
+      case "aiChatbot":
+        return (
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-black mb-4 text-center">
+              {element.data.title}
+            </h3>
+            <p className="text-center text-gray-600 mb-4">{element.data.welcomeMessage}</p>
+            
+            {isEditing ? (
+              <div className="space-y-4">
+                <Input
+                  value={element.data.title}
+                  onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                  placeholder="AI Assistant title"
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+                <Textarea
+                  value={element.data.welcomeMessage}
+                  onChange={(e) => handleDataUpdate({ welcomeMessage: e.target.value })}
+                  placeholder="Welcome message"
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+                <div className="space-y-2">
+                  <label className="text-black text-sm">Knowledge Base Content:</label>
+                  <Textarea
+                    value={element.data.knowledgeBase?.textContent || ''}
+                    onChange={(e) => handleDataUpdate({ 
+                      knowledgeBase: { 
+                        ...element.data.knowledgeBase, 
+                        textContent: e.target.value 
+                      } 
+                    })}
+                    placeholder="Enter knowledge base content..."
+                    rows={4}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+                <Input
+                  value={element.data.knowledgeBase?.websiteUrl || ''}
+                  onChange={(e) => handleDataUpdate({ 
+                    knowledgeBase: { 
+                      ...element.data.knowledgeBase, 
+                      websiteUrl: e.target.value 
+                    } 
+                  })}
+                  placeholder="Website URL for knowledge extraction"
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+                <div className="space-y-2">
+                  <label className="text-black text-sm">PDF Documents:</label>
+                  <Input
+                    type="file"
+                    accept=".pdf"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      files.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          const newPdf = {
+                            id: generateFieldId(),
+                            name: file.name,
+                            content: event.target?.result as string,
+                            uploadedAt: new Date()
+                          };
+                          
+                          handleDataUpdate({
+                            knowledgeBase: {
+                              ...element.data.knowledgeBase,
+                              pdfFiles: [...(element.data.knowledgeBase?.pdfFiles || []), newPdf]
+                            }
+                          });
+                        };
+                        reader.readAsDataURL(file);
+                      });
+                    }}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                  {element.data.knowledgeBase?.pdfFiles && element.data.knowledgeBase.pdfFiles.length > 0 && (
+                    <div className="space-y-1">
+                      {element.data.knowledgeBase.pdfFiles.map((pdf, index) => (
+                        <div key={pdf.id || index} className="flex items-center justify-between bg-slate-600 p-2 rounded">
+                          <span className="text-white text-sm">{pdf.name}</span>
+                          <Button
+                            onClick={() => {
+                              const updatedPdfs = element.data.knowledgeBase?.pdfFiles?.filter((_, i) => i !== index) || [];
+                              handleDataUpdate({
+                                knowledgeBase: {
+                                  ...element.data.knowledgeBase,
+                                  pdfFiles: updatedPdfs
+                                }
+                              });
+                            }}
+                            size="sm"
+                            variant="ghost"
+                            className="text-slate-400 hover:text-red-400"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={element.data.isEnabled}
+                    onChange={(e) => handleDataUpdate({ isEnabled: e.target.checked })}
+                    className="rounded"
+                  />
+                  <span className="text-black text-sm">Enable AI Assistant</span>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-black text-sm">Primary Color:</label>
+                  <Input
+                    type="color"
+                    value={element.data.appearance?.primaryColor || '#22c55e'}
+                    onChange={(e) => handleDataUpdate({ 
+                      appearance: { 
+                        ...element.data.appearance, 
+                        primaryColor: e.target.value 
+                      } 
+                    })}
+                    className="w-20 h-10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-black text-sm">Position:</label>
+                  <select
+                    value={element.data.appearance?.position || 'bottom-right'}
+                    onChange={(e) => handleDataUpdate({ 
+                      appearance: { 
+                        ...element.data.appearance, 
+                        position: e.target.value 
+                      } 
+                    })}
+                    className="w-full p-2 bg-slate-700 border-slate-600 text-white rounded"
+                  >
+                    <option value="bottom-right">Bottom Right</option>
+                    <option value="bottom-left">Bottom Left</option>
+                    <option value="embedded">Embedded</option>
+                  </select>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {element.data.isEnabled && (
+                  <div className="text-center">
+                    <Button
+                      onClick={() => setIsChatOpen(true)}
+                      className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg shadow-lg"
+                      style={{ backgroundColor: element.data.appearance?.primaryColor || '#22c55e' }}
+                      data-testid="button-open-ai-chat"
+                    >
+                      <MessageCircle className="h-5 w-5 mr-2" />
+                      Chat with AI Assistant
+                    </Button>
+                  </div>
+                )}
+                
+                {/* AI Chat Dialog */}
+                {element.type === "aiChatbot" && (
+                  <AIChat
+                    isOpen={isChatOpen}
+                    onClose={() => setIsChatOpen(false)}
+                    knowledgeBase={element.data.knowledgeBase}
+                    primaryColor={element.data.appearance?.primaryColor}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        );
+
       case "ragKnowledge":
         return (
           <div className="mb-6">
@@ -56,7 +231,7 @@ export function PageElementRenderer({ element, onUpdate, onDelete, isEditing }: 
                 <div className="space-y-3">
                   <label className="text-black text-sm font-medium">Website URLs:</label>
                   <div className="space-y-2">
-                    {(element.data.knowledgeBase?.websiteUrls || [element.data.knowledgeBase?.websiteUrl || '']).filter(Boolean).map((url: string, index: number) => (
+                    {((element.data.knowledgeBase as any)?.websiteUrls || [element.data.knowledgeBase?.websiteUrl || '']).filter(Boolean).map((url: string, index: number) => (
                       <div key={index} className="flex gap-2">
                         <Input
                           value={url}
