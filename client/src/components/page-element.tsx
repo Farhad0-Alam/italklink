@@ -1517,8 +1517,8 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             </h3>
             {isEditing ? (
               <div className="space-y-4">
-                {/* Title Section - Different Color */}
-                <div className="bg-talklink-500 p-4 rounded-lg border border-talklink-400">
+                {/* Title Section - Same Color as Display Style */}
+                <div className="bg-slate-700 p-4 rounded-lg border border-slate-600">
                   <label className="block text-white text-sm font-medium mb-2">
                     <i className="fas fa-heading mr-2"></i>
                     Section Title
@@ -1527,7 +1527,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     value={element.data.title}
                     onChange={(e) => handleDataUpdate({ title: e.target.value })}
                     placeholder="What Our Clients Say"
-                    className="bg-white border-talklink-300 text-slate-800 placeholder:text-slate-500"
+                    className="bg-slate-600 border-slate-500 text-white placeholder:text-slate-400"
                   />
                 </div>
 
