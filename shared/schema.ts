@@ -805,13 +805,10 @@ export const businessCardSchema = z.object({
   // Section-Specific Styling
   sectionStyles: z.object({
     basicInfo: z.object({
-      primaryColor: z.string().optional(),
-      headingColor: z.string().optional(),
-      headingSize: z.number().optional(),
-      headingWeight: z.number().optional(),
-      paragraphColor: z.string().optional(),
-      paragraphSize: z.number().optional(),
-      paragraphWeight: z.number().optional(),
+      nameColor: z.string().optional(),
+      titleColor: z.string().optional(),
+      companyColor: z.string().optional(),
+      aboutColor: z.string().optional(),
     }).default({}),
     contactInfo: z.object({
       iconColor: z.string().optional(),

@@ -223,29 +223,42 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           data.headerDesign === 'profile-center' ? 'pt-20' : 
           data.headerDesign === 'split-design' ? 'pt-16' : 'pt-16'
         }`}>
-          {/* Name & Title */}
+          {/* Name, Title, Company */}
           <h3 
             className="text-xl font-bold mb-1" 
             style={{
-              color: getSectionStyle('basicInfo', 'headingColor') || '#1f2937',
-              fontSize: `${((getSectionStyle('basicInfo', 'headingSize') as number) || 20) + 4}px`,
-              fontWeight: (getSectionStyle('basicInfo', 'headingWeight') as number) || 600
+              color: getSectionStyle('basicInfo', 'nameColor') || data.headingColor || '#1f2937',
+              fontSize: `${(data.headingSize || 20) + 4}px`,
+              fontWeight: data.headingWeight || 600
             }}
             data-testid="text-name"
           >
             {data.fullName || "Your Name"}
           </h3>
           <p 
-            className="text-sm mb-4" 
+            className="text-sm mb-2" 
             style={{
-              color: getSectionStyle('basicInfo', 'paragraphColor') || '#4b5563',
-              fontSize: `${(getSectionStyle('basicInfo', 'paragraphSize') as number) || 14}px`,
-              fontWeight: (getSectionStyle('basicInfo', 'paragraphWeight') as number) || 400
+              color: getSectionStyle('basicInfo', 'titleColor') || data.paragraphColor || '#4b5563',
+              fontSize: `${data.paragraphSize || 14}px`,
+              fontWeight: data.paragraphWeight || 400
             }}
             data-testid="text-title"
           >
             {data.title || "Your Title"}
           </p>
+          {data.company && (
+            <p 
+              className="text-sm mb-4" 
+              style={{
+                color: getSectionStyle('basicInfo', 'companyColor') || '#6b7280',
+                fontSize: `${data.paragraphSize || 14}px`,
+                fontWeight: data.paragraphWeight || 400
+              }}
+              data-testid="text-company"
+            >
+              {data.company}
+            </p>
+          )}
           
           {/* Contact Icons - Always Show */}
           <div className="flex justify-center space-x-3 mb-6 flex-wrap gap-y-3">
@@ -470,7 +483,15 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           {/* About Section */}
           {data.about && (
             <div className="mb-6">
-              <p className="text-sm text-slate-700 leading-relaxed" data-testid="text-about">
+              <p 
+                className="text-sm leading-relaxed" 
+                style={{
+                  color: getSectionStyle('basicInfo', 'aboutColor') || data.paragraphColor || '#4b5563',
+                  fontSize: `${data.paragraphSize || 14}px`,
+                  fontWeight: data.paragraphWeight || 400
+                }}
+                data-testid="text-about"
+              >
                 {data.about}
               </p>
             </div>
