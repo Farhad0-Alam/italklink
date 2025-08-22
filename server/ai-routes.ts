@@ -48,20 +48,51 @@ async function extractWebsiteText(url: string): Promise<string> {
     const html = await response.text();
     console.log('Received HTML content, length:', html.length);
     
-    const dom = new JSDOM(html);
+    const dom = new JSDOM(html, { runScripts: "dangerously" });
     const document = dom.window.document;
+    
+    // Debug: Log HTML structure
+    console.log('HTML title:', document.title);
+    console.log('HTML body preview:', document.body?.innerHTML?.substring(0, 500) + '...');
     
     // Remove script and style elements
     const scripts = document.querySelectorAll('script, style, nav, footer, aside');
     scripts.forEach(script => script.remove());
     
-    // Get main content (prioritize main, article, or body)
-    let contentElement = document.querySelector('main') || 
-                        document.querySelector('article') || 
-                        document.querySelector('[role="main"]') ||
-                        document.body;
+    // Try multiple extraction strategies
+    let text = '';
     
-    const text = contentElement?.textContent || '';
+    // Strategy 1: Try main content areas
+    const mainSelectors = ['main', 'article', '[role="main"]', '.content', '#content', '.main-content'];
+    for (const selector of mainSelectors) {
+      const element = document.querySelector(selector);
+      if (element?.textContent?.trim()) {
+        text = element.textContent;
+        console.log('Extracted from', selector);
+        break;
+      }
+    }
+    
+    // Strategy 2: Try body if main content failed
+    if (!text.trim() && document.body?.textContent?.trim()) {
+      text = document.body.textContent;
+      console.log('Extracted from document.body');
+    }
+    
+    // Strategy 3: Try full document as last resort
+    if (!text.trim() && document.documentElement?.textContent?.trim()) {
+      text = document.documentElement.textContent;
+      console.log('Extracted from document.documentElement');
+    }
+    
+    // Strategy 4: Extract from all visible text elements
+    if (!text.trim()) {
+      const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, div, span, li, td, th');
+      const textParts = Array.from(textElements).map(el => el.textContent?.trim()).filter(t => t && t.length > 10);
+      text = textParts.join(' ');
+      console.log('Extracted from individual elements, parts found:', textParts.length);
+    }
+    
     const cleanText = text.replace(/\s+/g, ' ').trim();
     
     console.log('Extracted text length:', cleanText.length);
