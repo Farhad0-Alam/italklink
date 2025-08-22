@@ -768,6 +768,86 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   </div>
                 </div>
               </div>
+              
+              {/* Icon Text Typography */}
+              <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                <h5 className="text-xs font-medium text-purple-200">Icon Text Typography</h5>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-white text-xs">Font</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.contactInfo?.iconTextFont || ""}
+                      onValueChange={(value) => form.setValue('sectionStyles.contactInfo.iconTextFont', value)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Choose font" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Inter">Inter</SelectItem>
+                        <SelectItem value="Roboto">Roboto</SelectItem>
+                        <SelectItem value="Open Sans">Open Sans</SelectItem>
+                        <SelectItem value="Lato">Lato</SelectItem>
+                        <SelectItem value="Montserrat">Montserrat</SelectItem>
+                        <SelectItem value="Poppins">Poppins</SelectItem>
+                        <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
+                        <SelectItem value="Nunito">Nunito</SelectItem>
+                        <SelectItem value="Raleway">Raleway</SelectItem>
+                        <SelectItem value="Ubuntu">Ubuntu</SelectItem>
+                        <SelectItem value="PT Sans">PT Sans</SelectItem>
+                        <SelectItem value="Merriweather">Merriweather</SelectItem>
+                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                        <SelectItem value="Oswald">Oswald</SelectItem>
+                        <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
+                        <SelectItem value="Crimson Text">Crimson Text</SelectItem>
+                        <SelectItem value="Work Sans">Work Sans</SelectItem>
+                        <SelectItem value="Fira Sans">Fira Sans</SelectItem>
+                        <SelectItem value="DM Sans">DM Sans</SelectItem>
+                        <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Weight</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.contactInfo?.iconTextWeight || ""}
+                      onValueChange={(value) => form.setValue('sectionStyles.contactInfo.iconTextWeight', value as any)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Weight" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="300">Light</SelectItem>
+                        <SelectItem value="400">Regular</SelectItem>
+                        <SelectItem value="500">Medium</SelectItem>
+                        <SelectItem value="600">Semi Bold</SelectItem>
+                        <SelectItem value="700">Bold</SelectItem>
+                        <SelectItem value="800">Extra Bold</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.contactInfo?.iconTextSize || 12}px</Label>
+                    <input
+                      type="range"
+                      value={watchedValues.sectionStyles?.contactInfo?.iconTextSize || 12}
+                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconTextSize', parseInt(e.target.value))}
+                      className="custom-range w-full"
+                      min="8"
+                      max="20"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="contactTextItalic"
+                      checked={watchedValues.sectionStyles?.contactInfo?.iconTextStyle === 'italic'}
+                      onCheckedChange={(checked) => 
+                        form.setValue('sectionStyles.contactInfo.iconTextStyle', checked ? 'italic' : 'normal')
+                      }
+                    />
+                    <Label htmlFor="contactTextItalic" className="text-white text-xs">Italic</Label>
+                  </div>
+                </div>
+              </div>
             </div>
             </div>
             )}
@@ -1090,6 +1170,86 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       className="bg-slate-700 border-slate-600 text-white text-xs"
                       placeholder="#64748b"
                     />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Icon Text Typography */}
+              <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                <h5 className="text-xs font-medium text-pink-200">Icon Text Typography</h5>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-white text-xs">Font</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.socialMedia?.iconTextFont || ""}
+                      onValueChange={(value) => form.setValue('sectionStyles.socialMedia.iconTextFont', value)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Choose font" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Inter">Inter</SelectItem>
+                        <SelectItem value="Roboto">Roboto</SelectItem>
+                        <SelectItem value="Open Sans">Open Sans</SelectItem>
+                        <SelectItem value="Lato">Lato</SelectItem>
+                        <SelectItem value="Montserrat">Montserrat</SelectItem>
+                        <SelectItem value="Poppins">Poppins</SelectItem>
+                        <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
+                        <SelectItem value="Nunito">Nunito</SelectItem>
+                        <SelectItem value="Raleway">Raleway</SelectItem>
+                        <SelectItem value="Ubuntu">Ubuntu</SelectItem>
+                        <SelectItem value="PT Sans">PT Sans</SelectItem>
+                        <SelectItem value="Merriweather">Merriweather</SelectItem>
+                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                        <SelectItem value="Oswald">Oswald</SelectItem>
+                        <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
+                        <SelectItem value="Crimson Text">Crimson Text</SelectItem>
+                        <SelectItem value="Work Sans">Work Sans</SelectItem>
+                        <SelectItem value="Fira Sans">Fira Sans</SelectItem>
+                        <SelectItem value="DM Sans">DM Sans</SelectItem>
+                        <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Weight</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.socialMedia?.iconTextWeight || ""}
+                      onValueChange={(value) => form.setValue('sectionStyles.socialMedia.iconTextWeight', value as any)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Weight" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="300">Light</SelectItem>
+                        <SelectItem value="400">Regular</SelectItem>
+                        <SelectItem value="500">Medium</SelectItem>
+                        <SelectItem value="600">Semi Bold</SelectItem>
+                        <SelectItem value="700">Bold</SelectItem>
+                        <SelectItem value="800">Extra Bold</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.socialMedia?.iconTextSize || 12}px</Label>
+                    <input
+                      type="range"
+                      value={watchedValues.sectionStyles?.socialMedia?.iconTextSize || 12}
+                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconTextSize', parseInt(e.target.value))}
+                      className="custom-range w-full"
+                      min="8"
+                      max="20"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="socialTextItalic"
+                      checked={watchedValues.sectionStyles?.socialMedia?.iconTextStyle === 'italic'}
+                      onCheckedChange={(checked) => 
+                        form.setValue('sectionStyles.socialMedia.iconTextStyle', checked ? 'italic' : 'normal')
+                      }
+                    />
+                    <Label htmlFor="socialTextItalic" className="text-white text-xs">Italic</Label>
                   </div>
                 </div>
               </div>

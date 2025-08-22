@@ -283,7 +283,13 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 </button>
                 <span 
                   className="text-xs"
-                  style={{ color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b' }}
+                  style={{ 
+                    color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b',
+                    fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
+                    fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || 400,
+                    fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
+                    fontStyle: getSectionStyle('contactInfo', 'iconTextStyle') || 'normal'
+                  }}
                 >
                   Phone
                 </span>
@@ -304,7 +310,13 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 </button>
                 <span 
                   className="text-xs"
-                  style={{ color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b' }}
+                  style={{ 
+                    color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b',
+                    fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
+                    fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || 400,
+                    fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
+                    fontStyle: getSectionStyle('contactInfo', 'iconTextStyle') || 'normal'
+                  }}
                 >
                   Email
                 </span>
@@ -342,7 +354,13 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 </button>
                 <span 
                   className="text-xs"
-                  style={{ color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b' }}
+                  style={{ 
+                    color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b',
+                    fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
+                    fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || 400,
+                    fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
+                    fontStyle: getSectionStyle('contactInfo', 'iconTextStyle') || 'normal'
+                  }}
                 >
                   WhatsApp
                 </span>
@@ -365,7 +383,13 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   </button>
                   <span 
                     className="text-xs"
-                    style={{ color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b' }}
+                    style={{ 
+                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b',
+                      fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
+                      fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || 400,
+                      fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
+                      fontStyle: getSectionStyle('contactInfo', 'iconTextStyle') || 'normal'
+                    }}
                   >
                     {contact.label || 'Contact'}
                   </span>
@@ -391,7 +415,13 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 </button>
                 <span 
                   className="text-xs"
-                  style={{ color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b' }}
+                  style={{ 
+                    color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
+                    fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
+                    fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
+                    fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                    fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
+                  }}
                 >
                   LinkedIn
                 </span>
@@ -412,7 +442,13 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 </button>
                 <span 
                   className="text-xs"
-                  style={{ color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b' }}
+                  style={{ 
+                    color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
+                    fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
+                    fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
+                    fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                    fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
+                  }}
                 >
                   Instagram
                 </span>
@@ -433,7 +469,13 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 </button>
                 <span 
                   className="text-xs"
-                  style={{ color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b' }}
+                  style={{ 
+                    color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
+                    fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
+                    fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
+                    fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                    fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
+                  }}
                 >
                   Twitter
                 </span>
@@ -454,7 +496,13 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 </button>
                 <span 
                   className="text-xs"
-                  style={{ color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b' }}
+                  style={{ 
+                    color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
+                    fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
+                    fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
+                    fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                    fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
+                  }}
                 >
                   Facebook
                 </span>
@@ -477,7 +525,13 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   </button>
                   <span 
                     className="text-xs"
-                    style={{ color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b' }}
+                    style={{ 
+                      color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
+                      fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
+                      fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
+                      fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                      fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
+                    }}
                   >
                     {social.label || 'Social'}
                   </span>
