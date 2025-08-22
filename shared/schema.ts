@@ -802,6 +802,51 @@ export const businessCardSchema = z.object({
   paragraphSize: z.number().default(14),
   paragraphWeight: z.number().default(400),
   
+  // Section-Specific Styling
+  sectionStyles: z.object({
+    basicInfo: z.object({
+      primaryColor: z.string().optional(),
+      headingColor: z.string().optional(),
+      headingSize: z.number().optional(),
+      headingWeight: z.number().optional(),
+      paragraphColor: z.string().optional(),
+      paragraphSize: z.number().optional(),
+      paragraphWeight: z.number().optional(),
+    }).default({}),
+    contactInfo: z.object({
+      primaryColor: z.string().optional(),
+      headingColor: z.string().optional(),
+      headingSize: z.number().optional(),
+      headingWeight: z.number().optional(),
+      paragraphColor: z.string().optional(),
+      paragraphSize: z.number().optional(),
+      paragraphWeight: z.number().optional(),
+    }).default({}),
+    socialMedia: z.object({
+      primaryColor: z.string().optional(),
+      headingColor: z.string().optional(),
+      headingSize: z.number().optional(),
+      headingWeight: z.number().optional(),
+      paragraphColor: z.string().optional(),
+      paragraphSize: z.number().optional(),
+      paragraphWeight: z.number().optional(),
+    }).default({}),
+    about: z.object({
+      primaryColor: z.string().optional(),
+      headingColor: z.string().optional(),
+      headingSize: z.number().optional(),
+      headingWeight: z.number().optional(),
+      paragraphColor: z.string().optional(),
+      paragraphSize: z.number().optional(),
+      paragraphWeight: z.number().optional(),
+    }).default({}),
+  }).default({
+    basicInfo: {},
+    contactInfo: {},
+    socialMedia: {},
+    about: {},
+  }),
+  
   // SEO Settings
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),

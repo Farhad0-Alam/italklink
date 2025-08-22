@@ -359,6 +359,47 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 data-testid="textarea-about"
               />
             </div>
+            
+            {/* Basic Info Section Styling */}
+            <div className="border-t border-green-600/30 pt-4 space-y-3">
+              <h4 className="text-sm font-medium text-green-200">Section Styling (Optional)</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-white text-xs">Primary Color</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="color"
+                      value={watchedValues.sectionStyles?.basicInfo?.primaryColor || watchedValues.primaryColor || "#22c55e"}
+                      onChange={(e) => form.setValue('sectionStyles.basicInfo.primaryColor', e.target.value)}
+                      className="w-8 h-6 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={watchedValues.sectionStyles?.basicInfo?.primaryColor || ""}
+                      onChange={(e) => form.setValue('sectionStyles.basicInfo.primaryColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="Global default"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-white text-xs">Heading Color</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="color"
+                      value={watchedValues.sectionStyles?.basicInfo?.headingColor || watchedValues.headingColor || "#1f2937"}
+                      onChange={(e) => form.setValue('sectionStyles.basicInfo.headingColor', e.target.value)}
+                      className="w-8 h-6 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={watchedValues.sectionStyles?.basicInfo?.headingColor || ""}
+                      onChange={(e) => form.setValue('sectionStyles.basicInfo.headingColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="Global default"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
             </div>
             )}
           </div>
@@ -424,6 +465,47 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
                 data-testid="input-location"
               />
+            </div>
+            
+            {/* Contact Info Section Styling */}
+            <div className="border-t border-purple-600/30 pt-4 space-y-3">
+              <h4 className="text-sm font-medium text-purple-200">Section Styling (Optional)</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-white text-xs">Primary Color</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="color"
+                      value={watchedValues.sectionStyles?.contactInfo?.primaryColor || watchedValues.primaryColor || "#22c55e"}
+                      onChange={(e) => form.setValue('sectionStyles.contactInfo.primaryColor', e.target.value)}
+                      className="w-8 h-6 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={watchedValues.sectionStyles?.contactInfo?.primaryColor || ""}
+                      onChange={(e) => form.setValue('sectionStyles.contactInfo.primaryColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="Global default"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-white text-xs">Heading Color</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="color"
+                      value={watchedValues.sectionStyles?.contactInfo?.headingColor || watchedValues.headingColor || "#1f2937"}
+                      onChange={(e) => form.setValue('sectionStyles.contactInfo.headingColor', e.target.value)}
+                      className="w-8 h-6 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={watchedValues.sectionStyles?.contactInfo?.headingColor || ""}
+                      onChange={(e) => form.setValue('sectionStyles.contactInfo.headingColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="Global default"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
             </div>
             )}
@@ -691,6 +773,47 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 <i className="fas fa-plus mr-2"></i>
                 Add Social Platform
               </Button>
+            </div>
+            
+            {/* Social Media Section Styling */}
+            <div className="border-t border-pink-600/30 pt-4 space-y-3">
+              <h4 className="text-sm font-medium text-pink-200">Section Styling (Optional)</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-white text-xs">Primary Color</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="color"
+                      value={watchedValues.sectionStyles?.socialMedia?.primaryColor || watchedValues.primaryColor || "#22c55e"}
+                      onChange={(e) => form.setValue('sectionStyles.socialMedia.primaryColor', e.target.value)}
+                      className="w-8 h-6 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={watchedValues.sectionStyles?.socialMedia?.primaryColor || ""}
+                      onChange={(e) => form.setValue('sectionStyles.socialMedia.primaryColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="Global default"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-white text-xs">Heading Color</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="color"
+                      value={watchedValues.sectionStyles?.socialMedia?.headingColor || watchedValues.headingColor || "#1f2937"}
+                      onChange={(e) => form.setValue('sectionStyles.socialMedia.headingColor', e.target.value)}
+                      className="w-8 h-6 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={watchedValues.sectionStyles?.socialMedia?.headingColor || ""}
+                      onChange={(e) => form.setValue('sectionStyles.socialMedia.headingColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="Global default"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           )}

@@ -62,6 +62,18 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     // Use sample image for preview when no profile photo
     const profileImageSrc = data.profilePhoto || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300";
     
+    // Helper function to get section-specific styling with global fallback
+    const getSectionStyle = (section: 'basicInfo' | 'contactInfo' | 'socialMedia' | 'about', styleType: string) => {
+      const sectionStyle = data.sectionStyles?.[section];
+      const globalStyle = data[styleType as keyof typeof data];
+      
+      if (sectionStyle && sectionStyle[styleType as keyof typeof sectionStyle]) {
+        return sectionStyle[styleType as keyof typeof sectionStyle];
+      }
+      
+      return globalStyle;
+    };
+    
 
     // Generate gradient style if enabled
     const gradientStyle = data.useGradient && data.gradientStops?.length > 0 
@@ -215,9 +227,9 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           <h3 
             className="text-xl font-bold mb-1" 
             style={{
-              color: data.headingColor || '#1f2937',
-              fontSize: `${(data.headingSize || 20) + 4}px`,
-              fontWeight: data.headingWeight || 600
+              color: getSectionStyle('basicInfo', 'headingColor') || '#1f2937',
+              fontSize: `${((getSectionStyle('basicInfo', 'headingSize') as number) || 20) + 4}px`,
+              fontWeight: (getSectionStyle('basicInfo', 'headingWeight') as number) || 600
             }}
             data-testid="text-name"
           >
@@ -226,9 +238,9 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           <p 
             className="text-sm mb-4" 
             style={{
-              color: data.paragraphColor || '#4b5563',
-              fontSize: `${data.paragraphSize || 14}px`,
-              fontWeight: data.paragraphWeight || 400
+              color: getSectionStyle('basicInfo', 'paragraphColor') || '#4b5563',
+              fontSize: `${(getSectionStyle('basicInfo', 'paragraphSize') as number) || 14}px`,
+              fontWeight: (getSectionStyle('basicInfo', 'paragraphWeight') as number) || 400
             }}
             data-testid="text-title"
           >
@@ -272,7 +284,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 <button 
                   onClick={() => handleContactAction('whatsapp', data.whatsapp)}
                   className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-talklink-600 transition-colors mb-1"
-                  style={{ backgroundColor: data.brandColor || '#22c55e' }}
+                  style={{ backgroundColor: getSectionStyle('contactInfo', 'primaryColor') || data.brandColor || '#22c55e' }}
                   data-testid="button-contact-whatsapp"
                 >
                   <i className="fab fa-whatsapp text-sm"></i>
@@ -303,7 +315,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               <div className="flex flex-col items-center">
                 <button 
                   onClick={() => handleContactAction('linkedin', data.linkedin)}
-                  className="w-10 h-10 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
+                  className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
+                  style={{ backgroundColor: getSectionStyle('socialMedia', 'primaryColor') || '#475569' }}
                   data-testid="button-social-linkedin"
                 >
                   <i className="fab fa-linkedin-in text-sm"></i>
@@ -315,7 +328,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               <div className="flex flex-col items-center">
                 <button 
                   onClick={() => handleContactAction('instagram', data.instagram)}
-                  className="w-10 h-10 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-pink-500 transition-colors mb-1"
+                  className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-pink-500 transition-colors mb-1"
+                  style={{ backgroundColor: getSectionStyle('socialMedia', 'primaryColor') || '#475569' }}
                   data-testid="button-social-instagram"
                 >
                   <i className="fab fa-instagram text-sm"></i>
@@ -327,7 +341,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               <div className="flex flex-col items-center">
                 <button 
                   onClick={() => handleContactAction('twitter', data.twitter)}
-                  className="w-10 h-10 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-blue-400 transition-colors mb-1"
+                  className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-blue-400 transition-colors mb-1"
+                  style={{ backgroundColor: getSectionStyle('socialMedia', 'primaryColor') || '#475569' }}
                   data-testid="button-social-twitter"
                 >
                   <i className="fab fa-twitter text-sm"></i>
@@ -339,7 +354,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               <div className="flex flex-col items-center">
                 <button 
                   onClick={() => handleContactAction('facebook', data.facebook)}
-                  className="w-10 h-10 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
+                  className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
+                  style={{ backgroundColor: getSectionStyle('socialMedia', 'primaryColor') || '#475569' }}
                   data-testid="button-social-facebook"
                 >
                   <i className="fab fa-facebook-f text-sm"></i>
@@ -353,7 +369,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 <div key={social.id} className="flex flex-col items-center">
                   <button 
                     onClick={() => handleContactAction(social.platform, social.value)}
-                    className="w-10 h-10 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                    className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                    style={{ backgroundColor: getSectionStyle('socialMedia', 'primaryColor') || '#475569' }}
                     data-testid={`button-custom-social-${social.id}`}
                   >
                     <i className={`${social.icon} text-sm`}></i>
