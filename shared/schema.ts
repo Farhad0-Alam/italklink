@@ -513,7 +513,7 @@ export const qrcodeElementSchema = baseElementSchema.extend({
   data: z.object({
     value: z.string(),
     size: z.number().default(200),
-    frameStyle: z.enum(['none', 'square', 'rounded', 'circle', 'dots', 'dashed', 'double', 'gradient']).default('square'),
+    frameStyle: z.enum(['none', 'rounded', 'corners']).default('none'),
     frameColor: z.string().default('#22c55e'),
     customLabel: z.boolean().default(false),
     labelText: z.string().default(''),
