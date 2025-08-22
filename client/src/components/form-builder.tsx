@@ -366,6 +366,95 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             )}
           </div>
 
+          {/* Contact Information (Typography controls) */}
+          <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => toggleSection('contactInfo')}
+            >
+              <h3 className="text-lg font-semibold text-purple-300">{t('form.contactInfo')}</h3>
+              <i className={`fas ${collapsedSections.contactInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-purple-300`}></i>
+            </div>
+            {!collapsedSections.contactInfo && (
+              <>
+                <div>
+                  <div>
+                    <Label className="text-white text-xs">Font</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.basicInfo?.nameFont || ""}
+                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.nameFont', value)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Choose font" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Inter">Inter</SelectItem>
+                        <SelectItem value="Roboto">Roboto</SelectItem>
+                        <SelectItem value="Open Sans">Open Sans</SelectItem>
+                        <SelectItem value="Lato">Lato</SelectItem>
+                        <SelectItem value="Montserrat">Montserrat</SelectItem>
+                        <SelectItem value="Poppins">Poppins</SelectItem>
+                        <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
+                        <SelectItem value="Nunito">Nunito</SelectItem>
+                        <SelectItem value="Raleway">Raleway</SelectItem>
+                        <SelectItem value="Ubuntu">Ubuntu</SelectItem>
+                        <SelectItem value="PT Sans">PT Sans</SelectItem>
+                        <SelectItem value="Merriweather">Merriweather</SelectItem>
+                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                        <SelectItem value="Oswald">Oswald</SelectItem>
+                        <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
+                        <SelectItem value="Crimson Text">Crimson Text</SelectItem>
+                        <SelectItem value="Work Sans">Work Sans</SelectItem>
+                        <SelectItem value="Fira Sans">Fira Sans</SelectItem>
+                        <SelectItem value="DM Sans">DM Sans</SelectItem>
+                        <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.basicInfo?.nameFontSize || 24}px</Label>
+                    <input
+                      type="range"
+                      value={watchedValues.sectionStyles?.basicInfo?.nameFontSize || 24}
+                      onChange={(e) => form.setValue('sectionStyles.basicInfo.nameFontSize', parseInt(e.target.value))}
+                      className="custom-range w-full"
+                      min="12"
+                      max="48"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Weight</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.basicInfo?.nameFontWeight || ""}
+                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.nameFontWeight', value as any)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Weight" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="300">Light</SelectItem>
+                        <SelectItem value="400">Regular</SelectItem>
+                        <SelectItem value="500">Medium</SelectItem>
+                        <SelectItem value="600">Semi Bold</SelectItem>
+                        <SelectItem value="700">Bold</SelectItem>
+                        <SelectItem value="800">Extra Bold</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="nameItalic"
+                    checked={watchedValues.sectionStyles?.basicInfo?.nameTextStyle === 'italic'}
+                    onCheckedChange={(checked) => 
+                      form.setValue('sectionStyles.basicInfo.nameTextStyle', checked ? 'italic' : 'normal')
+                    }
+                  />
+                  <Label htmlFor="nameItalic" className="text-white text-xs">Italic</Label>
+                </div>
+              </>
+            )}
+          </div>
 
           {/* Title Styling */}
           <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
@@ -642,6 +731,88 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     />
                   </div>
 
+                  {/* Additional Contact Methods */}
+                  <div className="space-y-4">
+                    <h4 className="text-md font-medium text-purple-300">Additional Contact Methods</h4>
+                    {form.watch("customContacts")?.map((contact, index) => (
+                      <div key={contact.id} className="flex gap-2 items-end">
+                        <div className="flex-1">
+                          <Label className="text-white">Label</Label>
+                          <Input
+                            value={contact.label}
+                            onChange={(e) => {
+                              const newContacts = [...(form.watch("customContacts") || [])];
+                              newContacts[index] = { ...contact, label: e.target.value };
+                              form.setValue("customContacts", newContacts);
+                            }}
+                            className="bg-slate-700 border-slate-600 text-white"
+                            placeholder="Contact label"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Label className="text-white">Value</Label>
+                          <Input
+                            value={contact.value}
+                            onChange={(e) => {
+                              const newContacts = [...(form.watch("customContacts") || [])];
+                              newContacts[index] = { ...contact, value: e.target.value };
+                              form.setValue("customContacts", newContacts);
+                            }}
+                            className="bg-slate-700 border-slate-600 text-white"
+                            placeholder="Contact value"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Label className="text-white">Icon</Label>
+                          <Select
+                            value={contact.icon}
+                            onValueChange={(value) => {
+                              const newContacts = [...(form.watch("customContacts") || [])];
+                              newContacts[index] = { ...contact, icon: value };
+                              form.setValue("customContacts", newContacts);
+                            }}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {getAvailableIcons().filter(icon => icon.category === 'contact').map(icon => (
+                                <SelectItem key={icon.name} value={icon.icon}>
+                                  <div className="flex items-center gap-2">
+                                    <i className={icon.icon}></i>
+                                    {icon.name}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            const newContacts = form.watch("customContacts")?.filter((_, i) => i !== index) || [];
+                            form.setValue("customContacts", newContacts);
+                          }}
+                        >
+                          <i className="fas fa-trash"></i>
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const newContact = { id: generateFieldId(), label: '', value: '', type: 'custom', icon: 'fas fa-link' };
+                        form.setValue("customContacts", [...(form.watch("customContacts") || []), newContact]);
+                      }}
+                      className="w-full bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                    >
+                      <i className="fas fa-plus mr-2"></i>
+                      Add Custom Contact
+                    </Button>
+                  </div>
 
                   {/* Contact Info Section Styling */}
                   <div className="border-t border-purple-600/30 pt-4 space-y-3">

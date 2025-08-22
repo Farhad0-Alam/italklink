@@ -349,6 +349,36 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 </span>
               </div>
             )}
+            {/* Custom Contact Methods */}
+            {data.customContacts?.map((contact) => (
+              contact.value && contact.label && (
+                <div key={contact.id} className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction(contact.type, contact.value)}
+                    className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                    style={{ 
+                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#475569',
+                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                    }}
+                    data-testid={`button-custom-contact-${contact.id}`}
+                  >
+                    <i className={`${contact.icon} text-sm`}></i>
+                  </button>
+                  <span 
+                    className="text-xs"
+                    style={{ 
+                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b',
+                      fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
+                      fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || 400,
+                      fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
+                      fontStyle: getSectionStyle('contactInfo', 'iconTextStyle') || 'normal'
+                    }}
+                  >
+                    {contact.label}
+                  </span>
+                </div>
+              )
+            ))}
           </div>
           
           {/* Social Icons */}
