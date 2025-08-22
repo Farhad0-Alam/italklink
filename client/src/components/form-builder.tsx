@@ -69,10 +69,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   // Update parent when form values change, but only when actually different
   const watchedValues = form.watch();
   const prevDataRef = useRef<string>("");
-  
+
   useEffect(() => {
     const currentData = JSON.stringify(watchedValues);
-    
     if (currentData !== prevDataRef.current) {
       prevDataRef.current = currentData;
       onDataChange(watchedValues);
@@ -114,7 +113,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     }
   };
 
-
   return (
     <div className="space-y-6">
       <Card className="bg-slate-800 border-slate-700">
@@ -135,181 +133,181 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.coverLogo ? 'fa-chevron-down' : 'fa-chevron-up'} text-blue-300`}></i>
             </div>
             {!collapsedSections.coverLogo && (
-            <>
-            <div>
-            {/* Header Design Options */}
-            <div className="space-y-3">
-              <Label className="text-white">Header Design</Label>
-              <div className="grid grid-cols-3 gap-3">
-                <div 
-                  className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
-                    watchedValues.headerDesign === 'cover-logo' || !watchedValues.headerDesign 
-                      ? 'border-talklink-500 bg-talklink-500/10' 
-                      : 'border-slate-600 bg-slate-700'
-                  }`}
-                  onClick={() => form.setValue('headerDesign', 'cover-logo')}
-                >
-                  <div className="text-center">
-                    <div className="h-8 bg-gradient-to-r from-green-400 to-green-600 rounded mb-1 relative">
-                      <div className="absolute top-1 left-1 w-2 h-2 bg-white rounded"></div>
-                    </div>
-                    <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2 border border-green-400"></div>
-                    <p className="text-xs text-white mt-1">Cover + Logo</p>
-                  </div>
-                </div>
-                
-                <div 
-                  className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
-                    watchedValues.headerDesign === 'profile-center' 
-                      ? 'border-talklink-500 bg-talklink-500/10' 
-                      : 'border-slate-600 bg-slate-700'
-                  }`}
-                  onClick={() => form.setValue('headerDesign', 'profile-center')}
-                >
-                  <div className="text-center">
-                    <div className="h-8 bg-gradient-to-r from-blue-400 to-blue-600 rounded mb-1"></div>
-                    <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2"></div>
-                    <p className="text-xs text-white mt-1">Profile Center</p>
-                  </div>
-                </div>
-                
-                <div 
-                  className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
-                    watchedValues.headerDesign === 'split-design' 
-                      ? 'border-talklink-500 bg-talklink-500/10' 
-                      : 'border-slate-600 bg-slate-700'
-                  }`}
-                  onClick={() => form.setValue('headerDesign', 'split-design')}
-                >
-                  <div className="text-center">
-                    <div className="h-8 bg-gradient-to-r from-purple-400 to-purple-600 rounded mb-1 flex">
-                      <div className="flex-1"></div>
-                      <div className="w-2 bg-white rounded-full my-auto mr-1"></div>
-                    </div>
-                    <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2"></div>
-                    <p className="text-xs text-white mt-1">Split Layout</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <Label htmlFor="profilePhoto" className="text-white text-sm">Profile Photo</Label>
-                <div className="mt-1">
-                  <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
-                    {watchedValues.profilePhoto ? (
-                      <img 
-                        src={watchedValues.profilePhoto} 
-                        alt="Profile" 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-center">
-                        <i className="fas fa-user text-slate-400 text-sm"></i>
-                        <p className="text-slate-400 text-xs mt-1">Profile</p>
+              <>
+                <div>
+                  {/* Header Design Options */}
+                  <div className="space-y-3">
+                    <Label className="text-white">Header Design</Label>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div 
+                        className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                          watchedValues.headerDesign === 'cover-logo' || !watchedValues.headerDesign 
+                            ? 'border-talklink-500 bg-talklink-500/10' 
+                            : 'border-slate-600 bg-slate-700'
+                        }`}
+                        onClick={() => form.setValue('headerDesign', 'cover-logo')}
+                      >
+                        <div className="text-center">
+                          <div className="h-8 bg-gradient-to-r from-green-400 to-green-600 rounded mb-1 relative">
+                            <div className="absolute top-1 left-1 w-2 h-2 bg-white rounded"></div>
+                          </div>
+                          <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2 border border-green-400"></div>
+                          <p className="text-xs text-white mt-1">Cover + Logo</p>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
-                    onClick={() => document.getElementById('profile-photo-input')?.click()}
-                    disabled={isUploading}
-                  >
-                    <i className="fas fa-upload mr-1"></i>
-                    Upload
-                  </Button>
-                  <input
-                    id="profile-photo-input"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileUpload(e, 'profilePhoto')}
-                    className="hidden"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="backgroundImage" className="text-white text-sm">Cover Photo</Label>
-                <div className="mt-1">
-                  <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
-                    {watchedValues.backgroundImage ? (
-                      <img 
-                        src={watchedValues.backgroundImage} 
-                        alt="Cover" 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-center">
-                        <i className="fas fa-image text-slate-400 text-sm"></i>
-                        <p className="text-slate-400 text-xs mt-1">Cover</p>
-                      </div>
-                    )}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
-                    onClick={() => document.getElementById('background-input')?.click()}
-                    disabled={isUploading}
-                  >
-                    <i className="fas fa-upload mr-1"></i>
-                    Upload
-                  </Button>
-                  <input
-                    id="background-input"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileUpload(e, 'backgroundImage')}
-                    className="hidden"
-                  />
-                </div>
-              </div>
 
-              <div>
-                <Label htmlFor="logo" className="text-white text-sm">Logo</Label>
-                <div className="mt-1">
-                  <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
-                    {watchedValues.logo ? (
-                      <img 
-                        src={watchedValues.logo} 
-                        alt="Logo" 
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <div className="text-center">
-                        <i className="fas fa-image text-slate-400 text-sm"></i>
-                        <p className="text-slate-400 text-xs mt-1">Logo</p>
+                      <div 
+                        className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                          watchedValues.headerDesign === 'profile-center' 
+                            ? 'border-talklink-500 bg-talklink-500/10' 
+                            : 'border-slate-600 bg-slate-700'
+                        }`}
+                        onClick={() => form.setValue('headerDesign', 'profile-center')}
+                      >
+                        <div className="text-center">
+                          <div className="h-8 bg-gradient-to-r from-blue-400 to-blue-600 rounded mb-1"></div>
+                          <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2"></div>
+                          <p className="text-xs text-white mt-1">Profile Center</p>
+                        </div>
                       </div>
-                    )}
+
+                      <div 
+                        className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                          watchedValues.headerDesign === 'split-design' 
+                            ? 'border-talklink-500 bg-talklink-500/10' 
+                            : 'border-slate-600 bg-slate-700'
+                        }`}
+                        onClick={() => form.setValue('headerDesign', 'split-design')}
+                      >
+                        <div className="text-center">
+                          <div className="h-8 bg-gradient-to-r from-purple-400 to-purple-600 rounded mb-1 flex">
+                            <div className="flex-1"></div>
+                            <div className="w-2 bg-white rounded-full my-auto mr-1"></div>
+                          </div>
+                          <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2"></div>
+                          <p className="text-xs text-white mt-1">Split Layout</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
-                    onClick={() => document.getElementById('logo-input')?.click()}
-                    disabled={isUploading}
-                  >
-                    <i className="fas fa-upload mr-1"></i>
-                    Upload
-                  </Button>
-                  <input
-                    id="logo-input"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileUpload(e, 'logo')}
-                    className="hidden"
-                  />
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <Label htmlFor="profilePhoto" className="text-white text-sm">Profile Photo</Label>
+                      <div className="mt-1">
+                        <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                          {watchedValues.profilePhoto ? (
+                            <img 
+                              src={watchedValues.profilePhoto} 
+                              alt="Profile" 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="text-center">
+                              <i className="fas fa-user text-slate-400 text-sm"></i>
+                              <p className="text-slate-400 text-xs mt-1">Profile</p>
+                            </div>
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
+                          onClick={() => document.getElementById('profile-photo-input')?.click()}
+                          disabled={isUploading}
+                        >
+                          <i className="fas fa-upload mr-1"></i>
+                          Upload
+                        </Button>
+                        <input
+                          id="profile-photo-input"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload(e, 'profilePhoto')}
+                          className="hidden"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="backgroundImage" className="text-white text-sm">Cover Photo</Label>
+                      <div className="mt-1">
+                        <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                          {watchedValues.backgroundImage ? (
+                            <img 
+                              src={watchedValues.backgroundImage} 
+                              alt="Cover" 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="text-center">
+                              <i className="fas fa-image text-slate-400 text-sm"></i>
+                              <p className="text-slate-400 text-xs mt-1">Cover</p>
+                            </div>
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
+                          onClick={() => document.getElementById('background-input')?.click()}
+                          disabled={isUploading}
+                        >
+                          <i className="fas fa-upload mr-1"></i>
+                          Upload
+                        </Button>
+                        <input
+                          id="background-input"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload(e, 'backgroundImage')}
+                          className="hidden"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="logo" className="text-white text-sm">Logo</Label>
+                      <div className="mt-1">
+                        <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                          {watchedValues.logo ? (
+                            <img 
+                              src={watchedValues.logo} 
+                              alt="Logo" 
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <div className="text-center">
+                              <i className="fas fa-image text-slate-400 text-sm"></i>
+                              <p className="text-slate-400 text-xs mt-1">Logo</p>
+                            </div>
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
+                          onClick={() => document.getElementById('logo-input')?.click()}
+                          disabled={isUploading}
+                        >
+                          <i className="fas fa-upload mr-1"></i>
+                          Upload
+                        </Button>
+                        <input
+                          id="logo-input"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload(e, 'logo')}
+                          className="hidden"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            </div>
-            </>
+              </>
             )}
           </div>
 
@@ -323,54 +321,52 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.basicInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-green-300`}></i>
             </div>
             {!collapsedSections.basicInfo && (
-            <>
-            <div>
-            
-            <div>
-              <Label htmlFor="fullName" className="text-white">{t('field.fullName')} *</Label>
-              <Input
-                id="fullName"
-                {...form.register("fullName")}
-                placeholder="John Doe"
-                className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                data-testid="input-full-name"
-              />
-              {form.formState.errors.fullName && (
-                <p className="text-red-400 text-sm mt-1">{form.formState.errors.fullName.message}</p>
-              )}
-            </div>
+              <>
+                <div>
+                  <div>
+                    <Label htmlFor="fullName" className="text-white">{t('field.fullName')} *</Label>
+                    <Input
+                      id="fullName"
+                      {...form.register("fullName")}
+                      placeholder="John Doe"
+                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                      data-testid="input-full-name"
+                    />
+                    {form.formState.errors.fullName && (
+                      <p className="text-red-400 text-sm mt-1">{form.formState.errors.fullName.message}</p>
+                    )}
+                  </div>
 
-            <div>
-              <Label htmlFor="title" className="text-white">{t('field.title')} *</Label>
-              <Input
-                id="title"
-                {...form.register("title")}
-                placeholder="Senior Developer"
-                className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                data-testid="input-title"
-              />
-              {form.formState.errors.title && (
-                <p className="text-red-400 text-sm mt-1">{form.formState.errors.title.message}</p>
-              )}
-            </div>
+                  <div>
+                    <Label htmlFor="title" className="text-white">{t('field.title')} *</Label>
+                    <Input
+                      id="title"
+                      {...form.register("title")}
+                      placeholder="Senior Developer"
+                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                      data-testid="input-title"
+                    />
+                    {form.formState.errors.title && (
+                      <p className="text-red-400 text-sm mt-1">{form.formState.errors.title.message}</p>
+                    )}
+                  </div>
 
-            <div>
-              <Label htmlFor="company" className="text-white">{t('field.company')}</Label>
-              <Input
-                id="company"
-                {...form.register("company")}
-                placeholder="Tech Corp"
-                className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                data-testid="input-company"
-              />
-            </div>
-            </div>
-            </>
+                  <div>
+                    <Label htmlFor="company" className="text-white">{t('field.company')}</Label>
+                    <Input
+                      id="company"
+                      {...form.register("company")}
+                      placeholder="Tech Corp"
+                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                      data-testid="input-company"
+                    />
+                  </div>
+                </div>
+              </>
             )}
           </div>
 
-
-          {/* Contact Information */}
+          {/* Contact Information (Typography controls) */}
           <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
             <div 
               className="flex items-center justify-between cursor-pointer"
@@ -380,8 +376,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.contactInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-purple-300`}></i>
             </div>
             {!collapsedSections.contactInfo && (
-            <>
-            <div>
+              <>
+                <div>
                   <div>
                     <Label className="text-white text-xs">Font</Label>
                     <Select
@@ -456,21 +452,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   />
                   <Label htmlFor="nameItalic" className="text-white text-xs">Italic</Label>
                 </div>
-                </>
-                )}
-              </div>
+              </>
+            )}
+          </div>
 
-              {/* Title Styling */}
-              <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
-                <div 
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => toggleSection('titleStyling')}
-                >
-                  <h5 className="text-xs font-medium text-green-300">Title Styling</h5>
-                  <i className={`fas fa-chevron-${collapsedSections.titleStyling ? 'down' : 'up'} text-green-300 text-xs`}></i>
-                </div>
-                {!collapsedSections.titleStyling && (
-                <>
+          {/* Title Styling */}
+          <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => toggleSection('titleStyling')}
+            >
+              <h5 className="text-xs font-medium text-green-300">Title Styling</h5>
+              <i className={`fas fa-chevron-${collapsedSections.titleStyling ? 'down' : 'up'} text-green-300 text-xs`}></i>
+            </div>
+            {!collapsedSections.titleStyling && (
+              <>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label className="text-white text-xs">Color</Label>
@@ -563,112 +559,108 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   />
                   <Label htmlFor="titleItalic" className="text-white text-xs">Italic</Label>
                 </div>
-                </>
-                )}
-              </div>
-
-              {/* Company Styling */}
-              <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
-                <h5 className="text-xs font-medium text-green-300">Company Styling</h5>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label className="text-white text-xs">Color</Label>
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="color"
-                        value={watchedValues.sectionStyles?.basicInfo?.companyColor || "#6b7280"}
-                        onChange={(e) => form.setValue('sectionStyles.basicInfo.companyColor', e.target.value)}
-                        className="w-6 h-6 rounded cursor-pointer"
-                      />
-                      <Input
-                        value={watchedValues.sectionStyles?.basicInfo?.companyColor || ""}
-                        onChange={(e) => form.setValue('sectionStyles.basicInfo.companyColor', e.target.value)}
-                        className="bg-slate-700 border-slate-600 text-white text-xs"
-                        placeholder="#6b7280"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-white text-xs">Font</Label>
-                    <Select
-                      value={watchedValues.sectionStyles?.basicInfo?.companyFont || ""}
-                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.companyFont', value)}
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                        <SelectValue placeholder="Choose font" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Inter">Inter</SelectItem>
-                        <SelectItem value="Roboto">Roboto</SelectItem>
-                        <SelectItem value="Open Sans">Open Sans</SelectItem>
-                        <SelectItem value="Lato">Lato</SelectItem>
-                        <SelectItem value="Montserrat">Montserrat</SelectItem>
-                        <SelectItem value="Poppins">Poppins</SelectItem>
-                        <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
-                        <SelectItem value="Nunito">Nunito</SelectItem>
-                        <SelectItem value="Raleway">Raleway</SelectItem>
-                        <SelectItem value="Ubuntu">Ubuntu</SelectItem>
-                        <SelectItem value="PT Sans">PT Sans</SelectItem>
-                        <SelectItem value="Merriweather">Merriweather</SelectItem>
-                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
-                        <SelectItem value="Oswald">Oswald</SelectItem>
-                        <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
-                        <SelectItem value="Crimson Text">Crimson Text</SelectItem>
-                        <SelectItem value="Work Sans">Work Sans</SelectItem>
-                        <SelectItem value="Fira Sans">Fira Sans</SelectItem>
-                        <SelectItem value="DM Sans">DM Sans</SelectItem>
-                        <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.basicInfo?.companyFontSize || 14}px</Label>
-                    <input
-                      type="range"
-                      value={watchedValues.sectionStyles?.basicInfo?.companyFontSize || 14}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.companyFontSize', parseInt(e.target.value))}
-                      className="custom-range w-full"
-                      min="10"
-                      max="32"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-white text-xs">Weight</Label>
-                    <Select
-                      value={watchedValues.sectionStyles?.basicInfo?.companyFontWeight || ""}
-                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.companyFontWeight', value as any)}
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                        <SelectValue placeholder="Weight" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="300">Light</SelectItem>
-                        <SelectItem value="400">Regular</SelectItem>
-                        <SelectItem value="500">Medium</SelectItem>
-                        <SelectItem value="600">Semi Bold</SelectItem>
-                        <SelectItem value="700">Bold</SelectItem>
-                        <SelectItem value="800">Extra Bold</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="companyItalic"
-                    checked={watchedValues.sectionStyles?.basicInfo?.companyTextStyle === 'italic'}
-                    onCheckedChange={(checked) => 
-                      form.setValue('sectionStyles.basicInfo.companyTextStyle', checked ? 'italic' : 'normal')
-                    }
-                  />
-                  <Label htmlFor="companyItalic" className="text-white text-xs">Italic</Label>
-                </div>
-              </div>
-            </div>
-            </>
+              </>
             )}
           </div>
 
-          {/* Contact Information */}
+          {/* Company Styling */}
+          <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+            <h5 className="text-xs font-medium text-green-300">Company Styling</h5>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-white text-xs">Color</Label>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="color"
+                    value={watchedValues.sectionStyles?.basicInfo?.companyColor || "#6b7280"}
+                    onChange={(e) => form.setValue('sectionStyles.basicInfo.companyColor', e.target.value)}
+                    className="w-6 h-6 rounded cursor-pointer"
+                  />
+                  <Input
+                    value={watchedValues.sectionStyles?.basicInfo?.companyColor || ""}
+                    onChange={(e) => form.setValue('sectionStyles.basicInfo.companyColor', e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-white text-xs"
+                    placeholder="#6b7280"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label className="text-white text-xs">Font</Label>
+                <Select
+                  value={watchedValues.sectionStyles?.basicInfo?.companyFont || ""}
+                  onValueChange={(value) => form.setValue('sectionStyles.basicInfo.companyFont', value)}
+                >
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                    <SelectValue placeholder="Choose font" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Inter">Inter</SelectItem>
+                    <SelectItem value="Roboto">Roboto</SelectItem>
+                    <SelectItem value="Open Sans">Open Sans</SelectItem>
+                    <SelectItem value="Lato">Lato</SelectItem>
+                    <SelectItem value="Montserrat">Montserrat</SelectItem>
+                    <SelectItem value="Poppins">Poppins</SelectItem>
+                    <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
+                    <SelectItem value="Nunito">Nunito</SelectItem>
+                    <SelectItem value="Raleway">Raleway</SelectItem>
+                    <SelectItem value="Ubuntu">Ubuntu</SelectItem>
+                    <SelectItem value="PT Sans">PT Sans</SelectItem>
+                    <SelectItem value="Merriweather">Merriweather</SelectItem>
+                    <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                    <SelectItem value="Oswald">Oswald</SelectItem>
+                    <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
+                    <SelectItem value="Crimson Text">Crimson Text</SelectItem>
+                    <SelectItem value="Work Sans">Work Sans</SelectItem>
+                    <SelectItem value="Fira Sans">Fira Sans</SelectItem>
+                    <SelectItem value="DM Sans">DM Sans</SelectItem>
+                    <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.basicInfo?.companyFontSize || 14}px</Label>
+                <input
+                  type="range"
+                  value={watchedValues.sectionStyles?.basicInfo?.companyFontSize || 14}
+                  onChange={(e) => form.setValue('sectionStyles.basicInfo.companyFontSize', parseInt(e.target.value))}
+                  className="custom-range w-full"
+                  min="10"
+                  max="32"
+                />
+              </div>
+              <div>
+                <Label className="text-white text-xs">Weight</Label>
+                <Select
+                  value={watchedValues.sectionStyles?.basicInfo?.companyFontWeight || ""}
+                  onValueChange={(value) => form.setValue('sectionStyles.basicInfo.companyFontWeight', value as any)}
+                >
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                    <SelectValue placeholder="Weight" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="300">Light</SelectItem>
+                    <SelectItem value="400">Regular</SelectItem>
+                    <SelectItem value="500">Medium</SelectItem>
+                    <SelectItem value="600">Semi Bold</SelectItem>
+                    <SelectItem value="700">Bold</SelectItem>
+                    <SelectItem value="800">Extra Bold</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="companyItalic"
+                checked={watchedValues.sectionStyles?.basicInfo?.companyTextStyle === 'italic'}
+                onCheckedChange={(checked) => 
+                  form.setValue('sectionStyles.basicInfo.companyTextStyle', checked ? 'italic' : 'normal')
+                }
+              />
+              <Label htmlFor="companyItalic" className="text-white text-xs">Italic</Label>
+            </div>
+          </div>
+
+          {/* Contact Information (fields + section styling) */}
           <div 
             className="rounded-lg p-4 space-y-4" 
             style={{
@@ -686,323 +678,321 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.contactInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-purple-300`}></i>
             </div>
             {!collapsedSections.contactInfo && (
-            <>
-            <div>
-            
-            <div>
-              <Label htmlFor="phone" className="text-white">{t('field.phone')}</Label>
-              <Input
-                id="phone"
-                {...form.register("phone")}
-                placeholder="+1 (555) 123-4567"
-                className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                data-testid="input-phone"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="email" className="text-white">{t('field.email')}</Label>
-              <Input
-                id="email"
-                type="email"
-                {...form.register("email")}
-                placeholder="john@example.com"
-                className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                data-testid="input-email"
-              />
-              {form.formState.errors.email && (
-                <p className="text-red-400 text-sm mt-1">{form.formState.errors.email.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="website" className="text-white">{t('field.website')}</Label>
-              <Input
-                id="website"
-                {...form.register("website")}
-                placeholder="https://johndoe.com"
-                className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                data-testid="input-website"
-              />
-              {form.formState.errors.website && (
-                <p className="text-red-400 text-sm mt-1">{form.formState.errors.website.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="location" className="text-white">{t('field.location')}</Label>
-              <Input
-                id="location"
-                {...form.register("location")}
-                placeholder="New York, NY"
-                className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                data-testid="input-location"
-              />
-            </div>
-            
-            {/* Additional Contact Methods */}
-            <div className="space-y-4">
-              <h4 className="text-md font-medium text-purple-300">Additional Contact Methods</h4>
-              {form.watch("customContacts")?.map((contact, index) => (
-                <div key={contact.id} className="flex gap-2 items-end">
-                  <div className="flex-1">
-                    <Label className="text-white">Label</Label>
-                    <Input
-                      value={contact.label}
-                      onChange={(e) => {
-                        const newContacts = [...(form.watch("customContacts") || [])];
-                        newContacts[index] = { ...contact, label: e.target.value };
-                        form.setValue("customContacts", newContacts);
-                      }}
-                      className="bg-slate-700 border-slate-600 text-white"
-                      placeholder="Contact label"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Label className="text-white">Value</Label>
-                    <Input
-                      value={contact.value}
-                      onChange={(e) => {
-                        const newContacts = [...(form.watch("customContacts") || [])];
-                        newContacts[index] = { ...contact, value: e.target.value };
-                        form.setValue("customContacts", newContacts);
-                      }}
-                      className="bg-slate-700 border-slate-600 text-white"
-                      placeholder="Contact value"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Label className="text-white">Icon</Label>
-                    <Select
-                      value={contact.icon}
-                      onValueChange={(value) => {
-                        const newContacts = [...(form.watch("customContacts") || [])];
-                        newContacts[index] = { ...contact, icon: value };
-                        form.setValue("customContacts", newContacts);
-                      }}
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getAvailableIcons().filter(icon => icon.category === 'contact').map(icon => (
-                          <SelectItem key={icon.name} value={icon.icon}>
-                            <div className="flex items-center gap-2">
-                              <i className={icon.icon}></i>
-                              {icon.name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => {
-                      const newContacts = form.watch("customContacts")?.filter((_, i) => i !== index) || [];
-                      form.setValue("customContacts", newContacts);
-                    }}
-                  >
-                    <i className="fas fa-trash"></i>
-                  </Button>
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  const newContact = { id: generateFieldId(), label: '', value: '', type: 'custom', icon: 'fas fa-link' };
-                  form.setValue("customContacts", [...(form.watch("customContacts") || []), newContact]);
-                }}
-                className="w-full bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
-              >
-                <i className="fas fa-plus mr-2"></i>
-                Add Custom Contact
-              </Button>
-            </div>
-            
-            {/* Contact Info Section Styling */}
-            <div className="border-t border-purple-600/30 pt-4 space-y-3">
-              <h4 className="text-sm font-medium text-purple-200">Section Styling</h4>
-              <div className="grid grid-cols-2 gap-3">
+              <>
                 <div>
-                  <Label className="text-white text-xs">Section Background</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.contactInfo?.sectionBackgroundColor || "#9333ea"}
-                      onChange={(e) => form.setValue('sectionStyles.contactInfo.sectionBackgroundColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.contactInfo?.sectionBackgroundColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.contactInfo.sectionBackgroundColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#9333ea"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-white text-xs">Section Border</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.contactInfo?.sectionBorderColor || "#a855f7"}
-                      onChange={(e) => form.setValue('sectionStyles.contactInfo.sectionBorderColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.contactInfo?.sectionBorderColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.contactInfo.sectionBorderColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#a855f7"
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <h4 className="text-sm font-medium text-purple-200 pt-2">Icon Styling (Optional)</h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-white text-xs">Icon Color</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.contactInfo?.iconColor || "#ffffff"}
-                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.contactInfo?.iconColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#ffffff"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-white text-xs">Icon Background</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundColor || "#475569"}
-                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconBackgroundColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconBackgroundColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#475569"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-white text-xs">Icon Text Color</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.contactInfo?.iconTextColor || "#64748b"}
-                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconTextColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.contactInfo?.iconTextColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconTextColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#64748b"
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              {/* Icon Text Typography */}
-              <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
-                <h5 className="text-xs font-medium text-purple-200">Icon Text Typography</h5>
-                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label className="text-white text-xs">Font</Label>
-                    <Select
-                      value={watchedValues.sectionStyles?.contactInfo?.iconTextFont || ""}
-                      onValueChange={(value) => form.setValue('sectionStyles.contactInfo.iconTextFont', value)}
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                        <SelectValue placeholder="Choose font" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Inter">Inter</SelectItem>
-                        <SelectItem value="Roboto">Roboto</SelectItem>
-                        <SelectItem value="Open Sans">Open Sans</SelectItem>
-                        <SelectItem value="Lato">Lato</SelectItem>
-                        <SelectItem value="Montserrat">Montserrat</SelectItem>
-                        <SelectItem value="Poppins">Poppins</SelectItem>
-                        <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
-                        <SelectItem value="Nunito">Nunito</SelectItem>
-                        <SelectItem value="Raleway">Raleway</SelectItem>
-                        <SelectItem value="Ubuntu">Ubuntu</SelectItem>
-                        <SelectItem value="PT Sans">PT Sans</SelectItem>
-                        <SelectItem value="Merriweather">Merriweather</SelectItem>
-                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
-                        <SelectItem value="Oswald">Oswald</SelectItem>
-                        <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
-                        <SelectItem value="Crimson Text">Crimson Text</SelectItem>
-                        <SelectItem value="Work Sans">Work Sans</SelectItem>
-                        <SelectItem value="Fira Sans">Fira Sans</SelectItem>
-                        <SelectItem value="DM Sans">DM Sans</SelectItem>
-                        <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-white text-xs">Weight</Label>
-                    <Select
-                      value={watchedValues.sectionStyles?.contactInfo?.iconTextWeight || ""}
-                      onValueChange={(value) => form.setValue('sectionStyles.contactInfo.iconTextWeight', value as any)}
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                        <SelectValue placeholder="Weight" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="300">Light</SelectItem>
-                        <SelectItem value="400">Regular</SelectItem>
-                        <SelectItem value="500">Medium</SelectItem>
-                        <SelectItem value="600">Semi Bold</SelectItem>
-                        <SelectItem value="700">Bold</SelectItem>
-                        <SelectItem value="800">Extra Bold</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.contactInfo?.iconTextSize || 12}px</Label>
-                    <input
-                      type="range"
-                      value={watchedValues.sectionStyles?.contactInfo?.iconTextSize || 12}
-                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconTextSize', parseInt(e.target.value))}
-                      className="custom-range w-full"
-                      min="8"
-                      max="20"
+                    <Label htmlFor="phone" className="text-white">{t('field.phone')}</Label>
+                    <Input
+                      id="phone"
+                      {...form.register("phone")}
+                      placeholder="+1 (555) 123-4567"
+                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                      data-testid="input-phone"
                     />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="contactTextItalic"
-                      checked={watchedValues.sectionStyles?.contactInfo?.iconTextStyle === 'italic'}
-                      onCheckedChange={(checked) => 
-                        form.setValue('sectionStyles.contactInfo.iconTextStyle', checked ? 'italic' : 'normal')
-                      }
+
+                  <div>
+                    <Label htmlFor="email" className="text-white">{t('field.email')}</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      {...form.register("email")}
+                      placeholder="john@example.com"
+                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                      data-testid="input-email"
                     />
-                    <Label htmlFor="contactTextItalic" className="text-white text-xs">Italic</Label>
+                    {form.formState.errors.email && (
+                      <p className="text-red-400 text-sm mt-1">{form.formState.errors.email.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="website" className="text-white">{t('field.website')}</Label>
+                    <Input
+                      id="website"
+                      {...form.register("website")}
+                      placeholder="https://johndoe.com"
+                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                      data-testid="input-website"
+                    />
+                    {form.formState.errors.website && (
+                      <p className="text-red-400 text-sm mt-1">{form.formState.errors.website.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="location" className="text-white">{t('field.location')}</Label>
+                    <Input
+                      id="location"
+                      {...form.register("location")}
+                      placeholder="New York, NY"
+                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                      data-testid="input-location"
+                    />
+                  </div>
+
+                  {/* Additional Contact Methods */}
+                  <div className="space-y-4">
+                    <h4 className="text-md font-medium text-purple-300">Additional Contact Methods</h4>
+                    {form.watch("customContacts")?.map((contact, index) => (
+                      <div key={contact.id} className="flex gap-2 items-end">
+                        <div className="flex-1">
+                          <Label className="text-white">Label</Label>
+                          <Input
+                            value={contact.label}
+                            onChange={(e) => {
+                              const newContacts = [...(form.watch("customContacts") || [])];
+                              newContacts[index] = { ...contact, label: e.target.value };
+                              form.setValue("customContacts", newContacts);
+                            }}
+                            className="bg-slate-700 border-slate-600 text-white"
+                            placeholder="Contact label"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Label className="text-white">Value</Label>
+                          <Input
+                            value={contact.value}
+                            onChange={(e) => {
+                              const newContacts = [...(form.watch("customContacts") || [])];
+                              newContacts[index] = { ...contact, value: e.target.value };
+                              form.setValue("customContacts", newContacts);
+                            }}
+                            className="bg-slate-700 border-slate-600 text-white"
+                            placeholder="Contact value"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Label className="text-white">Icon</Label>
+                          <Select
+                            value={contact.icon}
+                            onValueChange={(value) => {
+                              const newContacts = [...(form.watch("customContacts") || [])];
+                              newContacts[index] = { ...contact, icon: value };
+                              form.setValue("customContacts", newContacts);
+                            }}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {getAvailableIcons().filter(icon => icon.category === 'contact').map(icon => (
+                                <SelectItem key={icon.name} value={icon.icon}>
+                                  <div className="flex items-center gap-2">
+                                    <i className={icon.icon}></i>
+                                    {icon.name}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            const newContacts = form.watch("customContacts")?.filter((_, i) => i !== index) || [];
+                            form.setValue("customContacts", newContacts);
+                          }}
+                        >
+                          <i className="fas fa-trash"></i>
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const newContact = { id: generateFieldId(), label: '', value: '', type: 'custom', icon: 'fas fa-link' };
+                        form.setValue("customContacts", [...(form.watch("customContacts") || []), newContact]);
+                      }}
+                      className="w-full bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                    >
+                      <i className="fas fa-plus mr-2"></i>
+                      Add Custom Contact
+                    </Button>
+                  </div>
+
+                  {/* Contact Info Section Styling */}
+                  <div className="border-t border-purple-600/30 pt-4 space-y-3">
+                    <h4 className="text-sm font-medium text-purple-200">Section Styling</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-white text-xs">Section Background</Label>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="color"
+                            value={watchedValues.sectionStyles?.contactInfo?.sectionBackgroundColor || "#9333ea"}
+                            onChange={(e) => form.setValue('sectionStyles.contactInfo.sectionBackgroundColor', e.target.value)}
+                            className="w-8 h-6 rounded cursor-pointer"
+                          />
+                          <Input
+                            value={watchedValues.sectionStyles?.contactInfo?.sectionBackgroundColor || ""}
+                            onChange={(e) => form.setValue('sectionStyles.contactInfo.sectionBackgroundColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#9333ea"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-white text-xs">Section Border</Label>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="color"
+                            value={watchedValues.sectionStyles?.contactInfo?.sectionBorderColor || "#a855f7"}
+                            onChange={(e) => form.setValue('sectionStyles.contactInfo.sectionBorderColor', e.target.value)}
+                            className="w-8 h-6 rounded cursor-pointer"
+                          />
+                          <Input
+                            value={watchedValues.sectionStyles?.contactInfo?.sectionBorderColor || ""}
+                            onChange={(e) => form.setValue('sectionStyles.contactInfo.sectionBorderColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#a855f7"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <h4 className="text-sm font-medium text-purple-200 pt-2">Icon Styling (Optional)</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-white text-xs">Icon Color</Label>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="color"
+                            value={watchedValues.sectionStyles?.contactInfo?.iconColor || "#ffffff"}
+                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconColor', e.target.value)}
+                            className="w-8 h-6 rounded cursor-pointer"
+                          />
+                          <Input
+                            value={watchedValues.sectionStyles?.contactInfo?.iconColor || ""}
+                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#ffffff"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-white text-xs">Icon Background</Label>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="color"
+                            value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundColor || "#475569"}
+                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconBackgroundColor', e.target.value)}
+                            className="w-8 h-6 rounded cursor-pointer"
+                          />
+                          <Input
+                            value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundColor || ""}
+                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconBackgroundColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#475569"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-white text-xs">Icon Text Color</Label>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="color"
+                            value={watchedValues.sectionStyles?.contactInfo?.iconTextColor || "#64748b"}
+                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconTextColor', e.target.value)}
+                            className="w-8 h-6 rounded cursor-pointer"
+                          />
+                          <Input
+                            value={watchedValues.sectionStyles?.contactInfo?.iconTextColor || ""}
+                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconTextColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#64748b"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Icon Text Typography */}
+                    <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                      <h5 className="text-xs font-medium text-purple-200">Icon Text Typography</h5>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Font</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.contactInfo?.iconTextFont || ""}
+                            onValueChange={(value) => form.setValue('sectionStyles.contactInfo.iconTextFont', value)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Choose font" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Inter">Inter</SelectItem>
+                              <SelectItem value="Roboto">Roboto</SelectItem>
+                              <SelectItem value="Open Sans">Open Sans</SelectItem>
+                              <SelectItem value="Lato">Lato</SelectItem>
+                              <SelectItem value="Montserrat">Montserrat</SelectItem>
+                              <SelectItem value="Poppins">Poppins</SelectItem>
+                              <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
+                              <SelectItem value="Nunito">Nunito</SelectItem>
+                              <SelectItem value="Raleway">Raleway</SelectItem>
+                              <SelectItem value="Ubuntu">Ubuntu</SelectItem>
+                              <SelectItem value="PT Sans">PT Sans</SelectItem>
+                              <SelectItem value="Merriweather">Merriweather</SelectItem>
+                              <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                              <SelectItem value="Oswald">Oswald</SelectItem>
+                              <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
+                              <SelectItem value="Crimson Text">Crimson Text</SelectItem>
+                              <SelectItem value="Work Sans">Work Sans</SelectItem>
+                              <SelectItem value="Fira Sans">Fira Sans</SelectItem>
+                              <SelectItem value="DM Sans">DM Sans</SelectItem>
+                              <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-white text-xs">Weight</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.contactInfo?.iconTextWeight || ""}
+                            onValueChange={(value) => form.setValue('sectionStyles.contactInfo.iconTextWeight', value as any)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Weight" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="300">Light</SelectItem>
+                              <SelectItem value="400">Regular</SelectItem>
+                              <SelectItem value="500">Medium</SelectItem>
+                              <SelectItem value="600">Semi Bold</SelectItem>
+                              <SelectItem value="700">Bold</SelectItem>
+                              <SelectItem value="800">Extra Bold</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.contactInfo?.iconTextSize || 12}px</Label>
+                          <input
+                            type="range"
+                            value={watchedValues.sectionStyles?.contactInfo?.iconTextSize || 12}
+                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconTextSize', parseInt(e.target.value))}
+                            className="custom-range w-full"
+                            min="8"
+                            max="20"
+                          />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="contactTextItalic"
+                            checked={watchedValues.sectionStyles?.contactInfo?.iconTextStyle === 'italic'}
+                            onCheckedChange={(checked) => 
+                              form.setValue('sectionStyles.contactInfo.iconTextStyle', checked ? 'italic' : 'normal')
+                            }
+                          />
+                          <Label htmlFor="contactTextItalic" className="text-white text-xs">Italic</Label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            </div>
-            </>
+              </>
             )}
           </div>
-
 
           {/* Social Media */}
           <div 
@@ -1022,327 +1012,326 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.customization ? 'fa-chevron-down' : 'fa-chevron-up'} text-pink-300`}></i>
             </div>
             {!collapsedSections.customization && (
-            <>
-            <div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="whatsapp" className="text-white">WhatsApp</Label>
-                <Input
-                  id="whatsapp"
-                  {...form.register("whatsapp")}
-                  placeholder="+1234567890"
-                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                  data-testid="input-whatsapp"
-                />
-              </div>
+              <>
+                <div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="whatsapp" className="text-white">WhatsApp</Label>
+                      <Input
+                        id="whatsapp"
+                        {...form.register("whatsapp")}
+                        placeholder="+1234567890"
+                        className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                        data-testid="input-whatsapp"
+                      />
+                    </div>
 
-              <div>
-                <Label htmlFor="linkedin" className="text-white">LinkedIn</Label>
-                <Input
-                  id="linkedin"
-                  {...form.register("linkedin")}
-                  placeholder="linkedin.com/in/johndoe"
-                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                  data-testid="input-linkedin"
-                />
-              </div>
+                    <div>
+                      <Label htmlFor="linkedin" className="text-white">LinkedIn</Label>
+                      <Input
+                        id="linkedin"
+                        {...form.register("linkedin")}
+                        placeholder="linkedin.com/in/johndoe"
+                        className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                        data-testid="input-linkedin"
+                      />
+                    </div>
 
-              <div>
-                <Label htmlFor="instagram" className="text-white">Instagram</Label>
-                <Input
-                  id="instagram"
-                  {...form.register("instagram")}
-                  placeholder="@johndoe"
-                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                  data-testid="input-instagram"
-                />
-              </div>
+                    <div>
+                      <Label htmlFor="instagram" className="text-white">Instagram</Label>
+                      <Input
+                        id="instagram"
+                        {...form.register("instagram")}
+                        placeholder="@johndoe"
+                        className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                        data-testid="input-instagram"
+                      />
+                    </div>
 
-              <div>
-                <Label htmlFor="twitter" className="text-white">Twitter/X</Label>
-                <Input
-                  id="twitter"
-                  {...form.register("twitter")}
-                  placeholder="@johndoe"
-                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                  data-testid="input-twitter"
-                />
-              </div>
-            </div>
-            
-            {/* Custom Social Media Fields */}
-            <div className="space-y-4">
-              <h4 className="text-md font-medium text-talklink-300">Additional Social Platforms</h4>
-              {form.watch("customSocials")?.map((social, index) => (
-                <div key={social.id} className="flex gap-2 items-end">
-                  <div className="flex-1">
-                    <Label className="text-white">Platform</Label>
-                    <Input
-                      value={social.platform}
-                      onChange={(e) => {
-                        const newSocials = [...(form.watch("customSocials") || [])];
-                        newSocials[index] = { ...social, platform: e.target.value };
-                        form.setValue("customSocials", newSocials);
+                    <div>
+                      <Label htmlFor="twitter" className="text-white">Twitter/X</Label>
+                      <Input
+                        id="twitter"
+                        {...form.register("twitter")}
+                        placeholder="@johndoe"
+                        className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                        data-testid="input-twitter"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Custom Social Media Fields */}
+                  <div className="space-y-4">
+                    <h4 className="text-md font-medium text-talklink-300">Additional Social Platforms</h4>
+                    {form.watch("customSocials")?.map((social, index) => (
+                      <div key={social.id} className="flex gap-2 items-end">
+                        <div className="flex-1">
+                          <Label className="text-white">Platform</Label>
+                          <Input
+                            value={social.platform}
+                            onChange={(e) => {
+                              const newSocials = [...(form.watch("customSocials") || [])];
+                              newSocials[index] = { ...social, platform: e.target.value };
+                              form.setValue("customSocials", newSocials);
+                            }}
+                            className="bg-slate-700 border-slate-600 text-white"
+                            placeholder="Platform name"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Label className="text-white">Username/URL</Label>
+                          <Input
+                            value={social.value}
+                            onChange={(e) => {
+                              const newSocials = [...(form.watch("customSocials") || [])];
+                              newSocials[index] = { ...social, value: e.target.value };
+                              form.setValue("customSocials", newSocials);
+                            }}
+                            className="bg-slate-700 border-slate-600 text-white"
+                            placeholder="@username or URL"
+                          />
+                        </div>
+                        <div className="w-32">
+                          <Label className="text-white">Icon</Label>
+                          <Select
+                            value={social.icon}
+                            onValueChange={(value) => {
+                              const newSocials = [...(form.watch("customSocials") || [])];
+                              newSocials[index] = { ...social, icon: value };
+                              form.setValue("customSocials", newSocials);
+                            }}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                              <SelectValue>
+                                {social.icon && <i className={`${social.icon} mr-2`}></i>}
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {getAvailableIcons().filter(icon => icon.category === 'social').map(icon => (
+                                <SelectItem key={icon.icon} value={icon.icon}>
+                                  <div className="flex items-center">
+                                    <i className={`${icon.icon} mr-2`}></i>
+                                    {icon.name}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            const newSocials = form.watch("customSocials")?.filter((_, i) => i !== index) || [];
+                            form.setValue("customSocials", newSocials);
+                          }}
+                          className="mb-0"
+                        >
+                          <i className="fas fa-trash text-xs"></i>
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newSocial = {
+                          id: generateFieldId(),
+                          label: "",
+                          value: "",
+                          icon: "fab fa-facebook",
+                          platform: ""
+                        };
+                        const currentSocials = form.watch("customSocials") || [];
+                        form.setValue("customSocials", [...currentSocials, newSocial]);
                       }}
-                      className="bg-slate-700 border-slate-600 text-white"
-                      placeholder="Platform name"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Label className="text-white">Username/URL</Label>
-                    <Input
-                      value={social.value}
-                      onChange={(e) => {
-                        const newSocials = [...(form.watch("customSocials") || [])];
-                        newSocials[index] = { ...social, value: e.target.value };
-                        form.setValue("customSocials", newSocials);
-                      }}
-                      className="bg-slate-700 border-slate-600 text-white"
-                      placeholder="@username or URL"
-                    />
-                  </div>
-                  <div className="w-32">
-                    <Label className="text-white">Icon</Label>
-                    <Select
-                      value={social.icon}
-                      onValueChange={(value) => {
-                        const newSocials = [...(form.watch("customSocials") || [])];
-                        newSocials[index] = { ...social, icon: value };
-                        form.setValue("customSocials", newSocials);
-                      }}
+                      className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
                     >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                        <SelectValue>
-                          {social.icon && <i className={`${social.icon} mr-2`}></i>}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getAvailableIcons().filter(icon => icon.category === 'social').map(icon => (
-                          <SelectItem key={icon.icon} value={icon.icon}>
-                            <div className="flex items-center">
-                              <i className={`${icon.icon} mr-2`}></i>
-                              {icon.name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <i className="fas fa-plus mr-2"></i>
+                      Add Social Platform
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => {
-                      const newSocials = form.watch("customSocials")?.filter((_, i) => i !== index) || [];
-                      form.setValue("customSocials", newSocials);
-                    }}
-                    className="mb-0"
-                  >
-                    <i className="fas fa-trash text-xs"></i>
-                  </Button>
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const newSocial = {
-                    id: generateFieldId(),
-                    label: "",
-                    value: "",
-                    icon: "fab fa-facebook",
-                    platform: ""
-                  };
-                  const currentSocials = form.watch("customSocials") || [];
-                  form.setValue("customSocials", [...currentSocials, newSocial]);
-                }}
-                className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
-              >
-                <i className="fas fa-plus mr-2"></i>
-                Add Social Platform
-              </Button>
-            </div>
-            
-            {/* Social Media Section Styling */}
-            <div className="border-t border-pink-600/30 pt-4 space-y-3">
-              <h4 className="text-sm font-medium text-pink-200">Section Styling</h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-white text-xs">Section Background</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.socialMedia?.sectionBackgroundColor || "#db2777"}
-                      onChange={(e) => form.setValue('sectionStyles.socialMedia.sectionBackgroundColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.socialMedia?.sectionBackgroundColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.socialMedia.sectionBackgroundColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#db2777"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-white text-xs">Section Border</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.socialMedia?.sectionBorderColor || "#ec4899"}
-                      onChange={(e) => form.setValue('sectionStyles.socialMedia.sectionBorderColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.socialMedia?.sectionBorderColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.socialMedia.sectionBorderColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#ec4899"
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <h4 className="text-sm font-medium text-pink-200 pt-2">Icon Styling (Optional)</h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-white text-xs">Icon Color</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.socialMedia?.iconColor || "#ffffff"}
-                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.socialMedia?.iconColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#ffffff"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-white text-xs">Icon Background</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundColor || "#475569"}
-                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconBackgroundColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconBackgroundColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#475569"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-white text-xs">Icon Text Color</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.socialMedia?.iconTextColor || "#64748b"}
-                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconTextColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.socialMedia?.iconTextColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconTextColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#64748b"
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              {/* Icon Text Typography */}
-              <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
-                <h5 className="text-xs font-medium text-pink-200">Icon Text Typography</h5>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label className="text-white text-xs">Font</Label>
-                    <Select
-                      value={watchedValues.sectionStyles?.socialMedia?.iconTextFont || ""}
-                      onValueChange={(value) => form.setValue('sectionStyles.socialMedia.iconTextFont', value)}
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                        <SelectValue placeholder="Choose font" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Inter">Inter</SelectItem>
-                        <SelectItem value="Roboto">Roboto</SelectItem>
-                        <SelectItem value="Open Sans">Open Sans</SelectItem>
-                        <SelectItem value="Lato">Lato</SelectItem>
-                        <SelectItem value="Montserrat">Montserrat</SelectItem>
-                        <SelectItem value="Poppins">Poppins</SelectItem>
-                        <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
-                        <SelectItem value="Nunito">Nunito</SelectItem>
-                        <SelectItem value="Raleway">Raleway</SelectItem>
-                        <SelectItem value="Ubuntu">Ubuntu</SelectItem>
-                        <SelectItem value="PT Sans">PT Sans</SelectItem>
-                        <SelectItem value="Merriweather">Merriweather</SelectItem>
-                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
-                        <SelectItem value="Oswald">Oswald</SelectItem>
-                        <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
-                        <SelectItem value="Crimson Text">Crimson Text</SelectItem>
-                        <SelectItem value="Work Sans">Work Sans</SelectItem>
-                        <SelectItem value="Fira Sans">Fira Sans</SelectItem>
-                        <SelectItem value="DM Sans">DM Sans</SelectItem>
-                        <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-white text-xs">Weight</Label>
-                    <Select
-                      value={watchedValues.sectionStyles?.socialMedia?.iconTextWeight || ""}
-                      onValueChange={(value) => form.setValue('sectionStyles.socialMedia.iconTextWeight', value as any)}
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                        <SelectValue placeholder="Weight" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="300">Light</SelectItem>
-                        <SelectItem value="400">Regular</SelectItem>
-                        <SelectItem value="500">Medium</SelectItem>
-                        <SelectItem value="600">Semi Bold</SelectItem>
-                        <SelectItem value="700">Bold</SelectItem>
-                        <SelectItem value="800">Extra Bold</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.socialMedia?.iconTextSize || 12}px</Label>
-                    <input
-                      type="range"
-                      value={watchedValues.sectionStyles?.socialMedia?.iconTextSize || 12}
-                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconTextSize', parseInt(e.target.value))}
-                      className="custom-range w-full"
-                      min="8"
-                      max="20"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="socialTextItalic"
-                      checked={watchedValues.sectionStyles?.socialMedia?.iconTextStyle === 'italic'}
-                      onCheckedChange={(checked) => 
-                        form.setValue('sectionStyles.socialMedia.iconTextStyle', checked ? 'italic' : 'normal')
-                      }
-                    />
-                    <Label htmlFor="socialTextItalic" className="text-white text-xs">Italic</Label>
+
+                  {/* Social Media Section Styling */}
+                  <div className="border-t border-pink-600/30 pt-4 space-y-3">
+                    <h4 className="text-sm font-medium text-pink-200">Section Styling</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-white text-xs">Section Background</Label>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="color"
+                            value={watchedValues.sectionStyles?.socialMedia?.sectionBackgroundColor || "#db2777"}
+                            onChange={(e) => form.setValue('sectionStyles.socialMedia.sectionBackgroundColor', e.target.value)}
+                            className="w-8 h-6 rounded cursor-pointer"
+                          />
+                          <Input
+                            value={watchedValues.sectionStyles?.socialMedia?.sectionBackgroundColor || ""}
+                            onChange={(e) => form.setValue('sectionStyles.socialMedia.sectionBackgroundColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#db2777"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-white text-xs">Section Border</Label>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="color"
+                            value={watchedValues.sectionStyles?.socialMedia?.sectionBorderColor || "#ec4899"}
+                            onChange={(e) => form.setValue('sectionStyles.socialMedia.sectionBorderColor', e.target.value)}
+                            className="w-8 h-6 rounded cursor-pointer"
+                          />
+                          <Input
+                            value={watchedValues.sectionStyles?.socialMedia?.sectionBorderColor || ""}
+                            onChange={(e) => form.setValue('sectionStyles.socialMedia.sectionBorderColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#ec4899"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <h4 className="text-sm font-medium text-pink-200 pt-2">Icon Styling (Optional)</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-white text-xs">Icon Color</Label>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="color"
+                            value={watchedValues.sectionStyles?.socialMedia?.iconColor || "#ffffff"}
+                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconColor', e.target.value)}
+                            className="w-8 h-6 rounded cursor-pointer"
+                          />
+                          <Input
+                            value={watchedValues.sectionStyles?.socialMedia?.iconColor || ""}
+                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#ffffff"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-white text-xs">Icon Background</Label>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="color"
+                            value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundColor || "#475569"}
+                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconBackgroundColor', e.target.value)}
+                            className="w-8 h-6 rounded cursor-pointer"
+                          />
+                          <Input
+                            value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundColor || ""}
+                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconBackgroundColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#475569"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-white text-xs">Icon Text Color</Label>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="color"
+                            value={watchedValues.sectionStyles?.socialMedia?.iconTextColor || "#64748b"}
+                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconTextColor', e.target.value)}
+                            className="w-8 h-6 rounded cursor-pointer"
+                          />
+                          <Input
+                            value={watchedValues.sectionStyles?.socialMedia?.iconTextColor || ""}
+                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconTextColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#64748b"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Icon Text Typography */}
+                    <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                      <h5 className="text-xs font-medium text-pink-200">Icon Text Typography</h5>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Font</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.socialMedia?.iconTextFont || ""}
+                            onValueChange={(value) => form.setValue('sectionStyles.socialMedia.iconTextFont', value)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Choose font" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Inter">Inter</SelectItem>
+                              <SelectItem value="Roboto">Roboto</SelectItem>
+                              <SelectItem value="Open Sans">Open Sans</SelectItem>
+                              <SelectItem value="Lato">Lato</SelectItem>
+                              <SelectItem value="Montserrat">Montserrat</SelectItem>
+                              <SelectItem value="Poppins">Poppins</SelectItem>
+                              <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
+                              <SelectItem value="Nunito">Nunito</SelectItem>
+                              <SelectItem value="Raleway">Raleway</SelectItem>
+                              <SelectItem value="Ubuntu">Ubuntu</SelectItem>
+                              <SelectItem value="PT Sans">PT Sans</SelectItem>
+                              <SelectItem value="Merriweather">Merriweather</SelectItem>
+                              <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                              <SelectItem value="Oswald">Oswald</SelectItem>
+                              <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
+                              <SelectItem value="Crimson Text">Crimson Text</SelectItem>
+                              <SelectItem value="Work Sans">Work Sans</SelectItem>
+                              <SelectItem value="Fira Sans">Fira Sans</SelectItem>
+                              <SelectItem value="DM Sans">DM Sans</SelectItem>
+                              <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-white text-xs">Weight</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.socialMedia?.iconTextWeight || ""}
+                            onValueChange={(value) => form.setValue('sectionStyles.socialMedia.iconTextWeight', value as any)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Weight" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="300">Light</SelectItem>
+                              <SelectItem value="400">Regular</SelectItem>
+                              <SelectItem value="500">Medium</SelectItem>
+                              <SelectItem value="600">Semi Bold</SelectItem>
+                              <SelectItem value="700">Bold</SelectItem>
+                              <SelectItem value="800">Extra Bold</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.socialMedia?.iconTextSize || 12}px</Label>
+                          <input
+                            type="range"
+                            value={watchedValues.sectionStyles?.socialMedia?.iconTextSize || 12}
+                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconTextSize', parseInt(e.target.value))}
+                            className="custom-range w-full"
+                            min="8"
+                            max="20"
+                          />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="socialTextItalic"
+                            checked={watchedValues.sectionStyles?.socialMedia?.iconTextStyle === 'italic'}
+                            onCheckedChange={(checked) => 
+                              form.setValue('sectionStyles.socialMedia.iconTextStyle', checked ? 'italic' : 'normal')
+                            }
+                          />
+                          <Label htmlFor="socialTextItalic" className="text-white text-xs">Italic</Label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-          </>
-          )}
+              </>
+            )}
           </div>
 
           {/* Appearance Settings */}
@@ -1355,291 +1344,291 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.appearance ? 'fa-chevron-down' : 'fa-chevron-up'} text-indigo-300`}></i>
             </div>
             {!collapsedSections.appearance && (
-            <>
-            <div className="space-y-4">
-              {/* Customize Theme */}
-              <div className="space-y-3">
-                <h4 className="text-md font-medium text-indigo-200">Customize Theme</h4>
-                
-                {/* Default Colors */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label className="text-white text-sm">Primary Color</Label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={watchedValues.primaryColor || "#22c55e"}
-                        onChange={(e) => form.setValue('primaryColor', e.target.value)}
-                        className="w-12 h-8 rounded cursor-pointer"
-                        data-testid="input-primary-color"
-                      />
-                      <Input
-                        value={watchedValues.primaryColor || "#22c55e"}
-                        onChange={(e) => form.setValue('primaryColor', e.target.value)}
-                        className="bg-slate-700 border-slate-600 text-white text-xs"
-                        placeholder="#22c55e"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-white text-sm">Secondary Color</Label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={watchedValues.secondaryColor || "#16a34a"}
-                        onChange={(e) => form.setValue('secondaryColor', e.target.value)}
-                        className="w-12 h-8 rounded cursor-pointer"
-                        data-testid="input-secondary-color"
-                      />
-                      <Input
-                        value={watchedValues.secondaryColor || "#16a34a"}
-                        onChange={(e) => form.setValue('secondaryColor', e.target.value)}
-                        className="bg-slate-700 border-slate-600 text-white text-xs"
-                        placeholder="#16a34a"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-white text-sm">Tertiary Color</Label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={watchedValues.tertiaryColor || "#0d9488"}
-                        onChange={(e) => form.setValue('tertiaryColor', e.target.value)}
-                        className="w-12 h-8 rounded cursor-pointer"
-                        data-testid="input-tertiary-color"
-                      />
-                      <Input
-                        value={watchedValues.tertiaryColor || "#0d9488"}
-                        onChange={(e) => form.setValue('tertiaryColor', e.target.value)}
-                        className="bg-slate-700 border-slate-600 text-white text-xs"
-                        placeholder="#0d9488"
-                      />
-                    </div>
-                  </div>
-                </div>
+              <>
+                <div className="space-y-4">
+                  {/* Customize Theme */}
+                  <div className="space-y-3">
+                    <h4 className="text-md font-medium text-indigo-200">Customize Theme</h4>
 
-                {/* Gradient Settings */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="use-gradient"
-                      checked={watchedValues.useGradient || false}
-                      onChange={(e) => form.setValue('useGradient', e.target.checked)}
-                      className="w-4 h-4 rounded"
-                    />
-                    <Label htmlFor="use-gradient" className="text-white cursor-pointer">Use Gradient</Label>
-                  </div>
-                  
-                  {watchedValues.useGradient && (
-                    <div className="space-y-3 ml-6">
+                    {/* Default Colors */}
+                    <div className="grid grid-cols-3 gap-3">
                       <div>
-                        <Label className="text-white text-sm">Angle: {watchedValues.gradientAngle || 90}°</Label>
-                        <input
-                          type="range"
-                          min="0"
-                          max="360"
-                          value={watchedValues.gradientAngle || 90}
-                          onChange={(e) => form.setValue('gradientAngle', parseInt(e.target.value))}
-                          className="w-full mt-1"
-                          data-testid="input-gradient-angle"
-                        />
-                      </div>
-                      
-                      {watchedValues.gradientStops?.map((stop, index) => (
-                        <div key={index} className="flex items-center gap-2">
+                        <Label className="text-white text-sm">Primary Color</Label>
+                        <div className="flex items-center gap-2">
                           <input
                             type="color"
-                            value={stop.color}
-                            onChange={(e) => {
-                              const newStops = [...(watchedValues.gradientStops || [])];
-                              newStops[index] = { ...stop, color: e.target.value };
-                              form.setValue('gradientStops', newStops);
-                            }}
-                            className="w-10 h-8 rounded cursor-pointer"
+                            value={watchedValues.primaryColor || "#22c55e"}
+                            onChange={(e) => form.setValue('primaryColor', e.target.value)}
+                            className="w-12 h-8 rounded cursor-pointer"
+                            data-testid="input-primary-color"
                           />
-                          <Label className="text-white text-xs">Stop {index + 1}:</Label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            value={stop.position}
-                            onChange={(e) => {
-                              const newStops = [...(watchedValues.gradientStops || [])];
-                              newStops[index] = { ...stop, position: parseInt(e.target.value) };
-                              form.setValue('gradientStops', newStops);
-                            }}
-                            className="flex-1"
+                          <Input
+                            value={watchedValues.primaryColor || "#22c55e"}
+                            onChange={(e) => form.setValue('primaryColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#22c55e"
                           />
-                          <span className="text-white text-xs w-10">{stop.position}%</span>
                         </div>
-                      ))}
+                      </div>
+                      <div>
+                        <Label className="text-white text-sm">Secondary Color</Label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={watchedValues.secondaryColor || "#16a34a"}
+                            onChange={(e) => form.setValue('secondaryColor', e.target.value)}
+                            className="w-12 h-8 rounded cursor-pointer"
+                            data-testid="input-secondary-color"
+                          />
+                          <Input
+                            value={watchedValues.secondaryColor || "#16a34a"}
+                            onChange={(e) => form.setValue('secondaryColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#16a34a"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-white text-sm">Tertiary Color</Label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={watchedValues.tertiaryColor || "#0d9488"}
+                            onChange={(e) => form.setValue('tertiaryColor', e.target.value)}
+                            className="w-12 h-8 rounded cursor-pointer"
+                            data-testid="input-tertiary-color"
+                          />
+                          <Input
+                            value={watchedValues.tertiaryColor || "#0d9488"}
+                            onChange={(e) => form.setValue('tertiaryColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#0d9488"
+                          />
+                        </div>
+                      </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Background */}
-                <div>
-                  <Label className="text-white text-sm">Background Color</Label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={watchedValues.backgroundColor || "#ffffff"}
-                      onChange={(e) => form.setValue('backgroundColor', e.target.value)}
-                      className="w-12 h-8 rounded cursor-pointer"
-                      data-testid="input-background-color"
-                    />
-                    <Input
-                      value={watchedValues.backgroundColor || "#ffffff"}
-                      onChange={(e) => form.setValue('backgroundColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#ffffff"
-                    />
-                  </div>
-                </div>
+                    {/* Gradient Settings */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="use-gradient"
+                          checked={watchedValues.useGradient || false}
+                          onChange={(e) => form.setValue('useGradient', e.target.checked)}
+                          className="w-4 h-4 rounded"
+                        />
+                        <Label htmlFor="use-gradient" className="text-white cursor-pointer">Use Gradient</Label>
+                      </div>
 
-                {/* Font Family */}
-                <div>
-                  <Label className="text-white text-sm">Font Family</Label>
-                  <Select
-                    value={watchedValues.font || "inter"}
-                    onValueChange={(value) => form.setValue('font', value)}
-                  >
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="inter">Inter</SelectItem>
-                      <SelectItem value="roboto">Roboto</SelectItem>
-                      <SelectItem value="poppins">Poppins</SelectItem>
-                      <SelectItem value="work-sans">Work Sans</SelectItem>
-                      <SelectItem value="dm-sans">DM Sans</SelectItem>
-                      <SelectItem value="plus-jakarta-sans">Plus Jakarta Sans</SelectItem>
-                      <SelectItem value="manrope">Manrope</SelectItem>
-                      <SelectItem value="space-grotesk">Space Grotesk</SelectItem>
-                      <SelectItem value="outfit">Outfit</SelectItem>
-                      <SelectItem value="nunito-sans">Nunito Sans</SelectItem>
-                      <SelectItem value="red-hat-display">Red Hat Display</SelectItem>
-                      <SelectItem value="ibm-plex-sans">IBM Plex Sans</SelectItem>
-                      <SelectItem value="figtree">Figtree</SelectItem>
-                      <SelectItem value="quicksand">Quicksand</SelectItem>
-                      <SelectItem value="raleway">Raleway</SelectItem>
-                      <SelectItem value="montserrat">Montserrat</SelectItem>
-                      <SelectItem value="source-sans-pro">Source Sans Pro</SelectItem>
-                      <SelectItem value="lato">Lato</SelectItem>
-                      <SelectItem value="open-sans">Open Sans</SelectItem>
-                      <SelectItem value="rubik">Rubik</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+                      {watchedValues.useGradient && (
+                        <div className="space-y-3 ml-6">
+                          <div>
+                            <Label className="text-white text-sm">Angle: {watchedValues.gradientAngle || 90}°</Label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="360"
+                              value={watchedValues.gradientAngle || 90}
+                              onChange={(e) => form.setValue('gradientAngle', parseInt(e.target.value))}
+                              className="w-full mt-1"
+                              data-testid="input-gradient-angle"
+                            />
+                          </div>
 
-              {/* Heading Style */}
-              <div className="space-y-3">
-                <h4 className="text-md font-medium text-indigo-200">Heading Style</h4>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label className="text-white text-sm">Color</Label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={watchedValues.headingColor || "#1f2937"}
-                        onChange={(e) => form.setValue('headingColor', e.target.value)}
-                        className="w-12 h-8 rounded cursor-pointer"
-                      />
-                      <Input
-                        value={watchedValues.headingColor || "#1f2937"}
-                        onChange={(e) => form.setValue('headingColor', e.target.value)}
-                        className="bg-slate-700 border-slate-600 text-white text-xs"
-                        placeholder="#1f2937"
-                      />
+                          {watchedValues.gradientStops?.map((stop, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                              <input
+                                type="color"
+                                value={stop.color}
+                                onChange={(e) => {
+                                  const newStops = [...(watchedValues.gradientStops || [])];
+                                  newStops[index] = { ...stop, color: e.target.value };
+                                  form.setValue('gradientStops', newStops);
+                                }}
+                                className="w-10 h-8 rounded cursor-pointer"
+                              />
+                              <Label className="text-white text-xs">Stop {index + 1}:</Label>
+                              <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                value={stop.position}
+                                onChange={(e) => {
+                                  const newStops = [...(watchedValues.gradientStops || [])];
+                                  newStops[index] = { ...stop, position: parseInt(e.target.value) };
+                                  form.setValue('gradientStops', newStops);
+                                }}
+                                className="flex-1"
+                              />
+                              <span className="text-white text-xs w-10">{stop.position}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Background */}
+                    <div>
+                      <Label className="text-white text-sm">Background Color</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={watchedValues.backgroundColor || "#ffffff"}
+                          onChange={(e) => form.setValue('backgroundColor', e.target.value)}
+                          className="w-12 h-8 rounded cursor-pointer"
+                          data-testid="input-background-color"
+                        />
+                        <Input
+                          value={watchedValues.backgroundColor || "#ffffff"}
+                          onChange={(e) => form.setValue('backgroundColor', e.target.value)}
+                          className="bg-slate-700 border-slate-600 text-white text-xs"
+                          placeholder="#ffffff"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Font Family */}
+                    <div>
+                      <Label className="text-white text-sm">Font Family</Label>
+                      <Select
+                        value={watchedValues.font || "inter"}
+                        onValueChange={(value) => form.setValue('font', value)}
+                      >
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="inter">Inter</SelectItem>
+                          <SelectItem value="roboto">Roboto</SelectItem>
+                          <SelectItem value="poppins">Poppins</SelectItem>
+                          <SelectItem value="work-sans">Work Sans</SelectItem>
+                          <SelectItem value="dm-sans">DM Sans</SelectItem>
+                          <SelectItem value="plus-jakarta-sans">Plus Jakarta Sans</SelectItem>
+                          <SelectItem value="manrope">Manrope</SelectItem>
+                          <SelectItem value="space-grotesk">Space Grotesk</SelectItem>
+                          <SelectItem value="outfit">Outfit</SelectItem>
+                          <SelectItem value="nunito-sans">Nunito Sans</SelectItem>
+                          <SelectItem value="red-hat-display">Red Hat Display</SelectItem>
+                          <SelectItem value="ibm-plex-sans">IBM Plex Sans</SelectItem>
+                          <SelectItem value="figtree">Figtree</SelectItem>
+                          <SelectItem value="quicksand">Quicksand</SelectItem>
+                          <SelectItem value="raleway">Raleway</SelectItem>
+                          <SelectItem value="montserrat">Montserrat</SelectItem>
+                          <SelectItem value="source-sans-pro">Source Sans Pro</SelectItem>
+                          <SelectItem value="lato">Lato</SelectItem>
+                          <SelectItem value="open-sans">Open Sans</SelectItem>
+                          <SelectItem value="rubik">Rubik</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
-                  <div>
-                    <Label className="text-white text-sm">Size: {watchedValues.headingSize || 16}px</Label>
-                    <input
-                      type="range"
-                      min="12"
-                      max="32"
-                      value={watchedValues.headingSize || 16}
-                      onChange={(e) => form.setValue('headingSize', parseInt(e.target.value))}
-                      className="w-full mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-white text-sm">Weight</Label>
-                    <Select
-                      value={(watchedValues.headingWeight || 600).toString()}
-                      onValueChange={(value) => form.setValue('headingWeight', parseInt(value))}
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="400">Normal</SelectItem>
-                        <SelectItem value="500">Medium</SelectItem>
-                        <SelectItem value="600">Semibold</SelectItem>
-                        <SelectItem value="700">Bold</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
 
-              {/* Paragraph Style */}
-              <div className="space-y-3">
-                <h4 className="text-md font-medium text-indigo-200">Paragraph Style</h4>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label className="text-white text-sm">Color</Label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={watchedValues.paragraphColor || "#4b5563"}
-                        onChange={(e) => form.setValue('paragraphColor', e.target.value)}
-                        className="w-12 h-8 rounded cursor-pointer"
-                      />
-                      <Input
-                        value={watchedValues.paragraphColor || "#4b5563"}
-                        onChange={(e) => form.setValue('paragraphColor', e.target.value)}
-                        className="bg-slate-700 border-slate-600 text-white text-xs"
-                        placeholder="#4b5563"
-                      />
+                  {/* Heading Style */}
+                  <div className="space-y-3">
+                    <h4 className="text-md font-medium text-indigo-200">Heading Style</h4>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label className="text-white text-sm">Color</Label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={watchedValues.headingColor || "#1f2937"}
+                            onChange={(e) => form.setValue('headingColor', e.target.value)}
+                            className="w-12 h-8 rounded cursor-pointer"
+                          />
+                          <Input
+                            value={watchedValues.headingColor || "#1f2937"}
+                            onChange={(e) => form.setValue('headingColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#1f2937"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-white text-sm">Size: {watchedValues.headingSize || 16}px</Label>
+                        <input
+                          type="range"
+                          min="12"
+                          max="32"
+                          value={watchedValues.headingSize || 16}
+                          onChange={(e) => form.setValue('headingSize', parseInt(e.target.value))}
+                          className="w-full mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-white text-sm">Weight</Label>
+                        <Select
+                          value={(watchedValues.headingWeight || 600).toString()}
+                          onValueChange={(value) => form.setValue('headingWeight', parseInt(value))}
+                        >
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="400">Normal</SelectItem>
+                            <SelectItem value="500">Medium</SelectItem>
+                            <SelectItem value="600">Semibold</SelectItem>
+                            <SelectItem value="700">Bold</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <Label className="text-white text-sm">Size: {watchedValues.paragraphSize || 14}px</Label>
-                    <input
-                      type="range"
-                      min="10"
-                      max="20"
-                      value={watchedValues.paragraphSize || 14}
-                      onChange={(e) => form.setValue('paragraphSize', parseInt(e.target.value))}
-                      className="w-full mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-white text-sm">Weight</Label>
-                    <Select
-                      value={(watchedValues.paragraphWeight || 400).toString()}
-                      onValueChange={(value) => form.setValue('paragraphWeight', parseInt(value))}
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="300">Light</SelectItem>
-                        <SelectItem value="400">Normal</SelectItem>
-                        <SelectItem value="500">Medium</SelectItem>
-                        <SelectItem value="600">Semibold</SelectItem>
-                      </SelectContent>
-                    </Select>
+
+                  {/* Paragraph Style */}
+                  <div className="space-y-3">
+                    <h4 className="text-md font-medium text-indigo-200">Paragraph Style</h4>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label className="text-white text-sm">Color</Label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={watchedValues.paragraphColor || "#4b5563"}
+                            onChange={(e) => form.setValue('paragraphColor', e.target.value)}
+                            className="w-12 h-8 rounded cursor-pointer"
+                          />
+                          <Input
+                            value={watchedValues.paragraphColor || "#4b5563"}
+                            onChange={(e) => form.setValue('paragraphColor', e.target.value)}
+                            className="bg-slate-700 border-slate-600 text-white text-xs"
+                            placeholder="#4b5563"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-white text-sm">Size: {watchedValues.paragraphSize || 14}px</Label>
+                        <input
+                          type="range"
+                          min="10"
+                          max="20"
+                          value={watchedValues.paragraphSize || 14}
+                          onChange={(e) => form.setValue('paragraphSize', parseInt(e.target.value))}
+                          className="w-full mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-white text-sm">Weight</Label>
+                        <Select
+                          value={(watchedValues.paragraphWeight || 400).toString()}
+                          onValueChange={(value) => form.setValue('paragraphWeight', parseInt(value))}
+                        >
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="300">Light</SelectItem>
+                            <SelectItem value="400">Normal</SelectItem>
+                            <SelectItem value="500">Medium</SelectItem>
+                            <SelectItem value="600">Semibold</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            </>
+              </>
             )}
           </div>
 
@@ -1653,154 +1642,154 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.seo ? 'fa-chevron-down' : 'fa-chevron-up'} text-amber-300`}></i>
             </div>
             {!collapsedSections.seo && (
-            <>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="metaTitle" className="text-white">Meta Title</Label>
-                <Input
-                  id="metaTitle"
-                  {...form.register("metaTitle")}
-                  placeholder={`${watchedValues.fullName || 'Your Name'} - Digital Business Card`}
-                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                  data-testid="input-meta-title"
-                />
-                <p className="text-xs text-slate-400 mt-1">Recommended: 50-60 characters</p>
-              </div>
-
-              <div>
-                <Label htmlFor="metaDescription" className="text-white">Meta Description</Label>
-                <Textarea
-                  id="metaDescription"
-                  {...form.register("metaDescription")}
-                  placeholder={`Connect with ${watchedValues.fullName || 'me'} - ${watchedValues.title || 'Professional'}. View my digital business card for contact information and more.`}
-                  rows={3}
-                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                  data-testid="textarea-meta-description"
-                />
-                <p className="text-xs text-slate-400 mt-1">Recommended: 150-160 characters</p>
-              </div>
-
-              <div>
-                <Label htmlFor="ogTitle" className="text-white">Open Graph Title</Label>
-                <Input
-                  id="ogTitle"
-                  {...form.register("ogTitle")}
-                  placeholder={watchedValues.metaTitle || `${watchedValues.fullName || 'Your Name'} - Digital Business Card`}
-                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                  data-testid="input-og-title"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="ogDescription" className="text-white">Open Graph Description</Label>
-                <Textarea
-                  id="ogDescription"
-                  {...form.register("ogDescription")}
-                  placeholder={watchedValues.metaDescription || `Connect with ${watchedValues.fullName || 'me'} - ${watchedValues.title || 'Professional'}. View my digital business card for contact information and more.`}
-                  rows={3}
-                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                  data-testid="textarea-og-description"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="ogImage" className="text-white">Open Graph Image</Label>
-                <div className="mt-1">
-                  <div className="w-full h-32 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
-                    {watchedValues.ogImage ? (
-                      <img 
-                        src={watchedValues.ogImage} 
-                        alt="OG Image" 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-center">
-                        <i className="fas fa-image text-slate-400 text-2xl"></i>
-                        <p className="text-slate-400 text-sm mt-2">Open Graph Image</p>
-                        <p className="text-slate-500 text-xs mt-1">Recommended: 1200x630px</p>
-                      </div>
-                    )}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full"
-                    onClick={() => document.getElementById('og-image-input')?.click()}
-                    disabled={isUploading}
-                  >
-                    <i className="fas fa-upload mr-2"></i>
-                    Upload OG Image
-                  </Button>
-                  <input
-                    id="og-image-input"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileUpload(e, 'ogImage' as any)}
-                    className="hidden"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="keywords" className="text-white">Keywords</Label>
-                <div className="space-y-2">
-                  <div className="flex flex-wrap gap-2">
-                    {(watchedValues.keywords || []).map((keyword, index) => (
-                      <div key={index} className="flex items-center bg-slate-700 rounded-full px-3 py-1">
-                        <span className="text-white text-sm">{keyword}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newKeywords = [...(watchedValues.keywords || [])];
-                            newKeywords.splice(index, 1);
-                            form.setValue('keywords', newKeywords);
-                          }}
-                          className="ml-2 text-red-400 hover:text-red-300"
-                        >
-                          <i className="fas fa-times text-xs"></i>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
+              <>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="metaTitle" className="text-white">Meta Title</Label>
                     <Input
-                      id="new-keyword"
-                      placeholder="Add keyword..."
+                      id="metaTitle"
+                      {...form.register("metaTitle")}
+                      placeholder={`${watchedValues.fullName || 'Your Name'} - Digital Business Card`}
                       className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          const input = e.target as HTMLInputElement;
-                          if (input.value.trim()) {
-                            const newKeywords = [...(watchedValues.keywords || []), input.value.trim()];
-                            form.setValue('keywords', newKeywords);
-                            input.value = '';
-                          }
-                        }
-                      }}
+                      data-testid="input-meta-title"
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
-                      onClick={() => {
-                        const input = document.getElementById('new-keyword') as HTMLInputElement;
-                        if (input?.value.trim()) {
-                          const newKeywords = [...(watchedValues.keywords || []), input.value.trim()];
-                          form.setValue('keywords', newKeywords);
-                          input.value = '';
-                        }
-                      }}
-                    >
-                      <i className="fas fa-plus"></i>
-                    </Button>
+                    <p className="text-xs text-slate-400 mt-1">Recommended: 50-60 characters</p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="metaDescription" className="text-white">Meta Description</Label>
+                    <Textarea
+                      id="metaDescription"
+                      {...form.register("metaDescription")}
+                      placeholder={`Connect with ${watchedValues.fullName || 'me'} - ${watchedValues.title || 'Professional'}. View my digital business card for contact information and more.`}
+                      rows={3}
+                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                      data-testid="textarea-meta-description"
+                    />
+                    <p className="text-xs text-slate-400 mt-1">Recommended: 150-160 characters</p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ogTitle" className="text-white">Open Graph Title</Label>
+                    <Input
+                      id="ogTitle"
+                      {...form.register("ogTitle")}
+                      placeholder={watchedValues.metaTitle || `${watchedValues.fullName || 'Your Name'} - Digital Business Card`}
+                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                      data-testid="input-og-title"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ogDescription" className="text-white">Open Graph Description</Label>
+                    <Textarea
+                      id="ogDescription"
+                      {...form.register("ogDescription")}
+                      placeholder={watchedValues.metaDescription || `Connect with ${watchedValues.fullName || 'me'} - ${watchedValues.title || 'Professional'}. View my digital business card for contact information and more.`}
+                      rows={3}
+                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                      data-testid="textarea-og-description"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ogImage" className="text-white">Open Graph Image</Label>
+                    <div className="mt-1">
+                      <div className="w-full h-32 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                        {watchedValues.ogImage ? (
+                          <img 
+                            src={watchedValues.ogImage} 
+                            alt="OG Image" 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="text-center">
+                            <i className="fas fa-image text-slate-400 text-2xl"></i>
+                            <p className="text-slate-400 text-sm mt-2">Open Graph Image</p>
+                            <p className="text-slate-500 text-xs mt-1">Recommended: 1200x630px</p>
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full"
+                        onClick={() => document.getElementById('og-image-input')?.click()}
+                        disabled={isUploading}
+                      >
+                        <i className="fas fa-upload mr-2"></i>
+                        Upload OG Image
+                      </Button>
+                      <input
+                        id="og-image-input"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'ogImage' as any)}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="keywords" className="text-white">Keywords</Label>
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-2">
+                        {(watchedValues.keywords || []).map((keyword, index) => (
+                          <div key={index} className="flex items-center bg-slate-700 rounded-full px-3 py-1">
+                            <span className="text-white text-sm">{keyword}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newKeywords = [...(watchedValues.keywords || [])];
+                                newKeywords.splice(index, 1);
+                                form.setValue('keywords', newKeywords);
+                              }}
+                              className="ml-2 text-red-400 hover:text-red-300"
+                            >
+                              <i className="fas fa-times text-xs"></i>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          id="new-keyword"
+                          placeholder="Add keyword..."
+                          className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              const input = e.target as HTMLInputElement;
+                              if (input.value.trim()) {
+                                const newKeywords = [...(watchedValues.keywords || []), input.value.trim()];
+                                form.setValue('keywords', newKeywords);
+                                input.value = '';
+                              }
+                            }
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                          onClick={() => {
+                            const input = document.getElementById('new-keyword') as HTMLInputElement;
+                            if (input?.value.trim()) {
+                              const newKeywords = [...(watchedValues.keywords || []), input.value.trim()];
+                              form.setValue('keywords', newKeywords);
+                              input.value = '';
+                            }
+                          }}
+                        >
+                          <i className="fas fa-plus"></i>
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            </>
+              </>
             )}
           </div>
 
@@ -1822,8 +1811,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <span className="text-sm">Auto-saving changes...</span>
             </div>
           </div>
-          </CardContent>
-        </Card>
+        </CardContent>
+      </Card>
     </div>
   );
 };
