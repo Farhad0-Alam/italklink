@@ -48,6 +48,8 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const [voiceMode, setVoiceMode] = useState(false); // Toggle for voice conversation mode
+  const [lastInputWasVoice, setLastInputWasVoice] = useState(false); // Track if last input was voice
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -67,7 +69,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
     }
   }, [isOpen, welcomeMessage, messages.length]);
 
-  const sendMessage = async (message: string) => {
+  const sendMessage = async (message: string, fromVoice = false) => {
     if (!message.trim()) return;
 
     const userMessage: Message = {
@@ -79,6 +81,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
+    setLastInputWasVoice(fromVoice);
 
     try {
       const response = await apiRequest('POST', '/api/ai/chat', {
@@ -94,6 +97,13 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+
+      // Auto-speak response if in voice mode or last input was voice
+      if (voiceMode || fromVoice) {
+        setTimeout(() => {
+          speakText(assistantMessage.content);
+        }, 500); // Small delay to ensure message is rendered
+      }
     } catch (error) {
       console.error('Chat error:', error);
       toast({
@@ -132,7 +142,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
       recorder.onstop = async () => {
         const audioBlob = new Blob(audioChunks, { type: mimeType });
         console.log('Created audio blob:', { type: audioBlob.type, size: audioBlob.size });
-        await transcribeAudio(audioBlob);
+        await transcribeAudio(audioBlob, true); // Pass true to indicate voice input
         setAudioChunks([]);
       };
 
@@ -158,7 +168,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
     }
   };
 
-  const transcribeAudio = async (audioBlob: Blob) => {
+  const transcribeAudio = async (audioBlob: Blob, isVoiceInput = false) => {
     try {
       const formData = new FormData();
       // Force to mp3 format for better compatibility with OpenAI
@@ -180,7 +190,15 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
       }
 
       const result = await response.json();
-      setInputMessage(result.text);
+      const transcribedText = result.text;
+      setInputMessage(transcribedText);
+      
+      // Auto-send if in voice mode
+      if (voiceMode && transcribedText.trim()) {
+        setTimeout(() => {
+          sendMessage(transcribedText, true);
+        }, 1000); // Give user 1 second to review transcribed text
+      }
     } catch (error) {
       console.error('Transcription error:', error);
       toast({
@@ -240,7 +258,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage(inputMessage);
+      sendMessage(inputMessage, false);
     }
   };
 
@@ -253,11 +271,41 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
               <Bot className="h-5 w-5" style={{ color: primaryColor }} />
               <span>AI Assistant</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose} data-testid="button-close-chat">
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium">Voice Mode</label>
+                <Button
+                  variant={voiceMode ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setVoiceMode(!voiceMode)}
+                  className={voiceMode ? "text-white" : ""}
+                  style={{ backgroundColor: voiceMode ? primaryColor : 'transparent' }}
+                  data-testid="button-voice-mode-toggle"
+                >
+                  {voiceMode ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+                </Button>
+              </div>
+              <Button variant="ghost" size="sm" onClick={onClose} data-testid="button-close-chat">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </DialogTitle>
         </DialogHeader>
+
+        {/* Voice Mode Indicator */}
+        {voiceMode && (
+          <div className="px-6 py-2 border-b" style={{ backgroundColor: primaryColor + '10' }}>
+            <div className="flex items-center space-x-2">
+              <Mic className="h-4 w-4" style={{ color: primaryColor }} />
+              <span className="text-sm font-medium" style={{ color: primaryColor }}>
+                Voice Mode Active
+              </span>
+              <span className="text-xs text-gray-600">
+                Speak into microphone for automatic voice conversations
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Knowledge Base Info */}
         {knowledgeBase && (
@@ -376,7 +424,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
               </Button>
             </div>
             <Button
-              onClick={() => sendMessage(inputMessage)}
+              onClick={() => sendMessage(inputMessage, false)}
               disabled={!inputMessage.trim() || isLoading}
               style={{ backgroundColor: primaryColor }}
               className="text-white"
@@ -389,7 +437,16 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
           {isRecording && (
             <div className="mt-2 flex items-center space-x-2 text-red-500">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-              <span className="text-sm">Recording... Click mic to stop</span>
+              <span className="text-sm">
+                {voiceMode ? "Recording... (will auto-send & speak response)" : "Recording... Click mic to stop"}
+              </span>
+            </div>
+          )}
+
+          {voiceMode && !isRecording && (
+            <div className="mt-2 flex items-center space-x-2" style={{ color: primaryColor }}>
+              <Volume2 className="h-4 w-4" />
+              <span className="text-sm">Voice mode: Speak to start conversation, responses will be spoken automatically</span>
             </div>
           )}
         </div>
