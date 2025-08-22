@@ -505,6 +505,57 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     />
                   </div>
                 </div>
+                <div>
+                  <Label className="text-white text-xs">Icon Color</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="color"
+                      value={watchedValues.sectionStyles?.contactInfo?.iconColor || "#ffffff"}
+                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconColor', e.target.value)}
+                      className="w-8 h-6 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={watchedValues.sectionStyles?.contactInfo?.iconColor || ""}
+                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="#ffffff"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-white text-xs">Icon Background</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="color"
+                      value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundColor || "#475569"}
+                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconBackgroundColor', e.target.value)}
+                      className="w-8 h-6 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundColor || ""}
+                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconBackgroundColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="#475569"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-white text-xs">Icon Text Color</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="color"
+                      value={watchedValues.sectionStyles?.contactInfo?.iconTextColor || "#64748b"}
+                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconTextColor', e.target.value)}
+                      className="w-8 h-6 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={watchedValues.sectionStyles?.contactInfo?.iconTextColor || ""}
+                      onChange={(e) => form.setValue('sectionStyles.contactInfo.iconTextColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="#64748b"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             </div>
@@ -810,6 +861,57 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       onChange={(e) => form.setValue('sectionStyles.socialMedia.headingColor', e.target.value)}
                       className="bg-slate-700 border-slate-600 text-white text-xs"
                       placeholder="Global default"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-white text-xs">Icon Color</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="color"
+                      value={watchedValues.sectionStyles?.socialMedia?.iconColor || "#ffffff"}
+                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconColor', e.target.value)}
+                      className="w-8 h-6 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={watchedValues.sectionStyles?.socialMedia?.iconColor || ""}
+                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="#ffffff"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-white text-xs">Icon Background</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="color"
+                      value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundColor || "#475569"}
+                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconBackgroundColor', e.target.value)}
+                      className="w-8 h-6 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundColor || ""}
+                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconBackgroundColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="#475569"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-white text-xs">Icon Text Color</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="color"
+                      value={watchedValues.sectionStyles?.socialMedia?.iconTextColor || "#64748b"}
+                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconTextColor', e.target.value)}
+                      className="w-8 h-6 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={watchedValues.sectionStyles?.socialMedia?.iconTextColor || ""}
+                      onChange={(e) => form.setValue('sectionStyles.socialMedia.iconTextColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="#64748b"
                     />
                   </div>
                 </div>

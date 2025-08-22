@@ -253,43 +253,80 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               <div className="flex flex-col items-center">
                 <button 
                   onClick={() => handleContactAction('phone', data.phone)}
-                  className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                  style={{ 
+                    backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#475569',
+                    color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                  }}
                   data-testid="button-contact-phone"
                 >
                   <i className="fas fa-phone text-sm"></i>
                 </button>
-                <span className="text-xs text-slate-600">Phone</span>
+                <span 
+                  className="text-xs"
+                  style={{ color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b' }}
+                >
+                  Phone
+                </span>
               </div>
             )}
             {data.email && (
               <div className="flex flex-col items-center">
                 <button 
                   onClick={() => handleContactAction('email', data.email)}
-                  className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                  style={{ 
+                    backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#475569',
+                    color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                  }}
                   data-testid="button-contact-email"
                 >
                   <i className="fas fa-envelope text-sm"></i>
                 </button>
-                <span className="text-xs text-slate-600">Email</span>
+                <span 
+                  className="text-xs"
+                  style={{ color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b' }}
+                >
+                  Email
+                </span>
               </div>
             )}
             <div className="flex flex-col items-center">
-              <button className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1">
+              <button 
+                className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                style={{ 
+                  backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#475569',
+                  color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                }}
+              >
                 <i className="fas fa-comment text-sm"></i>
               </button>
-              <span className="text-xs text-slate-600">Text</span>
+              <span 
+                className="text-xs"
+                style={{ color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b' }}
+              >
+                Text
+              </span>
             </div>
             {data.whatsapp && (
               <div className="flex flex-col items-center">
                 <button 
                   onClick={() => handleContactAction('whatsapp', data.whatsapp)}
-                  className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-talklink-600 transition-colors mb-1"
-                  style={{ backgroundColor: getSectionStyle('contactInfo', 'primaryColor') || data.brandColor || '#22c55e' }}
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-600 transition-colors mb-1"
+                  style={{ 
+                    backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || getSectionStyle('contactInfo', 'primaryColor') || data.brandColor || '#22c55e',
+                    color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                  }}
                   data-testid="button-contact-whatsapp"
                 >
                   <i className="fab fa-whatsapp text-sm"></i>
                 </button>
-                <span className="text-xs text-slate-600">WhatsApp</span>
+                <span 
+                  className="text-xs"
+                  style={{ color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b' }}
+                >
+                  WhatsApp
+                </span>
               </div>
             )}
             {/* Custom Contact Methods */}
@@ -298,12 +335,21 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 <div key={contact.id} className="flex flex-col items-center">
                   <button 
                     onClick={() => handleContactAction(contact.type, contact.value)}
-                    className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                    className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                    style={{ 
+                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#475569',
+                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                    }}
                     data-testid={`button-custom-contact-${contact.id}`}
                   >
                     <i className={`${contact.icon} text-sm`}></i>
                   </button>
-                  <span className="text-xs text-slate-600">{contact.label || 'Contact'}</span>
+                  <span 
+                    className="text-xs"
+                    style={{ color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b' }}
+                  >
+                    {contact.label || 'Contact'}
+                  </span>
                 </div>
               )
             ))}
@@ -315,52 +361,84 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               <div className="flex flex-col items-center">
                 <button 
                   onClick={() => handleContactAction('linkedin', data.linkedin)}
-                  className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
-                  style={{ backgroundColor: getSectionStyle('socialMedia', 'primaryColor') || '#475569' }}
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
+                  style={{ 
+                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || getSectionStyle('socialMedia', 'primaryColor') || '#475569',
+                    color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
+                  }}
                   data-testid="button-social-linkedin"
                 >
                   <i className="fab fa-linkedin-in text-sm"></i>
                 </button>
-                <span className="text-xs text-slate-600">LinkedIn</span>
+                <span 
+                  className="text-xs"
+                  style={{ color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b' }}
+                >
+                  LinkedIn
+                </span>
               </div>
             )}
             {data.instagram && (
               <div className="flex flex-col items-center">
                 <button 
                   onClick={() => handleContactAction('instagram', data.instagram)}
-                  className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-pink-500 transition-colors mb-1"
-                  style={{ backgroundColor: getSectionStyle('socialMedia', 'primaryColor') || '#475569' }}
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-pink-500 transition-colors mb-1"
+                  style={{ 
+                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || getSectionStyle('socialMedia', 'primaryColor') || '#475569',
+                    color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
+                  }}
                   data-testid="button-social-instagram"
                 >
                   <i className="fab fa-instagram text-sm"></i>
                 </button>
-                <span className="text-xs text-slate-600">Instagram</span>
+                <span 
+                  className="text-xs"
+                  style={{ color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b' }}
+                >
+                  Instagram
+                </span>
               </div>
             )}
             {data.twitter && (
               <div className="flex flex-col items-center">
                 <button 
                   onClick={() => handleContactAction('twitter', data.twitter)}
-                  className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-blue-400 transition-colors mb-1"
-                  style={{ backgroundColor: getSectionStyle('socialMedia', 'primaryColor') || '#475569' }}
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-400 transition-colors mb-1"
+                  style={{ 
+                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || getSectionStyle('socialMedia', 'primaryColor') || '#475569',
+                    color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
+                  }}
                   data-testid="button-social-twitter"
                 >
                   <i className="fab fa-twitter text-sm"></i>
                 </button>
-                <span className="text-xs text-slate-600">Twitter</span>
+                <span 
+                  className="text-xs"
+                  style={{ color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b' }}
+                >
+                  Twitter
+                </span>
               </div>
             )}
             {data.facebook && (
               <div className="flex flex-col items-center">
                 <button 
                   onClick={() => handleContactAction('facebook', data.facebook)}
-                  className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
-                  style={{ backgroundColor: getSectionStyle('socialMedia', 'primaryColor') || '#475569' }}
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
+                  style={{ 
+                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || getSectionStyle('socialMedia', 'primaryColor') || '#475569',
+                    color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
+                  }}
                   data-testid="button-social-facebook"
                 >
                   <i className="fab fa-facebook-f text-sm"></i>
                 </button>
-                <span className="text-xs text-slate-600">Facebook</span>
+                <span 
+                  className="text-xs"
+                  style={{ color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b' }}
+                >
+                  Facebook
+                </span>
               </div>
             )}
             {/* Custom Social Platforms */}
@@ -369,13 +447,21 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 <div key={social.id} className="flex flex-col items-center">
                   <button 
                     onClick={() => handleContactAction(social.platform, social.value)}
-                    className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
-                    style={{ backgroundColor: getSectionStyle('socialMedia', 'primaryColor') || '#475569' }}
+                    className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                    style={{ 
+                      backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || getSectionStyle('socialMedia', 'primaryColor') || '#475569',
+                      color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
+                    }}
                     data-testid={`button-custom-social-${social.id}`}
                   >
                     <i className={`${social.icon} text-sm`}></i>
                   </button>
-                  <span className="text-xs text-slate-600">{social.label || 'Social'}</span>
+                  <span 
+                    className="text-xs"
+                    style={{ color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b' }}
+                  >
+                    {social.label || 'Social'}
+                  </span>
                 </div>
               )
             ))}

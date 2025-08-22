@@ -821,6 +821,9 @@ export const businessCardSchema = z.object({
       paragraphColor: z.string().optional(),
       paragraphSize: z.number().optional(),
       paragraphWeight: z.number().optional(),
+      iconColor: z.string().optional(),
+      iconBackgroundColor: z.string().optional(),
+      iconTextColor: z.string().optional(),
     }).default({}),
     socialMedia: z.object({
       primaryColor: z.string().optional(),
@@ -830,6 +833,9 @@ export const businessCardSchema = z.object({
       paragraphColor: z.string().optional(),
       paragraphSize: z.number().optional(),
       paragraphWeight: z.number().optional(),
+      iconColor: z.string().optional(),
+      iconBackgroundColor: z.string().optional(),
+      iconTextColor: z.string().optional(),
     }).default({}),
     about: z.object({
       primaryColor: z.string().optional(),
