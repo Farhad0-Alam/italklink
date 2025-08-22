@@ -2149,14 +2149,17 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
               </div>
             ) : (
               <div className="space-y-6">
-                {element.data.showIngestForm && (
-                  <div data-testid="rag-ingest-form">
-                    <IngestForm />
-                  </div>
-                )}
+                {/* Only show ingestion form in editing mode - hidden from end users */}
                 {element.data.showChatBox && (
                   <div data-testid="rag-chat-box">
                     <RAGChatBox />
+                  </div>
+                )}
+                
+                {/* Technical note for card creators - only visible during editing */}
+                {element.data.showIngestForm && (
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                    <p><strong>For Card Creators:</strong> Edit this element to manage knowledge base content. End users will only see the chat interface above.</p>
                   </div>
                 )}
               </div>

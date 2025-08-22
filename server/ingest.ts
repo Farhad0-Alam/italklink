@@ -347,14 +347,38 @@ export async function retrieveSimilarContent(
     const queryEmbedding = await generateEmbeddings([query]);
     const queryVector = embeddingToVector(queryEmbedding[0]);
 
-    // Perform similarity search
+    // Perform similarity search with relaxed threshold
     const result = await pool.query(`
       SELECT id, url, title, content, 
              1 - (embedding <=> $1::vector) as score
       FROM kb_docs 
+      WHERE (1 - (embedding <=> $1::vector)) > 0.1
       ORDER BY embedding <=> $1::vector
       LIMIT $2
     `, [queryVector, topK]);
+
+    console.log('Vector search found', result.rows.length, 'documents with threshold > 0.1');
+    
+    // If no results with threshold, try without threshold
+    if (result.rows.length === 0) {
+      console.log('No documents above threshold, trying without threshold...');
+      const fallbackResult = await pool.query(`
+        SELECT id, url, title, content, 
+               1 - (embedding <=> $1::vector) as score
+        FROM kb_docs 
+        ORDER BY embedding <=> $1::vector
+        LIMIT $2
+      `, [queryVector, topK]);
+      
+      console.log('Fallback search found', fallbackResult.rows.length, 'documents');
+      return fallbackResult.rows.map((row: any) => ({
+        id: Number(row.id),
+        url: row.url,
+        title: row.title,
+        content: row.content,
+        score: Number(row.score),
+      }));
+    }
 
     return result.rows.map((row: any) => ({
       id: Number(row.id),
