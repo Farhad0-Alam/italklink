@@ -62,6 +62,44 @@ async function extractWebsiteText(url: string): Promise<string> {
     const html = await response.text();
     console.log('Received HTML content, length:', html.length);
     
+    // FIRST: Extract meta tags directly from raw HTML (before JSDOM processing)
+    let metaContent = '';
+    
+    // Extract title from HTML
+    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    if (titleMatch) {
+      metaContent += `Title: ${titleMatch[1].trim()} `;
+      console.log('Found title in raw HTML:', titleMatch[1].trim());
+    }
+    
+    // Extract meta description
+    const descMatch = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i);
+    if (descMatch) {
+      metaContent += `Description: ${descMatch[1].trim()} `;
+      console.log('Found meta description in raw HTML:', descMatch[1].substring(0, 100) + '...');
+    }
+    
+    // Extract og:title
+    const ogTitleMatch = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i);
+    if (ogTitleMatch) {
+      metaContent += `Social Title: ${ogTitleMatch[1].trim()} `;
+      console.log('Found OG title in raw HTML:', ogTitleMatch[1].trim());
+    }
+    
+    // Extract og:description
+    const ogDescMatch = html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i);
+    if (ogDescMatch) {
+      metaContent += `Social Description: ${ogDescMatch[1].trim()} `;
+      console.log('Found OG description in raw HTML:', ogDescMatch[1].substring(0, 100) + '...');
+    }
+    
+    // If we found meta content, use it immediately
+    if (metaContent.trim()) {
+      console.log('Successfully extracted meta content from raw HTML, length:', metaContent.length);
+      return metaContent.trim();
+    }
+    
+    console.log('No meta content found in raw HTML, proceeding with DOM extraction...');
     const dom = new JSDOM(html, { runScripts: "dangerously" });
     const document = dom.window.document;
     
