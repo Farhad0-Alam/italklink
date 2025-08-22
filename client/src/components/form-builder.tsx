@@ -364,40 +364,24 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 data-testid="input-company"
               />
             </div>
+            </div>
             </>
             )}
           </div>
 
+
           {/* Contact Information */}
           <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
-                <div 
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => toggleSection('nameStyling')}
-                >
-                  <h5 className="text-xs font-medium text-green-300">Name Styling</h5>
-                  <i className={`fas fa-chevron-${collapsedSections.nameStyling ? 'down' : 'up'} text-green-300 text-xs`}></i>
-                </div>
-                {!collapsedSections.nameStyling && (
-                <>
-                <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label className="text-white text-xs">Color</Label>
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="color"
-                        value={watchedValues.sectionStyles?.basicInfo?.nameColor || "#1f2937"}
-                        onChange={(e) => form.setValue('sectionStyles.basicInfo.nameColor', e.target.value)}
-                        className="w-6 h-6 rounded cursor-pointer"
-                      />
-                      <Input
-                        value={watchedValues.sectionStyles?.basicInfo?.nameColor || ""}
-                        onChange={(e) => form.setValue('sectionStyles.basicInfo.nameColor', e.target.value)}
-                        className="bg-slate-700 border-slate-600 text-white text-xs"
-                        placeholder="#1f2937"
-                      />
-                    </div>
-                  </div>
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => toggleSection('contactInfo')}
+            >
+              <h3 className="text-lg font-semibold text-purple-300">{t('form.contactInfo')}</h3>
+              <i className={`fas ${collapsedSections.contactInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-purple-300`}></i>
+            </div>
+            {!collapsedSections.contactInfo && (
+            <>
+            <div>
                   <div>
                     <Label className="text-white text-xs">Font</Label>
                     <Select
@@ -471,7 +455,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     }
                   />
                   <Label htmlFor="nameItalic" className="text-white text-xs">Italic</Label>
-                </div>
                 </div>
                 </>
                 )}
@@ -1839,8 +1822,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <span className="text-sm">Auto-saving changes...</span>
             </div>
           </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
     </div>
   );
 };
