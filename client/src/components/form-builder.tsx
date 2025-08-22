@@ -848,6 +848,41 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     />
                   </div>
                 </div>
+
+                {/* Font Family */}
+                <div>
+                  <Label className="text-white text-sm">Font Family</Label>
+                  <Select
+                    value={watchedValues.font || "inter"}
+                    onValueChange={(value) => form.setValue('font', value)}
+                  >
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="inter">Inter</SelectItem>
+                      <SelectItem value="roboto">Roboto</SelectItem>
+                      <SelectItem value="poppins">Poppins</SelectItem>
+                      <SelectItem value="work-sans">Work Sans</SelectItem>
+                      <SelectItem value="dm-sans">DM Sans</SelectItem>
+                      <SelectItem value="plus-jakarta-sans">Plus Jakarta Sans</SelectItem>
+                      <SelectItem value="manrope">Manrope</SelectItem>
+                      <SelectItem value="space-grotesk">Space Grotesk</SelectItem>
+                      <SelectItem value="outfit">Outfit</SelectItem>
+                      <SelectItem value="nunito-sans">Nunito Sans</SelectItem>
+                      <SelectItem value="red-hat-display">Red Hat Display</SelectItem>
+                      <SelectItem value="ibm-plex-sans">IBM Plex Sans</SelectItem>
+                      <SelectItem value="figtree">Figtree</SelectItem>
+                      <SelectItem value="quicksand">Quicksand</SelectItem>
+                      <SelectItem value="raleway">Raleway</SelectItem>
+                      <SelectItem value="montserrat">Montserrat</SelectItem>
+                      <SelectItem value="source-sans-pro">Source Sans Pro</SelectItem>
+                      <SelectItem value="lato">Lato</SelectItem>
+                      <SelectItem value="open-sans">Open Sans</SelectItem>
+                      <SelectItem value="rubik">Rubik</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Heading Style */}

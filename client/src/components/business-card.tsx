@@ -80,7 +80,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
         ref={ref} 
         className="rounded-2xl shadow-2xl overflow-hidden max-w-sm mx-auto card-shadow"
         style={{ 
-          backgroundColor: data.backgroundColor || '#ffffff' 
+          backgroundColor: data.backgroundColor || '#ffffff',
+          fontFamily: data.font ? `var(--font-${data.font})` : 'var(--font-inter)'
         }}
       >
         <div className="relative">
