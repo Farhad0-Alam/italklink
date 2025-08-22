@@ -125,6 +125,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          <>
           {/* Cover & Logo Upload */}
           <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
             <div 
@@ -1073,6 +1074,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               </div>
             </div>
             </div>
+            </>
             )}
           </div>
 
@@ -1875,6 +1877,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             </div>
             </>
             )}
+          </div>
 
           {/* Page Builder */}
           <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
@@ -1894,6 +1897,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <span className="text-sm">Auto-saving changes...</span>
             </div>
           </div>
+          </div>
+          </>
         </CardContent>
       </Card>
     </div>
