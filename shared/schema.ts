@@ -820,6 +820,8 @@ export const businessCardSchema = z.object({
       nameTextStyle: z.enum(['normal', 'italic']).optional(),
       titleTextStyle: z.enum(['normal', 'italic']).optional(),
       companyTextStyle: z.enum(['normal', 'italic']).optional(),
+      sectionBackgroundColor: z.string().optional(),
+      sectionBorderColor: z.string().optional(),
     }).default({}),
     contactInfo: z.object({
       iconColor: z.string().optional(),
@@ -829,6 +831,8 @@ export const businessCardSchema = z.object({
       iconTextSize: z.number().optional(),
       iconTextWeight: z.enum(['300', '400', '500', '600', '700', '800']).optional(),
       iconTextStyle: z.enum(['normal', 'italic']).optional(),
+      sectionBackgroundColor: z.string().optional(),
+      sectionBorderColor: z.string().optional(),
     }).default({}),
     socialMedia: z.object({
       iconColor: z.string().optional(),
@@ -838,6 +842,8 @@ export const businessCardSchema = z.object({
       iconTextSize: z.number().optional(),
       iconTextWeight: z.enum(['300', '400', '500', '600', '700', '800']).optional(),
       iconTextStyle: z.enum(['normal', 'italic']).optional(),
+      sectionBackgroundColor: z.string().optional(),
+      sectionBorderColor: z.string().optional(),
     }).default({}),
     about: z.object({
       primaryColor: z.string().optional(),
