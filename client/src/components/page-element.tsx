@@ -336,14 +336,14 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             {isEditing ? (
               <div className="space-y-2">
                 <Input
-                  value={element.data.text}
+                  value={element.data.text || ''}
                   onChange={(e) => handleDataUpdate({ text: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Heading text"
                 />
                 <div className="flex gap-2">
                   <select
-                    value={element.data.level}
+                    value={element.data.level || 'h1'}
                     onChange={(e) => handleDataUpdate({ level: e.target.value })}
                     className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
                   >
@@ -352,7 +352,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <option value="h3">H3</option>
                   </select>
                   <select
-                    value={element.data.alignment}
+                    value={element.data.alignment || 'left'}
                     onChange={(e) => handleDataUpdate({ alignment: e.target.value })}
                     className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
                   >
@@ -379,14 +379,14 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             {isEditing ? (
               <div className="space-y-2">
                 <Textarea
-                  value={element.data.text}
+                  value={element.data.text || ''}
                   onChange={(e) => handleDataUpdate({ text: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Paragraph text"
                   rows={3}
                 />
                 <select
-                  value={element.data.alignment}
+                  value={element.data.alignment || 'left'}
                   onChange={(e) => handleDataUpdate({ alignment: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
                 >
@@ -409,19 +409,19 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             {isEditing ? (
               <div className="space-y-2">
                 <Input
-                  value={element.data.text}
+                  value={element.data.text || ''}
                   onChange={(e) => handleDataUpdate({ text: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Link text"
                 />
                 <Input
-                  value={element.data.url}
+                  value={element.data.url || ''}
                   onChange={(e) => handleDataUpdate({ url: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="https://example.com"
                 />
                 <select
-                  value={element.data.style}
+                  value={element.data.style || 'button'}
                   onChange={(e) => handleDataUpdate({ style: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
                 >
@@ -739,7 +739,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             {isEditing ? (
               <div className="space-y-2">
                 <Input
-                  value={element.data.url}
+                  value={element.data.url || ''}
                   onChange={(e) => handleDataUpdate({ url: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="YouTube/Vimeo URL"
@@ -832,7 +832,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 {/* Contact Form Title Display */}
                 <div className="p-4 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border border-slate-500 shadow-lg">
                   <Input
-                    value={element.data.title}
+                    value={element.data.title || ''}
                     onChange={(e) => handleDataUpdate({ title: e.target.value })}
                     className="bg-transparent border-0 text-white font-semibold text-xl tracking-wide opacity-100 p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
                     placeholder="Form Title here"

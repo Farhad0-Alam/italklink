@@ -42,6 +42,12 @@ export function IngestForm() {
         body: JSON.stringify({ url: url.trim() }),
       });
 
+      // Check if response is actually JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Server returned non-JSON response: ${response.status} ${response.statusText}`);
+      }
+
       const result = await response.json();
 
       if (response.ok) {
