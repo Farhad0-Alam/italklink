@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { storage, fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
@@ -350,59 +351,300 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
             
             {/* Basic Info Section Styling */}
-            <div className="border-t border-green-600/30 pt-4 space-y-3">
-              <h4 className="text-sm font-medium text-green-200">Text Colors (Optional)</h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-white text-xs">Name Color</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.basicInfo?.nameColor || "#1f2937"}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.nameColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
+            <div className="border-t border-green-600/30 pt-4 space-y-4">
+              <h4 className="text-sm font-medium text-green-200">Text Styling (Optional)</h4>
+              
+              {/* Name Styling */}
+              <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                <h5 className="text-xs font-medium text-green-300">Name Styling</h5>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-white text-xs">Color</Label>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="color"
+                        value={watchedValues.sectionStyles?.basicInfo?.nameColor || "#1f2937"}
+                        onChange={(e) => form.setValue('sectionStyles.basicInfo.nameColor', e.target.value)}
+                        className="w-6 h-6 rounded cursor-pointer"
+                      />
+                      <Input
+                        value={watchedValues.sectionStyles?.basicInfo?.nameColor || ""}
+                        onChange={(e) => form.setValue('sectionStyles.basicInfo.nameColor', e.target.value)}
+                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                        placeholder="#1f2937"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Font</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.basicInfo?.nameFont || ""}
+                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.nameFont', value)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Choose font" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Inter">Inter</SelectItem>
+                        <SelectItem value="Roboto">Roboto</SelectItem>
+                        <SelectItem value="Open Sans">Open Sans</SelectItem>
+                        <SelectItem value="Lato">Lato</SelectItem>
+                        <SelectItem value="Montserrat">Montserrat</SelectItem>
+                        <SelectItem value="Poppins">Poppins</SelectItem>
+                        <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
+                        <SelectItem value="Nunito">Nunito</SelectItem>
+                        <SelectItem value="Raleway">Raleway</SelectItem>
+                        <SelectItem value="Ubuntu">Ubuntu</SelectItem>
+                        <SelectItem value="PT Sans">PT Sans</SelectItem>
+                        <SelectItem value="Merriweather">Merriweather</SelectItem>
+                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                        <SelectItem value="Oswald">Oswald</SelectItem>
+                        <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
+                        <SelectItem value="Crimson Text">Crimson Text</SelectItem>
+                        <SelectItem value="Work Sans">Work Sans</SelectItem>
+                        <SelectItem value="Fira Sans">Fira Sans</SelectItem>
+                        <SelectItem value="DM Sans">DM Sans</SelectItem>
+                        <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Size</Label>
                     <Input
-                      value={watchedValues.sectionStyles?.basicInfo?.nameColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.nameColor', e.target.value)}
+                      type="number"
+                      value={watchedValues.sectionStyles?.basicInfo?.nameFontSize || ""}
+                      onChange={(e) => form.setValue('sectionStyles.basicInfo.nameFontSize', parseInt(e.target.value) || undefined)}
                       className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#1f2937"
+                      placeholder="24"
+                      min="12"
+                      max="48"
                     />
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Weight</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.basicInfo?.nameFontWeight || ""}
+                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.nameFontWeight', value as any)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Weight" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="300">Light</SelectItem>
+                        <SelectItem value="400">Regular</SelectItem>
+                        <SelectItem value="500">Medium</SelectItem>
+                        <SelectItem value="600">Semi Bold</SelectItem>
+                        <SelectItem value="700">Bold</SelectItem>
+                        <SelectItem value="800">Extra Bold</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-                <div>
-                  <Label className="text-white text-xs">Title Color</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.basicInfo?.titleColor || "#4b5563"}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.titleColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="nameItalic"
+                    checked={watchedValues.sectionStyles?.basicInfo?.nameTextStyle === 'italic'}
+                    onCheckedChange={(checked) => 
+                      form.setValue('sectionStyles.basicInfo.nameTextStyle', checked ? 'italic' : 'normal')
+                    }
+                  />
+                  <Label htmlFor="nameItalic" className="text-white text-xs">Italic</Label>
+                </div>
+              </div>
+
+              {/* Title Styling */}
+              <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                <h5 className="text-xs font-medium text-green-300">Title Styling</h5>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-white text-xs">Color</Label>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="color"
+                        value={watchedValues.sectionStyles?.basicInfo?.titleColor || "#4b5563"}
+                        onChange={(e) => form.setValue('sectionStyles.basicInfo.titleColor', e.target.value)}
+                        className="w-6 h-6 rounded cursor-pointer"
+                      />
+                      <Input
+                        value={watchedValues.sectionStyles?.basicInfo?.titleColor || ""}
+                        onChange={(e) => form.setValue('sectionStyles.basicInfo.titleColor', e.target.value)}
+                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                        placeholder="#4b5563"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Font</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.basicInfo?.titleFont || ""}
+                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.titleFont', value)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Choose font" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Inter">Inter</SelectItem>
+                        <SelectItem value="Roboto">Roboto</SelectItem>
+                        <SelectItem value="Open Sans">Open Sans</SelectItem>
+                        <SelectItem value="Lato">Lato</SelectItem>
+                        <SelectItem value="Montserrat">Montserrat</SelectItem>
+                        <SelectItem value="Poppins">Poppins</SelectItem>
+                        <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
+                        <SelectItem value="Nunito">Nunito</SelectItem>
+                        <SelectItem value="Raleway">Raleway</SelectItem>
+                        <SelectItem value="Ubuntu">Ubuntu</SelectItem>
+                        <SelectItem value="PT Sans">PT Sans</SelectItem>
+                        <SelectItem value="Merriweather">Merriweather</SelectItem>
+                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                        <SelectItem value="Oswald">Oswald</SelectItem>
+                        <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
+                        <SelectItem value="Crimson Text">Crimson Text</SelectItem>
+                        <SelectItem value="Work Sans">Work Sans</SelectItem>
+                        <SelectItem value="Fira Sans">Fira Sans</SelectItem>
+                        <SelectItem value="DM Sans">DM Sans</SelectItem>
+                        <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Size</Label>
                     <Input
-                      value={watchedValues.sectionStyles?.basicInfo?.titleColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.titleColor', e.target.value)}
+                      type="number"
+                      value={watchedValues.sectionStyles?.basicInfo?.titleFontSize || ""}
+                      onChange={(e) => form.setValue('sectionStyles.basicInfo.titleFontSize', parseInt(e.target.value) || undefined)}
                       className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#4b5563"
+                      placeholder="14"
+                      min="10"
+                      max="32"
                     />
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Weight</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.basicInfo?.titleFontWeight || ""}
+                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.titleFontWeight', value as any)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Weight" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="300">Light</SelectItem>
+                        <SelectItem value="400">Regular</SelectItem>
+                        <SelectItem value="500">Medium</SelectItem>
+                        <SelectItem value="600">Semi Bold</SelectItem>
+                        <SelectItem value="700">Bold</SelectItem>
+                        <SelectItem value="800">Extra Bold</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-                <div>
-                  <Label className="text-white text-xs">Company Color</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.basicInfo?.companyColor || "#6b7280"}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.companyColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="titleItalic"
+                    checked={watchedValues.sectionStyles?.basicInfo?.titleTextStyle === 'italic'}
+                    onCheckedChange={(checked) => 
+                      form.setValue('sectionStyles.basicInfo.titleTextStyle', checked ? 'italic' : 'normal')
+                    }
+                  />
+                  <Label htmlFor="titleItalic" className="text-white text-xs">Italic</Label>
+                </div>
+              </div>
+
+              {/* Company Styling */}
+              <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                <h5 className="text-xs font-medium text-green-300">Company Styling</h5>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-white text-xs">Color</Label>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="color"
+                        value={watchedValues.sectionStyles?.basicInfo?.companyColor || "#6b7280"}
+                        onChange={(e) => form.setValue('sectionStyles.basicInfo.companyColor', e.target.value)}
+                        className="w-6 h-6 rounded cursor-pointer"
+                      />
+                      <Input
+                        value={watchedValues.sectionStyles?.basicInfo?.companyColor || ""}
+                        onChange={(e) => form.setValue('sectionStyles.basicInfo.companyColor', e.target.value)}
+                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                        placeholder="#6b7280"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Font</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.basicInfo?.companyFont || ""}
+                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.companyFont', value)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Choose font" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Inter">Inter</SelectItem>
+                        <SelectItem value="Roboto">Roboto</SelectItem>
+                        <SelectItem value="Open Sans">Open Sans</SelectItem>
+                        <SelectItem value="Lato">Lato</SelectItem>
+                        <SelectItem value="Montserrat">Montserrat</SelectItem>
+                        <SelectItem value="Poppins">Poppins</SelectItem>
+                        <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
+                        <SelectItem value="Nunito">Nunito</SelectItem>
+                        <SelectItem value="Raleway">Raleway</SelectItem>
+                        <SelectItem value="Ubuntu">Ubuntu</SelectItem>
+                        <SelectItem value="PT Sans">PT Sans</SelectItem>
+                        <SelectItem value="Merriweather">Merriweather</SelectItem>
+                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                        <SelectItem value="Oswald">Oswald</SelectItem>
+                        <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
+                        <SelectItem value="Crimson Text">Crimson Text</SelectItem>
+                        <SelectItem value="Work Sans">Work Sans</SelectItem>
+                        <SelectItem value="Fira Sans">Fira Sans</SelectItem>
+                        <SelectItem value="DM Sans">DM Sans</SelectItem>
+                        <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Size</Label>
                     <Input
-                      value={watchedValues.sectionStyles?.basicInfo?.companyColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.companyColor', e.target.value)}
+                      type="number"
+                      value={watchedValues.sectionStyles?.basicInfo?.companyFontSize || ""}
+                      onChange={(e) => form.setValue('sectionStyles.basicInfo.companyFontSize', parseInt(e.target.value) || undefined)}
                       className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#6b7280"
+                      placeholder="14"
+                      min="10"
+                      max="32"
                     />
                   </div>
+                  <div>
+                    <Label className="text-white text-xs">Weight</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.basicInfo?.companyFontWeight || ""}
+                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.companyFontWeight', value as any)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Weight" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="300">Light</SelectItem>
+                        <SelectItem value="400">Regular</SelectItem>
+                        <SelectItem value="500">Medium</SelectItem>
+                        <SelectItem value="600">Semi Bold</SelectItem>
+                        <SelectItem value="700">Bold</SelectItem>
+                        <SelectItem value="800">Extra Bold</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="companyItalic"
+                    checked={watchedValues.sectionStyles?.basicInfo?.companyTextStyle === 'italic'}
+                    onCheckedChange={(checked) => 
+                      form.setValue('sectionStyles.basicInfo.companyTextStyle', checked ? 'italic' : 'normal')
+                    }
+                  />
+                  <Label htmlFor="companyItalic" className="text-white text-xs">Italic</Label>
                 </div>
               </div>
             </div>

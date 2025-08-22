@@ -228,8 +228,10 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             className="text-xl font-bold mb-1" 
             style={{
               color: getSectionStyle('basicInfo', 'nameColor') || data.headingColor || '#1f2937',
-              fontSize: `${(data.headingSize || 20) + 4}px`,
-              fontWeight: data.headingWeight || 600
+              fontSize: `${getSectionStyle('basicInfo', 'nameFontSize') || (data.headingSize || 20) + 4}px`,
+              fontWeight: getSectionStyle('basicInfo', 'nameFontWeight') || data.headingWeight || 600,
+              fontFamily: getSectionStyle('basicInfo', 'nameFont') || 'Inter, sans-serif',
+              fontStyle: getSectionStyle('basicInfo', 'nameTextStyle') || 'normal'
             }}
             data-testid="text-name"
           >
@@ -239,8 +241,10 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             className="text-sm mb-2" 
             style={{
               color: getSectionStyle('basicInfo', 'titleColor') || data.paragraphColor || '#4b5563',
-              fontSize: `${data.paragraphSize || 14}px`,
-              fontWeight: data.paragraphWeight || 400
+              fontSize: `${getSectionStyle('basicInfo', 'titleFontSize') || data.paragraphSize || 14}px`,
+              fontWeight: getSectionStyle('basicInfo', 'titleFontWeight') || data.paragraphWeight || 400,
+              fontFamily: getSectionStyle('basicInfo', 'titleFont') || 'Inter, sans-serif',
+              fontStyle: getSectionStyle('basicInfo', 'titleTextStyle') || 'normal'
             }}
             data-testid="text-title"
           >
@@ -251,8 +255,10 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               className="text-sm mb-4" 
               style={{
                 color: getSectionStyle('basicInfo', 'companyColor') || '#6b7280',
-                fontSize: `${data.paragraphSize || 14}px`,
-                fontWeight: data.paragraphWeight || 400
+                fontSize: `${getSectionStyle('basicInfo', 'companyFontSize') || data.paragraphSize || 14}px`,
+                fontWeight: getSectionStyle('basicInfo', 'companyFontWeight') || data.paragraphWeight || 400,
+                fontFamily: getSectionStyle('basicInfo', 'companyFont') || 'Inter, sans-serif',
+                fontStyle: getSectionStyle('basicInfo', 'companyTextStyle') || 'normal'
               }}
               data-testid="text-company"
             >
