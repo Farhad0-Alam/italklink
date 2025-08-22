@@ -35,6 +35,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     contactInfo: false,
     socialMedia: false,
     customization: false,
+    appearance: false,
+    seo: false,
     pageBuilder: false
   });
 
@@ -65,7 +67,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
-    field: "profilePhoto" | "logo" | "backgroundImage"
+    field: "profilePhoto" | "logo" | "backgroundImage" | "ogImage"
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -692,6 +694,426 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             </div>
           </div>
           )}
+          </div>
+
+          {/* Appearance Settings */}
+          <div className="bg-indigo-900/30 border border-indigo-600/30 rounded-lg p-4 space-y-4">
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => toggleSection('appearance')}
+            >
+              <h3 className="text-lg font-semibold text-indigo-300">Appearance</h3>
+              <i className={`fas ${collapsedSections.appearance ? 'fa-chevron-down' : 'fa-chevron-up'} text-indigo-300`}></i>
+            </div>
+            {!collapsedSections.appearance && (
+            <div className="space-y-4">
+              {/* Customize Theme */}
+              <div className="space-y-3">
+                <h4 className="text-md font-medium text-indigo-200">Customize Theme</h4>
+                
+                {/* Default Colors */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label className="text-white text-sm">Primary Color</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={watchedValues.primaryColor || "#22c55e"}
+                        onChange={(e) => form.setValue('primaryColor', e.target.value)}
+                        className="w-12 h-8 rounded cursor-pointer"
+                        data-testid="input-primary-color"
+                      />
+                      <Input
+                        value={watchedValues.primaryColor || "#22c55e"}
+                        onChange={(e) => form.setValue('primaryColor', e.target.value)}
+                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                        placeholder="#22c55e"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-white text-sm">Secondary Color</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={watchedValues.secondaryColor || "#16a34a"}
+                        onChange={(e) => form.setValue('secondaryColor', e.target.value)}
+                        className="w-12 h-8 rounded cursor-pointer"
+                        data-testid="input-secondary-color"
+                      />
+                      <Input
+                        value={watchedValues.secondaryColor || "#16a34a"}
+                        onChange={(e) => form.setValue('secondaryColor', e.target.value)}
+                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                        placeholder="#16a34a"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-white text-sm">Tertiary Color</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={watchedValues.tertiaryColor || "#0d9488"}
+                        onChange={(e) => form.setValue('tertiaryColor', e.target.value)}
+                        className="w-12 h-8 rounded cursor-pointer"
+                        data-testid="input-tertiary-color"
+                      />
+                      <Input
+                        value={watchedValues.tertiaryColor || "#0d9488"}
+                        onChange={(e) => form.setValue('tertiaryColor', e.target.value)}
+                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                        placeholder="#0d9488"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Gradient Settings */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="use-gradient"
+                      checked={watchedValues.useGradient || false}
+                      onChange={(e) => form.setValue('useGradient', e.target.checked)}
+                      className="w-4 h-4 rounded"
+                    />
+                    <Label htmlFor="use-gradient" className="text-white cursor-pointer">Use Gradient</Label>
+                  </div>
+                  
+                  {watchedValues.useGradient && (
+                    <div className="space-y-3 ml-6">
+                      <div>
+                        <Label className="text-white text-sm">Angle: {watchedValues.gradientAngle || 90}°</Label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="360"
+                          value={watchedValues.gradientAngle || 90}
+                          onChange={(e) => form.setValue('gradientAngle', parseInt(e.target.value))}
+                          className="w-full mt-1"
+                          data-testid="input-gradient-angle"
+                        />
+                      </div>
+                      
+                      {watchedValues.gradientStops?.map((stop, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={stop.color}
+                            onChange={(e) => {
+                              const newStops = [...(watchedValues.gradientStops || [])];
+                              newStops[index] = { ...stop, color: e.target.value };
+                              form.setValue('gradientStops', newStops);
+                            }}
+                            className="w-10 h-8 rounded cursor-pointer"
+                          />
+                          <Label className="text-white text-xs">Stop {index + 1}:</Label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={stop.position}
+                            onChange={(e) => {
+                              const newStops = [...(watchedValues.gradientStops || [])];
+                              newStops[index] = { ...stop, position: parseInt(e.target.value) };
+                              form.setValue('gradientStops', newStops);
+                            }}
+                            className="flex-1"
+                          />
+                          <span className="text-white text-xs w-10">{stop.position}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Background */}
+                <div>
+                  <Label className="text-white text-sm">Background Color</Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={watchedValues.backgroundColor || "#ffffff"}
+                      onChange={(e) => form.setValue('backgroundColor', e.target.value)}
+                      className="w-12 h-8 rounded cursor-pointer"
+                      data-testid="input-background-color"
+                    />
+                    <Input
+                      value={watchedValues.backgroundColor || "#ffffff"}
+                      onChange={(e) => form.setValue('backgroundColor', e.target.value)}
+                      className="bg-slate-700 border-slate-600 text-white text-xs"
+                      placeholder="#ffffff"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Heading Style */}
+              <div className="space-y-3">
+                <h4 className="text-md font-medium text-indigo-200">Heading Style</h4>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label className="text-white text-sm">Color</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={watchedValues.headingColor || "#1f2937"}
+                        onChange={(e) => form.setValue('headingColor', e.target.value)}
+                        className="w-12 h-8 rounded cursor-pointer"
+                      />
+                      <Input
+                        value={watchedValues.headingColor || "#1f2937"}
+                        onChange={(e) => form.setValue('headingColor', e.target.value)}
+                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                        placeholder="#1f2937"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-white text-sm">Size: {watchedValues.headingSize || 16}px</Label>
+                    <input
+                      type="range"
+                      min="12"
+                      max="32"
+                      value={watchedValues.headingSize || 16}
+                      onChange={(e) => form.setValue('headingSize', parseInt(e.target.value))}
+                      className="w-full mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-white text-sm">Weight</Label>
+                    <Select
+                      value={(watchedValues.headingWeight || 600).toString()}
+                      onValueChange={(value) => form.setValue('headingWeight', parseInt(value))}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="400">Normal</SelectItem>
+                        <SelectItem value="500">Medium</SelectItem>
+                        <SelectItem value="600">Semibold</SelectItem>
+                        <SelectItem value="700">Bold</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Paragraph Style */}
+              <div className="space-y-3">
+                <h4 className="text-md font-medium text-indigo-200">Paragraph Style</h4>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label className="text-white text-sm">Color</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={watchedValues.paragraphColor || "#4b5563"}
+                        onChange={(e) => form.setValue('paragraphColor', e.target.value)}
+                        className="w-12 h-8 rounded cursor-pointer"
+                      />
+                      <Input
+                        value={watchedValues.paragraphColor || "#4b5563"}
+                        onChange={(e) => form.setValue('paragraphColor', e.target.value)}
+                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                        placeholder="#4b5563"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-white text-sm">Size: {watchedValues.paragraphSize || 14}px</Label>
+                    <input
+                      type="range"
+                      min="10"
+                      max="20"
+                      value={watchedValues.paragraphSize || 14}
+                      onChange={(e) => form.setValue('paragraphSize', parseInt(e.target.value))}
+                      className="w-full mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-white text-sm">Weight</Label>
+                    <Select
+                      value={(watchedValues.paragraphWeight || 400).toString()}
+                      onValueChange={(value) => form.setValue('paragraphWeight', parseInt(value))}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="300">Light</SelectItem>
+                        <SelectItem value="400">Normal</SelectItem>
+                        <SelectItem value="500">Medium</SelectItem>
+                        <SelectItem value="600">Semibold</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            )}
+          </div>
+
+          {/* SEO Settings */}
+          <div className="bg-amber-900/30 border border-amber-600/30 rounded-lg p-4 space-y-4">
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => toggleSection('seo')}
+            >
+              <h3 className="text-lg font-semibold text-amber-300">SEO Settings</h3>
+              <i className={`fas ${collapsedSections.seo ? 'fa-chevron-down' : 'fa-chevron-up'} text-amber-300`}></i>
+            </div>
+            {!collapsedSections.seo && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="metaTitle" className="text-white">Meta Title</Label>
+                <Input
+                  id="metaTitle"
+                  {...form.register("metaTitle")}
+                  placeholder={`${watchedValues.fullName || 'Your Name'} - Digital Business Card`}
+                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                  data-testid="input-meta-title"
+                />
+                <p className="text-xs text-slate-400 mt-1">Recommended: 50-60 characters</p>
+              </div>
+
+              <div>
+                <Label htmlFor="metaDescription" className="text-white">Meta Description</Label>
+                <Textarea
+                  id="metaDescription"
+                  {...form.register("metaDescription")}
+                  placeholder={`Connect with ${watchedValues.fullName || 'me'} - ${watchedValues.title || 'Professional'}. View my digital business card for contact information and more.`}
+                  rows={3}
+                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                  data-testid="textarea-meta-description"
+                />
+                <p className="text-xs text-slate-400 mt-1">Recommended: 150-160 characters</p>
+              </div>
+
+              <div>
+                <Label htmlFor="ogTitle" className="text-white">Open Graph Title</Label>
+                <Input
+                  id="ogTitle"
+                  {...form.register("ogTitle")}
+                  placeholder={watchedValues.metaTitle || `${watchedValues.fullName || 'Your Name'} - Digital Business Card`}
+                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                  data-testid="input-og-title"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="ogDescription" className="text-white">Open Graph Description</Label>
+                <Textarea
+                  id="ogDescription"
+                  {...form.register("ogDescription")}
+                  placeholder={watchedValues.metaDescription || `Connect with ${watchedValues.fullName || 'me'} - ${watchedValues.title || 'Professional'}. View my digital business card for contact information and more.`}
+                  rows={3}
+                  className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                  data-testid="textarea-og-description"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="ogImage" className="text-white">Open Graph Image</Label>
+                <div className="mt-1">
+                  <div className="w-full h-32 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                    {watchedValues.ogImage ? (
+                      <img 
+                        src={watchedValues.ogImage} 
+                        alt="OG Image" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center">
+                        <i className="fas fa-image text-slate-400 text-2xl"></i>
+                        <p className="text-slate-400 text-sm mt-2">Open Graph Image</p>
+                        <p className="text-slate-500 text-xs mt-1">Recommended: 1200x630px</p>
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full"
+                    onClick={() => document.getElementById('og-image-input')?.click()}
+                    disabled={isUploading}
+                  >
+                    <i className="fas fa-upload mr-2"></i>
+                    Upload OG Image
+                  </Button>
+                  <input
+                    id="og-image-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, 'ogImage' as any)}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="keywords" className="text-white">Keywords</Label>
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
+                    {(watchedValues.keywords || []).map((keyword, index) => (
+                      <div key={index} className="flex items-center bg-slate-700 rounded-full px-3 py-1">
+                        <span className="text-white text-sm">{keyword}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newKeywords = [...(watchedValues.keywords || [])];
+                            newKeywords.splice(index, 1);
+                            form.setValue('keywords', newKeywords);
+                          }}
+                          className="ml-2 text-red-400 hover:text-red-300"
+                        >
+                          <i className="fas fa-times text-xs"></i>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      id="new-keyword"
+                      placeholder="Add keyword..."
+                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const input = e.target as HTMLInputElement;
+                          if (input.value.trim()) {
+                            const newKeywords = [...(watchedValues.keywords || []), input.value.trim()];
+                            form.setValue('keywords', newKeywords);
+                            input.value = '';
+                          }
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                      onClick={() => {
+                        const input = document.getElementById('new-keyword') as HTMLInputElement;
+                        if (input?.value.trim()) {
+                          const newKeywords = [...(watchedValues.keywords || []), input.value.trim()];
+                          form.setValue('keywords', newKeywords);
+                          input.value = '';
+                        }
+                      }}
+                    >
+                      <i className="fas fa-plus"></i>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            )}
           </div>
 
           {/* Page Builder */}

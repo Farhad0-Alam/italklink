@@ -759,6 +759,36 @@ export const businessCardSchema = z.object({
   template: z.enum(["minimal", "bold", "photo"]).default("minimal"),
   headerDesign: z.enum(["cover-logo", "profile-center", "split-design"]).default("cover-logo"),
   
+  // Appearance Settings
+  primaryColor: z.string().default("#22c55e"),
+  secondaryColor: z.string().default("#16a34a"),
+  tertiaryColor: z.string().default("#0d9488"),
+  useGradient: z.boolean().default(false),
+  gradientAngle: z.number().default(90),
+  gradientStops: z.array(z.object({
+    color: z.string(),
+    position: z.number()
+  })).default([
+    { color: "#22c55e", position: 0 },
+    { color: "#16a34a", position: 50 },
+    { color: "#0d9488", position: 100 }
+  ]),
+  backgroundColor: z.string().default("#ffffff"),
+  headingColor: z.string().default("#1f2937"),
+  headingSize: z.number().default(16),
+  headingWeight: z.number().default(600),
+  paragraphColor: z.string().default("#4b5563"),
+  paragraphSize: z.number().default(14),
+  paragraphWeight: z.number().default(400),
+  
+  // SEO Settings
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  ogTitle: z.string().optional(),
+  ogDescription: z.string().optional(),
+  ogImage: z.string().optional(),
+  keywords: z.array(z.string()).default([]),
+  
   // Media (base64 encoded)
   profilePhoto: z.string().optional(),
   logo: z.string().optional(),

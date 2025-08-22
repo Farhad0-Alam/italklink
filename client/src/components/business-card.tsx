@@ -63,8 +63,26 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     const profileImageSrc = data.profilePhoto || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300";
     
 
+    // Generate gradient style if enabled
+    const gradientStyle = data.useGradient && data.gradientStops?.length > 0 
+      ? {
+          background: `linear-gradient(${data.gradientAngle || 90}deg, ${
+            data.gradientStops
+              .sort((a, b) => a.position - b.position)
+              .map(stop => `${stop.color} ${stop.position}%`)
+              .join(', ')
+          })`
+        }
+      : {};
+
     return (
-      <div ref={ref} className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-sm mx-auto card-shadow">
+      <div 
+        ref={ref} 
+        className="rounded-2xl shadow-2xl overflow-hidden max-w-sm mx-auto card-shadow"
+        style={{ 
+          backgroundColor: data.backgroundColor || '#ffffff' 
+        }}
+      >
         <div className="relative">
           {/* Header Design - Cover + Logo */}
           {(data.headerDesign === 'cover-logo' || !data.headerDesign) && (
@@ -72,7 +90,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               className="h-40 relative"
               style={{ 
                 backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
-                backgroundColor: !data.backgroundImage ? data.brandColor || '#22c55e' : undefined,
+                backgroundColor: !data.backgroundImage && !data.useGradient ? data.brandColor || '#22c55e' : undefined,
+                ...(data.useGradient && !data.backgroundImage ? gradientStyle : {}),
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}
@@ -109,7 +128,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               className="h-32 relative"
               style={{ 
                 backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
-                backgroundColor: !data.backgroundImage ? data.brandColor || '#22c55e' : undefined,
+                backgroundColor: !data.backgroundImage && !data.useGradient ? data.brandColor || '#22c55e' : undefined,
+                ...(data.useGradient && !data.backgroundImage ? gradientStyle : {}),
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}
@@ -148,7 +168,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 className="flex-1 relative"
                 style={{ 
                   backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
-                  backgroundColor: !data.backgroundImage ? data.brandColor || '#22c55e' : undefined,
+                  backgroundColor: !data.backgroundImage && !data.useGradient ? data.brandColor || '#22c55e' : undefined,
+                  ...(data.useGradient && !data.backgroundImage ? gradientStyle : {}),
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
@@ -190,10 +211,26 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           data.headerDesign === 'split-design' ? 'pt-16' : 'pt-16'
         }`}>
           {/* Name & Title */}
-          <h3 className="text-xl font-bold text-slate-800 mb-1" data-testid="text-name">
+          <h3 
+            className="text-xl font-bold mb-1" 
+            style={{
+              color: data.headingColor || '#1f2937',
+              fontSize: `${(data.headingSize || 20) + 4}px`,
+              fontWeight: data.headingWeight || 600
+            }}
+            data-testid="text-name"
+          >
             {data.fullName || "Your Name"}
           </h3>
-          <p className="text-sm text-slate-600 mb-4" data-testid="text-title">
+          <p 
+            className="text-sm mb-4" 
+            style={{
+              color: data.paragraphColor || '#4b5563',
+              fontSize: `${data.paragraphSize || 14}px`,
+              fontWeight: data.paragraphWeight || 400
+            }}
+            data-testid="text-title"
+          >
             {data.title || "Your Title"}
           </p>
           
