@@ -322,23 +322,6 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 </span>
               </div>
             )}
-            <div className="flex flex-col items-center">
-              <button 
-                className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
-                style={{ 
-                  backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#475569',
-                  color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
-                }}
-              >
-                <i className="fas fa-comment text-sm"></i>
-              </button>
-              <span 
-                className="text-xs"
-                style={{ color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b' }}
-              >
-                Text
-              </span>
-            </div>
             {data.whatsapp && (
               <div className="flex flex-col items-center">
                 <button 
@@ -368,7 +351,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             )}
             {/* Custom Contact Methods */}
             {data.customContacts?.map((contact) => (
-              contact.value && (
+              contact.value && contact.label && (
                 <div key={contact.id} className="flex flex-col items-center">
                   <button 
                     onClick={() => handleContactAction(contact.type, contact.value)}
@@ -391,7 +374,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                       fontStyle: getSectionStyle('contactInfo', 'iconTextStyle') || 'normal'
                     }}
                   >
-                    {contact.label || 'Contact'}
+                    {contact.label}
                   </span>
                 </div>
               )
