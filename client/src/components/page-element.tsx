@@ -1764,8 +1764,6 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         >
                           <option value="roadmap">Roadmap</option>
                           <option value="satellite">Satellite</option>
-                          <option value="hybrid">Hybrid</option>
-                          <option value="terrain">Terrain</option>
                         </select>
                       </div>
                     </div>
