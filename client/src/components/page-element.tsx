@@ -7,8 +7,8 @@ import { QRCodeSVG } from "qrcode.react";
 import { useState, useEffect } from "react";
 import { generateFieldId } from "@/lib/card-data";
 import { AIChat } from "@/components/ai-chat";
-import { IngestForm } from './IngestForm';
-import { RAGChatBox } from './RAGChatBox';
+import { IngestForm } from "@/components/IngestForm";
+import { RAGChatBox } from "@/components/RAGChatBox";
 import {
   DndContext,
   closestCenter,
