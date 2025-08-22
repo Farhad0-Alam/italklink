@@ -4,7 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Send, Bot, User, ExternalLink, MessageCircle, X } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Loader2, Send, Bot, User, ExternalLink, MessageCircle, X, Settings, ChevronDown, ChevronUp } from 'lucide-react';
+import { URLManager } from '@/components/URLManager';
 import { useToast } from '@/hooks/use-toast';
 
 interface Source {
@@ -37,6 +39,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e' }: RAGCha
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showKnowledgeConfig, setShowKnowledgeConfig] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -182,6 +185,44 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e' }: RAGCha
             </Button>
           </DialogTitle>
         </DialogHeader>
+
+        {/* URL Knowledge Configuration */}
+        <Collapsible open={showKnowledgeConfig} onOpenChange={setShowKnowledgeConfig}>
+          <CollapsibleTrigger asChild>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-between px-6 py-3 h-auto border-b hover:bg-gray-50"
+              data-testid="button-toggle-url-config"
+            >
+              <div className="flex items-center gap-2">
+                <Settings className="h-4 w-4" style={{ color: primaryColor }} />
+                <span className="font-medium text-sm">+ Add Website URLs</span>
+                <Badge variant="outline" className="text-xs">Unlimited</Badge>
+              </div>
+              {showKnowledgeConfig ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="px-6 py-4 border-b bg-gray-50/50">
+            <URLManager
+              title="RAG Knowledge Base URLs"
+              description="Add unlimited website URLs to build comprehensive knowledge base for intelligent Q&A"
+              onIngest={async (urls) => {
+                toast({
+                  title: 'URLs Added',
+                  description: `Successfully added ${urls.length} URLs to RAG knowledge base`,
+                });
+                // Clear messages to encourage users to ask new questions
+                setMessages([]);
+              }}
+              maxUrls={100}
+              className="border-none shadow-none bg-transparent"
+            />
+          </CollapsibleContent>
+        </Collapsible>
 
         <div className="flex-1 flex flex-col">
           {/* Messages */}

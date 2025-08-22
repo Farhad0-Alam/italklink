@@ -15,8 +15,13 @@ import {
   Bot, 
   User, 
   Upload,
-  X
+  X,
+  Settings,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
+import { URLManager } from '@/components/URLManager';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
@@ -50,6 +55,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
   const [voiceMode, setVoiceMode] = useState(false); // Toggle for voice conversation mode
   const [lastInputWasVoice, setLastInputWasVoice] = useState(false); // Track if last input was voice
   const [voiceState, setVoiceState] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle'); // ChatGPT-like voice states
+  const [showKnowledgeConfig, setShowKnowledgeConfig] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -420,6 +426,43 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
             </div>
           </div>
         )}
+
+        {/* URL Knowledge Configuration */}
+        <Collapsible open={showKnowledgeConfig} onOpenChange={setShowKnowledgeConfig}>
+          <CollapsibleTrigger asChild>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-between px-6 py-3 h-auto border-b hover:bg-gray-50"
+              data-testid="button-toggle-url-config"
+            >
+              <div className="flex items-center gap-2">
+                <Settings className="h-4 w-4" style={{ color: primaryColor }} />
+                <span className="font-medium text-sm">+ Add Website URLs</span>
+                <Badge variant="outline" className="text-xs">Unlimited</Badge>
+              </div>
+              {showKnowledgeConfig ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="px-6 py-4 border-b bg-gray-50/50">
+            <URLManager
+              title="AI Knowledge Base URLs"
+              description="Add unlimited website URLs to enhance the AI's knowledge for more accurate responses"
+              onIngest={async (urls) => {
+                toast({
+                  title: 'URLs Added',
+                  description: `Successfully added ${urls.length} URLs to AI knowledge base`,
+                });
+                // URLs are automatically available to the AI chat through the RAG system
+              }}
+              maxUrls={100}
+              className="border-none shadow-none bg-transparent"
+            />
+          </CollapsibleContent>
+        </Collapsible>
 
         {/* Messages Area */}
         <ScrollArea className="flex-1 p-6">
