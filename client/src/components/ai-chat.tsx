@@ -95,8 +95,9 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
         conversationHistory: messages.slice(-10) // Send last 10 messages for context
       });
 
-      console.log('AI Response received:', response);
-      const responseContent = (response as any)?.response || (response as any)?.message;
+      const data = await response.json();
+      console.log('AI Response received:', data);
+      const responseContent = data?.response || data?.message;
       const assistantMessage: Message = {
         role: 'assistant',
         content: responseContent || 'I apologize, but I encountered an error processing your request.',
