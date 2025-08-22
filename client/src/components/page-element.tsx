@@ -136,12 +136,13 @@ interface ImageSliderComponentProps {
   images: { id: string; src: string; alt?: string; }[];
   defaultView?: string;
   autoPlay?: boolean;
+  orientation?: string;
+  displayMode?: string;
 }
 
-function ImageSliderComponent({ images, defaultView, autoPlay }: ImageSliderComponentProps) {
+function ImageSliderComponent({ images, defaultView, autoPlay, orientation, displayMode }: ImageSliderComponentProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(autoPlay || false);
-  const [viewMode, setViewMode] = useState<'carousel' | 'grid'>(defaultView as 'carousel' | 'grid' || 'carousel');
 
   // Auto-play functionality
   useEffect(() => {
@@ -153,164 +154,63 @@ function ImageSliderComponent({ images, defaultView, autoPlay }: ImageSliderComp
     }
   }, [isAutoPlay, images.length]);
 
-  if (viewMode === 'grid') {
-    return (
-      <div className="space-y-4">
-        {/* View Toggle */}
-        <div className="flex justify-center">
-          <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-1 flex">
-            <button
-              onClick={() => setViewMode('carousel')}
-              className="px-4 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
-            >
-              Carousel
-            </button>
-            <button
-              onClick={() => setViewMode('grid')}
-              className="px-4 py-2 rounded-md text-sm font-medium bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm transition-colors"
-            >
-              Grid
-            </button>
-          </div>
-        </div>
-        
-        {/* Grid Layout */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {images.map((image, index) => (
-            <div 
-              key={image.id} 
-              className="group relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-            >
-              <img
-                src={image.src}
-                alt={image.alt || ''}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <p className="text-white text-sm font-medium truncate">{image.alt || `Image ${index + 1}`}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
+  // Simple, clean carousel for card display
   return (
-    <div className="space-y-4">
-      {/* View Toggle & Auto-play Control */}
-      <div className="flex justify-between items-center">
-        <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-1 flex">
-          <button
-            onClick={() => setViewMode('carousel')}
-            className="px-4 py-2 rounded-md text-sm font-medium bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm transition-colors"
-          >
-            Carousel
-          </button>
-          <button
-            onClick={() => setViewMode('grid')}
-            className="px-4 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
-          >
-            Grid
-          </button>
-        </div>
-        
-        {images.length > 1 && (
-          <button
-            onClick={() => setIsAutoPlay(!isAutoPlay)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              isAutoPlay 
-                ? 'bg-green-500 text-white shadow-lg' 
-                : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-600'
-            }`}
-          >
-            {isAutoPlay ? '⏸️ Pause' : '▶️ Auto'}
-          </button>
-        )}
-      </div>
-
-      {/* Main Carousel */}
-      <div className="relative rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-2xl">
-        <div className="aspect-video relative">
-          {/* Current Image with Ken Burns Effect */}
-          <div className="absolute inset-0 overflow-hidden">
+    <div className="w-full">
+      {/* Main Carousel - Clean Design for Card */}
+      <div className="relative rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-lg">
+        <div className="relative" style={{ aspectRatio: 'auto' }}>
+          {/* Current Image - Full Display */}
+          <div className="relative">
             <img
               src={images[currentSlide]?.src}
               alt={images[currentSlide]?.alt || ''}
-              className="w-full h-full object-cover scale-110 animate-ken-burns"
+              className={`w-full ${
+                displayMode === 'cover' 
+                  ? 'h-64 object-cover' 
+                  : orientation === 'vertical' 
+                    ? 'max-h-96 object-contain' 
+                    : orientation === 'horizontal'
+                      ? 'max-h-64 object-contain'
+                      : 'max-h-80 object-contain'
+              }`}
               key={currentSlide}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
           </div>
 
-          {/* Navigation Arrows */}
+          {/* Navigation Arrows - Only if multiple images */}
           {images.length > 1 && (
             <>
               <button
                 onClick={() => setCurrentSlide(prev => prev > 0 ? prev - 1 : images.length - 1)}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 hover:scale-110 transition-all duration-200 shadow-lg"
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-all duration-200 shadow-lg"
               >
-                <i className="fas fa-chevron-left text-lg"></i>
+                <i className="fas fa-chevron-left text-sm"></i>
               </button>
               <button
                 onClick={() => setCurrentSlide(prev => prev < images.length - 1 ? prev + 1 : 0)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 hover:scale-110 transition-all duration-200 shadow-lg"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-all duration-200 shadow-lg"
               >
-                <i className="fas fa-chevron-right text-lg"></i>
+                <i className="fas fa-chevron-right text-sm"></i>
               </button>
             </>
           )}
 
-          {/* Image Counter */}
+          {/* Simple dot indicators */}
           {images.length > 1 && (
-            <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm font-medium">
-              {currentSlide + 1} / {images.length}
-            </div>
-          )}
-
-          {/* Image Title */}
-          <div className="absolute bottom-6 left-6 right-6">
-            <h3 className="text-white text-lg font-semibold drop-shadow-lg">
-              {images[currentSlide]?.alt || `Image ${currentSlide + 1}`}
-            </h3>
-          </div>
-        </div>
-
-        {/* Thumbnail Strip */}
-        {images.length > 1 && (
-          <div className="bg-white/10 backdrop-blur-sm p-4">
-            <div className="flex space-x-3 overflow-x-auto scrollbar-hide">
-              {images.map((image, index) => (
+            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2">
+              {images.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all duration-200 ${
-                    index === currentSlide 
-                      ? 'ring-3 ring-white ring-offset-2 ring-offset-transparent scale-110' 
-                      : 'opacity-70 hover:opacity-100 hover:scale-105'
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === currentSlide ? 'bg-white scale-125' : 'bg-white/60'
                   }`}
-                >
-                  <img
-                    src={image.src}
-                    alt={image.alt || ''}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
+                />
               ))}
             </div>
-          </div>
-        )}
-
-        {/* Progress Bar */}
-        {isAutoPlay && images.length > 1 && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-            <div 
-              className="h-full bg-white transition-all duration-4000 ease-linear"
-              style={{ width: `${((currentSlide + 1) / images.length) * 100}%` }}
-            />
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
@@ -1498,33 +1398,98 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
 
                 {/* Gallery Settings */}
                 {element.data.images && element.data.images.length > 0 && (
-                  <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
+                  <div className="bg-slate-700/50 rounded-lg p-4 space-y-4">
                     <h4 className="text-white text-sm font-medium flex items-center">
                       <i className="fas fa-cog mr-2 text-slate-400"></i>
                       Gallery Settings
                     </h4>
                     
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-4">
+                      {/* Image Orientation Setting */}
                       <div>
-                        <label className="block text-xs text-slate-400 mb-1">Default View</label>
-                        <select
-                          value={(element.data as any)?.defaultView || 'carousel'}
-                          onChange={(e) => handleDataUpdate({ defaultView: e.target.value })}
-                          className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md text-white text-sm"
-                        >
-                          <option value="carousel">Carousel</option>
-                          <option value="grid">Grid</option>
-                        </select>
+                        <label className="block text-xs text-slate-400 mb-2">Image Orientation</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          <button
+                            onClick={() => handleDataUpdate({ orientation: 'mixed' })}
+                            className={`p-3 rounded-lg border text-xs transition-colors ${
+                              (!((element.data as any)?.orientation) || (element.data as any)?.orientation === 'mixed')
+                                ? 'bg-talklink-500 border-talklink-400 text-white'
+                                : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
+                            }`}
+                          >
+                            <div className="w-8 h-6 mx-auto mb-1 bg-slate-400 rounded grid grid-cols-2 gap-0.5">
+                              <div className="bg-slate-300 rounded-sm"></div>
+                              <div className="bg-slate-300 rounded-sm"></div>
+                            </div>
+                            Mixed
+                          </button>
+                          <button
+                            onClick={() => handleDataUpdate({ orientation: 'horizontal' })}
+                            className={`p-3 rounded-lg border text-xs transition-colors ${
+                              (element.data as any)?.orientation === 'horizontal'
+                                ? 'bg-talklink-500 border-talklink-400 text-white'
+                                : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
+                            }`}
+                          >
+                            <div className="w-8 h-5 mx-auto mb-1 bg-slate-400 rounded"></div>
+                            Landscape
+                          </button>
+                          <button
+                            onClick={() => handleDataUpdate({ orientation: 'vertical' })}
+                            className={`p-3 rounded-lg border text-xs transition-colors ${
+                              (element.data as any)?.orientation === 'vertical'
+                                ? 'bg-talklink-500 border-talklink-400 text-white'
+                                : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
+                            }`}
+                          >
+                            <div className="w-5 h-8 mx-auto mb-1 bg-slate-400 rounded"></div>
+                            Portrait
+                          </button>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-2">
+                          Choose optimal display for your image collection
+                        </p>
                       </div>
-                      
-                      <div className="flex items-center space-x-2 pt-5">
+
+                      {/* Auto-play Setting */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <label className="text-xs text-slate-300 font-medium">Auto-play slides</label>
+                          <p className="text-xs text-slate-500">Automatically advance images every 4 seconds</p>
+                        </div>
                         <input
                           type="checkbox"
                           checked={(element.data as any)?.autoPlay || false}
                           onChange={(e) => handleDataUpdate({ autoPlay: e.target.checked })}
                           className="rounded border-slate-500 text-talklink-500 focus:ring-talklink-500"
                         />
-                        <label className="text-xs text-slate-400">Auto-play</label>
+                      </div>
+
+                      {/* Image Display Mode */}
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-2">Display Mode</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => handleDataUpdate({ displayMode: 'contain' })}
+                            className={`p-2 rounded-lg border text-xs transition-colors ${
+                              (!((element.data as any)?.displayMode) || (element.data as any)?.displayMode === 'contain')
+                                ? 'bg-talklink-500 border-talklink-400 text-white'
+                                : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
+                            }`}
+                          >
+                            Fit Full Image
+                          </button>
+                          <button
+                            onClick={() => handleDataUpdate({ displayMode: 'cover' })}
+                            className={`p-2 rounded-lg border text-xs transition-colors ${
+                              (element.data as any)?.displayMode === 'cover'
+                                ? 'bg-talklink-500 border-talklink-400 text-white'
+                                : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
+                            }`}
+                          >
+                            Crop to Fill
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1536,6 +1501,8 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   images={element.data.images}
                   defaultView={(element.data as any)?.defaultView}
                   autoPlay={(element.data as any)?.autoPlay}
+                  orientation={(element.data as any)?.orientation}
+                  displayMode={(element.data as any)?.displayMode}
                 />
               )
             )}
