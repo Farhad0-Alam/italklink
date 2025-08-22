@@ -107,9 +107,55 @@ async function extractWebsiteText(url: string): Promise<string> {
       console.log('Extracted from individual elements, parts found:', textParts.length);
     }
     
-    // Strategy 5: Last resort - extract from raw HTML with regex
+    // Strategy 5: Extract from Next.js/React JSON data in script tags
     if (!text.trim()) {
-      console.log('All DOM extraction failed, trying raw HTML parsing...');
+      console.log('DOM extraction failed, trying to extract from script tags...');
+      const scriptTags = Array.from(document.querySelectorAll('script'));
+      
+      for (const script of scriptTags) {
+        const scriptContent = script.textContent || script.innerHTML;
+        
+        // Look for Next.js __NEXT_DATA__ 
+        if (scriptContent.includes('__NEXT_DATA__')) {
+          try {
+            const match = scriptContent.match(/window\.__NEXT_DATA__\s*=\s*({.*?});?\s*$/);
+            if (match) {
+              const data = JSON.parse(match[1]);
+              // Extract text from the props/page data
+              const jsonText = JSON.stringify(data).replace(/[{}[\]"]/g, ' ').replace(/[:,]/g, ' ');
+              text = jsonText.replace(/\s+/g, ' ').trim();
+              console.log('Extracted from __NEXT_DATA__, length:', text.length);
+              break;
+            }
+          } catch (e) {
+            console.log('Failed to parse __NEXT_DATA__');
+          }
+        }
+        
+        // Look for any JSON data in scripts
+        if (scriptContent.includes('{') && scriptContent.includes('"')) {
+          try {
+            // Try to extract any JSON-like data from scripts
+            const jsonMatches = scriptContent.match(/\{[^{}]*"[^"]*"[^{}]*\}/g);
+            if (jsonMatches) {
+              const combinedData = jsonMatches.join(' ');
+              const cleanedData = combinedData.replace(/[{}[\]"]/g, ' ').replace(/[:,]/g, ' ');
+              if (cleanedData.length > text.length) {
+                text = cleanedData.replace(/\s+/g, ' ').trim();
+                console.log('Extracted from script JSON data, length:', text.length);
+                break;
+              }
+            }
+          } catch (e) {
+            // Continue trying other scripts
+          }
+        }
+      }
+    }
+
+    // Strategy 6: Last resort - extract from raw HTML with regex  
+    if (!text.trim()) {
+      console.log('All extraction methods failed, trying raw HTML parsing...');
       // Remove script and style tags from HTML
       const cleanHtml = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
                             .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
