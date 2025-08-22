@@ -74,7 +74,9 @@ router.post('/chat', async (req, res) => {
       .join('\n\n');
     
     // 3. Generate answer using chat model
-    const systemPrompt = `You are a helpful AI assistant. Answer the user's question based on the provided context below. Use the context to provide a helpful answer, and if the context provides relevant information, elaborate appropriately. Always include short citations like [#1] when referencing specific information. If the context doesn't contain enough information to answer the question, say you don't have sufficient information.
+    const systemPrompt = `You are a helpful AI assistant. Answer the user's question based on the provided context below. Use the context to provide a helpful answer, and if the context provides relevant information, elaborate appropriately. Always include short citations like [#1] when referencing specific information. 
+
+When answering about companies or brands, be flexible with name variations (e.g., "2TalkLink", "TalkLink", "2talklink" all refer to the same company). If the context doesn't contain enough information to answer the question, say you don't have sufficient information.
 
 Context:
 ${context}`;

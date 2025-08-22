@@ -119,16 +119,16 @@ export function RAGChatBox() {
         </div>
       )}
       
-      <div className={`max-w-[80%] space-y-2 ${message.type === 'user' ? 'order-1' : ''}`}>
+      <div className={`max-w-[85%] lg:max-w-[80%] space-y-2 ${message.type === 'user' ? 'order-1' : ''}`}>
         <div
-          className={`p-3 rounded-lg ${
+          className={`p-2 lg:p-3 rounded-lg ${
             message.type === 'user'
               ? 'bg-primary text-primary-foreground'
               : 'bg-muted'
           }`}
           data-testid={`message-${message.type}`}
         >
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
         </div>
         
         {message.sources && message.sources.length > 0 && (
@@ -161,22 +161,22 @@ export function RAGChatBox() {
   );
 
   return (
-    <Card className="w-full max-w-4xl h-[600px] flex flex-col">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <Card className="w-full max-w-4xl h-[500px] lg:h-[600px] flex flex-col">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
           <Bot className="h-5 w-5" />
-          RAG-Powered AI Chat
+          AI Chat
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="flex-1 flex flex-col p-4">
+      <CardContent className="flex-1 flex flex-col p-3 lg:p-4">
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto space-y-4 mb-4 scroll-smooth" data-testid="chat-messages">
+        <div className="flex-1 overflow-y-auto space-y-3 lg:space-y-4 mb-3 lg:mb-4 scroll-smooth px-1" data-testid="chat-messages">
           {messages.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
-              <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Ask me anything about the ingested content!</p>
-              <p className="text-sm mt-2">Make sure to ingest some URLs first using the ingestion form.</p>
+            <div className="text-center text-muted-foreground py-6 lg:py-8">
+              <Bot className="h-10 lg:h-12 w-10 lg:w-12 mx-auto mb-3 lg:mb-4 opacity-50" />
+              <p className="text-sm lg:text-base">Ask me anything about the ingested content!</p>
+              <p className="text-xs lg:text-sm mt-2">Make sure to ingest some URLs first using the ingestion form.</p>
             </div>
           ) : (
             messages.map(renderMessage)
@@ -204,15 +204,16 @@ export function RAGChatBox() {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me anything about the ingested content..."
+            placeholder="Ask me anything..."
             disabled={isLoading}
-            className="flex-1"
+            className="flex-1 text-sm"
             data-testid="input-chat"
           />
           <Button 
             type="submit" 
             disabled={isLoading || !input.trim()}
             size="icon"
+            className="shrink-0"
             data-testid="button-send"
           >
             <Send className="h-4 w-4" />
