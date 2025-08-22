@@ -671,6 +671,17 @@ export const ragKnowledgeElementSchema = baseElementSchema.extend({
   data: z.object({
     title: z.string().default("Knowledge Base Assistant"),
     description: z.string().default("Advanced AI assistant with website knowledge ingestion"),
+    knowledgeBase: z.object({
+      textContent: z.string().optional(),
+      websiteUrl: z.string().url().optional().or(z.literal("")),
+      pdfFiles: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        content: z.string(), // extracted text content
+        size: z.number().optional(),
+        uploadedAt: z.date().optional(),
+      })).default([]),
+    }),
     showIngestForm: z.boolean().default(true),
     showChatBox: z.boolean().default(true),
     primaryColor: z.string().default("#22c55e"),
