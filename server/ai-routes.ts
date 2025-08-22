@@ -65,9 +65,15 @@ async function extractWebsiteText(url: string): Promise<string> {
     const dom = new JSDOM(html, { runScripts: "dangerously" });
     const document = dom.window.document;
     
-    // Debug: Log HTML structure
+    // Debug: Log HTML structure and meta tags
     console.log('HTML title:', document.title);
     console.log('HTML body preview:', document.body?.innerHTML?.substring(0, 500) + '...');
+    
+    // Debug meta tags
+    const metaDesc = document.querySelector('meta[name="description"]');
+    const debugOgTitle = document.querySelector('meta[property="og:title"]');
+    console.log('Meta description found:', metaDesc?.getAttribute('content')?.substring(0, 100));
+    console.log('OG title found:', debugOgTitle?.getAttribute('content'));
     
     // Remove script and style elements
     const scripts = document.querySelectorAll('script, style, nav, footer, aside');
@@ -96,12 +102,17 @@ async function extractWebsiteText(url: string): Promise<string> {
     
     if (ogTitle && ogTitle !== title) metaTexts.push(`Social Title: ${ogTitle}`);
     if (ogDesc && ogDesc !== description) metaTexts.push(`Social Description: ${ogDesc}`);
-    if (twitterTitle && twitterTitle !== ogTitle) metaTexts.push(`Twitter Title: ${twitterTitle}`);
-    if (twitterDesc && twitterDesc !== ogDesc) metaTexts.push(`Twitter Description: ${twitterDesc}`);
+    if (twitterTitle && twitterTitle !== title) metaTexts.push(`Twitter Title: ${twitterTitle}`);
+    if (twitterDesc && twitterDesc !== description) metaTexts.push(`Twitter Description: ${twitterDesc}`);
     
     if (metaTexts.length > 0) {
       text = metaTexts.join(' ');
       console.log('Extracted from meta tags, parts found:', metaTexts.length);
+      console.log('Meta texts:', metaTexts);
+    } else {
+      console.log('No meta tag content found! Checking what went wrong...');
+      console.log('Title check:', title);
+      console.log('Description check:', description);
     }
     
     // Strategy 2: Try main content areas
