@@ -1687,7 +1687,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
       case "googleMaps":
         return (
           <div className="mb-6">
-            <h3 className="text-lg font-bold text-slate-800 mb-4 text-center">
+            <h3 className="text-lg font-bold text-black mb-4 text-center">
               {element.data.title}
             </h3>
             {isEditing ? (
