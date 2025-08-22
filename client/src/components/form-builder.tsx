@@ -701,6 +701,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               onElementsChange={(elements: PageElement[]) => {
                 form.setValue("pageElements", elements);
               }}
+              cardData={watchedValues}
             />
           </div>
 

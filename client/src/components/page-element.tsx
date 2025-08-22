@@ -138,9 +138,10 @@ interface PageElementProps {
   onUpdate?: (element: PageElement) => void;
   onDelete?: (elementId: string) => void;
   isInteractive?: boolean;
+  cardData?: any; // Business card data for theme colors
 }
 
-export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete }: PageElementProps) {
+export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, cardData }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   
   // Helper function to safely access element data
@@ -470,7 +471,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         {element.data.customLabel && element.data.labelText && (
                           <div 
                             className="mt-3 px-4 py-2 rounded-full text-white font-medium text-sm"
-                            style={{backgroundColor: element.data.frameColor || '#22c55e'}}
+                            style={{backgroundColor: cardData?.brandColor || '#22c55e'}}
                           >
                             {element.data.labelText}
                           </div>
@@ -508,7 +509,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     {element.data.customLabel && element.data.labelText && (
                       <div 
                         className="mt-3 px-4 py-2 rounded-full text-white font-medium text-sm"
-                        style={{backgroundColor: element.data.frameColor || '#22c55e'}}
+                        style={{backgroundColor: cardData?.brandColor || '#22c55e'}}
                       >
                         {element.data.labelText}
                       </div>

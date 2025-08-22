@@ -28,9 +28,10 @@ interface SortableElementProps {
   element: PageElement;
   onUpdate: (element: PageElement) => void;
   onDelete: (elementId: string) => void;
+  cardData?: any;
 }
 
-function SortableElement({ element, onUpdate, onDelete }: SortableElementProps) {
+function SortableElement({ element, onUpdate, onDelete, cardData }: SortableElementProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const {
     attributes,
@@ -105,6 +106,7 @@ function SortableElement({ element, onUpdate, onDelete }: SortableElementProps) 
                 isEditing={true}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
+                cardData={cardData}
               />
             </div>
           </CollapsibleContent>
@@ -117,9 +119,10 @@ function SortableElement({ element, onUpdate, onDelete }: SortableElementProps) 
 interface PageBuilderProps {
   elements: PageElement[];
   onElementsChange: (elements: PageElement[]) => void;
+  cardData?: any; // Business card data for theme colors
 }
 
-export function PageBuilder({ elements, onElementsChange }: PageBuilderProps) {
+export function PageBuilder({ elements, onElementsChange, cardData }: PageBuilderProps) {
   const [showElementSelector, setShowElementSelector] = useState(false);
   
   const sensors = useSensors(
@@ -204,6 +207,7 @@ export function PageBuilder({ elements, onElementsChange }: PageBuilderProps) {
                   element={element}
                   onUpdate={handleUpdateElement}
                   onDelete={handleDeleteElement}
+                  cardData={cardData}
                 />
               ))}
             </div>

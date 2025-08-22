@@ -339,7 +339,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           {data.pageElements && data.pageElements.length > 0 && (
             <div className="space-y-4 mb-6">
               {data.pageElements.map((element) => (
-                <PageElementRenderer key={element.id} element={element} isInteractive={isInteractive} />
+                <PageElementRenderer key={element.id} element={element} isInteractive={isInteractive} cardData={data} />
               ))}
             </div>
           )}
