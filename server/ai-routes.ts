@@ -31,17 +31,31 @@ async function extractWebsiteText(url: string): Promise<string> {
     
     // Add timeout to prevent hanging requests
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
     
     const response = await fetch(url, { 
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; AI Knowledge Extractor)'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Cache-Control': 'max-age=0',
+        'DNT': '1'
       }
     });
     clearTimeout(timeoutId);
     
     if (!response.ok) {
+      console.log(`HTTP ${response.status} error for ${url}: ${response.statusText}`);
+      if (response.status === 403) {
+        console.log('Website is blocking requests. This may be due to anti-bot protection.');
+      }
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     
