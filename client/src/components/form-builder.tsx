@@ -125,7 +125,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <>
           {/* Cover & Logo Upload */}
           <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
             <div 
@@ -315,15 +314,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </div>
 
           {/* Basic Information */}
-          <div 
-            className="rounded-lg p-4 space-y-4" 
-            style={{
-              backgroundColor: watchedValues.sectionStyles?.basicInfo?.sectionBackgroundColor || 'rgba(34, 197, 94, 0.3)',
-              borderColor: watchedValues.sectionStyles?.basicInfo?.sectionBorderColor || 'rgba(34, 197, 94, 0.6)',
-              borderWidth: '1px',
-              borderStyle: 'solid'
-            }}
-          >
+          <div className="bg-green-900/30 border border-green-600/30 rounded-lg p-4 space-y-4">
             <div 
               className="flex items-center justify-between cursor-pointer"
               onClick={() => toggleSection('basicInfo')}
@@ -373,61 +364,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 data-testid="input-company"
               />
             </div>
+            </>
+            )}
+          </div>
 
-            
-            {/* Basic Info Section Styling */}
-            <div className="border-t border-green-600/30 pt-4 space-y-4">
-              <div 
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() => toggleSection('basicSectionStyling')}
-              >
-                <h4 className="text-sm font-medium text-green-200">Section Styling</h4>
-                <i className={`fas fa-chevron-${collapsedSections.basicSectionStyling ? 'down' : 'up'} text-green-200`}></i>
-              </div>
-              {!collapsedSections.basicSectionStyling && (
-              <>
-              <div>
-                <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-white text-xs">Section Background</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.basicInfo?.sectionBackgroundColor || "#16a34a"}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.sectionBackgroundColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.basicInfo?.sectionBackgroundColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.sectionBackgroundColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#16a34a"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-white text-xs">Section Border</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.basicInfo?.sectionBorderColor || "#22c55e"}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.sectionBorderColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.basicInfo?.sectionBorderColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.sectionBorderColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#22c55e"
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <h4 className="text-sm font-medium text-green-200 pt-2">Text Styling (Optional)</h4>
-              
-              {/* Name Styling */}
-              <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+          {/* Contact Information */}
+          <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
                 <div 
                   className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleSection('nameStyling')}
@@ -1896,7 +1838,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <span className="text-sm">Auto-saving changes...</span>
             </div>
-          </div>
           </div>
         </CardContent>
       </Card>
