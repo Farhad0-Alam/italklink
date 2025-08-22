@@ -97,3 +97,31 @@
     font-family: var(--font-poppins);
   }
 }
+
+/* Ken Burns Animation for Image Slider */
+@keyframes ken-burns {
+  0% { transform: scale(1.1) translate(0, 0); }
+  25% { transform: scale(1.15) translate(-2%, -2%); }
+  50% { transform: scale(1.2) translate(2%, -1%); }
+  75% { transform: scale(1.15) translate(-1%, 2%); }
+  100% { transform: scale(1.1) translate(0, 0); }
+}
+
+.animate-ken-burns {
+  animation: ken-burns 20s ease-in-out infinite;
+}
+
+/* Custom duration classes */
+.duration-4000 {
+  transition-duration: 4s;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

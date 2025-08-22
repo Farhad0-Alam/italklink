@@ -4,52 +4,312 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { QRCodeSVG } from "qrcode.react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { generateFieldId } from "@/lib/card-data";
 import { AIChat } from "@/components/ai-chat";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-// Image Slider Component
-interface ImageSliderComponentProps {
-  images: { id: string; src: string; alt?: string; }[];
+// Sortable Image Item Component
+interface SortableImageItemProps {
+  image: { id: string; src: string; alt?: string; };
+  index: number;
+  onDelete: () => void;
+  onUpdateAlt: (alt: string) => void;
 }
 
-function ImageSliderComponent({ images }: ImageSliderComponentProps) {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  
+function SortableImageItem({ image, index, onDelete, onUpdateAlt }: SortableImageItemProps) {
+  const [showAltInput, setShowAltInput] = useState(false);
+  const [altText, setAltText] = useState(image.alt || '');
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: image.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
-    <div className="relative rounded-lg overflow-hidden bg-slate-100">
-      <div className="aspect-video relative">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`group relative rounded-xl overflow-hidden bg-slate-600 shadow-lg transition-all duration-200 ${
+        isDragging ? 'opacity-50 scale-105 z-50' : 'hover:shadow-xl'
+      }`}
+    >
+      {/* Drag Handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-2 left-2 w-8 h-8 bg-black/50 backdrop-blur-sm rounded-lg flex items-center justify-center cursor-grab active:cursor-grabbing z-20 opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <i className="fas fa-grip-vertical text-white text-xs"></i>
+      </div>
+
+      {/* Delete Button */}
+      <Button
+        onClick={onDelete}
+        variant="destructive"
+        size="sm"
+        className="absolute top-2 right-2 w-8 h-8 p-0 text-xs opacity-0 group-hover:opacity-100 transition-opacity z-20"
+      >
+        <i className="fas fa-times"></i>
+      </Button>
+
+      {/* Image Index */}
+      <div className="absolute bottom-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20">
+        #{index + 1}
+      </div>
+
+      {/* Image */}
+      <div className="aspect-square">
         <img
-          src={images[currentSlide]?.src}
-          alt={images[currentSlide]?.alt || ''}
-          className="w-full h-full object-cover"
+          src={image.src}
+          alt={image.alt || ''}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+
+      {/* Alt Text Input */}
+      {showAltInput ? (
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/80 backdrop-blur-sm">
+          <Input
+            value={altText}
+            onChange={(e) => setAltText(e.target.value)}
+            onBlur={() => {
+              onUpdateAlt(altText);
+              setShowAltInput(false);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                onUpdateAlt(altText);
+                setShowAltInput(false);
+              }
+              if (e.key === 'Escape') {
+                setAltText(image.alt || '');
+                setShowAltInput(false);
+              }
+            }}
+            placeholder="Image description..."
+            className="text-xs bg-transparent border-none text-white placeholder:text-slate-300 p-0 h-auto focus:ring-0"
+            autoFocus
+          />
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowAltInput(true)}
+          className="absolute bottom-0 left-0 right-0 p-2 bg-black/50 backdrop-blur-sm text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+        >
+          {image.alt || 'Add description...'}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// Enhanced Image Slider Component with Modern Design
+interface ImageSliderComponentProps {
+  images: { id: string; src: string; alt?: string; }[];
+  defaultView?: string;
+  autoPlay?: boolean;
+}
+
+function ImageSliderComponent({ images, defaultView, autoPlay }: ImageSliderComponentProps) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlay, setIsAutoPlay] = useState(autoPlay || false);
+  const [viewMode, setViewMode] = useState<'carousel' | 'grid'>(defaultView as 'carousel' | 'grid' || 'carousel');
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (isAutoPlay && images.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentSlide(prev => prev < images.length - 1 ? prev + 1 : 0);
+      }, 4000);
+      return () => clearInterval(interval);
+    }
+  }, [isAutoPlay, images.length]);
+
+  if (viewMode === 'grid') {
+    return (
+      <div className="space-y-4">
+        {/* View Toggle */}
+        <div className="flex justify-center">
+          <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-1 flex">
+            <button
+              onClick={() => setViewMode('carousel')}
+              className="px-4 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+            >
+              Carousel
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className="px-4 py-2 rounded-md text-sm font-medium bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm transition-colors"
+            >
+              Grid
+            </button>
+          </div>
+        </div>
+        
+        {/* Grid Layout */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {images.map((image, index) => (
+            <div 
+              key={image.id} 
+              className="group relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+            >
+              <img
+                src={image.src}
+                alt={image.alt || ''}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <p className="text-white text-sm font-medium truncate">{image.alt || `Image ${index + 1}`}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* View Toggle & Auto-play Control */}
+      <div className="flex justify-between items-center">
+        <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-1 flex">
+          <button
+            onClick={() => setViewMode('carousel')}
+            className="px-4 py-2 rounded-md text-sm font-medium bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm transition-colors"
+          >
+            Carousel
+          </button>
+          <button
+            onClick={() => setViewMode('grid')}
+            className="px-4 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+          >
+            Grid
+          </button>
+        </div>
+        
         {images.length > 1 && (
-          <>
-            <button
-              onClick={() => setCurrentSlide(prev => prev > 0 ? prev - 1 : images.length - 1)}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
-            >
-              <i className="fas fa-chevron-left text-sm"></i>
-            </button>
-            <button
-              onClick={() => setCurrentSlide(prev => prev < images.length - 1 ? prev + 1 : 0)}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
-            >
-              <i className="fas fa-chevron-right text-sm"></i>
-            </button>
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-              {images.map((_, index) => (
+          <button
+            onClick={() => setIsAutoPlay(!isAutoPlay)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              isAutoPlay 
+                ? 'bg-green-500 text-white shadow-lg' 
+                : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-600'
+            }`}
+          >
+            {isAutoPlay ? '⏸️ Pause' : '▶️ Auto'}
+          </button>
+        )}
+      </div>
+
+      {/* Main Carousel */}
+      <div className="relative rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-2xl">
+        <div className="aspect-video relative">
+          {/* Current Image with Ken Burns Effect */}
+          <div className="absolute inset-0 overflow-hidden">
+            <img
+              src={images[currentSlide]?.src}
+              alt={images[currentSlide]?.alt || ''}
+              className="w-full h-full object-cover scale-110 animate-ken-burns"
+              key={currentSlide}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+          </div>
+
+          {/* Navigation Arrows */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={() => setCurrentSlide(prev => prev > 0 ? prev - 1 : images.length - 1)}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 hover:scale-110 transition-all duration-200 shadow-lg"
+              >
+                <i className="fas fa-chevron-left text-lg"></i>
+              </button>
+              <button
+                onClick={() => setCurrentSlide(prev => prev < images.length - 1 ? prev + 1 : 0)}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 hover:scale-110 transition-all duration-200 shadow-lg"
+              >
+                <i className="fas fa-chevron-right text-lg"></i>
+              </button>
+            </>
+          )}
+
+          {/* Image Counter */}
+          {images.length > 1 && (
+            <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm font-medium">
+              {currentSlide + 1} / {images.length}
+            </div>
+          )}
+
+          {/* Image Title */}
+          <div className="absolute bottom-6 left-6 right-6">
+            <h3 className="text-white text-lg font-semibold drop-shadow-lg">
+              {images[currentSlide]?.alt || `Image ${currentSlide + 1}`}
+            </h3>
+          </div>
+        </div>
+
+        {/* Thumbnail Strip */}
+        {images.length > 1 && (
+          <div className="bg-white/10 backdrop-blur-sm p-4">
+            <div className="flex space-x-3 overflow-x-auto scrollbar-hide">
+              {images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === currentSlide ? 'bg-white' : 'bg-white/50'
+                  className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all duration-200 ${
+                    index === currentSlide 
+                      ? 'ring-3 ring-white ring-offset-2 ring-offset-transparent scale-110' 
+                      : 'opacity-70 hover:opacity-100 hover:scale-105'
                   }`}
-                />
+                >
+                  <img
+                    src={image.src}
+                    alt={image.alt || ''}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
               ))}
             </div>
-          </>
+          </div>
+        )}
+
+        {/* Progress Bar */}
+        {isAutoPlay && images.length > 1 && (
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+            <div 
+              className="h-full bg-white transition-all duration-4000 ease-linear"
+              style={{ width: `${((currentSlide + 1) / images.length) * 100}%` }}
+            />
+          </div>
         )}
       </div>
     </div>
@@ -143,6 +403,18 @@ interface PageElementProps {
 
 export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, cardData }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  
+  // Define sensors for drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
   
   // Helper function to safely access element data
   const getData = () => element.data || {};
@@ -1136,53 +1408,135 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
         return (
           <div className="mb-4">
             {isEditing ? (
-              <div className="space-y-2">
-                <div className="text-white text-sm">Image Slider (Upload images)</div>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    files.forEach(file => {
-                      const reader = new FileReader();
-                      reader.onload = (event) => {
-                        const newImage = {
-                          id: Math.random().toString(36).substring(7),
-                          src: event.target?.result as string,
-                          alt: file.name
-                        };
-                        handleDataUpdate({ 
-                          images: [...element.data.images, newImage] 
-                        });
-                      };
-                      reader.readAsDataURL(file);
-                    });
-                  }}
-                  className="bg-slate-700 border-slate-600 text-white"
-                />
-                <div className="grid grid-cols-3 gap-2">
-                  {element.data.images.map((img, index) => (
-                    <div key={img.id} className="relative">
-                      <img src={img.src} alt={img.alt || ''} className="w-full h-20 object-cover rounded" />
-                      <Button
-                        onClick={() => {
-                          const newImages = element.data.images.filter((_, i) => i !== index);
-                          handleDataUpdate({ images: newImages });
-                        }}
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-1 right-1 w-6 h-6 p-0 text-xs"
-                      >
-                        <i className="fas fa-times"></i>
-                      </Button>
-                    </div>
-                  ))}
+              <div className="space-y-4">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                    <h3 className="text-white text-sm font-medium">Image Gallery</h3>
+                    <span className="text-xs text-slate-400">({element.data.images?.length || 0} images)</span>
+                  </div>
+                  <div className="text-xs text-slate-400">Drag to reorder</div>
                 </div>
+
+                {/* Upload Button */}
+                <div className="relative">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      files.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          const newImage = {
+                            id: Math.random().toString(36).substring(7),
+                            src: event.target?.result as string,
+                            alt: file.name.split('.')[0]
+                          };
+                          handleDataUpdate({ 
+                            images: [...(element.data.images || []), newImage] 
+                          });
+                        };
+                        reader.readAsDataURL(file);
+                      });
+                    }}
+                    className="bg-slate-700 border-slate-600 text-white file:bg-talklink-500 file:text-white file:border-none file:rounded-md file:px-4 file:py-2 file:mr-4 hover:file:bg-talklink-600"
+                  />
+                </div>
+
+                {/* Image Preview with Drag & Drop */}
+                {element.data.images && element.data.images.length > 0 && (
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={(event) => {
+                      const {active, over} = event;
+                      if (active.id !== over?.id) {
+                        const oldIndex = element.data.images.findIndex(img => img.id === active.id);
+                        const newIndex = element.data.images.findIndex(img => img.id === over?.id);
+                        const reorderedImages = arrayMove(element.data.images, oldIndex, newIndex);
+                        handleDataUpdate({ images: reorderedImages });
+                      }
+                    }}
+                  >
+                    <SortableContext items={element.data.images.map(img => img.id)} strategy={rectSortingStrategy}>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {element.data.images.map((img, index) => (
+                          <SortableImageItem
+                            key={img.id}
+                            image={img}
+                            index={index}
+                            onDelete={() => {
+                              const newImages = element.data.images.filter((_, i) => i !== index);
+                              handleDataUpdate({ images: newImages });
+                            }}
+                            onUpdateAlt={(alt) => {
+                              const updatedImages = element.data.images.map((image, i) => 
+                                i === index ? { ...image, alt } : image
+                              );
+                              handleDataUpdate({ images: updatedImages });
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                )}
+
+                {/* Empty State */}
+                {(!element.data.images || element.data.images.length === 0) && (
+                  <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center">
+                    <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-slate-700 flex items-center justify-center">
+                      <i className="fas fa-images text-slate-400 text-xl"></i>
+                    </div>
+                    <p className="text-slate-400 text-sm">Upload images to create your gallery</p>
+                    <p className="text-slate-500 text-xs mt-1">Supports multiple image formats</p>
+                  </div>
+                )}
+
+                {/* Gallery Settings */}
+                {element.data.images && element.data.images.length > 0 && (
+                  <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
+                    <h4 className="text-white text-sm font-medium flex items-center">
+                      <i className="fas fa-cog mr-2 text-slate-400"></i>
+                      Gallery Settings
+                    </h4>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">Default View</label>
+                        <select
+                          value={(element.data as any)?.defaultView || 'carousel'}
+                          onChange={(e) => handleDataUpdate({ defaultView: e.target.value })}
+                          className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md text-white text-sm"
+                        >
+                          <option value="carousel">Carousel</option>
+                          <option value="grid">Grid</option>
+                        </select>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 pt-5">
+                        <input
+                          type="checkbox"
+                          checked={(element.data as any)?.autoPlay || false}
+                          onChange={(e) => handleDataUpdate({ autoPlay: e.target.checked })}
+                          className="rounded border-slate-500 text-talklink-500 focus:ring-talklink-500"
+                        />
+                        <label className="text-xs text-slate-400">Auto-play</label>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
-              element.data.images.length > 0 && (
-                <ImageSliderComponent images={element.data.images} />
+              element.data.images?.length > 0 && (
+                <ImageSliderComponent 
+                  images={element.data.images}
+                  defaultView={(element.data as any)?.defaultView}
+                  autoPlay={(element.data as any)?.autoPlay}
+                />
               )
             )}
           </div>
