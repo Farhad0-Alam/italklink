@@ -1745,7 +1745,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   <>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-white text-sm mb-1 block">Zoom Level</label>
+                        <label className="text-black text-sm mb-1 block">Zoom Level</label>
                         <Input
                           type="number"
                           min="1"
@@ -1756,7 +1756,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         />
                       </div>
                       <div>
-                        <label className="text-white text-sm mb-1 block">Map Type</label>
+                        <label className="text-black text-sm mb-1 block">Map Type</label>
                         <select
                           value={element.data.mapType}
                           onChange={(e) => handleDataUpdate({ mapType: e.target.value })}
@@ -1776,7 +1776,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         onChange={(e) => handleDataUpdate({ showMarker: e.target.checked })}
                         className="rounded"
                       />
-                      <span className="text-white text-sm">Show location marker</span>
+                      <span className="text-black text-sm">Show location marker</span>
                     </div>
                   </>
                 )}
