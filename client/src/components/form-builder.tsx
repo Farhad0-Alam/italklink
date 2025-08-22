@@ -34,6 +34,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     coverLogo: false,
     basicInfo: false,
     contactInfo: false,
+    additionalContacts: false,
     socialMedia: false,
     customization: false,
     appearance: false,
@@ -853,16 +854,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             )}
           </div>
 
-          {/* Contact Information Additional */}
+          {/* Additional Contact Methods */}
           <div className="bg-orange-900/30 border border-orange-600/30 rounded-lg p-4 space-y-4">
             <div 
               className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleSection('socialMedia')}
+              onClick={() => toggleSection('additionalContacts')}
             >
               <h4 className="text-md font-medium text-orange-300">Additional Contact Methods</h4>
-              <i className={`fas ${collapsedSections.socialMedia ? 'fa-chevron-down' : 'fa-chevron-up'} text-orange-300`}></i>
+              <i className={`fas ${collapsedSections.additionalContacts ? 'fa-chevron-down' : 'fa-chevron-up'} text-orange-300`}></i>
             </div>
-            {!collapsedSections.socialMedia && (
+            {!collapsedSections.additionalContacts && (
             <div>
             {form.watch("customContacts")?.map((contact, index) => (
               <div key={contact.id} className="flex gap-2 items-end">
