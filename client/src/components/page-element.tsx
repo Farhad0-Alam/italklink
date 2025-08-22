@@ -419,12 +419,13 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <div className="relative">
                       {/* QR Code Container */}
                       <div 
-                        className={`p-1 transition-all ${
+                        className={`transition-all ${
                           element.data.frameStyle === 'rounded' ? 'rounded-lg' : 'rounded'
                         }`}
                         style={{
                           backgroundColor: 'white',
-                          border: element.data.frameStyle === 'rounded' ? `3px solid ${cardData?.brandColor || '#22c55e'}` : 'none',
+                          padding: '9px',
+                          border: element.data.frameStyle === 'rounded' ? `6px solid ${cardData?.brandColor || '#22c55e'}` : 'none',
                           boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                         }}
                       >
