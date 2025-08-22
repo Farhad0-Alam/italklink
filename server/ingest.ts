@@ -21,10 +21,38 @@ export interface IngestResult {
   error?: string;
 }
 
-// Extract readable content from URL using Readability
+// Extract content from HTML using multiple methods
+function extractMetaContent(html: string): { title: string; content: string } {
+  // Extract meta description
+  const metaDescMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["'][^>]*>/i);
+  const metaDesc = metaDescMatch?.[1] || '';
+  
+  // Extract OG title and description
+  const ogTitleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["'][^>]*>/i);
+  const ogDescMatch = html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["'][^>]*>/i);
+  
+  const ogTitle = ogTitleMatch?.[1] || '';
+  const ogDesc = ogDescMatch?.[1] || '';
+  
+  // Extract title tag
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  const title = titleMatch?.[1] || ogTitle || 'Extracted Content';
+  
+  // Combine all extracted content
+  const content = [metaDesc, ogDesc].filter(Boolean).join(' ');
+  
+  console.log('Found meta description in raw HTML:', metaDesc);
+  console.log('Found OG title in raw HTML:', ogTitle);
+  console.log('Found OG description in raw HTML:', ogDesc);
+  console.log('Successfully extracted meta content from raw HTML, length:', content.length);
+  
+  return { title: title.trim(), content: content.trim() };
+}
+
+// Extract readable content from URL using Readability with fallbacks
 export async function fetchReadable(url: string): Promise<{ title: string; content: string } | null> {
   try {
-    console.log('Fetching URL:', url);
+    console.log('Starting website extraction for URL:', url);
     
     const response = await fetch(url, {
       headers: {
@@ -40,29 +68,70 @@ export async function fetchReadable(url: string): Promise<{ title: string; conte
     }
 
     const html = await response.text();
-    console.log('HTML received, length:', html.length);
+    console.log('Received HTML content, length:', html.length);
 
     const dom = new JSDOM(html, { url });
     const reader = new Readability(dom.window.document);
     const article = reader.parse();
 
-    if (!article) {
-      console.error('Readability failed to parse content');
-      return null;
+    // Try Readability first
+    if (article && article.textContent && article.textContent.length >= 100) {
+      const content = article.textContent.replace(/\s+/g, ' ').trim();
+      console.log('Successfully extracted via Readability, length:', content.length);
+      return {
+        title: article.title || new URL(url).hostname,
+        content,
+      };
     }
 
-    const content = article.textContent?.replace(/\s+/g, ' ').trim() || '';
+    console.log('Readability failed to parse content');
     
-    if (content.length < 200) {
-      console.error('Content too short:', content.length, 'characters');
-      return null;
+    // Fallback: Extract meta tags and structured data
+    const metaContent = extractMetaContent(html);
+    
+    if (metaContent.content.length >= 50) {
+      console.log('Successfully extracted website content:', `Description: ${metaContent.content.substring(0, 100)}...`);
+      return {
+        title: metaContent.title,
+        content: metaContent.content,
+      };
     }
 
-    console.log('Extracted content:', content.length, 'characters');
-    return {
-      title: article.title || new URL(url).hostname,
-      content,
-    };
+    // Final fallback: Extract text from common content areas
+    const document = dom.window.document;
+    const contentSelectors = [
+      'main', 'article', '.content', '#content', 
+      '.post-content', '.entry-content', '.page-content',
+      'p', 'div'
+    ];
+    
+    let fallbackContent = '';
+    for (const selector of contentSelectors) {
+      const elements = document.querySelectorAll(selector);
+      const text = Array.from(elements)
+        .map(el => el.textContent?.trim())
+        .filter(text => text && text.length > 20)
+        .join(' ');
+      
+      if (text.length > fallbackContent.length) {
+        fallbackContent = text;
+      }
+      
+      if (fallbackContent.length >= 200) break;
+    }
+    
+    if (fallbackContent.length >= 50) {
+      const cleanContent = fallbackContent.replace(/\s+/g, ' ').trim();
+      console.log('Extracted via fallback method, length:', cleanContent.length);
+      return {
+        title: metaContent.title || new URL(url).hostname,
+        content: cleanContent,
+      };
+    }
+
+    console.error('All extraction methods failed - insufficient content');
+    return null;
+
   } catch (error) {
     console.error('Error fetching readable content:', error);
     return null;
