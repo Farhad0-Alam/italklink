@@ -409,13 +409,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-white text-xs">Size</Label>
-                    <Input
-                      type="number"
-                      value={watchedValues.sectionStyles?.basicInfo?.nameFontSize || ""}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.nameFontSize', parseInt(e.target.value) || undefined)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="24"
+                    <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.basicInfo?.nameFontSize || 24}px</Label>
+                    <input
+                      type="range"
+                      value={watchedValues.sectionStyles?.basicInfo?.nameFontSize || 24}
+                      onChange={(e) => form.setValue('sectionStyles.basicInfo.nameFontSize', parseInt(e.target.value))}
+                      className="custom-range w-full"
                       min="12"
                       max="48"
                     />
@@ -507,13 +506,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-white text-xs">Size</Label>
-                    <Input
-                      type="number"
-                      value={watchedValues.sectionStyles?.basicInfo?.titleFontSize || ""}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.titleFontSize', parseInt(e.target.value) || undefined)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="14"
+                    <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.basicInfo?.titleFontSize || 14}px</Label>
+                    <input
+                      type="range"
+                      value={watchedValues.sectionStyles?.basicInfo?.titleFontSize || 14}
+                      onChange={(e) => form.setValue('sectionStyles.basicInfo.titleFontSize', parseInt(e.target.value))}
+                      className="custom-range w-full"
                       min="10"
                       max="32"
                     />
@@ -605,13 +603,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-white text-xs">Size</Label>
-                    <Input
-                      type="number"
-                      value={watchedValues.sectionStyles?.basicInfo?.companyFontSize || ""}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.companyFontSize', parseInt(e.target.value) || undefined)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="14"
+                    <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.basicInfo?.companyFontSize || 14}px</Label>
+                    <input
+                      type="range"
+                      value={watchedValues.sectionStyles?.basicInfo?.companyFontSize || 14}
+                      onChange={(e) => form.setValue('sectionStyles.basicInfo.companyFontSize', parseInt(e.target.value))}
+                      className="custom-range w-full"
                       min="10"
                       max="32"
                     />

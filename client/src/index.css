@@ -315,3 +315,55 @@
 .dark .loading-pulse {
   @apply from-gray-700 via-gray-600 to-gray-700;
 }
+
+/* Custom Range Slider Styles */
+.custom-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #a855f7 0%, #a855f7 var(--value, 0%), #d1d5db var(--value, 0%), #d1d5db 100%);
+  outline: none;
+  margin: 8px 0;
+}
+
+.custom-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #a855f7;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.custom-range::-webkit-slider-thumb:hover {
+  background: #9333ea;
+  transform: scale(1.1);
+}
+
+.custom-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #a855f7;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.custom-range::-moz-range-thumb:hover {
+  background: #9333ea;
+  transform: scale(1.1);
+}
+
+.custom-range::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  background: #d1d5db;
+  border: none;
+}
