@@ -1517,21 +1517,37 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             </h3>
             {isEditing ? (
               <div className="space-y-4">
-                <Input
-                  value={element.data.title}
-                  onChange={(e) => handleDataUpdate({ title: e.target.value })}
-                  placeholder="Section title"
-                  className="bg-slate-700 border-slate-600 text-white"
-                />
-                <select
-                  value={element.data.displayStyle}
-                  onChange={(e) => handleDataUpdate({ displayStyle: e.target.value })}
-                  className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1 w-full"
-                >
-                  <option value="cards">Cards</option>
-                  <option value="slider">Slider</option>
-                  <option value="grid">Grid</option>
-                </select>
+                {/* Title Section - Different Color */}
+                <div className="bg-talklink-500 p-4 rounded-lg border border-talklink-400">
+                  <label className="block text-white text-sm font-medium mb-2">
+                    <i className="fas fa-heading mr-2"></i>
+                    Section Title
+                  </label>
+                  <Input
+                    value={element.data.title}
+                    onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                    placeholder="What Our Clients Say"
+                    className="bg-white border-talklink-300 text-slate-800 placeholder:text-slate-500"
+                  />
+                </div>
+
+                {/* Display Style Section - Different Color */}
+                <div className="bg-slate-700 p-4 rounded-lg border border-slate-600">
+                  <label className="block text-white text-sm font-medium mb-2">
+                    <i className="fas fa-layout mr-2"></i>
+                    Display Style
+                  </label>
+                  <select
+                    value={element.data.displayStyle}
+                    onChange={(e) => handleDataUpdate({ displayStyle: e.target.value })}
+                    className="bg-slate-600 border-slate-500 text-white rounded px-3 py-2 w-full hover:bg-slate-500 transition-colors"
+                  >
+                    <option value="cards">Cards</option>
+                    <option value="slider">Slider</option>
+                    <option value="grid">Grid</option>
+                  </select>
+                </div>
+                {/* Testimonials List */}
                 {element.data.testimonials.map((testimonial, index) => (
                   <div key={testimonial.id} className="p-3 bg-slate-800 rounded border space-y-2">
                     <div className="flex justify-between items-center">
