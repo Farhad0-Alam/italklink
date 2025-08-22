@@ -45,25 +45,38 @@
 }
 
 .dark {
-  --background: hsl(222.2 84% 4.9%);
-  --foreground: hsl(210 40% 98%);
-  --card: hsl(222.2 84% 4.9%);
-  --card-foreground: hsl(210 40% 98%);
-  --popover: hsl(222.2 84% 4.9%);
-  --popover-foreground: hsl(210 40% 98%);
+  --background: hsl(224 71% 4%);
+  --foreground: hsl(213 31% 91%);
+  --card: hsl(224 71% 4%);
+  --card-foreground: hsl(213 31% 91%);
+  --popover: hsl(224 71% 4%);
+  --popover-foreground: hsl(213 31% 91%);
   --primary: hsl(142 71% 45%);
-  --primary-foreground: hsl(222.2 84% 4.9%);
-  --secondary: hsl(217.2 32.6% 17.5%);
-  --secondary-foreground: hsl(210 40% 98%);
-  --muted: hsl(217.2 32.6% 17.5%);
-  --muted-foreground: hsl(215 20.2% 65.1%);
-  --accent: hsl(217.2 32.6% 17.5%);
-  --accent-foreground: hsl(210 40% 98%);
-  --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(210 40% 98%);
-  --border: hsl(217.2 32.6% 17.5%);
-  --input: hsl(217.2 32.6% 17.5%);
+  --primary-foreground: hsl(224 71% 4%);
+  --secondary: hsl(215 28% 17%);
+  --secondary-foreground: hsl(213 31% 91%);
+  --muted: hsl(215 28% 17%);
+  --muted-foreground: hsl(217 10% 65%);
+  --accent: hsl(215 28% 17%);
+  --accent-foreground: hsl(213 31% 91%);
+  --destructive: hsl(0 63% 31%);
+  --destructive-foreground: hsl(213 31% 91%);
+  --border: hsl(215 28% 17%);
+  --input: hsl(215 28% 17%);
   --ring: hsl(142 71% 45%);
+  
+  /* TalkLink Dark Colors */
+  --talklink-50: hsl(143 61% 10%);
+  --talklink-100: hsl(142 64% 15%);
+  --talklink-200: hsl(142 69% 20%);
+  --talklink-300: hsl(142 69% 30%);
+  --talklink-400: hsl(142 69% 40%);
+  --talklink-500: hsl(142 71% 45%);
+  --talklink-600: hsl(142 76% 50%);
+  --talklink-700: hsl(141 79% 60%);
+  --talklink-800: hsl(141 84% 70%);
+  --talklink-900: hsl(138 76% 80%);
+  --talklink-950: hsl(143 61% 5%);
 }
 
 @layer base {
@@ -72,17 +85,56 @@
   }
   
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--accent));
   }
 }
 
 @layer components {
   .talklink-gradient {
-    background: linear-gradient(135deg, var(--talklink-500), var(--talklink-600));
+    background: linear-gradient(135deg, hsl(var(--talklink-500)), hsl(var(--talklink-600)));
   }
   
   .card-shadow {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .dark .glass-morphism {
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .mobile-touch {
+    @apply touch-manipulation select-none;
+    -webkit-tap-highlight-color: transparent;
   }
   
   .font-inter {
@@ -111,9 +163,83 @@
   animation: ken-burns 20s ease-in-out infinite;
 }
 
+/* Advanced Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.6); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+  }
+  50% { 
+    opacity: 0.8;
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.8);
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Animation Classes */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-gradient {
+  background: linear-gradient(-45deg, hsl(var(--talklink-400)), hsl(var(--talklink-500)), hsl(var(--talklink-600)), hsl(var(--talklink-500)));
+  background-size: 400% 400%;
+  animation: gradient-shift 4s ease infinite;
+}
+
 /* Custom duration classes */
 .duration-4000 {
   transition-duration: 4s;
+}
+
+.duration-1500 {
+  transition-duration: 1.5s;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .mobile-scale {
+    @apply active:scale-95 transition-transform duration-150;
+  }
+  
+  .mobile-padding {
+    @apply px-4 py-6;
+  }
+  
+  .mobile-text {
+    @apply text-base leading-relaxed;
+  }
 }
 
 /* Hide scrollbar but keep functionality */
@@ -124,4 +250,51 @@
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Dark mode theme transitions */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Enhanced focus styles */
+.focus-visible {
+  @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+}
+
+/* Enhanced gradients */
+.gradient-text {
+  background: linear-gradient(135deg, hsl(var(--talklink-500)), hsl(var(--talklink-600)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Interactive elements */
+.interactive-card {
+  @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer;
+}
+
+.dark .interactive-card {
+  @apply hover:shadow-2xl;
+}
+
+/* Mobile touch improvements */
+.touch-action {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Enhanced button styles */
+.btn-primary {
+  @apply bg-gradient-to-r from-talklink-500 to-talklink-600 hover:from-talklink-600 hover:to-talklink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300;
+}
+
+/* Loading animations */
+.loading-pulse {
+  @apply animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200;
+}
+
+.dark .loading-pulse {
+  @apply from-gray-700 via-gray-600 to-gray-700;
 }

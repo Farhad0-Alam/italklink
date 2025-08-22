@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion, useScroll, useTransform, AnimatePresence, useInView } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Link } from "wouter";
+import { useTheme } from "@/components/theme-provider";
+import { Moon, Sun, Smartphone, Monitor } from "lucide-react";
 
 interface PricingPlan {
   name: string;
@@ -155,40 +158,175 @@ const faqs = [
   }
 ];
 
-export default function Landing() {
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+// Animation variants
+const fadeInUp = {
+  initial: { opacity: 0, y: 60 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: "easeOut" }
+};
+
+const staggerContainer = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const slideInLeft = {
+  initial: { opacity: 0, x: -60 },
+  animate: { opacity: 1, x: 0 },
+  transition: { duration: 0.8, ease: "easeOut" }
+};
+
+const slideInRight = {
+  initial: { opacity: 0, x: 60 },
+  animate: { opacity: 1, x: 0 },
+  transition: { duration: 0.8, ease: "easeOut" }
+};
+
+const scaleIn = {
+  initial: { opacity: 0, scale: 0.8 },
+  animate: { opacity: 1, scale: 1 },
+  transition: { duration: 0.6, ease: "easeOut" }
+};
+
+// Theme Toggle Component
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-white">
+    <motion.button
+      onClick={toggleTheme}
+      className="relative p-3 rounded-xl bg-background/80 backdrop-blur-sm border border-border hover:bg-accent transition-colors"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      data-testid="theme-toggle"
+    >
+      <AnimatePresence mode="wait">
+        {theme === "light" ? (
+          <motion.div
+            key="moon"
+            initial={{ opacity: 0, rotate: -90 }}
+            animate={{ opacity: 1, rotate: 0 }}
+            exit={{ opacity: 0, rotate: 90 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Moon className="h-5 w-5 text-foreground" />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="sun"
+            initial={{ opacity: 0, rotate: 90 }}
+            animate={{ opacity: 1, rotate: 0 }}
+            exit={{ opacity: 0, rotate: -90 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Sun className="h-5 w-5 text-foreground" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.button>
+  );
+}
+
+export default function Landing() {
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const { scrollY } = useScroll();
+  const { theme } = useTheme();
+  
+  // Parallax effects
+  const heroY = useTransform(scrollY, [0, 500], [0, -150]);
+  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  return (
+    <motion.div 
+      className="min-h-screen bg-background transition-colors duration-300"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-slate-200 z-50">
+      <motion.nav 
+        className="fixed top-0 w-full bg-background/95 backdrop-blur-md border-b border-border z-50 transition-colors duration-300"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-talklink-500 to-talklink-600 rounded-lg flex items-center justify-center">
+            <motion.div 
+              className="flex items-center space-x-2"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <motion.div 
+                className="w-8 h-8 bg-gradient-to-br from-talklink-500 to-talklink-600 rounded-lg flex items-center justify-center shadow-lg"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+              >
                 <i className="fas fa-address-card text-white text-sm"></i>
-              </div>
-              <span className="text-xl font-bold text-slate-900">CardFlow</span>
-            </div>
+              </motion.div>
+              <span className="text-xl font-bold text-foreground">CardFlow</span>
+            </motion.div>
             
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-slate-600 hover:text-slate-900 transition-colors">Features</a>
-              <a href="#pricing" className="text-slate-600 hover:text-slate-900 transition-colors">Pricing</a>
-              <a href="#templates" className="text-slate-600 hover:text-slate-900 transition-colors">Templates</a>
-              <a href="#faq" className="text-slate-600 hover:text-slate-900 transition-colors">FAQ</a>
+              {["Features", "Pricing", "Templates", "FAQ"].map((item, index) => (
+                <motion.a 
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className="text-muted-foreground hover:text-foreground transition-colors relative"
+                  whileHover={{ y: -2 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{ transitionDelay: `${index * 0.1}s` }}
+                >
+                  {item}
+                  <motion.div
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-talklink-500"
+                    initial={{ scaleX: 0 }}
+                    whileHover={{ scaleX: 1 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                </motion.a>
+              ))}
             </div>
             
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" asChild>
-                <Link href="/login">Sign In</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/register">Get Started Free</Link>
-              </Button>
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="ghost" asChild>
+                  <Link href="/login">Sign In</Link>
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button asChild className="bg-talklink-500 hover:bg-talklink-600">
+                  <Link href="/register">Get Started Free</Link>
+                </Button>
+              </motion.div>
             </div>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Hero Section */}
       <section className="pt-24 pb-20 lg:pt-32 lg:pb-32 bg-white overflow-hidden">
@@ -289,55 +427,142 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 bg-slate-50">
+      <motion.section 
+        id="features" 
+        className="py-24 bg-secondary/30 dark:bg-secondary/20"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl lg:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+          <motion.div 
+            className="text-center mb-20"
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.h2 
+              className="text-4xl lg:text-5xl font-black text-foreground mb-6 tracking-tight"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+            >
               Built for Modern
-              <span className="text-talklink-500"> Professionals</span>
-            </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto font-light">
+              <span className="text-talklink-500 bg-gradient-to-r from-talklink-500 to-talklink-600 bg-clip-text text-transparent"> Professionals</span>
+            </motion.h2>
+            <motion.p 
+              className="text-xl text-muted-foreground max-w-2xl mx-auto font-light"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            >
               Everything you need to create, share, and track your digital presence.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <motion.div 
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, margin: "-50px" }}
+          >
             {features.map((feature, index) => (
-              <div key={index} className="group">
-                <div className="bg-white rounded-2xl p-8 h-full hover:shadow-xl transition-all duration-300 border border-slate-100 hover:-translate-y-1">
-                  <div className="w-14 h-14 bg-talklink-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-talklink-500 transition-colors duration-300">
+              <motion.div 
+                key={index} 
+                className="group"
+                variants={fadeInUp}
+                whileHover={{ y: -8, rotateY: 2 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <motion.div 
+                  className="bg-card hover:bg-card/80 rounded-2xl p-8 h-full hover:shadow-xl transition-all duration-300 border border-border backdrop-blur-sm"
+                  whileHover={{ 
+                    boxShadow: "0 20px 40px -12px rgba(0, 0, 0, 0.1), 0 0 30px rgba(34, 197, 94, 0.1)"
+                  }}
+                >
+                  <motion.div 
+                    className="w-14 h-14 bg-talklink-100 dark:bg-talklink-950/50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-talklink-500 transition-colors duration-300"
+                    whileHover={{ rotate: 10, scale: 1.1 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
                     <i className={`${feature.icon} text-talklink-500 group-hover:text-white text-xl transition-colors duration-300`}></i>
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-4">{feature.title}</h3>
-                  <p className="text-slate-600 leading-relaxed">{feature.description}</p>
-                </div>
-              </div>
+                  </motion.div>
+                  <h3 className="text-xl font-bold text-foreground mb-4">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                </motion.div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
           
-          <div className="text-center mt-16">
-            <Button size="lg" className="bg-talklink-500 hover:bg-talklink-600 text-lg px-8 py-4 h-auto" asChild>
-              <Link href="/register">
-                Start Building Your Card
-                <i className="fas fa-arrow-right ml-2"></i>
-              </Link>
-            </Button>
-          </div>
+          <motion.div 
+            className="text-center mt-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            <motion.div
+              whileHover={{ scale: 1.05, y: -3 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <Button size="lg" className="bg-talklink-500 hover:bg-talklink-600 text-lg px-8 py-4 h-auto shadow-xl hover:shadow-2xl transition-shadow" asChild>
+                <Link href="/register">
+                  Start Building Your Card
+                  <motion.i 
+                    className="fas fa-arrow-right ml-2"
+                    animate={{ x: [0, 3, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  />
+                </Link>
+              </Button>
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-24 bg-white">
+      <motion.section 
+        id="pricing" 
+        className="py-24 bg-background"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl lg:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+          <motion.div 
+            className="text-center mb-20"
+            initial={{ opacity: 0, y: 60 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.h2 
+              className="text-4xl lg:text-5xl font-black text-foreground mb-6 tracking-tight"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+            >
               Choose Your
-              <span className="text-talklink-500"> Growth Plan</span>
-            </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto font-light">
+              <span className="text-talklink-500 bg-gradient-to-r from-talklink-500 to-talklink-600 bg-clip-text text-transparent"> Growth Plan</span>
+            </motion.h2>
+            <motion.p 
+              className="text-xl text-muted-foreground max-w-2xl mx-auto font-light"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            >
               Start free. Scale as you grow. Cancel anytime.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {pricingPlans.map((plan, index) => (
@@ -383,7 +608,7 @@ export default function Landing() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Testimonials Section */}
       <section className="py-20 bg-white">
@@ -580,6 +805,6 @@ export default function Landing() {
           </div>
         </div>
       </footer>
-    </div>
+    </motion.div>
   );
 }
