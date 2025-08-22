@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import { generateFieldId } from "@/lib/card-data";
 import { AIChat } from "@/components/ai-chat";
 import { IngestForm } from "@/components/IngestForm";
+import { URLManager } from "@/components/URLManager";
+import { DocumentManager, DocumentItem } from "@/components/DocumentManager";
 import { RAGChatBox } from "@/components/RAGChatBox";
 import { MessageCircle } from "lucide-react";
 import {
@@ -2064,70 +2066,48 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   placeholder="Website URL for knowledge extraction"
                   className="bg-slate-700 border-slate-600 text-white"
                 />
-                {/* URL Ingestion Form directly in editing interface */}
-                <div className="mt-2 p-4 bg-slate-800 rounded-lg border border-slate-600">
-                  <div className="flex items-center gap-2 mb-2">
-                    <i className="fas fa-globe text-blue-400"></i>
-                    <span className="text-white text-sm font-medium">URL Knowledge Ingestion</span>
-                  </div>
-                  <p className="text-slate-400 text-xs mb-3">Extract and index content from any public webpage for AI chat</p>
-                  <IngestForm />
+                {/* Enhanced URL Manager - unlimited URLs */}
+                <div className="mt-2">
+                  <URLManager
+                    title="+ Add Website URLs"
+                    description="Add unlimited website URLs for comprehensive knowledge extraction"
+                    onIngest={async (urls) => {
+                      // URLs are automatically ingested through the URLManager component
+                      console.log('URLs ingested:', urls);
+                    }}
+                    maxUrls={100}
+                    className="bg-slate-800 border-slate-600"
+                  />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-black text-sm">PDF Documents:</label>
-                  <Input
-                    type="file"
-                    accept=".pdf"
-                    multiple
-                    onChange={(e) => {
-                      const files = Array.from(e.target.files || []);
-                      files.forEach(file => {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                          const newPdf = {
-                            id: generateFieldId(),
-                            name: file.name,
-                            content: event.target?.result as string,
-                            size: file.size
-                          };
-                          
-                          handleDataUpdate({
-                            knowledgeBase: {
-                              ...element.data.knowledgeBase,
-                              pdfFiles: [...(element.data.knowledgeBase?.pdfFiles || []), newPdf]
-                            }
-                          });
-                        };
-                        reader.readAsDataURL(file);
+                {/* Enhanced Document Manager - one by one upload */}
+                <div className="mt-4">
+                  <DocumentManager
+                    title="+ Add Documents (One by One)"
+                    description="Upload documents one by one for precise knowledge management"
+                    documents={element.data.knowledgeBase?.pdfFiles?.map((pdf: any) => ({
+                      id: pdf.id || generateFieldId(),
+                      name: pdf.name,
+                      content: pdf.content,
+                      size: pdf.size,
+                      status: 'success' as const
+                    })) || []}
+                    onDocumentsChange={(documents: DocumentItem[]) => {
+                      handleDataUpdate({
+                        knowledgeBase: {
+                          ...element.data.knowledgeBase,
+                          pdfFiles: documents.map(doc => ({
+                            id: doc.id,
+                            name: doc.name,
+                            content: doc.content,
+                            size: doc.size
+                          }))
+                        }
                       });
                     }}
-                    className="bg-slate-700 border-slate-600 text-white"
+                    maxDocuments={50}
+                    acceptedTypes={['.pdf', '.doc', '.docx', '.txt', '.md', '.rtf']}
+                    className="bg-slate-800 border-slate-600"
                   />
-                  {element.data.knowledgeBase?.pdfFiles && element.data.knowledgeBase.pdfFiles.length > 0 && (
-                    <div className="space-y-1">
-                      {element.data.knowledgeBase.pdfFiles.map((pdf, index) => (
-                        <div key={pdf.id || index} className="flex items-center justify-between bg-slate-600 p-2 rounded">
-                          <span className="text-white text-sm">{pdf.name}</span>
-                          <Button
-                            onClick={() => {
-                              const updatedPdfs = element.data.knowledgeBase?.pdfFiles?.filter((_, i) => i !== index) || [];
-                              handleDataUpdate({
-                                knowledgeBase: {
-                                  ...element.data.knowledgeBase,
-                                  pdfFiles: updatedPdfs
-                                }
-                              });
-                            }}
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-400 hover:text-red-300"
-                          >
-                            <i className="fas fa-trash text-xs"></i>
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
                 <div className="flex items-center space-x-2">
                   <input

@@ -229,12 +229,12 @@ export function URLManager({
   return (
     <Card className={`w-full ${className}`}>
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Globe className="h-5 w-5 text-blue-500" />
+        <CardTitle className="flex items-center gap-2 text-lg text-white">
+          <Globe className="h-5 w-5 text-blue-400" />
           {title}
         </CardTitle>
         {description && (
-          <p className="text-sm text-gray-600">{description}</p>
+          <p className="text-sm text-slate-400">{description}</p>
         )}
       </CardHeader>
       
@@ -247,10 +247,10 @@ export function URLManager({
               onChange={(e) => setNewUrl(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="https://example.com"
-              className="pl-8"
+              className="pl-8 bg-slate-700 border-slate-600 text-white placeholder-slate-400"
               disabled={isProcessing || urls.length >= maxUrls}
             />
-            <Globe className="h-4 w-4 absolute left-2.5 top-3 text-gray-400" />
+            <Globe className="h-4 w-4 absolute left-2.5 top-3 text-slate-400" />
           </div>
           <Button
             onClick={addUrl}
@@ -264,7 +264,7 @@ export function URLManager({
 
         {/* URL Limit Info */}
         {urls.length > 0 && (
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-slate-400">
             {urls.length}/{maxUrls} URLs added
           </div>
         )}
@@ -275,19 +275,19 @@ export function URLManager({
             {urls.map((item) => (
               <div 
                 key={item.id}
-                className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                className="flex items-center justify-between p-3 border border-slate-600 rounded-lg bg-slate-700 hover:bg-slate-650 transition-colors"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   {getStatusIcon(item.status)}
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate">
+                    <div className="font-medium text-sm truncate text-white">
                       {item.title || new URL(item.url).hostname}
                     </div>
-                    <div className="text-xs text-gray-500 truncate">
+                    <div className="text-xs text-slate-400 truncate">
                       {item.url}
                     </div>
                     {item.error && (
-                      <div className="text-xs text-red-600 truncate">
+                      <div className="text-xs text-red-400 truncate">
                         {item.error}
                       </div>
                     )}
@@ -314,7 +314,7 @@ export function URLManager({
         {/* Actions */}
         {urls.length > 0 && (
           <div className="flex justify-between items-center pt-2 border-t">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-slate-400">
               {urls.filter(u => u.status === 'success').length} ingested, {urls.filter(u => u.status === 'error').length} failed
             </div>
             <div className="flex gap-2">
@@ -350,8 +350,8 @@ export function URLManager({
 
         {/* Empty State */}
         {urls.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            <Globe className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+          <div className="text-center py-8 text-slate-500">
+            <Globe className="h-12 w-12 mx-auto mb-3 text-slate-400" />
             <p className="text-sm">No URLs added yet</p>
             <p className="text-xs">Add website URLs to build your knowledge base</p>
           </div>
