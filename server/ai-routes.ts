@@ -125,9 +125,9 @@ export function setupAIRoutes(app: Express) {
         size: req.file.buffer.length
       });
 
-      // Force to mp3 format for better compatibility
+      // Use original mimetype for better compatibility
       const transcription = await openai.audio.transcriptions.create({
-        file: new File([req.file.buffer], 'audio.mp3', { type: 'audio/mp3' }),
+        file: new File([req.file.buffer], req.file.originalname || 'audio.mp4', { type: req.file.mimetype }),
         model: 'whisper-1',
       });
 
