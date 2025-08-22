@@ -90,6 +90,7 @@ export function setupAIRoutes(app: Express) {
       let hasWebsiteKnowledge = false;
       
       console.log('Processing knowledge base:', JSON.stringify(knowledgeBase, null, 2));
+      console.log('Knowledge base websiteUrl check:', knowledgeBase?.websiteUrl);
       
       if (knowledgeBase) {
         if (knowledgeBase.textContent) {
