@@ -89,6 +89,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
     }
 
     try {
+      console.log('Sending AI request with knowledge base:', knowledgeBase);
       const response = await apiRequest('POST', '/api/ai/chat', {
         message,
         knowledgeBase,
