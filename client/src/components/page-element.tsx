@@ -1829,7 +1829,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
       case "aiChatbot":
         return (
           <div className="mb-6">
-            <h3 className="text-lg font-bold text-slate-800 mb-4 text-center">
+            <h3 className="text-lg font-bold text-black mb-4 text-center">
               {element.data.title}
             </h3>
             {isEditing ? (
@@ -1847,7 +1847,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   className="bg-slate-700 border-slate-600 text-white"
                 />
                 <div className="space-y-2">
-                  <label className="text-white text-sm">Knowledge Base Content:</label>
+                  <label className="text-black text-sm">Knowledge Base Content:</label>
                   <Textarea
                     value={element.data.knowledgeBase.textContent || ''}
                     onChange={(e) => handleDataUpdate({ 
@@ -1873,7 +1873,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   className="bg-slate-700 border-slate-600 text-white"
                 />
                 <div className="space-y-2">
-                  <label className="text-white text-sm">PDF Documents:</label>
+                  <label className="text-black text-sm">PDF Documents:</label>
                   <Input
                     type="file"
                     accept=".pdf"
@@ -1926,7 +1926,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-white text-sm mb-1 block">Position</label>
+                    <label className="text-black text-sm mb-1 block">Position</label>
                     <select
                       value={element.data.appearance.position}
                       onChange={(e) => handleDataUpdate({ 
@@ -1943,7 +1943,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     </select>
                   </div>
                   <div>
-                    <label className="text-white text-sm mb-1 block">Primary Color</label>
+                    <label className="text-black text-sm mb-1 block">Primary Color</label>
                     <Input
                       type="color"
                       value={element.data.appearance.primaryColor}
@@ -1964,7 +1964,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     onChange={(e) => handleDataUpdate({ isEnabled: e.target.checked })}
                     className="rounded"
                   />
-                  <span className="text-white text-sm">Enable chatbot</span>
+                  <span className="text-black text-sm">Enable chatbot</span>
                 </div>
               </div>
             ) : (

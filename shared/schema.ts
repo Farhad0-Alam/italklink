@@ -620,9 +620,10 @@ export const googleMapsElementSchema = baseElementSchema.extend({
     latitude: z.number().optional(),
     longitude: z.number().optional(),
     zoom: z.number().min(1).max(20).default(15),
-    mapType: z.enum(["roadmap", "satellite", "hybrid", "terrain"]).default("roadmap"),
+    mapType: z.enum(["roadmap", "satellite"]).default("roadmap"),
     showMarker: z.boolean().default(true),
     height: z.number().default(300), // in pixels
+    displayMode: z.enum(["map", "address"]).default("map"),
   }),
 });
 
