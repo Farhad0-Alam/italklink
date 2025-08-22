@@ -1695,7 +1695,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 <Input
                   value={element.data.title}
                   onChange={(e) => handleDataUpdate({ title: e.target.value })}
-                  placeholder="Map section title"
+                  placeholder="Location section title"
                   className="bg-slate-700 border-slate-600 text-white"
                 />
                 <Input
@@ -1704,55 +1704,126 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   placeholder="Address or location"
                   className="bg-slate-700 border-slate-600 text-white"
                 />
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-white text-sm mb-1 block">Zoom Level</label>
-                    <Input
-                      type="number"
-                      min="1"
-                      max="20"
-                      value={element.data.zoom}
-                      onChange={(e) => handleDataUpdate({ zoom: parseInt(e.target.value) || 15 })}
-                      className="bg-slate-700 border-slate-600 text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-white text-sm mb-1 block">Map Type</label>
-                    <select
-                      value={element.data.mapType}
-                      onChange={(e) => handleDataUpdate({ mapType: e.target.value })}
-                      className="bg-slate-700 border-slate-600 text-white rounded px-2 py-2 w-full"
+                
+                {/* Display Mode Selection */}
+                <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+                  <label className="block text-white text-sm font-medium mb-3">Display Mode</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => handleDataUpdate({ displayMode: 'address' })}
+                      className={`p-4 rounded-lg border text-sm transition-colors ${
+                        element.data.displayMode === 'address'
+                          ? 'bg-talklink-500 border-talklink-400 text-white'
+                          : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
+                      }`}
                     >
-                      <option value="roadmap">Roadmap</option>
-                      <option value="satellite">Satellite</option>
-                      <option value="hybrid">Hybrid</option>
-                      <option value="terrain">Terrain</option>
-                    </select>
+                      <div className="flex flex-col items-center space-y-2">
+                        <i className="fas fa-map-marker-alt text-lg"></i>
+                        <span>Address with Pin</span>
+                        <span className="text-xs opacity-75">Simple text display</span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleDataUpdate({ displayMode: 'map' })}
+                      className={`p-4 rounded-lg border text-sm transition-colors ${
+                        (!element.data.displayMode || element.data.displayMode === 'map')
+                          ? 'bg-talklink-500 border-talklink-400 text-white'
+                          : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
+                      }`}
+                    >
+                      <div className="flex flex-col items-center space-y-2">
+                        <i className="fas fa-map text-lg"></i>
+                        <span>Interactive Map</span>
+                        <span className="text-xs opacity-75">Full Google Maps</span>
+                      </div>
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={element.data.showMarker}
-                    onChange={(e) => handleDataUpdate({ showMarker: e.target.checked })}
-                    className="rounded"
-                  />
-                  <span className="text-white text-sm">Show location marker</span>
-                </div>
+
+                {/* Map-specific settings - only show when map mode is selected */}
+                {(!element.data.displayMode || element.data.displayMode === 'map') && (
+                  <>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-white text-sm mb-1 block">Zoom Level</label>
+                        <Input
+                          type="number"
+                          min="1"
+                          max="20"
+                          value={element.data.zoom}
+                          onChange={(e) => handleDataUpdate({ zoom: parseInt(e.target.value) || 15 })}
+                          className="bg-slate-700 border-slate-600 text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-white text-sm mb-1 block">Map Type</label>
+                        <select
+                          value={element.data.mapType}
+                          onChange={(e) => handleDataUpdate({ mapType: e.target.value })}
+                          className="bg-slate-700 border-slate-600 text-white rounded px-2 py-2 w-full"
+                        >
+                          <option value="roadmap">Roadmap</option>
+                          <option value="satellite">Satellite</option>
+                          <option value="hybrid">Hybrid</option>
+                          <option value="terrain">Terrain</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={element.data.showMarker}
+                        onChange={(e) => handleDataUpdate({ showMarker: e.target.checked })}
+                        className="rounded"
+                      />
+                      <span className="text-white text-sm">Show location marker</span>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
-              <div className="bg-slate-100 rounded-lg overflow-hidden">
-                <iframe
-                  src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(element.data.address)}&zoom=${element.data.zoom}&maptype=${element.data.mapType}`}
-                  width="100%"
-                  height={element.data.height}
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="w-full"
-                ></iframe>
-              </div>
+              // Display based on selected mode
+              element.data.displayMode === 'address' ? (
+                // Simple Address Display with Location Pin
+                <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200 hover:shadow-xl transition-shadow">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
+                        <i className="fas fa-map-marker-alt text-white text-lg"></i>
+                      </div>
+                    </div>
+                    <div className="flex-grow">
+                      <h4 className="text-lg font-semibold text-slate-800 mb-2">Our Location</h4>
+                      <p className="text-slate-600 leading-relaxed">{element.data.address}</p>
+                      <div className="mt-4">
+                        <a 
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(element.data.address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center space-x-2 text-talklink-500 hover:text-talklink-600 font-medium transition-colors"
+                        >
+                          <i className="fas fa-external-link-alt text-sm"></i>
+                          <span>View on Google Maps</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // Interactive Google Maps (default)
+                <div className="bg-slate-100 rounded-lg overflow-hidden">
+                  <iframe
+                    src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(element.data.address)}&zoom=${element.data.zoom}&maptype=${element.data.mapType}`}
+                    width="100%"
+                    height={element.data.height}
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="w-full"
+                  ></iframe>
+                </div>
+              )
             )}
           </div>
         );
