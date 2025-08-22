@@ -427,39 +427,4 @@ Use the provided information accurately and cite your sources clearly.`
       res.status(500).json({ message: 'Failed to process PDF' });
     }
   });
-
-  // Enhanced file upload endpoint supporting multiple formats
-  app.post('/api/ai/upload-file', requireAuth, upload.single('file'), async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ message: 'File is required' });
-      }
-
-      const { parseFile, isFormatSupported } = await import('./file-parsers');
-      
-      // Check if format is supported
-      if (!isFormatSupported(req.file.originalname, req.file.mimetype)) {
-        return res.status(400).json({ 
-          message: `Unsupported file format. Supported formats: PDF, DOCX, TXT, MD, CSV` 
-        });
-      }
-
-      // Parse the file
-      const parsedFile = await parseFile(req.file.buffer, req.file.originalname, req.file.mimetype);
-      
-      res.json({ 
-        filename: parsedFile.metadata.filename,
-        format: parsedFile.metadata.format,
-        text: parsedFile.text.slice(0, 5000), // Limit preview to 5000 characters
-        fullLength: parsedFile.text.length,
-        wordCount: parsedFile.metadata.wordCount,
-        pages: parsedFile.metadata.pages
-      });
-    } catch (error) {
-      console.error('File processing error:', error);
-      res.status(500).json({ 
-        message: `Failed to process file: ${error instanceof Error ? error.message : 'Unknown error'}` 
-      });
-    }
-  });
 }
