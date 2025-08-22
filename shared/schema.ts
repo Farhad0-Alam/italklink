@@ -424,6 +424,20 @@ export type CreateTemplateCollection = z.infer<typeof createTemplateCollectionSc
 export type UpdateTemplateCollection = z.infer<typeof updateTemplateCollectionSchema>;
 export type AddTemplateToCollection = z.infer<typeof addTemplateToCollectionSchema>;
 
+// Knowledge base documents table (vector column handled via raw SQL)
+export const kbDocs = pgTable("kb_docs", {
+  id: serial("id").primaryKey(),
+  url: text("url").notNull(),
+  title: text("title"),
+  content: text("content").notNull(),
+  contentTokens: integer("content_tokens"),
+  meta: jsonb("meta"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type KbDoc = typeof kbDocs.$inferSelect;
+export type InsertKbDoc = typeof kbDocs.$inferInsert;
+
 // CSV import schema
 export const csvMemberSchema = z.object({
   firstName: z.string().min(1, 'First name required'),
@@ -652,6 +666,17 @@ export const aiChatbotElementSchema = baseElementSchema.extend({
   }),
 });
 
+export const ragKnowledgeElementSchema = baseElementSchema.extend({
+  type: z.literal("ragKnowledge"),
+  data: z.object({
+    title: z.string().default("Knowledge Base Assistant"),
+    description: z.string().default("Advanced AI assistant with website knowledge ingestion"),
+    showIngestForm: z.boolean().default(true),
+    showChatBox: z.boolean().default(true),
+    primaryColor: z.string().default("#22c55e"),
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   headingElementSchema,
@@ -668,6 +693,7 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   testimonialsElementSchema,
   googleMapsElementSchema,
   aiChatbotElementSchema,
+  ragKnowledgeElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;

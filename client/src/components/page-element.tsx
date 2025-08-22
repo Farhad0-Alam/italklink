@@ -7,6 +7,8 @@ import { QRCodeSVG } from "qrcode.react";
 import { useState, useEffect } from "react";
 import { generateFieldId } from "@/lib/card-data";
 import { AIChat } from "@/components/ai-chat";
+import { IngestForm } from './IngestForm';
+import { RAGChatBox } from './RAGChatBox';
 import {
   DndContext,
   closestCenter,
@@ -2009,6 +2011,73 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 welcomeMessage={element.data.welcomeMessage}
                 primaryColor={element.data.appearance.primaryColor}
               />
+            )}
+          </div>
+        );
+
+      case "ragKnowledge":
+        return (
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-black mb-4 text-center">
+              {element.data.title}
+            </h3>
+            <p className="text-center text-gray-600 mb-6">{element.data.description}</p>
+            
+            {isEditing ? (
+              <div className="space-y-4">
+                <Input
+                  value={element.data.title}
+                  onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                  placeholder="Knowledge assistant title"
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+                <Textarea
+                  value={element.data.description}
+                  onChange={(e) => handleDataUpdate({ description: e.target.value })}
+                  placeholder="Description"
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={element.data.showIngestForm}
+                    onChange={(e) => handleDataUpdate({ showIngestForm: e.target.checked })}
+                    className="rounded"
+                  />
+                  <span className="text-black text-sm">Show URL Ingestion Form</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={element.data.showChatBox}
+                    onChange={(e) => handleDataUpdate({ showChatBox: e.target.checked })}
+                    className="rounded"
+                  />
+                  <span className="text-black text-sm">Show Chat Interface</span>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-black text-sm">Primary Color:</label>
+                  <Input
+                    type="color"
+                    value={element.data.primaryColor}
+                    onChange={(e) => handleDataUpdate({ primaryColor: e.target.value })}
+                    className="w-20 h-10"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {element.data.showIngestForm && (
+                  <div data-testid="rag-ingest-form">
+                    <IngestForm />
+                  </div>
+                )}
+                {element.data.showChatBox && (
+                  <div data-testid="rag-chat-box">
+                    <RAGChatBox />
+                  </div>
+                )}
+              </div>
             )}
           </div>
         );

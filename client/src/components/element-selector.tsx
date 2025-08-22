@@ -95,6 +95,13 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       icon: "fas fa-robot",
       color: "bg-violet-100",
       description: "Knowledge base assistant"
+    },
+    {
+      type: "ragKnowledge",
+      title: "RAG Knowledge",
+      icon: "fas fa-brain",
+      color: "bg-indigo-100",
+      description: "Advanced URL knowledge ingestion with vector search"
     }
   ];
 
@@ -161,7 +168,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           data: {
             value: window.location.href,
             size: 200,
-            frameStyle: "square",
+            frameStyle: "none",
             frameColor: "#22c55e",
             customLabel: false,
             labelText: ""
@@ -265,7 +272,8 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             zoom: 15,
             mapType: "roadmap" as const,
             showMarker: true,
-            height: 300
+            height: 300,
+            displayMode: "map" as const
           }
         };
         break;
@@ -290,6 +298,21 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
               chatWidth: 350
             },
             isEnabled: true
+          }
+        };
+        break;
+      
+      case "ragKnowledge":
+        element = {
+          id,
+          type: "ragKnowledge",
+          order: Date.now(),
+          data: {
+            title: "Knowledge Base Assistant",
+            description: "Advanced AI assistant with website knowledge ingestion",
+            showIngestForm: true,
+            showChatBox: true,
+            primaryColor: "#22c55e",
           }
         };
         break;

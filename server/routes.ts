@@ -14,6 +14,7 @@ import { setupAIRoutes } from './ai-routes';
 import adminRoutes from './admin-routes';
 import { templateCollectionsRoutes } from './template-collections-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
+import ragRoutes from './rag-routes';
 
 
 
@@ -25,6 +26,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup AI routes
   setupAIRoutes(app);
+  
+  // Setup RAG routes
+  app.use('/api', ragRoutes);
   
   // Setup admin routes
   app.use('/api/admin', adminRoutes);
