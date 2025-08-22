@@ -336,14 +336,14 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             {isEditing ? (
               <div className="space-y-2">
                 <Input
-                  value={element.data.text || ''}
+                  value={element.data?.text || ''}
                   onChange={(e) => handleDataUpdate({ text: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Heading text"
                 />
                 <div className="flex gap-2">
                   <select
-                    value={element.data.level || 'h1'}
+                    value={element.data?.level || 'h1'}
                     onChange={(e) => handleDataUpdate({ level: e.target.value })}
                     className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
                   >
@@ -352,7 +352,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <option value="h3">H3</option>
                   </select>
                   <select
-                    value={element.data.alignment || 'left'}
+                    value={element.data?.alignment || 'left'}
                     onChange={(e) => handleDataUpdate({ alignment: e.target.value })}
                     className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
                   >
@@ -379,14 +379,14 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             {isEditing ? (
               <div className="space-y-2">
                 <Textarea
-                  value={element.data.text || ''}
+                  value={element.data?.text || ''}
                   onChange={(e) => handleDataUpdate({ text: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Paragraph text"
                   rows={3}
                 />
                 <select
-                  value={element.data.alignment || 'left'}
+                  value={element.data?.alignment || 'left'}
                   onChange={(e) => handleDataUpdate({ alignment: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
                 >
@@ -409,19 +409,19 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             {isEditing ? (
               <div className="space-y-2">
                 <Input
-                  value={element.data.text || ''}
+                  value={element.data?.text || ''}
                   onChange={(e) => handleDataUpdate({ text: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Link text"
                 />
                 <Input
-                  value={element.data.url || ''}
+                  value={element.data?.url || ''}
                   onChange={(e) => handleDataUpdate({ url: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="https://example.com"
                 />
                 <select
-                  value={element.data.style || 'button'}
+                  value={element.data?.style || 'button'}
                   onChange={(e) => handleDataUpdate({ style: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
                 >
@@ -472,7 +472,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   className="bg-slate-700 border-slate-600 text-white"
                 />
                 <Input
-                  value={element.data.alt || ''}
+                  value={element.data?.alt || ''}
                   onChange={(e) => handleDataUpdate({ alt: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Image description"
@@ -499,7 +499,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 <div>
                   <label className="block text-white text-sm font-medium mb-2">QR Code Content</label>
                   <Input
-                    value={element.data.value || ''}
+                    value={element.data?.value || ''}
                     onChange={(e) => handleDataUpdate({ value: e.target.value })}
                     className="bg-slate-600 border-slate-500 text-white"
                     placeholder="Enter URL or text"
@@ -513,7 +513,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   </label>
                   <input
                     type="range"
-                    value={element.data.size || 200}
+                    value={element.data?.size || 200}
                     onChange={(e) => handleDataUpdate({ size: parseInt(e.target.value) })}
                     min="120"
                     max="300"
@@ -528,7 +528,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <button
                       onClick={() => handleDataUpdate({ frameStyle: 'none' })}
                       className={`p-3 rounded-lg border text-sm transition-colors ${
-                        (!element.data.frameStyle || element.data.frameStyle === 'none')
+                        (!element.data?.frameStyle || element.data?.frameStyle === 'none')
                           ? 'bg-talklink-500 border-talklink-400 text-white'
                           : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                       }`}
@@ -539,7 +539,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <button
                       onClick={() => handleDataUpdate({ frameStyle: 'rounded' })}
                       className={`p-3 rounded-lg border text-sm transition-colors ${
-                        element.data.frameStyle === 'rounded'
+                        element.data?.frameStyle === 'rounded'
                           ? 'bg-talklink-500 border-talklink-400 text-white'
                           : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                       }`}
@@ -550,7 +550,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <button
                       onClick={() => handleDataUpdate({ frameStyle: 'corners' })}
                       className={`p-3 rounded-lg border text-sm transition-colors ${
-                        element.data.frameStyle === 'corners'
+                        element.data?.frameStyle === 'corners'
                           ? 'bg-talklink-500 border-talklink-400 text-white'
                           : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                       }`}
@@ -570,16 +570,16 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={element.data.customLabel || false}
+                    checked={element.data?.customLabel || false}
                     onChange={(e) => handleDataUpdate({ customLabel: e.target.checked })}
                     className="accent-talklink-500"
                   />
                   <label className="text-white text-sm">Add custom label</label>
                 </div>
 
-                {element.data.customLabel && (
+                {element.data?.customLabel && (
                   <Input
-                    value={element.data.labelText || ''}
+                    value={element.data?.labelText || ''}
                     onChange={(e) => handleDataUpdate({ labelText: e.target.value })}
                     placeholder="Follow us on X"
                     className="bg-slate-600 border-slate-500 text-white"
@@ -739,13 +739,13 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             {isEditing ? (
               <div className="space-y-2">
                 <Input
-                  value={element.data.url || ''}
+                  value={element.data?.url || ''}
                   onChange={(e) => handleDataUpdate({ url: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="YouTube/Vimeo URL"
                 />
                 <Input
-                  value={element.data.thumbnail || ''}
+                  value={element.data?.thumbnail || ''}
                   onChange={(e) => handleDataUpdate({ thumbnail: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Thumbnail URL (optional)"
@@ -832,7 +832,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 {/* Contact Form Title Display */}
                 <div className="p-4 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border border-slate-500 shadow-lg">
                   <Input
-                    value={element.data.title || ''}
+                    value={element.data?.title || ''}
                     onChange={(e) => handleDataUpdate({ title: e.target.value })}
                     className="bg-transparent border-0 text-white font-semibold text-xl tracking-wide opacity-100 p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
                     placeholder="Form Title here"
@@ -909,7 +909,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         <div>
                           <div className="text-white text-sm mb-2">Receiver Email Address:</div>
                           <Input
-                            value={element.data.receiverEmail || ""}
+                            value={element.data?.receiverEmail || ""}
                             onChange={(e) => handleDataUpdate({ receiverEmail: e.target.value })}
                             className="bg-slate-700 border-slate-600 text-white"
                             placeholder="your@email.com"
@@ -1948,10 +1948,10 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <label className="text-black text-sm mb-1 block">Primary Color</label>
                     <Input
                       type="color"
-                      value={element.data.appearance.primaryColor}
+                      value={element.data?.appearance?.primaryColor || '#22C55E'}
                       onChange={(e) => handleDataUpdate({ 
                         appearance: { 
-                          ...element.data.appearance, 
+                          ...(element.data?.appearance || {}), 
                           primaryColor: e.target.value 
                         } 
                       })}
