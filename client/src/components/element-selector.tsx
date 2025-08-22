@@ -310,6 +310,11 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           data: {
             title: "Knowledge Base Assistant",
             description: "Advanced AI assistant with website knowledge ingestion",
+            knowledgeBase: {
+              textContent: "",
+              websiteUrl: "",
+              pdfFiles: []
+            },
             showIngestForm: true,
             showChatBox: true,
             primaryColor: "#22c55e",

@@ -2037,6 +2037,88 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   placeholder="Description"
                   className="bg-slate-700 border-slate-600 text-white"
                 />
+                <div className="space-y-2">
+                  <label className="text-black text-sm">Knowledge Base Content:</label>
+                  <Textarea
+                    value={element.data.knowledgeBase?.textContent || ''}
+                    onChange={(e) => handleDataUpdate({ 
+                      knowledgeBase: { 
+                        ...element.data.knowledgeBase, 
+                        textContent: e.target.value 
+                      } 
+                    })}
+                    placeholder="Enter knowledge base content..."
+                    rows={4}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+                <Input
+                  value={element.data.knowledgeBase?.websiteUrl || ''}
+                  onChange={(e) => handleDataUpdate({ 
+                    knowledgeBase: { 
+                      ...element.data.knowledgeBase, 
+                      websiteUrl: e.target.value 
+                    } 
+                  })}
+                  placeholder="Website URL for knowledge extraction"
+                  className="bg-slate-700 border-slate-600 text-white"
+                />
+                <div className="space-y-2">
+                  <label className="text-black text-sm">PDF Documents:</label>
+                  <Input
+                    type="file"
+                    accept=".pdf"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      files.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          const newPdf = {
+                            id: generateFieldId(),
+                            name: file.name,
+                            content: event.target?.result as string,
+                            size: file.size
+                          };
+                          
+                          handleDataUpdate({
+                            knowledgeBase: {
+                              ...element.data.knowledgeBase,
+                              pdfFiles: [...(element.data.knowledgeBase?.pdfFiles || []), newPdf]
+                            }
+                          });
+                        };
+                        reader.readAsDataURL(file);
+                      });
+                    }}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                  {element.data.knowledgeBase?.pdfFiles && element.data.knowledgeBase.pdfFiles.length > 0 && (
+                    <div className="space-y-1">
+                      {element.data.knowledgeBase.pdfFiles.map((pdf, index) => (
+                        <div key={pdf.id || index} className="flex items-center justify-between bg-slate-600 p-2 rounded">
+                          <span className="text-white text-sm">{pdf.name}</span>
+                          <Button
+                            onClick={() => {
+                              const updatedPdfs = element.data.knowledgeBase?.pdfFiles?.filter((_, i) => i !== index) || [];
+                              handleDataUpdate({
+                                knowledgeBase: {
+                                  ...element.data.knowledgeBase,
+                                  pdfFiles: updatedPdfs
+                                }
+                              });
+                            }}
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            <i className="fas fa-trash text-xs"></i>
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
