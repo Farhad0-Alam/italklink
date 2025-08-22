@@ -1898,7 +1898,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             </div>
           </div>
           </div>
-          </>
         </CardContent>
       </Card>
     </div>
