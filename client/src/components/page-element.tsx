@@ -419,20 +419,20 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <div className="relative">
                       {/* QR Code Container */}
                       <div 
-                        className={`p-4 transition-all ${
-                          element.data.frameStyle === 'rounded' ? 'rounded-2xl' : 'rounded-lg'
+                        className={`p-1 transition-all ${
+                          element.data.frameStyle === 'rounded' ? 'rounded-lg' : 'rounded'
                         }`}
                         style={{
                           backgroundColor: 'white',
-                          border: element.data.frameStyle === 'rounded' ? `4px solid ${cardData?.brandColor || '#22c55e'}` : 'none',
-                          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                          border: element.data.frameStyle === 'rounded' ? `3px solid ${cardData?.brandColor || '#22c55e'}` : 'none',
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                         }}
                       >
                         <QRCodeSVG
                           value={element.data.value}
                           size={element.data.size || 200}
                           level="H"
-                          includeMargin={true}
+                          includeMargin={false}
                           fgColor="#1e293b"
                           bgColor="#ffffff"
                         />
@@ -443,22 +443,22 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         <>
                           {/* Top Left Corner */}
                           <div 
-                            className="absolute -top-2 -left-2 w-6 h-6 border-l-4 border-t-4 rounded-tl-lg"
+                            className="absolute -top-1 -left-1 w-4 h-4 border-l-2 border-t-2"
                             style={{borderColor: cardData?.brandColor || '#22c55e'}}
                           ></div>
                           {/* Top Right Corner */}
                           <div 
-                            className="absolute -top-2 -right-2 w-6 h-6 border-r-4 border-t-4 rounded-tr-lg"
+                            className="absolute -top-1 -right-1 w-4 h-4 border-r-2 border-t-2"
                             style={{borderColor: cardData?.brandColor || '#22c55e'}}
                           ></div>
                           {/* Bottom Left Corner */}
                           <div 
-                            className="absolute -bottom-2 -left-2 w-6 h-6 border-l-4 border-b-4 rounded-bl-lg"
+                            className="absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2"
                             style={{borderColor: cardData?.brandColor || '#22c55e'}}
                           ></div>
                           {/* Bottom Right Corner */}
                           <div 
-                            className="absolute -bottom-2 -right-2 w-6 h-6 border-r-4 border-b-4 rounded-br-lg"
+                            className="absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2"
                             style={{borderColor: cardData?.brandColor || '#22c55e'}}
                           ></div>
                         </>
