@@ -9,6 +9,7 @@ import { generateFieldId } from "@/lib/card-data";
 import { AIChat } from "@/components/ai-chat";
 import { IngestForm } from "@/components/IngestForm";
 import { RAGChatBox } from "@/components/RAGChatBox";
+import { MessageCircle } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -2158,11 +2159,28 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
               </div>
             ) : (
               <div className="space-y-6">
-                {/* Only show ingestion form in editing mode - hidden from end users */}
+                {/* Chat Button for End Users */}
                 {element.data.showChatBox && (
-                  <div data-testid="rag-chat-box">
-                    <RAGChatBox />
+                  <div className="text-center">
+                    <Button
+                      onClick={() => setIsChatOpen(true)}
+                      className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg shadow-lg"
+                      style={{ backgroundColor: element.data.primaryColor || '#22c55e' }}
+                      data-testid="button-open-knowledge-chat"
+                    >
+                      <MessageCircle className="h-5 w-5 mr-2" />
+                      Ask Knowledge Assistant
+                    </Button>
                   </div>
+                )}
+                
+                {/* RAG Chat Dialog */}
+                {element.type === "ragKnowledge" && (
+                  <RAGChatBox
+                    isOpen={isChatOpen}
+                    onClose={() => setIsChatOpen(false)}
+                    primaryColor={element.data.primaryColor}
+                  />
                 )}
                 
                 {/* Technical note for card creators - only visible during editing */}

@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Send, Bot, User, ExternalLink } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Loader2, Send, Bot, User, ExternalLink, MessageCircle, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Source {
@@ -26,7 +27,13 @@ interface RAGResponse {
   sources: Source[];
 }
 
-export function RAGChatBox() {
+interface RAGChatBoxProps {
+  isOpen: boolean;
+  onClose: () => void;
+  primaryColor?: string;
+}
+
+export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e' }: RAGChatBoxProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -119,13 +126,14 @@ export function RAGChatBox() {
         </div>
       )}
       
-      <div className={`max-w-[85%] lg:max-w-[80%] space-y-2 ${message.type === 'user' ? 'order-1' : ''}`}>
+      <div className={`max-w-[85%] space-y-2 ${message.type === 'user' ? 'order-1' : ''}`}>
         <div
-          className={`p-2 lg:p-3 rounded-lg ${
+          className={`p-3 rounded-lg ${
             message.type === 'user'
-              ? 'bg-primary text-primary-foreground'
+              ? 'text-white'
               : 'bg-muted'
           }`}
+          style={{ backgroundColor: message.type === 'user' ? '#22c55e' : undefined }}
           data-testid={`message-${message.type}`}
         >
           <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
@@ -161,65 +169,81 @@ export function RAGChatBox() {
   );
 
   return (
-    <Card className="w-full max-w-4xl h-[500px] lg:h-[600px] flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Bot className="h-5 w-5" />
-          AI Chat
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="flex-1 flex flex-col p-3 lg:p-4">
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto space-y-3 lg:space-y-4 mb-3 lg:mb-4 scroll-smooth px-1" data-testid="chat-messages">
-          {messages.length === 0 ? (
-            <div className="text-center text-muted-foreground py-6 lg:py-8">
-              <Bot className="h-10 lg:h-12 w-10 lg:w-12 mx-auto mb-3 lg:mb-4 opacity-50" />
-              <p className="text-sm lg:text-base">Ask me anything about the ingested content!</p>
-              <p className="text-xs lg:text-sm mt-2">Make sure to ingest some URLs first using the ingestion form.</p>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b" style={{ borderColor: primaryColor + '20' }}>
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Bot className="h-5 w-5" style={{ color: primaryColor }} />
+              <span>Knowledge Assistant</span>
             </div>
-          ) : (
-            messages.map(renderMessage)
-          )}
-          
-          {isLoading && (
-            <div className="flex gap-3 justify-start">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Bot className="h-4 w-4" />
-              </div>
-              <div className="bg-muted p-3 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">Thinking...</span>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
+            <Button variant="ghost" size="sm" onClick={onClose} data-testid="button-close-chat">
+              <X className="h-4 w-4" />
+            </Button>
+          </DialogTitle>
+        </DialogHeader>
 
-        {/* Input */}
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me anything..."
-            disabled={isLoading}
-            className="flex-1 text-sm"
-            data-testid="input-chat"
-          />
-          <Button 
-            type="submit" 
-            disabled={isLoading || !input.trim()}
-            size="icon"
-            className="shrink-0"
-            data-testid="button-send"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        <div className="flex-1 flex flex-col">
+          {/* Messages */}
+          <ScrollArea className="flex-1 px-6">
+            <div className="space-y-4 py-4" data-testid="chat-messages">
+              {messages.length === 0 ? (
+                <div className="text-center text-muted-foreground py-12">
+                  <Bot className="h-16 w-16 mx-auto mb-4 opacity-30" style={{ color: primaryColor }} />
+                  <p className="text-lg font-medium mb-2">Knowledge Assistant</p>
+                  <p className="text-sm">Ask me anything about the ingested content!</p>
+                  <p className="text-xs mt-2 opacity-75">I can help you find information from the knowledge base.</p>
+                </div>
+              ) : (
+                messages.map(renderMessage)
+              )}
+              
+              {isLoading && (
+                <div className="flex gap-3 justify-start">
+                  <div 
+                    className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: primaryColor + '20' }}
+                  >
+                    <Bot className="h-4 w-4" style={{ color: primaryColor }} />
+                  </div>
+                  <div className="bg-muted p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" style={{ color: primaryColor }} />
+                      <span className="text-sm">Searching knowledge base...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
+
+          {/* Input */}
+          <div className="border-t px-6 py-4">
+            <form onSubmit={handleSubmit} className="flex gap-3">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask me anything about the content..."
+                disabled={isLoading}
+                className="flex-1"
+                data-testid="input-chat"
+              />
+              <Button 
+                type="submit" 
+                disabled={isLoading || !input.trim()}
+                size="icon"
+                style={{ backgroundColor: primaryColor }}
+                className="text-white hover:opacity-90"
+                data-testid="button-send"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
