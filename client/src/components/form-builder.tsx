@@ -348,17 +348,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               />
             </div>
 
-            <div>
-              <Label htmlFor="about" className="text-white">{t('field.about')}</Label>
-              <Textarea
-                id="about"
-                {...form.register("about")}
-                placeholder="Brief description..."
-                rows={3}
-                className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                data-testid="textarea-about"
-              />
-            </div>
             
             {/* Basic Info Section Styling */}
             <div className="border-t border-green-600/30 pt-4 space-y-3">
@@ -412,23 +401,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       onChange={(e) => form.setValue('sectionStyles.basicInfo.companyColor', e.target.value)}
                       className="bg-slate-700 border-slate-600 text-white text-xs"
                       placeholder="#6b7280"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-white text-xs">About Color</Label>
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="color"
-                      value={watchedValues.sectionStyles?.basicInfo?.aboutColor || "#4b5563"}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.aboutColor', e.target.value)}
-                      className="w-8 h-6 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={watchedValues.sectionStyles?.basicInfo?.aboutColor || ""}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.aboutColor', e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white text-xs"
-                      placeholder="#4b5563"
                     />
                   </div>
                 </div>

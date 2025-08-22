@@ -63,7 +63,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     const profileImageSrc = data.profilePhoto || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300";
     
     // Helper function to get section-specific styling with global fallback
-    const getSectionStyle = (section: 'basicInfo' | 'contactInfo' | 'socialMedia' | 'about', styleType: string) => {
+    const getSectionStyle = (section: 'basicInfo' | 'contactInfo' | 'socialMedia', styleType: string) => {
       const sectionStyle = data.sectionStyles?.[section];
       const globalStyle = data[styleType as keyof typeof data];
       
@@ -480,22 +480,6 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             ))}
           </div>
 
-          {/* About Section */}
-          {data.about && (
-            <div className="mb-6">
-              <p 
-                className="text-sm leading-relaxed" 
-                style={{
-                  color: getSectionStyle('basicInfo', 'aboutColor') || data.paragraphColor || '#4b5563',
-                  fontSize: `${data.paragraphSize || 14}px`,
-                  fontWeight: data.paragraphWeight || 400
-                }}
-                data-testid="text-about"
-              >
-                {data.about}
-              </p>
-            </div>
-          )}
 
           {/* Page Elements */}
           {data.pageElements && data.pageElements.length > 0 && (

@@ -808,7 +808,6 @@ export const businessCardSchema = z.object({
       nameColor: z.string().optional(),
       titleColor: z.string().optional(),
       companyColor: z.string().optional(),
-      aboutColor: z.string().optional(),
     }).default({}),
     contactInfo: z.object({
       iconColor: z.string().optional(),
