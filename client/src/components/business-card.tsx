@@ -314,7 +314,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   onClick={() => handleContactAction('whatsapp', data.whatsapp)}
                   className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-600 transition-colors mb-1"
                   style={{ 
-                    backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || getSectionStyle('contactInfo', 'primaryColor') || data.brandColor || '#22c55e',
+                    backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || data.brandColor || '#22c55e',
                     color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
                   }}
                   data-testid="button-contact-whatsapp"
@@ -363,7 +363,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   onClick={() => handleContactAction('linkedin', data.linkedin)}
                   className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
                   style={{ 
-                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || getSectionStyle('socialMedia', 'primaryColor') || '#475569',
+                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
                     color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
                   }}
                   data-testid="button-social-linkedin"
@@ -384,7 +384,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   onClick={() => handleContactAction('instagram', data.instagram)}
                   className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-pink-500 transition-colors mb-1"
                   style={{ 
-                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || getSectionStyle('socialMedia', 'primaryColor') || '#475569',
+                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
                     color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
                   }}
                   data-testid="button-social-instagram"
@@ -405,7 +405,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   onClick={() => handleContactAction('twitter', data.twitter)}
                   className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-400 transition-colors mb-1"
                   style={{ 
-                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || getSectionStyle('socialMedia', 'primaryColor') || '#475569',
+                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
                     color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
                   }}
                   data-testid="button-social-twitter"
@@ -426,7 +426,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   onClick={() => handleContactAction('facebook', data.facebook)}
                   className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
                   style={{ 
-                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || getSectionStyle('socialMedia', 'primaryColor') || '#475569',
+                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
                     color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
                   }}
                   data-testid="button-social-facebook"
