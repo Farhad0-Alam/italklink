@@ -1,0 +1,150 @@
+You are a senior full-stack engineer tasked to build a production-ready Knowledge Base + Chat (RAG) system inside a TypeScript monorepo.
+
+## Tech Stack (must use)
+- Frontend: React 18 + Vite + Tailwind + shadcn/ui, TanStack Query
+- Backend: Node.js (TypeScript) + Express
+- DB: PostgreSQL (Supabase compatible) with pgvector (Drizzle ORM)
+- Embeddings: OpenAI text-embedding-3-large (configurable)
+- LLM: GPT-4o or GPT-5 (configurable via ENV)
+- Storage: local (uploads/) + optional S3-compatible (toggle)
+- Crawler: Sitemap + URL queue + robots.txt aware (overridable)
+- Workers: BullMQ (Redis) for long-running ‘unlimited URL’ crawls
+- Auth: simple API key header for admin endpoints (X-API-KEY)
+- Logging: pino
+- Rate Limit: express-rate-limit
+- Validation: zod
+- Vector Search: cosine similarity with hybrid keyword fallback (pg_trgm)
+
+## Features & Requirements
+
+### 1) Ingestion – Files (multi-format)
+- Supported: .pdf, .doc, .docx, .txt, .md, .rtf, .csv, .xlsx, .ppt, .pptx
+- Optional: images (.png/.jpg) via OCR; audio/video via transcription (flag)
+- Implement parsers:
+  - PDF: pdf-parse or pdfjs
+  - DOCX/DOC: mammoth / officeparser
+  - TXT/MD/RTF: native/rtf-to-text
+  - CSV/XLSX: papaparse/sheetjs (sheet → rows → markdown table)
+  - PPT/PPTX: pptx-to-text (extract slides’ text, speaker notes)
+  - OCR (optional): Tesseract
+  - A/V (optional): Whisper local hook (stub function, toggled by ENV)
+- Chunking: recursive text splitter (target 800–1200 tokens, smart overlap 150)
+- Metadata saved per chunk: source_id, file_name/url, title, section, page/slide, tokens, md5, crawl_ts
+
+### 2) Ingestion – Unlimited Website URLs
+- POST /ingest/urls accepts:
+  {
+    "start_urls": [ "https://site.com", "https://docs.site.com/guide" ],
+    "include": ["site.com"],
+    "exclude": ["?utm_", "#", ".png", ".jpg"],
+    "max_depth": 5,
+    "max_pages": 100000,
+    "respect_robots": true,
+    "sitemap": true,
+    "concurrency": 5,
+    "user_agent": "KB-Bot/1.0",
+    "recrawl": "daily|weekly|never"
+  }
+- Implement URL frontier + dedupe (canonicalization, normalize, strip query noise).
+- Crawl priority: sitemap URLs → on-site links BFS.
+- Respect robots.txt by default; add ENV `CRAWL_IGNORE_ROBOTS=true` to override.
+- Fetch with timeout + retry + 429 backoff. Strip boilerplate (nav/footer/ads).
+- Extract: <title>, <meta>, headings, main article, tables, price blocks; convert to markdown.
+- Queue with BullMQ so arbitrarily large sites are supported (“unlimited URLs”).
+- Persist raw HTML snapshot path for audit; store cleaned markdown for embeddings.
+
+### 3) Storage Schema (Drizzle + pgvector)
+- tables:
+  - documents(id uuid pk, source_type enum('file','url','ocr','transcript'),
+              source_path text, url text, title text, tags text[], hash text unique,
+              created_at timestamptz, updated_at timestamptz)
+  - chunks(id uuid pk, document_id uuid fk, chunk_index int,
+           content text, tokens int, metadata jsonb,
+           embedding vector(3072), created_at timestamptz)
+  - chats(id uuid pk, session_id text, role text, content text, created_at timestamptz)
+- indexes:
+  - GIN on chunks USING ivfflat (pgvector) with cosine
+  - trigram on chunks.content for hybrid search
+  - (document_id, chunk_index)
+
+### 4) Chat API (RAG)
+- POST /chat
+  request: { "session_id": string, "query": string, "top_k": 8, "hybrid": true }
+  steps:
+    - embed query → vector search (top_k * 2)
+    - hybrid rerank: combine pg_trgm score + vector cosine; pick top_k
+    - LLM prompt template (system + instructions)
+    - return answer + cites [{title, url|file, snippet}]
+- POST /chat/stream → Server-Sent Events (SSE)
+- Safety: never leak API keys in responses; truncate long cites; strip PII unless admin.
+
+### 5) Admin Endpoints (API-Key Protected via X-API-KEY)
+- POST /ingest/files (multipart) → parse → chunk → embed → upsert
+- POST /ingest/urls (bulk config above) → enqueue crawl job
+- GET /ingest/status?job_id=… → progress (% processed, pages, errors)
+- GET /sources?query=&type=file|url → list documents, counts, last_crawl
+- DELETE /sources/:id → cascade delete chunks
+- POST /reindex/:id → re-embed document
+- POST /settings → update chunk size, overlap, embed model
+
+### 6) Frontend (React)
+- Pages: Chat, Upload, Crawl, Sources, Settings (shadcn/ui Cards + Tables)
+- Chat UI: query box, streaming answer, collapsible citations with source chips
+- Upload UI: drag-drop multi-file, progress, per-file result
+- Crawl UI: start URLs form, include/exclude, depth, concurrency; live status
+- Sources UI: search, filter by type, paginate, delete/reindex
+- Settings UI: models, chunk params, OCR/transcript toggles
+- i18n: English/Bengali (i18next). RTL-safe.
+
+### 7) ENV & Config
+- .env:
+  OPENAI_API_KEY=...
+  DB_URL=postgresql://user:pass@host:5432/db
+  EMBEDDING_MODEL=text-embedding-3-large
+  LLM_MODEL=gpt-4o
+  ADMIN_API_KEY=change_me
+  REDIS_URL=redis://localhost:6379
+  STORAGE_DISK_PATH=./uploads
+  USE_S3=false
+  S3_ENDPOINT=...
+  S3_BUCKET=...
+  CRAWL_IGNORE_ROBOTS=false
+  ENABLE_OCR=false
+  ENABLE_TRANSCRIPT=false
+- Healthcheck at GET /health
+
+### 8) Quality & DX
+- Provide `seed:demo` script to ingest a few URLs and sample PDFs.
+- Provide `migrate` script for Drizzle.
+- Unit tests for: chunker, hybrid scoring, URL canonicalization.
+- CLI:
+  - `kb ingest:file ./path/my.pdf`
+  - `kb ingest:url https://docs.example.com --max_pages=500`
+- Pino logs (json), error middleware with zod issues surfaced.
+- Large file handling: stream parse; 50MB per file limit (configurable).
+
+### 9) Prompts (RAG)
+System:
+"You are a precise, citation-first assistant. Use ONLY provided context. If unsure, say you don’t know. Return concise answers with bullet points when suitable. Always attach citations with title and (url or file)."
+User template:
+"Question: {query}\nContext:\n{top_chunks}\nInstructions: Answer from context only. Include short, verifiable citations."
+
+### 10) Security & Abuse
+- CORS allowlist
+- Size limits & rate limits
+- Sanitize HTML from crawled pages
+- Respect robots unless overridden by ENV
+- Disallow external network calls from LLM
+
+## Deliverables
+- /apps/server (Express) and /apps/web (React) workspaces
+- Drizzle schema + migrations + seed
+- BullMQ worker for crawl queue
+- All endpoints listed above working
+- Readme with run instructions:
+  - pnpm i
+  - pnpm db:migrate
+  - pnpm dev (server + web)
+- Done when: I can upload files, enqueue an “unlimited URLs” crawl, watch status, chat with sources, and see citations.
+
+Build now.
