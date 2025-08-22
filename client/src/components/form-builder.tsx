@@ -38,7 +38,20 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     customization: false,
     appearance: false,
     seo: false,
-    pageBuilder: false
+    pageBuilder: false,
+    // Basic Info subsections
+    basicSectionStyling: false,
+    nameStyling: false,
+    titleStyling: false,
+    companyStyling: false,
+    // Contact Info subsections
+    additionalContacts: false,
+    contactIconStyling: false,
+    contactTypography: false,
+    // Social Media subsections
+    additionalSocial: false,
+    socialIconStyling: false,
+    socialTypography: false
   });
 
   const form = useForm<BusinessCard>({
@@ -360,8 +373,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             
             {/* Basic Info Section Styling */}
             <div className="border-t border-green-600/30 pt-4 space-y-4">
-              <h4 className="text-sm font-medium text-green-200">Section Styling</h4>
-              <div className="grid grid-cols-2 gap-3">
+              <div 
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => toggleSection('basicSectionStyling')}
+              >
+                <h4 className="text-sm font-medium text-green-200">Section Styling</h4>
+                <i className={`fas fa-chevron-${collapsedSections.basicSectionStyling ? 'down' : 'up'} text-green-200`}></i>
+              </div>
+              {!collapsedSections.basicSectionStyling && (
+              <div>
+                <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-white text-xs">Section Background</Label>
                   <div className="flex items-center gap-1">
@@ -402,7 +423,15 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               
               {/* Name Styling */}
               <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
-                <h5 className="text-xs font-medium text-green-300">Name Styling</h5>
+                <div 
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() => toggleSection('nameStyling')}
+                >
+                  <h5 className="text-xs font-medium text-green-300">Name Styling</h5>
+                  <i className={`fas fa-chevron-${collapsedSections.nameStyling ? 'down' : 'up'} text-green-300 text-xs`}></i>
+                </div>
+                {!collapsedSections.nameStyling && (
+                <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label className="text-white text-xs">Color</Label>
@@ -495,11 +524,20 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   />
                   <Label htmlFor="nameItalic" className="text-white text-xs">Italic</Label>
                 </div>
+                </div>
+                )}
               </div>
 
               {/* Title Styling */}
               <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
-                <h5 className="text-xs font-medium text-green-300">Title Styling</h5>
+                <div 
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() => toggleSection('titleStyling')}
+                >
+                  <h5 className="text-xs font-medium text-green-300">Title Styling</h5>
+                  <i className={`fas fa-chevron-${collapsedSections.titleStyling ? 'down' : 'up'} text-green-300 text-xs`}></i>
+                </div>
+                {!collapsedSections.titleStyling && (
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label className="text-white text-xs">Color</Label>
@@ -592,6 +630,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   />
                   <Label htmlFor="titleItalic" className="text-white text-xs">Italic</Label>
                 </div>
+                )}
               </div>
 
               {/* Company Styling */}
