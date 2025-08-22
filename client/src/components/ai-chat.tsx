@@ -47,9 +47,9 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
   const [isRecording, setIsRecording] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   const [voiceMode, setVoiceMode] = useState(false); // Toggle for voice conversation mode
   const [lastInputWasVoice, setLastInputWasVoice] = useState(false); // Track if last input was voice
+  const [voiceState, setVoiceState] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle'); // ChatGPT-like voice states
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -82,6 +82,11 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
     setInputMessage('');
     setIsLoading(true);
     setLastInputWasVoice(fromVoice);
+    
+    // Set voice state to thinking for voice conversations
+    if (voiceMode || fromVoice) {
+      setVoiceState('thinking');
+    }
 
     try {
       const response = await apiRequest('POST', '/api/ai/chat', {
@@ -90,17 +95,19 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
         conversationHistory: messages.slice(-10) // Send last 10 messages for context
       });
 
+      const responseContent = (response as any).response;
       const assistantMessage: Message = {
         role: 'assistant',
-        content: (response as any).response,
+        content: responseContent || 'I apologize, but I encountered an error processing your request.',
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, assistantMessage]);
 
       // Auto-speak response if in voice mode or last input was voice
-      if (voiceMode || fromVoice) {
+      if ((voiceMode || fromVoice) && assistantMessage.content) {
         setTimeout(() => {
+          setVoiceState('speaking');
           speakText(assistantMessage.content);
         }, 500); // Small delay to ensure message is rendered
       }
@@ -111,6 +118,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
         description: 'Failed to send message. Please try again.',
         variant: 'destructive'
       });
+      setVoiceState('idle');
     } finally {
       setIsLoading(false);
     }
@@ -133,22 +141,37 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
       console.log('Recording with mimetype:', mimeType);
       const recorder = new MediaRecorder(stream, { mimeType });
       
+      const chunks: Blob[] = [];
+      
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-          setAudioChunks(prev => [...prev, event.data]);
+          chunks.push(event.data);
         }
       };
 
       recorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunks, { type: mimeType });
-        console.log('Created audio blob:', { type: audioBlob.type, size: audioBlob.size });
-        await transcribeAudio(audioBlob, true); // Pass true to indicate voice input
-        setAudioChunks([]);
+        if (chunks.length > 0) {
+          const audioBlob = new Blob(chunks, { type: mimeType });
+          console.log('Created audio blob:', { type: audioBlob.type, size: audioBlob.size });
+          if (audioBlob.size > 0) {
+            await transcribeAudio(audioBlob, true); // Pass true to indicate voice input
+          } else {
+            console.warn('Audio blob is empty, skipping transcription');
+            toast({
+              title: 'Recording Error',
+              description: 'No audio was captured. Please try again.',
+              variant: 'destructive'
+            });
+          }
+        }
+        chunks.length = 0;
       };
 
-      recorder.start();
+      // Record in chunks for better compatibility
+      recorder.start(1000); // Record in 1-second chunks
       setMediaRecorder(recorder);
       setIsRecording(true);
+      setVoiceState('listening');
     } catch (error) {
       console.error('Recording error:', error);
       toast({
@@ -165,6 +188,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
       mediaRecorder.stream.getTracks().forEach(track => track.stop());
       setMediaRecorder(null);
       setIsRecording(false);
+      setVoiceState('idle');
     }
   };
 
@@ -213,20 +237,18 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
     try {
       console.log('Speaking text:', { text, length: text?.length });
       
-      if (!text || text.trim().length === 0) {
-        toast({
-          title: 'Speech Error',
-          description: 'No text to speak',
-          variant: 'destructive'
-        });
-        return;
+      // Better text validation
+      const cleanText = typeof text === 'string' ? text.trim() : '';
+      if (!cleanText || cleanText.length === 0) {
+        console.warn('No text provided to speak:', text);
+        return; // Fail silently instead of showing error toast
       }
       
       setIsSpeaking(true);
       const response = await fetch('/api/ai/speak', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text.trim() }),
+        body: JSON.stringify({ text: cleanText }),
         credentials: 'include'
       });
 
@@ -240,6 +262,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
       
       audio.onended = () => {
         setIsSpeaking(false);
+        setVoiceState('idle'); // Reset voice state when done speaking
         URL.revokeObjectURL(audioUrl);
       };
 
@@ -247,6 +270,7 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
     } catch (error) {
       console.error('Text-to-speech error:', error);
       setIsSpeaking(false);
+      setVoiceState('idle');
       toast({
         title: 'Speech Error',
         description: 'Failed to generate speech. Please try again.',
@@ -292,16 +316,86 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
           </DialogTitle>
         </DialogHeader>
 
-        {/* Voice Mode Indicator */}
+        {/* Voice Mode Indicator with ChatGPT-style animations */}
         {voiceMode && (
-          <div className="px-6 py-2 border-b" style={{ backgroundColor: primaryColor + '10' }}>
-            <div className="flex items-center space-x-2">
-              <Mic className="h-4 w-4" style={{ color: primaryColor }} />
-              <span className="text-sm font-medium" style={{ color: primaryColor }}>
-                Voice Mode Active
-              </span>
+          <div className="px-6 py-3 border-b" style={{ backgroundColor: primaryColor + '10' }}>
+            <div className="flex items-center space-x-4">
+              {/* Voice State Animation */}
+              <div className="relative">
+                {voiceState === 'listening' && (
+                  <div className="flex items-center space-x-2">
+                    <div className="relative">
+                      <Mic className="h-5 w-5 animate-pulse" style={{ color: primaryColor }} />
+                      <div 
+                        className="absolute -inset-1 rounded-full animate-ping opacity-75"
+                        style={{ backgroundColor: primaryColor }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium animate-pulse" style={{ color: primaryColor }}>
+                      Listening...
+                    </span>
+                  </div>
+                )}
+                
+                {voiceState === 'thinking' && (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                      <div 
+                        className="w-2 h-2 rounded-full animate-bounce"
+                        style={{ backgroundColor: primaryColor, animationDelay: '0s' }}
+                      />
+                      <div 
+                        className="w-2 h-2 rounded-full animate-bounce"
+                        style={{ backgroundColor: primaryColor, animationDelay: '0.2s' }}
+                      />
+                      <div 
+                        className="w-2 h-2 rounded-full animate-bounce"
+                        style={{ backgroundColor: primaryColor, animationDelay: '0.4s' }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium" style={{ color: primaryColor }}>
+                      Thinking...
+                    </span>
+                  </div>
+                )}
+                
+                {voiceState === 'speaking' && (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="w-1 bg-current animate-pulse"
+                          style={{
+                            color: primaryColor,
+                            height: `${12 + Math.sin(i * 0.7) * 8}px`,
+                            animationDelay: `${i * 0.1}s`,
+                            animationDuration: '0.8s'
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm font-medium animate-pulse" style={{ color: primaryColor }}>
+                      Speaking...
+                    </span>
+                  </div>
+                )}
+                
+                {voiceState === 'idle' && (
+                  <div className="flex items-center space-x-2">
+                    <Volume2 className="h-5 w-5" style={{ color: primaryColor }} />
+                    <span className="text-sm font-medium" style={{ color: primaryColor }}>
+                      Voice Mode Ready
+                    </span>
+                  </div>
+                )}
+              </div>
+              
               <span className="text-xs text-gray-600">
-                Speak into microphone for automatic voice conversations
+                {voiceState === 'idle' && 'Click microphone to start conversation'}
+                {voiceState === 'listening' && 'Speak now, release when done'}
+                {voiceState === 'thinking' && 'Processing your request...'}
+                {voiceState === 'speaking' && 'AI is responding...'}
               </span>
             </div>
           </div>
@@ -443,10 +537,17 @@ export function AIChat({ isOpen, onClose, knowledgeBase, welcomeMessage, primary
             </div>
           )}
 
-          {voiceMode && !isRecording && (
-            <div className="mt-2 flex items-center space-x-2" style={{ color: primaryColor }}>
-              <Volume2 className="h-4 w-4" />
-              <span className="text-sm">Voice mode: Speak to start conversation, responses will be spoken automatically</span>
+          {voiceMode && !isRecording && voiceState === 'idle' && (
+            <div className="mt-2 flex items-center justify-center p-4 rounded-lg border-2 border-dashed" style={{ borderColor: primaryColor + '40', backgroundColor: primaryColor + '05' }}>
+              <div className="text-center">
+                <Mic className="h-8 w-8 mx-auto mb-2 opacity-70" style={{ color: primaryColor }} />
+                <span className="text-sm font-medium block" style={{ color: primaryColor }}>
+                  Ready for voice conversation
+                </span>
+                <span className="text-xs text-gray-600">
+                  Click microphone above to start speaking
+                </span>
+              </div>
             </div>
           )}
         </div>
