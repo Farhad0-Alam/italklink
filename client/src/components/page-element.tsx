@@ -324,69 +324,196 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 <div className="flex items-center justify-between w-full p-3 rounded-lg border transition-colors" style={{backgroundColor: '#4f46e520', borderColor: '#4f46e550'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4f46e530'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4f46e520'}>
                   <div className="flex items-center space-x-2">
                     <i className="fas fa-qrcode" style={{color: '#4f46e5'}}></i>
-                    <span className="font-medium" style={{color: '#4f46e5'}}>QR Code Settings</span>
+                    <span className="font-medium" style={{color: '#4f46e5'}}>QR Code Designer</span>
                     <span className="text-xs px-2 py-1 rounded font-medium text-white" style={{backgroundColor: '#4f46e5'}}>
-                      2025
+                      PRO 2025
                     </span>
                   </div>
                 </div>
                 
-                {/* Settings Form */}
-                <div className="space-y-3 p-4 rounded-lg" style={{backgroundColor: '#f8fafc', border: '1px solid #e2e8f0'}}>
-                  <div>
-                    <label className="block text-sm font-medium mb-2" style={{color: '#4f46e5'}}>
-                      <i className="fas fa-link mr-2"></i>QR Content
-                    </label>
-                    <Input
-                      value={element.data.value}
-                      onChange={(e) => handleDataUpdate({ value: e.target.value })}
-                      className="border-2 focus:ring-2 transition-all"
-                      style={{borderColor: '#4f46e5', backgroundColor: 'white'}}
-                      placeholder="Enter URL, text, or any content"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-2" style={{color: '#4f46e5'}}>
-                      <i className="fas fa-expand-arrows-alt mr-2"></i>Size (px)
-                    </label>
-                    <div className="flex items-center space-x-3">
-                      <Input
-                        type="range"
-                        value={element.data.size}
-                        onChange={(e) => handleDataUpdate({ size: parseInt(e.target.value) })}
-                        min="80"
-                        max="400"
-                        className="flex-1"
-                        style={{accentColor: '#4f46e5'}}
-                      />
-                      <div className="w-16 px-2 py-1 text-center border rounded" style={{borderColor: '#4f46e5', color: '#4f46e5', fontWeight: '600'}}>
-                        {element.data.size}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Settings Panel */}
+                  <div className="space-y-4">
+                    {/* Basic Settings */}
+                    <div className="space-y-3 p-4 rounded-lg" style={{backgroundColor: '#f8fafc', border: '1px solid #e2e8f0'}}>
+                      <div>
+                        <label className="block text-sm font-medium mb-2" style={{color: '#4f46e5'}}>
+                          <i className="fas fa-link mr-2"></i>QR Content
+                        </label>
+                        <Input
+                          value={element.data.value}
+                          onChange={(e) => handleDataUpdate({ value: e.target.value })}
+                          className="border-2 focus:ring-2 transition-all"
+                          style={{borderColor: '#4f46e5', backgroundColor: 'white'}}
+                          placeholder="Enter URL, text, or any content"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium mb-2" style={{color: '#4f46e5'}}>
+                          <i className="fas fa-expand-arrows-alt mr-2"></i>Size: {element.data.size}px
+                        </label>
+                        <Input
+                          type="range"
+                          value={element.data.size}
+                          onChange={(e) => handleDataUpdate({ size: parseInt(e.target.value) })}
+                          min="120"
+                          max="400"
+                          className="w-full"
+                          style={{accentColor: '#4f46e5'}}
+                        />
                       </div>
                     </div>
+
+                    {/* Frame Styles */}
+                    <div className="p-4 rounded-lg" style={{backgroundColor: '#f8fafc', border: '1px solid #e2e8f0'}}>
+                      <label className="block text-sm font-medium mb-3" style={{color: '#4f46e5'}}>
+                        <i className="fas fa-border-style mr-2"></i>Frame Style
+                      </label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {[
+                          { id: 'none', name: 'None', icon: '⚫' },
+                          { id: 'square', name: 'Square', icon: '⬜' },
+                          { id: 'rounded', name: 'Rounded', icon: '🔲' },
+                          { id: 'circle', name: 'Circle', icon: '⭕' },
+                          { id: 'dots', name: 'Dots', icon: '⚪' },
+                          { id: 'dashed', name: 'Dashed', icon: '▫️' },
+                          { id: 'double', name: 'Double', icon: '◼️' },
+                          { id: 'gradient', name: 'Gradient', icon: '🌈' }
+                        ].map((frame) => (
+                          <button
+                            key={frame.id}
+                            onClick={() => handleDataUpdate({ frameStyle: frame.id })}
+                            className={`p-2 text-xs rounded border-2 transition-all hover:scale-105 ${
+                              (element.data.frameStyle || 'square') === frame.id 
+                                ? 'border-green-500 bg-green-50' 
+                                : 'border-gray-300 hover:border-green-400'
+                            }`}
+                          >
+                            <div className="text-lg mb-1">{frame.icon}</div>
+                            <div className="font-medium">{frame.name}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Colors */}
+                    <div className="p-4 rounded-lg" style={{backgroundColor: '#f8fafc', border: '1px solid #e2e8f0'}}>
+                      <label className="block text-sm font-medium mb-3" style={{color: '#4f46e5'}}>
+                        <i className="fas fa-palette mr-2"></i>Colors
+                      </label>
+                      <div className="grid grid-cols-6 gap-2 mb-3">
+                        {['#22c55e', '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#ef4444', '#f97316', '#84cc16'].map((color) => (
+                          <button
+                            key={color}
+                            onClick={() => handleDataUpdate({ frameColor: color })}
+                            className={`w-10 h-10 rounded-full border-4 transition-all hover:scale-110 ${
+                              (element.data.frameColor || '#22c55e') === color 
+                                ? 'border-white shadow-lg ring-2 ring-gray-400' 
+                                : 'border-gray-300'
+                            }`}
+                            style={{backgroundColor: color}}
+                          />
+                        ))}
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 mb-3">
+                        <input
+                          type="checkbox"
+                          checked={element.data.customLabel || false}
+                          onChange={(e) => handleDataUpdate({ customLabel: e.target.checked })}
+                          style={{accentColor: '#22c55e'}}
+                        />
+                        <label className="text-sm font-medium" style={{color: '#4f46e5'}}>
+                          Custom label text
+                        </label>
+                      </div>
+                      
+                      {element.data.customLabel && (
+                        <Input
+                          value={element.data.labelText || ''}
+                          onChange={(e) => handleDataUpdate({ labelText: e.target.value })}
+                          placeholder="Follow us on X"
+                          className="border-2"
+                          style={{borderColor: '#4f46e5'}}
+                        />
+                      )}
+                    </div>
                   </div>
-                  
-                  {/* Premium Features Badge */}
-                  <div className="flex items-center justify-center p-2 rounded-lg" style={{backgroundColor: '#4f46e510'}}>
-                    <span className="text-xs" style={{color: '#4f46e5'}}>
-                      <i className="fas fa-star mr-1"></i>Premium QR Generator with Advanced Styling
-                    </span>
+
+                  {/* Live Preview */}
+                  <div className="flex flex-col items-center justify-center p-6 rounded-lg" style={{backgroundColor: '#f8fafc', border: '1px solid #e2e8f0'}}>
+                    <h3 className="text-lg font-semibold mb-4" style={{color: '#4f46e5'}}>Live Preview</h3>
+                    {element.data.value && (
+                      <div className="flex flex-col items-center">
+                        <div 
+                          className={`p-4 transition-all ${
+                            (element.data.frameStyle || 'square') === 'rounded' ? 'rounded-2xl' : 
+                            (element.data.frameStyle || 'square') === 'circle' ? 'rounded-full p-6' : 'rounded-lg'
+                          }`}
+                          style={{
+                            backgroundColor: 'white',
+                            border: (element.data.frameStyle || 'square') !== 'none' ? `4px solid ${element.data.frameColor || '#22c55e'}` : 'none',
+                            borderStyle: (element.data.frameStyle || 'square') === 'dashed' ? 'dashed' : 'solid',
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                          }}
+                        >
+                          <QRCodeSVG
+                            value={element.data.value}
+                            size={Math.min(element.data.size, 200)}
+                            level="H"
+                            includeMargin={true}
+                            fgColor="#1e293b"
+                            bgColor="#ffffff"
+                          />
+                        </div>
+                        {element.data.customLabel && element.data.labelText && (
+                          <div 
+                            className="mt-3 px-4 py-2 rounded-full text-white font-medium text-sm"
+                            style={{backgroundColor: element.data.frameColor || '#22c55e'}}
+                          >
+                            {element.data.labelText}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="flex justify-center">
+              <div className="flex flex-col items-center">
                 {element.data.value && (
-                  <div className="p-4 rounded-xl shadow-lg" style={{backgroundColor: 'white', border: '2px solid #4f46e5'}}>
-                    <QRCodeSVG
-                      value={element.data.value}
-                      size={element.data.size}
-                      level="H"
-                      includeMargin={true}
-                      fgColor="#1e293b"
-                      bgColor="#ffffff"
-                    />
-                  </div>
+                  <>
+                    <div 
+                      className={`p-4 transition-all ${
+                        (element.data.frameStyle || 'square') === 'rounded' ? 'rounded-2xl' : 
+                        (element.data.frameStyle || 'square') === 'circle' ? 'rounded-full p-6' : 'rounded-lg'
+                      }`}
+                      style={{
+                        backgroundColor: 'white',
+                        border: (element.data.frameStyle || 'square') !== 'none' ? `4px solid ${element.data.frameColor || '#22c55e'}` : 'none',
+                        borderStyle: (element.data.frameStyle || 'square') === 'dashed' ? 'dashed' : 'solid',
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      <QRCodeSVG
+                        value={element.data.value}
+                        size={element.data.size}
+                        level="H"
+                        includeMargin={true}
+                        fgColor="#1e293b"
+                        bgColor="#ffffff"
+                      />
+                    </div>
+                    {element.data.customLabel && element.data.labelText && (
+                      <div 
+                        className="mt-3 px-4 py-2 rounded-full text-white font-medium text-sm"
+                        style={{backgroundColor: element.data.frameColor || '#22c55e'}}
+                      >
+                        {element.data.labelText}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}

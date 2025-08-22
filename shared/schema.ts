@@ -512,7 +512,11 @@ export const qrcodeElementSchema = baseElementSchema.extend({
   type: z.literal("qrcode"),
   data: z.object({
     value: z.string(),
-    size: z.number().default(150),
+    size: z.number().default(200),
+    frameStyle: z.enum(['none', 'square', 'rounded', 'circle', 'dots', 'dashed', 'double', 'gradient']).default('square'),
+    frameColor: z.string().default('#22c55e'),
+    customLabel: z.boolean().default(false),
+    labelText: z.string().default(''),
   }),
 });
 

@@ -160,7 +160,11 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           order: Date.now(),
           data: {
             value: window.location.href,
-            size: 150
+            size: 200,
+            frameStyle: "square",
+            frameColor: "#22c55e",
+            customLabel: false,
+            labelText: ""
           }
         };
         break;
