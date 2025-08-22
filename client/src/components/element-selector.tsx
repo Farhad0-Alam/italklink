@@ -42,10 +42,10 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
     },
     {
       type: "qrcode",
-      title: "QRCode",
+      title: "QR Code",
       icon: "fas fa-qrcode",
-      color: "bg-red-100",
-      description: "Generate QR code"
+      color: "bg-gradient-to-br from-indigo-500 to-purple-600",
+      description: "Premium QR code generator"
     },
     {
       type: "video",

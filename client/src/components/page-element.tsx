@@ -317,34 +317,78 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
 
       case "qrcode":
         return (
-          <div className="mb-4 flex justify-center">
+          <div className="mb-4">
             {isEditing ? (
-              <div className="space-y-2">
-                <Input
-                  value={element.data.value}
-                  onChange={(e) => handleDataUpdate({ value: e.target.value })}
-                  className="bg-slate-700 border-slate-600 text-white"
-                  placeholder="QR Code content"
-                />
-                <Input
-                  type="number"
-                  value={element.data.size}
-                  onChange={(e) => handleDataUpdate({ size: parseInt(e.target.value) })}
-                  className="bg-slate-700 border-slate-600 text-white"
-                  placeholder="Size"
-                  min="50"
-                  max="300"
-                />
+              <div className="space-y-4">
+                {/* QR Code Settings Header */}
+                <div className="flex items-center justify-between w-full p-3 rounded-lg border transition-colors" style={{backgroundColor: '#4f46e520', borderColor: '#4f46e550'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4f46e530'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4f46e520'}>
+                  <div className="flex items-center space-x-2">
+                    <i className="fas fa-qrcode" style={{color: '#4f46e5'}}></i>
+                    <span className="font-medium" style={{color: '#4f46e5'}}>QR Code Settings</span>
+                    <span className="text-xs px-2 py-1 rounded font-medium text-white" style={{backgroundColor: '#4f46e5'}}>
+                      2025
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Settings Form */}
+                <div className="space-y-3 p-4 rounded-lg" style={{backgroundColor: '#f8fafc', border: '1px solid #e2e8f0'}}>
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{color: '#4f46e5'}}>
+                      <i className="fas fa-link mr-2"></i>QR Content
+                    </label>
+                    <Input
+                      value={element.data.value}
+                      onChange={(e) => handleDataUpdate({ value: e.target.value })}
+                      className="border-2 focus:ring-2 transition-all"
+                      style={{borderColor: '#4f46e5', backgroundColor: 'white'}}
+                      placeholder="Enter URL, text, or any content"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{color: '#4f46e5'}}>
+                      <i className="fas fa-expand-arrows-alt mr-2"></i>Size (px)
+                    </label>
+                    <div className="flex items-center space-x-3">
+                      <Input
+                        type="range"
+                        value={element.data.size}
+                        onChange={(e) => handleDataUpdate({ size: parseInt(e.target.value) })}
+                        min="80"
+                        max="400"
+                        className="flex-1"
+                        style={{accentColor: '#4f46e5'}}
+                      />
+                      <div className="w-16 px-2 py-1 text-center border rounded" style={{borderColor: '#4f46e5', color: '#4f46e5', fontWeight: '600'}}>
+                        {element.data.size}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Premium Features Badge */}
+                  <div className="flex items-center justify-center p-2 rounded-lg" style={{backgroundColor: '#4f46e510'}}>
+                    <span className="text-xs" style={{color: '#4f46e5'}}>
+                      <i className="fas fa-star mr-1"></i>Premium QR Generator with Advanced Styling
+                    </span>
+                  </div>
+                </div>
               </div>
             ) : (
-              element.data.value && (
-                <QRCodeSVG
-                  value={element.data.value}
-                  size={element.data.size}
-                  level="M"
-                  includeMargin={true}
-                />
-              )
+              <div className="flex justify-center">
+                {element.data.value && (
+                  <div className="p-4 rounded-xl shadow-lg" style={{backgroundColor: 'white', border: '2px solid #4f46e5'}}>
+                    <QRCodeSVG
+                      value={element.data.value}
+                      size={element.data.size}
+                      level="H"
+                      includeMargin={true}
+                      fgColor="#1e293b"
+                      bgColor="#ffffff"
+                    />
+                  </div>
+                )}
+              </div>
             )}
           </div>
         );
