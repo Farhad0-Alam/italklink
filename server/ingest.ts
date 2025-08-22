@@ -12,6 +12,9 @@ const openai = new OpenAI({
 const EMBED_MODEL = process.env.EMBED_MODEL || 'text-embedding-3-small';
 const CHUNK_SIZE = 4000; // characters
 const CHUNK_OVERLAP = 600; // characters
+const MAX_CONTENT_SIZE = 50000; // Maximum content size to prevent memory issues
+const MAX_EMBEDDING_BATCH_SIZE = 10; // Process embeddings in batches
+const MAX_CHUNKS_PER_URL = 50; // Maximum chunks per URL to prevent excessive memory usage
 
 export interface IngestResult {
   ok: boolean;
@@ -69,6 +72,11 @@ export async function fetchReadable(url: string): Promise<{ title: string; conte
 
     const html = await response.text();
     console.log('Received HTML content, length:', html.length);
+    
+    // Prevent memory issues with very large HTML content
+    if (html.length > 500000) {
+      console.log('HTML content too large, truncating to prevent memory issues');
+    }
 
     const dom = new JSDOM(html, { url });
     const reader = new Readability(dom.window.document);
@@ -76,7 +84,14 @@ export async function fetchReadable(url: string): Promise<{ title: string; conte
 
     // Try Readability first
     if (article && article.textContent && article.textContent.length >= 100) {
-      const content = article.textContent.replace(/\s+/g, ' ').trim();
+      let content = article.textContent.replace(/\s+/g, ' ').trim();
+      
+      // Limit content size to prevent memory issues
+      if (content.length > MAX_CONTENT_SIZE) {
+        console.log(`Content too large (${content.length} chars), truncating to ${MAX_CONTENT_SIZE} chars`);
+        content = content.substring(0, MAX_CONTENT_SIZE) + '...';
+      }
+      
       console.log('Successfully extracted via Readability, length:', content.length);
       return {
         title: article.title || new URL(url).hostname,
@@ -105,11 +120,17 @@ export async function fetchReadable(url: string): Promise<{ title: string; conte
       .join(' ');
     
     // Combine meta content with extracted text
-    const enhancedContent = [metaContent.content, headings, paragraphs]
+    let enhancedContent = [metaContent.content, headings, paragraphs]
       .filter(Boolean)
       .join(' ')
       .replace(/\s+/g, ' ')
       .trim();
+    
+    // Limit content size to prevent memory issues
+    if (enhancedContent.length > MAX_CONTENT_SIZE) {
+      console.log(`Enhanced content too large (${enhancedContent.length} chars), truncating to ${MAX_CONTENT_SIZE} chars`);
+      enhancedContent = enhancedContent.substring(0, MAX_CONTENT_SIZE) + '...';
+    }
     
     if (enhancedContent.length >= 50) {
       console.log('Successfully extracted enhanced website content:', `Description: ${enhancedContent.substring(0, 150)}...`);
@@ -205,17 +226,33 @@ export function chunkText(text: string, chunkSize: number = CHUNK_SIZE, overlap:
   return chunks.filter(chunk => chunk.length > 50); // Filter out tiny chunks
 }
 
-// Generate embeddings for text chunks
+// Generate embeddings for text chunks in batches to prevent memory issues
 export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
   try {
     console.log('Generating embeddings for', texts.length, 'chunks');
     
-    const response = await openai.embeddings.create({
-      model: EMBED_MODEL,
-      input: texts,
-    });
+    // Process embeddings in batches to prevent memory issues
+    const allEmbeddings: number[][] = [];
+    
+    for (let i = 0; i < texts.length; i += MAX_EMBEDDING_BATCH_SIZE) {
+      const batch = texts.slice(i, i + MAX_EMBEDDING_BATCH_SIZE);
+      console.log(`Processing embedding batch ${Math.floor(i / MAX_EMBEDDING_BATCH_SIZE) + 1}/${Math.ceil(texts.length / MAX_EMBEDDING_BATCH_SIZE)}`);
+      
+      const response = await openai.embeddings.create({
+        model: EMBED_MODEL,
+        input: batch,
+      });
+      
+      const batchEmbeddings = response.data.map(item => item.embedding);
+      allEmbeddings.push(...batchEmbeddings);
+      
+      // Small delay between batches to prevent rate limiting
+      if (i + MAX_EMBEDDING_BATCH_SIZE < texts.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
 
-    return response.data.map(item => item.embedding);
+    return allEmbeddings;
   } catch (error) {
     console.error('Error generating embeddings:', error);
     throw error;
@@ -297,8 +334,14 @@ export async function ingestUrl(url: string): Promise<IngestResult> {
     await pool.query(`DELETE FROM kb_docs WHERE url = $1`, [url]);
 
     // 4. Split into chunks
-    const chunks = chunkText(content);
+    let chunks = chunkText(content);
     console.log('Split into', chunks.length, 'chunks');
+    
+    // Limit chunks to prevent memory issues
+    if (chunks.length > MAX_CHUNKS_PER_URL) {
+      console.log(`Too many chunks (${chunks.length}), limiting to ${MAX_CHUNKS_PER_URL} to prevent memory issues`);
+      chunks = chunks.slice(0, MAX_CHUNKS_PER_URL);
+    }
 
     // 5. Generate embeddings
     const embeddings = await generateEmbeddings(chunks);
