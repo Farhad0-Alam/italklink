@@ -76,14 +76,44 @@ async function extractWebsiteText(url: string): Promise<string> {
     // Try multiple extraction strategies
     let text = '';
     
-    // Strategy 1: Try main content areas
-    const mainSelectors = ['main', 'article', '[role="main"]', '.content', '#content', '.main-content'];
-    for (const selector of mainSelectors) {
-      const element = document.querySelector(selector);
-      if (element?.textContent?.trim()) {
-        text = element.textContent;
-        console.log('Extracted from', selector);
-        break;
+    // Strategy 1: Extract from meta tags (title, description, og tags)
+    const metaTexts = [];
+    const title = document.title || document.querySelector('meta[property="og:title"]')?.getAttribute('content');
+    if (title) {
+      metaTexts.push(`Title: ${title}`);
+    }
+    
+    const description = document.querySelector('meta[name="description"]')?.getAttribute('content') ||
+                      document.querySelector('meta[property="og:description"]')?.getAttribute('content');
+    if (description) {
+      metaTexts.push(`Description: ${description}`);
+    }
+    
+    const ogTitle = document.querySelector('meta[property="og:title"]')?.getAttribute('content');
+    const ogDesc = document.querySelector('meta[property="og:description"]')?.getAttribute('content');
+    const twitterTitle = document.querySelector('meta[name="twitter:title"]')?.getAttribute('content');
+    const twitterDesc = document.querySelector('meta[name="twitter:description"]')?.getAttribute('content');
+    
+    if (ogTitle && ogTitle !== title) metaTexts.push(`Social Title: ${ogTitle}`);
+    if (ogDesc && ogDesc !== description) metaTexts.push(`Social Description: ${ogDesc}`);
+    if (twitterTitle && twitterTitle !== ogTitle) metaTexts.push(`Twitter Title: ${twitterTitle}`);
+    if (twitterDesc && twitterDesc !== ogDesc) metaTexts.push(`Twitter Description: ${twitterDesc}`);
+    
+    if (metaTexts.length > 0) {
+      text = metaTexts.join(' ');
+      console.log('Extracted from meta tags, parts found:', metaTexts.length);
+    }
+    
+    // Strategy 2: Try main content areas
+    if (!text.trim()) {
+      const mainSelectors = ['main', 'article', '[role="main"]', '.content', '#content', '.main-content'];
+      for (const selector of mainSelectors) {
+        const element = document.querySelector(selector);
+        if (element?.textContent?.trim()) {
+          text = element.textContent;
+          console.log('Extracted from', selector);
+          break;
+        }
       }
     }
     
