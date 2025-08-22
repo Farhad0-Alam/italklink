@@ -59,7 +59,7 @@ export const defaultCardData: BusinessCard = {
   galleryImages: [],
   vision: "",
   mission: "",
-  customContacts: [],
+
   customSocials: [],
   availableIcons: getAvailableIcons(),
 };
@@ -89,7 +89,7 @@ export const sampleCardData: BusinessCard = {
   galleryImages: [],
   vision: "To empower businesses through innovative digital solutions.",
   mission: "Creating scalable, user-friendly applications that drive business growth.",
-  customContacts: [],
+
   customSocials: [],
   availableIcons: getAvailableIcons(),
 };

@@ -27,7 +27,6 @@ export default function CardEditor() {
     fullName: "",
     title: "",
     template: "minimal" as const,
-    customContacts: [],
     pageElements: [],
     customSocials: [],
     galleryImages: [],

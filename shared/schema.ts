@@ -101,7 +101,6 @@ export const businessCards = pgTable("business_cards", {
   telegram: varchar("telegram"),
   
   // Dynamic fields
-  customContacts: jsonb("custom_contacts"),
   customSocials: jsonb("custom_socials"),
   pageElements: jsonb("page_elements"),
   
@@ -731,14 +730,6 @@ export const businessCardSchema = z.object({
   youtube: z.string().optional(),
   telegram: z.string().optional(),
   
-  // Dynamic contact fields (legacy)
-  customContacts: z.array(z.object({
-    id: z.string(),
-    label: z.string(),
-    value: z.string(),
-    icon: z.string(),
-    type: z.enum(["phone", "email", "website", "text", "other"])
-  })).default([]),
   
   // Dynamic social media fields (legacy)
   customSocials: z.array(z.object({
