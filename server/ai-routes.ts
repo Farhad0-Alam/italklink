@@ -27,20 +27,49 @@ async function extractPDFText(buffer: Buffer): Promise<string> {
 // Helper function to extract text from website
 async function extractWebsiteText(url: string): Promise<string> {
   try {
-    const response = await fetch(url);
+    console.log('Starting website extraction for URL:', url);
+    
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(url, { 
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; AI Knowledge Extractor)'
+      }
+    });
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
     const html = await response.text();
+    console.log('Received HTML content, length:', html.length);
+    
     const dom = new JSDOM(html);
     const document = dom.window.document;
     
     // Remove script and style elements
-    const scripts = document.querySelectorAll('script, style');
+    const scripts = document.querySelectorAll('script, style, nav, footer, aside');
     scripts.forEach(script => script.remove());
     
-    // Get text content and clean it up
-    const text = document.body.textContent || '';
-    return text.replace(/\s+/g, ' ').trim();
+    // Get main content (prioritize main, article, or body)
+    let contentElement = document.querySelector('main') || 
+                        document.querySelector('article') || 
+                        document.querySelector('[role="main"]') ||
+                        document.body;
+    
+    const text = contentElement?.textContent || '';
+    const cleanText = text.replace(/\s+/g, ' ').trim();
+    
+    console.log('Extracted text length:', cleanText.length);
+    console.log('Text preview:', cleanText.substring(0, 200) + '...');
+    
+    return cleanText;
   } catch (error) {
-    console.error('Error extracting website text:', error);
+    console.error('Error extracting website text from', url, ':', error);
     return '';
   }
 }
@@ -57,17 +86,28 @@ export function setupAIRoutes(app: Express) {
 
       // Build context from knowledge base
       let context = '';
+      let hasTextKnowledge = false;
+      let hasWebsiteKnowledge = false;
+      
+      console.log('Processing knowledge base:', JSON.stringify(knowledgeBase, null, 2));
       
       if (knowledgeBase) {
         if (knowledgeBase.textContent) {
-          context += `Knowledge Base Content: ${knowledgeBase.textContent}\n\n`;
+          context += `TEXT KNOWLEDGE BASE:\n${knowledgeBase.textContent}\n\n`;
+          hasTextKnowledge = true;
+          console.log('Added text knowledge:', knowledgeBase.textContent.substring(0, 100) + '...');
         }
         
         if (knowledgeBase.websiteUrl) {
           try {
+            console.log('Extracting website data from:', knowledgeBase.websiteUrl);
             const websiteText = await extractWebsiteText(knowledgeBase.websiteUrl);
-            if (websiteText) {
-              context += `Website Content from ${knowledgeBase.websiteUrl}: ${websiteText.slice(0, 2000)}\n\n`;
+            if (websiteText && websiteText.trim().length > 0) {
+              context += `WEBSITE KNOWLEDGE BASE from ${knowledgeBase.websiteUrl}:\n${websiteText.slice(0, 2000)}\n\n`;
+              hasWebsiteKnowledge = true;
+              console.log('Successfully extracted website content:', websiteText.substring(0, 100) + '...');
+            } else {
+              console.log('No website content extracted or content was empty');
             }
           } catch (error) {
             console.error('Website extraction failed:', error);
@@ -83,7 +123,21 @@ export function setupAIRoutes(app: Express) {
       const messages = [
         {
           role: 'system' as const,
-          content: `You are a helpful AI assistant. You have access to the following knowledge base information:\n\n${context}\n\nPlease use this information to answer questions accurately. If the user asks about something not in the knowledge base, you can use your general knowledge but mention that it's not from the provided knowledge base.`
+          content: `You are a helpful AI assistant. You have access to knowledge from multiple sources:
+
+${context}
+
+IMPORTANT: When answering questions, always specify your source:
+- If information comes from TEXT KNOWLEDGE BASE, say "According to the text knowledge base provided..."
+- If information comes from WEBSITE KNOWLEDGE BASE, say "According to the website data from [URL]..."
+- If using general knowledge, say "From my general knowledge (not from provided sources)..."
+- If combining sources, mention all relevant sources used
+
+Available sources for this conversation:
+${hasTextKnowledge ? '✓ Text Knowledge Base' : '✗ No Text Knowledge Base'}
+${hasWebsiteKnowledge ? '✓ Website Knowledge Base' : '✗ No Website Knowledge Base'}
+
+Use the provided information accurately and cite your sources clearly.`
         },
         ...filteredHistory,
         {
