@@ -424,7 +424,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         }`}
                         style={{
                           backgroundColor: 'white',
-                          padding: '9px',
+                          padding: '11px',
                           border: element.data.frameStyle === 'rounded' ? `6px solid ${cardData?.brandColor || '#22c55e'}` : 'none',
                           boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                         }}
@@ -444,23 +444,35 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         <>
                           {/* Top Left Corner */}
                           <div 
-                            className="absolute -top-1 -left-1 w-4 h-4 border-l-2 border-t-2"
-                            style={{borderColor: cardData?.brandColor || '#22c55e'}}
+                            className="absolute -top-1 -left-1 w-6 h-6"
+                            style={{
+                              borderLeft: `6px solid ${cardData?.brandColor || '#22c55e'}`,
+                              borderTop: `6px solid ${cardData?.brandColor || '#22c55e'}`
+                            }}
                           ></div>
                           {/* Top Right Corner */}
                           <div 
-                            className="absolute -top-1 -right-1 w-4 h-4 border-r-2 border-t-2"
-                            style={{borderColor: cardData?.brandColor || '#22c55e'}}
+                            className="absolute -top-1 -right-1 w-6 h-6"
+                            style={{
+                              borderRight: `6px solid ${cardData?.brandColor || '#22c55e'}`,
+                              borderTop: `6px solid ${cardData?.brandColor || '#22c55e'}`
+                            }}
                           ></div>
                           {/* Bottom Left Corner */}
                           <div 
-                            className="absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2"
-                            style={{borderColor: cardData?.brandColor || '#22c55e'}}
+                            className="absolute -bottom-1 -left-1 w-6 h-6"
+                            style={{
+                              borderLeft: `6px solid ${cardData?.brandColor || '#22c55e'}`,
+                              borderBottom: `6px solid ${cardData?.brandColor || '#22c55e'}`
+                            }}
                           ></div>
                           {/* Bottom Right Corner */}
                           <div 
-                            className="absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2"
-                            style={{borderColor: cardData?.brandColor || '#22c55e'}}
+                            className="absolute -bottom-1 -right-1 w-6 h-6"
+                            style={{
+                              borderRight: `6px solid ${cardData?.brandColor || '#22c55e'}`,
+                              borderBottom: `6px solid ${cardData?.brandColor || '#22c55e'}`
+                            }}
                           ></div>
                         </>
                       )}
