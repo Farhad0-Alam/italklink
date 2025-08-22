@@ -135,6 +135,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.coverLogo ? 'fa-chevron-down' : 'fa-chevron-up'} text-blue-300`}></i>
             </div>
             {!collapsedSections.coverLogo && (
+            <>
             <div>
             {/* Header Design Options */}
             <div className="space-y-3">
@@ -308,6 +309,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               </div>
             </div>
             </div>
+            </>
             )}
           </div>
 
@@ -329,6 +331,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.basicInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-green-300`}></i>
             </div>
             {!collapsedSections.basicInfo && (
+            <>
             <div>
             
             <div>
@@ -381,6 +384,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 <i className={`fas fa-chevron-${collapsedSections.basicSectionStyling ? 'down' : 'up'} text-green-200`}></i>
               </div>
               {!collapsedSections.basicSectionStyling && (
+              <>
               <div>
                 <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -431,6 +435,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   <i className={`fas fa-chevron-${collapsedSections.nameStyling ? 'down' : 'up'} text-green-300 text-xs`}></i>
                 </div>
                 {!collapsedSections.nameStyling && (
+                <>
                 <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
@@ -525,6 +530,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   <Label htmlFor="nameItalic" className="text-white text-xs">Italic</Label>
                 </div>
                 </div>
+                </>
                 )}
               </div>
 
@@ -538,6 +544,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   <i className={`fas fa-chevron-${collapsedSections.titleStyling ? 'down' : 'up'} text-green-300 text-xs`}></i>
                 </div>
                 {!collapsedSections.titleStyling && (
+                <>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label className="text-white text-xs">Color</Label>
@@ -630,6 +637,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   />
                   <Label htmlFor="titleItalic" className="text-white text-xs">Italic</Label>
                 </div>
+                </>
                 )}
               </div>
 
@@ -730,7 +738,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 </div>
               </div>
             </div>
-            </div>
+            </>
             )}
           </div>
 
@@ -752,6 +760,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.contactInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-purple-300`}></i>
             </div>
             {!collapsedSections.contactInfo && (
+            <>
             <div>
             
             <div>
@@ -1086,6 +1095,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.customization ? 'fa-chevron-down' : 'fa-chevron-up'} text-pink-300`}></i>
             </div>
             {!collapsedSections.customization && (
+            <>
             <div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -1404,6 +1414,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               </div>
             </div>
           </div>
+          </>
           )}
           </div>
 
@@ -1417,6 +1428,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.appearance ? 'fa-chevron-down' : 'fa-chevron-up'} text-indigo-300`}></i>
             </div>
             {!collapsedSections.appearance && (
+            <>
             <div className="space-y-4">
               {/* Customize Theme */}
               <div className="space-y-3">
@@ -1700,6 +1712,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 </div>
               </div>
             </div>
+            </>
             )}
           </div>
 
@@ -1713,6 +1726,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className={`fas ${collapsedSections.seo ? 'fa-chevron-down' : 'fa-chevron-up'} text-amber-300`}></i>
             </div>
             {!collapsedSections.seo && (
+            <>
             <div className="space-y-4">
               <div>
                 <Label htmlFor="metaTitle" className="text-white">Meta Title</Label>
@@ -1859,8 +1873,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 </div>
               </div>
             </div>
+            </>
             )}
-          </div>
 
           {/* Page Builder */}
           <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
