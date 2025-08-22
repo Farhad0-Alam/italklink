@@ -93,6 +93,20 @@ async function extractWebsiteText(url: string): Promise<string> {
       console.log('Extracted from individual elements, parts found:', textParts.length);
     }
     
+    // Strategy 5: Last resort - extract from raw HTML with regex
+    if (!text.trim()) {
+      console.log('All DOM extraction failed, trying raw HTML parsing...');
+      // Remove script and style tags from HTML
+      const cleanHtml = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                            .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+      // Extract text between HTML tags
+      const textMatches = cleanHtml.match(/>([^<]+)</g);
+      if (textMatches) {
+        text = textMatches.map(match => match.slice(1, -1).trim()).filter(t => t.length > 5).join(' ');
+        console.log('Extracted from raw HTML, text parts found:', textMatches.length);
+      }
+    }
+    
     const cleanText = text.replace(/\s+/g, ' ').trim();
     
     console.log('Extracted text length:', cleanText.length);
