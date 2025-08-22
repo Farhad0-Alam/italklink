@@ -89,16 +89,37 @@ export async function fetchReadable(url: string): Promise<{ title: string; conte
     // Fallback: Extract meta tags and structured data
     const metaContent = extractMetaContent(html);
     
-    if (metaContent.content.length >= 50) {
-      console.log('Successfully extracted website content:', `Description: ${metaContent.content.substring(0, 100)}...`);
+    // Enhanced extraction: Also try to get text content from common elements
+    const document = dom.window.document;
+    
+    // Extract headings and key content
+    const headings = Array.from(document.querySelectorAll('h1, h2, h3'))
+      .map(el => el.textContent?.trim())
+      .filter(text => text && text.length > 5)
+      .join('. ');
+    
+    // Extract paragraph content  
+    const paragraphs = Array.from(document.querySelectorAll('p'))
+      .map(el => el.textContent?.trim())
+      .filter(text => text && text.length > 20)
+      .join(' ');
+    
+    // Combine meta content with extracted text
+    const enhancedContent = [metaContent.content, headings, paragraphs]
+      .filter(Boolean)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    if (enhancedContent.length >= 50) {
+      console.log('Successfully extracted enhanced website content:', `Description: ${enhancedContent.substring(0, 150)}...`);
       return {
         title: metaContent.title,
-        content: metaContent.content,
+        content: enhancedContent,
       };
     }
 
     // Final fallback: Extract text from common content areas
-    const document = dom.window.document;
     const contentSelectors = [
       'main', 'article', '.content', '#content', 
       '.post-content', '.entry-content', '.page-content',
@@ -352,12 +373,12 @@ export async function retrieveSimilarContent(
       SELECT id, url, title, content, 
              1 - (embedding <=> $1::vector) as score
       FROM kb_docs 
-      WHERE (1 - (embedding <=> $1::vector)) > 0.1
+      WHERE (1 - (embedding <=> $1::vector)) > 0.05
       ORDER BY embedding <=> $1::vector
       LIMIT $2
     `, [queryVector, topK]);
 
-    console.log('Vector search found', result.rows.length, 'documents with threshold > 0.1');
+    console.log('Vector search found', result.rows.length, 'documents with threshold > 0.05');
     
     // If no results with threshold, try without threshold
     if (result.rows.length === 0) {
