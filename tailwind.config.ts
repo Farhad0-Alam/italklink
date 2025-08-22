@@ -51,6 +51,18 @@ export default {
           "4": "var(--chart-4)",
           "5": "var(--chart-5)",
         },
+        talklink: {
+          "50": "var(--talklink-50)",
+          "100": "var(--talklink-100)",
+          "200": "var(--talklink-200)",
+          "300": "var(--talklink-300)",
+          "400": "var(--talklink-400)",
+          "500": "var(--talklink-500)",
+          "600": "var(--talklink-600)",
+          "700": "var(--talklink-700)",
+          "800": "var(--talklink-800)",
+          "900": "var(--talklink-900)",
+        },
         sidebar: {
           DEFAULT: "var(--sidebar-background)",
           foreground: "var(--sidebar-foreground)",
