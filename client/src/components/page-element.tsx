@@ -2063,6 +2063,15 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   placeholder="Website URL for knowledge extraction"
                   className="bg-slate-700 border-slate-600 text-white"
                 />
+                {/* URL Ingestion Form directly in editing interface */}
+                <div className="mt-2 p-4 bg-slate-800 rounded-lg border border-slate-600">
+                  <div className="flex items-center gap-2 mb-2">
+                    <i className="fas fa-globe text-blue-400"></i>
+                    <span className="text-white text-sm font-medium">URL Knowledge Ingestion</span>
+                  </div>
+                  <p className="text-slate-400 text-xs mb-3">Extract and index content from any public webpage for AI chat</p>
+                  <IngestForm />
+                </div>
                 <div className="space-y-2">
                   <label className="text-black text-sm">PDF Documents:</label>
                   <Input
