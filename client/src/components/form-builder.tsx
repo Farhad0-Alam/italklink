@@ -30,7 +30,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
-  const [collapsedSections, setCollapsedSections] = useState<{[key: string]: boolean}>({
+  const [collapsedSections, setCollapsedSections] = useState<{ [key: string]: boolean }>({
     coverLogo: false,
     basicInfo: false,
     contactInfo: false,
@@ -119,18 +119,18 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
         <CardHeader>
           <CardTitle className="text-2xl font-bold flex items-center text-white">
             <i className="fas fa-edit text-talklink-500 mr-3"></i>
-            {t('form.title')}
+            {t("form.title")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Cover & Logo Upload */}
           <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
-            <div 
+            <div
               className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleSection('coverLogo')}
+              onClick={() => toggleSection("coverLogo")}
             >
               <h3 className="text-lg font-semibold text-blue-300">Cover & Logo</h3>
-              <i className={`fas ${collapsedSections.coverLogo ? 'fa-chevron-down' : 'fa-chevron-up'} text-blue-300`}></i>
+              <i className={`fas ${collapsedSections.coverLogo ? "fa-chevron-down" : "fa-chevron-up"} text-blue-300`}></i>
             </div>
             {!collapsedSections.coverLogo && (
               <>
@@ -139,13 +139,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   <div className="space-y-3">
                     <Label className="text-white">Header Design</Label>
                     <div className="grid grid-cols-3 gap-3">
-                      <div 
+                      <div
                         className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
-                          watchedValues.headerDesign === 'cover-logo' || !watchedValues.headerDesign 
-                            ? 'border-talklink-500 bg-talklink-500/10' 
-                            : 'border-slate-600 bg-slate-700'
+                          watchedValues.headerDesign === "cover-logo" || !watchedValues.headerDesign
+                            ? "border-talklink-500 bg-talklink-500/10"
+                            : "border-slate-600 bg-slate-700"
                         }`}
-                        onClick={() => form.setValue('headerDesign', 'cover-logo')}
+                        onClick={() => form.setValue("headerDesign", "cover-logo")}
                       >
                         <div className="text-center">
                           <div className="h-8 bg-gradient-to-r from-green-400 to-green-600 rounded mb-1 relative">
@@ -156,13 +156,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         </div>
                       </div>
 
-                      <div 
+                      <div
                         className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
-                          watchedValues.headerDesign === 'profile-center' 
-                            ? 'border-talklink-500 bg-talklink-500/10' 
-                            : 'border-slate-600 bg-slate-700'
+                          watchedValues.headerDesign === "profile-center"
+                            ? "border-talklink-500 bg-talklink-500/10"
+                            : "border-slate-600 bg-slate-700"
                         }`}
-                        onClick={() => form.setValue('headerDesign', 'profile-center')}
+                        onClick={() => form.setValue("headerDesign", "profile-center")}
                       >
                         <div className="text-center">
                           <div className="h-8 bg-gradient-to-r from-blue-400 to-blue-600 rounded mb-1"></div>
@@ -171,13 +171,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         </div>
                       </div>
 
-                      <div 
+                      <div
                         className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
-                          watchedValues.headerDesign === 'split-design' 
-                            ? 'border-talklink-500 bg-talklink-500/10' 
-                            : 'border-slate-600 bg-slate-700'
+                          watchedValues.headerDesign === "split-design"
+                            ? "border-talklink-500 bg-talklink-500/10"
+                            : "border-slate-600 bg-slate-700"
                         }`}
-                        onClick={() => form.setValue('headerDesign', 'split-design')}
+                        onClick={() => form.setValue("headerDesign", "split-design")}
                       >
                         <div className="text-center">
                           <div className="h-8 bg-gradient-to-r from-purple-400 to-purple-600 rounded mb-1 flex">
@@ -193,15 +193,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <Label htmlFor="profilePhoto" className="text-white text-sm">Profile Photo</Label>
+                      <Label htmlFor="profilePhoto" className="text-white text-sm">
+                        Profile Photo
+                      </Label>
                       <div className="mt-1">
                         <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
                           {watchedValues.profilePhoto ? (
-                            <img 
-                              src={watchedValues.profilePhoto} 
-                              alt="Profile" 
-                              className="w-full h-full object-cover"
-                            />
+                            <img src={watchedValues.profilePhoto} alt="Profile" className="w-full h-full object-cover" />
                           ) : (
                             <div className="text-center">
                               <i className="fas fa-user text-slate-400 text-sm"></i>
@@ -214,7 +212,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           variant="outline"
                           size="sm"
                           className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
-                          onClick={() => document.getElementById('profile-photo-input')?.click()}
+                          onClick={() => document.getElementById("profile-photo-input")?.click()}
                           disabled={isUploading}
                         >
                           <i className="fas fa-upload mr-1"></i>
@@ -224,22 +222,20 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           id="profile-photo-input"
                           type="file"
                           accept="image/*"
-                          onChange={(e) => handleFileUpload(e, 'profilePhoto')}
+                          onChange={(e) => handleFileUpload(e, "profilePhoto")}
                           className="hidden"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="backgroundImage" className="text-white text-sm">Cover Photo</Label>
+                      <Label htmlFor="backgroundImage" className="text-white text-sm">
+                        Cover Photo
+                      </Label>
                       <div className="mt-1">
                         <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
                           {watchedValues.backgroundImage ? (
-                            <img 
-                              src={watchedValues.backgroundImage} 
-                              alt="Cover" 
-                              className="w-full h-full object-cover"
-                            />
+                            <img src={watchedValues.backgroundImage} alt="Cover" className="w-full h-full object-cover" />
                           ) : (
                             <div className="text-center">
                               <i className="fas fa-image text-slate-400 text-sm"></i>
@@ -252,7 +248,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           variant="outline"
                           size="sm"
                           className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
-                          onClick={() => document.getElementById('background-input')?.click()}
+                          onClick={() => document.getElementById("background-input")?.click()}
                           disabled={isUploading}
                         >
                           <i className="fas fa-upload mr-1"></i>
@@ -262,22 +258,20 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           id="background-input"
                           type="file"
                           accept="image/*"
-                          onChange={(e) => handleFileUpload(e, 'backgroundImage')}
+                          onChange={(e) => handleFileUpload(e, "backgroundImage")}
                           className="hidden"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <Label htmlFor="logo" className="text-white text-sm">Logo</Label>
+                      <Label htmlFor="logo" className="text-white text-sm">
+                        Logo
+                      </Label>
                       <div className="mt-1">
                         <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
                           {watchedValues.logo ? (
-                            <img 
-                              src={watchedValues.logo} 
-                              alt="Logo" 
-                              className="w-full h-full object-contain"
-                            />
+                            <img src={watchedValues.logo} alt="Logo" className="w-full h-full object-contain" />
                           ) : (
                             <div className="text-center">
                               <i className="fas fa-image text-slate-400 text-sm"></i>
@@ -290,19 +284,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           variant="outline"
                           size="sm"
                           className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
-                          onClick={() => document.getElementById('logo-input')?.click()}
+                          onClick={() => document.getElementById("logo-input")?.click()}
                           disabled={isUploading}
                         >
                           <i className="fas fa-upload mr-1"></i>
                           Upload
                         </Button>
-                        <input
-                          id="logo-input"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileUpload(e, 'logo')}
-                          className="hidden"
-                        />
+                        <input id="logo-input" type="file" accept="image/*" onChange={(e) => handleFileUpload(e, "logo")} className="hidden" />
                       </div>
                     </div>
                   </div>
@@ -313,18 +301,17 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
           {/* Basic Information */}
           <div className="bg-green-900/30 border border-green-600/30 rounded-lg p-4 space-y-4">
-            <div 
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleSection('basicInfo')}
-            >
-              <h3 className="text-lg font-semibold text-green-300">{t('form.basicInfo')}</h3>
-              <i className={`fas ${collapsedSections.basicInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-green-300`}></i>
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("basicInfo")}>
+              <h3 className="text-lg font-semibold text-green-300">{t("form.basicInfo")}</h3>
+              <i className={`fas ${collapsedSections.basicInfo ? "fa-chevron-down" : "fa-chevron-up"} text-green-300`}></i>
             </div>
             {!collapsedSections.basicInfo && (
               <>
                 <div>
                   <div>
-                    <Label htmlFor="fullName" className="text-white">{t('field.fullName')} *</Label>
+                    <Label htmlFor="fullName" className="text-white">
+                      {t("field.fullName")} *
+                    </Label>
                     <Input
                       id="fullName"
                       {...form.register("fullName")}
@@ -332,13 +319,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
                       data-testid="input-full-name"
                     />
-                    {form.formState.errors.fullName && (
-                      <p className="text-red-400 text-sm mt-1">{form.formState.errors.fullName.message}</p>
-                    )}
+                    {form.formState.errors.fullName && <p className="text-red-400 text-sm mt-1">{form.formState.errors.fullName.message}</p>}
                   </div>
 
                   <div>
-                    <Label htmlFor="title" className="text-white">{t('field.title')} *</Label>
+                    <Label htmlFor="title" className="text-white">
+                      {t("field.title")} *
+                    </Label>
                     <Input
                       id="title"
                       {...form.register("title")}
@@ -346,13 +333,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
                       data-testid="input-title"
                     />
-                    {form.formState.errors.title && (
-                      <p className="text-red-400 text-sm mt-1">{form.formState.errors.title.message}</p>
-                    )}
+                    {form.formState.errors.title && <p className="text-red-400 text-sm mt-1">{form.formState.errors.title.message}</p>}
                   </div>
 
                   <div>
-                    <Label htmlFor="company" className="text-white">{t('field.company')}</Label>
+                    <Label htmlFor="company" className="text-white">
+                      {t("field.company")}
+                    </Label>
                     <Input
                       id="company"
                       {...form.register("company")}
@@ -366,104 +353,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             )}
           </div>
 
-          {/* Contact Information (Typography controls) */}
-          <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
-            <div 
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleSection('contactInfo')}
-            >
-              <h3 className="text-lg font-semibold text-purple-300">{t('form.contactInfo')}</h3>
-              <i className={`fas ${collapsedSections.contactInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-purple-300`}></i>
-            </div>
-            {!collapsedSections.contactInfo && (
-              <>
-                <div>
-                  <div>
-                    <Label className="text-white text-xs">Font</Label>
-                    <Select
-                      value={watchedValues.sectionStyles?.basicInfo?.nameFont || ""}
-                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.nameFont', value)}
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                        <SelectValue placeholder="Choose font" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Inter">Inter</SelectItem>
-                        <SelectItem value="Roboto">Roboto</SelectItem>
-                        <SelectItem value="Open Sans">Open Sans</SelectItem>
-                        <SelectItem value="Lato">Lato</SelectItem>
-                        <SelectItem value="Montserrat">Montserrat</SelectItem>
-                        <SelectItem value="Poppins">Poppins</SelectItem>
-                        <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
-                        <SelectItem value="Nunito">Nunito</SelectItem>
-                        <SelectItem value="Raleway">Raleway</SelectItem>
-                        <SelectItem value="Ubuntu">Ubuntu</SelectItem>
-                        <SelectItem value="PT Sans">PT Sans</SelectItem>
-                        <SelectItem value="Merriweather">Merriweather</SelectItem>
-                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
-                        <SelectItem value="Oswald">Oswald</SelectItem>
-                        <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
-                        <SelectItem value="Crimson Text">Crimson Text</SelectItem>
-                        <SelectItem value="Work Sans">Work Sans</SelectItem>
-                        <SelectItem value="Fira Sans">Fira Sans</SelectItem>
-                        <SelectItem value="DM Sans">DM Sans</SelectItem>
-                        <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.basicInfo?.nameFontSize || 24}px</Label>
-                    <input
-                      type="range"
-                      value={watchedValues.sectionStyles?.basicInfo?.nameFontSize || 24}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.nameFontSize', parseInt(e.target.value))}
-                      className="custom-range w-full"
-                      min="12"
-                      max="48"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-white text-xs">Weight</Label>
-                    <Select
-                      value={watchedValues.sectionStyles?.basicInfo?.nameFontWeight || ""}
-                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.nameFontWeight', value as any)}
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                        <SelectValue placeholder="Weight" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="300">Light</SelectItem>
-                        <SelectItem value="400">Regular</SelectItem>
-                        <SelectItem value="500">Medium</SelectItem>
-                        <SelectItem value="600">Semi Bold</SelectItem>
-                        <SelectItem value="700">Bold</SelectItem>
-                        <SelectItem value="800">Extra Bold</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="nameItalic"
-                    checked={watchedValues.sectionStyles?.basicInfo?.nameTextStyle === 'italic'}
-                    onCheckedChange={(checked) => 
-                      form.setValue('sectionStyles.basicInfo.nameTextStyle', checked ? 'italic' : 'normal')
-                    }
-                  />
-                  <Label htmlFor="nameItalic" className="text-white text-xs">Italic</Label>
-                </div>
-              </>
-            )}
-          </div>
-
           {/* Title Styling */}
           <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
-            <div 
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleSection('titleStyling')}
-            >
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("titleStyling")}>
               <h5 className="text-xs font-medium text-green-300">Title Styling</h5>
-              <i className={`fas fa-chevron-${collapsedSections.titleStyling ? 'down' : 'up'} text-green-300 text-xs`}></i>
+              <i className={`fas fa-chevron-${collapsedSections.titleStyling ? "down" : "up"} text-green-300 text-xs`}></i>
             </div>
             {!collapsedSections.titleStyling && (
               <>
@@ -474,12 +368,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       <input
                         type="color"
                         value={watchedValues.sectionStyles?.basicInfo?.titleColor || "#4b5563"}
-                        onChange={(e) => form.setValue('sectionStyles.basicInfo.titleColor', e.target.value)}
+                        onChange={(e) => form.setValue("sectionStyles.basicInfo.titleColor", e.target.value)}
                         className="w-6 h-6 rounded cursor-pointer"
                       />
                       <Input
                         value={watchedValues.sectionStyles?.basicInfo?.titleColor || ""}
-                        onChange={(e) => form.setValue('sectionStyles.basicInfo.titleColor', e.target.value)}
+                        onChange={(e) => form.setValue("sectionStyles.basicInfo.titleColor", e.target.value)}
                         className="bg-slate-700 border-slate-600 text-white text-xs"
                         placeholder="#4b5563"
                       />
@@ -487,34 +381,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   </div>
                   <div>
                     <Label className="text-white text-xs">Font</Label>
-                    <Select
-                      value={watchedValues.sectionStyles?.basicInfo?.titleFont || ""}
-                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.titleFont', value)}
-                    >
+                    <Select value={watchedValues.sectionStyles?.basicInfo?.titleFont || ""} onValueChange={(v) => form.setValue("sectionStyles.basicInfo.titleFont", v)}>
                       <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
                         <SelectValue placeholder="Choose font" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Inter">Inter</SelectItem>
-                        <SelectItem value="Roboto">Roboto</SelectItem>
-                        <SelectItem value="Open Sans">Open Sans</SelectItem>
-                        <SelectItem value="Lato">Lato</SelectItem>
-                        <SelectItem value="Montserrat">Montserrat</SelectItem>
-                        <SelectItem value="Poppins">Poppins</SelectItem>
-                        <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
-                        <SelectItem value="Nunito">Nunito</SelectItem>
-                        <SelectItem value="Raleway">Raleway</SelectItem>
-                        <SelectItem value="Ubuntu">Ubuntu</SelectItem>
-                        <SelectItem value="PT Sans">PT Sans</SelectItem>
-                        <SelectItem value="Merriweather">Merriweather</SelectItem>
-                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
-                        <SelectItem value="Oswald">Oswald</SelectItem>
-                        <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
-                        <SelectItem value="Crimson Text">Crimson Text</SelectItem>
-                        <SelectItem value="Work Sans">Work Sans</SelectItem>
-                        <SelectItem value="Fira Sans">Fira Sans</SelectItem>
-                        <SelectItem value="DM Sans">DM Sans</SelectItem>
-                        <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                        {["Inter","Roboto","Open Sans","Lato","Montserrat","Poppins","Source Sans Pro","Nunito","Raleway","Ubuntu","PT Sans","Merriweather","Playfair Display","Oswald","Libre Baskerville","Crimson Text","Work Sans","Fira Sans","DM Sans","Space Grotesk"].map(f=>(
+                          <SelectItem key={f} value={f}>{f}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -523,28 +397,30 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     <input
                       type="range"
                       value={watchedValues.sectionStyles?.basicInfo?.titleFontSize || 14}
-                      onChange={(e) => form.setValue('sectionStyles.basicInfo.titleFontSize', parseInt(e.target.value))}
+                      onChange={(e) => form.setValue("sectionStyles.basicInfo.titleFontSize", parseInt(e.target.value))}
                       className="custom-range w-full"
-                      min="10"
-                      max="32"
+                      min={10}
+                      max={32}
                     />
                   </div>
                   <div>
                     <Label className="text-white text-xs">Weight</Label>
                     <Select
                       value={watchedValues.sectionStyles?.basicInfo?.titleFontWeight || ""}
-                      onValueChange={(value) => form.setValue('sectionStyles.basicInfo.titleFontWeight', value as any)}
+                      onValueChange={(v) => form.setValue("sectionStyles.basicInfo.titleFontWeight", v as any)}
                     >
                       <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
                         <SelectValue placeholder="Weight" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="300">Light</SelectItem>
-                        <SelectItem value="400">Regular</SelectItem>
-                        <SelectItem value="500">Medium</SelectItem>
-                        <SelectItem value="600">Semi Bold</SelectItem>
-                        <SelectItem value="700">Bold</SelectItem>
-                        <SelectItem value="800">Extra Bold</SelectItem>
+                        {[
+                          ["300","Light"],
+                          ["400","Regular"],
+                          ["500","Medium"],
+                          ["600","Semi Bold"],
+                          ["700","Bold"],
+                          ["800","Extra Bold"],
+                        ].map(([v,l])=> <SelectItem key={v} value={v}>{l}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -552,12 +428,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="titleItalic"
-                    checked={watchedValues.sectionStyles?.basicInfo?.titleTextStyle === 'italic'}
-                    onCheckedChange={(checked) => 
-                      form.setValue('sectionStyles.basicInfo.titleTextStyle', checked ? 'italic' : 'normal')
-                    }
+                    checked={watchedValues.sectionStyles?.basicInfo?.titleTextStyle === "italic"}
+                    onCheckedChange={(checked) => form.setValue("sectionStyles.basicInfo.titleTextStyle", checked ? "italic" : "normal")}
                   />
-                  <Label htmlFor="titleItalic" className="text-white text-xs">Italic</Label>
+                  <Label htmlFor="titleItalic" className="text-white text-xs">
+                    Italic
+                  </Label>
                 </div>
               </>
             )}
@@ -573,12 +449,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   <input
                     type="color"
                     value={watchedValues.sectionStyles?.basicInfo?.companyColor || "#6b7280"}
-                    onChange={(e) => form.setValue('sectionStyles.basicInfo.companyColor', e.target.value)}
+                    onChange={(e) => form.setValue("sectionStyles.basicInfo.companyColor", e.target.value)}
                     className="w-6 h-6 rounded cursor-pointer"
                   />
                   <Input
                     value={watchedValues.sectionStyles?.basicInfo?.companyColor || ""}
-                    onChange={(e) => form.setValue('sectionStyles.basicInfo.companyColor', e.target.value)}
+                    onChange={(e) => form.setValue("sectionStyles.basicInfo.companyColor", e.target.value)}
                     className="bg-slate-700 border-slate-600 text-white text-xs"
                     placeholder="#6b7280"
                   />
@@ -586,34 +462,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               </div>
               <div>
                 <Label className="text-white text-xs">Font</Label>
-                <Select
-                  value={watchedValues.sectionStyles?.basicInfo?.companyFont || ""}
-                  onValueChange={(value) => form.setValue('sectionStyles.basicInfo.companyFont', value)}
-                >
+                <Select value={watchedValues.sectionStyles?.basicInfo?.companyFont || ""} onValueChange={(v) => form.setValue("sectionStyles.basicInfo.companyFont", v)}>
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
                     <SelectValue placeholder="Choose font" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Inter">Inter</SelectItem>
-                    <SelectItem value="Roboto">Roboto</SelectItem>
-                    <SelectItem value="Open Sans">Open Sans</SelectItem>
-                    <SelectItem value="Lato">Lato</SelectItem>
-                    <SelectItem value="Montserrat">Montserrat</SelectItem>
-                    <SelectItem value="Poppins">Poppins</SelectItem>
-                    <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
-                    <SelectItem value="Nunito">Nunito</SelectItem>
-                    <SelectItem value="Raleway">Raleway</SelectItem>
-                    <SelectItem value="Ubuntu">Ubuntu</SelectItem>
-                    <SelectItem value="PT Sans">PT Sans</SelectItem>
-                    <SelectItem value="Merriweather">Merriweather</SelectItem>
-                    <SelectItem value="Playfair Display">Playfair Display</SelectItem>
-                    <SelectItem value="Oswald">Oswald</SelectItem>
-                    <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
-                    <SelectItem value="Crimson Text">Crimson Text</SelectItem>
-                    <SelectItem value="Work Sans">Work Sans</SelectItem>
-                    <SelectItem value="Fira Sans">Fira Sans</SelectItem>
-                    <SelectItem value="DM Sans">DM Sans</SelectItem>
-                    <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                    {["Inter","Roboto","Open Sans","Lato","Montserrat","Poppins","Source Sans Pro","Nunito","Raleway","Ubuntu","PT Sans","Merriweather","Playfair Display","Oswald","Libre Baskerville","Crimson Text","Work Sans","Fira Sans","DM Sans","Space Grotesk"].map(f=>(
+                      <SelectItem key={f} value={f}>{f}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -622,28 +478,30 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 <input
                   type="range"
                   value={watchedValues.sectionStyles?.basicInfo?.companyFontSize || 14}
-                  onChange={(e) => form.setValue('sectionStyles.basicInfo.companyFontSize', parseInt(e.target.value))}
+                  onChange={(e) => form.setValue("sectionStyles.basicInfo.companyFontSize", parseInt(e.target.value))}
                   className="custom-range w-full"
-                  min="10"
-                  max="32"
+                  min={10}
+                  max={32}
                 />
               </div>
               <div>
                 <Label className="text-white text-xs">Weight</Label>
                 <Select
                   value={watchedValues.sectionStyles?.basicInfo?.companyFontWeight || ""}
-                  onValueChange={(value) => form.setValue('sectionStyles.basicInfo.companyFontWeight', value as any)}
+                  onValueChange={(v) => form.setValue("sectionStyles.basicInfo.companyFontWeight", v as any)}
                 >
                   <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
                     <SelectValue placeholder="Weight" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="300">Light</SelectItem>
-                    <SelectItem value="400">Regular</SelectItem>
-                    <SelectItem value="500">Medium</SelectItem>
-                    <SelectItem value="600">Semi Bold</SelectItem>
-                    <SelectItem value="700">Bold</SelectItem>
-                    <SelectItem value="800">Extra Bold</SelectItem>
+                    {[
+                      ["300","Light"],
+                      ["400","Regular"],
+                      ["500","Medium"],
+                      ["600","Semi Bold"],
+                      ["700","Bold"],
+                      ["800","Extra Bold"],
+                    ].map(([v,l])=> <SelectItem key={v} value={v}>{l}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -651,37 +509,36 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="companyItalic"
-                checked={watchedValues.sectionStyles?.basicInfo?.companyTextStyle === 'italic'}
-                onCheckedChange={(checked) => 
-                  form.setValue('sectionStyles.basicInfo.companyTextStyle', checked ? 'italic' : 'normal')
-                }
+                checked={watchedValues.sectionStyles?.basicInfo?.companyTextStyle === "italic"}
+                onCheckedChange={(checked) => form.setValue("sectionStyles.basicInfo.companyTextStyle", checked ? "italic" : "normal")}
               />
-              <Label htmlFor="companyItalic" className="text-white text-xs">Italic</Label>
+              <Label htmlFor="companyItalic" className="text-white text-xs">
+                Italic
+              </Label>
             </div>
           </div>
 
           {/* Contact Information (fields + section styling) */}
-          <div 
-            className="rounded-lg p-4 space-y-4" 
+          <div
+            className="rounded-lg p-4 space-y-4"
             style={{
-              backgroundColor: watchedValues.sectionStyles?.contactInfo?.sectionBackgroundColor || 'rgba(147, 51, 234, 0.3)',
-              borderColor: watchedValues.sectionStyles?.contactInfo?.sectionBorderColor || 'rgba(147, 51, 234, 0.6)',
-              borderWidth: '1px',
-              borderStyle: 'solid'
+              backgroundColor: watchedValues.sectionStyles?.contactInfo?.sectionBackgroundColor || "rgba(147, 51, 234, 0.3)",
+              borderColor: watchedValues.sectionStyles?.contactInfo?.sectionBorderColor || "rgba(147, 51, 234, 0.6)",
+              borderWidth: "1px",
+              borderStyle: "solid",
             }}
           >
-            <div 
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleSection('contactInfo')}
-            >
-              <h3 className="text-lg font-semibold text-purple-300">{t('form.contactInfo')}</h3>
-              <i className={`fas ${collapsedSections.contactInfo ? 'fa-chevron-down' : 'fa-chevron-up'} text-purple-300`}></i>
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("contactInfo")}>
+              <h3 className="text-lg font-semibold text-purple-300">{t("form.contactInfo")}</h3>
+              <i className={`fas ${collapsedSections.contactInfo ? "fa-chevron-down" : "fa-chevron-up"} text-purple-300`}></i>
             </div>
             {!collapsedSections.contactInfo && (
               <>
                 <div>
                   <div>
-                    <Label htmlFor="phone" className="text-white">{t('field.phone')}</Label>
+                    <Label htmlFor="phone" className="text-white">
+                      {t("field.phone")}
+                    </Label>
                     <Input
                       id="phone"
                       {...form.register("phone")}
@@ -692,7 +549,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   </div>
 
                   <div>
-                    <Label htmlFor="email" className="text-white">{t('field.email')}</Label>
+                    <Label htmlFor="email" className="text-white">
+                      {t("field.email")}
+                    </Label>
                     <Input
                       id="email"
                       type="email"
@@ -701,13 +560,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
                       data-testid="input-email"
                     />
-                    {form.formState.errors.email && (
-                      <p className="text-red-400 text-sm mt-1">{form.formState.errors.email.message}</p>
-                    )}
+                    {form.formState.errors.email && <p className="text-red-400 text-sm mt-1">{form.formState.errors.email.message}</p>}
                   </div>
 
                   <div>
-                    <Label htmlFor="website" className="text-white">{t('field.website')}</Label>
+                    <Label htmlFor="website" className="text-white">
+                      {t("field.website")}
+                    </Label>
                     <Input
                       id="website"
                       {...form.register("website")}
@@ -715,13 +574,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
                       data-testid="input-website"
                     />
-                    {form.formState.errors.website && (
-                      <p className="text-red-400 text-sm mt-1">{form.formState.errors.website.message}</p>
-                    )}
+                    {form.formState.errors.website && <p className="text-red-400 text-sm mt-1">{form.formState.errors.website.message}</p>}
                   </div>
 
                   <div>
-                    <Label htmlFor="location" className="text-white">{t('field.location')}</Label>
+                    <Label htmlFor="location" className="text-white">
+                      {t("field.location")}
+                    </Label>
                     <Input
                       id="location"
                       {...form.register("location")}
@@ -776,14 +635,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {getAvailableIcons().filter(icon => icon.category === 'contact').map(icon => (
-                                <SelectItem key={icon.name} value={icon.icon}>
-                                  <div className="flex items-center gap-2">
-                                    <i className={icon.icon}></i>
-                                    {icon.name}
-                                  </div>
-                                </SelectItem>
-                              ))}
+                              {getAvailableIcons()
+                                .filter((icon) => icon.category === "contact")
+                                .map((icon) => (
+                                  <SelectItem key={icon.name} value={icon.icon}>
+                                    <div className="flex items-center gap-2">
+                                      <i className={icon.icon}></i>
+                                      {icon.name}
+                                    </div>
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -804,7 +665,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        const newContact = { id: generateFieldId(), label: '', value: '', type: 'custom', icon: 'fas fa-link' };
+                        const newContact = { id: generateFieldId(), label: "", value: "", type: "custom", icon: "fas fa-link" };
                         form.setValue("customContacts", [...(form.watch("customContacts") || []), newContact]);
                       }}
                       className="w-full bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
@@ -824,12 +685,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="color"
                             value={watchedValues.sectionStyles?.contactInfo?.sectionBackgroundColor || "#9333ea"}
-                            onChange={(e) => form.setValue('sectionStyles.contactInfo.sectionBackgroundColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.sectionBackgroundColor", e.target.value)}
                             className="w-8 h-6 rounded cursor-pointer"
                           />
                           <Input
                             value={watchedValues.sectionStyles?.contactInfo?.sectionBackgroundColor || ""}
-                            onChange={(e) => form.setValue('sectionStyles.contactInfo.sectionBackgroundColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.sectionBackgroundColor", e.target.value)}
                             className="bg-slate-700 border-slate-600 text-white text-xs"
                             placeholder="#9333ea"
                           />
@@ -841,12 +702,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="color"
                             value={watchedValues.sectionStyles?.contactInfo?.sectionBorderColor || "#a855f7"}
-                            onChange={(e) => form.setValue('sectionStyles.contactInfo.sectionBorderColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.sectionBorderColor", e.target.value)}
                             className="w-8 h-6 rounded cursor-pointer"
                           />
                           <Input
                             value={watchedValues.sectionStyles?.contactInfo?.sectionBorderColor || ""}
-                            onChange={(e) => form.setValue('sectionStyles.contactInfo.sectionBorderColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.sectionBorderColor", e.target.value)}
                             className="bg-slate-700 border-slate-600 text-white text-xs"
                             placeholder="#a855f7"
                           />
@@ -862,12 +723,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="color"
                             value={watchedValues.sectionStyles?.contactInfo?.iconColor || "#ffffff"}
-                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.iconColor", e.target.value)}
                             className="w-8 h-6 rounded cursor-pointer"
                           />
                           <Input
                             value={watchedValues.sectionStyles?.contactInfo?.iconColor || ""}
-                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.iconColor", e.target.value)}
                             className="bg-slate-700 border-slate-600 text-white text-xs"
                             placeholder="#ffffff"
                           />
@@ -879,12 +740,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="color"
                             value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundColor || "#475569"}
-                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconBackgroundColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBackgroundColor", e.target.value)}
                             className="w-8 h-6 rounded cursor-pointer"
                           />
                           <Input
                             value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundColor || ""}
-                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconBackgroundColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBackgroundColor", e.target.value)}
                             className="bg-slate-700 border-slate-600 text-white text-xs"
                             placeholder="#475569"
                           />
@@ -896,12 +757,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="color"
                             value={watchedValues.sectionStyles?.contactInfo?.iconTextColor || "#64748b"}
-                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconTextColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.iconTextColor", e.target.value)}
                             className="w-8 h-6 rounded cursor-pointer"
                           />
                           <Input
                             value={watchedValues.sectionStyles?.contactInfo?.iconTextColor || ""}
-                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconTextColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.iconTextColor", e.target.value)}
                             className="bg-slate-700 border-slate-600 text-white text-xs"
                             placeholder="#64748b"
                           />
@@ -915,34 +776,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <Label className="text-white text-xs">Font</Label>
-                          <Select
-                            value={watchedValues.sectionStyles?.contactInfo?.iconTextFont || ""}
-                            onValueChange={(value) => form.setValue('sectionStyles.contactInfo.iconTextFont', value)}
-                          >
+                          <Select value={watchedValues.sectionStyles?.contactInfo?.iconTextFont || ""} onValueChange={(v) => form.setValue("sectionStyles.contactInfo.iconTextFont", v)}>
                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
                               <SelectValue placeholder="Choose font" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Inter">Inter</SelectItem>
-                              <SelectItem value="Roboto">Roboto</SelectItem>
-                              <SelectItem value="Open Sans">Open Sans</SelectItem>
-                              <SelectItem value="Lato">Lato</SelectItem>
-                              <SelectItem value="Montserrat">Montserrat</SelectItem>
-                              <SelectItem value="Poppins">Poppins</SelectItem>
-                              <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
-                              <SelectItem value="Nunito">Nunito</SelectItem>
-                              <SelectItem value="Raleway">Raleway</SelectItem>
-                              <SelectItem value="Ubuntu">Ubuntu</SelectItem>
-                              <SelectItem value="PT Sans">PT Sans</SelectItem>
-                              <SelectItem value="Merriweather">Merriweather</SelectItem>
-                              <SelectItem value="Playfair Display">Playfair Display</SelectItem>
-                              <SelectItem value="Oswald">Oswald</SelectItem>
-                              <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
-                              <SelectItem value="Crimson Text">Crimson Text</SelectItem>
-                              <SelectItem value="Work Sans">Work Sans</SelectItem>
-                              <SelectItem value="Fira Sans">Fira Sans</SelectItem>
-                              <SelectItem value="DM Sans">DM Sans</SelectItem>
-                              <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                              {["Inter","Roboto","Open Sans","Lato","Montserrat","Poppins","Source Sans Pro","Nunito","Raleway","Ubuntu","PT Sans","Merriweather","Playfair Display","Oswald","Libre Baskerville","Crimson Text","Work Sans","Fira Sans","DM Sans","Space Grotesk"].map(f=>(
+                                <SelectItem key={f} value={f}>{f}</SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -950,18 +791,20 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <Label className="text-white text-xs">Weight</Label>
                           <Select
                             value={watchedValues.sectionStyles?.contactInfo?.iconTextWeight || ""}
-                            onValueChange={(value) => form.setValue('sectionStyles.contactInfo.iconTextWeight', value as any)}
+                            onValueChange={(v) => form.setValue("sectionStyles.contactInfo.iconTextWeight", v as any)}
                           >
                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
                               <SelectValue placeholder="Weight" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="300">Light</SelectItem>
-                              <SelectItem value="400">Regular</SelectItem>
-                              <SelectItem value="500">Medium</SelectItem>
-                              <SelectItem value="600">Semi Bold</SelectItem>
-                              <SelectItem value="700">Bold</SelectItem>
-                              <SelectItem value="800">Extra Bold</SelectItem>
+                              {[
+                                ["300","Light"],
+                                ["400","Regular"],
+                                ["500","Medium"],
+                                ["600","Semi Bold"],
+                                ["700","Bold"],
+                                ["800","Extra Bold"],
+                              ].map(([v,l])=> <SelectItem key={v} value={v}>{l}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
@@ -970,21 +813,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="range"
                             value={watchedValues.sectionStyles?.contactInfo?.iconTextSize || 12}
-                            onChange={(e) => form.setValue('sectionStyles.contactInfo.iconTextSize', parseInt(e.target.value))}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.iconTextSize", parseInt(e.target.value))}
                             className="custom-range w-full"
-                            min="8"
-                            max="20"
+                            min={8}
+                            max={20}
                           />
                         </div>
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             id="contactTextItalic"
-                            checked={watchedValues.sectionStyles?.contactInfo?.iconTextStyle === 'italic'}
-                            onCheckedChange={(checked) => 
-                              form.setValue('sectionStyles.contactInfo.iconTextStyle', checked ? 'italic' : 'normal')
-                            }
+                            checked={watchedValues.sectionStyles?.contactInfo?.iconTextStyle === "italic"}
+                            onCheckedChange={(checked) => form.setValue("sectionStyles.contactInfo.iconTextStyle", checked ? "italic" : "normal")}
                           />
-                          <Label htmlFor="contactTextItalic" className="text-white text-xs">Italic</Label>
+                          <Label htmlFor="contactTextItalic" className="text-white text-xs">
+                            Italic
+                          </Label>
                         </div>
                       </div>
                     </div>
@@ -995,28 +838,27 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </div>
 
           {/* Social Media */}
-          <div 
-            className="rounded-lg p-4 space-y-4" 
+          <div
+            className="rounded-lg p-4 space-y-4"
             style={{
-              backgroundColor: watchedValues.sectionStyles?.socialMedia?.sectionBackgroundColor || 'rgba(219, 39, 119, 0.3)',
-              borderColor: watchedValues.sectionStyles?.socialMedia?.sectionBorderColor || 'rgba(219, 39, 119, 0.6)',
-              borderWidth: '1px',
-              borderStyle: 'solid'
+              backgroundColor: watchedValues.sectionStyles?.socialMedia?.sectionBackgroundColor || "rgba(219, 39, 119, 0.3)",
+              borderColor: watchedValues.sectionStyles?.socialMedia?.sectionBorderColor || "rgba(219, 39, 119, 0.6)",
+              borderWidth: "1px",
+              borderStyle: "solid",
             }}
           >
-            <div 
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleSection('customization')}
-            >
-              <h3 className="text-lg font-semibold text-pink-300">{t('form.socialMedia')}</h3>
-              <i className={`fas ${collapsedSections.customization ? 'fa-chevron-down' : 'fa-chevron-up'} text-pink-300`}></i>
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("customization")}>
+              <h3 className="text-lg font-semibold text-pink-300">{t("form.socialMedia")}</h3>
+              <i className={`fas ${collapsedSections.customization ? "fa-chevron-down" : "fa-chevron-up"} text-pink-300`}></i>
             </div>
             {!collapsedSections.customization && (
               <>
                 <div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="whatsapp" className="text-white">WhatsApp</Label>
+                      <Label htmlFor="whatsapp" className="text-white">
+                        WhatsApp
+                      </Label>
                       <Input
                         id="whatsapp"
                         {...form.register("whatsapp")}
@@ -1027,7 +869,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </div>
 
                     <div>
-                      <Label htmlFor="linkedin" className="text-white">LinkedIn</Label>
+                      <Label htmlFor="linkedin" className="text-white">
+                        LinkedIn
+                      </Label>
                       <Input
                         id="linkedin"
                         {...form.register("linkedin")}
@@ -1038,7 +882,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </div>
 
                     <div>
-                      <Label htmlFor="instagram" className="text-white">Instagram</Label>
+                      <Label htmlFor="instagram" className="text-white">
+                        Instagram
+                      </Label>
                       <Input
                         id="instagram"
                         {...form.register("instagram")}
@@ -1049,7 +895,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </div>
 
                     <div>
-                      <Label htmlFor="twitter" className="text-white">Twitter/X</Label>
+                      <Label htmlFor="twitter" className="text-white">
+                        Twitter/X
+                      </Label>
                       <Input
                         id="twitter"
                         {...form.register("twitter")}
@@ -1102,19 +950,19 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             }}
                           >
                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                              <SelectValue>
-                                {social.icon && <i className={`${social.icon} mr-2`}></i>}
-                              </SelectValue>
+                              <SelectValue>{social.icon && <i className={`${social.icon} mr-2`}></i>}</SelectValue>
                             </SelectTrigger>
                             <SelectContent>
-                              {getAvailableIcons().filter(icon => icon.category === 'social').map(icon => (
-                                <SelectItem key={icon.icon} value={icon.icon}>
-                                  <div className="flex items-center">
-                                    <i className={`${icon.icon} mr-2`}></i>
-                                    {icon.name}
-                                  </div>
-                                </SelectItem>
-                              ))}
+                              {getAvailableIcons()
+                                .filter((icon) => icon.category === "social")
+                                .map((icon) => (
+                                  <SelectItem key={icon.icon} value={icon.icon}>
+                                    <div className="flex items-center">
+                                      <i className={`${icon.icon} mr-2`}></i>
+                                      {icon.name}
+                                    </div>
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -1137,13 +985,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const newSocial = {
-                          id: generateFieldId(),
-                          label: "",
-                          value: "",
-                          icon: "fab fa-facebook",
-                          platform: ""
-                        };
+                        const newSocial = { id: generateFieldId(), label: "", value: "", icon: "fab fa-facebook", platform: "" };
                         const currentSocials = form.watch("customSocials") || [];
                         form.setValue("customSocials", [...currentSocials, newSocial]);
                       }}
@@ -1164,12 +1006,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="color"
                             value={watchedValues.sectionStyles?.socialMedia?.sectionBackgroundColor || "#db2777"}
-                            onChange={(e) => form.setValue('sectionStyles.socialMedia.sectionBackgroundColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.sectionBackgroundColor", e.target.value)}
                             className="w-8 h-6 rounded cursor-pointer"
                           />
                           <Input
                             value={watchedValues.sectionStyles?.socialMedia?.sectionBackgroundColor || ""}
-                            onChange={(e) => form.setValue('sectionStyles.socialMedia.sectionBackgroundColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.sectionBackgroundColor", e.target.value)}
                             className="bg-slate-700 border-slate-600 text-white text-xs"
                             placeholder="#db2777"
                           />
@@ -1181,12 +1023,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="color"
                             value={watchedValues.sectionStyles?.socialMedia?.sectionBorderColor || "#ec4899"}
-                            onChange={(e) => form.setValue('sectionStyles.socialMedia.sectionBorderColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.sectionBorderColor", e.target.value)}
                             className="w-8 h-6 rounded cursor-pointer"
                           />
                           <Input
                             value={watchedValues.sectionStyles?.socialMedia?.sectionBorderColor || ""}
-                            onChange={(e) => form.setValue('sectionStyles.socialMedia.sectionBorderColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.sectionBorderColor", e.target.value)}
                             className="bg-slate-700 border-slate-600 text-white text-xs"
                             placeholder="#ec4899"
                           />
@@ -1202,12 +1044,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="color"
                             value={watchedValues.sectionStyles?.socialMedia?.iconColor || "#ffffff"}
-                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.iconColor", e.target.value)}
                             className="w-8 h-6 rounded cursor-pointer"
                           />
                           <Input
                             value={watchedValues.sectionStyles?.socialMedia?.iconColor || ""}
-                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.iconColor", e.target.value)}
                             className="bg-slate-700 border-slate-600 text-white text-xs"
                             placeholder="#ffffff"
                           />
@@ -1219,12 +1061,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="color"
                             value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundColor || "#475569"}
-                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconBackgroundColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBackgroundColor", e.target.value)}
                             className="w-8 h-6 rounded cursor-pointer"
                           />
                           <Input
                             value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundColor || ""}
-                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconBackgroundColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBackgroundColor", e.target.value)}
                             className="bg-slate-700 border-slate-600 text-white text-xs"
                             placeholder="#475569"
                           />
@@ -1236,12 +1078,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="color"
                             value={watchedValues.sectionStyles?.socialMedia?.iconTextColor || "#64748b"}
-                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconTextColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.iconTextColor", e.target.value)}
                             className="w-8 h-6 rounded cursor-pointer"
                           />
                           <Input
                             value={watchedValues.sectionStyles?.socialMedia?.iconTextColor || ""}
-                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconTextColor', e.target.value)}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.iconTextColor", e.target.value)}
                             className="bg-slate-700 border-slate-600 text-white text-xs"
                             placeholder="#64748b"
                           />
@@ -1255,53 +1097,32 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <Label className="text-white text-xs">Font</Label>
-                          <Select
-                            value={watchedValues.sectionStyles?.socialMedia?.iconTextFont || ""}
-                            onValueChange={(value) => form.setValue('sectionStyles.socialMedia.iconTextFont', value)}
-                          >
+                          <Select value={watchedValues.sectionStyles?.socialMedia?.iconTextFont || ""} onValueChange={(v) => form.setValue("sectionStyles.socialMedia.iconTextFont", v)}>
                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
                               <SelectValue placeholder="Choose font" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Inter">Inter</SelectItem>
-                              <SelectItem value="Roboto">Roboto</SelectItem>
-                              <SelectItem value="Open Sans">Open Sans</SelectItem>
-                              <SelectItem value="Lato">Lato</SelectItem>
-                              <SelectItem value="Montserrat">Montserrat</SelectItem>
-                              <SelectItem value="Poppins">Poppins</SelectItem>
-                              <SelectItem value="Source Sans Pro">Source Sans Pro</SelectItem>
-                              <SelectItem value="Nunito">Nunito</SelectItem>
-                              <SelectItem value="Raleway">Raleway</SelectItem>
-                              <SelectItem value="Ubuntu">Ubuntu</SelectItem>
-                              <SelectItem value="PT Sans">PT Sans</SelectItem>
-                              <SelectItem value="Merriweather">Merriweather</SelectItem>
-                              <SelectItem value="Playfair Display">Playfair Display</SelectItem>
-                              <SelectItem value="Oswald">Oswald</SelectItem>
-                              <SelectItem value="Libre Baskerville">Libre Baskerville</SelectItem>
-                              <SelectItem value="Crimson Text">Crimson Text</SelectItem>
-                              <SelectItem value="Work Sans">Work Sans</SelectItem>
-                              <SelectItem value="Fira Sans">Fira Sans</SelectItem>
-                              <SelectItem value="DM Sans">DM Sans</SelectItem>
-                              <SelectItem value="Space Grotesk">Space Grotesk</SelectItem>
+                              {["Inter","Roboto","Open Sans","Lato","Montserrat","Poppins","Source Sans Pro","Nunito","Raleway","Ubuntu","PT Sans","Merriweather","Playfair Display","Oswald","Libre Baskerville","Crimson Text","Work Sans","Fira Sans","DM Sans","Space Grotesk"].map(f=>(
+                                <SelectItem key={f} value={f}>{f}</SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div>
                           <Label className="text-white text-xs">Weight</Label>
-                          <Select
-                            value={watchedValues.sectionStyles?.socialMedia?.iconTextWeight || ""}
-                            onValueChange={(value) => form.setValue('sectionStyles.socialMedia.iconTextWeight', value as any)}
-                          >
+                          <Select value={watchedValues.sectionStyles?.socialMedia?.iconTextWeight || ""} onValueChange={(v) => form.setValue("sectionStyles.socialMedia.iconTextWeight", v as any)}>
                             <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
                               <SelectValue placeholder="Weight" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="300">Light</SelectItem>
-                              <SelectItem value="400">Regular</SelectItem>
-                              <SelectItem value="500">Medium</SelectItem>
-                              <SelectItem value="600">Semi Bold</SelectItem>
-                              <SelectItem value="700">Bold</SelectItem>
-                              <SelectItem value="800">Extra Bold</SelectItem>
+                              {[
+                                ["300","Light"],
+                                ["400","Regular"],
+                                ["500","Medium"],
+                                ["600","Semi Bold"],
+                                ["700","Bold"],
+                                ["800","Extra Bold"],
+                              ].map(([v,l])=> <SelectItem key={v} value={v}>{l}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
@@ -1310,21 +1131,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="range"
                             value={watchedValues.sectionStyles?.socialMedia?.iconTextSize || 12}
-                            onChange={(e) => form.setValue('sectionStyles.socialMedia.iconTextSize', parseInt(e.target.value))}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.iconTextSize", parseInt(e.target.value))}
                             className="custom-range w-full"
-                            min="8"
-                            max="20"
+                            min={8}
+                            max={20}
                           />
                         </div>
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             id="socialTextItalic"
-                            checked={watchedValues.sectionStyles?.socialMedia?.iconTextStyle === 'italic'}
-                            onCheckedChange={(checked) => 
-                              form.setValue('sectionStyles.socialMedia.iconTextStyle', checked ? 'italic' : 'normal')
-                            }
+                            checked={watchedValues.sectionStyles?.socialMedia?.iconTextStyle === "italic"}
+                            onCheckedChange={(checked) => form.setValue("sectionStyles.socialMedia.iconTextStyle", checked ? "italic" : "normal")}
                           />
-                          <Label htmlFor="socialTextItalic" className="text-white text-xs">Italic</Label>
+                          <Label htmlFor="socialTextItalic" className="text-white text-xs">
+                            Italic
+                          </Label>
                         </div>
                       </div>
                     </div>
@@ -1336,12 +1157,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
           {/* Appearance Settings */}
           <div className="bg-indigo-900/30 border border-indigo-600/30 rounded-lg p-4 space-y-4">
-            <div 
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleSection('appearance')}
-            >
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("appearance")}>
               <h3 className="text-lg font-semibold text-indigo-300">Appearance</h3>
-              <i className={`fas ${collapsedSections.appearance ? 'fa-chevron-down' : 'fa-chevron-up'} text-indigo-300`}></i>
+              <i className={`fas ${collapsedSections.appearance ? "fa-chevron-down" : "fa-chevron-up"} text-indigo-300`}></i>
             </div>
             {!collapsedSections.appearance && (
               <>
@@ -1352,60 +1170,30 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
                     {/* Default Colors */}
                     <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <Label className="text-white text-sm">Primary Color</Label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={watchedValues.primaryColor || "#22c55e"}
-                            onChange={(e) => form.setValue('primaryColor', e.target.value)}
-                            className="w-12 h-8 rounded cursor-pointer"
-                            data-testid="input-primary-color"
-                          />
-                          <Input
-                            value={watchedValues.primaryColor || "#22c55e"}
-                            onChange={(e) => form.setValue('primaryColor', e.target.value)}
-                            className="bg-slate-700 border-slate-600 text-white text-xs"
-                            placeholder="#22c55e"
-                          />
+                      {[
+                        ["Primary Color", "primaryColor", "#22c55e", "input-primary-color"],
+                        ["Secondary Color", "secondaryColor", "#16a34a", "input-secondary-color"],
+                        ["Tertiary Color", "tertiaryColor", "#0d9488", "input-tertiary-color"],
+                      ].map(([label, key, def, testId]) => (
+                        <div key={key}>
+                          <Label className="text-white text-sm">{label}</Label>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={(watchedValues as any)[key] || (def as string)}
+                              onChange={(e) => form.setValue(key as any, e.target.value)}
+                              className="w-12 h-8 rounded cursor-pointer"
+                              data-testid={testId as string}
+                            />
+                            <Input
+                              value={(watchedValues as any)[key] || (def as string)}
+                              onChange={(e) => form.setValue(key as any, e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder={def as string}
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <Label className="text-white text-sm">Secondary Color</Label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={watchedValues.secondaryColor || "#16a34a"}
-                            onChange={(e) => form.setValue('secondaryColor', e.target.value)}
-                            className="w-12 h-8 rounded cursor-pointer"
-                            data-testid="input-secondary-color"
-                          />
-                          <Input
-                            value={watchedValues.secondaryColor || "#16a34a"}
-                            onChange={(e) => form.setValue('secondaryColor', e.target.value)}
-                            className="bg-slate-700 border-slate-600 text-white text-xs"
-                            placeholder="#16a34a"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-white text-sm">Tertiary Color</Label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={watchedValues.tertiaryColor || "#0d9488"}
-                            onChange={(e) => form.setValue('tertiaryColor', e.target.value)}
-                            className="w-12 h-8 rounded cursor-pointer"
-                            data-testid="input-tertiary-color"
-                          />
-                          <Input
-                            value={watchedValues.tertiaryColor || "#0d9488"}
-                            onChange={(e) => form.setValue('tertiaryColor', e.target.value)}
-                            className="bg-slate-700 border-slate-600 text-white text-xs"
-                            placeholder="#0d9488"
-                          />
-                        </div>
-                      </div>
+                      ))}
                     </div>
 
                     {/* Gradient Settings */}
@@ -1415,10 +1203,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           type="checkbox"
                           id="use-gradient"
                           checked={watchedValues.useGradient || false}
-                          onChange={(e) => form.setValue('useGradient', e.target.checked)}
+                          onChange={(e) => form.setValue("useGradient", e.target.checked)}
                           className="w-4 h-4 rounded"
                         />
-                        <Label htmlFor="use-gradient" className="text-white cursor-pointer">Use Gradient</Label>
+                        <Label htmlFor="use-gradient" className="text-white cursor-pointer">
+                          Use Gradient
+                        </Label>
                       </div>
 
                       {watchedValues.useGradient && (
@@ -1427,10 +1217,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <Label className="text-white text-sm">Angle: {watchedValues.gradientAngle || 90}°</Label>
                             <input
                               type="range"
-                              min="0"
-                              max="360"
+                              min={0}
+                              max={360}
                               value={watchedValues.gradientAngle || 90}
-                              onChange={(e) => form.setValue('gradientAngle', parseInt(e.target.value))}
+                              onChange={(e) => form.setValue("gradientAngle", parseInt(e.target.value))}
                               className="w-full mt-1"
                               data-testid="input-gradient-angle"
                             />
@@ -1444,20 +1234,20 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 onChange={(e) => {
                                   const newStops = [...(watchedValues.gradientStops || [])];
                                   newStops[index] = { ...stop, color: e.target.value };
-                                  form.setValue('gradientStops', newStops);
+                                  form.setValue("gradientStops", newStops);
                                 }}
                                 className="w-10 h-8 rounded cursor-pointer"
                               />
                               <Label className="text-white text-xs">Stop {index + 1}:</Label>
                               <input
                                 type="range"
-                                min="0"
-                                max="100"
+                                min={0}
+                                max={100}
                                 value={stop.position}
                                 onChange={(e) => {
                                   const newStops = [...(watchedValues.gradientStops || [])];
                                   newStops[index] = { ...stop, position: parseInt(e.target.value) };
-                                  form.setValue('gradientStops', newStops);
+                                  form.setValue("gradientStops", newStops);
                                 }}
                                 className="flex-1"
                               />
@@ -1475,13 +1265,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         <input
                           type="color"
                           value={watchedValues.backgroundColor || "#ffffff"}
-                          onChange={(e) => form.setValue('backgroundColor', e.target.value)}
+                          onChange={(e) => form.setValue("backgroundColor", e.target.value)}
                           className="w-12 h-8 rounded cursor-pointer"
                           data-testid="input-background-color"
                         />
                         <Input
                           value={watchedValues.backgroundColor || "#ffffff"}
-                          onChange={(e) => form.setValue('backgroundColor', e.target.value)}
+                          onChange={(e) => form.setValue("backgroundColor", e.target.value)}
                           className="bg-slate-700 border-slate-600 text-white text-xs"
                           placeholder="#ffffff"
                         />
@@ -1491,34 +1281,37 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     {/* Font Family */}
                     <div>
                       <Label className="text-white text-sm">Font Family</Label>
-                      <Select
-                        value={watchedValues.font || "inter"}
-                        onValueChange={(value) => form.setValue('font', value)}
-                      >
+                      <Select value={watchedValues.font || "inter"} onValueChange={(v) => form.setValue("font", v)}>
                         <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="inter">Inter</SelectItem>
-                          <SelectItem value="roboto">Roboto</SelectItem>
-                          <SelectItem value="poppins">Poppins</SelectItem>
-                          <SelectItem value="work-sans">Work Sans</SelectItem>
-                          <SelectItem value="dm-sans">DM Sans</SelectItem>
-                          <SelectItem value="plus-jakarta-sans">Plus Jakarta Sans</SelectItem>
-                          <SelectItem value="manrope">Manrope</SelectItem>
-                          <SelectItem value="space-grotesk">Space Grotesk</SelectItem>
-                          <SelectItem value="outfit">Outfit</SelectItem>
-                          <SelectItem value="nunito-sans">Nunito Sans</SelectItem>
-                          <SelectItem value="red-hat-display">Red Hat Display</SelectItem>
-                          <SelectItem value="ibm-plex-sans">IBM Plex Sans</SelectItem>
-                          <SelectItem value="figtree">Figtree</SelectItem>
-                          <SelectItem value="quicksand">Quicksand</SelectItem>
-                          <SelectItem value="raleway">Raleway</SelectItem>
-                          <SelectItem value="montserrat">Montserrat</SelectItem>
-                          <SelectItem value="source-sans-pro">Source Sans Pro</SelectItem>
-                          <SelectItem value="lato">Lato</SelectItem>
-                          <SelectItem value="open-sans">Open Sans</SelectItem>
-                          <SelectItem value="rubik">Rubik</SelectItem>
+                          {[
+                            "inter",
+                            "roboto",
+                            "poppins",
+                            "work-sans",
+                            "dm-sans",
+                            "plus-jakarta-sans",
+                            "manrope",
+                            "space-grotesk",
+                            "outfit",
+                            "nunito-sans",
+                            "red-hat-display",
+                            "ibm-plex-sans",
+                            "figtree",
+                            "quicksand",
+                            "raleway",
+                            "montserrat",
+                            "source-sans-pro",
+                            "lato",
+                            "open-sans",
+                            "rubik",
+                          ].map((f) => (
+                            <SelectItem key={f} value={f}>
+                              {f.replace(/-/g, " ")}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1534,12 +1327,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="color"
                             value={watchedValues.headingColor || "#1f2937"}
-                            onChange={(e) => form.setValue('headingColor', e.target.value)}
+                            onChange={(e) => form.setValue("headingColor", e.target.value)}
                             className="w-12 h-8 rounded cursor-pointer"
                           />
                           <Input
                             value={watchedValues.headingColor || "#1f2937"}
-                            onChange={(e) => form.setValue('headingColor', e.target.value)}
+                            onChange={(e) => form.setValue("headingColor", e.target.value)}
                             className="bg-slate-700 border-slate-600 text-white text-xs"
                             placeholder="#1f2937"
                           />
@@ -1549,19 +1342,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         <Label className="text-white text-sm">Size: {watchedValues.headingSize || 16}px</Label>
                         <input
                           type="range"
-                          min="12"
-                          max="32"
+                          min={12}
+                          max={32}
                           value={watchedValues.headingSize || 16}
-                          onChange={(e) => form.setValue('headingSize', parseInt(e.target.value))}
+                          onChange={(e) => form.setValue("headingSize", parseInt(e.target.value))}
                           className="w-full mt-1"
                         />
                       </div>
                       <div>
                         <Label className="text-white text-sm">Weight</Label>
-                        <Select
-                          value={(watchedValues.headingWeight || 600).toString()}
-                          onValueChange={(value) => form.setValue('headingWeight', parseInt(value))}
-                        >
+                        <Select value={(watchedValues.headingWeight || 600).toString()} onValueChange={(v) => form.setValue("headingWeight", parseInt(v))}>
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                             <SelectValue />
                           </SelectTrigger>
@@ -1586,12 +1376,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <input
                             type="color"
                             value={watchedValues.paragraphColor || "#4b5563"}
-                            onChange={(e) => form.setValue('paragraphColor', e.target.value)}
+                            onChange={(e) => form.setValue("paragraphColor", e.target.value)}
                             className="w-12 h-8 rounded cursor-pointer"
                           />
                           <Input
                             value={watchedValues.paragraphColor || "#4b5563"}
-                            onChange={(e) => form.setValue('paragraphColor', e.target.value)}
+                            onChange={(e) => form.setValue("paragraphColor", e.target.value)}
                             className="bg-slate-700 border-slate-600 text-white text-xs"
                             placeholder="#4b5563"
                           />
@@ -1601,19 +1391,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         <Label className="text-white text-sm">Size: {watchedValues.paragraphSize || 14}px</Label>
                         <input
                           type="range"
-                          min="10"
-                          max="20"
+                          min={10}
+                          max={20}
                           value={watchedValues.paragraphSize || 14}
-                          onChange={(e) => form.setValue('paragraphSize', parseInt(e.target.value))}
+                          onChange={(e) => form.setValue("paragraphSize", parseInt(e.target.value))}
                           className="w-full mt-1"
                         />
                       </div>
                       <div>
                         <Label className="text-white text-sm">Weight</Label>
-                        <Select
-                          value={(watchedValues.paragraphWeight || 400).toString()}
-                          onValueChange={(value) => form.setValue('paragraphWeight', parseInt(value))}
-                        >
+                        <Select value={(watchedValues.paragraphWeight || 400).toString()} onValueChange={(v) => form.setValue("paragraphWeight", parseInt(v))}>
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                             <SelectValue />
                           </SelectTrigger>
@@ -1634,22 +1421,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
           {/* SEO Settings */}
           <div className="bg-amber-900/30 border border-amber-600/30 rounded-lg p-4 space-y-4">
-            <div 
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleSection('seo')}
-            >
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("seo")}>
               <h3 className="text-lg font-semibold text-amber-300">SEO Settings</h3>
-              <i className={`fas ${collapsedSections.seo ? 'fa-chevron-down' : 'fa-chevron-up'} text-amber-300`}></i>
+              <i className={`fas ${collapsedSections.seo ? "fa-chevron-down" : "fa-chevron-up"} text-amber-300`}></i>
             </div>
             {!collapsedSections.seo && (
               <>
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="metaTitle" className="text-white">Meta Title</Label>
+                    <Label htmlFor="metaTitle" className="text-white">
+                      Meta Title
+                    </Label>
                     <Input
                       id="metaTitle"
                       {...form.register("metaTitle")}
-                      placeholder={`${watchedValues.fullName || 'Your Name'} - Digital Business Card`}
+                      placeholder={`${watchedValues.fullName || "Your Name"} - Digital Business Card`}
                       className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
                       data-testid="input-meta-title"
                     />
@@ -1657,11 +1443,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   </div>
 
                   <div>
-                    <Label htmlFor="metaDescription" className="text-white">Meta Description</Label>
+                    <Label htmlFor="metaDescription" className="text-white">
+                      Meta Description
+                    </Label>
                     <Textarea
                       id="metaDescription"
                       {...form.register("metaDescription")}
-                      placeholder={`Connect with ${watchedValues.fullName || 'me'} - ${watchedValues.title || 'Professional'}. View my digital business card for contact information and more.`}
+                      placeholder={`Connect with ${watchedValues.fullName || "me"} - ${watchedValues.title || "Professional"}. View my digital business card for contact information and more.`}
                       rows={3}
                       className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
                       data-testid="textarea-meta-description"
@@ -1670,22 +1458,29 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   </div>
 
                   <div>
-                    <Label htmlFor="ogTitle" className="text-white">Open Graph Title</Label>
+                    <Label htmlFor="ogTitle" className="text-white">
+                      Open Graph Title
+                    </Label>
                     <Input
                       id="ogTitle"
                       {...form.register("ogTitle")}
-                      placeholder={watchedValues.metaTitle || `${watchedValues.fullName || 'Your Name'} - Digital Business Card`}
+                      placeholder={watchedValues.metaTitle || `${watchedValues.fullName || "Your Name"} - Digital Business Card`}
                       className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
                       data-testid="input-og-title"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="ogDescription" className="text-white">Open Graph Description</Label>
+                    <Label htmlFor="ogDescription" className="text-white">
+                      Open Graph Description
+                    </Label>
                     <Textarea
                       id="ogDescription"
                       {...form.register("ogDescription")}
-                      placeholder={watchedValues.metaDescription || `Connect with ${watchedValues.fullName || 'me'} - ${watchedValues.title || 'Professional'}. View my digital business card for contact information and more.`}
+                      placeholder={
+                        watchedValues.metaDescription ||
+                        `Connect with ${watchedValues.fullName || "me"} - ${watchedValues.title || "Professional"}. View my digital business card for contact information and more.`
+                      }
                       rows={3}
                       className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
                       data-testid="textarea-og-description"
@@ -1693,15 +1488,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   </div>
 
                   <div>
-                    <Label htmlFor="ogImage" className="text-white">Open Graph Image</Label>
+                    <Label htmlFor="ogImage" className="text-white">
+                      Open Graph Image
+                    </Label>
                     <div className="mt-1">
                       <div className="w-full h-32 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
                         {watchedValues.ogImage ? (
-                          <img 
-                            src={watchedValues.ogImage} 
-                            alt="OG Image" 
-                            className="w-full h-full object-cover"
-                          />
+                          <img src={watchedValues.ogImage} alt="OG Image" className="w-full h-full object-cover" />
                         ) : (
                           <div className="text-center">
                             <i className="fas fa-image text-slate-400 text-2xl"></i>
@@ -1715,24 +1508,20 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         variant="outline"
                         size="sm"
                         className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full"
-                        onClick={() => document.getElementById('og-image-input')?.click()}
+                        onClick={() => document.getElementById("og-image-input")?.click()}
                         disabled={isUploading}
                       >
                         <i className="fas fa-upload mr-2"></i>
                         Upload OG Image
                       </Button>
-                      <input
-                        id="og-image-input"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleFileUpload(e, 'ogImage' as any)}
-                        className="hidden"
-                      />
+                      <input id="og-image-input" type="file" accept="image/*" onChange={(e) => handleFileUpload(e, "ogImage" as any)} className="hidden" />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="keywords" className="text-white">Keywords</Label>
+                    <Label htmlFor="keywords" className="text-white">
+                      Keywords
+                    </Label>
                     <div className="space-y-2">
                       <div className="flex flex-wrap gap-2">
                         {(watchedValues.keywords || []).map((keyword, index) => (
@@ -1743,7 +1532,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               onClick={() => {
                                 const newKeywords = [...(watchedValues.keywords || [])];
                                 newKeywords.splice(index, 1);
-                                form.setValue('keywords', newKeywords);
+                                form.setValue("keywords", newKeywords);
                               }}
                               className="ml-2 text-red-400 hover:text-red-300"
                             >
@@ -1758,13 +1547,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           placeholder="Add keyword..."
                           className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
                           onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === "Enter") {
                               e.preventDefault();
                               const input = e.target as HTMLInputElement;
                               if (input.value.trim()) {
                                 const newKeywords = [...(watchedValues.keywords || []), input.value.trim()];
-                                form.setValue('keywords', newKeywords);
-                                input.value = '';
+                                form.setValue("keywords", newKeywords);
+                                input.value = "";
                               }
                             }
                           }}
@@ -1775,11 +1564,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           size="sm"
                           className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
                           onClick={() => {
-                            const input = document.getElementById('new-keyword') as HTMLInputElement;
+                            const input = document.getElementById("new-keyword") as HTMLInputElement;
                             if (input?.value.trim()) {
                               const newKeywords = [...(watchedValues.keywords || []), input.value.trim()];
-                              form.setValue('keywords', newKeywords);
-                              input.value = '';
+                              form.setValue("keywords", newKeywords);
+                              input.value = "";
                             }
                           }}
                         >
