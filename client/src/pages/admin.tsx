@@ -2,10 +2,11 @@ import { Route, Switch } from 'wouter';
 import AdminLayout from '@/components/admin/AdminLayout';
 import DashboardPage from '@/components/admin/DashboardPage';
 import UsersPage from '@/components/admin/UsersPage';
+import TemplatesPage from '@/components/admin/TemplatesPage';
+import TemplateBuilder from '@/components/admin/TemplateBuilder';
 
 // Placeholder components for other admin pages (to be implemented)
 const PlansPage = () => <div className="p-6">Plans page coming soon...</div>;
-const TemplatesPage = () => <div className="p-6">Templates page coming soon...</div>;
 const IconPacksPage = () => <div className="p-6">Icon packs page coming soon...</div>;
 const SettingsPage = () => <div className="p-6">Settings page coming soon...</div>;
 
@@ -17,6 +18,7 @@ export default function Admin() {
         <Route path="/admin/users" component={UsersPage} />
         <Route path="/admin/plans" component={PlansPage} />
         <Route path="/admin/templates" component={TemplatesPage} />
+        <Route path="/admin/templates/builder" component={TemplateBuilder} />
         <Route path="/admin/icon-packs" component={IconPacksPage} />
         <Route path="/admin/settings" component={SettingsPage} />
         <Route>
