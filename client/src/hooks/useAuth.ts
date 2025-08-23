@@ -6,7 +6,7 @@ export interface User {
   firstName?: string;
   lastName?: string;
   profileImageUrl?: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'owner';
   planType: 'free' | 'pro' | 'enterprise';
   businessCardsCount: number;
   businessCardsLimit: number;

@@ -15,29 +15,46 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      setLocation('/dashboard');
+    if (isAuthenticated && user) {
+      if (user.role === 'owner') {
+        setLocation('/admin');
+      } else {
+        setLocation('/dashboard');
+      }
     }
-  }, [isAuthenticated, setLocation]);
+  }, [isAuthenticated, user, setLocation]);
 
   const loginMutation = useMutation({
     mutationFn: async (loginData: { email: string; password: string }) => {
       const response = await apiRequest('POST', '/api/auth/login', loginData);
       return response;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({
         title: 'Login Successful',
         description: 'Welcome back!',
       });
-      // Invalidate user query to refetch user data
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      // Redirect to dashboard
-      setLocation('/dashboard');
+      // Invalidate and refetch user data
+      await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      
+      // Wait for user query to be updated and redirect based on role
+      setTimeout(async () => {
+        try {
+          const updatedUserQuery = await queryClient.fetchQuery({ queryKey: ['/api/auth/user'] });
+          if (updatedUserQuery && (updatedUserQuery as any).role === 'owner') {
+            setLocation('/admin');
+          } else {
+            setLocation('/dashboard');
+          }
+        } catch (error) {
+          // Fallback to dashboard if user data fetch fails
+          setLocation('/dashboard');
+        }
+      }, 100);
     },
     onError: (error: any) => {
       toast({
