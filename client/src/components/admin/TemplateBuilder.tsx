@@ -50,7 +50,6 @@ export default function TemplateBuilder() {
   const [previewMode, setPreviewMode] = useState(false);
   const [businessCardData, setBusinessCardData] = useState<BusinessCard>({
     id: 'template-preview',
-    userId: 'template-user',
     fullName: 'John Doe',
     title: 'Software Engineer',
     company: 'Tech Company',
