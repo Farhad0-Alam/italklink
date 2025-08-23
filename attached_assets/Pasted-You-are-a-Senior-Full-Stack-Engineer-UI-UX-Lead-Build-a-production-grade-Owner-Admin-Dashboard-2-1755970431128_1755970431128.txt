@@ -1,0 +1,279 @@
+You are a Senior Full-Stack Engineer + UI/UX Lead. Build a production-grade Owner Admin Dashboard (2025) for a digital business card SaaS (2TalkLink-style).
+Strictly match the attached design references (see “Resources”).
+
+0) Resources (must be added to repo and linked in-app)
+
+Place these images in /resources and use them for pixel/spacing/labels. Add a Resources page in the admin where the Owner can view/download them, and add a “View reference” link on related pages.
+
+resources/dashboard.png → (Your file: /mnt/data/Screenshot 2025-08-23 225300.png)
+Dashboard with KPI chips + All Links list + profile dropdown.
+
+resources/users.png → (/mnt/data/Screenshot 2025-08-23 230808.png)
+Users table with search, status switch, actions (Visit/Edit/Delete/Copy), Add New User.
+
+resources/plans-add.png → (/mnt/data/screencapture-2talklink-admin-plans-add-2025-08-23-23_10_31.png)
+Add Plan: large template grid (thumbnails + checkboxes), bottom form with Frequency, Currency, Price, Card Number, Trial days, Custom duration toggle, Features check-mark grid.
+
+resources/icon-type-modal.png → (/mnt/data/Screenshot 2025-08-23 232127.png)
+“Add New Icon Type” modal with radio types: URL, Email, Phone, WhatsApp, Text, Connect; Name; Add Icon Type button.
+
+resources/icon-packs.png → (/mnt/data/Screenshot 2025-08-23 232147.png)
+Icon Pack list/grid: cards with top-left active toggle, 3-dot menu, search box, Add New button. Card caption like “pack#14”.
+
+resources/icon-pack-default.png → (/mnt/data/Screenshot 2025-08-23 232209.png)
+Icon Pack detail grid (Default): “+” tiles for Call, Email, Text, Connect, Website and social icons (Pinterest, WhatsApp, LinkedIn, Instagram, Twitter, Facebook).
+
+If these files aren’t present, prompt the user to upload them and continue.
+
+1) Tech (2025-ready)
+
+Frontend: React 19, React-DOM 19, Vite 6, TypeScript 5.7, Tailwind v4, shadcn/ui, lucide-react, TanStack Query v5, React Router v7, i18next (en, bn).
+
+Backend: Node 22 (Active LTS), Express + TypeScript, Drizzle ORM + PostgreSQL, Zod v4, JWT (access+refresh in httpOnly cookies), RBAC.
+
+Tooling: pnpm, ESLint+Prettier, Vitest (unit) + Playwright (E2E), Dockerfile + docker-compose (Postgres).
+
+Payments (scaffold): Stripe (products/prices/webhooks) + Manual toggle.
+
+React 19 usage: Prefer Actions (<form action={serverFn}>, useActionState, useFormStatus, useOptimistic) for simple/medium forms. Use React Hook Form + Zod only for wizard/repeater-heavy editors.
+
+2) Navigation (Owner-only)
+
+Topbar: Dashboard, Users, Categories, Plans, Templates, Icon Packs, Resources, Settings (Profile & Plan, Payment, Email, Branding, Security) + avatar dropdown (Logout).
+Route guard: only role owner can access.
+
+3) Pages — must match the screenshots
+A) Dashboard → match resources/dashboard.png
+
+KPI cards: “Weekly Clicks”, “Weekly Visitor”, “Monthly Visitor” (rounded-2xl, soft shadows, emoji-style chips).
+
+All Links list: rows like screenshot—monogram avatar, title, URL with copy, badges Visitor(n) and Clicks(n), owner name “By – <User>”.
+
+Profile dropdown: “Profile & Plan”, “Payment Settings”, “Email Settings”, “Logout”.
+
+Chart: 30-day timeseries for visits/clicks under KPIs.
+
+B) Users → match resources/users.png
+
+Table columns: S.N., Name (monogram), Email, Registration Date, Plan Validity, Status (switch with “Active” label), Actions (Visit | ✏️ | 🗑️ | Copy).
+
+Search by name/email; filters: status, plan; bulk actions (activate/deactivate/assign plan/delete).
+
+Assign Plan modal: choose plan, validity (dates or duration), optional note.
+
+Add New User button (top-right) as in screenshot.
+
+C) Plans → match resources/plans-add.png
+
+Index: cards showing plan name, price, currency, frequency, trial days, active toggle.
+
+Add/Edit Plan form:
+
+Name, Frequency (Monthly/Yearly/Custom), Currency (select), Price, Card Number (label string), Trial days, Custom duration toggle (reveals customDurationDays), Active switch.
+
+Features grid (checkbox pills, 2–4 columns, labels from screenshot + more):
+
+Heading, Paragraph, Link, Image, Video, Contact Form, Accordion, Image Slider, Social Links, CTA Buttons, Maps block, File Download, Custom Colors, Custom Fonts, HTML Block, Analytics, QR/NFC, Multi-language, Template Library Access, Icon Pack Access, Remove Branding, Custom Domain, Email/WhatsApp/Call buttons.
+
+Include Templates: large thumbnail grid exactly like screenshot (multiple “Theme” rows). Each has a checkbox at top-right; clicking the image previews; selection persists.
+
+Plan detail: shows assigned users + quick Assign to User(s).
+
+D) Templates
+
+Gallery: 4-column responsive card grid; each card: thumbnail, name, theme tag; hover quick actions: Preview, Duplicate, Edit, Publish/Unpublish, Delete.
+
+Builder v1: Left controls / Right live preview.
+
+Blocks: ProfileHeader, About, ContactList, SocialList, Gallery, CTAButtons, CustomHTML, Footer.
+
+Each block has props (title, text, colors, fonts, layout, icon selection).
+
+Export/Import template JSON, Versioning (draft → published).
+
+E) Icon Packs (NEW top-level) → match resources/icon-packs.png + resources/icon-pack-default.png
+
+List/Grid view of Packs (cards): top-left active toggle, 3-dot context menu (Rename, Duplicate, Delete), search box (top), Add New button (top-right). Card caption style like “pack#14”.
+
+Pack Detail (Default pack example): grid tiles. First row contains large “+” tiles labeled Call, Email, Text, Connect, Website. Next rows: social icons (Pinterest, WhatsApp, LinkedIn, Instagram, Twitter, Facebook) exactly styled as the screenshot (icon centered, label beneath).
+
+Icon Type Manager page with Add New Icon Type modal → match resources/icon-type-modal.png:
+
+Radio Select Type: URL, Email, Phone, WhatsApp, Text, Connect.
+
+Name input, Add Icon Type button.
+
+Table lists existing types with Status toggle and Actions (✏️/🗑️).
+
+SVG upload: sanitize (strip scripts/foreignObject), normalize viewBox. Store raw SVG text and metadata (name, tags, type).
+
+Type-driven link behaviors:
+
+URL → href as given,
+
+Email → mailto:,
+
+Phone → tel:,
+
+WhatsApp → https://wa.me/<number>?text=<msg>,
+
+Text → free text field,
+
+Connect → internal link selector (e.g., another profile block or multi-link modal).
+
+Packs are selectable inside the Template Builder and Plan features (enable/disable “Icon Pack Access”).
+
+F) Resources (page)
+
+Grid/list of image references (the six files above). Show preview modal + download.
+
+Let Owner upload additional references (PNG/JPG/SVG/PDF).
+
+G) Settings
+
+Profile & Plan, Payment Settings (Stripe keys, webhook secret, Manual toggle), Email Settings (SMTP + test email), Branding (logo, colors), Security (rotate JWT secret, session TTL, optional 2FA scaffold).
+
+4) Data Model (Drizzle)
+
+users (id, name, email*, passwordHash, role, status, createdAt, updatedAt)
+
+profiles (id, userId, publicSlug*, primaryColor, secondaryColor, avatarUrl, published)
+
+links (id, userId, title, slug*, url, clicksCount, visitorsCount, createdAt)
+
+plans (id, name, frequency enum, currency, priceCents, trialDays, customDurationDays?, cardLabel, isActive, createdAt)
+
+features (id, key*, label, description)
+
+plan_features (planId, featureId) PK(planId, featureId)
+
+plan_templates (planId, templateId) PK(planId, templateId)
+
+user_plans (id, userId, planId, startsAt, endsAt, note?)
+
+templates (id, name, category, thumbnailUrl, jsonSchema jsonb, version, isPublished, createdBy, createdAt, updatedAt)
+
+icon_types (id, name, type enum: url|email|phone|whatsapp|text|connect, isActive)
+
+icon_packs (id, name, isActive, createdAt)
+
+icons (id, packId FK, typeId FK, name, svg text, tags text[], sort, isActive)
+
+events (id, userId?, profileId?, type: visit|click|custom, metadata jsonb, occurredAt)
+
+counters_daily (day date, metric visits|clicks, value, profileId?, userId?) + composite indexes
+
+5) API (Express + Zod) — /admin/* requires role owner
+
+Auth: /auth/login, /auth/refresh, /auth/logout (+ /auth/register dev-seed only)
+
+Users:
+GET /admin/users?search=&status=&planId=&page=&size=
+POST /admin/users · PATCH /admin/users/:id · DELETE /admin/users/:id
+POST /admin/users/:id/assign-plan · POST /admin/users/bulk
+
+Plans & Features:
+CRUD /admin/plans · GET /admin/features
+POST /admin/plans/:id/features {featureIds[]}
+POST /admin/plans/:id/templates {templateIds[]}
+
+Templates:
+GET /admin/templates?search=&category=&published=
+CRUD /admin/templates
+POST /admin/templates/:id/publish (toggle)
+POST /admin/templates/:id/duplicate
+Upload thumbnail
+
+Icon Packs & Types:
+GET /admin/icon-packs?search= · POST /admin/icon-packs · PATCH /admin/icon-packs/:id · DELETE /admin/icon-packs/:id
+GET /admin/icon-packs/:id/icons · POST /admin/icon-packs/:id/icons (SVG upload) · PATCH /admin/icons/:iconId · DELETE /admin/icons/:iconId
+GET /admin/icon-types · POST /admin/icon-types · PATCH /admin/icon-types/:id · DELETE /admin/icon-types/:id
+
+Analytics:
+GET /admin/metrics/summary (weeklyClicks, weeklyVisitors, monthlyVisitors)
+GET /admin/metrics/timeseries?range=30d
+GET /admin/links (for All Links list)
+
+Settings:
+GET/PUT /admin/settings/profile /payment /email /branding
+POST /admin/settings/security/rotate-jwt
+
+Public tracking: POST /t/visit · POST /t/click
+
+Apply rate limiting to admin & uploads.
+
+6) Frontend Implementation
+
+Use shadcn/ui: Card, Table, Dialog, Drawer, Tabs, Select, Checkbox, Switch, DropdownMenu, Toast, Input, Textarea, Badge, Button.
+
+Style & spacing must mirror screenshots (rounded-2xl cards, airy paddings, soft shadows, pastel icon chips).
+
+Status toggles use optimistic UI (useOptimistic) with rollback on error.
+
+Template Gallery: hover actions per card.
+
+Add Plan: big thumbnail grid + checkbox in the top-right corner of each template card (match reference).
+
+Resources page + “View reference” link in page headers for Dashboard/Users/Plans/Icon Packs.
+
+7) Env & Scripts
+
+/apps/web (Vite React 19), /apps/api (Express TS), /packages (ui/types/utils).
+.env.example
+
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ecard
+JWT_SECRET=change_me
+REFRESH_SECRET=change_me_too
+WEB_ORIGIN=http://localhost:5173
+API_ORIGIN=http://localhost:3000
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+
+
+pnpm scripts: dev (concurrently web+api), build, db:push, db:seed, test, e2e.
+
+8) Seeds (realistic demo)
+
+Owner: owner@demo.local / Demo@12345
+
+8 demo users, mixed status + links
+
+20+ features, 3 plans (Basic/Pro/Business) with different feature sets
+
+12 templates (6 published) with thumbnails
+
+6 icon types, 4 icon packs, 60+ icons (social + utility)
+
+30 days of events for charts
+
+Resources page preloaded with the six files in /resources
+
+9) Quality, Security, Tests
+
+All inputs validated (Zod). Sanitize SVG uploads. Limit file size/type.
+
+httpOnly cookies; CORS restricted to WEB_ORIGIN.
+
+Audit log for deletes, plan edits, template publish/unpublish.
+
+Vitest for utilities & API handlers. Playwright flow:
+
+Login → create plan → select features → include templates
+
+Assign plan to user → toggle status
+
+Create template → publish → duplicate
+
+Create icon type → upload icons → build an icon pack → toggle active
+
+Dashboard shows seeded KPIs & 30-day chart
+
+Resources page lists and previews the six reference images
+
+Acceptance: UI and copy must match the screenshots (labels: “Weekly Clicks”, “Weekly Visitor”, “Monthly Visitor”, “Add New User”, “Icon Pack”, “Add New Icon Type”, etc.). The Icon Pack flows (list, detail grid, add type modal) must replicate the visuals and behaviors exactly.
+
+Build now. If any package has React 19/Tailwind v4 peer constraints, select the latest compatible versions and proceed. Keep code typed, clean, and production-ready.
