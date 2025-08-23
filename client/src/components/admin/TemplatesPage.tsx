@@ -60,10 +60,14 @@ export default function TemplatesPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
 
   // Fetch templates data
-  const { data: templates = [], isLoading, refetch } = useQuery<Template[]>({
-    queryKey: ['/api/admin/templates', { search, category: categoryFilter, published: statusFilter }],
-    initialData: []
+  const { data: templates = [], isLoading, refetch, error } = useQuery<Template[]>({
+    queryKey: ['/api/admin/templates'],
+    retry: 1,
+    refetchOnWindowFocus: false
   });
+
+  // Debug logging
+  console.log('Templates query result:', { templates, isLoading, error });
 
   const handleCreateTemplate = () => {
     // Navigate to template builder
