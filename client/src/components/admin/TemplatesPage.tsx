@@ -97,8 +97,14 @@ export default function TemplatesPage() {
         method: 'POST',
         credentials: 'include'
       });
+      
       if (response.ok) {
+        const result = await response.json();
+        console.log('Template status toggled:', result.message);
         refetch();
+      } else {
+        const error = await response.json();
+        console.error('Failed to toggle template status:', error);
       }
     } catch (error) {
       console.error('Failed to toggle template status:', error);

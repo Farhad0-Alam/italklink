@@ -47,6 +47,9 @@ export default function TemplateBuilder() {
     isActive: false
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [templateId, setTemplateId] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
   const [businessCardData, setBusinessCardData] = useState<BusinessCard>({
     id: 'template-preview',
@@ -99,6 +102,8 @@ export default function TemplateBuilder() {
     const editId = urlParams.get('edit');
     
     if (editId) {
+      setIsEditing(true);
+      setTemplateId(editId);
       // Load existing template for editing
       loadTemplate(editId);
     }
@@ -106,18 +111,33 @@ export default function TemplateBuilder() {
 
   const loadTemplate = async (templateId: string) => {
     try {
+      setIsLoading(true);
       const response = await fetch(`/api/admin/templates/${templateId}`, {
         credentials: 'include'
       });
       if (response.ok) {
         const data = await response.json();
-        setTemplate(data);
+        setTemplate({
+          id: data.id,
+          name: data.name,
+          description: data.description || '',
+          category: 'business',
+          isActive: data.isActive,
+          templateData: data.templateData
+        });
+        
+        // Load template data into business card preview
         if (data.templateData) {
-          setBusinessCardData(data.templateData);
+          setBusinessCardData(prev => ({
+            ...prev,
+            ...data.templateData
+          }));
         }
       }
     } catch (error) {
       console.error('Failed to load template:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
