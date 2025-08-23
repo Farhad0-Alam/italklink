@@ -441,81 +441,88 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
           {/* Company Styling */}
           <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
-            <h5 className="text-xs font-medium text-green-300">Company Styling</h5>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label className="text-white text-xs">Color</Label>
-                <div className="flex items-center gap-1">
-                  <input
-                    type="color"
-                    value={watchedValues.sectionStyles?.basicInfo?.companyColor || "#6b7280"}
-                    onChange={(e) => form.setValue("sectionStyles.basicInfo.companyColor", e.target.value)}
-                    className="w-6 h-6 rounded cursor-pointer"
-                  />
-                  <Input
-                    value={watchedValues.sectionStyles?.basicInfo?.companyColor || ""}
-                    onChange={(e) => form.setValue("sectionStyles.basicInfo.companyColor", e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white text-xs"
-                    placeholder="#6b7280"
-                  />
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("companyStyling")}>
+              <h5 className="text-xs font-medium text-green-300">Company Styling</h5>
+              <i className={`fas fa-chevron-${collapsedSections.companyStyling ? "down" : "up"} text-green-300 text-xs`}></i>
+            </div>
+            {!collapsedSections.companyStyling && (
+              <>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-white text-xs">Color</Label>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="color"
+                        value={watchedValues.sectionStyles?.basicInfo?.companyColor || "#6b7280"}
+                        onChange={(e) => form.setValue("sectionStyles.basicInfo.companyColor", e.target.value)}
+                        className="w-6 h-6 rounded cursor-pointer"
+                      />
+                      <Input
+                        value={watchedValues.sectionStyles?.basicInfo?.companyColor || ""}
+                        onChange={(e) => form.setValue("sectionStyles.basicInfo.companyColor", e.target.value)}
+                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                        placeholder="#6b7280"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Font</Label>
+                    <Select value={watchedValues.sectionStyles?.basicInfo?.companyFont || ""} onValueChange={(v) => form.setValue("sectionStyles.basicInfo.companyFont", v)}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Choose font" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["Inter","Roboto","Open Sans","Lato","Montserrat","Poppins","Source Sans Pro","Nunito","Raleway","Ubuntu","PT Sans","Merriweather","Playfair Display","Oswald","Libre Baskerville","Crimson Text","Work Sans","Fira Sans","DM Sans","Space Grotesk"].map(f=>(
+                          <SelectItem key={f} value={f}>{f}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.basicInfo?.companyFontSize || 14}px</Label>
+                    <input
+                      type="range"
+                      value={watchedValues.sectionStyles?.basicInfo?.companyFontSize || 14}
+                      onChange={(e) => form.setValue("sectionStyles.basicInfo.companyFontSize", parseInt(e.target.value))}
+                      className="custom-range w-full"
+                      min={10}
+                      max={32}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-white text-xs">Weight</Label>
+                    <Select
+                      value={watchedValues.sectionStyles?.basicInfo?.companyFontWeight || ""}
+                      onValueChange={(v) => form.setValue("sectionStyles.basicInfo.companyFontWeight", v as any)}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                        <SelectValue placeholder="Weight" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          ["300","Light"],
+                          ["400","Regular"],
+                          ["500","Medium"],
+                          ["600","Semi Bold"],
+                          ["700","Bold"],
+                          ["800","Extra Bold"],
+                        ].map(([v,l])=> <SelectItem key={v} value={v}>{l}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <Label className="text-white text-xs">Font</Label>
-                <Select value={watchedValues.sectionStyles?.basicInfo?.companyFont || ""} onValueChange={(v) => form.setValue("sectionStyles.basicInfo.companyFont", v)}>
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                    <SelectValue placeholder="Choose font" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {["Inter","Roboto","Open Sans","Lato","Montserrat","Poppins","Source Sans Pro","Nunito","Raleway","Ubuntu","PT Sans","Merriweather","Playfair Display","Oswald","Libre Baskerville","Crimson Text","Work Sans","Fira Sans","DM Sans","Space Grotesk"].map(f=>(
-                      <SelectItem key={f} value={f}>{f}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.basicInfo?.companyFontSize || 14}px</Label>
-                <input
-                  type="range"
-                  value={watchedValues.sectionStyles?.basicInfo?.companyFontSize || 14}
-                  onChange={(e) => form.setValue("sectionStyles.basicInfo.companyFontSize", parseInt(e.target.value))}
-                  className="custom-range w-full"
-                  min={10}
-                  max={32}
-                />
-              </div>
-              <div>
-                <Label className="text-white text-xs">Weight</Label>
-                <Select
-                  value={watchedValues.sectionStyles?.basicInfo?.companyFontWeight || ""}
-                  onValueChange={(v) => form.setValue("sectionStyles.basicInfo.companyFontWeight", v as any)}
-                >
-                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                    <SelectValue placeholder="Weight" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      ["300","Light"],
-                      ["400","Regular"],
-                      ["500","Medium"],
-                      ["600","Semi Bold"],
-                      ["700","Bold"],
-                      ["800","Extra Bold"],
-                    ].map(([v,l])=> <SelectItem key={v} value={v}>{l}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="companyItalic"
-                checked={watchedValues.sectionStyles?.basicInfo?.companyTextStyle === "italic"}
-                onCheckedChange={(checked) => form.setValue("sectionStyles.basicInfo.companyTextStyle", checked ? "italic" : "normal")}
-              />
-              <Label htmlFor="companyItalic" className="text-white text-xs">
-                Italic
-              </Label>
-            </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="companyItalic"
+                    checked={watchedValues.sectionStyles?.basicInfo?.companyTextStyle === "italic"}
+                    onCheckedChange={(checked) => form.setValue("sectionStyles.basicInfo.companyTextStyle", checked ? "italic" : "normal")}
+                  />
+                  <Label htmlFor="companyItalic" className="text-white text-xs">
+                    Italic
+                  </Label>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Contact Information (fields + section styling) */}
