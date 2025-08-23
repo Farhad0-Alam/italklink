@@ -1,372 +1,269 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Save, 
-  Eye, 
-  ArrowLeft, 
-  Download, 
-  Upload,
-  Palette,
-  Layout,
-  Type,
-  Image as ImageIcon
-} from 'lucide-react';
-import { useLocation } from 'wouter';
-import { BusinessCard } from '@shared/schema';
+import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { BusinessCard, Template } from "@shared/schema";
 
-// Import existing form builder for template creation
-import { FormBuilder } from '@/components/form-builder';
-
-interface TemplateData {
-  id?: string;
-  name: string;
-  description: string;
-  category: string;
-  isActive: boolean;
-  templateData?: any;
+/**
+ * Helper: read ?edit=<templateId> from URL (Wouter ব্যবহার করছেন, তাই window.location যথেষ্ট)
+ */
+function useEditId() {
+  return useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("edit");
+  }, []);
 }
 
 export default function TemplateBuilder() {
-  const [location, navigate] = useLocation();
-  const [template, setTemplate] = useState<TemplateData>({
-    name: '',
-    description: '',
-    category: 'business',
-    isActive: false
-  });
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [templateId, setTemplateId] = useState<string | null>(null);
-  const [previewMode, setPreviewMode] = useState(false);
-  const [businessCardData, setBusinessCardData] = useState<BusinessCard>({
-    id: 'template-preview',
-    fullName: 'John Doe',
-    title: 'Software Engineer',
-    company: 'Tech Company',
-    email: 'john@example.com',
-    phone: '+1 (555) 123-4567',
-    website: 'johndoe.com',
-    linkedin: 'linkedin.com/in/johndoe',
-    bio: 'Passionate software engineer with 5+ years of experience building web applications.',
-    profileImageUrl: '',
-    backgroundColor: '#ffffff',
-    textColor: '#000000',
-    accentColor: '#3b82f6',
-    template: 'minimal' as const,
-    shareSlug: 'john-doe-template',
-    isPublic: true,
-    qrCodeUrl: '',
-    viewCount: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    pageElements: [],
+  const editId = useEditId();
+
+  // BusinessCard স্টেট—খালি/null থেকে শুরু; ডাটা এলে হাইড্রেট হবে
+  const [card, setCard] = useState<BusinessCard | null>(null);
+
+  // সার্ভার থেকে টেমপ্লেট (এডিট মোডে)
+  const [template, setTemplate] = useState<Template | null>(null);
+  const [loading, setLoading] = useState<boolean>(!!editId);
+  const [saving, setSaving] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Initial fallback (create-new preview) — BusinessCard টাইপে যেগুলো নেই সেগুলো রাখি না
+  const initialCard: BusinessCard = {
+    fullName: "John Doe",
+    title: "Software Engineer",
+    company: "Tech Company",
+    about: "Passionate software engineer with 5+ years of experience building web applications.",
+    phone: "+1 (555) 123-4567",
+    email: "john@example.com",
+    website: "https://johndoe.com",
+    linkedin: "https://linkedin.com/in/johndoe",
     customContacts: [],
-    socialLinks: { twitter: '', facebook: '', instagram: '', youtube: '', tiktok: '', pinterest: '', snapchat: '', whatsapp: '', telegram: '' },
-    skills: [],
-    categories: [],
-    isOwner: false,
-    frameworkId: '',
-    themeId: '',
-    iconColor: '#3b82f6',
-    qrCodeStyle: 'square',
-    metaTitle: '',
-    metaDescription: '',
-    language: 'en',
-    timezone: 'UTC',
-    passwordProtected: false
-  });
-
-  const templateCategories = [
-    'business', 'creative', 'minimal', 'corporate', 'modern', 
-    'elegant', 'professional', 'classic', 'tech', 'healthcare',
-    'education', 'retail', 'finance', 'real-estate', 'consulting'
-  ];
-
-  // Extract template ID from URL params for editing
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const editId = urlParams.get('edit');
-    
-    if (editId) {
-      setIsEditing(true);
-      setTemplateId(editId);
-      // Load existing template for editing
-      loadTemplate(editId);
-    }
-  }, []);
-
-  const loadTemplate = async (templateId: string) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`/api/admin/templates/${templateId}`, {
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setTemplate({
-          id: data.id,
-          name: data.name,
-          description: data.description || '',
-          category: 'business',
-          isActive: data.isActive,
-          templateData: data.templateData
-        });
-        
-        // Load template data into business card preview
-        if (data.templateData) {
-          setBusinessCardData(prev => ({
-            ...prev,
-            ...data.templateData
-          }));
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load template:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    customSocials: [],
+    pageElements: [],
+    brandColor: "#21c45d",   // primary
+    accentColor: "#0f172a",  // secondary
+    template: "minimal",
+    headerDesign: "cover-logo",
+    backgroundColor: "#ffffff",
+    headingColor: "#1f2937",
+    paragraphColor: "#4b5563",
+    availableIcons: [],
+    galleryImages: [],
   };
 
-  const handleSaveTemplate = async () => {
-    if (!template.name.trim()) {
-      alert('Please enter a template name');
+  useEffect(() => {
+    // এডিট না হলে ডিফল্ট প্রিভিউ দেখাই
+    if (!editId) {
+      setCard(initialCard);
       return;
     }
 
-    setIsSaving(true);
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // আপনার API রুট— প্রয়োজনমত সমন্বয় করুন
+        const res = await fetch(`/api/admin/templates/${editId}`);
+        if (!res.ok) {
+          if (res.status === 404) throw new Error("Template not found");
+          throw new Error("Failed to load template");
+        }
+        const data = await res.json();
+        if (cancelled) return;
+
+        const t: Template = {
+          id: data.id,
+          name: data.name,
+          description: data.description ?? "",
+          category: data.category ?? "business",
+          isActive: !!data.isActive,
+          templateData: data.templateData,
+        };
+        setTemplate(t);
+
+        // templateData string বা object— দুই-ভাবেই আসতে পারে
+        let incoming: unknown = t.templateData;
+        if (typeof incoming === "string") {
+          try {
+            incoming = JSON.parse(incoming);
+          } catch {
+            incoming = {};
+          }
+        }
+
+        // শেষ পর্যন্ত BusinessCard-এ merge
+        setCard({ ...initialCard, ...(incoming as Partial<BusinessCard>) });
+      } catch (e: any) {
+        setError(e?.message ?? "Unknown error");
+        setCard(initialCard);
+      } finally {
+        setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editId]);
+
+  const handleChange =
+    (field: keyof BusinessCard) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setCard((prev) => (prev ? { ...prev, [field]: e.target.value } : prev));
+    };
+
+  const handleSave = async () => {
+    if (!card) return;
     try {
-      const templateData = {
-        name: template.name,
-        description: template.description,
-        templateData: JSON.stringify(businessCardData),
-        previewImage: await generatePreviewImage(),
-        isActive: template.isActive
+      setSaving(true);
+      setError(null);
+
+      const payload = {
+        name: template?.name ?? "Untitled",
+        description: template?.description ?? "",
+        isActive: template?.isActive ?? true,
+        category: template?.category ?? "business",
+        templateData: card, // সার্ভারে JSON হিসেবে সেভ করুন
       };
 
-      const url = template.id 
-        ? `/api/admin/templates/${template.id}`
-        : '/api/admin/templates';
-      
-      const method = template.id ? 'PATCH' : 'POST';
+      const url = editId ? `/api/admin/templates/${editId}` : `/api/admin/templates`;
+      const method = editId ? "PATCH" : "POST";
 
-      const response = await fetch(url, {
+      const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(templateData)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        navigate('/admin/templates');
-      } else {
-        alert('Failed to save template');
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || "Failed to save template");
       }
-    } catch (error) {
-      console.error('Failed to save template:', error);
-      alert('Failed to save template');
+      alert("Template saved successfully.");
+    } catch (e: any) {
+      setError(e?.message ?? "Save failed");
     } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const generatePreviewImage = async () => {
-    // This would generate a preview image of the business card
-    // For now, return a placeholder
-    return '/api/placeholder/300/400';
-  };
-
-  const handlePublishTemplate = async () => {
-    await handleSaveTemplate();
-    
-    if (template.id) {
-      try {
-        await fetch(`/api/admin/templates/${template.id}/publish`, {
-          method: 'POST',
-          credentials: 'include'
-        });
-      } catch (error) {
-        console.error('Failed to publish template:', error);
-      }
+      setSaving(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b sticky top-0 z-50">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate('/admin/templates')}
-                className="p-2"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-ink">Template Builder</h1>
+        <div className="flex items-center gap-3">
+          {editId ? <span className="text-sm opacity-70">Editing ID: {editId}</span> : null}
+          <Button className="bg-brand text-white" onClick={handleSave} disabled={saving || loading}>
+            {saving ? "Saving..." : "Save Template"}
+          </Button>
+        </div>
+      </div>
+
+      {error ? (
+        <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-red-800">{error}</div>
+      ) : null}
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {/* Editor panel */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Details</CardTitle>
+            <CardDescription>Update text fields, colors & links</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  {template.id ? 'Edit Template' : 'Create New Template'}
-                </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Design a business card template for your users
-                </p>
+                <Label>Full Name</Label>
+                <Input value={card?.fullName ?? ""} onChange={handleChange("fullName")} />
               </div>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setPreviewMode(!previewMode)}
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                {previewMode ? 'Edit' : 'Preview'}
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleSaveTemplate}
-                disabled={isSaving}
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {isSaving ? 'Saving...' : 'Save Draft'}
-              </Button>
-              <Button 
-                onClick={handlePublishTemplate}
-                disabled={isSaving}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                {template.id ? 'Update & Publish' : 'Save & Publish'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+              <div>
+                <Label>Title</Label>
+                <Input value={card?.title ?? ""} onChange={handleChange("title")} />
+              </div>
+              <div>
+                <Label>Company</Label>
+                <Input value={card?.company ?? ""} onChange={handleChange("company")} />
+              </div>
+              <div>
+                <Label>About</Label>
+                <Textarea rows={3} value={card?.about ?? ""} onChange={handleChange("about")} />
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <Label>Phone</Label>
+                  <Input value={card?.phone ?? ""} onChange={handleChange("phone")} />
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <Input value={card?.email ?? ""} onChange={handleChange("email")} />
+                </div>
+                <div>
+                  <Label>Website</Label>
+                  <Input value={card?.website ?? ""} onChange={handleChange("website")} />
+                </div>
+                <div>
+                  <Label>LinkedIn</Label>
+                  <Input value={card?.linkedin ?? ""} onChange={handleChange("linkedin")} />
+                </div>
+              </div>
 
-      <div className="flex">
-        {/* Template Settings Sidebar */}
-        <div className="w-80 bg-white dark:bg-gray-800 border-r h-screen overflow-y-auto">
-          <div className="p-6 space-y-6">
-            <div>
-              <h2 className="text-lg font-medium mb-4">Template Settings</h2>
-              
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
-                  <Label htmlFor="templateName">Template Name</Label>
-                  <Input
-                    id="templateName"
-                    value={template.name}
-                    onChange={(e) => setTemplate({...template, name: e.target.value})}
-                    placeholder="Professional Business Card"
-                  />
+                  <Label>Brand Color</Label>
+                  <Input value={card?.brandColor ?? "#21c45d"} onChange={handleChange("brandColor")} />
                 </div>
-                
                 <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={template.description}
-                    onChange={(e) => setTemplate({...template, description: e.target.value})}
-                    placeholder="A clean and professional business card template..."
-                    rows={3}
-                  />
+                  <Label>Accent Color</Label>
+                  <Input value={card?.accentColor ?? "#0f172a"} onChange={handleChange("accentColor")} />
                 </div>
-                
                 <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select value={template.category} onValueChange={(value) => setTemplate({...template, category: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {templateCategories.map(category => (
-                        <SelectItem key={category} value={category} className="capitalize">
-                          {category.replace('-', ' ')}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label>Background</Label>
+                  <Input value={card?.backgroundColor ?? "#ffffff"} onChange={handleChange("backgroundColor")} />
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-            <div>
-              <h3 className="font-medium mb-3">Template Status</h3>
-              <Badge variant={template.isActive ? "default" : "secondary"}>
-                {template.isActive ? "Published" : "Draft"}
-              </Badge>
-            </div>
+        {/* Live preview */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Live Preview</CardTitle>
+            <CardDescription>What your eCard looks like</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div
+              className="rounded-xl p-6"
+              style={{
+                background: card?.backgroundColor ?? "#ffffff",
+                color: card?.paragraphColor ?? "#334155",
+                border: `2px solid ${card?.accentColor ?? "#0f172a"}`,
+              }}
+            >
+              <div
+                className="rounded-lg p-4 text-white"
+                style={{ background: card?.brandColor ?? "#21c45d" }}
+              >
+                <div className="text-xl font-semibold">{card?.fullName || "Full Name"}</div>
+                <div className="opacity-90">{card?.title || "Title"}</div>
+                <div className="opacity-90">{card?.company || "Company"}</div>
+              </div>
 
-            <div>
-              <h3 className="font-medium mb-3">Design Tools</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" className="justify-start">
-                  <Layout className="h-4 w-4 mr-2" />
-                  Layout
-                </Button>
-                <Button variant="outline" size="sm" className="justify-start">
-                  <Palette className="h-4 w-4 mr-2" />
-                  Colors
-                </Button>
-                <Button variant="outline" size="sm" className="justify-start">
-                  <Type className="h-4 w-4 mr-2" />
-                  Typography
-                </Button>
-                <Button variant="outline" size="sm" className="justify-start">
-                  <ImageIcon className="h-4 w-4 mr-2" />
-                  Images
-                </Button>
+              <div className="mt-4 space-y-1">
+                {card?.about ? <p>{card.about}</p> : <p>Tell people who you are…</p>}
+                <div className="mt-3 text-sm">
+                  {card?.phone ? <div>📞 {card.phone}</div> : null}
+                  {card?.email ? <div>✉️ {card.email}</div> : null}
+                  {card?.website ? <div>🌐 {card.website}</div> : null}
+                  {card?.linkedin ? <div>🔗 {card.linkedin}</div> : null}
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Template Builder/Preview */}
-        <div className="flex-1">
-          {previewMode ? (
-            <div className="p-8">
-              <div className="max-w-md mx-auto">
-                <FormBuilder 
-                  cardData={businessCardData}
-                  onDataChange={setBusinessCardData}
-                  onGenerateQR={() => {}}
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="p-8">
-              <div className="max-w-4xl mx-auto">
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle>Template Design</CardTitle>
-                    <CardDescription>
-                      Customize the business card template. Use sample data to see how it will look for users.
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-                
-                <FormBuilder 
-                  cardData={businessCardData}
-                  onDataChange={setBusinessCardData}
-                  onGenerateQR={() => {}}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
