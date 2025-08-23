@@ -17,9 +17,11 @@ import { createInsertSchema } from "drizzle-zod";
 // Database Enums
 export const subscriptionStatusEnum = pgEnum('subscription_status', ['active', 'canceled', 'past_due', 'incomplete']);
 export const planTypeEnum = pgEnum('plan_type', ['free', 'pro', 'enterprise']);
-export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'super_admin']);
+export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'super_admin', 'owner']);
 export const teamRoleEnum = pgEnum('team_role', ['owner', 'admin', 'member']);
 export const teamMemberStatusEnum = pgEnum('team_member_status', ['active', 'invited', 'suspended']);
+export const frequencyEnum = pgEnum('frequency', ['monthly', 'yearly', 'custom']);
+export const iconTypeEnum = pgEnum('icon_type', ['url', 'email', 'phone', 'whatsapp', 'text', 'connect']);
 
 // Database Tables
 
@@ -61,16 +63,21 @@ export const users = pgTable("users", {
 
 // Subscription plans table
 export const subscriptionPlans = pgTable("subscription_plans", {
-  id: serial("id").primaryKey(),
+  id: serial("id").primaryKey(), // NEVER change this ID type
   name: varchar("name").notNull(),
   planType: planTypeEnum("plan_type").notNull(),
   price: integer("price").notNull(), // in cents
   currency: varchar("currency").default('usd'),
-  interval: varchar("interval").notNull(), // month, year
+  interval: varchar("interval").notNull(), // keep existing for compatibility
+  frequency: frequencyEnum("frequency").default('monthly'), // new admin field
   businessCardsLimit: integer("business_cards_limit").notNull(),
-  features: jsonb("features").notNull(), // array of feature strings
+  features: jsonb("features").notNull(), // array of feature strings - keep for compatibility
   stripePriceId: varchar("stripe_price_id"),
   isActive: boolean("is_active").default(true),
+  // New admin dashboard fields
+  cardLabel: varchar("card_label"), // "Card Number" label string from admin
+  trialDays: integer("trial_days").default(0),
+  customDurationDays: integer("custom_duration_days"), // for custom frequency
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -316,6 +323,100 @@ export const templateCollectionComments = pgTable("template_collection_comments"
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Admin Dashboard Tables
+
+// Features table for plan features
+export const features = pgTable("features", {
+  id: serial("id").primaryKey(),
+  key: varchar("key").unique().notNull(), // e.g. "custom_colors", "analytics"
+  label: varchar("label").notNull(), // e.g. "Custom Colors", "Analytics"
+  description: text("description"),
+  category: varchar("category").default('general'), // e.g. "design", "functionality"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Plan features junction table
+export const planFeatures = pgTable("plan_features", {
+  planId: integer("plan_id").references(() => subscriptionPlans.id, { onDelete: 'cascade' }).notNull(),
+  featureId: integer("feature_id").references(() => features.id, { onDelete: 'cascade' }).notNull(),
+}, (table) => [{
+  pk: { columns: [table.planId, table.featureId] }
+}]);
+
+// Plan templates junction table  
+export const planTemplates = pgTable("plan_templates", {
+  planId: integer("plan_id").references(() => subscriptionPlans.id, { onDelete: 'cascade' }).notNull(),
+  templateId: varchar("template_id").references(() => globalTemplates.id, { onDelete: 'cascade' }).notNull(),
+}, (table) => [{
+  pk: { columns: [table.planId, table.templateId] }
+}]);
+
+// User plans table (assigns plans to users with validity)
+export const userPlans = pgTable("user_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  planId: integer("plan_id").references(() => subscriptionPlans.id, { onDelete: 'cascade' }).notNull(),
+  startsAt: timestamp("starts_at").defaultNow(),
+  endsAt: timestamp("ends_at"),
+  note: text("note"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Icon types table
+export const iconTypes = pgTable("icon_types", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  type: iconTypeEnum("type").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Icon packs table
+export const iconPacks = pgTable("icon_packs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Icons table
+export const icons = pgTable("icons", {
+  id: serial("id").primaryKey(),
+  packId: varchar("pack_id").references(() => iconPacks.id, { onDelete: 'cascade' }).notNull(),
+  typeId: integer("type_id").references(() => iconTypes.id, { onDelete: 'cascade' }).notNull(),
+  name: varchar("name").notNull(),
+  svg: text("svg").notNull(), // SVG content
+  tags: jsonb("tags").default([]), // array of strings for search
+  sort: integer("sort").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Links table (references to business cards for dashboard)
+export const links = pgTable("links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  businessCardId: varchar("business_card_id").references(() => businessCards.id, { onDelete: 'cascade' }),
+  title: varchar("title").notNull(),
+  slug: varchar("slug").unique().notNull(),
+  url: varchar("url").notNull(),
+  clicksCount: integer("clicks_count").default(0),
+  visitorsCount: integer("visitors_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Daily counters for analytics
+export const countersDaily = pgTable("counters_daily", {
+  day: varchar("day").notNull(), // YYYY-MM-DD format
+  metric: varchar("metric").notNull(), // 'visits', 'clicks'
+  value: integer("value").default(0),
+  profileId: varchar("profile_id"), // references business card id
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }),
+}, (table) => [
+  index("idx_counters_daily_day").on(table.day),
+  index("idx_counters_daily_metric").on(table.metric),
+]);
+
 // Database Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
@@ -360,6 +461,34 @@ export type InsertTemplateCollectionLike = typeof templateCollectionLikes.$infer
 export type TemplateCollectionComment = typeof templateCollectionComments.$inferSelect;
 export type InsertTemplateCollectionComment = typeof templateCollectionComments.$inferInsert;
 
+// New admin dashboard types
+export type Feature = typeof features.$inferSelect;
+export type InsertFeature = typeof features.$inferInsert;
+
+export type PlanFeature = typeof planFeatures.$inferSelect;
+export type InsertPlanFeature = typeof planFeatures.$inferInsert;
+
+export type PlanTemplate = typeof planTemplates.$inferSelect;
+export type InsertPlanTemplate = typeof planTemplates.$inferInsert;
+
+export type UserPlan = typeof userPlans.$inferSelect;
+export type InsertUserPlan = typeof userPlans.$inferInsert;
+
+export type IconType = typeof iconTypes.$inferSelect;
+export type InsertIconType = typeof iconTypes.$inferInsert;
+
+export type IconPack = typeof iconPacks.$inferSelect;
+export type InsertIconPack = typeof iconPacks.$inferInsert;
+
+export type Icon = typeof icons.$inferSelect;
+export type InsertIcon = typeof icons.$inferInsert;
+
+export type Link = typeof links.$inferSelect;
+export type InsertLink = typeof links.$inferInsert;
+
+export type CounterDaily = typeof countersDaily.$inferSelect;
+export type InsertCounterDaily = typeof countersDaily.$inferInsert;
+
 // Zod schemas for database
 export const insertUserSchema = createInsertSchema(users);
 export const insertDbBusinessCardSchema = createInsertSchema(businessCards);
@@ -375,6 +504,17 @@ export const insertTemplateCollectionSchema = createInsertSchema(templateCollect
 export const insertTemplateCollectionItemSchema = createInsertSchema(templateCollectionItems);
 export const insertTemplateCollectionLikeSchema = createInsertSchema(templateCollectionLikes);
 export const insertTemplateCollectionCommentSchema = createInsertSchema(templateCollectionComments);
+
+// New admin dashboard schemas
+export const insertFeatureSchema = createInsertSchema(features);
+export const insertPlanFeatureSchema = createInsertSchema(planFeatures);
+export const insertPlanTemplateSchema = createInsertSchema(planTemplates);
+export const insertUserPlanSchema = createInsertSchema(userPlans);
+export const insertIconTypeSchema = createInsertSchema(iconTypes);
+export const insertIconPackSchema = createInsertSchema(iconPacks);
+export const insertIconSchema = createInsertSchema(icons);
+export const insertLinkSchema = createInsertSchema(links);
+export const insertCounterDailySchema = createInsertSchema(countersDaily);
 
 // Team invitation schema
 export const teamInvitationSchema = z.object({

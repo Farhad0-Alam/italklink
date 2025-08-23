@@ -146,6 +146,20 @@ export const requireAdmin: RequestHandler = (req, res, next) => {
   next();
 };
 
+// Owner middleware (for admin dashboard access)
+export const requireOwner: RequestHandler = (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Authentication required' });
+  }
+  
+  const user = req.user as any;
+  if (user.role !== 'owner') {
+    return res.status(403).json({ message: 'Owner access required' });
+  }
+  
+  next();
+};
+
 // Extend Express Request interface
 declare global {
   namespace Express {
@@ -155,7 +169,7 @@ declare global {
       firstName?: string;
       lastName?: string;
       profileImageUrl?: string;
-      role: 'user' | 'admin';
+      role: 'user' | 'admin' | 'owner';
       planType: 'free' | 'pro' | 'enterprise';
       businessCardsCount: number;
       businessCardsLimit: number;
