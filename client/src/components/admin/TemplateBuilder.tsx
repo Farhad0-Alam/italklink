@@ -60,7 +60,6 @@ export default function TemplateBuilder() {
     phone: '+1 (555) 123-4567',
     website: 'johndoe.com',
     linkedin: 'linkedin.com/in/johndoe',
-    github: 'github.com/johndoe',
     bio: 'Passionate software engineer with 5+ years of experience building web applications.',
     profileImageUrl: '',
     backgroundColor: '#ffffff',

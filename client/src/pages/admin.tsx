@@ -18,6 +18,7 @@ export default function Admin() {
         <Route path="/admin/users" component={UsersPage} />
         <Route path="/admin/plans" component={PlansPage} />
         <Route path="/admin/templates/builder" component={TemplateBuilder} />
+        <Route path="/admin/templates/builder/:rest*" component={TemplateBuilder} />
         <Route path="/admin/templates" component={TemplatesPage} />
         <Route path="/admin/icon-packs" component={IconPacksPage} />
         <Route path="/admin/settings" component={SettingsPage} />
