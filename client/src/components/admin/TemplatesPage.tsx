@@ -66,8 +66,6 @@ export default function TemplatesPage() {
     refetchOnWindowFocus: false
   });
 
-  // Debug logging
-  console.log('Templates query result:', { templates, isLoading, error });
 
   const handleCreateTemplate = () => {
     // Navigate to template builder

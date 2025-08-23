@@ -481,12 +481,85 @@ router.get('/templates', requireOwner, async (req, res) => {
   }
 });
 
+// Get single template by ID
+router.get('/templates/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [template] = await db.select()
+      .from(globalTemplates)
+      .where(eq(globalTemplates.id, id));
+    
+    if (!template) {
+      return res.status(404).json({ message: 'Template not found' });
+    }
+    
+    res.json(template);
+  } catch (error) {
+    console.error('Failed to get template:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update template
+router.patch('/templates/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, templateData, previewImage, isActive } = req.body;
+    
+    const [updatedTemplate] = await db.update(globalTemplates)
+      .set({ 
+        name,
+        description,
+        templateData,
+        previewImage,
+        isActive,
+        updatedAt: new Date()
+      })
+      .where(eq(globalTemplates.id, id))
+      .returning();
+    
+    if (!updatedTemplate) {
+      return res.status(404).json({ message: 'Template not found' });
+    }
+    
+    await logAdminAction(req.user!.id, 'update', 'template', id, req.body);
+    
+    res.json({ message: 'Template updated successfully', template: updatedTemplate });
+  } catch (error) {
+    console.error('Failed to update template:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Delete template
+router.delete('/templates/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [deletedTemplate] = await db.delete(globalTemplates)
+      .where(eq(globalTemplates.id, id))
+      .returning();
+    
+    if (!deletedTemplate) {
+      return res.status(404).json({ message: 'Template not found' });
+    }
+    
+    await logAdminAction(req.user!.id, 'delete', 'template', id);
+    
+    res.json({ message: 'Template deleted successfully' });
+  } catch (error) {
+    console.error('Failed to delete template:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Create template
 router.post('/templates', requireOwner, async (req, res) => {
   try {
     const templateData = {
       ...req.body,
-      createdBy: req.user.id
+      createdBy: req.user!.id
     };
     
     const [newTemplate] = await db.insert(globalTemplates).values(templateData).returning();
@@ -522,7 +595,7 @@ router.post('/templates/:id/publish', requireOwner, async (req, res) => {
       .returning();
     
     await logAdminAction(
-      req.user.id, 
+      req.user!.id, 
       updatedTemplate.isActive ? 'publish' : 'unpublish', 
       'template', 
       id
@@ -557,10 +630,10 @@ router.post('/templates/:id/duplicate', requireOwner, async (req, res) => {
       templateData: originalTemplate.templateData,
       previewImage: originalTemplate.previewImage,
       isActive: false, // Duplicates start as inactive
-      createdBy: req.user.id
+      createdBy: req.user!.id
     }).returning();
     
-    await logAdminAction(req.user.id, 'duplicate', 'template', duplicatedTemplate.id, { originalId: id });
+    await logAdminAction(req.user!.id, 'duplicate', 'template', duplicatedTemplate.id, { originalId: id });
     
     res.json({ message: 'Template duplicated successfully', template: duplicatedTemplate });
   } catch (error) {
