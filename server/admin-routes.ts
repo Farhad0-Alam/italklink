@@ -564,7 +564,7 @@ router.post('/templates', requireOwner, async (req, res) => {
     
     const [newTemplate] = await db.insert(globalTemplates).values(templateData).returning();
     
-    await logAdminAction(req.user.id, 'create', 'template', newTemplate.id, templateData);
+    await logAdminAction(req.user!.id, 'create', 'template', newTemplate.id, templateData);
     
     res.json({ message: 'Template created successfully', template: newTemplate });
   } catch (error) {
