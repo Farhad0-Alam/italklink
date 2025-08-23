@@ -39,6 +39,7 @@ interface Template {
   textColor: string;
 }
 
+// Use static templates for users - they shouldn't manage admin templates
 const templates: Template[] = [
   {
     id: "tangeria",
