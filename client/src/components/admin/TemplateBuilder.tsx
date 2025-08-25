@@ -39,6 +39,7 @@ interface TemplateData {
 }
 
 export default function TemplateBuilder() {
+  console.log('🎯 TemplateBuilder component loaded! Location:', window.location.href);
   const [location, navigate] = useLocation();
   const [template, setTemplate] = useState<TemplateData>({
     name: '',
@@ -133,8 +134,10 @@ export default function TemplateBuilder() {
 
   // Extract template ID from URL params for editing
   useEffect(() => {
+    console.log('🔍 Checking URL params for editing...');
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('edit');
+    console.log('📝 Edit ID found:', editId);
     
     if (editId) {
       setIsEditing(true);
