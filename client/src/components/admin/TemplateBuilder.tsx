@@ -274,7 +274,7 @@ export default function TemplateBuilder() {
       <header className="bg-white dark:bg-gray-800 border-b sticky top-0 z-50">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('/admin/templates')}
@@ -289,6 +289,28 @@ export default function TemplateBuilder() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Design a business card template for your users
                 </p>
+              </div>
+              
+              {/* Template Settings in Header */}
+              <div className="flex items-center gap-4 text-sm">
+                <div>
+                  <Label className="font-medium text-gray-700 dark:text-gray-300">Template Name:</Label>
+                  <Input
+                    value={template.name}
+                    onChange={(e) => setTemplate(prev => ({...prev, name: e.target.value}))}
+                    className="w-48 mt-1"
+                    placeholder="Template name"
+                  />
+                </div>
+                
+                <div>
+                  <Label className="font-medium text-gray-700 dark:text-gray-300">Status:</Label>
+                  <div className="mt-1">
+                    <Badge variant={template.isActive ? "default" : "secondary"}>
+                      {template.isActive ? "Published" : "Draft"}
+                    </Badge>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -321,96 +343,12 @@ export default function TemplateBuilder() {
         </div>
       </header>
 
-      <div className="flex">
-        {/* Template Settings Sidebar */}
-        <div className="w-80 bg-white dark:bg-gray-800 border-r h-screen overflow-y-auto">
-          <div className="p-6 space-y-6">
-            <div>
-              <h2 className="text-lg font-medium mb-4">Template Settings</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="templateName">Template Name</Label>
-                  <Input
-                    id="templateName"
-                    value={template.name}
-                    onChange={(e) => setTemplate({...template, name: e.target.value})}
-                    placeholder="Professional Business Card"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={template.description}
-                    onChange={(e) => setTemplate({...template, description: e.target.value})}
-                    placeholder="A clean and professional business card template..."
-                    rows={3}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select value={template.category} onValueChange={(value) => setTemplate({...template, category: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {templateCategories.map(category => (
-                        <SelectItem key={category} value={category} className="capitalize">
-                          {category.replace('-', ' ')}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-medium mb-3">Template Status</h3>
-              <Badge variant={template.isActive ? "default" : "secondary"}>
-                {template.isActive ? "Published" : "Draft"}
-              </Badge>
-            </div>
-
-            <div>
-              <h3 className="font-medium mb-3">Design Tools</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" className="justify-start">
-                  <Layout className="h-4 w-4 mr-2" />
-                  Layout
-                </Button>
-                <Button variant="outline" size="sm" className="justify-start">
-                  <Palette className="h-4 w-4 mr-2" />
-                  Colors
-                </Button>
-                <Button variant="outline" size="sm" className="justify-start">
-                  <Type className="h-4 w-4 mr-2" />
-                  Typography
-                </Button>
-                <Button variant="outline" size="sm" className="justify-start">
-                  <ImageIcon className="h-4 w-4 mr-2" />
-                  Images
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Main Content Area */}
+      <div className="flex flex-1">
 
         {/* Template Builder */}
         <div className="flex-1 border-r border-gray-200 dark:border-gray-700">
           <div className="p-6">
-            <Card className="mb-4">
-              <CardHeader>
-                <CardTitle>Template Design</CardTitle>
-                <CardDescription>
-                  Customize the business card template. Use sample data to see how it will look for users.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            
             <FormBuilder 
               cardData={businessCardData}
               onDataChange={setBusinessCardData}
