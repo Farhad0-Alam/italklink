@@ -52,10 +52,10 @@ interface SubscriptionPlan {
   planType: 'free' | 'pro' | 'enterprise';
   price: number;
   currency: string;
-  frequency: 'monthly' | 'yearly' | 'weekly' | 'daily' | 'custom';
+  frequency?: 'monthly' | 'yearly' | 'weekly' | 'daily' | 'custom';
   interval: string;
   businessCardsLimit: number;
-  features: string[];
+  features: any; // Can contain both legacy array and new object structure
   stripePriceId?: string;
   isActive: boolean;
   cardLabel?: string;
@@ -80,6 +80,12 @@ interface Template {
   previewImage?: string;
 }
 
+interface ExtraCardOption {
+  cards: number;
+  price: number;
+  label: string;
+}
+
 interface PlanFormData {
   name: string;
   planType: 'free' | 'pro' | 'enterprise';
@@ -94,6 +100,11 @@ interface PlanFormData {
   templates: string[];
   isActive: boolean;
   stripePriceId: string;
+  // Extra card pricing
+  extraCardOptions: ExtraCardOption[];
+  hasUnlimitedOption: boolean;
+  unlimitedPrice: number;
+  templateLimit: number;
 }
 
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'BDT'];
@@ -156,7 +167,11 @@ export default function PlansPage() {
     features: [],
     templates: [],
     isActive: true,
-    stripePriceId: ''
+    stripePriceId: '',
+    extraCardOptions: [],
+    hasUnlimitedOption: false,
+    unlimitedPrice: 0,
+    templateLimit: -1
   });
 
   const queryClient = useQueryClient();
@@ -204,7 +219,11 @@ export default function PlansPage() {
       features: [],
       templates: [],
       isActive: true,
-      stripePriceId: ''
+      stripePriceId: '',
+      extraCardOptions: [],
+      hasUnlimitedOption: false,
+      unlimitedPrice: 0,
+      templateLimit: -1
     });
   };
 
@@ -303,7 +322,7 @@ export default function PlansPage() {
       planType: plan.planType,
       price: plan.price,
       currency: plan.currency,
-      frequency: plan.frequency,
+      frequency: plan.frequency || 'monthly',
       businessCardsLimit: plan.businessCardsLimit,
       cardLabel: plan.cardLabel || '',
       trialDays: plan.trialDays,
@@ -311,7 +330,11 @@ export default function PlansPage() {
       features: [], // Will be populated from API
       templates: [], // Will be populated from API
       isActive: true,
-      stripePriceId: ''
+      stripePriceId: '',
+      extraCardOptions: plan.features?.extraCardOptions || [],
+      hasUnlimitedOption: plan.features?.hasUnlimitedOption || false,
+      unlimitedPrice: plan.features?.unlimitedPrice || 0,
+      templateLimit: plan.features?.templateLimit || -1
     });
     setAddPlanOpen(true);
   };
@@ -323,7 +346,7 @@ export default function PlansPage() {
       planType: plan.planType,
       price: plan.price,
       currency: plan.currency,
-      frequency: plan.frequency,
+      frequency: plan.frequency || 'monthly',
       businessCardsLimit: plan.businessCardsLimit,
       cardLabel: plan.cardLabel || '',
       trialDays: plan.trialDays,
@@ -331,7 +354,11 @@ export default function PlansPage() {
       features: [], // Will be populated from API
       templates: [], // Will be populated from API
       isActive: plan.isActive,
-      stripePriceId: plan.stripePriceId || ''
+      stripePriceId: plan.stripePriceId || '',
+      extraCardOptions: plan.features?.extraCardOptions || [],
+      hasUnlimitedOption: plan.features?.hasUnlimitedOption || false,
+      unlimitedPrice: plan.features?.unlimitedPrice || 0,
+      templateLimit: plan.features?.templateLimit || -1
     });
     setEditPlanOpen(true);
   };
@@ -377,6 +404,23 @@ export default function PlansPage() {
             {plan.businessCardsLimit === -1 ? 'Unlimited' : plan.businessCardsLimit} cards
           </span>
         </div>
+        
+        {plan.features?.extraCardOptions && plan.features.extraCardOptions.length > 0 && (
+          <div className="space-y-1">
+            <div className="text-xs text-gray-500">Extra Options:</div>
+            {plan.features.extraCardOptions.map((option: any, index: number) => (
+              <div key={index} className="text-xs text-gray-600">
+                {option.label}
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {plan.features?.hasUnlimitedOption && (
+          <div className="text-xs text-gray-600">
+            Unlimited: ${(plan.features.unlimitedPrice / 100).toFixed(2)}
+          </div>
+        )}
         
         {plan.trialDays > 0 && (
           <div className="flex items-center space-x-2">
@@ -609,10 +653,120 @@ export default function PlansPage() {
         </div>
       </div>
 
+      {/* Extra Card Pricing Options */}
+      <div className="space-y-3">
+        <Label className="text-base font-medium">Extra Card Pricing Options</Label>
+        
+        <div className="space-y-2">
+          {formData.extraCardOptions.map((option, index) => (
+            <div key={index} className="flex items-center space-x-2 p-3 border rounded-lg">
+              <Input
+                type="number"
+                placeholder="Cards"
+                value={option.cards}
+                onChange={(e) => {
+                  const newOptions = [...formData.extraCardOptions];
+                  newOptions[index] = { ...option, cards: Number(e.target.value) };
+                  setFormData(prev => ({ ...prev, extraCardOptions: newOptions }));
+                }}
+                className="w-20"
+              />
+              <span className="text-sm">cards for</span>
+              <Input
+                type="number"
+                placeholder="Price in cents"
+                value={option.price}
+                onChange={(e) => {
+                  const newOptions = [...formData.extraCardOptions];
+                  newOptions[index] = { ...option, price: Number(e.target.value) };
+                  setFormData(prev => ({ ...prev, extraCardOptions: newOptions }));
+                }}
+                className="w-32"
+              />
+              <Input
+                placeholder="Display label"
+                value={option.label}
+                onChange={(e) => {
+                  const newOptions = [...formData.extraCardOptions];
+                  newOptions[index] = { ...option, label: e.target.value };
+                  setFormData(prev => ({ ...prev, extraCardOptions: newOptions }));
+                }}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const newOptions = formData.extraCardOptions.filter((_, i) => i !== index);
+                  setFormData(prev => ({ ...prev, extraCardOptions: newOptions }));
+                }}
+              >
+                Remove
+              </Button>
+            </div>
+          ))}
+          
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setFormData(prev => ({
+                ...prev,
+                extraCardOptions: [...prev.extraCardOptions, { cards: 5, price: 4500, label: '5 cards for $45' }]
+              }));
+            }}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Extra Card Option
+          </Button>
+        </div>
+      </div>
+
+      {/* Unlimited Option */}
+      <div className="space-y-3">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="hasUnlimited"
+            checked={formData.hasUnlimitedOption}
+            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, hasUnlimitedOption: checked }))}
+          />
+          <Label htmlFor="hasUnlimited">Offer Unlimited Cards Option</Label>
+        </div>
+        
+        {formData.hasUnlimitedOption && (
+          <div className="space-y-2">
+            <Label htmlFor="unlimitedPrice">Unlimited Cards Price (in cents)</Label>
+            <Input
+              id="unlimitedPrice"
+              type="number"
+              placeholder="9900"
+              value={formData.unlimitedPrice}
+              onChange={(e) => setFormData(prev => ({ ...prev, unlimitedPrice: Number(e.target.value) }))}
+            />
+          </div>
+        )}
+      </div>
+
       {/* Templates Selection */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-base font-medium">Available Templates</Label>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">Limit:</span>
+            <Input
+              type="number"
+              placeholder="-1"
+              value={formData.templateLimit}
+              onChange={(e) => setFormData(prev => ({ ...prev, templateLimit: Number(e.target.value) }))}
+              className="w-20"
+            />
+            <span className="text-xs text-gray-500">(-1 = unlimited)</span>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600">Select templates available to this plan:</span>
           <Button
             type="button"
             variant="outline" 

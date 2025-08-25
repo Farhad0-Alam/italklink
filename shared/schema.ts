@@ -69,7 +69,6 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   price: integer("price").notNull(), // in cents
   currency: varchar("currency").default('usd'),
   interval: varchar("interval").notNull(), // keep existing for compatibility
-  frequency: frequencyEnum("frequency").default('monthly'), // new admin field
   businessCardsLimit: integer("business_cards_limit").notNull(),
   features: jsonb("features").notNull(), // array of feature strings - keep for compatibility
   stripePriceId: varchar("stripe_price_id"),
@@ -77,7 +76,12 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   // New admin dashboard fields
   cardLabel: varchar("card_label"), // "Card Number" label string from admin
   trialDays: integer("trial_days").default(0),
-  customDurationDays: integer("custom_duration_days"), // for custom frequency
+  // Extra card pricing options
+  extraCardOptions: jsonb("extra_card_options").default([]), // [{ cards: 5, price: 4500, label: "5 cards for $45" }]
+  hasUnlimitedOption: boolean("has_unlimited_option").default(false),
+  unlimitedPrice: integer("unlimited_price"), // price for unlimited cards in cents
+  // Template limits
+  templateLimit: integer("template_limit").default(-1), // -1 for unlimited, number for limit
   createdAt: timestamp("created_at").defaultNow(),
 });
 

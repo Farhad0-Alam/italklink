@@ -855,14 +855,15 @@ router.post('/plans', requireOwner, async (req, res) => {
     const { 
       name, planType, price, currency, frequency, businessCardsLimit,
       cardLabel, trialDays, customDurationDays, features, templates, 
-      isActive, stripePriceId 
+      isActive, stripePriceId, extraCardOptions, hasUnlimitedOption, 
+      unlimitedPrice, templateLimit 
     } = req.body;
     
     if (!name || !planType) {
       return res.status(400).json({ message: 'Name and plan type are required' });
     }
     
-    // Create the plan
+    // Create the plan (temporarily without new fields until migration)
     const [newPlan] = await db.insert(subscriptionPlans).values({
       name,
       planType,
@@ -870,12 +871,17 @@ router.post('/plans', requireOwner, async (req, res) => {
       currency: currency || 'USD',
       interval: frequency || 'monthly', // Keep for compatibility
       businessCardsLimit: businessCardsLimit || 1,
-      features: features || [], // Keep for backward compatibility
+      features: {
+        ...features || [],
+        extraCardOptions: extraCardOptions || [],
+        hasUnlimitedOption: hasUnlimitedOption || false,
+        unlimitedPrice: unlimitedPrice || 0,
+        templateLimit: templateLimit || -1
+      }, // Store all data in features field for now
       stripePriceId,
       isActive: isActive !== undefined ? isActive : true,
       cardLabel,
-      trialDays: trialDays || 0,
-      customDurationDays
+      trialDays: trialDays || 0
     }).returning();
     
     // Insert plan features if provided
@@ -912,10 +918,11 @@ router.put('/plans/:id', requireOwner, async (req, res) => {
     const { 
       name, planType, price, currency, frequency, businessCardsLimit,
       cardLabel, trialDays, customDurationDays, features, templates, 
-      isActive, stripePriceId 
+      isActive, stripePriceId, extraCardOptions, hasUnlimitedOption, 
+      unlimitedPrice, templateLimit 
     } = req.body;
     
-    // Update the plan
+    // Update the plan (temporarily store new fields in features)
     const [updatedPlan] = await db.update(subscriptionPlans)
       .set({
         name,
@@ -928,7 +935,13 @@ router.put('/plans/:id', requireOwner, async (req, res) => {
         isActive,
         cardLabel,
         trialDays,
-        customDurationDays
+        features: {
+          ...features || [],
+          extraCardOptions: extraCardOptions || [],
+          hasUnlimitedOption: hasUnlimitedOption || false,
+          unlimitedPrice: unlimitedPrice || 0,
+          templateLimit: templateLimit || -1
+        }
       })
       .where(eq(subscriptionPlans.id, parseInt(id)))
       .returning();
