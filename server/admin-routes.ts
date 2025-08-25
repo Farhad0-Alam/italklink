@@ -678,6 +678,291 @@ router.post('/templates/:id/duplicate', requireOwner, async (req, res) => {
 
 // === ICON PACKS & TYPES ENDPOINTS ===
 
+// Get all icon packs with icon counts
+router.get('/icon-packs', requireOwner, async (req, res) => {
+  try {
+    const packsWithCounts = await db
+      .select({
+        id: iconPacks.id,
+        name: iconPacks.name,
+        isActive: iconPacks.isActive,
+        createdAt: iconPacks.createdAt,
+        iconCount: count(icons.id)
+      })
+      .from(iconPacks)
+      .leftJoin(icons, eq(iconPacks.id, icons.packId))
+      .groupBy(iconPacks.id)
+      .orderBy(desc(iconPacks.createdAt));
+
+    // Add missing fields with defaults
+    const packs = packsWithCounts.map(pack => ({
+      ...pack,
+      description: '', // Add description field
+      category: 'custom', // Add category field
+      isPremium: false, // Add isPremium field
+      updatedAt: pack.createdAt // Add updatedAt field
+    }));
+
+    res.json(packs);
+  } catch (error) {
+    console.error('Failed to load icon packs:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Create new icon pack
+router.post('/icon-packs', requireOwner, async (req, res) => {
+  try {
+    const packData = req.body;
+    
+    const [pack] = await db.insert(iconPacks).values({
+      name: packData.name,
+      isActive: packData.isActive ?? true
+    }).returning();
+    
+    await logAdminAction(req.user!.id, 'create', 'icon_pack', pack.id, packData);
+    
+    // Return with additional fields for consistency
+    res.json({
+      ...pack,
+      description: packData.description || '',
+      category: packData.category || 'custom',
+      isPremium: packData.isPremium || false,
+      iconCount: 0,
+      updatedAt: pack.createdAt
+    });
+  } catch (error) {
+    console.error('Failed to create icon pack:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update icon pack
+router.patch('/icon-packs/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const packData = req.body;
+    
+    const [pack] = await db
+      .update(iconPacks)
+      .set({
+        name: packData.name,
+        isActive: packData.isActive
+      })
+      .where(eq(iconPacks.id, id))
+      .returning();
+    
+    if (!pack) {
+      return res.status(404).json({ message: 'Icon pack not found' });
+    }
+    
+    await logAdminAction(req.user!.id, 'update', 'icon_pack', id, packData);
+    
+    res.json({
+      ...pack,
+      description: packData.description || '',
+      category: packData.category || 'custom',
+      isPremium: packData.isPremium || false,
+      iconCount: 0,
+      updatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Failed to update icon pack:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Delete icon pack
+router.delete('/icon-packs/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Delete all icons in the pack first
+    await db.delete(icons).where(eq(icons.packId, id));
+    
+    // Delete the pack
+    const [deletedPack] = await db
+      .delete(iconPacks)
+      .where(eq(iconPacks.id, id))
+      .returning();
+    
+    if (!deletedPack) {
+      return res.status(404).json({ message: 'Icon pack not found' });
+    }
+    
+    await logAdminAction(req.user!.id, 'delete', 'icon_pack', id);
+    
+    res.json({ message: 'Icon pack deleted successfully' });
+  } catch (error) {
+    console.error('Failed to delete icon pack:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get icon types for a pack
+router.get('/icon-packs/:packId/icons', requireOwner, async (req, res) => {
+  try {
+    const { packId } = req.params;
+    
+    const iconsWithTypes = await db
+      .select({
+        id: icons.id,
+        packId: icons.packId,
+        name: icons.name,
+        svg: icons.svg,
+        tags: icons.tags,
+        sort: icons.sort,
+        isActive: icons.isActive,
+        createdAt: icons.createdAt,
+        typeName: iconTypes.name,
+        typeEnum: iconTypes.type
+      })
+      .from(icons)
+      .leftJoin(iconTypes, eq(icons.typeId, iconTypes.id))
+      .where(eq(icons.packId, packId))
+      .orderBy(icons.sort, icons.name);
+
+    // Transform to match IconType interface
+    const transformedIcons = iconsWithTypes.map(icon => ({
+      id: icon.id.toString(),
+      packId: icon.packId,
+      name: icon.name,
+      slug: icon.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+      type: icon.typeEnum as 'url' | 'email' | 'phone' | 'text',
+      category: 'social' as const, // Default category
+      svgCode: icon.svg,
+      defaultColor: '#000000', // Default color
+      isActive: icon.isActive,
+      sortOrder: icon.sort
+    }));
+
+    res.json(transformedIcons);
+  } catch (error) {
+    console.error('Failed to load icons:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Create new icon in pack
+router.post('/icon-packs/:packId/icons', requireOwner, async (req, res) => {
+  try {
+    const { packId } = req.params;
+    const iconData = req.body;
+    
+    // Find or create icon type
+    let iconType = await db
+      .select()
+      .from(iconTypes)
+      .where(eq(iconTypes.name, iconData.name))
+      .limit(1);
+    
+    if (iconType.length === 0) {
+      // Create new icon type
+      const [newType] = await db.insert(iconTypes).values({
+        name: iconData.name,
+        type: iconData.type,
+        isActive: true
+      }).returning();
+      iconType = [newType];
+    }
+    
+    // Create icon
+    const [icon] = await db.insert(icons).values({
+      packId,
+      typeId: iconType[0].id,
+      name: iconData.name,
+      svg: iconData.svgCode,
+      tags: [iconData.category],
+      sort: iconData.sortOrder || 0,
+      isActive: iconData.isActive ?? true
+    }).returning();
+    
+    await logAdminAction(req.user!.id, 'create', 'icon', String(icon.id), iconData);
+    
+    // Return formatted response
+    res.json({
+      id: icon.id.toString(),
+      packId: icon.packId,
+      name: icon.name,
+      slug: iconData.slug,
+      type: iconData.type,
+      category: iconData.category,
+      svgCode: icon.svg,
+      defaultColor: iconData.defaultColor,
+      isActive: icon.isActive,
+      sortOrder: icon.sort
+    });
+  } catch (error) {
+    console.error('Failed to create icon:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update icon
+router.patch('/icon-types/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const iconData = req.body;
+    
+    const [icon] = await db
+      .update(icons)
+      .set({
+        name: iconData.name,
+        svg: iconData.svgCode,
+        tags: [iconData.category],
+        sort: iconData.sortOrder || 0,
+        isActive: iconData.isActive ?? true
+      })
+      .where(eq(icons.id, parseInt(id)))
+      .returning();
+    
+    if (!icon) {
+      return res.status(404).json({ message: 'Icon not found' });
+    }
+    
+    await logAdminAction(req.user!.id, 'update', 'icon', id, iconData);
+    
+    res.json({
+      id: icon.id.toString(),
+      packId: icon.packId,
+      name: icon.name,
+      slug: iconData.slug,
+      type: iconData.type,
+      category: iconData.category,
+      svgCode: icon.svg,
+      defaultColor: iconData.defaultColor,
+      isActive: icon.isActive,
+      sortOrder: icon.sort
+    });
+  } catch (error) {
+    console.error('Failed to update icon:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Delete icon
+router.delete('/icon-types/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [deletedIcon] = await db
+      .delete(icons)
+      .where(eq(icons.id, parseInt(id)))
+      .returning();
+    
+    if (!deletedIcon) {
+      return res.status(404).json({ message: 'Icon not found' });
+    }
+    
+    await logAdminAction(req.user!.id, 'delete', 'icon', id);
+    
+    res.json({ message: 'Icon deleted successfully' });
+  } catch (error) {
+    console.error('Failed to delete icon:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Get icon types
 router.get('/icon-types', requireOwner, async (req, res) => {
   try {
@@ -709,393 +994,33 @@ router.post('/icon-types', requireOwner, async (req, res) => {
   }
 });
 
-// Get icon packs
-router.get('/icon-packs', requireOwner, async (req, res) => {
+// Get icons by category for builder integration
+router.get('/icons/by-category/:category', requireOwner, async (req, res) => {
   try {
-    const { search } = req.query;
+    const { category } = req.params;
     
-    let query = db.select({
-      id: iconPacks.id,
-      name: iconPacks.name,
-      isActive: iconPacks.isActive,
-      createdAt: iconPacks.createdAt,
-      iconCount: sql`(SELECT COUNT(*) FROM ${icons} WHERE ${icons.packId} = ${iconPacks.id})`.as('iconCount')
-    }).from(iconPacks);
-    
-    if (search) {
-      query = query.where(like(iconPacks.name, `%${search}%`));
-    }
-    
-    const packs = await query.orderBy(desc(iconPacks.createdAt));
-    
-    res.json(packs);
-  } catch (error) {
-    console.error('Failed to get icon packs:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Create icon pack
-router.post('/icon-packs', requireOwner, async (req, res) => {
-  try {
-    const { name } = req.body;
-    
-    const [newPack] = await db.insert(iconPacks).values({
-      name,
-      isActive: true
-    }).returning();
-    
-    await logAdminAction(req.user!.id, 'create', 'icon_pack', newPack.id, { name });
-    
-    res.json({ message: 'Icon pack created successfully', pack: newPack });
-  } catch (error) {
-    console.error('Failed to create icon pack:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Get icons in pack
-router.get('/icon-packs/:id/icons', requireOwner, async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const packIcons = await db.select({
-      id: icons.id,
-      name: icons.name,
-      svg: icons.svg,
-      tags: icons.tags,
-      sort: icons.sort,
-      isActive: icons.isActive,
-      typeName: iconTypes.name,
-      typeIcon: iconTypes.type
-    })
-    .from(icons)
-    .leftJoin(iconTypes, eq(icons.typeId, iconTypes.id))
-    .where(eq(icons.packId, id))
-    .orderBy(icons.sort, icons.name);
-    
-    res.json(packIcons);
-  } catch (error) {
-    console.error('Failed to get pack icons:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Upload icon to pack
-router.post('/icon-packs/:id/icons', requireOwner, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, svg, typeId, tags = [] } = req.body;
-    
-    // Basic SVG sanitization
-    const sanitizedSvg = svg.replace(/<script[^>]*>.*?<\/script>/gi, '');
-    
-    const [newIcon] = await db.insert(icons).values({
-      packId: id,
-      typeId,
-      name,
-      svg: sanitizedSvg,
-      tags,
-      isActive: true
-    }).returning();
-    
-    await logAdminAction(req.user!.id, 'create', 'icon', String(newIcon.id), { packId: id, name });
-    
-    res.json({ message: 'Icon uploaded successfully', icon: newIcon });
-  } catch (error) {
-    console.error('Failed to upload icon:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Initialize features in database
-router.post('/init-features', requireOwner, async (req, res) => {
-  try {
-    const defaultFeatures = [
-      { key: 'heading', label: 'Heading', description: 'Add heading elements to cards', category: 'Basic' },
-      { key: 'paragraph', label: 'Paragraph', description: 'Add paragraph text to cards', category: 'Basic' },
-      { key: 'link', label: 'Link', description: 'Add clickable links to cards', category: 'Basic' },
-      { key: 'image', label: 'Image', description: 'Add images to cards', category: 'Media' },
-      { key: 'qrcode', label: 'QR Code', description: 'Add QR codes to cards', category: 'Basic' },
-      { key: 'video', label: 'Video', description: 'Embed videos in cards', category: 'Media' },
-      { key: 'contactForm', label: 'Contact Form', description: 'Add contact forms to cards', category: 'Forms' },
-      { key: 'accordion', label: 'Accordion', description: 'Add collapsible content sections', category: 'Interactive' },
-      { key: 'imageSlider', label: 'Image Slider', description: 'Add image carousels to cards', category: 'Media' },
-      { key: 'contactSection', label: 'Contact Section', description: 'Add structured contact information', category: 'Contact' },
-      { key: 'socialSection', label: 'Social Media Section', description: 'Add social media links and icons', category: 'Social' },
-      { key: 'testimonials', label: 'Testimonials', description: 'Add customer testimonial sections', category: 'Advanced' },
-      { key: 'googleMaps', label: 'Google Maps', description: 'Add interactive maps to cards', category: 'Advanced' },
-      { key: 'aiChatbot', label: 'AI Chatbot', description: 'Add AI-powered chat functionality', category: 'AI Features' },
-      { key: 'ragKnowledge', label: 'Knowledge Base AI', description: 'Add AI knowledge base integration', category: 'AI Features' },
-    ];
-
-    // Clear existing features
-    await db.delete(features);
-    
-    // Insert new features
-    await db.insert(features).values(defaultFeatures);
-    
-    res.json({ message: 'Features initialized successfully', count: defaultFeatures.length });
-  } catch (error) {
-    console.error('Failed to initialize features:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// === PLANS ENDPOINTS ===
-
-// Get all subscription plans
-router.get('/plans', requireOwner, async (req, res) => {
-  try {
-    const { search, status, type } = req.query;
-    
-    let whereConditions = [];
-    
-    if (search) {
-      whereConditions.push(
-        or(
-          like(subscriptionPlans.name, `%${search}%`),
-          like(subscriptionPlans.planType, `%${search}%`)
-        )
-      );
-    }
-    
-    if (status === 'active') {
-      whereConditions.push(eq(subscriptionPlans.isActive, true));
-    } else if (status === 'inactive') {
-      whereConditions.push(eq(subscriptionPlans.isActive, false));
-    }
-    
-    if (type && type !== 'all') {
-      whereConditions.push(eq(subscriptionPlans.planType, type as any));
-    }
-    
-    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
-    
-    const plans = await db.select().from(subscriptionPlans)
-      .where(whereClause)
-      .orderBy(desc(subscriptionPlans.createdAt));
-    
-    res.json(plans);
-  } catch (error) {
-    console.error('Failed to get plans:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Create new plan (temporarily no auth for testing)
-router.post('/plans', async (req, res) => {
-  try {
-    const { 
-      name, planType, price, currency, frequency, businessCardsLimit,
-      cardLabel, trialDays, customDurationDays, features, templates, 
-      isActive, stripePriceId, extraCardOptions, hasUnlimitedOption, 
-      unlimitedPrice, templateLimit 
-    } = req.body;
-    
-    if (!name || !planType) {
-      return res.status(400).json({ message: 'Name and plan type are required' });
-    }
-    
-    // Create the plan (store all new fields in features JSON until migration)
-    const [newPlan] = await db.insert(subscriptionPlans).values({
-      name,
-      planType,
-      price: price || 0,
-      currency: currency || 'USD',
-      interval: frequency || 'monthly',
-      businessCardsLimit: businessCardsLimit || 1,
-      features: {
-        featureList: features || [],
-        extraCardOptions: extraCardOptions || [],
-        hasUnlimitedOption: hasUnlimitedOption || false,
-        unlimitedPrice: unlimitedPrice || 0,
-        templateLimit: templateLimit || -1,
-        cardLabel: cardLabel || '',
-        trialDays: trialDays || 0,
-        customDurationDays: customDurationDays
-      },
-      stripePriceId,
-      isActive: isActive !== undefined ? isActive : true
-    }).returning();
-    
-    // Insert plan features if provided
-    if (features && features.length > 0) {
-      const planFeatureInserts = features.map((featureId: number) => ({
-        planId: newPlan.id,
-        featureId: featureId
-      }));
-      await db.insert(planFeatures).values(planFeatureInserts);
-    }
-    
-    // Insert plan templates if provided
-    if (templates && templates.length > 0) {
-      const planTemplateInserts = templates.map((templateId: string) => ({
-        planId: newPlan.id,
-        templateId: templateId
-      }));
-      await db.insert(planTemplates).values(planTemplateInserts);
-    }
-    
-    // await logAdminAction(req.user!.id, 'create', 'plan', newPlan.id.toString(), { name, planType });
-    
-    res.json({ message: 'Plan created successfully', plan: newPlan });
-  } catch (error) {
-    console.error('Failed to create plan:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Update plan
-router.put('/plans/:id', requireOwner, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { 
-      name, planType, price, currency, frequency, businessCardsLimit,
-      cardLabel, trialDays, customDurationDays, features, templates, 
-      isActive, stripePriceId, extraCardOptions, hasUnlimitedOption, 
-      unlimitedPrice, templateLimit 
-    } = req.body;
-    
-    // Update the plan (store new fields in features JSON until migration)
-    const [updatedPlan] = await db.update(subscriptionPlans)
-      .set({
-        name,
-        planType,
-        price,
-        currency,
-        interval: frequency,
-        businessCardsLimit,
-        stripePriceId,
-        isActive,
-        features: {
-          featureList: features || [],
-          extraCardOptions: extraCardOptions || [],
-          hasUnlimitedOption: hasUnlimitedOption || false,
-          unlimitedPrice: unlimitedPrice || 0,
-          templateLimit: templateLimit || -1,
-          cardLabel: cardLabel || '',
-          trialDays: trialDays || 0,
-          customDurationDays: customDurationDays
-        }
+    const categoryIcons = await db
+      .select({
+        id: icons.id,
+        name: icons.name,
+        svg: icons.svg,
+        packName: iconPacks.name
       })
-      .where(eq(subscriptionPlans.id, parseInt(id)))
-      .returning();
-    
-    if (!updatedPlan) {
-      return res.status(404).json({ message: 'Plan not found' });
-    }
-    
-    // Update plan features
-    if (features !== undefined) {
-      // Delete existing features
-      await db.delete(planFeatures).where(eq(planFeatures.planId, parseInt(id)));
-      
-      // Insert new features
-      if (features.length > 0) {
-        const planFeatureInserts = features.map((featureId: number) => ({
-          planId: parseInt(id),
-          featureId: featureId
-        }));
-        await db.insert(planFeatures).values(planFeatureInserts);
-      }
-    }
-    
-    // Update plan templates
-    if (templates !== undefined) {
-      // Delete existing templates
-      await db.delete(planTemplates).where(eq(planTemplates.planId, parseInt(id)));
-      
-      // Insert new templates
-      if (templates.length > 0) {
-        const planTemplateInserts = templates.map((templateId: string) => ({
-          planId: parseInt(id),
-          templateId: templateId
-        }));
-        await db.insert(planTemplates).values(planTemplateInserts);
-      }
-    }
-    
-    await logAdminAction(req.user!.id, 'update', 'plan', id, { name, planType });
-    
-    res.json({ message: 'Plan updated successfully', plan: updatedPlan });
-  } catch (error) {
-    console.error('Failed to update plan:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
+      .from(icons)
+      .innerJoin(iconPacks, eq(icons.packId, iconPacks.id))
+      .where(
+        sql`${icons.tags} @> ${JSON.stringify([category])} AND ${icons.isActive} = true AND ${iconPacks.isActive} = true`
+      )
+      .orderBy(icons.sort, icons.name);
 
-// Delete plan
-router.delete('/plans/:id', requireOwner, async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    // Check if plan is being used by any users
-    const userPlanCount = await db.select({ count: count() })
-      .from(userPlans)
-      .where(eq(userPlans.planId, parseInt(id)));
-    
-    if (userPlanCount[0].count > 0) {
-      return res.status(400).json({ 
-        message: 'Cannot delete plan that is assigned to users. Please remove all user assignments first.' 
-      });
-    }
-    
-    // Delete plan features and templates first (cascade)
-    await db.delete(planFeatures).where(eq(planFeatures.planId, parseInt(id)));
-    await db.delete(planTemplates).where(eq(planTemplates.planId, parseInt(id)));
-    
-    // Delete the plan
-    await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, parseInt(id)));
-    
-    await logAdminAction(req.user!.id, 'delete', 'plan', id);
-    
-    res.json({ message: 'Plan deleted successfully' });
+    res.json(categoryIcons.map(icon => ({
+      id: icon.id.toString(),
+      name: icon.name,
+      svgCode: icon.svg,
+      packName: icon.packName
+    })));
   } catch (error) {
-    console.error('Failed to delete plan:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Get all available features
-router.get('/features', requireOwner, async (req, res) => {
-  try {
-    const allFeatures = await db.select().from(features).orderBy(features.category, features.label);
-    res.json(allFeatures);
-  } catch (error) {
-    console.error('Failed to get features:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Get plan features for a specific plan
-router.get('/plans/:id/features', requireOwner, async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const planFeatureIds = await db.select({ featureId: planFeatures.featureId })
-      .from(planFeatures)
-      .where(eq(planFeatures.planId, parseInt(id)));
-    
-    res.json(planFeatureIds.map(pf => pf.featureId));
-  } catch (error) {
-    console.error('Failed to get plan features:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-// Get plan templates for a specific plan
-router.get('/plans/:id/templates', requireOwner, async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const planTemplateIds = await db.select({ templateId: planTemplates.templateId })
-      .from(planTemplates)
-      .where(eq(planTemplates.planId, parseInt(id)));
-    
-    res.json(planTemplateIds.map(pt => pt.templateId));
-  } catch (error) {
-    console.error('Failed to get plan templates:', error);
+    console.error('Failed to load icons by category:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -1152,3 +1077,4 @@ router.put('/settings/:category', requireOwner, async (req, res) => {
 });
 
 export default router;
+    

@@ -6,9 +6,7 @@ import PlansPage from '@/components/admin/PlansPage';
 import TemplatesPage from '@/components/admin/TemplatesPage';
 import TemplateBuilder from '@/components/admin/TemplateBuilder';
 import HeaderBuilder from '@/components/admin/HeaderBuilder';
-
-// Placeholder components for other admin pages (to be implemented)
-const IconPacksPage = () => <div className="p-6">Icon packs page coming soon...</div>;
+import IconPacksPage from '@/components/admin/IconPacksPage';
 const SettingsPage = () => <div className="p-6">Settings page coming soon...</div>;
 
 export default function Admin() {
