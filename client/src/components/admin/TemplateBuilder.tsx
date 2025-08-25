@@ -379,13 +379,17 @@ export default function TemplateBuilder() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Card Preview Container */}
+                {/* Card Preview Container - iPhone-like dimensions */}
                 <div className="flex justify-center">
-                  <BusinessCardComponent 
-                    data={businessCardData}
-                    showQR={false}
-                    isInteractive={false}
-                  />
+                  <div className="w-[390px] max-w-full mx-auto bg-gray-100 dark:bg-gray-900 rounded-3xl p-4 shadow-lg border-4 border-gray-300 dark:border-gray-600">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm">
+                      <BusinessCardComponent 
+                        data={businessCardData}
+                        showQR={false}
+                        isInteractive={false}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Preview Actions */}
