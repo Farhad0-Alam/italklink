@@ -515,8 +515,8 @@ router.get('/templates', async (req, res) => {
   }
 });
 
-// Get single template by ID
-router.get('/templates/:id', requireOwner, async (req, res) => {
+// Get single template by ID  
+router.get('/templates/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
