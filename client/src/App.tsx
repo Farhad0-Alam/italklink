@@ -34,8 +34,14 @@ function Router() {
       <Route path="/cards/create" component={CardEditor} />
       <Route path="/cards/:id/edit" component={CardEditor} />
       <Route path="/share" component={Share} />
-      <Route path="/admin/:rest*" component={Admin} />
-      <Route path="/admin" component={Admin} />
+      <Route path="/admin/templates/builder" component={() => <Admin />} />
+      <Route path="/admin/templates/header-builder" component={() => <Admin />} />
+      <Route path="/admin/templates" component={() => <Admin />} />
+      <Route path="/admin/users" component={() => <Admin />} />
+      <Route path="/admin/plans" component={() => <Admin />} />
+      <Route path="/admin/icon-packs" component={() => <Admin />} />
+      <Route path="/admin/settings" component={() => <Admin />} />
+      <Route path="/admin" component={() => <Admin />} />
       <Route component={NotFound} />
     </Switch>
   );

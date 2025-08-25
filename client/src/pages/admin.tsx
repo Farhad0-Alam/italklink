@@ -1,4 +1,4 @@
-import { Route, Switch } from 'wouter';
+import { useLocation } from 'wouter';
 import AdminLayout from '@/components/admin/AdminLayout';
 import DashboardPage from '@/components/admin/DashboardPage';
 import UsersPage from '@/components/admin/UsersPage';
@@ -10,27 +10,33 @@ import IconPacksPage from '@/components/admin/IconPacksPage';
 const SettingsPage = () => <div className="p-6">Settings page coming soon...</div>;
 
 export default function Admin() {
+  const [location] = useLocation();
+  
+  const renderContent = () => {
+    switch (location) {
+      case '/admin/users':
+        return <UsersPage />;
+      case '/admin/plans':
+        return <PlansPage />;
+      case '/admin/templates/header-builder':
+        return <HeaderBuilder />;
+      case '/admin/templates/builder':
+        return <TemplateBuilder />;
+      case '/admin/templates':
+        return <TemplatesPage />;
+      case '/admin/icon-packs':
+        return <IconPacksPage />;
+      case '/admin/settings':
+        return <SettingsPage />;
+      case '/admin':
+      default:
+        return <DashboardPage />;
+    }
+  };
+  
   return (
     <AdminLayout>
-      <Switch>
-        <Route path="/admin" component={DashboardPage} />
-        <Route path="/admin/users" component={UsersPage} />
-        <Route path="/admin/plans" component={PlansPage} />
-        <Route path="/admin/templates/header-builder" component={HeaderBuilder} />
-        <Route path="/admin/templates/builder" component={TemplateBuilder} />
-        <Route path="/admin/templates" component={TemplatesPage} />
-        <Route path="/admin/icon-packs" component={IconPacksPage} />
-        <Route path="/admin/settings" component={SettingsPage} />
-        <Route>
-          <div className="text-center py-20">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Page Not Found</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">The page you're looking for doesn't exist.</p>
-            <a href="/admin" className="text-green-600 hover:text-green-700">
-              Back to Dashboard
-            </a>
-          </div>
-        </Route>
-      </Switch>
+      {renderContent()}
     </AdminLayout>
   );
 }
