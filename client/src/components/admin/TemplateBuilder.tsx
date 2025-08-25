@@ -28,6 +28,7 @@ import { useLocation } from 'wouter';
 import { BusinessCard } from '@shared/schema';
 import HeaderBuilder from './HeaderBuilder';
 import { templateExtractor } from '@/utils/template-extractor';
+import { FormBuilder } from '@/components/form-builder';
 
 interface TemplateData {
   id?: string;
