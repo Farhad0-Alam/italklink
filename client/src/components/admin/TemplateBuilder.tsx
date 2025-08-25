@@ -29,6 +29,7 @@ import { BusinessCard } from '@shared/schema';
 import HeaderBuilder from './HeaderBuilder';
 import { templateExtractor } from '@/utils/template-extractor';
 import { FormBuilder } from '@/components/form-builder';
+import { BusinessCardComponent } from '@/components/business-card';
 
 interface TemplateData {
   id?: string;
@@ -398,38 +399,58 @@ export default function TemplateBuilder() {
           </div>
         </div>
 
-        {/* Template Builder/Preview */}
-        <div className="flex-1">
-          {previewMode ? (
-            <div className="p-8">
-              <div className="max-w-md mx-auto">
-                <FormBuilder 
-                  cardData={businessCardData}
-                  onDataChange={setBusinessCardData}
-                  onGenerateQR={() => {}}
+        {/* Template Builder */}
+        <div className="flex-1 border-r border-gray-200 dark:border-gray-700">
+          <div className="p-6">
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle>Template Design</CardTitle>
+                <CardDescription>
+                  Customize the business card template. Use sample data to see how it will look for users.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            
+            <FormBuilder 
+              cardData={businessCardData}
+              onDataChange={setBusinessCardData}
+              onGenerateQR={() => {}}
+            />
+          </div>
+        </div>
+
+        {/* Live Preview Panel */}
+        <div className="w-96 bg-gray-50 dark:bg-gray-900/50">
+          <div className="p-6">
+            <div className="mb-4">
+              <h3 className="font-semibold text-lg mb-2">Live Preview</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Real-time preview of your template
+              </p>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+              <div className="max-w-sm mx-auto scale-75 transform-gpu">
+                <BusinessCardComponent 
+                  data={businessCardData}
+                  showQR={false}
+                  isInteractive={false}
                 />
               </div>
             </div>
-          ) : (
-            <div className="p-8">
-              <div className="max-w-4xl mx-auto">
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle>Template Design</CardTitle>
-                    <CardDescription>
-                      Customize the business card template. Use sample data to see how it will look for users.
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-                
-                <FormBuilder 
-                  cardData={businessCardData}
-                  onDataChange={setBusinessCardData}
-                  onGenerateQR={() => {}}
-                />
-              </div>
+
+            <div className="mt-4 space-y-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setPreviewMode(!previewMode)}
+                className="w-full"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                {previewMode ? 'Edit Mode' : 'Preview Mode'}
+              </Button>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
