@@ -76,7 +76,16 @@ export default function UsersPage() {
 
   // Fetch users data
   const { data: users = [], isLoading } = useQuery<User[]>({
-    queryKey: ['/api/admin/users', { search, status: statusFilter, plan: planFilter }],
+    queryKey: ['/api/admin/users', search, statusFilter, planFilter],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (search.trim()) params.append('search', search.trim());
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      if (planFilter !== 'all') params.append('plan', planFilter);
+      
+      const url = `/api/admin/users${params.toString() ? '?' + params.toString() : ''}`;
+      return fetch(url, { credentials: 'include' }).then(res => res.json());
+    },
     initialData: []
   });
 
