@@ -774,6 +774,40 @@ router.post('/icon-packs/:id/icons', requireOwner, async (req, res) => {
   }
 });
 
+// Initialize features in database
+router.post('/init-features', requireOwner, async (req, res) => {
+  try {
+    const defaultFeatures = [
+      { key: 'heading', label: 'Heading', description: 'Add heading elements to cards', category: 'Basic' },
+      { key: 'paragraph', label: 'Paragraph', description: 'Add paragraph text to cards', category: 'Basic' },
+      { key: 'link', label: 'Link', description: 'Add clickable links to cards', category: 'Basic' },
+      { key: 'image', label: 'Image', description: 'Add images to cards', category: 'Media' },
+      { key: 'qrcode', label: 'QR Code', description: 'Add QR codes to cards', category: 'Basic' },
+      { key: 'video', label: 'Video', description: 'Embed videos in cards', category: 'Media' },
+      { key: 'contactForm', label: 'Contact Form', description: 'Add contact forms to cards', category: 'Forms' },
+      { key: 'accordion', label: 'Accordion', description: 'Add collapsible content sections', category: 'Interactive' },
+      { key: 'imageSlider', label: 'Image Slider', description: 'Add image carousels to cards', category: 'Media' },
+      { key: 'contactSection', label: 'Contact Section', description: 'Add structured contact information', category: 'Contact' },
+      { key: 'socialSection', label: 'Social Media Section', description: 'Add social media links and icons', category: 'Social' },
+      { key: 'testimonials', label: 'Testimonials', description: 'Add customer testimonial sections', category: 'Advanced' },
+      { key: 'googleMaps', label: 'Google Maps', description: 'Add interactive maps to cards', category: 'Advanced' },
+      { key: 'aiChatbot', label: 'AI Chatbot', description: 'Add AI-powered chat functionality', category: 'AI Features' },
+      { key: 'ragKnowledge', label: 'Knowledge Base AI', description: 'Add AI knowledge base integration', category: 'AI Features' },
+    ];
+
+    // Clear existing features
+    await db.delete(features);
+    
+    // Insert new features
+    await db.insert(features).values(defaultFeatures);
+    
+    res.json({ message: 'Features initialized successfully', count: defaultFeatures.length });
+  } catch (error) {
+    console.error('Failed to initialize features:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // === PLANS ENDPOINTS ===
 
 // Get all subscription plans
@@ -835,7 +869,6 @@ router.post('/plans', requireOwner, async (req, res) => {
       price: price || 0,
       currency: currency || 'USD',
       interval: frequency || 'monthly', // Keep for compatibility
-      frequency: frequency || 'monthly',
       businessCardsLimit: businessCardsLimit || 1,
       features: features || [], // Keep for backward compatibility
       stripePriceId,
@@ -890,7 +923,6 @@ router.put('/plans/:id', requireOwner, async (req, res) => {
         price,
         currency,
         interval: frequency, // Keep for compatibility
-        frequency,
         businessCardsLimit,
         stripePriceId,
         isActive,

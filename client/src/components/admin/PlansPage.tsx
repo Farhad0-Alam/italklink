@@ -106,15 +106,30 @@ const FREQUENCIES = [
 ];
 
 const AVAILABLE_FEATURES = [
-  { key: 'heading', label: 'Heading' },
-  { key: 'paragraph', label: 'Paragraph' },
-  { key: 'link', label: 'Link' },
-  { key: 'image', label: 'Image' },
-  { key: 'qrcode', label: 'QRCode' },
-  { key: 'video', label: 'Video' },
-  { key: 'contactForm', label: 'Contact Form' },
-  { key: 'accordion', label: 'Accordion' },
-  { key: 'imageSlider', label: 'Image Slider' },
+  // Basic Elements
+  { key: 'heading', label: 'Heading', category: 'Basic' },
+  { key: 'paragraph', label: 'Paragraph', category: 'Basic' },
+  { key: 'link', label: 'Link', category: 'Basic' },
+  { key: 'image', label: 'Image', category: 'Media' },
+  { key: 'qrcode', label: 'QR Code', category: 'Basic' },
+  { key: 'video', label: 'Video', category: 'Media' },
+  
+  // Form Elements
+  { key: 'contactForm', label: 'Contact Form', category: 'Forms' },
+  
+  // Interactive Elements
+  { key: 'accordion', label: 'Accordion', category: 'Interactive' },
+  { key: 'imageSlider', label: 'Image Slider', category: 'Media' },
+  
+  // Contact & Social
+  { key: 'contactSection', label: 'Contact Section', category: 'Contact' },
+  { key: 'socialSection', label: 'Social Media Section', category: 'Social' },
+  
+  // Advanced Elements
+  { key: 'testimonials', label: 'Testimonials', category: 'Advanced' },
+  { key: 'googleMaps', label: 'Google Maps', category: 'Advanced' },
+  { key: 'aiChatbot', label: 'AI Chatbot', category: 'AI Features' },
+  { key: 'ragKnowledge', label: 'Knowledge Base AI', category: 'AI Features' },
 ];
 
 export default function PlansPage() {
@@ -331,7 +346,7 @@ export default function PlansPage() {
   };
 
   const toggleAllFeatures = () => {
-    const allFeatureIds = features.map(f => f.id);
+    const allFeatureIds = AVAILABLE_FEATURES.map((_, index) => index + 1);
     setFormData(prev => ({
       ...prev,
       features: prev.features.length === allFeatureIds.length ? [] : allFeatureIds
@@ -551,29 +566,110 @@ export default function PlansPage() {
       {/* Features Selection */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-base font-medium">Features*</Label>
+          <Label className="text-base font-medium">Page Elements*</Label>
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={toggleAllFeatures}
           >
-            {formData.features.length === features.length ? 'Deselect All' : 'Select All'} ({formData.features.length})
+            {formData.features.length === AVAILABLE_FEATURES.length ? 'Deselect All' : 'Select All'} ({formData.features.length})
           </Button>
         </div>
         
-        <div className="grid grid-cols-3 gap-3 p-4 border rounded-lg">
-          {AVAILABLE_FEATURES.map((feature) => (
-            <div key={feature.key} className="flex items-center space-x-2">
-              <Checkbox
-                id={feature.key}
-                checked={formData.features.includes(features.findIndex(f => f.key === feature.key) + 1)}
-                onCheckedChange={() => toggleFeature(features.findIndex(f => f.key === feature.key) + 1)}
-              />
-              <Label htmlFor={feature.key} className="text-sm">{feature.label}</Label>
+        <div className="max-h-80 overflow-y-auto border rounded-lg p-3">
+          {Object.entries(
+            AVAILABLE_FEATURES.reduce((acc, feature) => {
+              if (!acc[feature.category]) acc[feature.category] = [];
+              acc[feature.category].push(feature);
+              return acc;
+            }, {} as Record<string, typeof AVAILABLE_FEATURES>)
+          ).map(([category, categoryFeatures]) => (
+            <div key={category} className="mb-4">
+              <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2 border-b pb-1">
+                {category}
+              </h4>
+              <div className="grid grid-cols-2 gap-2 pl-2">
+                {categoryFeatures.map((feature) => {
+                  const featureIndex = AVAILABLE_FEATURES.findIndex(f => f.key === feature.key);
+                  return (
+                    <div key={feature.key} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={feature.key}
+                        checked={formData.features.includes(featureIndex + 1)}
+                        onCheckedChange={() => toggleFeature(featureIndex + 1)}
+                      />
+                      <Label htmlFor={feature.key} className="text-sm">{feature.label}</Label>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Templates Selection */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-base font-medium">Available Templates</Label>
+          <Button
+            type="button"
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              const allTemplateIds = templates.map(t => t.id);
+              setFormData(prev => ({
+                ...prev,
+                templates: prev.templates.length === allTemplateIds.length ? [] : allTemplateIds
+              }));
+            }}
+          >
+            {formData.templates.length === templates.length ? 'Deselect All' : 'Select All'} ({formData.templates.length})
+          </Button>
+        </div>
+        
+        {templates.length > 0 ? (
+          <div className="max-h-80 overflow-y-auto border rounded-lg p-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {templates.map((template) => (
+                <div key={template.id} className="border rounded-lg p-2 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Checkbox
+                      id={`template-${template.id}`}
+                      checked={formData.templates.includes(template.id)}
+                      onCheckedChange={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          templates: prev.templates.includes(template.id)
+                            ? prev.templates.filter(id => id !== template.id)
+                            : [...prev.templates, template.id]
+                        }));
+                      }}
+                    />
+                    <Label htmlFor={`template-${template.id}`} className="text-sm font-medium">
+                      {template.name}
+                    </Label>
+                  </div>
+                  {template.previewImage && (
+                    <img 
+                      src={template.previewImage} 
+                      alt={template.name}
+                      className="w-full h-20 object-cover rounded border"
+                    />
+                  )}
+                  {template.description && (
+                    <p className="text-xs text-gray-500 mt-1">{template.description}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="border rounded-lg p-6 text-center text-gray-500">
+            <p>No templates available. Create templates first to assign them to plans.</p>
+          </div>
+        )}
       </div>
 
       {/* Active Status */}
