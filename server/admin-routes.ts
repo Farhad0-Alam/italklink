@@ -863,7 +863,7 @@ router.post('/plans', async (req, res) => {
       return res.status(400).json({ message: 'Name and plan type are required' });
     }
     
-    // Create the plan (store new fields in features JSON until migration)
+    // Create the plan (store all new fields in features JSON until migration)
     const [newPlan] = await db.insert(subscriptionPlans).values({
       name,
       planType,
@@ -878,7 +878,8 @@ router.post('/plans', async (req, res) => {
         unlimitedPrice: unlimitedPrice || 0,
         templateLimit: templateLimit || -1,
         cardLabel: cardLabel || '',
-        trialDays: trialDays || 0
+        trialDays: trialDays || 0,
+        customDurationDays: customDurationDays
       },
       stripePriceId,
       isActive: isActive !== undefined ? isActive : true
@@ -940,7 +941,8 @@ router.put('/plans/:id', requireOwner, async (req, res) => {
           unlimitedPrice: unlimitedPrice || 0,
           templateLimit: templateLimit || -1,
           cardLabel: cardLabel || '',
-          trialDays: trialDays || 0
+          trialDays: trialDays || 0,
+          customDurationDays: customDurationDays
         }
       })
       .where(eq(subscriptionPlans.id, parseInt(id)))
