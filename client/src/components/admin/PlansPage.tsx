@@ -199,10 +199,41 @@ export default function PlansPage() {
   });
 
   // Fetch available templates
-  const { data: templates = [] } = useQuery<Template[]>({
-    queryKey: ['/api/admin/templates'],
-    queryFn: () => fetch('/api/admin/templates', { credentials: 'include' }).then(res => res.json()),
-    initialData: []
+  const { data: templates = [], isLoading: templatesLoading, error: templatesError, refetch: refetchTemplates } = useQuery<any[]>({
+    queryKey: ['admin-templates'], // Stable query key
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/admin/templates', { 
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Templates SUCCESS:', data?.length, 'templates loaded');
+        
+        if (!Array.isArray(data)) {
+          console.warn('Templates response is not an array:', data);
+          return [];
+        }
+        
+        return data;
+      } catch (error) {
+        console.error('Templates fetch error:', error);
+        throw error;
+      }
+    },
+    staleTime: 30000, // 30 seconds
+    retry: 2
+  });
+
+  console.log('Templates FINAL state:', { 
+    templatesCount: templates?.length, 
+    templatesLoading, 
+    hasError: !!templatesError,
+    firstTemplate: templates?.[0]?.name 
   });
 
   const resetForm = () => {
@@ -783,7 +814,15 @@ export default function PlansPage() {
           </Button>
         </div>
         
-        {templates.length > 0 ? (
+        {templatesLoading ? (
+          <div className="border rounded-lg p-6 text-center text-gray-500">
+            <p>Loading templates...</p>
+          </div>
+        ) : templatesError ? (
+          <div className="border rounded-lg p-6 text-center text-red-500">
+            <p>Error loading templates: {templatesError.message}</p>
+          </div>
+        ) : templates.length > 0 ? (
           <div className="max-h-80 overflow-y-auto border rounded-lg p-3">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {templates.map((template) => (
@@ -822,6 +861,15 @@ export default function PlansPage() {
         ) : (
           <div className="border rounded-lg p-6 text-center text-gray-500">
             <p>No templates available. Create templates first to assign them to plans.</p>
+            <p className="text-xs mt-2">Debug: {JSON.stringify({ templatesLoading, templatesError: templatesError?.message, templatesCount: templates.length })}</p>
+            <Button 
+              onClick={() => refetchTemplates()} 
+              variant="outline" 
+              size="sm" 
+              className="mt-2"
+            >
+              Retry Loading Templates
+            </Button>
           </div>
         )}
       </div>
