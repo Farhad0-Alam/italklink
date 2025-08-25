@@ -607,27 +607,6 @@ export default function PlansPage() {
       )}
 
 
-      {/* Stripe Price ID */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="cardLabel">Card Label</Label>
-          <Input
-            id="cardLabel"
-            placeholder="js.custom_vcard_number"
-            value={formData.cardLabel}
-            onChange={(e) => setFormData(prev => ({ ...prev, cardLabel: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="stripePriceId">Stripe Price ID</Label>
-          <Input
-            id="stripePriceId"
-            placeholder="js.custom_vcard_price"
-            value={formData.stripePriceId}
-            onChange={(e) => setFormData(prev => ({ ...prev, stripePriceId: e.target.value }))}
-          />
-        </div>
-      </div>
 
       {/* Features Selection */}
       <div className="space-y-3">
@@ -750,17 +729,6 @@ export default function PlansPage() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-base font-medium">Available Templates</Label>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">Limit:</span>
-            <Input
-              type="number"
-              placeholder="-1"
-              value={formData.templateLimit}
-              onChange={(e) => setFormData(prev => ({ ...prev, templateLimit: Number(e.target.value) }))}
-              className="w-20"
-            />
-            <span className="text-xs text-gray-500">(-1 = unlimited)</span>
-          </div>
         </div>
         
         <div className="flex items-center justify-between">
