@@ -95,6 +95,42 @@ export default function TemplateBuilder() {
     'education', 'retail', 'finance', 'real-estate', 'consulting'
   ];
 
+  // Convert 2TalkLink template structure to BusinessCard format
+  const convert2TalkLinkToBusinessCard = (talkLinkData: any) => {
+    const profile = talkLinkData.profile || {};
+    const templateStyle = talkLinkData.templateStyle || {};
+    const socialIcons = talkLinkData.socialIcons || [];
+    
+    return {
+      fullName: profile.name || 'Sample Name',
+      title: profile.tagline || 'Professional Title',
+      company: 'Sample Company',
+      email: 'sample@email.com',
+      phone: '+1 (555) 123-4567',
+      website: 'www.example.com',
+      linkedin: 'linkedin.com/in/sample',
+      bio: 'Professional bio description',
+      profileImageUrl: profile.image || '',
+      backgroundColor: templateStyle.bgcolor || templateStyle.secondary_color || '#ffffff',
+      textColor: templateStyle.textcolor || templateStyle.headingcolor || '#000000',
+      accentColor: templateStyle.primary_color || '#3b82f6',
+      template: 'minimal' as const,
+      // Convert social icons to our format
+      socialLinks: {
+        twitter: socialIcons.find((icon: any) => icon.name === 'Twitter')?.value || '',
+        facebook: socialIcons.find((icon: any) => icon.name === 'Facebook')?.value || '',
+        instagram: socialIcons.find((icon: any) => icon.name === 'Instagram')?.value || '',
+        linkedin: socialIcons.find((icon: any) => icon.name === 'Linkedin')?.value || '',
+        youtube: '',
+        tiktok: '',
+        pinterest: socialIcons.find((icon: any) => icon.name === 'Pinterest')?.value || '',
+        snapchat: '',
+        whatsapp: socialIcons.find((icon: any) => icon.name === 'WhatsApp')?.value || '',
+        telegram: ''
+      }
+    };
+  };
+
   // Extract template ID from URL params for editing
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -125,11 +161,14 @@ export default function TemplateBuilder() {
           templateData: data.templateData
         });
         
-        // Load template data into business card preview
+        // Convert 2TalkLink template data to our BusinessCard format
         if (data.templateData) {
+          console.log('2TalkLink template data:', data.templateData);
+          const convertedData = convert2TalkLinkToBusinessCard(data.templateData);
+          console.log('Converted BusinessCard data:', convertedData);
           setBusinessCardData(prev => ({
             ...prev,
-            ...data.templateData
+            ...convertedData
           }));
         }
       }
