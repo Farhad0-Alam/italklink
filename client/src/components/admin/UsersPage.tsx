@@ -45,7 +45,7 @@ import {
   Copy,
   Filter
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface User {
   id: string;
@@ -63,6 +63,16 @@ export default function UsersPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [planFilter, setPlanFilter] = useState('all');
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Form states for adding user
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [plan, setPlan] = useState('free');
+  
+  const queryClient = useQueryClient();
 
   // Fetch users data
   const { data: users = [], isLoading } = useQuery<User[]>({
@@ -90,10 +100,54 @@ export default function UsersPage() {
     console.log('Copy user:', userId);
   };
 
-  const handleAddUser = (formData: FormData) => {
-    // TODO: Implement add user functionality
-    console.log('Add user:', formData);
-    setAddUserOpen(false);
+  const handleAddUser = async () => {
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password.trim()) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const userData = {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        password: password.trim(),
+        planId: plan
+      };
+
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(userData)
+      });
+
+      if (response.ok) {
+        // Clear form
+        setFirstName('');
+        setLastName('');
+        setEmail('');
+        setPassword('');
+        setPlan('free');
+        setAddUserOpen(false);
+        
+        // Refresh users list
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+        
+        console.log('User added successfully');
+      } else {
+        const error = await response.json();
+        alert(`Failed to add user: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error adding user:', error);
+      alert('Failed to add user. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -127,24 +181,46 @@ export default function UsersPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" placeholder="John" />
+                  <Input 
+                    id="firstName" 
+                    placeholder="John"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" placeholder="Doe" />
+                  <Input 
+                    id="lastName" 
+                    placeholder="Doe"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="john@example.com" />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="john@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="••••••••" />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="plan">Plan</Label>
-                <Select defaultValue="free">
+                <Select value={plan} onValueChange={setPlan}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select plan" />
                   </SelectTrigger>
@@ -160,8 +236,11 @@ export default function UsersPage() {
               <Button variant="outline" onClick={() => setAddUserOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={() => handleAddUser(new FormData())}>
-                Add User
+              <Button 
+                onClick={handleAddUser}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Adding...' : 'Add User'}
               </Button>
             </DialogFooter>
           </DialogContent>
