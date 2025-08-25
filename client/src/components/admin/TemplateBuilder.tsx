@@ -153,23 +153,48 @@ export default function TemplateBuilder() {
       });
       if (response.ok) {
         const data = await response.json();
+        console.log('Template data loaded:', data);
+        
         setTemplate({
           id: data.id,
           name: data.name,
           description: data.description || '',
-          category: 'business',
+          category: data.templateData?.category || 'business',
           isActive: data.isActive,
           templateData: data.templateData
         });
         
-        // Convert 2TalkLink template data to our BusinessCard format
+        // Convert template data to our BusinessCard format
         if (data.templateData) {
-          const convertedData = convert2TalkLinkToBusinessCard(data.templateData);
-          setBusinessCardData(prev => ({
-            ...prev,
-            ...convertedData
-          }));
+          // Check if it's our new format or legacy 2TalkLink format
+          if (data.templateData.defaultData) {
+            // New format - use the defaultData directly
+            const defaultData = data.templateData.defaultData;
+            setBusinessCardData(prev => ({
+              ...prev,
+              fullName: defaultData.fullName || 'Your Name',
+              title: defaultData.title || 'Your Title', 
+              company: defaultData.company || 'Your Company',
+              backgroundColor: defaultData.backgroundColor || '#ffffff',
+              accentColor: defaultData.brandColor || '#22c55e',
+              template: defaultData.template || 'minimal',
+              // Add other default fields as needed
+              email: 'sample@email.com',
+              phone: '+1 (555) 123-4567',
+              website: 'www.example.com',
+              linkedin: 'linkedin.com/in/sample'
+            }));
+          } else {
+            // Legacy 2TalkLink format
+            const convertedData = convert2TalkLinkToBusinessCard(data.templateData);
+            setBusinessCardData(prev => ({
+              ...prev,
+              ...convertedData
+            }));
+          }
         }
+      } else {
+        console.error('Failed to load template:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Failed to load template:', error);
