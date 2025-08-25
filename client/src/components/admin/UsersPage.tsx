@@ -42,7 +42,7 @@ import {
   Eye, 
   Edit, 
   Trash2, 
-  Copy,
+  UserPlus,
   Filter
 } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -90,23 +90,45 @@ export default function UsersPage() {
   });
 
   const handleVisitUser = (userId: string) => {
-    // TODO: Implement visit user functionality
-    console.log('Visit user:', userId);
+    // Open user's business card in new tab
+    window.open(`/share/${userId}`, '_blank');
   };
 
-  const handleEditUser = (userId: string) => {
-    // TODO: Implement edit user functionality
+  const handleEditUser = async (userId: string) => {
+    // TODO: Open edit user modal with current user data
     console.log('Edit user:', userId);
+    alert('Edit user functionality will be implemented in next update');
   };
 
-  const handleDeleteUser = (userId: string) => {
-    // TODO: Implement delete user functionality
-    console.log('Delete user:', userId);
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        // Refresh users list
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+        console.log('User deleted successfully');
+      } else {
+        const error = await response.json();
+        alert(`Failed to delete user: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Failed to delete user. Please try again.');
+    }
   };
 
-  const handleCopyUser = (userId: string) => {
-    // TODO: Implement copy user functionality
-    console.log('Copy user:', userId);
+  const handleAssignPlan = (userId: string) => {
+    // TODO: Open assign plan modal
+    console.log('Assign plan to user:', userId);
+    alert('Assign plan functionality will be implemented with Plans page');
   };
 
   const handleAddUser = async () => {
@@ -407,10 +429,11 @@ export default function UsersPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleCopyUser(user.id)}
-                          className="p-2"
+                          onClick={() => handleAssignPlan(user.id)}
+                          className="p-2 text-green-600 hover:text-green-700"
+                          title="Assign Plan"
                         >
-                          <Copy className="h-4 w-4" />
+                          <UserPlus className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
