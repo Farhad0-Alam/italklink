@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;400;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
+        .email-container { max-width: 600px; margin: auto; padding: 20px; background-color: #f8fafd; border-radius: 8px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header img { max-width: 50px; }
+        .header h2 { font-size: 22px; color: #313337; margin: 10px 0; }
+        .content p { font-size: 14px; color: #5F6C91; line-height: 1.6; margin-bottom: 15px; }
+        .content span { font-weight: 700; color: #313337; }
+        .button { text-align: center; margin: 20px 0; }
+        .button a { padding: 10px 30px; background-color: #f9913a; color: #fff; text-decoration: none; font-size: 16px; border-radius: 5px; }
+        .footer { margin-top: 30px; text-align: center; font-size: 14px; color: #5F6C91; }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://2TalkLink.com/images/favicon.png" alt="logo">
+            <h2>Thank You for Purchasing a Plan</h2>
+        </div>
+        <div class="content">
+            <p>Hello <span>{member_name}</span>,</p>
+            <p>Thank you for purchasing the <span>{plan_name}</span>. Your plan will be active until <span>{plan_expiry_date}</span>.</p>
+            <p>If you have any questions, feel free to reach out to us anytime.</p>
+        </div>
+        <div class="button">
+            <a href="{renew_link}">Manage Your Plan</a>
+        </div>
+        <div class="footer">
+            <p>To your success,</p>
+            <p>2TalkLink Team</p>
+        </div>
+    </div>
+</body>
+</html>

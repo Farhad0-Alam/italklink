@@ -1,0 +1,253 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  background: #008080;
+  padding: 6rem 2rem;
+  gap: 1.5rem;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeIn 0.6s ease-out;
+}
+.playerFirstDiv div {
+  width: 100% !important;
+}
+.playerFirstDiv div iframe {
+  border-radius: 20px;
+}
+
+.boxBorder {
+  place-content: center;
+  color: white;
+  text-shadow: 0 1px 0 #000;
+
+  /* Variables for animation and styling */
+  --border-angle: 0turn; /* For animation */
+  --main-bg: conic-gradient(
+    from var(--border-angle),
+    #213,
+    #112 5%,
+    #112 60%,
+    #213 95%
+  );
+
+  border: solid 5px transparent;
+  border-radius: 2em;
+
+  /* Gradient for the border */
+  --gradient-border: conic-gradient(
+    from var(--border-angle),
+    transparent 25%,
+    #08f,
+    #f03 99%,
+    transparent
+  );
+
+  background: var(--main-bg) padding-box,
+    /* Background inside the border */ var(--gradient-border) border-box,
+    /* Gradient border */ var(--main-bg) border-box; /* Duplicate main background behind the gradient */
+
+  background-position: center center;
+  animation: bg-spin 3s linear infinite;
+}
+.howItWorkBoxBorder {
+  place-content: center;
+  color: white;
+  text-shadow: 0 1px 0 #000;
+
+  /* Variables for animation and styling */
+  --border-angle: 0turn; /* For animation */
+  --main-bg: conic-gradient(
+    from var(--border-angle),
+    #213,
+    #112 5%,
+    #112 60%,
+    #213 95%
+  );
+
+  border: solid 8px transparent;
+  border-radius: 2em;
+
+  /* Gradient for the border */
+  --gradient-border: conic-gradient(
+    from var(--border-angle),
+    transparent 25%,
+    #08f,
+    rgb(248, 248, 248) 85%,
+    rgba(255, 110, 97, 0.852) 95%,
+    transparent
+  );
+
+  background: var(--main-bg) padding-box,
+    /* Background inside the border */ var(--gradient-border) border-box,
+    /* Gradient border */ var(--main-bg) border-box; /* Duplicate main background behind the gradient */
+
+  background-position: center center;
+  animation: bg-spin 3s linear infinite;
+}
+
+@keyframes bg-spin {
+  to {
+    --border-angle: 1turn;
+  }
+}
+
+.boxBorder:hover {
+  animation-play-state: paused;
+}
+
+/* Registering the custom property for the border angle */
+@property --border-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0turn;
+}
+
+.videoPlayButton {
+  cursor: pointer;
+  position: relative;
+  z-index: 10;
+  margin: 30px auto;
+  box-sizing: content-box;
+  display: block;
+  width: 32px;
+  height: 44px;
+  padding: 18px 20px 18px 28px;
+}
+
+.videoPlayButton::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  display: block;
+  width: 80px;
+  height: 80px;
+  background: #ba1f24;
+  border-radius: 50%;
+  animation: pulse-border 1500ms ease-out infinite;
+}
+
+.videoPlayButton::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  display: block;
+  width: 80px;
+  height: 80px;
+  background: #fa183d;
+  border-radius: 50%;
+  transition: all 200ms;
+}
+
+.videoPlayButton:hover::after {
+  background-color: #d4141e; /* Use darker red directly */
+}
+
+.videoPlayButton span {
+  display: block;
+  position: relative;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  border-left: 32px solid #fff;
+  border-top: 22px solid transparent;
+  border-bottom: 22px solid transparent;
+}
+
+@keyframes pulse-border {
+  0% {
+    transform: translateX(-50%) translateY(-50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) translateY(-50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fcard {
+  text-align: center;
+  min-width: 280px;
+  margin: auto;
+}
+
+.title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin: 10px 0;
+}
+
+.textContent {
+  margin-top: 25px;
+  width: 100%;
+}
+.gradient {
+  background: linear-gradient(90deg, #ff6b6b, #ffd93d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.fcard strong {
+  font-size: 16px;
+  padding: 0 10px;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 600px;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 4rem 1rem;
+  }
+  .content {
+    flex-direction: row;
+  }
+
+  .fcard h3 {
+    font-size: 3.5rem;
+  }
+  .fcard strong {
+    margin: 0 auto;
+    font-size: 1.25rem;
+  }
+  .textContent {
+    width: 60%;
+    margin: 0 auto;
+    margin-top: 15px;
+  }
+
+  .subtitle {
+    font-size: 30px;
+  }
+}

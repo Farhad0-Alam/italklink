@@ -1,0 +1,119 @@
+[{
+  "_id": {
+    "$oid": "62e3b2c459a9cc1ec40373d4"
+  },
+  "status": 1,
+  "userId": {
+    "$oid": "62a484875fc8144773df6576"
+  },
+  "name": "Linkedin",
+  "createdAt": {
+    "$date": "2022-07-29T10:13:24.338Z"
+  },
+  "updatedAt": {
+    "$date": "2022-07-29T10:18:13.682Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "62e2507cdd0b414314143218"
+  },
+  "status": 1,
+  "userId": {
+    "$oid": "62a484875fc8144773df6576"
+  },
+  "name": "Twitter",
+  "createdAt": {
+    "$date": "2022-07-28T09:01:48.821Z"
+  },
+  "updatedAt": {
+    "$date": "2022-07-28T09:01:48.821Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "62e3de2ffacfa20b483f360e"
+  },
+  "status": 1,
+  "userId": {
+    "$oid": "62a484875fc8144773df6576"
+  },
+  "name": "Email",
+  "createdAt": {
+    "$date": "2022-07-29T13:18:39.374Z"
+  },
+  "updatedAt": {
+    "$date": "2022-07-29T13:18:39.374Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "62e24ee1dd0b4143141431f1"
+  },
+  "status": 1,
+  "userId": {
+    "$oid": "62a484875fc8144773df6576"
+  },
+  "name": "Facebook",
+  "createdAt": {
+    "$date": "2022-07-28T08:54:57.250Z"
+  },
+  "updatedAt": {
+    "$date": "2022-07-28T08:55:48.975Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "62e25088dd0b41431414321f"
+  },
+  "status": 1,
+  "userId": {
+    "$oid": "62a484875fc8144773df6576"
+  },
+  "name": "Instagram",
+  "createdAt": {
+    "$date": "2022-07-28T09:02:00.691Z"
+  },
+  "updatedAt": {
+    "$date": "2022-07-28T09:02:00.691Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "62e5145beb9cf514f4274144"
+  },
+  "status": 1,
+  "userId": {
+    "$oid": "62a484875fc8144773df6576"
+  },
+  "name": "Pinterest",
+  "createdAt": {
+    "$date": "2022-07-30T11:22:03.964Z"
+  },
+  "updatedAt": {
+    "$date": "2022-07-30T11:22:03.964Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "62e4c0b34c29494bc0d50791"
+  },
+  "status": 1,
+  "userId": {
+    "$oid": "62a484875fc8144773df6576"
+  },
+  "name": "WhatsApp",
+  "createdAt": {
+    "$date": "2022-07-30T05:25:07.952Z"
+  },
+  "updatedAt": {
+    "$date": "2022-07-30T05:25:07.952Z"
+  },
+  "__v": 0
+}]
