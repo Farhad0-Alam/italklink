@@ -2,11 +2,11 @@ import { Route, Switch } from 'wouter';
 import AdminLayout from '@/components/admin/AdminLayout';
 import DashboardPage from '@/components/admin/DashboardPage';
 import UsersPage from '@/components/admin/UsersPage';
+import PlansPage from '@/components/admin/PlansPage';
 import TemplatesPage from '@/components/admin/TemplatesPage';
 import TemplateBuilder from '@/components/admin/TemplateBuilder';
 
 // Placeholder components for other admin pages (to be implemented)
-const PlansPage = () => <div className="p-6">Plans page coming soon...</div>;
 const IconPacksPage = () => <div className="p-6">Icon packs page coming soon...</div>;
 const SettingsPage = () => <div className="p-6">Settings page coming soon...</div>;
 

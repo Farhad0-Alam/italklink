@@ -253,7 +253,7 @@ router.post('/users', requireOwner, async (req, res) => {
       planType: 'free'
     }).returning();
     
-    await logAdminAction(req.user.id, 'create', 'user', newUser.id, { email, planId });
+    await logAdminAction(req.user!.id, 'create', 'user', newUser.id, { email, planId });
     
     res.json({ message: 'User created successfully', user: newUser });
   } catch (error) {
@@ -273,7 +273,7 @@ router.patch('/users/:id', requireOwner, async (req, res) => {
       .where(eq(users.id, id))
       .returning();
     
-    await logAdminAction(req.user.id, 'update', 'user', id, updates);
+    await logAdminAction(req.user!.id, 'update', 'user', id, updates);
     
     res.json({ message: 'User updated successfully', user: updatedUser });
   } catch (error) {
@@ -289,7 +289,7 @@ router.delete('/users/:id', requireOwner, async (req, res) => {
     
     await db.delete(users).where(eq(users.id, id));
     
-    await logAdminAction(req.user.id, 'delete', 'user', id);
+    await logAdminAction(req.user!.id, 'delete', 'user', id);
     
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
@@ -321,7 +321,7 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
       })
       .where(eq(users.id, id));
     
-    await logAdminAction(req.user.id, 'assign_plan', 'user', id, { planId, endsAt, note });
+    await logAdminAction(req.user!.id, 'assign_plan', 'user', id, { planId, endsAt, note });
     
     res.json({ message: 'Plan assigned successfully' });
   } catch (error) {
@@ -361,7 +361,7 @@ router.post('/plans', requireOwner, async (req, res) => {
     
     const [newPlan] = await db.insert(subscriptionPlans).values(planData).returning();
     
-    await logAdminAction(req.user.id, 'create', 'plan', String(newPlan.id), planData);
+    await logAdminAction(req.user!.id, 'create', 'plan', String(newPlan.id), planData);
     
     res.json({ message: 'Plan created successfully', plan: newPlan });
   } catch (error) {
@@ -381,7 +381,7 @@ router.patch('/plans/:id', requireOwner, async (req, res) => {
       .where(eq(subscriptionPlans.id, Number(id)))
       .returning();
     
-    await logAdminAction(req.user.id, 'update', 'plan', id, updates);
+    await logAdminAction(req.user!.id, 'update', 'plan', id, updates);
     
     res.json({ message: 'Plan updated successfully', plan: updatedPlan });
   } catch (error) {
@@ -409,7 +409,7 @@ router.post('/plans/:id/features', requireOwner, async (req, res) => {
       await db.insert(planFeatures).values(planFeatureData);
     }
     
-    await logAdminAction(req.user.id, 'assign_features', 'plan', id, { featureIds });
+    await logAdminAction(req.user!.id, 'assign_features', 'plan', id, { featureIds });
     
     res.json({ message: 'Features assigned successfully' });
   } catch (error) {
@@ -437,7 +437,7 @@ router.post('/plans/:id/templates', requireOwner, async (req, res) => {
       await db.insert(planTemplates).values(planTemplateData);
     }
     
-    await logAdminAction(req.user.id, 'assign_templates', 'plan', id, { templateIds });
+    await logAdminAction(req.user!.id, 'assign_templates', 'plan', id, { templateIds });
     
     res.json({ message: 'Templates assigned successfully' });
   } catch (error) {
@@ -666,7 +666,7 @@ router.post('/icon-types', requireOwner, async (req, res) => {
       isActive: true
     }).returning();
     
-    await logAdminAction(req.user.id, 'create', 'icon_type', String(newIconType.id), { name, type });
+    await logAdminAction(req.user!.id, 'create', 'icon_type', String(newIconType.id), { name, type });
     
     res.json({ message: 'Icon type created successfully', iconType: newIconType });
   } catch (error) {
@@ -711,7 +711,7 @@ router.post('/icon-packs', requireOwner, async (req, res) => {
       isActive: true
     }).returning();
     
-    await logAdminAction(req.user.id, 'create', 'icon_pack', newPack.id, { name });
+    await logAdminAction(req.user!.id, 'create', 'icon_pack', newPack.id, { name });
     
     res.json({ message: 'Icon pack created successfully', pack: newPack });
   } catch (error) {
@@ -765,11 +765,256 @@ router.post('/icon-packs/:id/icons', requireOwner, async (req, res) => {
       isActive: true
     }).returning();
     
-    await logAdminAction(req.user.id, 'create', 'icon', String(newIcon.id), { packId: id, name });
+    await logAdminAction(req.user!.id, 'create', 'icon', String(newIcon.id), { packId: id, name });
     
     res.json({ message: 'Icon uploaded successfully', icon: newIcon });
   } catch (error) {
     console.error('Failed to upload icon:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// === PLANS ENDPOINTS ===
+
+// Get all subscription plans
+router.get('/plans', requireOwner, async (req, res) => {
+  try {
+    const { search, status, type } = req.query;
+    
+    let whereConditions = [];
+    
+    if (search) {
+      whereConditions.push(
+        or(
+          like(subscriptionPlans.name, `%${search}%`),
+          like(subscriptionPlans.planType, `%${search}%`)
+        )
+      );
+    }
+    
+    if (status === 'active') {
+      whereConditions.push(eq(subscriptionPlans.isActive, true));
+    } else if (status === 'inactive') {
+      whereConditions.push(eq(subscriptionPlans.isActive, false));
+    }
+    
+    if (type && type !== 'all') {
+      whereConditions.push(eq(subscriptionPlans.planType, type as any));
+    }
+    
+    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+    
+    const plans = await db.select().from(subscriptionPlans)
+      .where(whereClause)
+      .orderBy(desc(subscriptionPlans.createdAt));
+    
+    res.json(plans);
+  } catch (error) {
+    console.error('Failed to get plans:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Create new plan
+router.post('/plans', requireOwner, async (req, res) => {
+  try {
+    const { 
+      name, planType, price, currency, frequency, businessCardsLimit,
+      cardLabel, trialDays, customDurationDays, features, templates, 
+      isActive, stripePriceId 
+    } = req.body;
+    
+    if (!name || !planType) {
+      return res.status(400).json({ message: 'Name and plan type are required' });
+    }
+    
+    // Create the plan
+    const [newPlan] = await db.insert(subscriptionPlans).values({
+      name,
+      planType,
+      price: price || 0,
+      currency: currency || 'USD',
+      interval: frequency || 'monthly', // Keep for compatibility
+      frequency: frequency || 'monthly',
+      businessCardsLimit: businessCardsLimit || 1,
+      features: features || [], // Keep for backward compatibility
+      stripePriceId,
+      isActive: isActive !== undefined ? isActive : true,
+      cardLabel,
+      trialDays: trialDays || 0,
+      customDurationDays
+    }).returning();
+    
+    // Insert plan features if provided
+    if (features && features.length > 0) {
+      const planFeatureInserts = features.map((featureId: number) => ({
+        planId: newPlan.id,
+        featureId: featureId
+      }));
+      await db.insert(planFeatures).values(planFeatureInserts);
+    }
+    
+    // Insert plan templates if provided
+    if (templates && templates.length > 0) {
+      const planTemplateInserts = templates.map((templateId: string) => ({
+        planId: newPlan.id,
+        templateId: templateId
+      }));
+      await db.insert(planTemplates).values(planTemplateInserts);
+    }
+    
+    await logAdminAction(req.user!.id, 'create', 'plan', newPlan.id.toString(), { name, planType });
+    
+    res.json({ message: 'Plan created successfully', plan: newPlan });
+  } catch (error) {
+    console.error('Failed to create plan:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update plan
+router.put('/plans/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { 
+      name, planType, price, currency, frequency, businessCardsLimit,
+      cardLabel, trialDays, customDurationDays, features, templates, 
+      isActive, stripePriceId 
+    } = req.body;
+    
+    // Update the plan
+    const [updatedPlan] = await db.update(subscriptionPlans)
+      .set({
+        name,
+        planType,
+        price,
+        currency,
+        interval: frequency, // Keep for compatibility
+        frequency,
+        businessCardsLimit,
+        stripePriceId,
+        isActive,
+        cardLabel,
+        trialDays,
+        customDurationDays
+      })
+      .where(eq(subscriptionPlans.id, parseInt(id)))
+      .returning();
+    
+    if (!updatedPlan) {
+      return res.status(404).json({ message: 'Plan not found' });
+    }
+    
+    // Update plan features
+    if (features !== undefined) {
+      // Delete existing features
+      await db.delete(planFeatures).where(eq(planFeatures.planId, parseInt(id)));
+      
+      // Insert new features
+      if (features.length > 0) {
+        const planFeatureInserts = features.map((featureId: number) => ({
+          planId: parseInt(id),
+          featureId: featureId
+        }));
+        await db.insert(planFeatures).values(planFeatureInserts);
+      }
+    }
+    
+    // Update plan templates
+    if (templates !== undefined) {
+      // Delete existing templates
+      await db.delete(planTemplates).where(eq(planTemplates.planId, parseInt(id)));
+      
+      // Insert new templates
+      if (templates.length > 0) {
+        const planTemplateInserts = templates.map((templateId: string) => ({
+          planId: parseInt(id),
+          templateId: templateId
+        }));
+        await db.insert(planTemplates).values(planTemplateInserts);
+      }
+    }
+    
+    await logAdminAction(req.user!.id, 'update', 'plan', id, { name, planType });
+    
+    res.json({ message: 'Plan updated successfully', plan: updatedPlan });
+  } catch (error) {
+    console.error('Failed to update plan:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Delete plan
+router.delete('/plans/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if plan is being used by any users
+    const userPlanCount = await db.select({ count: count() })
+      .from(userPlans)
+      .where(eq(userPlans.planId, parseInt(id)));
+    
+    if (userPlanCount[0].count > 0) {
+      return res.status(400).json({ 
+        message: 'Cannot delete plan that is assigned to users. Please remove all user assignments first.' 
+      });
+    }
+    
+    // Delete plan features and templates first (cascade)
+    await db.delete(planFeatures).where(eq(planFeatures.planId, parseInt(id)));
+    await db.delete(planTemplates).where(eq(planTemplates.planId, parseInt(id)));
+    
+    // Delete the plan
+    await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, parseInt(id)));
+    
+    await logAdminAction(req.user!.id, 'delete', 'plan', id);
+    
+    res.json({ message: 'Plan deleted successfully' });
+  } catch (error) {
+    console.error('Failed to delete plan:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get all available features
+router.get('/features', requireOwner, async (req, res) => {
+  try {
+    const allFeatures = await db.select().from(features).orderBy(features.category, features.label);
+    res.json(allFeatures);
+  } catch (error) {
+    console.error('Failed to get features:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get plan features for a specific plan
+router.get('/plans/:id/features', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const planFeatureIds = await db.select({ featureId: planFeatures.featureId })
+      .from(planFeatures)
+      .where(eq(planFeatures.planId, parseInt(id)));
+    
+    res.json(planFeatureIds.map(pf => pf.featureId));
+  } catch (error) {
+    console.error('Failed to get plan features:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get plan templates for a specific plan
+router.get('/plans/:id/templates', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const planTemplateIds = await db.select({ templateId: planTemplates.templateId })
+      .from(planTemplates)
+      .where(eq(planTemplates.planId, parseInt(id)));
+    
+    res.json(planTemplateIds.map(pt => pt.templateId));
+  } catch (error) {
+    console.error('Failed to get plan templates:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -785,7 +1030,7 @@ router.get('/settings/:category', requireOwner, async (req, res) => {
     const mockSettings = {
       profile: {
         companyName: '2TalkLink',
-        adminEmail: req.user.email,
+        adminEmail: req.user!.email,
         supportEmail: 'support@2talklink.com'
       },
       payment: {
@@ -803,7 +1048,7 @@ router.get('/settings/:category', requireOwner, async (req, res) => {
       }
     };
     
-    res.json(mockSettings[category] || {});
+    res.json(mockSettings[category as keyof typeof mockSettings] || {});
   } catch (error) {
     console.error('Failed to get settings:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -816,7 +1061,7 @@ router.put('/settings/:category', requireOwner, async (req, res) => {
     const { category } = req.params;
     const settings = req.body;
     
-    await logAdminAction(req.user.id, 'update', 'settings', category, settings);
+    await logAdminAction(req.user!.id, 'update', 'settings', category, settings);
     
     res.json({ message: 'Settings updated successfully' });
   } catch (error) {
