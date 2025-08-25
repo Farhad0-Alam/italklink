@@ -357,11 +357,45 @@ router.get('/features', requireOwner, async (req, res) => {
 // Create plan
 router.post('/plans', requireOwner, async (req, res) => {
   try {
-    const planData = req.body;
+    const {
+      name, planType, price, currency, frequency, businessCardsLimit, 
+      features, isActive, stripePriceId, extraCardOptions, hasUnlimitedOption, 
+      unlimitedPrice, templateLimit, templates, trialDays, cardLabel, customDurationDays
+    } = req.body;
     
-    const [newPlan] = await db.insert(subscriptionPlans).values(planData).returning();
+    // Create the plan (store all new fields in features JSON until migration)
+    const [newPlan] = await db.insert(subscriptionPlans).values({
+      name,
+      planType,
+      price: price || 0,
+      currency: currency || 'USD',
+      interval: frequency || 'monthly',
+      businessCardsLimit: businessCardsLimit || 1,
+      features: {
+        featureList: features || [],
+        extraCardOptions: extraCardOptions || [],
+        hasUnlimitedOption: hasUnlimitedOption || false,
+        unlimitedPrice: unlimitedPrice || 0,
+        templateLimit: templateLimit || -1,
+        cardLabel: cardLabel || '',
+        trialDays: trialDays || 0,
+        customDurationDays: customDurationDays
+      },
+      stripePriceId,
+      isActive: isActive !== undefined ? isActive : true
+    }).returning();
     
-    await logAdminAction(req.user!.id, 'create', 'plan', String(newPlan.id), planData);
+    // Insert plan templates if provided
+    if (templates && templates.length > 0) {
+      const templateInserts = templates.map((templateId: string) => ({
+        planId: Number(newPlan.id),
+        templateId
+      }));
+      
+      await db.insert(planTemplates).values(templateInserts);
+    }
+    
+    await logAdminAction(req.user!.id, 'create', 'plan', String(newPlan.id), req.body);
     
     res.json({ message: 'Plan created successfully', plan: newPlan });
   } catch (error) {
