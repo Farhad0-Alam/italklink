@@ -54,6 +54,7 @@ export default function TemplateBuilder() {
   const [templateId, setTemplateId] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
   const [showHeaderBuilder, setShowHeaderBuilder] = useState(false);
+  const [previewCollapsed, setPreviewCollapsed] = useState(false);
   const [businessCardData, setBusinessCardData] = useState<BusinessCard>({
     id: 'template-preview',
     fullName: 'John Doe',
@@ -317,6 +318,14 @@ export default function TemplateBuilder() {
             <div className="flex items-center space-x-2">
               <Button 
                 variant="outline" 
+                onClick={() => setPreviewCollapsed(!previewCollapsed)}
+                size="sm"
+              >
+                <Layout className="h-4 w-4 mr-2" />
+                {previewCollapsed ? 'Show Preview' : 'Hide Preview'}
+              </Button>
+              <Button 
+                variant="outline" 
                 onClick={() => setPreviewMode(!previewMode)}
               >
                 <Eye className="h-4 w-4 mr-2" />
@@ -347,7 +356,7 @@ export default function TemplateBuilder() {
       <div className="flex flex-1">
 
         {/* Template Builder */}
-        <div className="flex-1 border-r border-gray-200 dark:border-gray-700">
+        <div className={`flex-1 ${!previewCollapsed ? 'border-r border-gray-200 dark:border-gray-700' : ''}`}>
           <div className="p-6">
             <FormBuilder 
               cardData={businessCardData}
@@ -358,7 +367,8 @@ export default function TemplateBuilder() {
         </div>
 
         {/* Live Preview Panel */}
-        <div className="w-96 bg-gray-50 dark:bg-gray-900/50">
+        {!previewCollapsed && (
+          <div className="w-96 bg-gray-50 dark:bg-gray-900/50">
           <div className="p-6">
             <div className="mb-4">
               <h3 className="font-semibold text-lg mb-2">Live Preview</h3>
@@ -389,7 +399,8 @@ export default function TemplateBuilder() {
               </Button>
             </div>
           </div>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
