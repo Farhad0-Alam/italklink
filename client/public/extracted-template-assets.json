@@ -1,0 +1,656 @@
+{
+  "icons": [
+    {
+      "id": "62e5145beb9cf514f4274144",
+      "name": "Pinterest",
+      "svgCode": "<svg width=\"51\" height=\"50\" viewBox=\"0 0 51 50\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M25 0C11.2 0 0 11.2 0 25C0 35.3 6.1 44.1 15 47.9C14.9 46.2 15 44 15.4 42.1C15.9 40 18.6 28.5 18.6 28.5C18.6 28.5 17.8 26.9 17.8 24.5C17.8 20.8 20 18 22.6 18C24.8 18 26 19.7 26 21.8C26 24 24.5 27.5 23.8 30.7C23.2 33.4 25.1 35.5 27.8 35.5C32.5 35.5 35.7 29.4 35.7 22.2C35.7 16.7 32 12.6 25.3 12.6C17.7 12.6 13 18.3 13 24.6C13 26.8 13.6 28.3 14.6 29.5C15 30 15.1 30.3 14.9 30.9C14.8 31.3 14.5 32.5 14.4 32.9C14.2 33.5 13.7 33.8 13.1 33.5C9.6 32.2 8 28.4 8 24.1C8 17 14 8.4 25.9 8.4C35.5 8.4 41.8 15.3 41.8 22.7C41.8 32.5 36.4 39.9 28.4 39.9C25.7 39.9 23.1 38.4 22.3 36.8C22.3 36.8 20.8 42.6 20.6 43.7C20.1 45.6 19 47.6 18.1 49C20.3 49.7 22.8 50 25.2 50C39 50 50.2 38.8 50.2 25C50.2 11.2 38.8 0 25 0Z\" fill=\"#E60023\"/></svg>",
+      "category": "social"
+    },
+    {
+      "id": "62e4c0b34c29494bc0d50791",
+      "name": "WhatsApp",
+      "svgCode": "<svg width=\"50\" height=\"50\" viewBox=\"0 0 50 50\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M0.0100334 50L3.39003 37.58C1.16288 33.7621 -0.00722658 29.42 3.35806e-05 25C3.35806e-05 11.1925 11.1925 0 25 0C38.8075 0 50 11.1925 50 25C50 38.8075 38.8075 50 25 50C20.582 50.0071 16.2417 48.8379 12.425 46.6125L0.0100334 50ZM15.9775 13.27C15.6547 13.29 15.3392 13.3751 15.05 13.52C14.7788 13.6736 14.5313 13.8656 14.315 14.09C14.015 14.3725 13.845 14.6175 13.6625 14.855C12.7386 16.0575 12.2415 17.5335 12.25 19.05C12.255 20.275 12.575 21.4675 13.075 22.5825C14.0975 24.8375 15.78 27.225 18.0025 29.4375C18.5375 29.97 19.06 30.505 19.6225 31.0025C22.381 33.4311 25.6682 35.1826 29.2225 36.1175L30.645 36.335C31.1075 36.36 31.57 36.325 32.035 36.3025C32.7631 36.2649 33.474 36.0677 34.1175 35.725C34.4449 35.5563 34.7644 35.3728 35.075 35.175C35.075 35.175 35.1825 35.105 35.3875 34.95C35.725 34.7 35.9325 34.5225 36.2125 34.23C36.42 34.015 36.6 33.7625 36.7375 33.475C36.9325 33.0675 37.1275 32.29 37.2075 31.6425C37.2675 31.1475 37.25 30.8775 37.2425 30.71C37.2325 30.4425 37.01 30.165 36.7675 30.0475L35.3125 29.395C35.3125 29.395 33.1375 28.4475 31.81 27.8425C31.67 27.7815 31.5201 27.7467 31.3675 27.74C31.1965 27.7224 31.0236 27.7417 30.8606 27.7964C30.6976 27.8512 30.5483 27.9402 30.4225 28.0575V28.0525C30.41 28.0525 30.2425 28.195 28.435 30.385C28.3313 30.5244 28.1884 30.6297 28.0245 30.6876C27.8607 30.7455 27.6833 30.7533 27.515 30.71C27.3521 30.6664 27.1925 30.6113 27.0375 30.545C26.7275 30.415 26.62 30.365 26.4075 30.2725L26.395 30.2675C24.9648 29.643 23.6406 28.7996 22.47 27.7675C22.155 27.4925 21.8625 27.1925 21.5625 26.9025C20.579 25.9606 19.7218 24.895 19.0125 23.7325L18.865 23.495C18.7591 23.3354 18.6734 23.1632 18.61 22.9825C18.515 22.615 18.7625 22.32 18.7625 22.32C18.7625 22.32 19.37 21.655 19.6525 21.295C19.8877 20.9958 20.1072 20.6845 20.31 20.3625C20.605 19.8875 20.6975 19.4 20.5425 19.0225C19.8425 17.3125 19.1175 15.61 18.3725 13.92C18.225 13.585 17.7875 13.345 17.39 13.2975C17.255 13.2825 17.12 13.2675 16.985 13.2575C16.6493 13.2408 16.3129 13.2442 15.9775 13.2675V13.27Z\" fill=\"#25D366\"/>\n</svg>",
+      "category": "social"
+    },
+    {
+      "id": "62e3de2ffacfa20b483f360e",
+      "name": "Email",
+      "svgCode": "<svg width=\"50\" height=\"36\" viewBox=\"0 0 50 36\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<path d=\"M50 30.8642V4.40917C50 1.96943 48.0306 0 45.5908 0H4.40917C1.96943 0 0 1.96943 0 4.40917V30.8642C0 33.3039 1.96943 35.2734 4.40917 35.2734H45.5908C48.0306 35.2734 50 33.3039 50 30.8642ZM46.1493 4.08583C47.1193 5.05585 46.5902 6.05526 46.0611 6.55497L34.127 17.4897L45.5908 29.4239C45.9436 29.8354 46.1787 30.4821 45.7672 30.923C45.3851 31.3933 44.5032 31.3639 44.1211 31.07L31.2757 20.1058L24.9853 25.8377L18.7243 20.1058L5.87889 31.07C5.49677 31.3639 4.61493 31.3933 4.2328 30.923C3.82128 30.4821 4.05644 29.8354 4.40917 29.4239L15.873 17.4897L3.93886 6.55497C3.40976 6.05526 2.88066 5.05585 3.85068 4.08583C4.82069 3.11581 5.82011 3.58613 6.64315 4.29159L24.9853 19.1064L43.3568 4.29159C44.1799 3.58613 45.1793 3.11581 46.1493 4.08583Z\" fill=\"#FF4C4C\"/>\n</svg>",
+      "category": "social"
+    },
+    {
+      "id": "62e3b2c459a9cc1ec40373d4",
+      "name": "Linkedin",
+      "svgCode": "<svg width=\"50\" height=\"50\" viewBox=\"0 0 50 50\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M27.7 21.9998C27.7 21.8998 27.6 21.8998 27.7 21.9998V21.9998Z\" fill=\"#007AB9\"/><path d=\"M25 0C11.2 0 0 11.2 0 25C0 38.8 11.2 50 25 50C38.8 50 50 38.8 50 25C50 11.2 38.8 0 25 0ZM18.4 37.3H12.4V19.3H18.4V37.3ZM15.4 16.9C13.4 16.9 12.1 15.5 12.1 13.8C12.1 12 13.4 10.7 15.5 10.7C17.5 10.7 18.8 12 18.8 13.8C18.8 15.5 17.5 16.9 15.4 16.9ZM39.9 37.3H33.9V27.7C33.9 25.3 33 23.6 30.9 23.6C29.2 23.6 28.3 24.7 27.8 25.8C27.6 26.2 27.6 26.7 27.6 27.3V37.3H21.6C21.6 37.3 21.7 21 21.6 19.3H27.6V21.8C28.4 20.6 29.8 18.8 33 18.8C36.9 18.8 39.9 21.4 39.9 26.9V37.3Z\" fill=\"#007AB9\"/></svg>",
+      "category": "social"
+    },
+    {
+      "id": "62e25088dd0b41431414321f",
+      "name": "Instagram",
+      "svgCode": "<svg width=\"50\" height=\"50\" viewBox=\"0 0 50 50\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M24.9933 16.6628C20.4028 16.6628 16.6566 20.409 16.6566 24.9995C16.6566 29.59 20.4028 33.3363 24.9933 33.3363C29.5838 33.3363 33.33 29.59 33.33 24.9995C33.33 20.409 29.5838 16.6628 24.9933 16.6628ZM49.9972 24.9995C49.9972 21.5473 50.0285 18.1263 49.8346 14.6803C49.6407 10.6776 48.7276 7.12529 45.8007 4.19837C42.8675 1.26519 39.3214 0.358344 35.3188 0.164467C31.8665 -0.0294104 28.4455 0.00186025 24.9995 0.00186025C21.5473 0.00186025 18.1263 -0.0294104 14.6803 0.164467C10.6776 0.358344 7.12529 1.27144 4.19837 4.19837C1.26519 7.13154 0.358344 10.6776 0.164467 14.6803C-0.0294104 18.1325 0.00186025 21.5535 0.00186025 24.9995C0.00186025 28.4455 -0.0294104 31.8728 0.164467 35.3188C0.358344 39.3214 1.27144 42.8738 4.19837 45.8007C7.13154 48.7339 10.6776 49.6407 14.6803 49.8346C18.1325 50.0285 21.5535 49.9972 24.9995 49.9972C28.4518 49.9972 31.8728 50.0285 35.3188 49.8346C39.3214 49.6407 42.8738 48.7276 45.8007 45.8007C48.7339 42.8675 49.6407 39.3214 49.8346 35.3188C50.0347 31.8728 49.9972 28.4518 49.9972 24.9995ZM24.9933 37.8267C17.8949 37.8267 12.1661 32.0979 12.1661 24.9995C12.1661 17.9011 17.8949 12.1724 24.9933 12.1724C32.0917 12.1724 37.8205 17.9011 37.8205 24.9995C37.8205 32.0979 32.0917 37.8267 24.9933 37.8267ZM38.3458 14.6427C36.6885 14.6427 35.3501 13.3043 35.3501 11.647C35.3501 9.98967 36.6885 8.65129 38.3458 8.65129C40.0031 8.65129 41.3415 9.98967 41.3415 11.647C41.342 12.0406 41.2649 12.4303 41.1145 12.794C40.9641 13.1577 40.7435 13.4881 40.4652 13.7664C40.1869 14.0447 39.8565 14.2653 39.4928 14.4157C39.1291 14.5661 38.7393 14.6432 38.3458 14.6427Z\" fill=\"#E1306C\"/></svg>",
+      "category": "social"
+    },
+    {
+      "id": "62e2507cdd0b414314143218",
+      "name": "Twitter",
+      "svgCode": "<svg width=\"50\" height=\"50\" viewBox=\"0 0 50 50\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M34.9 19.9C34.9 20.1 34.9 20.3 34.9 20.6C34.9 27.4 29.7 35.2 20.3 35.2C17.4 35.2 14.7 34.4 12.4 32.9C12.8 32.9 13.2 33 13.6 33C16 33 18.2 32.2 20 30.8C17.8 30.8 15.9 29.3 15.2 27.2C15.5 27.3 15.8 27.3 16.2 27.3C16.7 27.3 17.1 27.2 17.6 27.1C15.3 26.6 13.5 24.6 13.5 22.1V22C14.2 22.4 15 22.6 15.8 22.6C14.4 21.7 13.5 20.1 13.5 18.3C13.5 17.4 13.8 16.5 14.2 15.7C16.7 18.8 20.5 20.8 24.8 21.1C24.7 20.7 24.7 20.3 24.7 19.9C24.7 17.1 27 14.8 29.8 14.8C31.3 14.8 32.6 15.4 33.5 16.4C34.7 16.2 35.8 15.7 36.8 15.2C36.4 16.4 35.6 17.4 34.5 18C35.5 17.9 36.5 17.6 37.4 17.2C36.8 18.3 35.9 19.2 34.9 19.9ZM25 0C11.2 0 0 11.2 0 25C0 38.8 11.2 50 25 50C38.8 50 50 38.8 50 25C50 11.2 38.8 0 25 0Z\" fill=\"#1DA1F2\"/></svg>",
+      "category": "social"
+    },
+    {
+      "id": "62e24ee1dd0b4143141431f1",
+      "name": "Facebook",
+      "svgCode": "<svg width=\"50\" height=\"50\" viewBox=\"0 0 50 50\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M31.5 16.7H29.1C27.3 16.7 26.9 17.6 26.9 18.9V21.7H31.3L30.7 26.1H26.9V37.5H22.3V26.1H18.5V21.7H22.3V18.4C22.3 14.6 24.6 12.5 28 12.5C29.6 12.5 31 12.6 31.4 12.7V16.7H31.5ZM25 0C11.2 0 0 11.2 0 25C0 38.8 11.2 50 25 50C38.8 50 50 38.8 50 25C50 11.2 38.8 0 25 0Z\" fill=\"#1877F2\"/></svg>",
+      "category": "social"
+    }
+  ],
+  "colorSchemes": [
+    {
+      "id": "template_1_erasmus-theme_colors",
+      "name": "Erasmus Theme",
+      "primary": "#2bdcf0",
+      "secondary": "#2d2d38",
+      "accent": "#2bdcf0",
+      "background": "#ffffff",
+      "text": "#333333",
+      "heading": "#222222"
+    },
+    {
+      "id": "template_2_cosmos-theme_colors",
+      "name": "Cosmos Theme",
+      "primary": "#655292",
+      "secondary": "#ffeffe",
+      "accent": "#655292",
+      "background": "#ffffff",
+      "text": "#7b768d",
+      "heading": "#190548"
+    },
+    {
+      "id": "template_3_tokyo-theme_colors",
+      "name": "Tokyo Theme",
+      "primary": "#ffadb6",
+      "secondary": "#ffffff",
+      "accent": "#ffadb6",
+      "background": "#ffffff",
+      "text": "#333333",
+      "heading": "#222222"
+    },
+    {
+      "id": "template_4_icarus-theme_colors",
+      "name": "Icarus Theme",
+      "primary": "#a6a4bd",
+      "secondary": "#ffffff",
+      "accent": "#a6a4bd",
+      "background": "#ffffff",
+      "text": "#000000",
+      "heading": "#000000"
+    },
+    {
+      "id": "template_5_perseus-theme_colors",
+      "name": "Perseus Theme",
+      "primary": "#0d276b",
+      "secondary": "#e6eeff",
+      "accent": "#0d276b",
+      "background": "#ffffff",
+      "text": "#333333",
+      "heading": "#222222"
+    },
+    {
+      "id": "template_6_azul-marino-theme_colors",
+      "name": "Azul Marino Theme",
+      "primary": "#ffa726",
+      "secondary": "#b6bad3",
+      "accent": "#ffa726",
+      "background": "#272a41",
+      "text": "#ffffff",
+      "heading": "#ffffff"
+    },
+    {
+      "id": "template_7_erika-theme_colors",
+      "name": "Erika Theme",
+      "primary": "#2bdcf0",
+      "secondary": "#ffffff",
+      "accent": "#2bdcf0",
+      "background": "#ffffff",
+      "text": "#333333",
+      "heading": "#222222"
+    },
+    {
+      "id": "template_8_emerald-theme_colors",
+      "name": "Emerald Theme",
+      "primary": "#50e7a3",
+      "secondary": "#3b3c4e",
+      "accent": "#50e7a3",
+      "background": "#d4fded",
+      "text": "#333333",
+      "heading": "#222222"
+    },
+    {
+      "id": "template_9_cyan-theme_colors",
+      "name": "Cyan Theme",
+      "primary": "#2bdcf0",
+      "secondary": "#6e7182",
+      "accent": "#2bdcf0",
+      "background": "#1c1f30",
+      "text": "#6e7182",
+      "heading": "#dbdeec"
+    },
+    {
+      "id": "template_10_tibet-theme_colors",
+      "name": "Tibet Theme",
+      "primary": "#f9b530",
+      "secondary": "#2d2d38",
+      "accent": "#f9b530",
+      "background": "#fef2da",
+      "text": "#333333",
+      "heading": "#222222"
+    },
+    {
+      "id": "template_11_pentajaze-theme_colors",
+      "name": "PentaJaze Theme",
+      "primary": "#34b3f1",
+      "secondary": "#ffffff",
+      "accent": "#34b3f1",
+      "background": "#0b1b3f",
+      "text": "#333333",
+      "heading": "#222222"
+    },
+    {
+      "id": "template_12_gaudi-theme_colors",
+      "name": "Gaudi Theme",
+      "primary": "#5fe8b3",
+      "secondary": "#ffffff",
+      "accent": "#5fe8b3",
+      "background": "#2c2334",
+      "text": "#b6bad3",
+      "heading": "#ffffff"
+    },
+    {
+      "id": "template_13_genesis-theme_colors",
+      "name": "Genesis Theme",
+      "primary": "#b1cbc0",
+      "secondary": "#b1cbc0",
+      "accent": "#b1cbc0",
+      "background": "#26a69a",
+      "text": "#b1cbc0",
+      "heading": "#ffffff"
+    },
+    {
+      "id": "template_14_canarias-theme_colors",
+      "name": "Canarias Theme",
+      "primary": "#fbc82e",
+      "secondary": "#ffffff",
+      "accent": "#fbc82e",
+      "background": "#ffffff",
+      "text": "#333333",
+      "heading": "#222222"
+    },
+    {
+      "id": "template_15_eldorado-theme_colors",
+      "name": "Eldorado Theme",
+      "primary": "#2bdcf0",
+      "secondary": "#ffffff",
+      "accent": "#2bdcf0",
+      "background": "#ffffff",
+      "text": "#9dacb7",
+      "heading": "#2f4858"
+    },
+    {
+      "id": "template_16_argo-theme_colors",
+      "name": "Argo Theme",
+      "primary": "#3ab4f2",
+      "secondary": "#dff3fd",
+      "accent": "#3ab4f2",
+      "background": "#202b3c",
+      "text": "#787c7f",
+      "heading": "#3ab4f2"
+    },
+    {
+      "id": "template_17_angel-theme_colors",
+      "name": "Angel Theme",
+      "primary": "#2d2d38",
+      "secondary": "#effcfd",
+      "accent": "#2d2d38",
+      "background": "#ffffff",
+      "text": "#7f7f86",
+      "heading": "#2d2d38"
+    },
+    {
+      "id": "template_18_mars-theme_colors",
+      "name": "Mars Theme",
+      "primary": "#2bdcf0",
+      "secondary": "#2d2d38",
+      "accent": "#2bdcf0",
+      "background": "#ffffff",
+      "text": "#333333",
+      "heading": "#1d001c"
+    },
+    {
+      "id": "template_19_rabia-theme_colors",
+      "name": "Rabia Theme",
+      "primary": "#fb1c40",
+      "secondary": "#19081d",
+      "accent": "#fb1c40",
+      "background": "#ffffff",
+      "text": "#333333",
+      "heading": "#222222"
+    },
+    {
+      "id": "template_20_twister-theme_colors",
+      "name": "Twister Theme",
+      "primary": "#2bdcf0",
+      "secondary": "#ffffff",
+      "accent": "#2bdcf0",
+      "background": "#000000",
+      "text": "#b7b7b7",
+      "heading": "#ffffff"
+    },
+    {
+      "id": "template_21_orchid-theme_colors",
+      "name": "Orchid Theme",
+      "primary": "#2bdcf0",
+      "secondary": "#ffffff",
+      "accent": "#2bdcf0",
+      "background": "#ab47bc",
+      "text": "#ffffff",
+      "heading": "#ffffff"
+    },
+    {
+      "id": "template_22_miedo-theme_colors",
+      "name": "Miedo Theme",
+      "primary": "#ef5350",
+      "secondary": "#2d2d38",
+      "accent": "#ef5350",
+      "background": "#ffffff",
+      "text": "#000000",
+      "heading": "#ffffff"
+    },
+    {
+      "id": "template_23_furia-theme_colors",
+      "name": "Furia Theme",
+      "primary": "#2bdcf0",
+      "secondary": "#ffffff",
+      "accent": "#2bdcf0",
+      "background": "#ffffff",
+      "text": "#333333",
+      "heading": "#222222"
+    },
+    {
+      "id": "template_24_estima-theme_colors",
+      "name": "Estima Theme",
+      "primary": "#ec407a",
+      "secondary": "#da97af",
+      "accent": "#ec407a",
+      "background": "#ffffff",
+      "text": "#333333",
+      "heading": "#222222"
+    }
+  ],
+  "styles": [
+    {
+      "id": "template_1_erasmus-theme",
+      "templateName": "Erasmus Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Red Hat Display"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_2_cosmos-theme",
+      "templateName": "Cosmos Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_3_tokyo-theme",
+      "templateName": "Tokyo Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_4_icarus-theme",
+      "templateName": "Icarus Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_5_perseus-theme",
+      "templateName": "Perseus Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_6_azul-marino-theme",
+      "templateName": "Azul Marino Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_7_erika-theme",
+      "templateName": "Erika Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_8_emerald-theme",
+      "templateName": "Emerald Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_9_cyan-theme",
+      "templateName": "Cyan Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_10_tibet-theme",
+      "templateName": "Tibet Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_11_pentajaze-theme",
+      "templateName": "PentaJaze Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_12_gaudi-theme",
+      "templateName": "Gaudi Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_13_genesis-theme",
+      "templateName": "Genesis Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_14_canarias-theme",
+      "templateName": "Canarias Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_15_eldorado-theme",
+      "templateName": "Eldorado Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_16_argo-theme",
+      "templateName": "Argo Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_17_angel-theme",
+      "templateName": "Angel Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Caveat"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_18_mars-theme",
+      "templateName": "Mars Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_19_rabia-theme",
+      "templateName": "Rabia Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Yeseva One"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_20_twister-theme",
+      "templateName": "Twister Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_21_orchid-theme",
+      "templateName": "Orchid Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_22_miedo-theme",
+      "templateName": "Miedo Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_23_furia-theme",
+      "templateName": "Furia Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    },
+    {
+      "id": "template_24_estima-theme",
+      "templateName": "Estima Theme",
+      "fonts": {
+        "primary": "Inter, sans-serif",
+        "heading": "Nunito"
+      },
+      "spacing": {
+        "padding": "1rem",
+        "margin": "0",
+        "gap": "1rem"
+      },
+      "borderRadius": "0.5rem",
+      "shadows": "none"
+    }
+  ],
+  "metadata": {
+    "totalIcons": 7,
+    "totalColorSchemes": 24,
+    "totalStyles": 24,
+    "extractedAt": "2025-08-25T22:07:35.190Z"
+  }
+}

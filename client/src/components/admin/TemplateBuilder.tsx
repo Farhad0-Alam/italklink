@@ -21,13 +21,13 @@ import {
   Palette,
   Layout,
   Type,
-  Image as ImageIcon
+  Image as ImageIcon,
+  X
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { BusinessCard } from '@shared/schema';
-
-// Import existing form builder for template creation
-import { FormBuilder } from '@/components/form-builder';
+import HeaderBuilder from './HeaderBuilder';
+import { templateExtractor } from '@/utils/template-extractor';
 
 interface TemplateData {
   id?: string;
@@ -39,7 +39,6 @@ interface TemplateData {
 }
 
 export default function TemplateBuilder() {
-  console.log('🎯 TemplateBuilder component loaded! Location:', window.location.href);
   const [location, navigate] = useLocation();
   const [template, setTemplate] = useState<TemplateData>({
     name: '',
@@ -52,6 +51,7 @@ export default function TemplateBuilder() {
   const [isEditing, setIsEditing] = useState(false);
   const [templateId, setTemplateId] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
+  const [showHeaderBuilder, setShowHeaderBuilder] = useState(false);
   const [businessCardData, setBusinessCardData] = useState<BusinessCard>({
     id: 'template-preview',
     fullName: 'John Doe',
@@ -134,10 +134,8 @@ export default function TemplateBuilder() {
 
   // Extract template ID from URL params for editing
   useEffect(() => {
-    console.log('🔍 Checking URL params for editing...');
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('edit');
-    console.log('📝 Edit ID found:', editId);
     
     if (editId) {
       setIsEditing(true);
@@ -166,9 +164,7 @@ export default function TemplateBuilder() {
         
         // Convert 2TalkLink template data to our BusinessCard format
         if (data.templateData) {
-          console.log('2TalkLink template data:', data.templateData);
           const convertedData = convert2TalkLinkToBusinessCard(data.templateData);
-          console.log('Converted BusinessCard data:', convertedData);
           setBusinessCardData(prev => ({
             ...prev,
             ...convertedData

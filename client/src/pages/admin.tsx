@@ -5,6 +5,7 @@ import UsersPage from '@/components/admin/UsersPage';
 import PlansPage from '@/components/admin/PlansPage';
 import TemplatesPage from '@/components/admin/TemplatesPage';
 import TemplateBuilder from '@/components/admin/TemplateBuilder';
+import HeaderBuilder from '@/components/admin/HeaderBuilder';
 
 // Placeholder components for other admin pages (to be implemented)
 const IconPacksPage = () => <div className="p-6">Icon packs page coming soon...</div>;
@@ -17,8 +18,8 @@ export default function Admin() {
         <Route path="/admin" component={DashboardPage} />
         <Route path="/admin/users" component={UsersPage} />
         <Route path="/admin/plans" component={PlansPage} />
+        <Route path="/admin/templates/header-builder" component={HeaderBuilder} />
         <Route path="/admin/templates/builder" component={TemplateBuilder} />
-        <Route path="/admin/templates/builder/:rest*" component={TemplateBuilder} />
         <Route path="/admin/templates" component={TemplatesPage} />
         <Route path="/admin/icon-packs" component={IconPacksPage} />
         <Route path="/admin/settings" component={SettingsPage} />
