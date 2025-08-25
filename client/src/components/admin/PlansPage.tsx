@@ -606,15 +606,6 @@ export default function PlansPage() {
         </div>
       )}
 
-      {/* Custom Selection Toggle */}
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="customSelection"
-          checked={true}
-          onCheckedChange={() => {}}
-        />
-        <Label htmlFor="customSelection">Custom selection</Label>
-      </div>
 
       {/* Stripe Price ID */}
       <div className="grid grid-cols-2 gap-4">
@@ -754,30 +745,6 @@ export default function PlansPage() {
         </div>
       </div>
 
-      {/* Unlimited Option */}
-      <div className="space-y-3">
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="hasUnlimited"
-            checked={formData.hasUnlimitedOption}
-            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, hasUnlimitedOption: checked }))}
-          />
-          <Label htmlFor="hasUnlimited">Offer Unlimited Cards Option</Label>
-        </div>
-        
-        {formData.hasUnlimitedOption && (
-          <div className="space-y-2">
-            <Label htmlFor="unlimitedPrice">Unlimited Cards Price (in cents)</Label>
-            <Input
-              id="unlimitedPrice"
-              type="number"
-              placeholder="9900"
-              value={formData.unlimitedPrice}
-              onChange={(e) => setFormData(prev => ({ ...prev, unlimitedPrice: Number(e.target.value) }))}
-            />
-          </div>
-        )}
-      </div>
 
       {/* Templates Selection */}
       <div className="space-y-3">
