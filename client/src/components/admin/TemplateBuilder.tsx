@@ -353,54 +353,57 @@ export default function TemplateBuilder() {
       </header>
 
       {/* Main Content Area */}
-      <div className="flex flex-1">
-
-        {/* Template Builder */}
-        <div className={`flex-1 ${!previewCollapsed ? 'border-r border-gray-200 dark:border-gray-700' : ''}`}>
-          <div className="p-6">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className={`${!previewCollapsed ? 'grid lg:grid-cols-2 gap-8' : 'grid grid-cols-1'}`}>
+          
+          {/* Template Builder - Left Column */}
+          <div className="space-y-6">
             <FormBuilder 
               cardData={businessCardData}
               onDataChange={setBusinessCardData}
               onGenerateQR={() => {}}
             />
           </div>
+
+          {/* Live Preview Panel - Right Column */}
+          {!previewCollapsed && (
+            <div className="space-y-6">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 sticky top-24">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold flex items-center">
+                  <Eye className="text-blue-500 mr-3 h-6 w-6" />
+                  Live Preview
+                </CardTitle>
+                <CardDescription>
+                  Real-time preview of your template
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Card Preview Container */}
+                <div className="flex justify-center">
+                  <BusinessCardComponent 
+                    data={businessCardData}
+                    showQR={false}
+                    isInteractive={false}
+                  />
+                </div>
+
+                {/* Preview Actions */}
+                <div className="space-y-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setPreviewMode(!previewMode)}
+                    className="w-full"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    {previewMode ? 'Edit Mode' : 'Preview Mode'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            </div>
+          )}
         </div>
-
-        {/* Live Preview Panel */}
-        {!previewCollapsed && (
-          <div className="w-96 bg-gray-50 dark:bg-gray-900/50">
-          <div className="p-6">
-            <div className="mb-4">
-              <h3 className="font-semibold text-lg mb-2">Live Preview</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Real-time preview of your template
-              </p>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-              <div className="max-w-sm mx-auto scale-75 transform-gpu">
-                <BusinessCardComponent 
-                  data={businessCardData}
-                  showQR={false}
-                  isInteractive={false}
-                />
-              </div>
-            </div>
-
-            <div className="mt-4 space-y-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setPreviewMode(!previewMode)}
-                className="w-full"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                {previewMode ? 'Edit Mode' : 'Preview Mode'}
-              </Button>
-            </div>
-          </div>
-          </div>
-        )}
       </div>
     </div>
   );
