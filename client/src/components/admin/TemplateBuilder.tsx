@@ -376,13 +376,13 @@ export default function TemplateBuilder() {
             <div className="space-y-6">
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 sticky top-24">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold flex items-center">
-                  <Eye className="text-blue-500 mr-3 h-6 w-6" />
+                <CardTitle className="text-xl font-bold flex items-center text-green-600">
+                  <div className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center mr-3">
+                    <Eye className="text-white h-4 w-4" />
+                  </div>
                   Live Preview
+                  <Share2 className="ml-auto h-5 w-5 text-gray-400" />
                 </CardTitle>
-                <CardDescription>
-                  Real-time preview of your template
-                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Card Preview Container - iPhone-like dimensions */}
@@ -398,8 +398,62 @@ export default function TemplateBuilder() {
                   </div>
                 </div>
 
-                {/* Template Actions */}
+                {/* Template Actions - Original Design */}
                 <div className="space-y-3">
+                  {/* Download PNG Button */}
+                  <Button 
+                    variant="default" 
+                    onClick={async () => {
+                      if (!cardRef.current) return;
+                      try {
+                        const dataUrl = await htmlToImage.toPng(cardRef.current, {
+                          quality: 0.95,
+                          width: 400,
+                          height: 600,
+                          backgroundColor: '#ffffff'
+                        });
+                        
+                        // Create download link
+                        const link = document.createElement('a');
+                        link.download = `${businessCardData.fullName || 'business-card'}.png`;
+                        link.href = dataUrl;
+                        link.click();
+                      } catch (error) {
+                        console.error('Failed to download image:', error);
+                      }
+                    }}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download PNG
+                  </Button>
+                  
+                  {/* Share Link Button */}
+                  <Button 
+                    variant="default" 
+                    onClick={() => {
+                      const shareUrl = generateShareUrl(businessCardData);
+                      navigator.clipboard.writeText(shareUrl);
+                    }}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share Link
+                  </Button>
+                  
+                  {/* Get Full Smart Card Button */}
+                  <Button 
+                    variant="default" 
+                    onClick={() => window.open('https://2talklink.com', '_blank')}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    <div className="flex items-center justify-center">
+                      <span className="mr-2">💳</span>
+                      Get a Full Smart Card on 2TalkLink →
+                    </div>
+                  </Button>
+                  
+                  {/* Set Thumb Button - For Admin Use */}
                   <Button 
                     variant="outline" 
                     onClick={async () => {
@@ -444,22 +498,24 @@ export default function TemplateBuilder() {
                         setIsGeneratingThumb(false);
                       }
                     }}
-                    className="w-full"
+                    className="w-full border-2 border-dashed border-gray-300"
                     disabled={isGeneratingThumb}
                   >
                     <ImageIcon className="h-4 w-4 mr-2" />
-                    {isGeneratingThumb ? 'Generating...' : 'Design Set Thumb'}
+                    {isGeneratingThumb ? 'Generating...' : 'Set Thumb'}
                   </Button>
+                  
+                  {/* See Preview Button */}
                   <Button 
-                    variant="default" 
+                    variant="outline" 
                     onClick={() => {
                       const shareUrl = generateShareUrl(businessCardData);
                       window.open(shareUrl, '_blank');
                     }}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    className="w-full border-2 border-dashed border-gray-300"
                   >
                     <Eye className="h-4 w-4 mr-2" />
-                    Preview Template
+                    See Preview
                   </Button>
                 </div>
               </CardContent>
