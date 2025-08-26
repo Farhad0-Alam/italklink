@@ -519,7 +519,7 @@ END:VCARD`;
                   document.body.removeChild(link);
                   URL.revokeObjectURL(url);
                 }}
-                className="py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{
                   backgroundColor: data.secondaryColor || data.accentColor || '#16a34a',
                   color: data.tertiaryColor || '#ffffff',
@@ -535,7 +535,7 @@ END:VCARD`;
               {/* Share Button */}
               <button 
                 onClick={() => handleShare()}
-                className="py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{ 
                   backgroundColor: data.brandColor || '#22c55e',
                   color: data.tertiaryColor || '#ffffff',
@@ -554,7 +554,7 @@ END:VCARD`;
               <div className="px-4">
                 <button 
                   onClick={() => handleContactAction('website', data.website)}
-                  className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                  className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
@@ -573,7 +573,7 @@ END:VCARD`;
               {data.whatsapp && (
                 <button 
                   onClick={() => handleContactAction('whatsapp', data.whatsapp)}
-                  className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                  className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
@@ -589,7 +589,7 @@ END:VCARD`;
               {data.facebook && (
                 <button 
                   onClick={() => handleContactAction('facebook', data.facebook)}
-                  className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                  className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
@@ -605,7 +605,7 @@ END:VCARD`;
               {data.instagram && (
                 <button 
                   onClick={() => handleContactAction('instagram', data.instagram)}
-                  className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                  className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
@@ -621,7 +621,7 @@ END:VCARD`;
               {data.linkedin && (
                 <button 
                   onClick={() => handleContactAction('linkedin', data.linkedin)}
-                  className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                  className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
@@ -637,7 +637,7 @@ END:VCARD`;
               {data.twitter && (
                 <button 
                   onClick={() => handleContactAction('twitter', data.twitter)}
-                  className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                  className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
@@ -656,7 +656,7 @@ END:VCARD`;
                   <button 
                     key={social.id}
                     onClick={() => handleContactAction(social.platform, social.value)}
-                    className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                    className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                     style={{ 
                       backgroundColor: data.brandColor || '#22c55e',
                       color: data.tertiaryColor || '#ffffff',
@@ -682,39 +682,6 @@ END:VCARD`;
             </div>
           )}
 
-          {/* Company & Contact Info */}
-          {(data.company || data.website || data.location) && (
-            <Collapsible open={expandedSections.company}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('company')}
-                className="w-full mb-4"
-              >
-                <div className="flex items-center justify-center space-x-2">
-                  <span 
-                    className="text-sm font-medium"
-                    style={{ color: data.brandColor || '#22c55e' }}
-                  >
-                    Company Info
-                  </span>
-                  <i className={`fas fa-chevron-${expandedSections.company ? 'up' : 'down'} text-xs`}></i>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-2 mb-6">
-                {data.company && <p className="text-sm text-slate-600">{data.company}</p>}
-                {data.website && (
-                  <button 
-                    onClick={() => handleContactAction('website', data.website)}
-                    className="text-sm underline"
-                    style={{ color: data.brandColor || '#22c55e' }}
-                    data-testid="button-website"
-                  >
-                    Visit Website
-                  </button>
-                )}
-                {data.location && <p className="text-sm text-slate-600">{data.location}</p>}
-              </CollapsibleContent>
-            </Collapsible>
-          )}
 
           
           {/* QR Code */}
