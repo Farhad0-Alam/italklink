@@ -394,26 +394,29 @@ export default function TemplateBuilder() {
                   </div>
                 </div>
 
-                {/* Preview Actions */}
+                {/* Template Actions */}
                 <div className="space-y-3">
                   <Button 
                     variant="outline" 
-                    onClick={() => setPreviewMode(!previewMode)}
+                    onClick={() => {
+                      // Generate template thumbnail functionality
+                      console.log('Design Set Thumb clicked');
+                    }}
                     className="w-full"
                   >
-                    <Eye className="h-4 w-4 mr-2" />
-                    {previewMode ? 'Edit Mode' : 'Preview Mode'}
+                    <ImageIcon className="h-4 w-4 mr-2" />
+                    Design Set Thumb
                   </Button>
                   <Button 
-                    variant="outline" 
+                    variant="default" 
                     onClick={() => {
                       const shareUrl = generateShareUrl(businessCardData);
                       window.open(shareUrl, '_blank');
                     }}
-                    className="w-full"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
                   >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Open Preview in New Tab
+                    <Eye className="h-4 w-4 mr-2" />
+                    Preview Template
                   </Button>
                 </div>
               </CardContent>
