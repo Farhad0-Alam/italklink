@@ -272,6 +272,56 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
     }
   };
 
+  const handleSVGUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    elementId: string
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.svg')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a valid SVG file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const svgContent = await file.text();
+      
+      // Extract viewBox if it exists
+      const viewBoxMatch = svgContent.match(/viewBox="([^"]+)"/);
+      const viewBox = viewBoxMatch ? viewBoxMatch[1] : "0 0 100 100";
+      
+      // Extract the inner SVG content (remove <svg> tags)
+      const svgCodeMatch = svgContent.match(/<svg[^>]*>(.*?)<\/svg>/s);
+      const svgCode = svgCodeMatch ? svgCodeMatch[1] : svgContent;
+
+      updateElement(elementId, {
+        content: {
+          ...headerTemplate.elements.find(el => el.id === elementId)?.content,
+          shapeName: `Custom: ${file.name}`,
+          svgCode: svgCode,
+          viewBox: viewBox,
+          isCustom: true
+        }
+      });
+      
+      toast({ title: "SVG uploaded", description: "Your custom SVG has been uploaded successfully" });
+    } catch (e) {
+      toast({
+        title: "Upload failed",
+        description: e instanceof Error ? e.message : "Failed to upload SVG",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const selectedElementData = selectedElement 
     ? headerTemplate.elements.find(el => el.id === selectedElement)
     : null;
@@ -655,33 +705,64 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
                     
                     <div>
                       <Label className="text-white">Select Shape</Label>
-                      <Select
-                        value={element.content.shapeName || ''}
-                        onValueChange={(shapeName) => {
-                          const shape = SVG_SHAPES_LIBRARY.find(s => s.name === shapeName);
-                          if (shape) {
-                            updateElement(element.id, {
-                              content: {
-                                ...element.content,
-                                shapeName,
-                                svgCode: shape.svgCode,
-                                viewBox: shape.viewBox
-                              }
-                            });
-                          }
-                        }}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2 max-h-64 overflow-y-auto">
+                        {SVG_SHAPES_LIBRARY.map(shape => {
+                          const isSelected = element.content.shapeName === shape.name;
+                          const previewSvg = applySVGShapeColors(shape.svgCode, { color1: '#22c55e', color2: '#16a34a' });
+                          
+                          return (
+                            <div
+                              key={shape.name}
+                              className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
+                                isSelected 
+                                  ? "border-purple-500 bg-purple-500/10" 
+                                  : "border-slate-600 bg-slate-700 hover:border-purple-400"
+                              }`}
+                              onClick={() => {
+                                updateElement(element.id, {
+                                  content: {
+                                    ...element.content,
+                                    shapeName: shape.name,
+                                    svgCode: shape.svgCode,
+                                    viewBox: shape.viewBox
+                                  }
+                                });
+                              }}
+                            >
+                              <div className="aspect-square mb-2 bg-white rounded flex items-center justify-center p-2">
+                                <div
+                                  style={{ width: '100%', height: '100%' }}
+                                  dangerouslySetInnerHTML={{ 
+                                    __html: `<svg viewBox="${shape.viewBox}" style="width: 100%; height: 100%;">${previewSvg}</svg>` 
+                                  }}
+                                />
+                              </div>
+                              <p className="text-xs text-white text-center font-medium">{shape.name}</p>
+                              <p className="text-xs text-slate-400 text-center">{shape.category}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-white">Upload Custom SVG</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById(`svg-upload-${element.id}`)?.click()}
+                        className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full mt-2"
                       >
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                          <SelectValue placeholder="Choose a shape..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {SVG_SHAPES_LIBRARY.map(shape => (
-                            <SelectItem key={shape.name} value={shape.name}>
-                              {shape.name} ({shape.category})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <i className="fas fa-upload mr-2" />
+                        Upload SVG File
+                      </Button>
+                      <input
+                        id={`svg-upload-${element.id}`}
+                        type="file"
+                        accept=".svg"
+                        onChange={(e) => handleSVGUpload(e, element.id)}
+                        className="hidden"
+                      />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">

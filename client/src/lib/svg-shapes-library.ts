@@ -306,6 +306,298 @@ export const SVG_SHAPES_LIBRARY: SVGShapeDefinition[] = [
     },
     tags: ['star', 'burst', 'energy', 'radial', 'creative'],
     difficulty: 'advanced'
+  },
+  {
+    id: 'lightning_bolt',
+    name: 'Lightning Bolt',
+    category: 'creative',
+    description: 'Dynamic lightning bolt shape',
+    svgCode: `<polygon points="120,10 80,90 100,90 60,180 100,100 80,100" fill="{color1}"/>`,
+    viewBox: "0 0 180 190",
+    customizableProps: {
+      colors: ['color1'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['lightning', 'bolt', 'energy', 'power', 'electric'],
+    difficulty: 'easy'
+  },
+  {
+    id: 'spiral_galaxy',
+    name: 'Spiral Galaxy',
+    category: 'creative',
+    description: 'Cosmic spiral pattern',
+    svgCode: `<g transform="translate(100,100)">
+      <path d="M0,0 Q-20,-40 -60,-30 Q-80,10 -40,50 Q20,60 50,20 Q40,-30 0,-40 Q-30,-20 -20,20 Q10,30 20,0" fill="{color1}" opacity="0.8"/>
+      <circle cx="0" cy="0" r="8" fill="{color2}"/>
+    </g>`,
+    viewBox: "0 0 200 200",
+    customizableProps: {
+      colors: ['color1', 'color2'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['spiral', 'galaxy', 'space', 'cosmic', 'abstract'],
+    difficulty: 'advanced'
+  },
+
+  // === MORE GEOMETRIC SHAPES ===
+  {
+    id: 'pentagon_regular',
+    name: 'Pentagon',
+    category: 'geometric',
+    description: 'Regular pentagon shape',
+    svgCode: `<polygon points="100,20 150,60 130,120 70,120 50,60" fill="{color1}"/>`,
+    viewBox: "0 0 200 140",
+    customizableProps: {
+      colors: ['color1'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['pentagon', 'geometric', 'polygon', 'shape'],
+    difficulty: 'easy'
+  },
+  {
+    id: 'octagon_regular',
+    name: 'Octagon',
+    category: 'geometric',
+    description: 'Regular octagon shape',
+    svgCode: `<polygon points="100,30 140,30 170,60 170,100 140,130 100,130 70,100 70,60" fill="{color1}"/>`,
+    viewBox: "0 0 240 160",
+    customizableProps: {
+      colors: ['color1'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['octagon', 'geometric', 'polygon', 'eight-sided'],
+    difficulty: 'easy'
+  },
+  {
+    id: 'star_five_point',
+    name: 'Five Point Star',
+    category: 'geometric',
+    description: 'Classic five-pointed star',
+    svgCode: `<polygon points="100,10 120,70 180,70 135,110 155,170 100,135 45,170 65,110 20,70 80,70" fill="{color1}"/>`,
+    viewBox: "0 0 200 180",
+    customizableProps: {
+      colors: ['color1'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['star', 'five-point', 'classic', 'geometric'],
+    difficulty: 'easy'
+  },
+  {
+    id: 'heart_shape',
+    name: 'Heart',
+    category: 'creative',
+    description: 'Classic heart shape',
+    svgCode: `<path d="M100,180 C100,180 20,120 20,80 C20,40 50,20 80,40 C90,30 110,30 120,40 C150,20 180,40 180,80 C180,120 100,180 100,180 Z" fill="{color1}"/>`,
+    viewBox: "0 0 200 190",
+    customizableProps: {
+      colors: ['color1'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['heart', 'love', 'romantic', 'classic'],
+    difficulty: 'medium'
+  },
+  {
+    id: 'infinity_symbol',
+    name: 'Infinity',
+    category: 'abstract',
+    description: 'Infinity symbol shape',
+    svgCode: `<path d="M60,100 C20,60 20,40 60,40 C100,40 140,60 180,60 C220,60 220,80 180,80 C140,80 100,100 60,100 C20,100 20,120 60,120 C100,120 140,100 180,100 C220,100 220,140 180,140 C140,140 100,120 60,120 C20,120 20,100 60,100" fill="{color1}"/>`,
+    viewBox: "0 0 240 180",
+    customizableProps: {
+      colors: ['color1'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['infinity', 'symbol', 'endless', 'loop'],
+    difficulty: 'medium'
+  },
+
+  // === MORE WAVE VARIATIONS ===
+  {
+    id: 'wave_sharp',
+    name: 'Sharp Wave',
+    category: 'waves',
+    description: 'Angular wave with sharp peaks',
+    svgCode: `<polygon points="0,100 100,50 200,100 300,50 400,100 500,50 600,100 600,150 0,150" fill="{color1}"/>`,
+    viewBox: "0 0 600 150",
+    customizableProps: {
+      colors: ['color1'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['wave', 'sharp', 'angular', 'zigzag'],
+    difficulty: 'easy'
+  },
+  {
+    id: 'wave_curves',
+    name: 'Curved Waves',
+    category: 'waves',
+    description: 'Smooth curved wave pattern',
+    svgCode: `<path d="M0,80 Q150,20 300,80 T600,80 L600,150 L0,150 Z" fill="{color1}"/>`,
+    viewBox: "0 0 600 150",
+    customizableProps: {
+      colors: ['color1'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['wave', 'curved', 'smooth', 'flowing'],
+    difficulty: 'medium'
+  },
+
+  // === BUSINESS/PROFESSIONAL SHAPES ===
+  {
+    id: 'shield_badge',
+    name: 'Shield Badge',
+    category: 'professional',
+    description: 'Professional shield emblem',
+    svgCode: `<path d="M100,20 L160,40 L160,100 Q160,140 100,160 Q40,140 40,100 L40,40 Z" fill="{color1}" stroke="{color2}" stroke-width="2"/>`,
+    viewBox: "0 0 200 180",
+    customizableProps: {
+      colors: ['color1', 'color2'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['shield', 'badge', 'security', 'protection', 'professional'],
+    difficulty: 'medium'
+  },
+  {
+    id: 'gear_cog',
+    name: 'Gear Cog',
+    category: 'professional',
+    description: 'Technical gear wheel',
+    svgCode: `<g transform="translate(100,100)">
+      <polygon points="-60,-10 -60,10 -80,15 -80,35 -60,40 -60,60 -40,60 -35,80 -15,80 -10,60 10,60 15,80 35,80 40,60 60,60 60,40 80,35 80,15 60,10 60,-10 40,-10 35,-30 15,-30 10,-10 -10,-10 -15,-30 -35,-30 -40,-10" fill="{color1}"/>
+      <circle cx="0" cy="0" r="25" fill="{color2}"/>
+    </g>`,
+    viewBox: "0 0 200 200",
+    customizableProps: {
+      colors: ['color1', 'color2'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['gear', 'cog', 'mechanical', 'technical', 'industry'],
+    difficulty: 'advanced'
+  },
+  {
+    id: 'trophy_cup',
+    name: 'Trophy Cup',
+    category: 'professional',
+    description: 'Achievement trophy shape',
+    svgCode: `<g>
+      <ellipse cx="100" cy="40" rx="40" ry="20" fill="{color1}"/>
+      <rect x="70" y="40" width="60" height="60" fill="{color1}"/>
+      <ellipse cx="100" cy="100" rx="30" ry="15" fill="{color1}"/>
+      <rect x="90" y="100" width="20" height="30" fill="{color2}"/>
+      <rect x="70" y="130" width="60" height="10" fill="{color2}"/>
+    </g>`,
+    viewBox: "0 0 200 150",
+    customizableProps: {
+      colors: ['color1', 'color2'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['trophy', 'award', 'achievement', 'winner', 'success'],
+    difficulty: 'medium'
+  },
+
+  // === NATURE ADDITIONS ===
+  {
+    id: 'sun_rays',
+    name: 'Sun with Rays',
+    category: 'nature',
+    description: 'Bright sun with radiating rays',
+    svgCode: `<g transform="translate(100,100)">
+      <circle cx="0" cy="0" r="30" fill="{color1}"/>
+      <g stroke="{color2}" stroke-width="4" stroke-linecap="round">
+        <line x1="0" y1="-55" x2="0" y2="-40"/>
+        <line x1="39" y1="-39" x2="28" y2="-28"/>
+        <line x1="55" y1="0" x2="40" y2="0"/>
+        <line x1="39" y1="39" x2="28" y2="28"/>
+        <line x1="0" y1="55" x2="0" y2="40"/>
+        <line x1="-39" y1="39" x2="-28" y2="28"/>
+        <line x1="-55" y1="0" x2="-40" y2="0"/>
+        <line x1="-39" y1="-39" x2="-28" y2="-28"/>
+      </g>
+    </g>`,
+    viewBox: "0 0 200 200",
+    customizableProps: {
+      colors: ['color1', 'color2'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['sun', 'rays', 'sunshine', 'bright', 'energy'],
+    difficulty: 'medium'
+  },
+  {
+    id: 'cloud_fluffy',
+    name: 'Fluffy Cloud',
+    category: 'nature',
+    description: 'Soft fluffy cloud shape',
+    svgCode: `<path d="M60,80 Q40,60 60,40 Q80,20 120,30 Q160,20 180,40 Q200,50 190,70 Q200,90 170,90 L70,90 Q40,90 60,80 Z" fill="{color1}"/>`,
+    viewBox: "0 0 240 110",
+    customizableProps: {
+      colors: ['color1'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['cloud', 'fluffy', 'sky', 'weather', 'soft'],
+    difficulty: 'medium'
+  },
+  {
+    id: 'tree_simple',
+    name: 'Simple Tree',
+    category: 'nature',
+    description: 'Minimalist tree silhouette',
+    svgCode: `<g>
+      <rect x="95" y="120" width="10" height="40" fill="{color2}"/>
+      <circle cx="100" cy="100" r="30" fill="{color1}"/>
+      <circle cx="85" cy="85" r="20" fill="{color1}"/>
+      <circle cx="115" cy="85" r="20" fill="{color1}"/>
+    </g>`,
+    viewBox: "0 0 200 170",
+    customizableProps: {
+      colors: ['color1', 'color2'],
+      fillable: true,
+      strokeable: true,
+      scalable: true,
+      rotatable: true
+    },
+    tags: ['tree', 'nature', 'plant', 'green', 'environment'],
+    difficulty: 'easy'
   }
 ];
 
