@@ -75,54 +75,13 @@ export const Share: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-50">
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">Shared Digital Business Card</h1>
-          <p className="text-slate-300">View and connect with this professional</p>
-        </div>
-        
-        {/* Shared Card Display */}
-        <div className="mb-8 flex justify-center">
+        {/* Shared Card Display - Clean Layout */}
+        <div className="flex justify-center">
           <BusinessCardComponent
             data={cardData}
             showQR={true}
             isInteractive={true}
           />
-        </div>
-        
-        {/* CTA Banner */}
-        <Card className="bg-gradient-to-r from-talklink-500 to-talklink-600 border-0 text-white">
-          <CardContent className="p-6 text-center">
-            <h3 className="text-xl font-bold mb-2">Want your own smart business card?</h3>
-            <p className="mb-4 opacity-90">Create unlimited cards, track analytics, and more with 2TalkLink</p>
-            <Button
-              asChild
-              className="bg-white text-talklink-600 hover:bg-slate-100 font-semibold"
-              data-testid="button-get-started"
-              onClick={() => logEvent("cta_click_share_page")}
-            >
-              <a 
-                href="https://2talklink.com/?utm_source=preview-app&utm_medium=cta&utm_campaign=free-tool" 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                Get Started Free
-              </a>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Install App Floating Button */}
-        <div className="fixed bottom-6 right-6 z-50">
-          <a 
-            href="https://2talklink.com/?utm_source=preview-app&utm_medium=fab&utm_campaign=free-tool" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="bg-talklink-500 hover:bg-talklink-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 flex items-center space-x-2"
-            data-testid="button-install-app"
-          >
-            <i className="fas fa-mobile-alt"></i>
-            <span className="hidden sm:inline font-medium">Install App</span>
-          </a>
         </div>
       </div>
     </div>
