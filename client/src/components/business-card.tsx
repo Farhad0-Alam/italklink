@@ -519,11 +519,11 @@ END:VCARD`;
                   document.body.removeChild(link);
                   URL.revokeObjectURL(url);
                 }}
-                className="py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                className="py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{
                   backgroundColor: data.secondaryColor || data.accentColor || '#16a34a',
                   color: data.tertiaryColor || '#ffffff',
-                  borderBottom: `2px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`,
+                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`,
                   width: '70%'
                 }}
                 data-testid="button-add-to-contacts"
@@ -535,11 +535,11 @@ END:VCARD`;
               {/* Share Button */}
               <button 
                 onClick={() => handleShare()}
-                className="py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                className="py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{ 
                   backgroundColor: data.brandColor || '#22c55e',
                   color: data.tertiaryColor || '#ffffff',
-                  borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
+                  borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
                   width: '30%'
                 }}
                 data-testid="button-share-main"
@@ -554,11 +554,11 @@ END:VCARD`;
               <div className="px-4">
                 <button 
                   onClick={() => handleContactAction('website', data.website)}
-                  className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                  className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
+                    borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
                   data-testid="button-website"
                 >
@@ -573,11 +573,11 @@ END:VCARD`;
               {data.whatsapp && (
                 <button 
                   onClick={() => handleContactAction('whatsapp', data.whatsapp)}
-                  className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                  className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
+                    borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
                   data-testid="button-social-whatsapp"
                 >
@@ -589,11 +589,11 @@ END:VCARD`;
               {data.facebook && (
                 <button 
                   onClick={() => handleContactAction('facebook', data.facebook)}
-                  className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                  className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
+                    borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
                   data-testid="button-social-facebook"
                 >
@@ -605,11 +605,11 @@ END:VCARD`;
               {data.instagram && (
                 <button 
                   onClick={() => handleContactAction('instagram', data.instagram)}
-                  className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                  className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
+                    borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
                   data-testid="button-social-instagram"
                 >
@@ -621,11 +621,11 @@ END:VCARD`;
               {data.linkedin && (
                 <button 
                   onClick={() => handleContactAction('linkedin', data.linkedin)}
-                  className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                  className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
+                    borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
                   data-testid="button-social-linkedin"
                 >
@@ -637,11 +637,11 @@ END:VCARD`;
               {data.twitter && (
                 <button 
                   onClick={() => handleContactAction('twitter', data.twitter)}
-                  className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                  className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
+                    borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
                   data-testid="button-social-twitter"
                 >
@@ -656,11 +656,11 @@ END:VCARD`;
                   <button 
                     key={social.id}
                     onClick={() => handleContactAction(social.platform, social.value)}
-                    className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                    className="w-full py-1 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                     style={{ 
                       backgroundColor: data.brandColor || '#22c55e',
                       color: data.tertiaryColor || '#ffffff',
-                      borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
+                      borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                     }}
                     data-testid={`button-custom-social-${social.id}`}
                   >
