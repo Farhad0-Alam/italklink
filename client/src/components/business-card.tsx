@@ -332,117 +332,23 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           
           {/* New Button Layout - Top 8 Buttons from Contact Information */}
           <div className="mb-6 space-y-4">
-            {/* Grid of Contact Buttons ONLY - 2 rows of 4 */}
-            <div className="grid grid-cols-4 gap-3 px-4">
-              {/* Row 1 */}
-              {data.phone && (
-                <div className="flex flex-col items-center">
-                  <button 
-                    onClick={() => handleContactAction('phone', data.phone)}
-                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
-                    style={{ 
-                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
-                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
-                    }}
-                    data-testid="button-contact-phone"
-                  >
-                    <i className="fas fa-phone text-sm"></i>
-                  </button>
-                  <span 
-                    className="text-xs font-medium"
-                    style={{ 
-                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                    }}
-                  >
-                    Call
-                  </span>
-                </div>
-              )}
-              
-              {data.email && (
-                <div className="flex flex-col items-center">
-                  <button 
-                    onClick={() => handleContactAction('email', data.email)}
-                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
-                    style={{ 
-                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
-                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
-                    }}
-                    data-testid="button-contact-email"
-                  >
-                    <i className="fas fa-envelope text-sm"></i>
-                  </button>
-                  <span 
-                    className="text-xs font-medium"
-                    style={{ 
-                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                    }}
-                  >
-                    Email
-                  </span>
-                </div>
-              )}
-
-              {data.phone && (
-                <div className="flex flex-col items-center">
-                  <button 
-                    onClick={() => handleContactAction('phone', `sms:${data.phone}`)}
-                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
-                    style={{ 
-                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
-                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
-                    }}
-                    data-testid="button-contact-text"
-                  >
-                    <i className="fas fa-sms text-sm"></i>
-                  </button>
-                  <span 
-                    className="text-xs font-medium"
-                    style={{ 
-                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                    }}
-                  >
-                    Text
-                  </span>
-                </div>
-              )}
-
-              <div className="flex flex-col items-center">
-                <button 
-                  onClick={() => handleShare()}
-                  className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
-                  style={{ 
-                    backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff'
-                  }}
-                  data-testid="button-connect"
-                >
-                  <i className="fas fa-link text-sm"></i>
-                </button>
-                <span 
-                  className="text-xs font-medium"
-                  style={{ 
-                    color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                  }}
-                >
-                  Connect
-                </span>
-              </div>
-
-              {/* Custom Contact Methods fill remaining slots up to 8 total */}
-              {data.customContacts?.slice(0, 8 - [data.phone, data.email].filter(Boolean).length - 2).map((contact) => (
-                contact.value && contact.label && (
-                  <div key={contact.id} className="flex flex-col items-center">
+            {/* Grid of Contact Buttons ONLY - Responsive 2 rows of 4 */}
+            <div className="space-y-3">
+              {/* Row 1 - Top 4 buttons */}
+              <div className="grid grid-cols-4 gap-3 px-4">
+                {/* Call Button */}
+                {data.phone ? (
+                  <div className="flex flex-col items-center">
                     <button 
-                      onClick={() => handleContactAction(contact.type, contact.value)}
+                      onClick={() => handleContactAction('phone', data.phone)}
                       className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
                       style={{ 
                         backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
                         color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
                       }}
-                      data-testid={`button-custom-contact-${contact.id}`}
+                      data-testid="button-contact-phone"
                     >
-                      <i className={`${contact.icon} text-sm`}></i>
+                      <i className="fas fa-phone text-sm"></i>
                     </button>
                     <span 
                       className="text-xs font-medium"
@@ -450,11 +356,122 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
                       }}
                     >
-                      {contact.label}
+                      Call
                     </span>
                   </div>
-                )
-              ))}
+                ) : (
+                  <div></div>
+                )}
+                
+                {/* Email Button */}
+                {data.email ? (
+                  <div className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction('email', data.email)}
+                      className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                      style={{ 
+                        backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
+                        color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                      }}
+                      data-testid="button-contact-email"
+                    >
+                      <i className="fas fa-envelope text-sm"></i>
+                    </button>
+                    <span 
+                      className="text-xs font-medium"
+                      style={{ 
+                        color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                      }}
+                    >
+                      Email
+                    </span>
+                  </div>
+                ) : (
+                  <div></div>
+                )}
+
+                {/* Text Button */}
+                {data.phone ? (
+                  <div className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction('phone', `sms:${data.phone}`)}
+                      className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                      style={{ 
+                        backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
+                        color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                      }}
+                      data-testid="button-contact-text"
+                    >
+                      <i className="fas fa-sms text-sm"></i>
+                    </button>
+                    <span 
+                      className="text-xs font-medium"
+                      style={{ 
+                        color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                      }}
+                    >
+                      Text
+                    </span>
+                  </div>
+                ) : (
+                  <div></div>
+                )}
+
+                {/* Connect Button - Always Show */}
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleShare()}
+                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                    style={{ 
+                      backgroundColor: data.brandColor || '#22c55e',
+                      color: '#ffffff'
+                    }}
+                    data-testid="button-connect"
+                  >
+                    <i className="fas fa-link text-sm"></i>
+                  </button>
+                  <span 
+                    className="text-xs font-medium"
+                    style={{ 
+                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                    }}
+                  >
+                    Connect
+                  </span>
+                </div>
+              </div>
+
+              {/* Row 2 - Bottom 4 buttons (Custom Contact Methods) */}
+              <div className="grid grid-cols-4 gap-3 px-4">
+                {Array.from({ length: 4 }, (_, index) => {
+                  const contact = data.customContacts?.[index];
+                  return contact?.value && contact?.label ? (
+                    <div key={contact.id} className="flex flex-col items-center">
+                      <button 
+                        onClick={() => handleContactAction(contact.type, contact.value)}
+                        className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                        style={{ 
+                          backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
+                          color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                        }}
+                        data-testid={`button-custom-contact-${contact.id}`}
+                      >
+                        <i className={`${contact.icon} text-sm`}></i>
+                      </button>
+                      <span 
+                        className="text-xs font-medium"
+                        style={{ 
+                          color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                        }}
+                      >
+                        {contact.label}
+                      </span>
+                    </div>
+                  ) : (
+                    <div key={`empty-${index}`}></div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Action Buttons Row */}
