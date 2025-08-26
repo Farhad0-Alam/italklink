@@ -14,6 +14,7 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
     // Register service worker for business cards
@@ -44,6 +45,7 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
       setIsInstalled(true);
       setIsInstallable(false);
       setDeferredPrompt(null);
+      setShowInstructions(false);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -63,32 +65,39 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
   }, [cardData]);
 
   const installBusinessCard = async () => {
-    if (!deferredPrompt) return false;
-
-    try {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === 'accepted') {
-        console.log('User installed business card app');
-        return true;
-      } else {
-        console.log('User dismissed install prompt');
+    // If browser supports native install prompt, use it
+    if (deferredPrompt) {
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+          console.log('User installed business card app');
+          return true;
+        } else {
+          console.log('User dismissed install prompt');
+          return false;
+        }
+      } catch (error) {
+        console.error('Error installing business card app:', error);
         return false;
+      } finally {
+        setDeferredPrompt(null);
+        setIsInstallable(false);
       }
-    } catch (error) {
-      console.error('Error installing business card app:', error);
+    } else {
+      // Show manual instructions for unsupported browsers
+      setShowInstructions(true);
       return false;
-    } finally {
-      setDeferredPrompt(null);
-      setIsInstallable(false);
     }
   };
 
   return {
     isInstallable,
     isInstalled,
-    installBusinessCard
+    installBusinessCard,
+    showInstructions,
+    setShowInstructions
   };
 };
 

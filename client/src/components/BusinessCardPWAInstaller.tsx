@@ -14,21 +14,22 @@ interface BusinessCardPWAInstallerProps {
 }
 
 export const BusinessCardPWAInstaller = ({ cardData, className = '' }: BusinessCardPWAInstallerProps) => {
-  const { isInstallable, isInstalled, installBusinessCard } = useBusinessCardPWA(cardData);
-  const [showModal, setShowModal] = useState(false);
+  const { 
+    isInstallable, 
+    isInstalled, 
+    installBusinessCard, 
+    showInstructions, 
+    setShowInstructions 
+  } = useBusinessCardPWA(cardData);
   const [installing, setInstalling] = useState(false);
 
   const handleInstall = async () => {
-    if (isInstallable) {
-      setInstalling(true);
-      const success = await installBusinessCard();
-      setInstalling(false);
-      if (success) {
-        setShowModal(false);
-      }
-    } else {
-      setShowModal(true);
-    }
+    setInstalling(true);
+    const success = await installBusinessCard();
+    setInstalling(false);
+    
+    // If installation was successful, the native prompt handled it
+    // If not successful and showInstructions is true, our modal will show
   };
 
   // Don't show if already installed
@@ -53,7 +54,7 @@ export const BusinessCardPWAInstaller = ({ cardData, className = '' }: BusinessC
       </div>
 
       {/* Install Instructions Modal - 2TalkLink Design */}
-      <Dialog open={showModal} onOpenChange={setShowModal}>
+      <Dialog open={showInstructions} onOpenChange={setShowInstructions}>
         <DialogContent className="sm:max-w-lg p-0 bg-white">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b">
@@ -61,7 +62,7 @@ export const BusinessCardPWAInstaller = ({ cardData, className = '' }: BusinessC
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowModal(false)}
+              onClick={() => setShowInstructions(false)}
               className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
             >
               <X className="h-5 w-5" />
@@ -155,7 +156,7 @@ export const BusinessCardPWAInstaller = ({ cardData, className = '' }: BusinessC
             {/* Got it button */}
             <div className="pt-4">
               <Button
-                onClick={() => setShowModal(false)}
+                onClick={() => setShowInstructions(false)}
                 className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-medium"
               >
                 Got it, thanks!
