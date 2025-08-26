@@ -499,23 +499,28 @@ END:VCARD`;
                   document.body.removeChild(link);
                   URL.revokeObjectURL(url);
                 }}
-                className="flex-1 bg-gray-800 text-white py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm hover:bg-gray-700 transition-colors"
+                className="flex-1 py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                style={{
+                  backgroundColor: '#1f2937',
+                  color: '#ffffff'
+                }}
                 data-testid="button-add-to-contacts"
               >
-                <i className="fas fa-address-book mr-2"></i>
+                <i className="fas fa-address-book text-lg mr-3"></i>
                 Add to Contacts
               </button>
 
               {/* Share Button */}
               <button 
                 onClick={() => handleShare()}
-                className="flex-1 py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                className="flex-1 py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{ 
-                  backgroundColor: data.brandColor || '#22c55e'
+                  backgroundColor: data.brandColor || '#22c55e',
+                  color: '#ffffff'
                 }}
                 data-testid="button-share-main"
               >
-                <i className="fas fa-share mr-2"></i>
+                <i className="fas fa-share-alt text-lg mr-3"></i>
                 Share
               </button>
             </div>
@@ -525,13 +530,14 @@ END:VCARD`;
               <div className="px-4">
                 <button 
                   onClick={() => handleContactAction('website', data.website)}
-                  className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                  className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
-                    backgroundColor: data.brandColor || '#22c55e'
+                    backgroundColor: data.brandColor || '#22c55e',
+                    color: '#ffffff'
                   }}
                   data-testid="button-website"
                 >
-                  <i className="fas fa-globe mr-2"></i>
+                  <i className="fas fa-desktop text-lg mr-3"></i>
                   Website
                 </button>
               </div>
@@ -542,13 +548,14 @@ END:VCARD`;
               {data.whatsapp && (
                 <button 
                   onClick={() => handleContactAction('whatsapp', data.whatsapp)}
-                  className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                  className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
-                    backgroundColor: data.brandColor || '#22c55e'
+                    backgroundColor: data.brandColor || '#22c55e',
+                    color: '#ffffff'
                   }}
                   data-testid="button-social-whatsapp"
                 >
-                  <i className="fab fa-whatsapp mr-2"></i>
+                  <i className="fab fa-whatsapp text-lg mr-3"></i>
                   WhatsApp
                 </button>
               )}
@@ -556,13 +563,14 @@ END:VCARD`;
               {data.facebook && (
                 <button 
                   onClick={() => handleContactAction('facebook', data.facebook)}
-                  className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                  className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
-                    backgroundColor: data.brandColor || '#22c55e'
+                    backgroundColor: data.brandColor || '#22c55e',
+                    color: '#ffffff'
                   }}
                   data-testid="button-social-facebook"
                 >
-                  <i className="fab fa-facebook-f mr-2"></i>
+                  <i className="fab fa-facebook-f text-lg mr-3"></i>
                   Facebook
                 </button>
               )}
@@ -570,13 +578,14 @@ END:VCARD`;
               {data.instagram && (
                 <button 
                   onClick={() => handleContactAction('instagram', data.instagram)}
-                  className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                  className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
-                    backgroundColor: data.brandColor || '#22c55e'
+                    backgroundColor: data.brandColor || '#22c55e',
+                    color: '#ffffff'
                   }}
                   data-testid="button-social-instagram"
                 >
-                  <i className="fab fa-instagram mr-2"></i>
+                  <i className="fab fa-instagram text-lg mr-3"></i>
                   Instagram
                 </button>
               )}
@@ -584,13 +593,14 @@ END:VCARD`;
               {data.linkedin && (
                 <button 
                   onClick={() => handleContactAction('linkedin', data.linkedin)}
-                  className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                  className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
-                    backgroundColor: data.brandColor || '#22c55e'
+                    backgroundColor: data.brandColor || '#22c55e',
+                    color: '#ffffff'
                   }}
                   data-testid="button-social-linkedin"
                 >
-                  <i className="fab fa-linkedin-in mr-2"></i>
+                  <i className="fab fa-linkedin-in text-lg mr-3"></i>
                   LinkedIn
                 </button>
               )}
@@ -598,13 +608,14 @@ END:VCARD`;
               {data.twitter && (
                 <button 
                   onClick={() => handleContactAction('twitter', data.twitter)}
-                  className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                  className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
-                    backgroundColor: data.brandColor || '#22c55e'
+                    backgroundColor: data.brandColor || '#22c55e',
+                    color: '#ffffff'
                   }}
                   data-testid="button-social-twitter"
                 >
-                  <i className="fab fa-twitter mr-2"></i>
+                  <i className="fab fa-twitter text-lg mr-3"></i>
                   Twitter
                 </button>
               )}
@@ -615,13 +626,14 @@ END:VCARD`;
                   <button 
                     key={social.id}
                     onClick={() => handleContactAction(social.platform, social.value)}
-                    className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                    className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                     style={{ 
-                      backgroundColor: data.brandColor || '#22c55e'
+                      backgroundColor: data.brandColor || '#22c55e',
+                      color: '#ffffff'
                     }}
                     data-testid={`button-custom-social-${social.id}`}
                   >
-                    <i className={`${social.icon} mr-2`}></i>
+                    <i className={`${social.icon} text-lg mr-3`}></i>
                     {social.label || 'Social'}
                   </button>
                 )
