@@ -913,131 +913,316 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           {/* Appearance Section */}
           <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("appearance")}>
-              <h3 className="text-lg font-semibold text-purple-300">Appearance & Design</h3>
+              <h3 className="text-lg font-semibold text-purple-300">Customize Theme</h3>
               <i className={`fas ${collapsedSections.appearance ? "fa-chevron-down" : "fa-chevron-up"} text-purple-300`} />
             </div>
 
             {!collapsedSections.appearance && (
               <>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-white">Brand Color</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          {...form.register("brandColor")}
-                          className="w-16 h-10 p-1 bg-slate-700 border-slate-600 rounded"
-                          data-testid="input-brand-color"
-                        />
-                        <Input
-                          {...form.register("brandColor")}
-                          placeholder="#22c55e"
-                          className="bg-slate-700 border-slate-600 text-white flex-1"
-                        />
+                <div className="space-y-6">
+                  {/* Default Colors Section */}
+                  <div>
+                    <h4 className="text-md font-medium text-purple-200 mb-3">Default Colors</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label className="text-white text-sm">Primary Color</Label>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Input
+                            type="color"
+                            {...form.register("brandColor")}
+                            className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                            data-testid="input-primary-color"
+                          />
+                          <span className="text-xs text-gray-400">#54C5BC</span>
+                        </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <Label className="text-white">Text Color</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          {...form.register("textColor")}
-                          className="w-16 h-10 p-1 bg-slate-700 border-slate-600 rounded"
-                          data-testid="input-text-color"
-                        />
-                        <Input
-                          {...form.register("textColor")}
-                          placeholder="#374151"
-                          className="bg-slate-700 border-slate-600 text-white flex-1"
-                        />
+                      <div>
+                        <Label className="text-white text-sm">Secondary Color</Label>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Input
+                            type="color"
+                            {...form.register("secondaryColor")}
+                            className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                            data-testid="input-secondary-color"
+                          />
+                          <span className="text-xs text-gray-400">#999999</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-white text-sm">Tertiary Color</Label>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Input
+                            type="color"
+                            {...form.register("tertiaryColor")}
+                            className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                            data-testid="input-tertiary-color"
+                          />
+                          <span className="text-xs text-gray-400">#FFFFFF</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-white">Background Color</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          {...form.register("backgroundColor")}
-                          className="w-16 h-10 p-1 bg-slate-700 border-slate-600 rounded"
-                          data-testid="input-background-color"
-                        />
-                        <Input
-                          {...form.register("backgroundColor")}
-                          placeholder="#ffffff"
-                          className="bg-slate-700 border-slate-600 text-white flex-1"
-                        />
+                  {/* Default Gradient Section */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-md font-medium text-purple-200">Default Gradient</h4>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 text-xs h-6 px-2"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-white text-sm">Type</Label>
+                        <Select value="Linear" onValueChange={() => {}}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Linear">Linear</SelectItem>
+                            <SelectItem value="Radial">Radial</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-white text-sm">Angle</Label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="range"
+                            min="0"
+                            max="360"
+                            defaultValue="90"
+                            className="flex-1 h-1 bg-slate-600 rounded-lg appearance-none slider"
+                          />
+                          <span className="text-xs text-gray-400 w-8">90°</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div>
-                      <Label className="text-white">Card Template</Label>
-                      <Select value={watchedValues.template || "original"} onValueChange={(v) => form.setValue("template", v)}>
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="original">Original Template</SelectItem>
-                          <SelectItem value="minimal">Minimal Style</SelectItem>
-                          <SelectItem value="bold">Bold Design</SelectItem>
-                          <SelectItem value="photo">Photo Focus</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    {/* Gradient Colors */}
+                    <div className="space-y-2 mt-3">
+                      {[
+                        { name: "BRAND", color: "#FF69B4", position: 0 },
+                        { name: "ACCENT", color: "#FFA500", position: 0 },
+                        { name: "#348E5E", color: "#348E5E", position: 100 }
+                      ].map((grad, index) => (
+                        <div key={index} className="flex items-center gap-3">
+                          <Input
+                            type="color"
+                            defaultValue={grad.color}
+                            className="w-8 h-6 p-0 border-0 rounded bg-transparent cursor-pointer"
+                          />
+                          <span className="text-xs text-white min-w-0 flex-1">{grad.name}</span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              defaultValue={grad.position}
+                              className="w-16 h-1 bg-slate-600 rounded-lg appearance-none slider"
+                            />
+                            <span className="text-xs text-gray-400 w-6">{grad.position}</span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="w-6 h-6 p-0 text-orange-400 hover:bg-slate-700"
+                          >
+                            <i className="fas fa-times text-xs"></i>
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-3 bg-slate-700 border-slate-600 text-white hover:bg-slate-600 h-8 text-xs"
+                    >
+                      <i className="fas fa-plus mr-2"></i>
+                      Add New Color
+                    </Button>
+                  </div>
+
+                  {/* Background Section */}
+                  <div>
+                    <h4 className="text-md font-medium text-purple-200 mb-3">Background</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-white text-sm">Content</Label>
+                        <Select value="Gradient" onValueChange={() => {}}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Gradient">Gradient</SelectItem>
+                            <SelectItem value="Color">Color</SelectItem>
+                            <SelectItem value="Image">Image</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-white text-sm">Background Color</Label>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Input
+                            type="color"
+                            {...form.register("backgroundColor")}
+                            className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                            data-testid="input-background-color"
+                          />
+                          <span className="text-xs text-gray-400">#FFFFFF</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <Label className="text-white">Font Size</Label>
-                      <Select value={`${watchedValues.fontSize || 16}`} onValueChange={(v) => form.setValue("fontSize", parseInt(v))}>
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="14">Small (14px)</SelectItem>
-                          <SelectItem value="16">Medium (16px)</SelectItem>
-                          <SelectItem value="18">Large (18px)</SelectItem>
-                          <SelectItem value="20">X-Large (20px)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  {/* Heading Style Section */}
+                  <div>
+                    <h4 className="text-md font-medium text-purple-200 mb-3">Heading Style</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label className="text-white text-sm">Font</Label>
+                        <Select value="Nunito" onValueChange={() => {}}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Nunito">Nunito</SelectItem>
+                            <SelectItem value="Inter">Inter</SelectItem>
+                            <SelectItem value="Roboto">Roboto</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-white text-sm">Weight</Label>
+                        <Select value="400" onValueChange={() => {}}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="300">Light</SelectItem>
+                            <SelectItem value="400">Normal</SelectItem>
+                            <SelectItem value="600">Semi-Bold</SelectItem>
+                            <SelectItem value="700">Bold</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-white text-sm">Size</Label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="range"
+                            min="12"
+                            max="40"
+                            defaultValue="16"
+                            className="flex-1 h-1 bg-slate-600 rounded-lg appearance-none slider"
+                          />
+                          <span className="text-xs text-gray-400 w-6">16</span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <Label className="text-white">Font Weight</Label>
-                      <Select value={`${watchedValues.fontWeight || 400}`} onValueChange={(v) => form.setValue("fontWeight", parseInt(v))}>
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="300">Light</SelectItem>
-                          <SelectItem value="400">Normal</SelectItem>
-                          <SelectItem value="500">Medium</SelectItem>
-                          <SelectItem value="600">Semi-Bold</SelectItem>
-                          <SelectItem value="700">Bold</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label className="text-white">Border Radius</Label>
-                      <Select value={`${watchedValues.borderRadius || 8}`} onValueChange={(v) => form.setValue("borderRadius", parseInt(v))}>
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="0">None</SelectItem>
-                          <SelectItem value="4">Small</SelectItem>
-                          <SelectItem value="8">Medium</SelectItem>
-                          <SelectItem value="12">Large</SelectItem>
-                          <SelectItem value="16">X-Large</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="grid grid-cols-2 gap-4 mt-3">
+                      <div>
+                        <Label className="text-white text-sm">Color</Label>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Input
+                            type="color"
+                            {...form.register("headingColor")}
+                            className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                            data-testid="input-heading-color"
+                          />
+                          <span className="text-xs text-gray-400">#000000</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Paragraph Style Section */}
+                  <div>
+                    <h4 className="text-md font-medium text-purple-200 mb-3">Paragraph Style</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label className="text-white text-sm">Font</Label>
+                        <Select value="Nunito" onValueChange={() => {}}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Nunito">Nunito</SelectItem>
+                            <SelectItem value="Inter">Inter</SelectItem>
+                            <SelectItem value="Roboto">Roboto</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-white text-sm">Weight</Label>
+                        <Select value="400" onValueChange={() => {}}>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="300">Light</SelectItem>
+                            <SelectItem value="400">Normal</SelectItem>
+                            <SelectItem value="600">Semi-Bold</SelectItem>
+                            <SelectItem value="700">Bold</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-white text-sm">Size</Label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="range"
+                            min="10"
+                            max="24"
+                            defaultValue="14"
+                            className="flex-1 h-1 bg-slate-600 rounded-lg appearance-none slider"
+                          />
+                          <span className="text-xs text-gray-400 w-6">14</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mt-3">
+                      <div>
+                        <Label className="text-white text-sm">Color</Label>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Input
+                            type="color"
+                            {...form.register("paragraphColor")}
+                            className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                            data-testid="input-paragraph-color"
+                          />
+                          <span className="text-xs text-gray-400">#000000</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Save Theme Button */}
+                  <Button
+                    type="button"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white h-10"
+                  >
+                    Save Theme
+                  </Button>
                 </div>
               </>
             )}
