@@ -523,7 +523,7 @@ END:VCARD`;
                 style={{
                   backgroundColor: data.secondaryColor || data.accentColor || '#16a34a',
                   color: data.tertiaryColor || '#ffffff',
-                  borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
+                  borderBottom: `2px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`,
                   width: '70%'
                 }}
                 data-testid="button-add-to-contacts"
@@ -539,7 +539,7 @@ END:VCARD`;
                 style={{ 
                   backgroundColor: data.brandColor || '#22c55e',
                   color: data.tertiaryColor || '#ffffff',
-                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`,
+                  borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
                   width: '30%'
                 }}
                 data-testid="button-share-main"
@@ -558,7 +558,7 @@ END:VCARD`;
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`
+                    borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
                   data-testid="button-website"
                 >
@@ -577,7 +577,7 @@ END:VCARD`;
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`
+                    borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
                   data-testid="button-social-whatsapp"
                 >
@@ -593,7 +593,7 @@ END:VCARD`;
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`
+                    borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
                   data-testid="button-social-facebook"
                 >
@@ -609,7 +609,7 @@ END:VCARD`;
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`
+                    borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
                   data-testid="button-social-instagram"
                 >
@@ -625,7 +625,7 @@ END:VCARD`;
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`
+                    borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
                   data-testid="button-social-linkedin"
                 >
@@ -641,7 +641,7 @@ END:VCARD`;
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`
+                    borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
                   data-testid="button-social-twitter"
                 >
@@ -660,7 +660,7 @@ END:VCARD`;
                     style={{ 
                       backgroundColor: data.brandColor || '#22c55e',
                       color: data.tertiaryColor || '#ffffff',
-                      borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`
+                      borderBottom: `2px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                     }}
                     data-testid={`button-custom-social-${social.id}`}
                   >
