@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { svgShapeLibrary } from "@/lib/svg-shapes-library";
+import { SVG_SHAPES_LIBRARY, getSVGShapeById, applySVGShapeColors } from "@/lib/svg-shapes-library";
 
 interface HeaderElement {
   id: string;
@@ -629,7 +629,7 @@ export const HeaderFormBuilder: React.FC<HeaderFormBuilderProps> = ({
                           <Select
                             value={selectedElementData.content.shapeName || ''}
                             onValueChange={(shapeName) => {
-                              const shape = svgShapeLibrary.getAllShapes().find(s => s.name === shapeName);
+                              const shape = SVG_SHAPES_LIBRARY.find(s => s.name === shapeName);
                               if (shape) {
                                 updateElement(selectedElement!, {
                                   content: {
@@ -646,7 +646,7 @@ export const HeaderFormBuilder: React.FC<HeaderFormBuilderProps> = ({
                               <SelectValue placeholder="Choose a shape..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {svgShapeLibrary.getAllShapes().map(shape => (
+                              {SVG_SHAPES_LIBRARY.map(shape => (
                                 <SelectItem key={shape.name} value={shape.name}>
                                   {shape.name}
                                 </SelectItem>
