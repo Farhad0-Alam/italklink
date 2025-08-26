@@ -330,261 +330,292 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             </p>
           )}
           
-          {/* Contact Icons - Always Show */}
-          <div className="flex justify-center space-x-3 mb-6 flex-wrap gap-y-3">
-            {data.phone && (
-              <div className="flex flex-col items-center">
-                <button 
-                  onClick={() => handleContactAction('phone', data.phone)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
-                  style={{ 
-                    backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#475569',
-                    color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
-                  }}
-                  data-testid="button-contact-phone"
-                >
-                  <i className="fas fa-phone text-sm"></i>
-                </button>
-                <span 
-                  className="text-xs"
-                  style={{ 
-                    color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b',
-                    fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
-                    fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || 400,
-                    fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
-                    fontStyle: getSectionStyle('contactInfo', 'iconTextStyle') || 'normal'
-                  }}
-                >
-                  Phone
-                </span>
-              </div>
-            )}
-            {data.email && (
-              <div className="flex flex-col items-center">
-                <button 
-                  onClick={() => handleContactAction('email', data.email)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
-                  style={{ 
-                    backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#475569',
-                    color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
-                  }}
-                  data-testid="button-contact-email"
-                >
-                  <i className="fas fa-envelope text-sm"></i>
-                </button>
-                <span 
-                  className="text-xs"
-                  style={{ 
-                    color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b',
-                    fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
-                    fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || 400,
-                    fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
-                    fontStyle: getSectionStyle('contactInfo', 'iconTextStyle') || 'normal'
-                  }}
-                >
-                  Email
-                </span>
-              </div>
-            )}
-            {data.whatsapp && (
-              <div className="flex flex-col items-center">
-                <button 
-                  onClick={() => handleContactAction('whatsapp', data.whatsapp)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-600 transition-colors mb-1"
-                  style={{ 
-                    backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || data.brandColor || '#22c55e',
-                    color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
-                  }}
-                  data-testid="button-contact-whatsapp"
-                >
-                  <i className="fab fa-whatsapp text-sm"></i>
-                </button>
-                <span 
-                  className="text-xs"
-                  style={{ 
-                    color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b',
-                    fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
-                    fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || 400,
-                    fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
-                    fontStyle: getSectionStyle('contactInfo', 'iconTextStyle') || 'normal'
-                  }}
-                >
-                  WhatsApp
-                </span>
-              </div>
-            )}
-            {/* Custom Contact Methods */}
-            {data.customContacts?.map((contact) => (
-              contact.value && contact.label && (
-                <div key={contact.id} className="flex flex-col items-center">
+          {/* New Button Layout - Top 8 Buttons from Contact Information */}
+          <div className="mb-6 space-y-4">
+            {/* Grid of Contact Buttons - 2 rows of 4 */}
+            <div className="grid grid-cols-4 gap-3 px-4">
+              {/* Row 1 */}
+              {data.phone && (
+                <div className="flex flex-col items-center">
                   <button 
-                    onClick={() => handleContactAction(contact.type, contact.value)}
-                    className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                    onClick={() => handleContactAction('phone', data.phone)}
+                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
                     style={{ 
-                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#475569',
+                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
                       color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
                     }}
-                    data-testid={`button-custom-contact-${contact.id}`}
+                    data-testid="button-contact-phone"
                   >
-                    <i className={`${contact.icon} text-sm`}></i>
+                    <i className="fas fa-phone text-sm"></i>
                   </button>
                   <span 
-                    className="text-xs"
+                    className="text-xs font-medium"
                     style={{ 
-                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#64748b',
-                      fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
-                      fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || 400,
-                      fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
-                      fontStyle: getSectionStyle('contactInfo', 'iconTextStyle') || 'normal'
+                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
                     }}
                   >
-                    {contact.label}
+                    Call
                   </span>
                 </div>
-              )
-            ))}
-          </div>
-          
-          {/* Social Icons */}
-          <div className="flex justify-center space-x-4 mb-6 flex-wrap gap-y-3">
-            {data.linkedin && (
-              <div className="flex flex-col items-center">
-                <button 
-                  onClick={() => handleContactAction('linkedin', data.linkedin)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
-                  style={{ 
-                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
-                    color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
-                  }}
-                  data-testid="button-social-linkedin"
-                >
-                  <i className="fab fa-linkedin-in text-sm"></i>
-                </button>
-                <span 
-                  className="text-xs"
-                  style={{ 
-                    color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
-                    fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
-                    fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
-                    fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                    fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
-                  }}
-                >
-                  LinkedIn
-                </span>
-              </div>
-            )}
-            {data.instagram && (
-              <div className="flex flex-col items-center">
-                <button 
-                  onClick={() => handleContactAction('instagram', data.instagram)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-pink-500 transition-colors mb-1"
-                  style={{ 
-                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
-                    color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
-                  }}
-                  data-testid="button-social-instagram"
-                >
-                  <i className="fab fa-instagram text-sm"></i>
-                </button>
-                <span 
-                  className="text-xs"
-                  style={{ 
-                    color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
-                    fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
-                    fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
-                    fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                    fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
-                  }}
-                >
-                  Instagram
-                </span>
-              </div>
-            )}
-            {data.twitter && (
-              <div className="flex flex-col items-center">
-                <button 
-                  onClick={() => handleContactAction('twitter', data.twitter)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-400 transition-colors mb-1"
-                  style={{ 
-                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
-                    color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
-                  }}
-                  data-testid="button-social-twitter"
-                >
-                  <i className="fab fa-twitter text-sm"></i>
-                </button>
-                <span 
-                  className="text-xs"
-                  style={{ 
-                    color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
-                    fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
-                    fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
-                    fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                    fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
-                  }}
-                >
-                  Twitter
-                </span>
-              </div>
-            )}
-            {data.facebook && (
-              <div className="flex flex-col items-center">
-                <button 
-                  onClick={() => handleContactAction('facebook', data.facebook)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors mb-1"
-                  style={{ 
-                    backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
-                    color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
-                  }}
-                  data-testid="button-social-facebook"
-                >
-                  <i className="fab fa-facebook-f text-sm"></i>
-                </button>
-                <span 
-                  className="text-xs"
-                  style={{ 
-                    color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
-                    fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
-                    fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
-                    fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                    fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
-                  }}
-                >
-                  Facebook
-                </span>
-              </div>
-            )}
-            {/* Custom Social Platforms */}
-            {data.customSocials?.map((social) => (
-              social.value && (
-                <div key={social.id} className="flex flex-col items-center">
+              )}
+              
+              {data.email && (
+                <div className="flex flex-col items-center">
                   <button 
-                    onClick={() => handleContactAction(social.platform, social.value)}
-                    className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                    onClick={() => handleContactAction('email', data.email)}
+                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
                     style={{ 
-                      backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || getSectionStyle('socialMedia', 'primaryColor') || '#475569',
-                      color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
+                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
+                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
                     }}
-                    data-testid={`button-custom-social-${social.id}`}
+                    data-testid="button-contact-email"
                   >
-                    <i className={`${social.icon} text-sm`}></i>
+                    <i className="fas fa-envelope text-sm"></i>
                   </button>
                   <span 
-                    className="text-xs"
+                    className="text-xs font-medium"
                     style={{ 
-                      color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
-                      fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
-                      fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
-                      fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                      fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
+                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
                     }}
                   >
-                    {social.label || 'Social'}
+                    Email
                   </span>
                 </div>
-              )
-            ))}
+              )}
+
+              {data.phone && (
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction('phone', `sms:${data.phone}`)}
+                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                    style={{ 
+                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
+                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                    }}
+                    data-testid="button-contact-text"
+                  >
+                    <i className="fas fa-sms text-sm"></i>
+                  </button>
+                  <span 
+                    className="text-xs font-medium"
+                    style={{ 
+                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                    }}
+                  >
+                    Text
+                  </span>
+                </div>
+              )}
+
+              <div className="flex flex-col items-center">
+                <button 
+                  onClick={() => handleShare()}
+                  className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                  style={{ 
+                    backgroundColor: data.brandColor || '#22c55e',
+                    color: '#ffffff'
+                  }}
+                  data-testid="button-connect"
+                >
+                  <i className="fas fa-link text-sm"></i>
+                </button>
+                <span 
+                  className="text-xs font-medium"
+                  style={{ 
+                    color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                  }}
+                >
+                  Connect
+                </span>
+              </div>
+
+              {/* Row 2 */}
+              {data.facebook && (
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction('facebook', data.facebook)}
+                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                    style={{ 
+                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
+                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                    }}
+                    data-testid="button-contact-facebook"
+                  >
+                    <i className="fab fa-facebook-f text-sm"></i>
+                  </button>
+                  <span 
+                    className="text-xs font-medium"
+                    style={{ 
+                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                    }}
+                  >
+                    Facebook
+                  </span>
+                </div>
+              )}
+
+              {data.instagram && (
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction('instagram', data.instagram)}
+                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                    style={{ 
+                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
+                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                    }}
+                    data-testid="button-contact-instagram"
+                  >
+                    <i className="fab fa-instagram text-sm"></i>
+                  </button>
+                  <span 
+                    className="text-xs font-medium"
+                    style={{ 
+                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                    }}
+                  >
+                    Instagram
+                  </span>
+                </div>
+              )}
+
+              {data.linkedin && (
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction('linkedin', data.linkedin)}
+                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                    style={{ 
+                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
+                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                    }}
+                    data-testid="button-contact-linkedin"
+                  >
+                    <i className="fab fa-linkedin-in text-sm"></i>
+                  </button>
+                  <span 
+                    className="text-xs font-medium"
+                    style={{ 
+                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                    }}
+                  >
+                    LinkedIn
+                  </span>
+                </div>
+              )}
+
+              {data.whatsapp && (
+                <div className="flex flex-col items-center">
+                  <button 
+                    onClick={() => handleContactAction('whatsapp', data.whatsapp)}
+                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                    style={{ 
+                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
+                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                    }}
+                    data-testid="button-contact-whatsapp"
+                  >
+                    <i className="fab fa-whatsapp text-sm"></i>
+                  </button>
+                  <span 
+                    className="text-xs font-medium"
+                    style={{ 
+                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                    }}
+                  >
+                    WhatsApp
+                  </span>
+                </div>
+              )}
+
+              {/* Custom Contact Methods fill remaining slots */}
+              {data.customContacts?.slice(0, 8 - [data.phone, data.email, data.facebook, data.instagram, data.linkedin, data.whatsapp].filter(Boolean).length - 1).map((contact) => (
+                contact.value && contact.label && (
+                  <div key={contact.id} className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction(contact.type, contact.value)}
+                      className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                      style={{ 
+                        backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
+                        color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                      }}
+                      data-testid={`button-custom-contact-${contact.id}`}
+                    >
+                      <i className={`${contact.icon} text-sm`}></i>
+                    </button>
+                    <span 
+                      className="text-xs font-medium"
+                      style={{ 
+                        color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                      }}
+                    >
+                      {contact.label}
+                    </span>
+                  </div>
+                )
+              ))}
+            </div>
+
+            {/* Action Buttons Row */}
+            <div className="flex gap-3 px-4">
+              {/* Add to Contacts Button */}
+              <button 
+                onClick={() => {
+                  const vCard = `BEGIN:VCARD
+VERSION:3.0
+FN:${data.fullName || 'Contact'}
+ORG:${data.company || ''}
+TITLE:${data.title || ''}
+TEL:${data.phone || ''}
+EMAIL:${data.email || ''}
+URL:${data.website || ''}
+END:VCARD`;
+                  
+                  const blob = new Blob([vCard], { type: 'text/vcard' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `${data.fullName || 'contact'}.vcf`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(url);
+                }}
+                className="flex-1 bg-gray-800 text-white py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm hover:bg-gray-700 transition-colors"
+                data-testid="button-add-to-contacts"
+              >
+                <i className="fas fa-address-book mr-2"></i>
+                Add to Contacts
+              </button>
+
+              {/* Share Button */}
+              <button 
+                onClick={() => handleShare()}
+                className="flex-1 py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                style={{ 
+                  backgroundColor: data.brandColor || '#22c55e'
+                }}
+                data-testid="button-share-main"
+              >
+                <i className="fas fa-share mr-2"></i>
+                Share
+              </button>
+            </div>
+
+            {/* Website Button from Social Media Section */}
+            {data.website && (
+              <div className="px-4">
+                <button 
+                  onClick={() => handleContactAction('website', data.website)}
+                  className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                  style={{ 
+                    backgroundColor: data.brandColor || '#22c55e'
+                  }}
+                  data-testid="button-website"
+                >
+                  <i className="fas fa-globe mr-2"></i>
+                  Website
+                </button>
+              </div>
+            )}
           </div>
 
 
