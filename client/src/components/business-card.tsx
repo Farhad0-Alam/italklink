@@ -429,32 +429,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 </span>
               </div>
 
-              {data.whatsapp && (
-                <div className="flex flex-col items-center">
-                  <button 
-                    onClick={() => handleContactAction('whatsapp', data.whatsapp)}
-                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
-                    style={{ 
-                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
-                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
-                    }}
-                    data-testid="button-contact-whatsapp"
-                  >
-                    <i className="fab fa-whatsapp text-sm"></i>
-                  </button>
-                  <span 
-                    className="text-xs font-medium"
-                    style={{ 
-                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                    }}
-                  >
-                    WhatsApp
-                  </span>
-                </div>
-              )}
-
               {/* Custom Contact Methods fill remaining slots up to 8 total */}
-              {data.customContacts?.slice(0, 8 - [data.phone, data.email, data.whatsapp].filter(Boolean).length - 2).map((contact) => (
+              {data.customContacts?.slice(0, 8 - [data.phone, data.email].filter(Boolean).length - 2).map((contact) => (
                 contact.value && contact.label && (
                   <div key={contact.id} className="flex flex-col items-center">
                     <button 
@@ -545,8 +521,36 @@ END:VCARD`;
             )}
 
             {/* Social Media Buttons - Below Website (Unlimited) */}
-            {(data.facebook || data.instagram || data.linkedin || data.twitter || (data.customSocials && data.customSocials.length > 0)) && (
+            {(data.whatsapp || data.facebook || data.instagram || data.linkedin || data.twitter || (data.customSocials && data.customSocials.length > 0)) && (
               <div className="flex justify-center space-x-4 flex-wrap gap-y-3 px-4">
+                {data.whatsapp && (
+                  <div className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction('whatsapp', data.whatsapp)}
+                      className="w-10 h-10 rounded-full flex items-center justify-center transition-colors mb-1"
+                      style={{ 
+                        backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
+                        color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
+                      }}
+                      data-testid="button-social-whatsapp"
+                    >
+                      <i className="fab fa-whatsapp text-sm"></i>
+                    </button>
+                    <span 
+                      className="text-xs"
+                      style={{ 
+                        color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
+                        fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
+                        fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
+                        fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                        fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
+                      }}
+                    >
+                      WhatsApp
+                    </span>
+                  </div>
+                )}
+                
                 {data.facebook && (
                   <div className="flex flex-col items-center">
                     <button 
