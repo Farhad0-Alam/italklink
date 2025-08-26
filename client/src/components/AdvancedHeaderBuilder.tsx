@@ -69,6 +69,12 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const previewRef = useRef<HTMLDivElement>(null);
 
+  // Pen Tool States
+  const [penToolActive, setPenToolActive] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [currentPath, setCurrentPath] = useState<{x: number, y: number}[]>([]);
+  const [drawingElement, setDrawingElement] = useState<string | null>(null);
+
   const [collapsedSections, setCollapsedSections] = useState<{ [key: string]: boolean }>({
     basicInfo: false,
     globalStyles: false,
@@ -206,18 +212,39 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
     setSelectedElement(null);
   };
 
-  const handleMouseDown = (e: React.MouseEvent, elementId: string) => {
+  const handleMouseDown = (e: React.MouseEvent, elementId?: string) => {
     e.preventDefault();
-    setSelectedElement(elementId);
-    setIsDragging(true);
     
-    const element = headerTemplate.elements.find(el => el.id === elementId);
-    if (element && previewRef.current) {
+    if (penToolActive && previewRef.current) {
+      // Pen tool drawing mode
       const rect = previewRef.current.getBoundingClientRect();
-      setDragOffset({
-        x: e.clientX - rect.left - element.position.x,
-        y: e.clientY - rect.top - element.position.y
-      });
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      if (!isDrawing) {
+        // Start new path
+        setIsDrawing(true);
+        setCurrentPath([{ x, y }]);
+        setDrawingElement(null);
+      } else {
+        // Add point to current path
+        setCurrentPath(prev => [...prev, { x, y }]);
+      }
+      return;
+    }
+
+    if (elementId) {
+      setSelectedElement(elementId);
+      setIsDragging(true);
+      
+      const element = headerTemplate.elements.find(el => el.id === elementId);
+      if (element && previewRef.current) {
+        const rect = previewRef.current.getBoundingClientRect();
+        setDragOffset({
+          x: e.clientX - rect.left - element.position.x,
+          y: e.clientY - rect.top - element.position.y
+        });
+      }
     }
   };
 
@@ -246,6 +273,12 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
     const rect = previewRef.current.getBoundingClientRect();
     const currentX = e.clientX - rect.left;
     const currentY = e.clientY - rect.top;
+
+    // Pen tool preview line
+    if (penToolActive && isDrawing && currentPath.length > 0) {
+      // Update preview line - this will be handled in rendering
+      return;
+    }
 
     if (isDragging && selectedElement && !isResizing) {
       const newX = Math.max(0, Math.min(headerTemplate.globalStyles.headerWidth - 50, currentX - dragOffset.x));
@@ -322,6 +355,107 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
     setIsDragging(false);
     setIsResizing(false);
     setResizeHandle(null);
+  };
+
+  const finishDrawing = () => {
+    if (currentPath.length < 2) {
+      setCurrentPath([]);
+      setIsDrawing(false);
+      return;
+    }
+
+    // Convert path to SVG
+    const pathData = pathToSVG(currentPath);
+    const bounds = getPathBounds(currentPath);
+    
+    // Create new SVG element
+    const newElement: HeaderElement = {
+      id: generateId(),
+      type: 'svg_shape',
+      position: {
+        x: bounds.minX,
+        y: bounds.minY,
+        width: bounds.width,
+        height: bounds.height
+      },
+      content: {
+        shapeName: 'Custom Drawn Shape',
+        svgCode: `<path d="${pathData}" fill="{color1}" stroke="{color2}" stroke-width="2"/>`,
+        viewBox: `0 0 ${bounds.width} ${bounds.height}`,
+        colors: { color1: '#22c55e', color2: '#16a34a' },
+        isCustom: true,
+        isDrawn: true
+      },
+      styles: {
+        zIndex: 10
+      },
+      visible: true,
+      order: headerTemplate.elements.length
+    };
+
+    setHeaderTemplate(prev => ({
+      ...prev,
+      elements: [...prev.elements, newElement]
+    }));
+
+    // Reset drawing state
+    setCurrentPath([]);
+    setIsDrawing(false);
+    setPenToolActive(false);
+    setSelectedElement(newElement.id);
+  };
+
+  const cancelDrawing = () => {
+    setCurrentPath([]);
+    setIsDrawing(false);
+    setPenToolActive(false);
+  };
+
+  const pathToSVG = (points: {x: number, y: number}[]): string => {
+    if (points.length < 2) return '';
+    
+    const bounds = getPathBounds(points);
+    const normalizedPoints = points.map(p => ({
+      x: p.x - bounds.minX,
+      y: p.y - bounds.minY
+    }));
+
+    let path = `M ${normalizedPoints[0].x} ${normalizedPoints[0].y}`;
+    
+    // Create smooth curves using quadratic Bezier curves
+    for (let i = 1; i < normalizedPoints.length; i++) {
+      if (i === normalizedPoints.length - 1) {
+        // Last point - direct line
+        path += ` L ${normalizedPoints[i].x} ${normalizedPoints[i].y}`;
+      } else {
+        // Create smooth curve
+        const current = normalizedPoints[i];
+        const next = normalizedPoints[i + 1];
+        const controlX = (current.x + next.x) / 2;
+        const controlY = (current.y + next.y) / 2;
+        path += ` Q ${current.x} ${current.y} ${controlX} ${controlY}`;
+      }
+    }
+    
+    return path;
+  };
+
+  const getPathBounds = (points: {x: number, y: number}[]) => {
+    if (points.length === 0) return { minX: 0, minY: 0, width: 100, height: 100 };
+    
+    const xs = points.map(p => p.x);
+    const ys = points.map(p => p.y);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    
+    return {
+      minX,
+      minY,
+      width: Math.max(50, maxX - minX + 20), // Add padding
+      height: Math.max(50, maxY - minY + 20)
+    };
   };
 
   const handleFileUpload = async (
@@ -473,7 +607,7 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
           <div key={element.id} style={{ position: 'relative' }}>
             <div
               style={style}
-              onMouseDown={(e) => handleMouseDown(e, element.id)}
+              onMouseDown={(e) => penToolActive ? handleMouseDown(e) : handleMouseDown(e, element.id)}
               className="flex items-center justify-center bg-slate-200 rounded overflow-hidden"
             >
               {element.content.src ? (
@@ -496,7 +630,7 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
           <div key={element.id} style={{ position: 'relative' }}>
             <div
               style={style}
-              onMouseDown={(e) => handleMouseDown(e, element.id)}
+              onMouseDown={(e) => penToolActive ? handleMouseDown(e) : handleMouseDown(e, element.id)}
               className="flex items-center justify-center"
             >
               <span style={{ fontSize: element.styles.fontSize, fontWeight: element.styles.fontWeight, color: element.styles.color }}>
@@ -514,7 +648,7 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
           <div key={element.id} style={{ position: 'relative' }}>
             <div
               style={style}
-              onMouseDown={(e) => handleMouseDown(e, element.id)}
+              onMouseDown={(e) => penToolActive ? handleMouseDown(e) : handleMouseDown(e, element.id)}
               dangerouslySetInnerHTML={{ __html: `<svg viewBox="${element.content.viewBox}" style="width: 100%; height: 100%;">${coloredSvg}</svg>` }}
             />
             {renderResizeHandles(element)}
@@ -812,14 +946,31 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
 
             {!collapsedSections.svgShapes && (
               <div className="space-y-4">
-                <Button
-                  variant="outline"
-                  onClick={() => addElement('svg_shape')}
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
-                >
-                  <i className="fas fa-shapes mr-2" />
-                  Add SVG Shape
-                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => addElement('svg_shape')}
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                  >
+                    <i className="fas fa-shapes mr-2" />
+                    Add Shape
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setPenToolActive(true);
+                      setSelectedElement(null);
+                    }}
+                    className={`${
+                      penToolActive 
+                        ? "bg-purple-500 border-purple-400 hover:bg-purple-600" 
+                        : "bg-slate-700 border-slate-600 hover:bg-slate-600"
+                    } text-white`}
+                  >
+                    <i className="fas fa-pen mr-2" />
+                    Pen Tool
+                  </Button>
+                </div>
 
                 {headerTemplate.elements.filter(el => el.type === 'svg_shape').map((element) => (
                   <div key={element.id} className="bg-slate-900/50 border border-slate-600 rounded-lg p-4 space-y-3">
@@ -895,6 +1046,22 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
                         onChange={(e) => handleSVGUpload(e, element.id)}
                         className="hidden"
                       />
+                    </div>
+
+                    <div>
+                      <Label className="text-white">Draw Custom Shape</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setPenToolActive(true);
+                          setSelectedElement(null);
+                        }}
+                        className="bg-purple-700 border-purple-600 text-white hover:bg-purple-600 w-full mt-2"
+                      >
+                        <i className="fas fa-pen mr-2" />
+                        Use Pen Tool
+                      </Button>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -1116,10 +1283,105 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
+                onClick={(e) => penToolActive ? handleMouseDown(e) : undefined}
+                onDoubleClick={() => isDrawing && finishDrawing()}
               >
                 {headerTemplate.elements.map(renderElement)}
                 
-                {headerTemplate.elements.length === 0 && (
+                {/* Pen Tool Drawing Overlay */}
+                {penToolActive && (
+                  <>
+                    {/* Current drawing path preview */}
+                    {currentPath.length > 0 && (
+                      <svg
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          pointerEvents: 'none',
+                          zIndex: 999
+                        }}
+                      >
+                        {/* Draw existing path points */}
+                        {currentPath.map((point, index) => (
+                          <circle
+                            key={index}
+                            cx={point.x}
+                            cy={point.y}
+                            r="3"
+                            fill="#22c55e"
+                            stroke="#ffffff"
+                            strokeWidth="1"
+                          />
+                        ))}
+                        
+                        {/* Draw path lines */}
+                        {currentPath.length > 1 && (
+                          <path
+                            d={`M ${currentPath[0].x} ${currentPath[0].y} ${currentPath.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')}`}
+                            stroke="#22c55e"
+                            strokeWidth="2"
+                            fill="none"
+                          />
+                        )}
+                      </svg>
+                    )}
+                    
+                    {/* Pen tool instructions */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '10px',
+                        left: '10px',
+                        background: 'rgba(0, 0, 0, 0.8)',
+                        color: 'white',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        zIndex: 1000
+                      }}
+                    >
+                      {!isDrawing ? 'Click to start drawing' : 'Click to add points • Double-click to finish'}
+                    </div>
+                    
+                    {/* Drawing controls */}
+                    {isDrawing && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          bottom: '10px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          display: 'flex',
+                          gap: '8px',
+                          zIndex: 1000
+                        }}
+                      >
+                        <Button
+                          size="sm"
+                          onClick={finishDrawing}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          <i className="fas fa-check mr-1" />
+                          Finish
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={cancelDrawing}
+                          className="bg-red-600 hover:bg-red-700 text-white border-red-500"
+                        >
+                          <i className="fas fa-times mr-1" />
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                )}
+                
+                {headerTemplate.elements.length === 0 && !penToolActive && (
                   <div className="absolute inset-0 flex items-center justify-center text-white opacity-60">
                     <div className="text-center">
                       <i className="fas fa-plus-circle text-4xl mb-2" />
