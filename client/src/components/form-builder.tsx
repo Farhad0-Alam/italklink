@@ -933,7 +933,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
                             data-testid="input-primary-color"
                           />
-                          <span className="text-xs text-gray-400">#54C5BC</span>
+                          <span className="text-xs text-gray-400">{watchedValues.brandColor || "#54C5BC"}</span>
                         </div>
                       </div>
 
@@ -946,7 +946,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
                             data-testid="input-secondary-color"
                           />
-                          <span className="text-xs text-gray-400">#999999</span>
+                          <span className="text-xs text-gray-400">{watchedValues.secondaryColor || "#999999"}</span>
                         </div>
                       </div>
 
@@ -959,7 +959,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
                             data-testid="input-tertiary-color"
                           />
-                          <span className="text-xs text-gray-400">#FFFFFF</span>
+                          <span className="text-xs text-gray-400">{watchedValues.tertiaryColor || "#FFFFFF"}</span>
                         </div>
                       </div>
                     </div>
@@ -981,29 +981,32 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label className="text-white text-sm">Type</Label>
-                        <Select value="Linear" onValueChange={() => {}}>
+                        <Label className="text-white text-sm">Content</Label>
+                        <Select 
+                          value={watchedValues.backgroundType || "color"} 
+                          onValueChange={(v) => form.setValue("backgroundType", v)}
+                        >
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Linear">Linear</SelectItem>
-                            <SelectItem value="Radial">Radial</SelectItem>
+                            <SelectItem value="color">Color</SelectItem>
+                            <SelectItem value="gradient">Gradient</SelectItem>
+                            <SelectItem value="image">Image</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div>
-                        <Label className="text-white text-sm">Angle</Label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="range"
-                            min="0"
-                            max="360"
-                            defaultValue="90"
-                            className="flex-1 h-1 bg-slate-600 rounded-lg appearance-none slider"
+                        <Label className="text-white text-sm">Background Color</Label>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Input
+                            type="color"
+                            {...form.register("backgroundColor")}
+                            className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                            data-testid="input-background-color"
                           />
-                          <span className="text-xs text-gray-400 w-8">90°</span>
+                          <span className="text-xs text-gray-400">{watchedValues.backgroundColor || "#FFFFFF"}</span>
                         </div>
                       </div>
                     </div>
@@ -1058,32 +1061,112 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   {/* Background Section */}
                   <div>
                     <h4 className="text-md font-medium text-purple-200 mb-3">Background</h4>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-white text-sm">Content</Label>
+                          <Select 
+                            value={watchedValues.backgroundType || "color"} 
+                            onValueChange={(v) => form.setValue("backgroundType", v)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="color">Color</SelectItem>
+                              <SelectItem value="gradient">Gradient</SelectItem>
+                              <SelectItem value="image">Image</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-sm">Background Color</Label>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Input
+                              type="color"
+                              {...form.register("backgroundColor")}
+                              className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                              data-testid="input-background-color"
+                            />
+                            <span className="text-xs text-gray-400">{watchedValues.backgroundColor || "#FFFFFF"}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {watchedValues.backgroundType === "image" && (
+                        <div>
+                          <Label className="text-white text-sm">Background Image</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleFileUpload(e, "backgroundImage")}
+                              disabled={isUploading}
+                              className="bg-slate-700 border-slate-600 text-white flex-1"
+                              data-testid="input-background-image"
+                            />
+                            {watchedValues.backgroundImage && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => form.setValue("backgroundImage", "")}
+                                className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                              >
+                                <i className="fas fa-trash" />
+                              </Button>
+                            )}
+                          </div>
+                          {watchedValues.backgroundImage && (
+                            <div className="mt-2">
+                              <img
+                                src={watchedValues.backgroundImage}
+                                alt="Background Preview"
+                                className="w-full max-w-xs h-auto rounded border border-slate-600"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Animation Section */}
+                  <div>
+                    <h4 className="text-md font-medium text-purple-200 mb-3">Animations</h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label className="text-white text-sm">Content</Label>
-                        <Select value="Gradient" onValueChange={() => {}}>
+                        <Label className="text-white text-sm">Animation Type</Label>
+                        <Select 
+                          value={watchedValues.animationType || "none"} 
+                          onValueChange={(v) => form.setValue("animationType", v)}
+                        >
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Gradient">Gradient</SelectItem>
-                            <SelectItem value="Color">Color</SelectItem>
-                            <SelectItem value="Image">Image</SelectItem>
+                            <SelectItem value="none">None</SelectItem>
+                            <SelectItem value="fade">Fade In</SelectItem>
+                            <SelectItem value="slide">Slide Up</SelectItem>
+                            <SelectItem value="bounce">Bounce</SelectItem>
+                            <SelectItem value="zoom">Zoom In</SelectItem>
+                            <SelectItem value="rotate">Rotate</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div>
-                        <Label className="text-white text-sm">Background Color</Label>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Input
-                            type="color"
-                            {...form.register("backgroundColor")}
-                            className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
-                            data-testid="input-background-color"
-                          />
-                          <span className="text-xs text-gray-400">#FFFFFF</span>
-                        </div>
+                        <Label className="text-white text-sm">Duration (ms)</Label>
+                        <Input
+                          type="number"
+                          min="100"
+                          max="2000"
+                          step="100"
+                          {...form.register("animationDuration", { valueAsNumber: true })}
+                          className="bg-slate-700 border-slate-600 text-white h-8 text-sm"
+                          placeholder="500"
+                        />
                       </div>
                     </div>
                   </div>
@@ -1094,29 +1177,81 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <Label className="text-white text-sm">Font</Label>
-                        <Select value="Nunito" onValueChange={() => {}}>
+                        <Select 
+                          value={watchedValues.headingFont || "inter"} 
+                          onValueChange={(v) => form.setValue("headingFont", v)}
+                        >
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Nunito">Nunito</SelectItem>
-                            <SelectItem value="Inter">Inter</SelectItem>
-                            <SelectItem value="Roboto">Roboto</SelectItem>
+                          <SelectContent className="max-h-60">
+                            <SelectItem value="inter">Inter</SelectItem>
+                            <SelectItem value="roboto">Roboto</SelectItem>
+                            <SelectItem value="poppins">Poppins</SelectItem>
+                            <SelectItem value="montserrat">Montserrat</SelectItem>
+                            <SelectItem value="open-sans">Open Sans</SelectItem>
+                            <SelectItem value="lato">Lato</SelectItem>
+                            <SelectItem value="nunito">Nunito</SelectItem>
+                            <SelectItem value="source-sans-pro">Source Sans Pro</SelectItem>
+                            <SelectItem value="raleway">Raleway</SelectItem>
+                            <SelectItem value="ubuntu">Ubuntu</SelectItem>
+                            <SelectItem value="merriweather">Merriweather</SelectItem>
+                            <SelectItem value="oswald">Oswald</SelectItem>
+                            <SelectItem value="pt-sans">PT Sans</SelectItem>
+                            <SelectItem value="playfair-display">Playfair Display</SelectItem>
+                            <SelectItem value="libre-baskerville">Libre Baskerville</SelectItem>
+                            <SelectItem value="crimson-text">Crimson Text</SelectItem>
+                            <SelectItem value="fira-sans">Fira Sans</SelectItem>
+                            <SelectItem value="noto-sans">Noto Sans</SelectItem>
+                            <SelectItem value="karla">Karla</SelectItem>
+                            <SelectItem value="dm-sans">DM Sans</SelectItem>
+                            <SelectItem value="mulish">Mulish</SelectItem>
+                            <SelectItem value="rubik">Rubik</SelectItem>
+                            <SelectItem value="outfit">Outfit</SelectItem>
+                            <SelectItem value="manrope">Manrope</SelectItem>
+                            <SelectItem value="space-grotesk">Space Grotesk</SelectItem>
+                            <SelectItem value="plus-jakarta-sans">Plus Jakarta Sans</SelectItem>
+                            <SelectItem value="lexend">Lexend</SelectItem>
+                            <SelectItem value="be-vietnam-pro">Be Vietnam Pro</SelectItem>
+                            <SelectItem value="public-sans">Public Sans</SelectItem>
+                            <SelectItem value="commissioner">Commissioner</SelectItem>
+                            <SelectItem value="epilogue">Epilogue</SelectItem>
+                            <SelectItem value="work-sans">Work Sans</SelectItem>
+                            <SelectItem value="quicksand">Quicksand</SelectItem>
+                            <SelectItem value="red-hat-display">Red Hat Display</SelectItem>
+                            <SelectItem value="ibm-plex-sans">IBM Plex Sans</SelectItem>
+                            <SelectItem value="figtree">Figtree</SelectItem>
+                            <SelectItem value="nunito-sans">Nunito Sans</SelectItem>
+                            <SelectItem value="satoshi">Satoshi</SelectItem>
+                            <SelectItem value="cabinet-grotesk">Cabinet Grotesk</SelectItem>
+                            <SelectItem value="general-sans">General Sans</SelectItem>
+                            <SelectItem value="supreme">Supreme</SelectItem>
+                            <SelectItem value="gt-walsheim">GT Walsheim</SelectItem>
+                            <SelectItem value="circular">Circular</SelectItem>
+                            <SelectItem value="avenir-next">Avenir Next</SelectItem>
+                            <SelectItem value="helvetica-neue">Helvetica Neue</SelectItem>
+                            <SelectItem value="sf-pro">SF Pro</SelectItem>
+                            <SelectItem value="system-ui">System UI</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div>
                         <Label className="text-white text-sm">Weight</Label>
-                        <Select value="400" onValueChange={() => {}}>
+                        <Select 
+                          value={`${watchedValues.headingFontWeight || 600}`} 
+                          onValueChange={(v) => form.setValue("headingFontWeight", parseInt(v))}
+                        >
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="300">Light</SelectItem>
                             <SelectItem value="400">Normal</SelectItem>
+                            <SelectItem value="500">Medium</SelectItem>
                             <SelectItem value="600">Semi-Bold</SelectItem>
                             <SelectItem value="700">Bold</SelectItem>
+                            <SelectItem value="800">Extra Bold</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -1128,10 +1263,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             type="range"
                             min="12"
                             max="40"
-                            defaultValue="16"
+                            value={watchedValues.headingFontSize || 24}
+                            onChange={(e) => form.setValue("headingFontSize", parseInt(e.target.value))}
                             className="flex-1 h-1 bg-slate-600 rounded-lg appearance-none slider"
                           />
-                          <span className="text-xs text-gray-400 w-6">16</span>
+                          <span className="text-xs text-gray-400 w-6">{watchedValues.headingFontSize || 24}</span>
                         </div>
                       </div>
                     </div>
@@ -1146,7 +1282,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
                             data-testid="input-heading-color"
                           />
-                          <span className="text-xs text-gray-400">#000000</span>
+                          <span className="text-xs text-gray-400">{watchedValues.headingColor || "#000000"}</span>
                         </div>
                       </div>
                     </div>
@@ -1158,29 +1294,81 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <Label className="text-white text-sm">Font</Label>
-                        <Select value="Nunito" onValueChange={() => {}}>
+                        <Select 
+                          value={watchedValues.paragraphFont || "inter"} 
+                          onValueChange={(v) => form.setValue("paragraphFont", v)}
+                        >
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Nunito">Nunito</SelectItem>
-                            <SelectItem value="Inter">Inter</SelectItem>
-                            <SelectItem value="Roboto">Roboto</SelectItem>
+                          <SelectContent className="max-h-60">
+                            <SelectItem value="inter">Inter</SelectItem>
+                            <SelectItem value="roboto">Roboto</SelectItem>
+                            <SelectItem value="poppins">Poppins</SelectItem>
+                            <SelectItem value="montserrat">Montserrat</SelectItem>
+                            <SelectItem value="open-sans">Open Sans</SelectItem>
+                            <SelectItem value="lato">Lato</SelectItem>
+                            <SelectItem value="nunito">Nunito</SelectItem>
+                            <SelectItem value="source-sans-pro">Source Sans Pro</SelectItem>
+                            <SelectItem value="raleway">Raleway</SelectItem>
+                            <SelectItem value="ubuntu">Ubuntu</SelectItem>
+                            <SelectItem value="merriweather">Merriweather</SelectItem>
+                            <SelectItem value="oswald">Oswald</SelectItem>
+                            <SelectItem value="pt-sans">PT Sans</SelectItem>
+                            <SelectItem value="playfair-display">Playfair Display</SelectItem>
+                            <SelectItem value="libre-baskerville">Libre Baskerville</SelectItem>
+                            <SelectItem value="crimson-text">Crimson Text</SelectItem>
+                            <SelectItem value="fira-sans">Fira Sans</SelectItem>
+                            <SelectItem value="noto-sans">Noto Sans</SelectItem>
+                            <SelectItem value="karla">Karla</SelectItem>
+                            <SelectItem value="dm-sans">DM Sans</SelectItem>
+                            <SelectItem value="mulish">Mulish</SelectItem>
+                            <SelectItem value="rubik">Rubik</SelectItem>
+                            <SelectItem value="outfit">Outfit</SelectItem>
+                            <SelectItem value="manrope">Manrope</SelectItem>
+                            <SelectItem value="space-grotesk">Space Grotesk</SelectItem>
+                            <SelectItem value="plus-jakarta-sans">Plus Jakarta Sans</SelectItem>
+                            <SelectItem value="lexend">Lexend</SelectItem>
+                            <SelectItem value="be-vietnam-pro">Be Vietnam Pro</SelectItem>
+                            <SelectItem value="public-sans">Public Sans</SelectItem>
+                            <SelectItem value="commissioner">Commissioner</SelectItem>
+                            <SelectItem value="epilogue">Epilogue</SelectItem>
+                            <SelectItem value="work-sans">Work Sans</SelectItem>
+                            <SelectItem value="quicksand">Quicksand</SelectItem>
+                            <SelectItem value="red-hat-display">Red Hat Display</SelectItem>
+                            <SelectItem value="ibm-plex-sans">IBM Plex Sans</SelectItem>
+                            <SelectItem value="figtree">Figtree</SelectItem>
+                            <SelectItem value="nunito-sans">Nunito Sans</SelectItem>
+                            <SelectItem value="satoshi">Satoshi</SelectItem>
+                            <SelectItem value="cabinet-grotesk">Cabinet Grotesk</SelectItem>
+                            <SelectItem value="general-sans">General Sans</SelectItem>
+                            <SelectItem value="supreme">Supreme</SelectItem>
+                            <SelectItem value="gt-walsheim">GT Walsheim</SelectItem>
+                            <SelectItem value="circular">Circular</SelectItem>
+                            <SelectItem value="avenir-next">Avenir Next</SelectItem>
+                            <SelectItem value="helvetica-neue">Helvetica Neue</SelectItem>
+                            <SelectItem value="sf-pro">SF Pro</SelectItem>
+                            <SelectItem value="system-ui">System UI</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div>
                         <Label className="text-white text-sm">Weight</Label>
-                        <Select value="400" onValueChange={() => {}}>
+                        <Select 
+                          value={`${watchedValues.paragraphFontWeight || 400}`} 
+                          onValueChange={(v) => form.setValue("paragraphFontWeight", parseInt(v))}
+                        >
                           <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="300">Light</SelectItem>
                             <SelectItem value="400">Normal</SelectItem>
+                            <SelectItem value="500">Medium</SelectItem>
                             <SelectItem value="600">Semi-Bold</SelectItem>
                             <SelectItem value="700">Bold</SelectItem>
+                            <SelectItem value="800">Extra Bold</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -1192,10 +1380,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             type="range"
                             min="10"
                             max="24"
-                            defaultValue="14"
+                            value={watchedValues.paragraphFontSize || 14}
+                            onChange={(e) => form.setValue("paragraphFontSize", parseInt(e.target.value))}
                             className="flex-1 h-1 bg-slate-600 rounded-lg appearance-none slider"
                           />
-                          <span className="text-xs text-gray-400 w-6">14</span>
+                          <span className="text-xs text-gray-400 w-6">{watchedValues.paragraphFontSize || 14}</span>
                         </div>
                       </div>
                     </div>
@@ -1210,7 +1399,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
                             data-testid="input-paragraph-color"
                           />
-                          <span className="text-xs text-gray-400">#000000</span>
+                          <span className="text-xs text-gray-400">{watchedValues.paragraphColor || "#000000"}</span>
                         </div>
                       </div>
                     </div>

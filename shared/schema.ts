@@ -118,10 +118,38 @@ export const businessCards = pgTable("business_cards", {
   
   // Branding
   brandColor: varchar("brand_color").default('#22c55e'),
+  secondaryColor: varchar("secondary_color").default('#999999'),
+  tertiaryColor: varchar("tertiary_color").default('#ffffff'),
   accentColor: varchar("accent_color").default('#16a34a'),
+  backgroundColor: varchar("background_color").default('#ffffff'),
+  textColor: varchar("text_color").default('#374151'),
+  headingColor: varchar("heading_color").default('#000000'),
+  paragraphColor: varchar("paragraph_color").default('#000000'),
+  
+  // Typography
   font: varchar("font").default('inter'),
+  headingFont: varchar("heading_font").default('inter'),
+  paragraphFont: varchar("paragraph_font").default('inter'),
+  fontSize: integer("font_size").default(16),
+  headingFontSize: integer("heading_font_size").default(24),
+  paragraphFontSize: integer("paragraph_font_size").default(14),
+  fontWeight: integer("font_weight").default(400),
+  headingFontWeight: integer("heading_font_weight").default(600),
+  paragraphFontWeight: integer("paragraph_font_weight").default(400),
+  
+  // Design
   template: varchar("template").default('minimal'),
   headerDesign: varchar("header_design").default('cover-logo'),
+  borderRadius: integer("border_radius").default(8),
+  
+  // Background options
+  backgroundType: varchar("background_type").default('color'), // 'color', 'gradient', 'image'
+  backgroundGradient: jsonb("background_gradient"), // {type: 'linear', angle: 90, colors: []}
+  backgroundImage: text("background_image"),
+  
+  // Animations
+  animationType: varchar("animation_type").default('none'), // 'none', 'fade', 'slide', 'bounce'
+  animationDuration: integer("animation_duration").default(500),
   
   // Media
   profilePhoto: text("profile_photo"), // base64
@@ -896,18 +924,67 @@ export const businessCardSchema = z.object({
   // New drag-and-drop page elements system
   pageElements: z.array(pageElementSchema).default([]),
   
-  // Branding
+  // Branding & Colors
   brandColor: z.string().default("#22c55e"),
+  secondaryColor: z.string().default("#999999"),
+  tertiaryColor: z.string().default("#ffffff"),
   accentColor: z.string().default("#16a34a"),
+  backgroundColor: z.string().default("#ffffff"),
+  textColor: z.string().default("#374151"),
+  headingColor: z.string().default("#000000"),
+  paragraphColor: z.string().default("#000000"),
+  
+  // Typography
   font: z.enum([
     "inter", 
     "roboto", 
     "poppins",
     "work-sans",
+    "playfair-display",
+    "montserrat",
+    "open-sans",
+    "lato",
+    "nunito",
+    "source-sans-pro",
+    "raleway",
+    "ubuntu",
+    "merriweather",
+    "oswald",
+    "pt-sans",
+    "libre-baskerville",
+    "crimson-text",
+    "fira-sans",
+    "noto-sans",
+    "karla",
     "dm-sans",
-    "plus-jakarta-sans",
+    "mulish",
+    "rubik",
+    "outfit",
     "manrope",
     "space-grotesk",
+    "plus-jakarta-sans",
+    "lexend",
+    "be-vietnam-pro",
+    "public-sans",
+    "commissioner",
+    "epilogue",
+    "satoshi",
+    "cabinet-grotesk",
+    "general-sans",
+    "supreme",
+    "gt-walsheim",
+    "circular",
+    "avenir-next",
+    "helvetica-neue",
+    "sf-pro",
+    "system-ui",
+    "times-new-roman",
+    "georgia",
+    "arial",
+    "verdana",
+    "trebuchet-ms",
+    "impact",
+    "comic-sans-ms",
     "outfit",
     "nunito-sans",
     "red-hat-display",
@@ -924,27 +1001,37 @@ export const businessCardSchema = z.object({
   template: z.enum(["minimal", "bold", "photo"]).default("minimal"),
   headerDesign: z.enum(["cover-logo", "profile-center", "split-design"]).default("cover-logo"),
   
-  // Appearance Settings
-  primaryColor: z.string().default("#22c55e"),
-  secondaryColor: z.string().default("#16a34a"),
-  tertiaryColor: z.string().default("#0d9488"),
-  useGradient: z.boolean().default(false),
-  gradientAngle: z.number().default(90),
-  gradientStops: z.array(z.object({
-    color: z.string(),
-    position: z.number()
-  })).default([
-    { color: "#22c55e", position: 0 },
-    { color: "#16a34a", position: 50 },
-    { color: "#0d9488", position: 100 }
-  ]),
-  backgroundColor: z.string().default("#ffffff"),
-  headingColor: z.string().default("#1f2937"),
-  headingSize: z.number().default(16),
-  headingWeight: z.number().default(600),
-  paragraphColor: z.string().default("#4b5563"),
-  paragraphSize: z.number().default(14),
-  paragraphWeight: z.number().default(400),
+  // Additional Typography
+  headingFont: z.string().default("inter"),
+  paragraphFont: z.string().default("inter"),
+  fontSize: z.number().default(16),
+  headingFontSize: z.number().default(24),
+  paragraphFontSize: z.number().default(14),
+  fontWeight: z.number().default(400),
+  headingFontWeight: z.number().default(600),
+  paragraphFontWeight: z.number().default(400),
+  
+  // Design
+  borderRadius: z.number().default(8),
+  
+  // Background options
+  backgroundType: z.string().default("color"), // 'color', 'gradient', 'image'
+  backgroundGradient: z.object({
+    type: z.string().default("linear"),
+    angle: z.number().default(90),
+    colors: z.array(z.object({
+      color: z.string(),
+      position: z.number()
+    })).default([
+      { color: "#22c55e", position: 0 },
+      { color: "#16a34a", position: 50 },
+      { color: "#0d9488", position: 100 }
+    ])
+  }).optional(),
+  
+  // Animations
+  animationType: z.string().default("none"), // 'none', 'fade', 'slide', 'bounce'
+  animationDuration: z.number().default(500),
   
   // Section-Specific Styling
   sectionStyles: z.object({
