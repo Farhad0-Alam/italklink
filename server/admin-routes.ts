@@ -3,7 +3,7 @@ import { db } from './db';
 import { 
   users, businessCards, adminLogs, analyticsEvents, globalTemplates, subscriptionPlans,
   features, planFeatures, planTemplates, userPlans, iconTypes, iconPacks, icons, 
-  links, countersDaily
+  links, countersDaily, headerTemplates, insertHeaderTemplateSchema
 } from '@shared/schema';
 import { requireOwner } from './auth';
 import { eq, desc, count, sql, and, or, like, inArray } from 'drizzle-orm';
@@ -1072,6 +1072,129 @@ router.put('/settings/:category', requireOwner, async (req, res) => {
     res.json({ message: 'Settings updated successfully' });
   } catch (error) {
     console.error('Failed to update settings:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// === HEADER TEMPLATE ENDPOINTS ===
+
+// Get all header templates
+router.get('/header-templates', requireOwner, async (req, res) => {
+  try {
+    const templates = await db.select().from(headerTemplates).orderBy(headerTemplates.createdAt);
+    res.json(templates);
+  } catch (error) {
+    console.error('Failed to get header templates:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get header template by ID
+router.get('/header-templates/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const template = await db.select().from(headerTemplates).where(eq(headerTemplates.id, id)).limit(1);
+    
+    if (!template[0]) {
+      return res.status(404).json({ message: 'Header template not found' });
+    }
+    
+    res.json(template[0]);
+  } catch (error) {
+    console.error('Failed to get header template:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Create header template
+router.post('/header-templates', requireOwner, async (req, res) => {
+  try {
+    const data = insertHeaderTemplateSchema.parse(req.body);
+    const newTemplate = await db.insert(headerTemplates).values(data).returning();
+    
+    await logAdminAction(req.user!.id, 'create', 'header_template', newTemplate[0].id, data);
+    
+    res.status(201).json(newTemplate[0]);
+  } catch (error) {
+    console.error('Failed to create header template:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update header template
+router.patch('/header-templates/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+    
+    const updated = await db.update(headerTemplates)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(headerTemplates.id, id))
+      .returning();
+    
+    if (!updated[0]) {
+      return res.status(404).json({ message: 'Header template not found' });
+    }
+    
+    await logAdminAction(req.user!.id, 'update', 'header_template', id, data);
+    
+    res.json(updated[0]);
+  } catch (error) {
+    console.error('Failed to update header template:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Delete header template
+router.delete('/header-templates/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const result = await db.delete(headerTemplates).where(eq(headerTemplates.id, id)).returning();
+    
+    if (!result[0]) {
+      return res.status(404).json({ message: 'Header template not found' });
+    }
+    
+    await logAdminAction(req.user!.id, 'delete', 'header_template', id);
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Failed to delete header template:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Duplicate header template
+router.post('/header-templates/:id/duplicate', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const original = await db.select().from(headerTemplates).where(eq(headerTemplates.id, id)).limit(1);
+    
+    if (!original[0]) {
+      return res.status(404).json({ message: 'Header template not found' });
+    }
+    
+    const duplicateData = {
+      name: `${original[0].name} (Copy)`,
+      description: original[0].description,
+      category: original[0].category,
+      isActive: false, // New duplicates start as inactive
+      elements: original[0].elements,
+      globalStyles: original[0].globalStyles,
+      layoutType: original[0].layoutType,
+      advancedLayout: original[0].advancedLayout,
+      previewImage: original[0].previewImage
+    };
+    
+    const newTemplate = await db.insert(headerTemplates).values(duplicateData).returning();
+    
+    await logAdminAction(req.user!.id, 'duplicate', 'header_template', newTemplate[0].id, { originalId: id });
+    
+    res.status(201).json(newTemplate[0]);
+  } catch (error) {
+    console.error('Failed to duplicate header template:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

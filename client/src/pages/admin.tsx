@@ -6,6 +6,7 @@ import PlansPage from '@/components/admin/PlansPage';
 import TemplatesPage from '@/components/admin/TemplatesPage';
 import TemplateBuilder from '@/components/admin/TemplateBuilder';
 import HeaderBuilder from '@/components/admin/HeaderBuilder';
+import HeaderTemplatesPage from '@/components/admin/HeaderTemplatesPage';
 import IconPacksPage from '@/components/admin/IconPacksPage';
 const SettingsPage = () => <div className="p-6">Settings page coming soon...</div>;
 
@@ -22,6 +23,8 @@ export default function Admin() {
         return <HeaderBuilder />;
       case '/admin/templates/builder':
         return <TemplateBuilder />;
+      case '/admin/header-templates':
+        return <HeaderTemplatesPage />;
       case '/admin/templates':
         return <TemplatesPage />;
       case '/admin/icon-packs':

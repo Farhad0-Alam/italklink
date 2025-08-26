@@ -142,6 +142,13 @@ export const businessCards = pgTable("business_cards", {
   headerDesign: varchar("header_design").default('cover-logo'),
   borderRadius: integer("border_radius").default(8),
   
+  // Advanced Header Design
+  advancedHeaderEnabled: boolean("advanced_header_enabled").default(false),
+  headerTemplate: jsonb("header_template"), // Complete header configuration with SVG shapes, layouts, etc.
+  headerLayoutType: varchar("header_layout_type").default('standard'), // 'standard', 'split', 'overlay', 'geometric', 'custom'
+  headerSvgShapes: jsonb("header_svg_shapes"), // Array of SVG shape configurations
+  headerTextPositioning: jsonb("header_text_positioning"), // Text overlay positioning and styling
+  
   // Background options
   backgroundType: varchar("background_type").default('color'), // 'color', 'gradient', 'image'
   backgroundGradient: jsonb("background_gradient"), // {type: 'linear', angle: 90, colors: []}
@@ -154,7 +161,6 @@ export const businessCards = pgTable("business_cards", {
   // Media
   profilePhoto: text("profile_photo"), // base64
   logo: text("logo"), // base64
-  backgroundImage: text("background_image"), // base64
   galleryImages: jsonb("gallery_images"),
   
   // Extended content
@@ -298,6 +304,53 @@ export const globalTemplates = pgTable("global_templates", {
   templateData: jsonb("template_data").notNull(), // The template configuration
   previewImage: text("preview_image"), // base64 preview
   isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// SVG Shapes Library table
+export const svgShapes = pgTable("svg_shapes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  category: varchar("category").notNull(), // 'waves', 'geometric', 'abstract', 'nature', 'professional'
+  description: text("description"),
+  svgCode: text("svg_code").notNull(), // The actual SVG markup
+  viewBox: varchar("view_box").notNull(), // SVG viewBox attribute
+  customizableProps: jsonb("customizable_props"), // Properties that can be customized (colors, scale, etc.)
+  tags: jsonb("tags"), // Array of tags for searching
+  isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Header Design Templates table  
+export const headerDesignTemplates = pgTable("header_design_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  category: varchar("category").notNull(), // 'modern', 'classic', 'creative', 'minimal', 'bold'
+  description: text("description"),
+  layoutType: varchar("layout_type").notNull(), // 'standard', 'split', 'overlay', 'geometric', 'custom'
+  
+  // Template configuration
+  templateConfig: jsonb("template_config").notNull(), // Complete header layout configuration
+  svgShapeIds: jsonb("svg_shape_ids"), // Array of SVG shape IDs used in this template
+  textElements: jsonb("text_elements"), // Text positioning and styling configurations
+  
+  // Styling options
+  colorScheme: jsonb("color_scheme"), // Default color scheme
+  typographySettings: jsonb("typography_settings"), // Font and text styling defaults
+  
+  // Preview and metadata
+  previewImage: text("preview_image"), // base64 preview
+  thumbnailImage: text("thumbnail_image"), // smaller preview for grid views
+  difficulty: varchar("difficulty").default('easy'), // 'easy', 'medium', 'advanced'
+  
+  // Settings
+  isActive: boolean("is_active").default(true),
+  isPremium: boolean("is_premium").default(false),
+  usageCount: integer("usage_count").default(0),
+  
   createdBy: varchar("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -598,7 +651,7 @@ export type AddTemplateToCollection = z.infer<typeof addTemplateToCollectionSche
 
 // Knowledge base documents table (vector column handled via raw SQL)
 export const kbDocs = pgTable("kb_docs", {
-  id: serial("id").primaryKey(),
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   url: text("url").notNull(),
   title: text("title"),
   content: text("content").notNull(),
@@ -607,8 +660,30 @@ export const kbDocs = pgTable("kb_docs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Header templates table for advanced header designs
+export const headerTemplates = pgTable("header_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull().default('general'),
+  isActive: boolean("is_active").notNull().default(true),
+  elements: jsonb("elements").notNull().default('[]'),
+  globalStyles: jsonb("global_styles").notNull().default('{}'),
+  layoutType: varchar("layout_type").notNull().default('standard'),
+  advancedLayout: jsonb("advanced_layout").notNull().default('{}'),
+  previewImage: text("preview_image"),
+  usageCount: integer("usage_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export type KbDoc = typeof kbDocs.$inferSelect;
 export type InsertKbDoc = typeof kbDocs.$inferInsert;
+
+export type HeaderTemplate = typeof headerTemplates.$inferSelect;
+export type InsertHeaderTemplate = typeof headerTemplates.$inferInsert;
+
+export const insertHeaderTemplateSchema = createInsertSchema(headerTemplates);
 
 // CSV import schema
 export const csvMemberSchema = z.object({

@@ -5,6 +5,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { QRCodeSVG } from "qrcode.react";
 import { generateShareUrl } from "@/lib/share";
 import { PageElementRenderer } from "./page-element";
+import DynamicHeaderRenderer from "./DynamicHeaderRenderer";
 import { Share2, Copy, Facebook, Twitter, Linkedin, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -181,129 +182,137 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
         }}
       >
         <div className="relative">
-          {/* Header Design - Cover + Logo */}
-          {(data.headerDesign === 'cover-logo' || !data.headerDesign) && (
-            <div 
-              className="h-40 relative"
-              style={{ 
-                backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
-                backgroundColor: !data.backgroundImage && !data.useGradient ? data.brandColor || '#22c55e' : undefined,
-                ...(data.useGradient && !data.backgroundImage ? gradientStyle : {}),
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}
-            >
-              {/* Logo in top left corner */}
-              {data.logo && (
-                <div className="absolute top-4 left-4 z-10">
-                  <img 
-                    src={data.logo}
-                    alt="Logo"
-                    className="h-8 w-auto max-w-20 object-contain"
-                    data-testid="img-logo"
-                  />
-                </div>
-              )}
-              
-              {/* Profile Photo with White Border */}
-              <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 z-30">
-                <div className="w-24 h-24 rounded-full bg-white p-1">
-                  <img 
-                    src={profileImageSrc}
-                    alt={data.fullName || "Profile photo"}
-                    className="w-full h-full rounded-full object-cover"
-                    data-testid="img-profile-photo"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Header Design - Profile Center */}
-          {data.headerDesign === 'profile-center' && (
-            <div 
-              className="h-32 relative"
-              style={{ 
-                backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
-                backgroundColor: !data.backgroundImage && !data.useGradient ? data.brandColor || '#22c55e' : undefined,
-                ...(data.useGradient && !data.backgroundImage ? gradientStyle : {}),
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}
-            >
-              {/* Large Profile Photo */}
-              <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-20">
-                <div className="w-32 h-32 rounded-full bg-white p-2">
-                  <img 
-                    src={profileImageSrc}
-                    alt={data.fullName || "Profile photo"}
-                    className="w-full h-full rounded-full object-cover"
-                    data-testid="img-profile-photo"
-                  />
-                </div>
-              </div>
-              
-              {/* Logo in top right */}
-              {data.logo && (
-                <div className="absolute top-4 right-4 z-10">
-                  <img 
-                    src={data.logo}
-                    alt="Logo"
-                    className="h-6 w-auto max-w-16 object-contain"
-                    data-testid="img-logo"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Header Design - Split Layout */}
-          {data.headerDesign === 'split-design' && (
-            <div className="h-40 relative flex">
-              {/* Left side - Cover */}
-              <div 
-                className="flex-1 relative"
-                style={{ 
-                  backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
-                  backgroundColor: !data.backgroundImage && !data.useGradient ? data.brandColor || '#22c55e' : undefined,
-                  ...(data.useGradient && !data.backgroundImage ? gradientStyle : {}),
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-              >
-                {/* Profile Photo on left side */}
-                <div className="absolute -bottom-12 right-4 z-30">
-                  <div className="w-20 h-20 rounded-full bg-white p-1">
-                    <img 
-                      src={profileImageSrc}
-                      alt={data.fullName || "Profile photo"}
-                      className="w-full h-full rounded-full object-cover"
-                      data-testid="img-profile-photo"
-                    />
+          {/* Advanced Header Design */}
+          {data.advancedHeaderEnabled && data.headerTemplate ? (
+            <DynamicHeaderRenderer data={data} profileImageSrc={profileImageSrc} />
+          ) : (
+            <>
+              {/* Header Design - Cover + Logo */}
+              {(data.headerDesign === 'cover-logo' || !data.headerDesign) && (
+                <div 
+                  className="h-40 relative"
+                  style={{ 
+                    backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
+                    backgroundColor: !data.backgroundImage && !data.useGradient ? data.brandColor || '#22c55e' : undefined,
+                    ...(data.useGradient && !data.backgroundImage ? gradientStyle : {}),
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                >
+                  {/* Logo in top left corner */}
+                  {data.logo && (
+                    <div className="absolute top-4 left-4 z-10">
+                      <img 
+                        src={data.logo}
+                        alt="Logo"
+                        className="h-8 w-auto max-w-20 object-contain"
+                        data-testid="img-logo"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Profile Photo with White Border */}
+                  <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 z-30">
+                    <div className="w-24 h-24 rounded-full bg-white p-1">
+                      <img 
+                        src={profileImageSrc}
+                        alt={data.fullName || "Profile photo"}
+                        className="w-full h-full rounded-full object-cover"
+                        data-testid="img-profile-photo"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              {/* Right side - Logo space */}
-              <div 
-                className="w-24 flex items-center justify-center z-10"
-                style={{ backgroundColor: data.accentColor || '#16a34a' }}
-              >
-                {data.logo && (
-                  <img 
-                    src={data.logo}
-                    alt="Logo"
-                    className="h-12 w-auto max-w-20 object-contain"
-                    data-testid="img-logo"
-                  />
-                )}
-              </div>
-            </div>
+              )}
+
+              {/* Header Design - Profile Center */}
+              {data.headerDesign === 'profile-center' && (
+                <div 
+                  className="h-32 relative"
+                  style={{ 
+                    backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
+                    backgroundColor: !data.backgroundImage && !data.useGradient ? data.brandColor || '#22c55e' : undefined,
+                    ...(data.useGradient && !data.backgroundImage ? gradientStyle : {}),
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                >
+                  {/* Large Profile Photo */}
+                  <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-20">
+                    <div className="w-32 h-32 rounded-full bg-white p-2">
+                      <img 
+                        src={profileImageSrc}
+                        alt={data.fullName || "Profile photo"}
+                        className="w-full h-full rounded-full object-cover"
+                        data-testid="img-profile-photo"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Logo in top right */}
+                  {data.logo && (
+                    <div className="absolute top-4 right-4 z-10">
+                      <img 
+                        src={data.logo}
+                        alt="Logo"
+                        className="h-6 w-auto max-w-16 object-contain"
+                        data-testid="img-logo"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Header Design - Split Layout */}
+              {data.headerDesign === 'split-design' && (
+                <div className="h-40 relative flex">
+                  {/* Left side - Cover */}
+                  <div 
+                    className="flex-1 relative"
+                    style={{ 
+                      backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
+                      backgroundColor: !data.backgroundImage && !data.useGradient ? data.brandColor || '#22c55e' : undefined,
+                      ...(data.useGradient && !data.backgroundImage ? gradientStyle : {}),
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    }}
+                  >
+                    {/* Profile Photo on left side */}
+                    <div className="absolute -bottom-12 right-4 z-30">
+                      <div className="w-20 h-20 rounded-full bg-white p-1">
+                        <img 
+                          src={profileImageSrc}
+                          alt={data.fullName || "Profile photo"}
+                          className="w-full h-full rounded-full object-cover"
+                          data-testid="img-profile-photo"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Right side - Logo space */}
+                  <div 
+                    className="w-24 flex items-center justify-center z-10"
+                    style={{ backgroundColor: data.accentColor || '#16a34a' }}
+                  >
+                    {data.logo && (
+                      <img 
+                        src={data.logo}
+                        alt="Logo"
+                        className="h-12 w-auto max-w-20 object-contain"
+                        data-testid="img-logo"
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
           
         {/* Content */}
         <div className={`pb-8 px-6 text-center text-slate-800 ${
+          data.advancedHeaderEnabled ? 'pt-8' : 
           data.headerDesign === 'profile-center' ? 'pt-20' : 
           data.headerDesign === 'split-design' ? 'pt-16' : 'pt-16'
         }`}>

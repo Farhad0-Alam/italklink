@@ -23,12 +23,17 @@ import {
   ArrowUp,
   ArrowDown,
   Settings,
-  Sparkles
+  Sparkles,
+  Shapes,
+  Grid,
+  Layers
 } from 'lucide-react';
+import SVGShapeRenderer from './SVGShapeRenderer';
+import { SVGShapeDefinition, applySVGShapeColors } from '@/lib/svg-shapes-library';
 
 interface HeaderElement {
   id: string;
-  type: 'text' | 'image' | 'logo' | 'tagline' | 'social' | 'contact' | 'button' | 'divider';
+  type: 'text' | 'image' | 'logo' | 'tagline' | 'social' | 'contact' | 'button' | 'divider' | 'svg_shape' | 'layout_container';
   content: any;
   styles: {
     fontSize?: string;
@@ -41,9 +46,22 @@ interface HeaderElement {
     textAlign?: string;
     width?: string;
     height?: string;
+    position?: string;
+    top?: string;
+    left?: string;
+    right?: string;
+    bottom?: string;
+    zIndex?: string;
+    transform?: string;
+    opacity?: string;
   };
   order: number;
   visible: boolean;
+  layoutConfig?: {
+    container: 'standard' | 'split' | 'overlay' | 'geometric' | 'custom';
+    alignment: 'left' | 'center' | 'right' | 'justified';
+    responsiveBreakpoints?: Record<string, any>;
+  };
 }
 
 interface HeaderTemplate {
@@ -60,6 +78,20 @@ interface HeaderTemplate {
     padding: string;
     borderRadius: string;
     shadow: string;
+  };
+  layoutType: 'standard' | 'split' | 'overlay' | 'geometric' | 'custom';
+  advancedLayout: {
+    columns: number;
+    rows: number;
+    gridGap: string;
+    flexDirection: 'row' | 'column';
+    justifyContent: string;
+    alignItems: string;
+    backgroundEffects: {
+      gradients: any[];
+      svgOverlays: any[];
+      patterns: any[];
+    };
   };
   category: string;
   isActive: boolean;
@@ -81,12 +113,29 @@ export default function HeaderBuilder({ onSave }: { onSave?: (template: HeaderTe
       borderRadius: '0.5rem',
       shadow: 'sm'
     },
+    layoutType: 'standard',
+    advancedLayout: {
+      columns: 1,
+      rows: 1,
+      gridGap: '1rem',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundEffects: {
+        gradients: [],
+        svgOverlays: [],
+        patterns: []
+      }
+    },
     category: 'professional',
     isActive: true
   });
 
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(true);
+  const [showSVGShapeSelector, setShowSVGShapeSelector] = useState(false);
+  const [selectedElementForSVG, setSelectedElementForSVG] = useState<string | null>(null);
+  const [showLayoutControls, setShowLayoutControls] = useState(false);
 
   // Pre-defined element templates
   const elementTemplates = {
@@ -147,6 +196,42 @@ export default function HeaderBuilder({ onSave }: { onSave?: (template: HeaderTe
         backgroundColor: '#e5e7eb',
         margin: '1rem 0'
       }
+    },
+    svg_shape: {
+      type: 'svg_shape' as const,
+      content: { 
+        shapeId: '',
+        shapeName: 'Select SVG Shape',
+        svgCode: '',
+        customColors: { color1: '#22c55e', color2: '#16a34a' },
+        viewBox: '0 0 100 100'
+      },
+      styles: { 
+        width: '100px',
+        height: '100px',
+        opacity: '1',
+        transform: 'scale(1) rotate(0deg)'
+      }
+    },
+    layout_container: {
+      type: 'layout_container' as const,
+      content: {
+        containerType: 'flex',
+        childElements: []
+      },
+      styles: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '1rem',
+        padding: '1rem',
+        width: '100%'
+      },
+      layoutConfig: {
+        container: 'standard',
+        alignment: 'center'
+      }
     }
   };
 
@@ -196,6 +281,48 @@ export default function HeaderBuilder({ onSave }: { onSave?: (template: HeaderTe
       
       return { ...prev, elements };
     });
+  };
+
+  // SVG Shape handlers
+  const handleSVGShapeSelect = (shape: SVGShapeDefinition, customization: any) => {
+    if (!selectedElementForSVG) return;
+    
+    const processedSvgCode = applySVGShapeColors(shape.svgCode, customization.colors);
+    
+    updateElement(selectedElementForSVG, {
+      content: {
+        shapeId: shape.id,
+        shapeName: shape.name,
+        svgCode: processedSvgCode,
+        customColors: customization.colors,
+        viewBox: shape.viewBox
+      },
+      styles: {
+        ...headerTemplate.elements.find(el => el.id === selectedElementForSVG)?.styles,
+        opacity: customization.opacity.toString(),
+        transform: `scale(${customization.scale}) rotate(${customization.rotation}deg)`
+      }
+    });
+    
+    setShowSVGShapeSelector(false);
+    setSelectedElementForSVG(null);
+  };
+
+  const openSVGShapeSelector = (elementId: string) => {
+    setSelectedElementForSVG(elementId);
+    setShowSVGShapeSelector(true);
+  };
+
+  const updateLayoutType = (layoutType: HeaderTemplate['layoutType']) => {
+    setHeaderTemplate(prev => ({
+      ...prev,
+      layoutType,
+      advancedLayout: {
+        ...prev.advancedLayout,
+        columns: layoutType === 'split' ? 2 : layoutType === 'geometric' ? 3 : 1,
+        flexDirection: layoutType === 'split' ? 'row' : 'column'
+      }
+    }));
   };
 
   const duplicateElement = (id: string) => {
@@ -255,6 +382,7 @@ export default function HeaderBuilder({ onSave }: { onSave?: (template: HeaderTe
           <Tabs defaultValue="elements" className="flex-1">
             <TabsList className="w-full">
               <TabsTrigger value="elements" className="flex-1">Elements</TabsTrigger>
+              <TabsTrigger value="layouts" className="flex-1">Layouts</TabsTrigger>
               <TabsTrigger value="settings" className="flex-1">Settings</TabsTrigger>
             </TabsList>
             
@@ -325,6 +453,24 @@ export default function HeaderBuilder({ onSave }: { onSave?: (template: HeaderTe
                   >
                     <Separator className="w-4 h-4 mr-1" />
                     Divider
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addElement('svg_shape')}
+                    className="bg-green-50 hover:bg-green-100 border-green-200"
+                  >
+                    <Shapes className="w-4 h-4 mr-1" />
+                    SVG Shape
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addElement('layout_container')}
+                    className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                  >
+                    <Grid className="w-4 h-4 mr-1" />
+                    Container
                   </Button>
                 </div>
               </div>
@@ -401,6 +547,146 @@ export default function HeaderBuilder({ onSave }: { onSave?: (template: HeaderTe
                     ))}
                   </div>
                 </ScrollArea>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="layouts" className="p-4 space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold mb-3">Header Layout Type</h3>
+                <div className="grid grid-cols-1 gap-2">
+                  {(['standard', 'split', 'overlay', 'geometric', 'custom'] as const).map(layout => (
+                    <Button
+                      key={layout}
+                      variant={headerTemplate.layoutType === layout ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => updateLayoutType(layout)}
+                      className="justify-start"
+                    >
+                      <Layout className="w-4 h-4 mr-2" />
+                      {layout.charAt(0).toUpperCase() + layout.slice(1)}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="text-sm font-semibold mb-3">Advanced Layout Settings</h3>
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-xs">Columns: {headerTemplate.advancedLayout.columns}</Label>
+                    <Input
+                      type="range"
+                      min="1"
+                      max="4"
+                      value={headerTemplate.advancedLayout.columns}
+                      onChange={(e) => setHeaderTemplate(prev => ({
+                        ...prev,
+                        advancedLayout: {
+                          ...prev.advancedLayout,
+                          columns: parseInt(e.target.value)
+                        }
+                      }))}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-xs">Grid Gap</Label>
+                    <Select
+                      value={headerTemplate.advancedLayout.gridGap}
+                      onValueChange={(value) => setHeaderTemplate(prev => ({
+                        ...prev,
+                        advancedLayout: {
+                          ...prev.advancedLayout,
+                          gridGap: value
+                        }
+                      }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0.5rem">Small (0.5rem)</SelectItem>
+                        <SelectItem value="1rem">Medium (1rem)</SelectItem>
+                        <SelectItem value="1.5rem">Large (1.5rem)</SelectItem>
+                        <SelectItem value="2rem">XLarge (2rem)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs">Flex Direction</Label>
+                    <Select
+                      value={headerTemplate.advancedLayout.flexDirection}
+                      onValueChange={(value: 'row' | 'column') => setHeaderTemplate(prev => ({
+                        ...prev,
+                        advancedLayout: {
+                          ...prev.advancedLayout,
+                          flexDirection: value
+                        }
+                      }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="row">Horizontal</SelectItem>
+                        <SelectItem value="column">Vertical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs">Justify Content</Label>
+                    <Select
+                      value={headerTemplate.advancedLayout.justifyContent}
+                      onValueChange={(value) => setHeaderTemplate(prev => ({
+                        ...prev,
+                        advancedLayout: {
+                          ...prev.advancedLayout,
+                          justifyContent: value
+                        }
+                      }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="flex-start">Start</SelectItem>
+                        <SelectItem value="center">Center</SelectItem>
+                        <SelectItem value="flex-end">End</SelectItem>
+                        <SelectItem value="space-between">Space Between</SelectItem>
+                        <SelectItem value="space-around">Space Around</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs">Align Items</Label>
+                    <Select
+                      value={headerTemplate.advancedLayout.alignItems}
+                      onValueChange={(value) => setHeaderTemplate(prev => ({
+                        ...prev,
+                        advancedLayout: {
+                          ...prev.advancedLayout,
+                          alignItems: value
+                        }
+                      }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="flex-start">Start</SelectItem>
+                        <SelectItem value="center">Center</SelectItem>
+                        <SelectItem value="flex-end">End</SelectItem>
+                        <SelectItem value="stretch">Stretch</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             </TabsContent>
 
@@ -616,6 +902,83 @@ export default function HeaderBuilder({ onSave }: { onSave?: (template: HeaderTe
                     </Select>
                   </div>
                 </>
+              )}
+
+              {/* SVG Shape Specific Controls */}
+              {selectedElementData.type === 'svg_shape' && (
+                <div className="space-y-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200">
+                  <h4 className="font-medium text-green-800 dark:text-green-200">SVG Shape Settings</h4>
+                  
+                  <div>
+                    <Label>Current Shape: {selectedElementData.content.shapeName || 'None Selected'}</Label>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => openSVGShapeSelector(selectedElement!)}
+                      className="w-full mt-2"
+                    >
+                      <Shapes className="w-4 h-4 mr-2" />
+                      Change SVG Shape
+                    </Button>
+                  </div>
+
+                  {selectedElementData.content.svgCode && (
+                    <>
+                      <div>
+                        <Label>Shape Preview</Label>
+                        <div className="mt-2 p-4 bg-white dark:bg-gray-800 rounded border flex items-center justify-center h-20">
+                          <svg 
+                            viewBox={selectedElementData.content.viewBox || '0 0 100 100'} 
+                            className="h-full max-w-full"
+                            dangerouslySetInnerHTML={{ __html: selectedElementData.content.svgCode }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label>Transform Controls</Label>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          <div>
+                            <Label className="text-xs">Scale</Label>
+                            <Input
+                              type="range"
+                              min="0.5"
+                              max="3"
+                              step="0.1"
+                              value={(selectedElementData.styles.transform?.match(/scale\(([\d.]+)\)/) || [,'1'])[1]}
+                              onChange={(e) => {
+                                const currentTransform = selectedElementData.styles.transform || '';
+                                const newTransform = currentTransform.replace(/scale\([\d.]+\)/, `scale(${e.target.value})`);
+                                const finalTransform = newTransform.includes('scale') ? newTransform : `${newTransform} scale(${e.target.value})`;
+                                updateElement(selectedElement!, { 
+                                  styles: { ...selectedElementData.styles, transform: finalTransform.trim() }
+                                });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Rotation</Label>
+                            <Input
+                              type="range"
+                              min="0"
+                              max="360"
+                              step="15"
+                              value={(selectedElementData.styles.transform?.match(/rotate\(([\d.]+)deg\)/) || [,'0'])[1]}
+                              onChange={(e) => {
+                                const currentTransform = selectedElementData.styles.transform || '';
+                                const newTransform = currentTransform.replace(/rotate\([\d.]+deg\)/, `rotate(${e.target.value}deg)`);
+                                const finalTransform = newTransform.includes('rotate') ? newTransform : `${newTransform} rotate(${e.target.value}deg)`;
+                                updateElement(selectedElement!, { 
+                                  styles: { ...selectedElementData.styles, transform: finalTransform.trim() }
+                                });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
               )}
 
               {selectedElementData.type === 'image' && (
@@ -862,6 +1225,41 @@ export default function HeaderBuilder({ onSave }: { onSave?: (template: HeaderTe
                           )}
                         </div>
                       )}
+
+                      {element.type === 'svg_shape' && element.content.svgCode && (
+                        <div 
+                          className="svg-shape-container"
+                          style={{
+                            width: element.styles.width || '100px',
+                            height: element.styles.height || '100px',
+                            opacity: element.styles.opacity || 1,
+                            transform: element.styles.transform || 'none'
+                          }}
+                        >
+                          <svg 
+                            viewBox={element.content.viewBox || '0 0 100 100'} 
+                            className="w-full h-full"
+                            dangerouslySetInnerHTML={{ __html: element.content.svgCode }}
+                          />
+                        </div>
+                      )}
+
+                      {element.type === 'layout_container' && (
+                        <div 
+                          className="layout-container border-2 border-dashed border-gray-300 p-2 min-h-[50px]"
+                          style={{
+                            display: element.styles.display || 'flex',
+                            flexDirection: element.styles.flexDirection || 'row',
+                            justifyContent: element.styles.justifyContent || 'center',
+                            alignItems: element.styles.alignItems || 'center',
+                            gap: element.styles.gap || '1rem'
+                          }}
+                        >
+                          <span className="text-gray-500 text-sm">
+                            Container ({element.content.containerType || 'flex'})
+                          </span>
+                        </div>
+                      )}
                     </div>
                   ))}
               </div>
@@ -869,6 +1267,35 @@ export default function HeaderBuilder({ onSave }: { onSave?: (template: HeaderTe
           </div>
         )}
       </div>
+
+      {/* SVG Shape Selector Modal */}
+      {showSVGShapeSelector && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-6xl max-h-[90vh] overflow-hidden">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Select SVG Shape</CardTitle>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => {
+                    setShowSVGShapeSelector(false);
+                    setSelectedElementForSVG(null);
+                  }}
+                >
+                  ×
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="h-full overflow-auto">
+              <SVGShapeRenderer 
+                onShapeSelect={handleSVGShapeSelect}
+                selectedShapes={[]}
+                allowMultiple={false}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
