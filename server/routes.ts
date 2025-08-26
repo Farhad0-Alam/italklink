@@ -15,6 +15,7 @@ import adminRoutes from './admin-routes';
 import { templateCollectionsRoutes } from './template-collections-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 import ragRoutes from './rag-routes';
+import { pwaRouter } from './routes/pwa';
 
 
 
@@ -35,6 +36,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup template collections routes
   app.use('/api/collections', requireAuth, templateCollectionsRoutes);
+  
+  // Setup PWA routes
+  app.use('/api/pwa', pwaRouter);
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {

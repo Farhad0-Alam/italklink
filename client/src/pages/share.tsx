@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { decodeCardData, logEvent } from "@/lib/share";
 import { defaultCardData } from "@/lib/card-data";
+import { BusinessCardPWAInstaller } from "@/components/BusinessCardPWAInstaller";
 
 export const Share: React.FC = () => {
   const { t } = useTranslation();
@@ -83,6 +84,9 @@ export const Share: React.FC = () => {
             isInteractive={true}
           />
         </div>
+        
+        {/* PWA Install Button */}
+        <BusinessCardPWAInstaller cardData={cardData} />
       </div>
     </div>
   );

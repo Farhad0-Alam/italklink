@@ -96,7 +96,7 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Install App Floating Button */}
+      {/* Install 2TalkLink App Floating Button */}
       <div className="fixed bottom-6 right-6 z-50">
         <a 
           href="https://2talklink.com/?utm_source=preview-app&utm_medium=fab&utm_campaign=free-tool" 
@@ -106,7 +106,7 @@ export const Home: React.FC = () => {
           data-testid="button-install-app"
         >
           <i className="fas fa-mobile-alt"></i>
-          <span className="hidden sm:inline font-medium">Install App</span>
+          <span className="hidden sm:inline font-medium">Get 2TalkLink</span>
         </a>
       </div>
 
