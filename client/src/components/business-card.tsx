@@ -519,11 +519,12 @@ END:VCARD`;
                   document.body.removeChild(link);
                   URL.revokeObjectURL(url);
                 }}
-                className="flex-1 py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                className="py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{
-                  backgroundColor: data.brandColor || '#22c55e',
+                  backgroundColor: data.secondaryColor || data.accentColor || '#16a34a',
                   color: data.tertiaryColor || '#ffffff',
-                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`
+                  borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
+                  width: '70%'
                 }}
                 data-testid="button-add-to-contacts"
               >
@@ -534,11 +535,12 @@ END:VCARD`;
               {/* Share Button */}
               <button 
                 onClick={() => handleShare()}
-                className="flex-1 py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                className="py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{ 
                   backgroundColor: data.brandColor || '#22c55e',
                   color: data.tertiaryColor || '#ffffff',
-                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`
+                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`,
+                  width: '30%'
                 }}
                 data-testid="button-share-main"
               >
