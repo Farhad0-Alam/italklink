@@ -1,14 +1,11 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Smartphone, X, Check } from 'lucide-react';
+import { Download, X } from 'lucide-react';
 import { useBusinessCardPWA } from '@/hooks/useBusinessCardPWA';
 import { BusinessCard } from '@shared/schema';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
 } from '@/components/ui/dialog';
 
 interface BusinessCardPWAInstallerProps {
@@ -55,71 +52,111 @@ export const BusinessCardPWAInstaller = ({ cardData, className = '' }: BusinessC
         </Button>
       </div>
 
-      {/* Install Instructions Modal */}
+      {/* Install Instructions Modal - 2TalkLink Design */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-semibold text-gray-700">
-                Install Business Card
-              </DialogTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowModal(false)}
-                className="h-6 w-6 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <DialogDescription className="text-gray-600">
-              Install {cardData.fullName || 'this'}'s digital business card on your device for quick access.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-lg p-0 bg-white">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b">
+            <h2 className="text-xl font-semibold text-gray-800">Install Business Card</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowModal(false)}
+              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
 
-          <div className="space-y-4">
-            <div className="text-center p-4 border rounded-lg bg-green-50">
-              <Smartphone className="h-12 w-12 mx-auto mb-3 text-green-600" />
-              <h3 className="font-medium text-lg mb-2">Install as App</h3>
-              <p className="text-sm text-gray-600 mb-3">
+          <div className="p-6 space-y-6">
+            {/* Description */}
+            <p className="text-gray-600 text-sm leading-relaxed">
+              Install {cardData.fullName || 'this person'}'s digital business card on your device for quick access.
+            </p>
+
+            {/* Install as App Section */}
+            <div className="bg-green-50 rounded-lg p-6 text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <div className="w-8 h-12 bg-green-600 rounded-md relative">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full absolute top-2 left-1/2 transform -translate-x-1/2"></div>
+                  <div className="w-4 h-0.5 bg-white rounded absolute bottom-1.5 left-1/2 transform -translate-x-1/2"></div>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Install as App</h3>
+              <p className="text-sm text-gray-600">
                 Add this business card to your home screen for instant access.
               </p>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-sm mb-3">Installation Instructions:</h4>
-              <div className="space-y-2 text-xs text-gray-600">
-                <div className="flex items-center space-x-2">
-                  <Check className="h-3 w-3 text-green-500" />
-                  <span><strong>Chrome/Android:</strong> Tap "Add to Home screen" notification</span>
+            {/* Installation Instructions */}
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-3">Installation Instructions:</h4>
+              <div className="space-y-3">
+                <div className="flex items-start space-x-3">
+                  <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center mt-0.5">
+                    <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    <span className="font-medium">Chrome/Android:</span> Tap "Add to Home screen" notification
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-3 w-3 text-green-500" />
-                  <span><strong>Safari/iOS:</strong> Share → "Add to Home Screen"</span>
+                <div className="flex items-start space-x-3">
+                  <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center mt-0.5">
+                    <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    <span className="font-medium">Safari/iOS:</span> Share → "Add to Home Screen"
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Check className="h-3 w-3 text-green-500" />
-                  <span><strong>Desktop:</strong> Look for install icon in address bar</span>
+                <div className="flex items-start space-x-3">
+                  <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center mt-0.5">
+                    <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    <span className="font-medium">Desktop:</span> Look for install icon in address bar
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-medium text-sm mb-2 text-blue-800">Why Install?</h4>
-              <ul className="text-xs text-blue-700 space-y-1">
-                <li>• Instant access from home screen</li>
-                <li>• Works offline once installed</li>
-                <li>• Native app-like experience</li>
-                <li>• Quick contact sharing</li>
-                <li>• Always up-to-date information</li>
-              </ul>
+            {/* Why Install */}
+            <div>
+              <h4 className="font-semibold text-blue-700 mb-3">Why Install?</h4>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-blue-600">•</span>
+                  <span className="text-sm text-blue-700">Instant access from home screen</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-blue-600">•</span>
+                  <span className="text-sm text-blue-700">Works offline once installed</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-blue-600">•</span>
+                  <span className="text-sm text-blue-700">Native app-like experience</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-blue-600">•</span>
+                  <span className="text-sm text-blue-700">Quick contact sharing</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-blue-600">•</span>
+                  <span className="text-sm text-blue-700">Always up-to-date information</span>
+                </div>
+              </div>
             </div>
 
-            <div className="text-center">
+            {/* Got it button */}
+            <div className="pt-4">
               <Button
                 onClick={() => setShowModal(false)}
-                variant="outline"
-                className="w-full"
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-medium"
               >
                 Got it, thanks!
               </Button>
