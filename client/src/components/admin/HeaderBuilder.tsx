@@ -1,6 +1,6 @@
 import React from 'react';
-import { HeaderFormBuilder } from '@/components/HeaderFormBuilder';
+import { AdvancedHeaderBuilder } from '@/components/AdvancedHeaderBuilder';
 
 export default function HeaderBuilder() {
-  return <HeaderFormBuilder />;
+  return <AdvancedHeaderBuilder />;
 }
