@@ -63,7 +63,10 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeHandle, setResizeHandle] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const previewRef = useRef<HTMLDivElement>(null);
 
   const [collapsedSections, setCollapsedSections] = useState<{ [key: string]: boolean }>({
@@ -218,11 +221,35 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging && selectedElement && previewRef.current) {
+  const handleResizeMouseDown = (e: React.MouseEvent, elementId: string, handle: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedElement(elementId);
+    setIsResizing(true);
+    setResizeHandle(handle);
+    
+    const element = headerTemplate.elements.find(el => el.id === elementId);
+    if (element && previewRef.current) {
       const rect = previewRef.current.getBoundingClientRect();
-      const newX = Math.max(0, Math.min(headerTemplate.globalStyles.headerWidth - 50, e.clientX - rect.left - dragOffset.x));
-      const newY = Math.max(0, Math.min(headerTemplate.globalStyles.headerHeight - 30, e.clientY - rect.top - dragOffset.y));
+      setResizeStart({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+        width: element.position.width,
+        height: element.position.height
+      });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!previewRef.current) return;
+    
+    const rect = previewRef.current.getBoundingClientRect();
+    const currentX = e.clientX - rect.left;
+    const currentY = e.clientY - rect.top;
+
+    if (isDragging && selectedElement && !isResizing) {
+      const newX = Math.max(0, Math.min(headerTemplate.globalStyles.headerWidth - 50, currentX - dragOffset.x));
+      const newY = Math.max(0, Math.min(headerTemplate.globalStyles.headerHeight - 30, currentY - dragOffset.y));
       
       updateElement(selectedElement, {
         position: {
@@ -232,10 +259,69 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
         }
       });
     }
+
+    if (isResizing && selectedElement && resizeHandle) {
+      const element = headerTemplate.elements.find(el => el.id === selectedElement)!;
+      const deltaX = currentX - resizeStart.x;
+      const deltaY = currentY - resizeStart.y;
+      
+      let newWidth = resizeStart.width;
+      let newHeight = resizeStart.height;
+      let newX = element.position.x;
+      let newY = element.position.y;
+
+      switch (resizeHandle) {
+        case 'se': // Bottom-right corner
+          newWidth = Math.max(20, resizeStart.width + deltaX);
+          newHeight = Math.max(20, resizeStart.height + deltaY);
+          break;
+        case 'sw': // Bottom-left corner
+          newWidth = Math.max(20, resizeStart.width - deltaX);
+          newHeight = Math.max(20, resizeStart.height + deltaY);
+          newX = element.position.x + (resizeStart.width - newWidth);
+          break;
+        case 'ne': // Top-right corner
+          newWidth = Math.max(20, resizeStart.width + deltaX);
+          newHeight = Math.max(20, resizeStart.height - deltaY);
+          newY = element.position.y + (resizeStart.height - newHeight);
+          break;
+        case 'nw': // Top-left corner
+          newWidth = Math.max(20, resizeStart.width - deltaX);
+          newHeight = Math.max(20, resizeStart.height - deltaY);
+          newX = element.position.x + (resizeStart.width - newWidth);
+          newY = element.position.y + (resizeStart.height - newHeight);
+          break;
+        case 'n': // Top edge
+          newHeight = Math.max(20, resizeStart.height - deltaY);
+          newY = element.position.y + (resizeStart.height - newHeight);
+          break;
+        case 's': // Bottom edge
+          newHeight = Math.max(20, resizeStart.height + deltaY);
+          break;
+        case 'e': // Right edge
+          newWidth = Math.max(20, resizeStart.width + deltaX);
+          break;
+        case 'w': // Left edge
+          newWidth = Math.max(20, resizeStart.width - deltaX);
+          newX = element.position.x + (resizeStart.width - newWidth);
+          break;
+      }
+
+      updateElement(selectedElement, {
+        position: {
+          x: Math.max(0, newX),
+          y: Math.max(0, newY),
+          width: Math.min(newWidth, headerTemplate.globalStyles.headerWidth - newX),
+          height: Math.min(newHeight, headerTemplate.globalStyles.headerHeight - newY)
+        }
+      });
+    }
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
+    setIsResizing(false);
+    setResizeHandle(null);
   };
 
   const handleFileUpload = async (
@@ -326,7 +412,46 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
     ? headerTemplate.elements.find(el => el.id === selectedElement)
     : null;
 
+  const renderResizeHandles = (element: HeaderElement) => {
+    if (selectedElement !== element.id) return null;
+
+    const handleStyle = {
+      position: 'absolute' as const,
+      width: '8px',
+      height: '8px',
+      backgroundColor: '#22c55e',
+      border: '1px solid #ffffff',
+      borderRadius: '1px',
+      cursor: 'pointer',
+      zIndex: 1000
+    };
+
+    const handles = [
+      { id: 'nw', style: { ...handleStyle, top: '-4px', left: '-4px', cursor: 'nw-resize' } },
+      { id: 'n', style: { ...handleStyle, top: '-4px', left: '50%', transform: 'translateX(-50%)', cursor: 'n-resize' } },
+      { id: 'ne', style: { ...handleStyle, top: '-4px', right: '-4px', cursor: 'ne-resize' } },
+      { id: 'e', style: { ...handleStyle, top: '50%', right: '-4px', transform: 'translateY(-50%)', cursor: 'e-resize' } },
+      { id: 'se', style: { ...handleStyle, bottom: '-4px', right: '-4px', cursor: 'se-resize' } },
+      { id: 's', style: { ...handleStyle, bottom: '-4px', left: '50%', transform: 'translateX(-50%)', cursor: 's-resize' } },
+      { id: 'sw', style: { ...handleStyle, bottom: '-4px', left: '-4px', cursor: 'sw-resize' } },
+      { id: 'w', style: { ...handleStyle, top: '50%', left: '-4px', transform: 'translateY(-50%)', cursor: 'w-resize' } }
+    ];
+
+    return (
+      <>
+        {handles.map(handle => (
+          <div
+            key={handle.id}
+            style={handle.style}
+            onMouseDown={(e) => handleResizeMouseDown(e, element.id, handle.id)}
+          />
+        ))}
+      </>
+    );
+  };
+
   const renderElement = (element: HeaderElement) => {
+    const isSelected = selectedElement === element.id;
     const style = {
       position: 'absolute' as const,
       left: `${element.position.x}px`,
@@ -334,8 +459,9 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
       width: `${element.position.width}px`,
       height: `${element.position.height}px`,
       zIndex: element.styles.zIndex || 1,
-      cursor: 'move',
-      border: selectedElement === element.id ? '2px solid #22c55e' : 'none',
+      cursor: isDragging ? 'grabbing' : 'move',
+      border: isSelected ? '1px solid #22c55e' : '1px solid transparent',
+      outline: isSelected ? '1px solid rgba(34, 197, 94, 0.3)' : 'none',
       ...element.styles
     };
 
@@ -344,20 +470,22 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
       case 'logo':
       case 'header_image':
         return (
-          <div
-            key={element.id}
-            style={style}
-            onMouseDown={(e) => handleMouseDown(e, element.id)}
-            className="flex items-center justify-center bg-slate-200 rounded overflow-hidden"
-          >
-            {element.content.src ? (
-              <img src={element.content.src} alt={element.content.alt} className="w-full h-full object-cover" />
-            ) : (
-              <div className="text-center text-slate-600 text-xs">
-                <i className="fas fa-image mb-1" />
-                <p>{element.type.replace('_', ' ')}</p>
-              </div>
-            )}
+          <div key={element.id} style={{ position: 'relative' }}>
+            <div
+              style={style}
+              onMouseDown={(e) => handleMouseDown(e, element.id)}
+              className="flex items-center justify-center bg-slate-200 rounded overflow-hidden"
+            >
+              {element.content.src ? (
+                <img src={element.content.src} alt={element.content.alt} className="w-full h-full object-cover" />
+              ) : (
+                <div className="text-center text-slate-600 text-xs">
+                  <i className="fas fa-image mb-1" />
+                  <p>{element.type.replace('_', ' ')}</p>
+                </div>
+              )}
+            </div>
+            {renderResizeHandles(element)}
           </div>
         );
 
@@ -365,15 +493,17 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
       case 'title':
       case 'company':
         return (
-          <div
-            key={element.id}
-            style={style}
-            onMouseDown={(e) => handleMouseDown(e, element.id)}
-            className="flex items-center justify-center"
-          >
-            <span style={{ fontSize: element.styles.fontSize, fontWeight: element.styles.fontWeight, color: element.styles.color }}>
-              {element.content.text || element.type}
-            </span>
+          <div key={element.id} style={{ position: 'relative' }}>
+            <div
+              style={style}
+              onMouseDown={(e) => handleMouseDown(e, element.id)}
+              className="flex items-center justify-center"
+            >
+              <span style={{ fontSize: element.styles.fontSize, fontWeight: element.styles.fontWeight, color: element.styles.color }}>
+                {element.content.text || element.type}
+              </span>
+            </div>
+            {renderResizeHandles(element)}
           </div>
         );
 
@@ -381,12 +511,14 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
         if (!element.content.svgCode) return null;
         const coloredSvg = applySVGShapeColors(element.content.svgCode, element.content.colors || {});
         return (
-          <div
-            key={element.id}
-            style={style}
-            onMouseDown={(e) => handleMouseDown(e, element.id)}
-            dangerouslySetInnerHTML={{ __html: `<svg viewBox="${element.content.viewBox}" style="width: 100%; height: 100%;">${coloredSvg}</svg>` }}
-          />
+          <div key={element.id} style={{ position: 'relative' }}>
+            <div
+              style={style}
+              onMouseDown={(e) => handleMouseDown(e, element.id)}
+              dangerouslySetInnerHTML={{ __html: `<svg viewBox="${element.content.viewBox}" style="width: 100%; height: 100%;">${coloredSvg}</svg>` }}
+            />
+            {renderResizeHandles(element)}
+          </div>
         );
 
       default:
@@ -978,7 +1110,8 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
                   position: 'relative',
                   fontFamily: headerTemplate.globalStyles.fontFamily,
                   margin: '0 auto',
-                  cursor: isDragging ? 'grabbing' : 'grab'
+                  cursor: isDragging || isResizing ? 'grabbing' : 'default',
+                  userSelect: 'none'
                 }}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
