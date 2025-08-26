@@ -403,7 +403,7 @@ export default function TemplateBuilder() {
                   <Button 
                     variant="outline" 
                     onClick={async () => {
-                      if (!cardRef.current) return;
+                      if (!cardRef.current || !templateId) return;
                       
                       setIsGeneratingThumb(true);
                       try {
@@ -415,14 +415,29 @@ export default function TemplateBuilder() {
                           backgroundColor: '#ffffff'
                         });
                         
-                        // Update template with thumbnail
-                        const updatedTemplate = {
-                          ...template,
-                          thumbnailUrl: dataUrl
-                        };
-                        setTemplate(updatedTemplate);
+                        // Save thumbnail to database
+                        const response = await fetch(`/api/admin/templates/${templateId}`, {
+                          method: 'PATCH',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            ...template,
+                            previewImage: dataUrl
+                          }),
+                        });
                         
-                        console.log('Thumbnail generated successfully');
+                        if (response.ok) {
+                          const { template: updatedTemplate } = await response.json();
+                          setTemplate({
+                            ...template,
+                            thumbnailUrl: dataUrl,
+                            previewImage: dataUrl
+                          });
+                          console.log('Thumbnail generated and saved successfully');
+                        } else {
+                          throw new Error('Failed to save thumbnail');
+                        }
                       } catch (error) {
                         console.error('Failed to generate thumbnail:', error);
                       } finally {
