@@ -537,181 +537,96 @@ END:VCARD`;
               </div>
             )}
 
-            {/* Social Media Buttons - Below Website (Unlimited) */}
-            {(data.whatsapp || data.facebook || data.instagram || data.linkedin || data.twitter || (data.customSocials && data.customSocials.length > 0)) && (
-              <div className="flex justify-center space-x-4 flex-wrap gap-y-3 px-4">
-                {data.whatsapp && (
-                  <div className="flex flex-col items-center">
-                    <button 
-                      onClick={() => handleContactAction('whatsapp', data.whatsapp)}
-                      className="w-10 h-10 rounded-full flex items-center justify-center transition-colors mb-1"
-                      style={{ 
-                        backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
-                        color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
-                      }}
-                      data-testid="button-social-whatsapp"
-                    >
-                      <i className="fab fa-whatsapp text-sm"></i>
-                    </button>
-                    <span 
-                      className="text-xs"
-                      style={{ 
-                        color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
-                        fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
-                        fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
-                        fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                        fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
-                      }}
-                    >
-                      WhatsApp
-                    </span>
-                  </div>
-                )}
-                
-                {data.facebook && (
-                  <div className="flex flex-col items-center">
-                    <button 
-                      onClick={() => handleContactAction('facebook', data.facebook)}
-                      className="w-10 h-10 rounded-full flex items-center justify-center transition-colors mb-1"
-                      style={{ 
-                        backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
-                        color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
-                      }}
-                      data-testid="button-social-facebook"
-                    >
-                      <i className="fab fa-facebook-f text-sm"></i>
-                    </button>
-                    <span 
-                      className="text-xs"
-                      style={{ 
-                        color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
-                        fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
-                        fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
-                        fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                        fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
-                      }}
-                    >
-                      Facebook
-                    </span>
-                  </div>
-                )}
-                
-                {data.instagram && (
-                  <div className="flex flex-col items-center">
-                    <button 
-                      onClick={() => handleContactAction('instagram', data.instagram)}
-                      className="w-10 h-10 rounded-full flex items-center justify-center transition-colors mb-1"
-                      style={{ 
-                        backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
-                        color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
-                      }}
-                      data-testid="button-social-instagram"
-                    >
-                      <i className="fab fa-instagram text-sm"></i>
-                    </button>
-                    <span 
-                      className="text-xs"
-                      style={{ 
-                        color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
-                        fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
-                        fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
-                        fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                        fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
-                      }}
-                    >
-                      Instagram
-                    </span>
-                  </div>
-                )}
+            {/* Social Media Buttons - Same Style as Website Button */}
+            <div className="space-y-2 px-4">
+              {data.whatsapp && (
+                <button 
+                  onClick={() => handleContactAction('whatsapp', data.whatsapp)}
+                  className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                  style={{ 
+                    backgroundColor: data.brandColor || '#22c55e'
+                  }}
+                  data-testid="button-social-whatsapp"
+                >
+                  <i className="fab fa-whatsapp mr-2"></i>
+                  WhatsApp
+                </button>
+              )}
+              
+              {data.facebook && (
+                <button 
+                  onClick={() => handleContactAction('facebook', data.facebook)}
+                  className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                  style={{ 
+                    backgroundColor: data.brandColor || '#22c55e'
+                  }}
+                  data-testid="button-social-facebook"
+                >
+                  <i className="fab fa-facebook-f mr-2"></i>
+                  Facebook
+                </button>
+              )}
+              
+              {data.instagram && (
+                <button 
+                  onClick={() => handleContactAction('instagram', data.instagram)}
+                  className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                  style={{ 
+                    backgroundColor: data.brandColor || '#22c55e'
+                  }}
+                  data-testid="button-social-instagram"
+                >
+                  <i className="fab fa-instagram mr-2"></i>
+                  Instagram
+                </button>
+              )}
 
-                {data.linkedin && (
-                  <div className="flex flex-col items-center">
-                    <button 
-                      onClick={() => handleContactAction('linkedin', data.linkedin)}
-                      className="w-10 h-10 rounded-full flex items-center justify-center transition-colors mb-1"
-                      style={{ 
-                        backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
-                        color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
-                      }}
-                      data-testid="button-social-linkedin"
-                    >
-                      <i className="fab fa-linkedin-in text-sm"></i>
-                    </button>
-                    <span 
-                      className="text-xs"
-                      style={{ 
-                        color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
-                        fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
-                        fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
-                        fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                        fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
-                      }}
-                    >
-                      LinkedIn
-                    </span>
-                  </div>
-                )}
+              {data.linkedin && (
+                <button 
+                  onClick={() => handleContactAction('linkedin', data.linkedin)}
+                  className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                  style={{ 
+                    backgroundColor: data.brandColor || '#22c55e'
+                  }}
+                  data-testid="button-social-linkedin"
+                >
+                  <i className="fab fa-linkedin-in mr-2"></i>
+                  LinkedIn
+                </button>
+              )}
 
-                {data.twitter && (
-                  <div className="flex flex-col items-center">
-                    <button 
-                      onClick={() => handleContactAction('twitter', data.twitter)}
-                      className="w-10 h-10 rounded-full flex items-center justify-center transition-colors mb-1"
-                      style={{ 
-                        backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
-                        color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
-                      }}
-                      data-testid="button-social-twitter"
-                    >
-                      <i className="fab fa-twitter text-sm"></i>
-                    </button>
-                    <span 
-                      className="text-xs"
-                      style={{ 
-                        color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
-                        fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
-                        fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
-                        fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                        fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
-                      }}
-                    >
-                      Twitter
-                    </span>
-                  </div>
-                )}
+              {data.twitter && (
+                <button 
+                  onClick={() => handleContactAction('twitter', data.twitter)}
+                  className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                  style={{ 
+                    backgroundColor: data.brandColor || '#22c55e'
+                  }}
+                  data-testid="button-social-twitter"
+                >
+                  <i className="fab fa-twitter mr-2"></i>
+                  Twitter
+                </button>
+              )}
 
-                {/* Custom Social Media Platforms - Unlimited */}
-                {data.customSocials?.map((social) => (
-                  social.value && (
-                    <div key={social.id} className="flex flex-col items-center">
-                      <button 
-                        onClick={() => handleContactAction(social.platform, social.value)}
-                        className="w-10 h-10 rounded-full flex items-center justify-center transition-colors mb-1"
-                        style={{ 
-                          backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
-                          color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
-                        }}
-                        data-testid={`button-custom-social-${social.id}`}
-                      >
-                        <i className={`${social.icon} text-sm`}></i>
-                      </button>
-                      <span 
-                        className="text-xs"
-                        style={{ 
-                          color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
-                          fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
-                          fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
-                          fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                          fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
-                        }}
-                      >
-                        {social.label || 'Social'}
-                      </span>
-                    </div>
-                  )
-                ))}
-              </div>
-            )}
+              {/* Custom Social Media Platforms - Same Style */}
+              {data.customSocials?.map((social) => (
+                social.value && (
+                  <button 
+                    key={social.id}
+                    onClick={() => handleContactAction(social.platform, social.value)}
+                    className="w-full py-3 px-4 rounded-lg flex items-center justify-center font-medium text-sm text-white transition-colors"
+                    style={{ 
+                      backgroundColor: data.brandColor || '#22c55e'
+                    }}
+                    data-testid={`button-custom-social-${social.id}`}
+                  >
+                    <i className={`${social.icon} mr-2`}></i>
+                    {social.label || 'Social'}
+                  </button>
+                )
+              ))}
+            </div>
           </div>
 
 
