@@ -503,7 +503,7 @@ END:VCARD`;
                 style={{
                   backgroundColor: '#1f2937',
                   color: '#ffffff',
-                  boxShadow: '0 4px 0 #111827'
+                  borderBottom: '4px solid #111827'
                 }}
                 data-testid="button-add-to-contacts"
               >
@@ -518,7 +518,7 @@ END:VCARD`;
                 style={{ 
                   backgroundColor: data.brandColor || '#22c55e',
                   color: '#ffffff',
-                  boxShadow: '0 4px 0 #16a34a'
+                  borderBottom: '4px solid #16a34a'
                 }}
                 data-testid="button-share-main"
               >
@@ -535,7 +535,8 @@ END:VCARD`;
                   className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff'
+                    color: '#ffffff',
+                    borderBottom: '4px solid #16a34a'
                   }}
                   data-testid="button-website"
                 >
@@ -553,7 +554,8 @@ END:VCARD`;
                   className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff'
+                    color: '#ffffff',
+                    borderBottom: '4px solid #16a34a'
                   }}
                   data-testid="button-social-whatsapp"
                 >
@@ -568,7 +570,8 @@ END:VCARD`;
                   className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff'
+                    color: '#ffffff',
+                    borderBottom: '4px solid #16a34a'
                   }}
                   data-testid="button-social-facebook"
                 >
@@ -583,7 +586,8 @@ END:VCARD`;
                   className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff'
+                    color: '#ffffff',
+                    borderBottom: '4px solid #16a34a'
                   }}
                   data-testid="button-social-instagram"
                 >
@@ -598,7 +602,8 @@ END:VCARD`;
                   className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff'
+                    color: '#ffffff',
+                    borderBottom: '4px solid #16a34a'
                   }}
                   data-testid="button-social-linkedin"
                 >
@@ -613,7 +618,8 @@ END:VCARD`;
                   className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff'
+                    color: '#ffffff',
+                    borderBottom: '4px solid #16a34a'
                   }}
                   data-testid="button-social-twitter"
                 >
@@ -631,7 +637,8 @@ END:VCARD`;
                     className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                     style={{ 
                       backgroundColor: data.brandColor || '#22c55e',
-                      color: '#ffffff'
+                      color: '#ffffff',
+                      borderBottom: '4px solid #16a34a'
                     }}
                     data-testid={`button-custom-social-${social.id}`}
                   >
