@@ -351,9 +351,9 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           )}
           
           {/* New Button Layout - Top 8 Buttons from Contact Information */}
-          <div className="mb-6 space-y-3">
+          <div className="mb-6 space-y-2">
             {/* Grid of Contact Buttons ONLY - Responsive 2 rows of 4 */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               {/* Row 1 - Top 4 buttons */}
               <div className="grid grid-cols-4 gap-3 px-4">
                 {/* Call Button */}
