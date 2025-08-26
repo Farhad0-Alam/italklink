@@ -14,6 +14,7 @@ import { fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
 import { PageBuilder } from "./page-builder";
+import { useQuery } from "@tanstack/react-query";
 
 interface FormBuilderProps {
   cardData: BusinessCard;
@@ -29,6 +30,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
+
+  // Fetch available header templates
+  const { data: headerTemplates = [] } = useQuery({
+    queryKey: ['/api/admin/header-templates'],
+    select: (data: any[]) => data.filter(template => template.isActive),
+    refetchOnWindowFocus: false
+  });
 
   const [collapsedSections, setCollapsedSections] = useState<{ [key: string]: boolean }>({
     coverLogo: false,
@@ -117,18 +125,27 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <>
                 <div className="space-y-3">
                   <Label className="text-white">Header Design</Label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     {[
                       { v: "cover-logo", label: "Cover + Logo", active: watchedValues.headerDesign === "cover-logo" || !watchedValues.headerDesign },
                       { v: "profile-center", label: "Profile Center", active: watchedValues.headerDesign === "profile-center" },
                       { v: "split-design", label: "Split Layout", active: watchedValues.headerDesign === "split-design" },
+                      { v: "advanced", label: "Advanced Template", active: watchedValues.advancedHeaderEnabled },
                     ].map(({ v, label, active }) => (
                       <div
                         key={v}
                         className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
                           active ? "border-talklink-500 bg-talklink-500/10" : "border-slate-600 bg-slate-700"
                         }`}
-                        onClick={() => form.setValue("headerDesign", v as any)}
+                        onClick={() => {
+                          if (v === "advanced") {
+                            form.setValue("advancedHeaderEnabled", true);
+                            form.setValue("headerDesign", "cover-logo"); // Keep a fallback
+                          } else {
+                            form.setValue("advancedHeaderEnabled", false);
+                            form.setValue("headerDesign", v as any);
+                          }
+                        }}
                       >
                         <div className="text-center">
                           <div className="h-8 bg-gradient-to-r from-slate-400 to-slate-600 rounded mb-1 relative">
@@ -141,6 +158,57 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     ))}
                   </div>
                 </div>
+
+                {/* Advanced Header Template Selection */}
+                {watchedValues.advancedHeaderEnabled && (
+                  <div className="space-y-3 p-4 bg-purple-900/20 border border-purple-600/30 rounded-lg">
+                    <Label className="text-purple-300">Select Header Template</Label>
+                    <Select
+                      value={watchedValues.headerTemplate?.id || ""}
+                      onValueChange={(templateId) => {
+                        const selectedTemplate = headerTemplates.find(t => t.id === templateId);
+                        if (selectedTemplate) {
+                          form.setValue("headerTemplate", selectedTemplate);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                        <SelectValue placeholder="Choose a header template..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {headerTemplates.length === 0 ? (
+                          <SelectItem value="none" disabled>
+                            No templates available
+                          </SelectItem>
+                        ) : (
+                          headerTemplates.map((template: any) => (
+                            <SelectItem key={template.id} value={template.id}>
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 rounded bg-gradient-to-r from-purple-500 to-pink-500"></div>
+                                {template.name}
+                                <span className="text-xs text-gray-500">({template.category})</span>
+                              </div>
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    
+                    {watchedValues.headerTemplate && (
+                      <div className="text-sm text-purple-300">
+                        <p><strong>Template:</strong> {(watchedValues.headerTemplate as any).name}</p>
+                        <p><strong>Description:</strong> {(watchedValues.headerTemplate as any).description || "Custom header with advanced layouts and SVG shapes"}</p>
+                      </div>
+                    )}
+                    
+                    {headerTemplates.length === 0 && (
+                      <div className="text-sm text-yellow-300 bg-yellow-900/20 border border-yellow-600/30 rounded p-3">
+                        <i className="fas fa-info-circle mr-2"></i>
+                        No active header templates found. Contact your administrator to create advanced header templates.
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="grid grid-cols-3 gap-3">
                   {[
