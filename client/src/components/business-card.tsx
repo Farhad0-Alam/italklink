@@ -502,7 +502,8 @@ END:VCARD`;
                 className="flex-1 py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{
                   backgroundColor: '#1f2937',
-                  color: '#ffffff'
+                  color: '#ffffff',
+                  boxShadow: '0 4px 0 #111827'
                 }}
                 data-testid="button-add-to-contacts"
               >
@@ -516,7 +517,8 @@ END:VCARD`;
                 className="flex-1 py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{ 
                   backgroundColor: data.brandColor || '#22c55e',
-                  color: '#ffffff'
+                  color: '#ffffff',
+                  boxShadow: '0 4px 0 #16a34a'
                 }}
                 data-testid="button-share-main"
               >
