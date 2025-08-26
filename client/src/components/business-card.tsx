@@ -332,7 +332,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           
           {/* New Button Layout - Top 8 Buttons from Contact Information */}
           <div className="mb-6 space-y-4">
-            {/* Grid of Contact Buttons - 2 rows of 4 */}
+            {/* Grid of Contact Buttons ONLY - 2 rows of 4 */}
             <div className="grid grid-cols-4 gap-3 px-4">
               {/* Row 1 */}
               {data.phone && (
@@ -429,79 +429,6 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 </span>
               </div>
 
-              {/* Row 2 */}
-              {data.facebook && (
-                <div className="flex flex-col items-center">
-                  <button 
-                    onClick={() => handleContactAction('facebook', data.facebook)}
-                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
-                    style={{ 
-                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
-                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
-                    }}
-                    data-testid="button-contact-facebook"
-                  >
-                    <i className="fab fa-facebook-f text-sm"></i>
-                  </button>
-                  <span 
-                    className="text-xs font-medium"
-                    style={{ 
-                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                    }}
-                  >
-                    Facebook
-                  </span>
-                </div>
-              )}
-
-              {data.instagram && (
-                <div className="flex flex-col items-center">
-                  <button 
-                    onClick={() => handleContactAction('instagram', data.instagram)}
-                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
-                    style={{ 
-                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
-                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
-                    }}
-                    data-testid="button-contact-instagram"
-                  >
-                    <i className="fab fa-instagram text-sm"></i>
-                  </button>
-                  <span 
-                    className="text-xs font-medium"
-                    style={{ 
-                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                    }}
-                  >
-                    Instagram
-                  </span>
-                </div>
-              )}
-
-              {data.linkedin && (
-                <div className="flex flex-col items-center">
-                  <button 
-                    onClick={() => handleContactAction('linkedin', data.linkedin)}
-                    className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
-                    style={{ 
-                      backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
-                      color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
-                    }}
-                    data-testid="button-contact-linkedin"
-                  >
-                    <i className="fab fa-linkedin-in text-sm"></i>
-                  </button>
-                  <span 
-                    className="text-xs font-medium"
-                    style={{ 
-                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                    }}
-                  >
-                    LinkedIn
-                  </span>
-                </div>
-              )}
-
               {data.whatsapp && (
                 <div className="flex flex-col items-center">
                   <button 
@@ -526,8 +453,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 </div>
               )}
 
-              {/* Custom Contact Methods fill remaining slots */}
-              {data.customContacts?.slice(0, 8 - [data.phone, data.email, data.facebook, data.instagram, data.linkedin, data.whatsapp].filter(Boolean).length - 1).map((contact) => (
+              {/* Custom Contact Methods fill remaining slots up to 8 total */}
+              {data.customContacts?.slice(0, 8 - [data.phone, data.email, data.whatsapp].filter(Boolean).length - 2).map((contact) => (
                 contact.value && contact.label && (
                   <div key={contact.id} className="flex flex-col items-center">
                     <button 
@@ -614,6 +541,154 @@ END:VCARD`;
                   <i className="fas fa-globe mr-2"></i>
                   Website
                 </button>
+              </div>
+            )}
+
+            {/* Social Media Buttons - Below Website (Unlimited) */}
+            {(data.facebook || data.instagram || data.linkedin || data.twitter || (data.customSocials && data.customSocials.length > 0)) && (
+              <div className="flex justify-center space-x-4 flex-wrap gap-y-3 px-4">
+                {data.facebook && (
+                  <div className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction('facebook', data.facebook)}
+                      className="w-10 h-10 rounded-full flex items-center justify-center transition-colors mb-1"
+                      style={{ 
+                        backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
+                        color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
+                      }}
+                      data-testid="button-social-facebook"
+                    >
+                      <i className="fab fa-facebook-f text-sm"></i>
+                    </button>
+                    <span 
+                      className="text-xs"
+                      style={{ 
+                        color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
+                        fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
+                        fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
+                        fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                        fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
+                      }}
+                    >
+                      Facebook
+                    </span>
+                  </div>
+                )}
+                
+                {data.instagram && (
+                  <div className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction('instagram', data.instagram)}
+                      className="w-10 h-10 rounded-full flex items-center justify-center transition-colors mb-1"
+                      style={{ 
+                        backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
+                        color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
+                      }}
+                      data-testid="button-social-instagram"
+                    >
+                      <i className="fab fa-instagram text-sm"></i>
+                    </button>
+                    <span 
+                      className="text-xs"
+                      style={{ 
+                        color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
+                        fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
+                        fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
+                        fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                        fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
+                      }}
+                    >
+                      Instagram
+                    </span>
+                  </div>
+                )}
+
+                {data.linkedin && (
+                  <div className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction('linkedin', data.linkedin)}
+                      className="w-10 h-10 rounded-full flex items-center justify-center transition-colors mb-1"
+                      style={{ 
+                        backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
+                        color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
+                      }}
+                      data-testid="button-social-linkedin"
+                    >
+                      <i className="fab fa-linkedin-in text-sm"></i>
+                    </button>
+                    <span 
+                      className="text-xs"
+                      style={{ 
+                        color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
+                        fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
+                        fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
+                        fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                        fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
+                      }}
+                    >
+                      LinkedIn
+                    </span>
+                  </div>
+                )}
+
+                {data.twitter && (
+                  <div className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction('twitter', data.twitter)}
+                      className="w-10 h-10 rounded-full flex items-center justify-center transition-colors mb-1"
+                      style={{ 
+                        backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
+                        color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
+                      }}
+                      data-testid="button-social-twitter"
+                    >
+                      <i className="fab fa-twitter text-sm"></i>
+                    </button>
+                    <span 
+                      className="text-xs"
+                      style={{ 
+                        color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
+                        fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
+                        fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
+                        fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                        fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
+                      }}
+                    >
+                      Twitter
+                    </span>
+                  </div>
+                )}
+
+                {/* Custom Social Media Platforms - Unlimited */}
+                {data.customSocials?.map((social) => (
+                  social.value && (
+                    <div key={social.id} className="flex flex-col items-center">
+                      <button 
+                        onClick={() => handleContactAction(social.platform, social.value)}
+                        className="w-10 h-10 rounded-full flex items-center justify-center transition-colors mb-1"
+                        style={{ 
+                          backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || '#475569',
+                          color: getSectionStyle('socialMedia', 'iconColor') || '#ffffff'
+                        }}
+                        data-testid={`button-custom-social-${social.id}`}
+                      >
+                        <i className={`${social.icon} text-sm`}></i>
+                      </button>
+                      <span 
+                        className="text-xs"
+                        style={{ 
+                          color: getSectionStyle('socialMedia', 'iconTextColor') || '#64748b',
+                          fontSize: `${getSectionStyle('socialMedia', 'iconTextSize') || 12}px`,
+                          fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || 400,
+                          fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                          fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
+                        }}
+                      >
+                        {social.label || 'Social'}
+                      </span>
+                    </div>
+                  )
+                ))}
               </div>
             )}
           </div>
