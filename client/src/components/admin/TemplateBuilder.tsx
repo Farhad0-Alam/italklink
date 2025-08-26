@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,6 +32,7 @@ import { templateExtractor } from '@/utils/template-extractor';
 import { FormBuilder } from '@/components/form-builder';
 import { BusinessCardComponent } from '@/components/business-card';
 import { generateShareUrl } from '@/lib/share';
+import * as htmlToImage from 'html-to-image';
 
 interface TemplateData {
   id?: string;
@@ -40,6 +41,7 @@ interface TemplateData {
   category: string;
   isActive: boolean;
   templateData?: any;
+  thumbnailUrl?: string;
 }
 
 export default function TemplateBuilder() {
@@ -55,6 +57,8 @@ export default function TemplateBuilder() {
   const [isEditing, setIsEditing] = useState(false);
   const [templateId, setTemplateId] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
+  const [isGeneratingThumb, setIsGeneratingThumb] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const [showHeaderBuilder, setShowHeaderBuilder] = useState(false);
   const [previewCollapsed, setPreviewCollapsed] = useState(false);
   const [businessCardData, setBusinessCardData] = useState<BusinessCard>({
@@ -384,7 +388,7 @@ export default function TemplateBuilder() {
                 {/* Card Preview Container - iPhone-like dimensions */}
                 <div className="flex justify-center">
                   <div className="w-[390px] max-w-full mx-auto bg-gray-100 dark:bg-gray-900 rounded-3xl p-4 shadow-lg border-4 border-gray-300 dark:border-gray-600">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm">
+                    <div ref={cardRef} className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm">
                       <BusinessCardComponent 
                         data={businessCardData}
                         showQR={false}
@@ -398,14 +402,38 @@ export default function TemplateBuilder() {
                 <div className="space-y-3">
                   <Button 
                     variant="outline" 
-                    onClick={() => {
-                      // Generate template thumbnail functionality
-                      console.log('Design Set Thumb clicked');
+                    onClick={async () => {
+                      if (!cardRef.current) return;
+                      
+                      setIsGeneratingThumb(true);
+                      try {
+                        // Generate thumbnail image
+                        const dataUrl = await htmlToImage.toPng(cardRef.current, {
+                          quality: 0.95,
+                          width: 400,
+                          height: 600,
+                          backgroundColor: '#ffffff'
+                        });
+                        
+                        // Update template with thumbnail
+                        const updatedTemplate = {
+                          ...template,
+                          thumbnailUrl: dataUrl
+                        };
+                        setTemplate(updatedTemplate);
+                        
+                        console.log('Thumbnail generated successfully');
+                      } catch (error) {
+                        console.error('Failed to generate thumbnail:', error);
+                      } finally {
+                        setIsGeneratingThumb(false);
+                      }
                     }}
                     className="w-full"
+                    disabled={isGeneratingThumb}
                   >
                     <ImageIcon className="h-4 w-4 mr-2" />
-                    Design Set Thumb
+                    {isGeneratingThumb ? 'Generating...' : 'Design Set Thumb'}
                   </Button>
                   <Button 
                     variant="default" 
