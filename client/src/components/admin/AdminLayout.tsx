@@ -12,7 +12,8 @@ import {
   Bell,
   Search,
   ChevronDown,
-  User
+  User,
+  Layout
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -51,6 +52,11 @@ const sidebarNavItems = [
     title: 'Templates',
     href: '/admin/templates',
     icon: FileText,
+  },
+  {
+    title: 'Header Templates',
+    href: '/admin/header-templates',
+    icon: Layout,
   },
   {
     title: 'Icon Packs',
