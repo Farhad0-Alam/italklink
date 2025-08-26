@@ -292,7 +292,9 @@ export default function DynamicHeaderRenderer({ data, profileImageSrc }: Dynamic
 
   // Render background effects
   const renderBackgroundEffects = () => {
-    const { backgroundEffects } = headerTemplate.advancedLayout;
+    const { backgroundEffects } = headerTemplate.advancedLayout || {};
+    
+    if (!backgroundEffects) return null;
     
     return (
       <>

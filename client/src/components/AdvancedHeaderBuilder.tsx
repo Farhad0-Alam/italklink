@@ -86,6 +86,19 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
       fontFamily: 'Inter, sans-serif',
       headerHeight: 300,
       headerWidth: 800,
+    },
+    advancedLayout: editingTemplate?.advancedLayout || {
+      columns: 3,
+      rows: 2,
+      gridGap: '1rem',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundEffects: {
+        gradients: [],
+        svgOverlays: [],
+        patterns: []
+      }
     }
   });
 
