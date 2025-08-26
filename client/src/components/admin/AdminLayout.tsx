@@ -14,6 +14,7 @@ import {
   ChevronDown,
   User
 } from 'lucide-react';
+import { PWAInstallButton } from '@/components/PWAInstallButton';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
@@ -158,6 +159,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </div>
 
               <div className="flex items-center space-x-4">
+                <PWAInstallButton />
+                
                 <Button variant="ghost" size="icon">
                   <Bell className="h-5 w-5" />
                 </Button>
