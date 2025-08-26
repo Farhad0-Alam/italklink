@@ -22,6 +22,7 @@ import {
   Layout,
   Type,
   Image as ImageIcon,
+  Share2,
   X
 } from 'lucide-react';
 import { useLocation } from 'wouter';
@@ -30,6 +31,7 @@ import HeaderBuilder from './HeaderBuilder';
 import { templateExtractor } from '@/utils/template-extractor';
 import { FormBuilder } from '@/components/form-builder';
 import { BusinessCardComponent } from '@/components/business-card';
+import { generateShareUrl } from '@/lib/share';
 
 interface TemplateData {
   id?: string;
@@ -386,7 +388,7 @@ export default function TemplateBuilder() {
                       <BusinessCardComponent 
                         data={businessCardData}
                         showQR={false}
-                        isInteractive={false}
+                        isInteractive={true}
                       />
                     </div>
                   </div>
@@ -401,6 +403,17 @@ export default function TemplateBuilder() {
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     {previewMode ? 'Edit Mode' : 'Preview Mode'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      const shareUrl = generateShareUrl(businessCardData);
+                      window.open(shareUrl, '_blank');
+                    }}
+                    className="w-full"
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Open Preview in New Tab
                   </Button>
                 </div>
               </CardContent>
