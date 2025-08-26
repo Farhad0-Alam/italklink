@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { decodeCardData, logEvent } from "@/lib/share";
 import { defaultCardData } from "@/lib/card-data";
 import { BusinessCardPWAInstaller } from "@/components/BusinessCardPWAInstaller";
+import { SEOHead } from "@/components/SEOHead";
 
 export const Share: React.FC = () => {
   const { t } = useTranslation();
@@ -75,14 +76,19 @@ export const Share: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-50">
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        {/* Shared Card Display - Clean Layout */}
+      {/* Dynamic SEO Head Component */}
+      <SEOHead cardData={cardData} />
+      
+      <div className="w-full max-w-[470px] mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        {/* Shared Card Display - Mobile Responsive Layout */}
         <div className="flex justify-center">
-          <BusinessCardComponent
-            data={cardData}
-            showQR={true}
-            isInteractive={true}
-          />
+          <div className="w-full">
+            <BusinessCardComponent
+              data={cardData}
+              showQR={true}
+              isInteractive={true}
+            />
+          </div>
         </div>
         
         {/* PWA Install Button */}

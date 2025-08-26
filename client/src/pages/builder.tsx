@@ -115,14 +115,16 @@ export const Builder = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Card Preview Container */}
+                {/* Card Preview Container - 430px Business Card */}
                 <div className="flex justify-center">
-                  <BusinessCardComponent
-                    ref={cardRef}
-                    data={cardData}
-                    showQR={showQR}
-                    isInteractive={true}
-                  />
+                  <div className="w-full max-w-[430px]">
+                    <BusinessCardComponent
+                      ref={cardRef}
+                      data={cardData}
+                      showQR={showQR}
+                      isInteractive={true}
+                    />
+                  </div>
                 </div>
 
                 {/* Preview Actions */}
