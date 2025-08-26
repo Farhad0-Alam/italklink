@@ -910,8 +910,258 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             )}
           </div>
 
-          {/* Appearance, SEO (unchanged) */}
-          {/* ... same as previous message ... */}
+          {/* Appearance Section */}
+          <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("appearance")}>
+              <h3 className="text-lg font-semibold text-purple-300">Appearance & Design</h3>
+              <i className={`fas ${collapsedSections.appearance ? "fa-chevron-down" : "fa-chevron-up"} text-purple-300`} />
+            </div>
+
+            {!collapsedSections.appearance && (
+              <>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-white">Brand Color</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          {...form.register("brandColor")}
+                          className="w-16 h-10 p-1 bg-slate-700 border-slate-600 rounded"
+                          data-testid="input-brand-color"
+                        />
+                        <Input
+                          {...form.register("brandColor")}
+                          placeholder="#22c55e"
+                          className="bg-slate-700 border-slate-600 text-white flex-1"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-white">Text Color</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          {...form.register("textColor")}
+                          className="w-16 h-10 p-1 bg-slate-700 border-slate-600 rounded"
+                          data-testid="input-text-color"
+                        />
+                        <Input
+                          {...form.register("textColor")}
+                          placeholder="#374151"
+                          className="bg-slate-700 border-slate-600 text-white flex-1"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-white">Background Color</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          {...form.register("backgroundColor")}
+                          className="w-16 h-10 p-1 bg-slate-700 border-slate-600 rounded"
+                          data-testid="input-background-color"
+                        />
+                        <Input
+                          {...form.register("backgroundColor")}
+                          placeholder="#ffffff"
+                          className="bg-slate-700 border-slate-600 text-white flex-1"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-white">Card Template</Label>
+                      <Select value={watchedValues.template || "original"} onValueChange={(v) => form.setValue("template", v)}>
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="original">Original Template</SelectItem>
+                          <SelectItem value="minimal">Minimal Style</SelectItem>
+                          <SelectItem value="bold">Bold Design</SelectItem>
+                          <SelectItem value="photo">Photo Focus</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label className="text-white">Font Size</Label>
+                      <Select value={`${watchedValues.fontSize || 16}`} onValueChange={(v) => form.setValue("fontSize", parseInt(v))}>
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="14">Small (14px)</SelectItem>
+                          <SelectItem value="16">Medium (16px)</SelectItem>
+                          <SelectItem value="18">Large (18px)</SelectItem>
+                          <SelectItem value="20">X-Large (20px)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-white">Font Weight</Label>
+                      <Select value={`${watchedValues.fontWeight || 400}`} onValueChange={(v) => form.setValue("fontWeight", parseInt(v))}>
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="300">Light</SelectItem>
+                          <SelectItem value="400">Normal</SelectItem>
+                          <SelectItem value="500">Medium</SelectItem>
+                          <SelectItem value="600">Semi-Bold</SelectItem>
+                          <SelectItem value="700">Bold</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-white">Border Radius</Label>
+                      <Select value={`${watchedValues.borderRadius || 8}`} onValueChange={(v) => form.setValue("borderRadius", parseInt(v))}>
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">None</SelectItem>
+                          <SelectItem value="4">Small</SelectItem>
+                          <SelectItem value="8">Medium</SelectItem>
+                          <SelectItem value="12">Large</SelectItem>
+                          <SelectItem value="16">X-Large</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* SEO Settings Section */}
+          <div className="bg-orange-900/30 border border-orange-600/30 rounded-lg p-4 space-y-4">
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("seo")}>
+              <h3 className="text-lg font-semibold text-orange-300">SEO & Meta Settings</h3>
+              <i className={`fas ${collapsedSections.seo ? "fa-chevron-down" : "fa-chevron-up"} text-orange-300`} />
+            </div>
+
+            {!collapsedSections.seo && (
+              <>
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-white">Meta Title</Label>
+                    <Input
+                      {...form.register("metaTitle")}
+                      placeholder="Professional Digital Business Card - Your Name"
+                      className="bg-slate-700 border-slate-600 text-white"
+                      data-testid="input-meta-title"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Recommended: 50-60 characters</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Meta Description</Label>
+                    <Textarea
+                      {...form.register("metaDescription")}
+                      placeholder="Connect with me easily through my digital business card. Find my contact information, social media, and professional details in one place."
+                      className="bg-slate-700 border-slate-600 text-white"
+                      data-testid="input-meta-description"
+                      rows={3}
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Recommended: 150-160 characters</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-white">Keywords</Label>
+                      <Input
+                        {...form.register("keywords")}
+                        placeholder="digital business card, contact, professional"
+                        className="bg-slate-700 border-slate-600 text-white"
+                        data-testid="input-keywords"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-white">Author</Label>
+                      <Input
+                        {...form.register("author")}
+                        placeholder="Your Full Name"
+                        className="bg-slate-700 border-slate-600 text-white"
+                        data-testid="input-author"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Open Graph Image</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, "ogImage")}
+                        disabled={isUploading}
+                        className="bg-slate-700 border-slate-600 text-white flex-1"
+                        data-testid="input-og-image"
+                      />
+                      {watchedValues.ogImage && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => form.setValue("ogImage", "")}
+                          className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                        >
+                          <i className="fas fa-trash" />
+                        </Button>
+                      )}
+                    </div>
+                    {watchedValues.ogImage && (
+                      <div className="mt-2">
+                        <img
+                          src={watchedValues.ogImage}
+                          alt="OG Preview"
+                          className="w-full max-w-xs h-auto rounded border border-slate-600"
+                        />
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">Recommended: 1200x630px for social media sharing</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="noIndex"
+                        checked={watchedValues.noIndex || false}
+                        onCheckedChange={(checked) => form.setValue("noIndex", !!checked)}
+                        className="border-slate-600"
+                      />
+                      <Label htmlFor="noIndex" className="text-white text-sm">
+                        No Index (Hide from search engines)
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="noFollow"
+                        checked={watchedValues.noFollow || false}
+                        onCheckedChange={(checked) => form.setValue("noFollow", !!checked)}
+                        className="border-slate-600"
+                      />
+                      <Label htmlFor="noFollow" className="text-white text-sm">
+                        No Follow (Don't follow links)
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
 
           {/* Page Builder */}
           <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
