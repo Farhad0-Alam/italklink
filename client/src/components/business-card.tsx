@@ -343,8 +343,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                       onClick={() => handleContactAction('phone', data.phone)}
                       className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
                       style={{ 
-                        backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
-                        color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                        backgroundColor: data.accentColor || '#16a34a',
+                        color: '#ffffff'
                       }}
                       data-testid="button-contact-phone"
                     >
@@ -370,8 +370,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                       onClick={() => handleContactAction('email', data.email)}
                       className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
                       style={{ 
-                        backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
-                        color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                        backgroundColor: data.accentColor || '#16a34a',
+                        color: '#ffffff'
                       }}
                       data-testid="button-contact-email"
                     >
@@ -397,8 +397,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                       onClick={() => handleContactAction('phone', `sms:${data.phone}`)}
                       className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
                       style={{ 
-                        backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
-                        color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                        backgroundColor: data.accentColor || '#16a34a',
+                        color: '#ffffff'
                       }}
                       data-testid="button-contact-text"
                     >
@@ -451,8 +451,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         onClick={() => handleContactAction(contact.type, contact.value)}
                         className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
                         style={{ 
-                          backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || '#374151',
-                          color: getSectionStyle('contactInfo', 'iconColor') || '#ffffff'
+                          backgroundColor: data.accentColor || '#16a34a',
+                          color: '#ffffff'
                         }}
                         data-testid={`button-custom-contact-${contact.id}`}
                       >
@@ -501,9 +501,9 @@ END:VCARD`;
                 }}
                 className="flex-1 py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{
-                  backgroundColor: '#1f2937',
-                  color: '#ffffff',
-                  borderBottom: '4px solid #111827'
+                  backgroundColor: data.brandColor || '#22c55e',
+                  color: data.accentColor || '#16a34a',
+                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`
                 }}
                 data-testid="button-add-to-contacts"
               >
@@ -516,9 +516,9 @@ END:VCARD`;
                 onClick={() => handleShare()}
                 className="flex-1 py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{ 
-                  backgroundColor: data.brandColor || '#22c55e',
-                  color: '#ffffff',
-                  borderBottom: '4px solid #16a34a'
+                  backgroundColor: data.accentColor || '#16a34a',
+                  color: data.brandColor || '#22c55e',
+                  borderBottom: `4px solid ${data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a'}`
                 }}
                 data-testid="button-share-main"
               >
@@ -534,9 +534,9 @@ END:VCARD`;
                   onClick={() => handleContactAction('website', data.website)}
                   className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
-                    backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff',
-                    borderBottom: '4px solid #16a34a'
+                    backgroundColor: data.accentColor || '#16a34a',
+                    color: data.brandColor || '#22c55e',
+                    borderBottom: `4px solid ${data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a'}`
                   }}
                   data-testid="button-website"
                 >
@@ -553,9 +553,9 @@ END:VCARD`;
                   onClick={() => handleContactAction('whatsapp', data.whatsapp)}
                   className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
-                    backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff',
-                    borderBottom: '4px solid #16a34a'
+                    backgroundColor: data.accentColor || '#16a34a',
+                    color: data.brandColor || '#22c55e',
+                    borderBottom: `4px solid ${data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a'}`
                   }}
                   data-testid="button-social-whatsapp"
                 >
@@ -569,9 +569,9 @@ END:VCARD`;
                   onClick={() => handleContactAction('facebook', data.facebook)}
                   className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
-                    backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff',
-                    borderBottom: '4px solid #16a34a'
+                    backgroundColor: data.accentColor || '#16a34a',
+                    color: data.brandColor || '#22c55e',
+                    borderBottom: `4px solid ${data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a'}`
                   }}
                   data-testid="button-social-facebook"
                 >
@@ -585,9 +585,9 @@ END:VCARD`;
                   onClick={() => handleContactAction('instagram', data.instagram)}
                   className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
-                    backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff',
-                    borderBottom: '4px solid #16a34a'
+                    backgroundColor: data.accentColor || '#16a34a',
+                    color: data.brandColor || '#22c55e',
+                    borderBottom: `4px solid ${data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a'}`
                   }}
                   data-testid="button-social-instagram"
                 >
@@ -601,9 +601,9 @@ END:VCARD`;
                   onClick={() => handleContactAction('linkedin', data.linkedin)}
                   className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
-                    backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff',
-                    borderBottom: '4px solid #16a34a'
+                    backgroundColor: data.accentColor || '#16a34a',
+                    color: data.brandColor || '#22c55e',
+                    borderBottom: `4px solid ${data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a'}`
                   }}
                   data-testid="button-social-linkedin"
                 >
@@ -617,9 +617,9 @@ END:VCARD`;
                   onClick={() => handleContactAction('twitter', data.twitter)}
                   className="w-full py-4 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
-                    backgroundColor: data.brandColor || '#22c55e',
-                    color: '#ffffff',
-                    borderBottom: '4px solid #16a34a'
+                    backgroundColor: data.accentColor || '#16a34a',
+                    color: data.brandColor || '#22c55e',
+                    borderBottom: `4px solid ${data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a'}`
                   }}
                   data-testid="button-social-twitter"
                 >
