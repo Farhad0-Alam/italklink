@@ -8,6 +8,26 @@ import { PageElementRenderer } from "./page-element";
 import { Share2, Copy, Facebook, Twitter, Linkedin, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+// Helper function to adjust color brightness
+const adjustColor = (color: string, amount: number): string => {
+  // Remove # if present
+  const hex = color.replace('#', '');
+  
+  // Convert to RGB
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  
+  // Adjust brightness
+  const newR = Math.max(0, Math.min(255, r + amount));
+  const newG = Math.max(0, Math.min(255, g + amount));
+  const newB = Math.max(0, Math.min(255, b + amount));
+  
+  // Convert back to hex
+  const newHex = ((newR << 16) | (newG << 8) | newB).toString(16).padStart(6, '0');
+  return `#${newHex}`;
+};
+
 interface BusinessCardProps {
   data: BusinessCard;
   showQR?: boolean;
