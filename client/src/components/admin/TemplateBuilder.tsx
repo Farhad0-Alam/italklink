@@ -398,66 +398,16 @@ export default function TemplateBuilder() {
                   </div>
                 </div>
 
-                {/* Template Actions - Original Design */}
+                {/* Template Actions - Only Set Thumb and See Preview */}
                 <div className="space-y-3">
-                  {/* Download PNG Button */}
-                  <Button 
-                    variant="default" 
-                    onClick={async () => {
-                      if (!cardRef.current) return;
-                      try {
-                        const dataUrl = await htmlToImage.toPng(cardRef.current, {
-                          quality: 0.95,
-                          width: 400,
-                          height: 600,
-                          backgroundColor: '#ffffff'
-                        });
-                        
-                        // Create download link
-                        const link = document.createElement('a');
-                        link.download = `${businessCardData.fullName || 'business-card'}.png`;
-                        link.href = dataUrl;
-                        link.click();
-                      } catch (error) {
-                        console.error('Failed to download image:', error);
-                      }
-                    }}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download PNG
-                  </Button>
-                  
-                  {/* Share Link Button */}
-                  <Button 
-                    variant="default" 
-                    onClick={() => {
-                      const shareUrl = generateShareUrl(businessCardData);
-                      navigator.clipboard.writeText(shareUrl);
-                    }}
-                    className="w-full bg-green-600 hover:bg-green-700"
-                  >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share Link
-                  </Button>
-                  
-                  {/* Get Full Smart Card Button */}
-                  <Button 
-                    variant="default" 
-                    onClick={() => window.open('https://2talklink.com', '_blank')}
-                    className="w-full bg-green-600 hover:bg-green-700"
-                  >
-                    <div className="flex items-center justify-center">
-                      <span className="mr-2">💳</span>
-                      Get a Full Smart Card on 2TalkLink →
-                    </div>
-                  </Button>
-                  
                   {/* Set Thumb Button - For Admin Use */}
                   <Button 
                     variant="outline" 
                     onClick={async () => {
-                      if (!cardRef.current || !templateId) return;
+                      if (!cardRef.current) {
+                        console.error('Card reference not found');
+                        return;
+                      }
                       
                       setIsGeneratingThumb(true);
                       try {
@@ -469,31 +419,63 @@ export default function TemplateBuilder() {
                           backgroundColor: '#ffffff'
                         });
                         
-                        // Save thumbnail to database
-                        const response = await fetch(`/api/admin/templates/${templateId}`, {
-                          method: 'PATCH',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({
-                            ...template,
-                            previewImage: dataUrl
-                          }),
-                        });
-                        
-                        if (response.ok) {
-                          const { template: updatedTemplate } = await response.json();
-                          setTemplate({
-                            ...template,
-                            thumbnailUrl: dataUrl,
-                            previewImage: dataUrl
+                        // For new templates, create first then update with thumbnail
+                        if (!templateId) {
+                          // Save template first
+                          const saveResponse = await fetch('/api/admin/templates', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              ...template,
+                              templateData: businessCardData,
+                              previewImage: dataUrl
+                            }),
                           });
-                          console.log('Thumbnail generated and saved successfully');
+                          
+                          if (saveResponse.ok) {
+                            const { template: newTemplate } = await saveResponse.json();
+                            setTemplateId(newTemplate.id);
+                            setTemplate({
+                              ...template,
+                              id: newTemplate.id,
+                              thumbnailUrl: dataUrl,
+                              previewImage: dataUrl
+                            });
+                            console.log('Template created with thumbnail');
+                          } else {
+                            throw new Error('Failed to create template');
+                          }
                         } else {
-                          throw new Error('Failed to save thumbnail');
+                          // Update existing template with thumbnail
+                          const response = await fetch(`/api/admin/templates/${templateId}`, {
+                            method: 'PATCH',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              ...template,
+                              templateData: businessCardData,
+                              previewImage: dataUrl
+                            }),
+                          });
+                          
+                          if (response.ok) {
+                            const { template: updatedTemplate } = await response.json();
+                            setTemplate({
+                              ...template,
+                              thumbnailUrl: dataUrl,
+                              previewImage: dataUrl
+                            });
+                            console.log('Thumbnail updated successfully');
+                          } else {
+                            throw new Error('Failed to update thumbnail');
+                          }
                         }
                       } catch (error) {
                         console.error('Failed to generate thumbnail:', error);
+                        alert('Failed to generate thumbnail. Please try again.');
                       } finally {
                         setIsGeneratingThumb(false);
                       }
