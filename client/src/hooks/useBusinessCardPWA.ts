@@ -65,11 +65,13 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
   }, [cardData]);
 
   const installBusinessCard = async () => {
-    // If browser supports native install prompt, use it
+    // Only trigger native install prompt (like 2TalkLink)
     if (deferredPrompt) {
       try {
         await deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
+        setDeferredPrompt(null);
+        setIsInstallable(false);
         
         if (outcome === 'accepted') {
           console.log('User installed business card app');
@@ -80,24 +82,18 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
         }
       } catch (error) {
         console.error('Error installing business card app:', error);
-        return false;
-      } finally {
         setDeferredPrompt(null);
         setIsInstallable(false);
+        return false;
       }
-    } else {
-      // Show manual instructions for unsupported browsers
-      setShowInstructions(true);
-      return false;
     }
+    return false;
   };
 
   return {
     isInstallable,
     isInstalled,
-    installBusinessCard,
-    showInstructions,
-    setShowInstructions
+    installBusinessCard
   };
 };
 
