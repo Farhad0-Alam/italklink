@@ -49,7 +49,9 @@ export default function Templates() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showUrlModal, setShowUrlModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [customUrl, setCustomUrl] = useState("");
 
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
@@ -150,6 +152,11 @@ export default function Templates() {
     setShowUrlModal(true);
   };
 
+  const handleTemplatePreview = (template: Template) => {
+    setPreviewTemplate(template);
+    setShowPreviewModal(true);
+  };
+
   const handleContinue = () => {
     if (selectedTemplate) {
       const params = new URLSearchParams();
@@ -162,6 +169,59 @@ export default function Templates() {
   };
 
   const renderTemplatePreview = (template: Template) => {
+    // For database templates, use the template data to create a proper preview
+    if (template.templateData) {
+      const data = template.templateData;
+      const bgColor = data.backgroundColor || "#ffffff";
+      const brandColor = data.brandColor || "#22c55e";
+      const textColor = data.textColor || "#000000";
+      
+      return (
+        <div 
+          className="w-full h-full flex flex-col items-center justify-center rounded-lg p-4"
+          style={{ backgroundColor: bgColor, color: textColor }}
+        >
+          {/* Profile section */}
+          <div className="text-center mb-4">
+            <div 
+              className="w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center"
+              style={{ backgroundColor: brandColor }}
+            >
+              <span className="text-white font-bold text-lg">
+                {data.fullName?.[0] || "J"}
+              </span>
+            </div>
+            <h3 className="font-bold text-sm" style={{ color: textColor }}>
+              {data.fullName || "John Doe"}
+            </h3>
+            <p className="text-xs opacity-75">
+              {data.title || "Professional"}
+            </p>
+          </div>
+          
+          {/* Contact buttons */}
+          <div className="flex space-x-1 mb-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div 
+                key={i} 
+                className="w-6 h-6 rounded flex items-center justify-center"
+                style={{ backgroundColor: brandColor }}
+              >
+                <i className="fas fa-phone text-white text-xs"></i>
+              </div>
+            ))}
+          </div>
+          
+          {/* Info section */}
+          <div className="text-center space-y-1">
+            <div className="text-xs opacity-75">{data.company || "Company Name"}</div>
+            <div className="text-xs opacity-75">{data.email || "email@example.com"}</div>
+          </div>
+        </div>
+      );
+    }
+
+    // Fallback for hardcoded templates
     switch (template.id) {
       case "tangeria":
         return (
@@ -186,142 +246,33 @@ export default function Templates() {
             </div>
           </div>
         );
-      case "theme1":
-        return (
-          <div className="w-full h-full relative bg-emerald-500 rounded-lg overflow-hidden">
-            <div className="p-4 text-center text-white">
-              <div className="w-16 h-16 bg-purple-600 rounded-full mx-auto mb-2"></div>
-              <h3 className="font-bold">Farhad Alam</h3>
-              <p className="text-sm">Pro Freelancer</p>
-              <div className="flex justify-center space-x-2 mt-4">
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                  <i className="fas fa-phone text-white text-xs"></i>
-                </div>
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                  <i className="fas fa-envelope text-white text-xs"></i>
-                </div>
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                  <i className="fas fa-globe text-white text-xs"></i>
-                </div>
-                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                  <i className="fab fa-whatsapp text-white text-xs"></i>
-                </div>
-              </div>
-              <div className="flex justify-center space-x-2 mt-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <i className="fab fa-linkedin text-white text-xs"></i>
-                </div>
-                <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center">
-                  <i className="fab fa-instagram text-white text-xs"></i>
-                </div>
-                <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center">
-                  <i className="fab fa-twitter text-white text-xs"></i>
-                </div>
-                <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center">
-                  <i className="fab fa-facebook text-white text-xs"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      case "theme2":
-        return (
-          <div className="w-full h-full relative bg-gray-900 rounded-lg overflow-hidden">
-            <div className="p-4 text-center text-white">
-              <h3 className="font-bold mb-1">Siham El Yacoub</h3>
-              <div className="mb-4">
-                <Button className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-4 py-1 rounded-full">
-                  Preview
-                </Button>
-              </div>
-              <div className="mb-4">
-                <Button className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-6 py-2 rounded-full">
-                  Get Name
-                </Button>
-              </div>
-              <div className="text-xs text-gray-400 space-y-1">
-                <div>Contact Info</div>
-                <div>Social Links</div>
-              </div>
-            </div>
-          </div>
-        );
-      case "theme3":
-        return (
-          <div className="w-full h-full relative bg-orange-100 rounded-lg overflow-hidden">
-            <div className="p-4">
-              <div className="bg-orange-400 w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center">
-                <span className="text-white font-bold">Y</span>
-              </div>
-              <div className="text-center">
-                <h3 className="font-bold text-gray-800">Your Name</h3>
-                <p className="text-xs text-gray-600 mb-3">Text Tag Line</p>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-6 h-4 bg-orange-400 rounded text-xs text-white flex items-center justify-center">Home</div>
-                    <div className="w-6 h-4 bg-orange-400 rounded text-xs text-white flex items-center justify-center">About</div>
-                    <div className="w-6 h-4 bg-orange-400 rounded text-xs text-white flex items-center justify-center">Service</div>
-                    <div className="w-6 h-4 bg-orange-400 rounded text-xs text-white flex items-center justify-center">Contact</div>
-                  </div>
-                  <div className="text-xs text-gray-600">555-647-3732</div>
-                  <div className="text-xs text-gray-600">yourname@gmail.com</div>
-                  <div className="text-xs text-gray-600">www.websitename.com</div>
-                  <div className="text-xs text-gray-600">Your Location here</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      case "theme4":
-        return (
-          <div className="w-full h-full relative bg-sky-500 rounded-lg overflow-hidden">
-            <div className="p-4 text-center text-white">
-              <h3 className="font-bold">Test</h3>
-              <p className="text-xs mb-3">Test Tag Line</p>
-              <div className="space-y-1 text-xs">
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="bg-white text-sky-500 px-2 py-1 rounded text-xs">About</div>
-                  <div className="bg-white text-sky-500 px-2 py-1 rounded text-xs">Beauty</div>
-                  <div className="bg-white text-sky-500 px-2 py-1 rounded text-xs">Contact</div>
-                </div>
-                <div className="flex items-center justify-center">
-                  <i className="fas fa-phone mr-1"></i>
-                  <span>055-456-5478</span>
-                </div>
-                <div className="flex items-center justify-center">
-                  <i className="fas fa-envelope mr-1"></i>
-                  <span>yourname@gmail.com</span>
-                </div>
-                <div className="flex items-center justify-center">
-                  <i className="fas fa-globe mr-1"></i>
-                  <span>acrobat.com</span>
-                </div>
-                <div className="flex items-center justify-center">
-                  <i className="fas fa-map-marker mr-1"></i>
-                  <span>Your address goes here</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
       default:
         return (
           <div 
-            className="w-full h-full flex flex-col items-center justify-center text-white rounded-lg"
-            style={{ backgroundColor: template.backgroundColor }}
+            className="w-full h-full flex flex-col items-center justify-center rounded-lg p-4"
+            style={{ backgroundColor: template.backgroundColor || "#22c55e" }}
           >
-            <div className="w-32 h-20 bg-white/20 rounded-lg backdrop-blur-sm p-3 mb-4">
-              <div className="w-6 h-6 bg-white/30 rounded-full mb-2"></div>
-              <div className="space-y-1">
-                <div className="h-2 bg-white/60 rounded w-20"></div>
-                <div className="h-1.5 bg-white/40 rounded w-16"></div>
-                <div className="h-1.5 bg-white/40 rounded w-12"></div>
+            <div className="text-center text-white">
+              <div className="w-12 h-12 bg-white/20 rounded-full mx-auto mb-2 flex items-center justify-center">
+                <span className="font-bold text-lg">
+                  {template.name?.[0] || "T"}
+                </span>
               </div>
-            </div>
-            <div className="flex space-x-2">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="w-4 h-4 bg-white/30 rounded"></div>
-              ))}
+              <h3 className="font-bold text-sm mb-1">Sample Name</h3>
+              <p className="text-xs opacity-75 mb-3">Professional Title</p>
+              
+              <div className="flex justify-center space-x-1 mb-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="w-6 h-6 bg-white/30 rounded flex items-center justify-center">
+                    <i className="fas fa-phone text-xs"></i>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="text-xs opacity-75 space-y-1">
+                <div>Company Name</div>
+                <div>email@example.com</div>
+              </div>
             </div>
           </div>
         );
@@ -442,8 +393,7 @@ export default function Templates() {
           {filteredTemplates.map((template) => (
             <Card 
               key={template.id} 
-              className="bg-white shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => handleTemplateSelect(template)}
+              className="bg-white shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
               data-testid={`template-${template.id}`}
             >
               <CardContent className="p-0">
@@ -454,7 +404,34 @@ export default function Templates() {
                 
                 {/* Template Info */}
                 <div className="p-4">
-                  <h3 className="font-medium text-gray-900 text-sm">{template.name}</h3>
+                  <h3 className="font-medium text-gray-900 text-sm mb-3">{template.name}</h3>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTemplatePreview(template);
+                      }}
+                      data-testid={`button-preview-${template.id}`}
+                    >
+                      Preview
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTemplateSelect(template);
+                      }}
+                      data-testid={`button-select-${template.id}`}
+                    >
+                      Select
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -520,6 +497,63 @@ export default function Templates() {
               Continue
               <i className="fas fa-arrow-right ml-2"></i>
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Preview Modal */}
+      <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl font-semibold text-gray-700">
+                Template Preview: {previewTemplate?.name}
+              </DialogTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPreviewModal(false)}
+                className="h-6 w-6 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <DialogDescription className="text-gray-500">
+              See how this template will look for your business card
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Large Template Preview */}
+            <div className="w-full h-80 border border-gray-200 rounded-lg overflow-hidden">
+              {previewTemplate && renderTemplatePreview(previewTemplate)}
+            </div>
+          </div>
+
+          <DialogFooter className="mt-6">
+            <div className="flex space-x-2 w-full">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowPreviewModal(false)}
+                className="flex-1"
+                data-testid="button-preview-close"
+              >
+                Close
+              </Button>
+              <Button 
+                onClick={() => {
+                  setShowPreviewModal(false);
+                  if (previewTemplate) {
+                    handleTemplateSelect(previewTemplate);
+                  }
+                }}
+                className="bg-orange-500 hover:bg-orange-600 text-white flex-1"
+                data-testid="button-preview-select"
+              >
+                Select This Template
+                <i className="fas fa-arrow-right ml-2"></i>
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
