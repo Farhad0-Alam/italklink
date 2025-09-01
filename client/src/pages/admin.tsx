@@ -20,6 +20,7 @@ export default function Admin() {
       case '/admin/plans':
         return <PlansPage />;
       case '/admin/templates/header-builder':
+      case '/admin/header-builder':
         return <HeaderBuilder />;
       case '/admin/templates/builder':
         return <TemplateBuilder />;

@@ -36,6 +36,7 @@ function Router() {
       <Route path="/share" component={Share} />
       <Route path="/admin/templates/builder" component={() => <Admin />} />
       <Route path="/admin/templates/header-builder" component={() => <Admin />} />
+      <Route path="/admin/header-builder" component={() => <Admin />} />
       <Route path="/admin/header-templates" component={() => <Admin />} />
       <Route path="/admin/templates" component={() => <Admin />} />
       <Route path="/admin/users" component={() => <Admin />} />
