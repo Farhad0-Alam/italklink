@@ -1306,13 +1306,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </div>
                   </div>
 
-                  {/* Save Theme Button */}
-                  <Button
-                    type="button"
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white h-10"
-                  >
-                    Save Theme
-                  </Button>
                 </div>
               </>
             )}
