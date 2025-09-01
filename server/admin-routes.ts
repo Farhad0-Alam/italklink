@@ -242,6 +242,16 @@ router.post('/users', requireOwner, async (req, res) => {
   try {
     const { email, firstName, lastName, password, planId } = req.body;
     
+    // Check if user with this email already exists
+    const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    
+    if (existingUser.length > 0) {
+      return res.status(400).json({ 
+        message: 'User with this email already exists',
+        error: 'DUPLICATE_EMAIL' 
+      });
+    }
+    
     const hashedPassword = await bcryptjs.hash(password, 12);
     
     const [newUser] = await db.insert(users).values({
@@ -258,7 +268,16 @@ router.post('/users', requireOwner, async (req, res) => {
     res.json({ message: 'User created successfully', user: newUser });
   } catch (error) {
     console.error('Failed to create user:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    
+    // Handle specific database constraint errors
+    if (error.code === '23505') { // Unique constraint violation
+      res.status(400).json({ 
+        message: 'User with this email already exists',
+        error: 'DUPLICATE_EMAIL' 
+      });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
   }
 });
 
@@ -267,6 +286,21 @@ router.patch('/users/:id', requireOwner, async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
+    
+    // If updating email, check for duplicates
+    if (updates.email) {
+      const existingUser = await db.select()
+        .from(users)
+        .where(and(eq(users.email, updates.email), sql`${users.id} != ${id}`))
+        .limit(1);
+      
+      if (existingUser.length > 0) {
+        return res.status(400).json({ 
+          message: 'User with this email already exists',
+          error: 'DUPLICATE_EMAIL' 
+        });
+      }
+    }
     
     const [updatedUser] = await db.update(users)
       .set({ ...updates, updatedAt: new Date() })
@@ -278,7 +312,16 @@ router.patch('/users/:id', requireOwner, async (req, res) => {
     res.json({ message: 'User updated successfully', user: updatedUser });
   } catch (error) {
     console.error('Failed to update user:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    
+    // Handle specific database constraint errors
+    if (error.code === '23505') { // Unique constraint violation
+      res.status(400).json({ 
+        message: 'User with this email already exists',
+        error: 'DUPLICATE_EMAIL' 
+      });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
   }
 });
 
@@ -362,6 +405,24 @@ router.post('/plans', requireOwner, async (req, res) => {
       features, isActive, stripePriceId, extraCardOptions, hasUnlimitedOption, 
       unlimitedPrice, templateLimit, templates, trialDays, cardLabel, customDurationDays
     } = req.body;
+    
+    // Validate required fields
+    if (!name || !planType) {
+      return res.status(400).json({ 
+        message: 'Plan name and type are required',
+        error: 'MISSING_REQUIRED_FIELDS' 
+      });
+    }
+    
+    // Check if plan with this name already exists
+    const existingPlan = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.name, name)).limit(1);
+    
+    if (existingPlan.length > 0) {
+      return res.status(400).json({ 
+        message: 'Plan with this name already exists',
+        error: 'DUPLICATE_PLAN_NAME' 
+      });
+    }
     
     // Create the plan (store all new fields in features JSON until migration)
     const [newPlan] = await db.insert(subscriptionPlans).values({
