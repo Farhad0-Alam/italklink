@@ -277,6 +277,7 @@ export default function PlansPage() {
         resetForm();
         setAddPlanOpen(false);
         queryClient.invalidateQueries({ queryKey: ['/api/admin/plans'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/plans'] }); // Also refresh public plans
         console.log('Plan created successfully');
       } else {
         const error = await response.json();
@@ -310,6 +311,7 @@ export default function PlansPage() {
         setEditPlanOpen(false);
         setSelectedPlan(null);
         queryClient.invalidateQueries({ queryKey: ['/api/admin/plans'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/plans'] }); // Also refresh public plans
         console.log('Plan updated successfully');
       } else {
         const error = await response.json();
@@ -336,6 +338,7 @@ export default function PlansPage() {
       
       if (response.ok) {
         queryClient.invalidateQueries({ queryKey: ['/api/admin/plans'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/plans'] }); // Also refresh public plans
         console.log('Plan deleted successfully');
       } else {
         const error = await response.json();

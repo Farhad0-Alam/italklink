@@ -80,7 +80,7 @@ export default function Pricing() {
 
   const { data: plans, isLoading } = useQuery<Plan[]>({
     queryKey: ['/api/plans'],
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 30, // 30 seconds - refresh more frequently for new plans
   });
 
   // Calculate pricing display logic
@@ -222,7 +222,7 @@ export default function Pricing() {
       >
         <div className="container mx-auto max-w-7xl">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-6">
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               {plans?.map((plan, index) => {
                 const IconComponent = getPlanIcon(plan.planType);
                 const features = getPlanFeatures(plan);

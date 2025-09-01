@@ -53,9 +53,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/plans", async (req, res) => {
     try {
       const plans = await storage.getPlans();
-      // Filter to only active plans and include only public information
+      // Include only public information (all plans from getPlans are already active)
       const publicPlans = plans
-        .filter(plan => plan.isActive)
         .map(plan => ({
           id: plan.id,
           name: plan.name,
