@@ -57,6 +57,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     defaultValues: cardData,
   });
 
+  // Ensure form values stay in sync with cardData, especially template type
+  useEffect(() => {
+    form.reset(cardData);
+  }, [cardData, form]);
+
   const toggleSection = (k: string) =>
     setCollapsedSections((p) => ({ ...p, [k]: !p[k] }));
 
@@ -710,8 +715,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       type="button"
                       variant="outline"
                       onClick={() => {
+                        const currentTemplate = form.getValues("template"); // Preserve current template
                         const newContact = { id: generateFieldId(), label: "", value: "", type: "custom", icon: "fas fa-link" };
                         form.setValue("customContacts", [...(form.watch("customContacts") || []), newContact]);
+                        // Explicitly preserve template type to prevent reverting to schema default
+                        form.setValue("template", currentTemplate);
                       }}
                       className="w-full bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
                     >
@@ -962,8 +970,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => {
+                        const currentTemplate = form.getValues("template"); // Preserve current template
                         const newSocial = { id: generateFieldId(), label: "", value: "", icon: "fab fa-facebook", platform: "" };
                         form.setValue("customSocials", [...(form.watch("customSocials") || []), newSocial]);
+                        // Explicitly preserve template type to prevent reverting to schema default
+                        form.setValue("template", currentTemplate);
                       }}
                       className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
                     >
