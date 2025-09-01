@@ -459,24 +459,50 @@ END:VCARD`;
 
 
             {/* Custom Social Media Platforms */}
-            <div className="space-y-2 px-4">
+            <div className={`${data.template === 'dark' ? 'grid grid-cols-4 gap-3' : 'space-y-2'} px-4`}>
               {/* Custom Social Media Platforms */}
               {data.customSocials?.map((social) => (
                 social.value && (
-                  <button 
-                    key={social.id}
-                    onClick={() => handleContactAction(social.platform, social.value)}
-                    className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
-                    style={{ 
-                      backgroundColor: data.brandColor || '#22c55e',
-                      color: data.tertiaryColor || '#ffffff',
-                      borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
-                    }}
-                    data-testid={`button-custom-social-${social.id}`}
-                  >
-                    <i className={`${social.icon} text-lg mr-3`}></i>
-                    {social.label || 'Social'}
-                  </button>
+                  data.template === 'dark' ? (
+                    // Template 2 (dark): Circular social buttons
+                    <div key={social.id} className="flex flex-col items-center">
+                      <button 
+                        onClick={() => handleContactAction(social.platform, social.value)}
+                        className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                        style={{ 
+                          backgroundColor: data.brandColor || '#fbbf24',
+                          color: '#000000'
+                        }}
+                        data-testid={`button-custom-social-${social.id}`}
+                      >
+                        <i className={`${social.icon} text-sm`}></i>
+                      </button>
+                      <span 
+                        className="text-xs font-medium text-center"
+                        style={{ 
+                          color: data.brandColor || '#fbbf24'
+                        }}
+                      >
+                        {social.label || 'Social'}
+                      </span>
+                    </div>
+                  ) : (
+                    // Other templates: Rectangular social buttons
+                    <button 
+                      key={social.id}
+                      onClick={() => handleContactAction(social.platform, social.value)}
+                      className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                      style={{ 
+                        backgroundColor: data.brandColor || '#22c55e',
+                        color: data.tertiaryColor || '#ffffff',
+                        borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
+                      }}
+                      data-testid={`button-custom-social-${social.id}`}
+                    >
+                      <i className={`${social.icon} text-lg mr-3`}></i>
+                      {social.label || 'Social'}
+                    </button>
+                  )
                 )
               ))}
             </div>
