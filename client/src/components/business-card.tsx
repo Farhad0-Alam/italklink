@@ -410,37 +410,6 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   <div></div>
                 )}
 
-                {/* Text Button */}
-                {data.phone ? (
-                  <div className="flex flex-col items-center">
-                    <button 
-                      onClick={() => handleContactAction('phone', `sms:${data.phone}`)}
-                      className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
-                      style={{ 
-                        backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
-                        color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
-                      }}
-                      data-testid="button-contact-text"
-                    >
-                      <i className={`fas fa-sms ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
-                      {data.template === 'dark' && (
-                        <span className="text-xs font-medium">TEXT</span>
-                      )}
-                    </button>
-                    {data.template !== 'dark' && (
-                      <span 
-                        className="text-xs font-medium"
-                        style={{ 
-                          color: getSectionStyle('contactInfo', 'iconTextColor') || (data.template === 'dark' ? '#d1d5db' : '#374151')
-                        }}
-                      >
-                        Text
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div></div>
-                )}
 
                 {/* Website/Connect Button - Only for non-dark templates */}
                 {data.template !== 'dark' && data.website ? (
@@ -471,11 +440,10 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
 
               </div>
 
-              {/* Row 2 - Bottom 4 buttons (Custom Contact Methods) */}
-              <div className={`grid ${data.template === 'dark' ? 'grid-cols-3' : 'grid-cols-4'} gap-3 px-4`}>
-                {Array.from({ length: data.template === 'dark' ? 3 : 4 }, (_, index) => {
-                  const contact = data.customContacts?.[index];
-                  return contact?.value && contact?.label ? (
+              {/* Row 2 - Unlimited Custom Contact Methods */}
+              {data.customContacts && data.customContacts.length > 0 && (
+                <div className={`grid ${data.template === 'dark' ? 'grid-cols-3' : 'grid-cols-4'} gap-3 px-4`}>
+                  {data.customContacts.filter(contact => contact?.value && contact?.label).map((contact) => (
                     <div key={contact.id} className="flex flex-col items-center">
                       <button 
                         onClick={() => handleContactAction(contact.type, contact.value)}
@@ -502,11 +470,9 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         </span>
                       )}
                     </div>
-                  ) : (
-                    <div key={`empty-${index}`}></div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Action Buttons Row */}
