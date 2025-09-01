@@ -41,6 +41,7 @@ function Router() {
       <Route path="/admin/templates" component={() => <Admin />} />
       <Route path="/admin/users" component={() => <Admin />} />
       <Route path="/admin/plans" component={() => <Admin />} />
+      <Route path="/admin/coupons" component={() => <Admin />} />
       <Route path="/admin/icon-packs" component={() => <Admin />} />
       <Route path="/admin/settings" component={() => <Admin />} />
       <Route path="/admin" component={() => <Admin />} />
