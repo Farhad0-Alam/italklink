@@ -472,30 +472,35 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               </div>
 
               {/* Row 2 - Bottom 4 buttons (Custom Contact Methods) */}
-              <div className="grid grid-cols-4 gap-3 px-4">
-                {Array.from({ length: 4 }, (_, index) => {
+              <div className={`grid ${data.template === 'dark' ? 'grid-cols-3' : 'grid-cols-4'} gap-3 px-4`}>
+                {Array.from({ length: data.template === 'dark' ? 3 : 4 }, (_, index) => {
                   const contact = data.customContacts?.[index];
                   return contact?.value && contact?.label ? (
                     <div key={contact.id} className="flex flex-col items-center">
                       <button 
                         onClick={() => handleContactAction(contact.type, contact.value)}
-                        className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                        className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
                         style={{ 
-                          backgroundColor: data.secondaryColor || data.accentColor || '#16a34a',
-                          color: data.tertiaryColor || '#ffffff'
+                          backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
+                          color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
                         }}
                         data-testid={`button-custom-contact-${contact.id}`}
                       >
-                        <i className={`${contact.icon} text-sm`}></i>
+                        <i className={`${contact.icon} ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
+                        {data.template === 'dark' && (
+                          <span className="text-xs font-medium">{contact.label}</span>
+                        )}
                       </button>
-                      <span 
-                        className="text-xs font-medium"
-                        style={{ 
-                          color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                        }}
-                      >
-                        {contact.label}
-                      </span>
+                      {data.template !== 'dark' && (
+                        <span 
+                          className="text-xs font-medium"
+                          style={{ 
+                            color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                          }}
+                        >
+                          {contact.label}
+                        </span>
+                      )}
                     </div>
                   ) : (
                     <div key={`empty-${index}`}></div>
