@@ -15,12 +15,70 @@ import { useToast } from "@/hooks/use-toast";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
 import { PageBuilder } from "./page-builder";
 import { useQuery } from "@tanstack/react-query";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface FormBuilderProps {
   cardData: BusinessCard;
   onDataChange: (data: BusinessCard) => void;
   onGenerateQR: () => void;
 }
+
+// Sortable Item Component
+interface SortableItemProps {
+  id: string;
+  children: React.ReactNode;
+}
+
+const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <div className="relative">
+        <div 
+          {...listeners}
+          className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-grab hover:bg-slate-600 rounded-l"
+        >
+          <i className="fas fa-grip-vertical text-gray-400 text-sm"></i>
+        </div>
+        <div className="ml-8">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const FormBuilder: React.FC<FormBuilderProps> = ({
   cardData,
@@ -30,6 +88,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Fetch available header templates
   const { data: headerTemplates = [] } = useQuery({
@@ -64,6 +130,37 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
   const toggleSection = (k: string) =>
     setCollapsedSections((p) => ({ ...p, [k]: !p[k] }));
+
+  // Drag end handlers for reordering
+  const handleContactDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (active.id !== over?.id) {
+      const contacts = form.getValues("customContacts") || [];
+      const oldIndex = contacts.findIndex((contact) => contact.id === active.id);
+      const newIndex = contacts.findIndex((contact) => contact.id === over?.id);
+      
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const reorderedContacts = arrayMove(contacts, oldIndex, newIndex);
+        form.setValue("customContacts", reorderedContacts);
+      }
+    }
+  };
+
+  const handleSocialDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (active.id !== over?.id) {
+      const socials = form.getValues("customSocials") || [];
+      const oldIndex = socials.findIndex((social) => social.id === active.id);
+      const newIndex = socials.findIndex((social) => social.id === over?.id);
+      
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const reorderedSocials = arrayMove(socials, oldIndex, newIndex);
+        form.setValue("customSocials", reorderedSocials);
+      }
+    }
+  };
 
   // sync to parent
   const watchedValues = form.watch();
@@ -595,74 +692,87 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <>
                 <div className="space-y-4">
                   <h4 className="text-md font-medium text-purple-300">Custom Contact Methods</h4>
-                  {form.watch("customContacts")?.map((contact, index) => (
-                      <div key={contact.id} className="flex gap-2 items-end">
-                        <div className="flex-1">
-                          <Label className="text-white">Label</Label>
-                          <Input
-                            value={contact.label}
-                            onChange={(e) => {
-                              const arr = [...(form.watch("customContacts") || [])];
-                              arr[index] = { ...contact, label: e.target.value };
-                              form.setValue("customContacts", arr);
-                            }}
-                            className="bg-slate-700 border-slate-600 text-white"
-                            placeholder="Contact label"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <Label className="text-white">Value</Label>
-                          <Input
-                            value={contact.value}
-                            onChange={(e) => {
-                              const arr = [...(form.watch("customContacts") || [])];
-                              arr[index] = { ...contact, value: e.target.value };
-                              form.setValue("customContacts", arr);
-                            }}
-                            className="bg-slate-700 border-slate-600 text-white"
-                            placeholder="Contact value"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <Label className="text-white">Icon</Label>
-                          <Select
-                            value={contact.icon}
-                            onValueChange={(v) => {
-                              const arr = [...(form.watch("customContacts") || [])];
-                              arr[index] = { ...contact, icon: v };
-                              form.setValue("customContacts", arr);
-                            }}
-                          >
-                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {getAvailableIcons()
-                                .filter((icon) => icon.category === "contact")
-                                .map((icon) => (
-                                  <SelectItem key={icon.name} value={icon.icon}>
-                                    <div className="flex items-center gap-2">
-                                      <i className={icon.icon} />
-                                      {icon.name}
-                                    </div>
-                                  </SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            const arr = form.watch("customContacts")?.filter((_, i) => i !== index) || [];
-                            form.setValue("customContacts", arr);
-                          }}
-                        >
-                          <i className="fas fa-trash" />
-                        </Button>
-                      </div>
-                    ))}
+                  <DndContext 
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleContactDragEnd}
+                  >
+                    <SortableContext 
+                      items={form.watch("customContacts")?.map(c => c.id) || []}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {form.watch("customContacts")?.map((contact, index) => (
+                        <SortableItem key={contact.id} id={contact.id}>
+                          <div className="flex gap-2 items-end bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                            <div className="flex-1">
+                              <Label className="text-white">Label</Label>
+                              <Input
+                                value={contact.label}
+                                onChange={(e) => {
+                                  const arr = [...(form.watch("customContacts") || [])];
+                                  arr[index] = { ...contact, label: e.target.value };
+                                  form.setValue("customContacts", arr);
+                                }}
+                                className="bg-slate-700 border-slate-600 text-white"
+                                placeholder="Contact label"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <Label className="text-white">Value</Label>
+                              <Input
+                                value={contact.value}
+                                onChange={(e) => {
+                                  const arr = [...(form.watch("customContacts") || [])];
+                                  arr[index] = { ...contact, value: e.target.value };
+                                  form.setValue("customContacts", arr);
+                                }}
+                                className="bg-slate-700 border-slate-600 text-white"
+                                placeholder="Contact value"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <Label className="text-white">Icon</Label>
+                              <Select
+                                value={contact.icon}
+                                onValueChange={(v) => {
+                                  const arr = [...(form.watch("customContacts") || [])];
+                                  arr[index] = { ...contact, icon: v };
+                                  form.setValue("customContacts", arr);
+                                }}
+                              >
+                                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {getAvailableIcons()
+                                    .filter((icon) => icon.category === "contact")
+                                    .map((icon) => (
+                                      <SelectItem key={icon.name} value={icon.icon}>
+                                        <div className="flex items-center gap-2">
+                                          <i className={icon.icon} />
+                                          {icon.name}
+                                        </div>
+                                      </SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                const arr = form.watch("customContacts")?.filter((_, i) => i !== index) || [];
+                                form.setValue("customContacts", arr);
+                              }}
+                            >
+                              <i className="fas fa-trash" />
+                            </Button>
+                          </div>
+                        </SortableItem>
+                      ))}
+                    </SortableContext>
+                  </DndContext>
                     <Button
                       type="button"
                       variant="outline"
@@ -705,70 +815,83 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <>
                 <div className="space-y-4">
                     <h4 className="text-md font-medium text-talklink-300">Additional Social Platforms</h4>
-                    {form.watch("customSocials")?.map((social, index) => (
-                      <div key={social.id} className="flex gap-2 items-end">
-                        <div className="flex-1">
-                          <Label className="text-white">Button Label</Label>
-                          <Input
-                            value={social.label}
-                            onChange={(e) => {
-                              const arr = [...(form.watch("customSocials") || [])];
-                              arr[index] = { ...social, label: e.target.value };
-                              form.setValue("customSocials", arr);
-                            }}
-                            className="bg-slate-700 border-slate-600 text-white"
-                            placeholder="Button text"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <Label className="text-white">Username/URL</Label>
-                          <Input
-                            value={social.value}
-                            onChange={(e) => {
-                              const arr = [...(form.watch("customSocials") || [])];
-                              arr[index] = { ...social, value: e.target.value };
-                              form.setValue("customSocials", arr);
-                            }}
-                            className="bg-slate-700 border-slate-600 text-white"
-                            placeholder="@username or URL"
-                          />
-                        </div>
-                        <div className="w-32">
-                          <Label className="text-white">Icon</Label>
-                          <Select
-                            value={social.icon}
-                            onValueChange={(v) => {
-                              const arr = [...(form.watch("customSocials") || [])];
-                              arr[index] = { ...social, icon: v };
-                              form.setValue("customSocials", arr);
-                            }}
-                          >
-                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                              <SelectValue>{social.icon && <i className={`${social.icon} mr-2`} />}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              {getAvailableIcons().filter(i => i.category === "social").map(i => (
-                                <SelectItem key={i.icon} value={i.icon}>
-                                  <div className="flex items-center"><i className={`${i.icon} mr-2`} />{i.name}</div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            const arr = form.watch("customSocials")?.filter((_, i) => i !== index) || [];
-                            form.setValue("customSocials", arr);
-                          }}
-                          className="mb-0"
-                        >
-                          <i className="fas fa-trash text-xs" />
-                        </Button>
-                      </div>
-                    ))}
+                    <DndContext 
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleSocialDragEnd}
+                    >
+                      <SortableContext 
+                        items={form.watch("customSocials")?.map(s => s.id) || []}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {form.watch("customSocials")?.map((social, index) => (
+                          <SortableItem key={social.id} id={social.id}>
+                            <div className="flex gap-2 items-end bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                              <div className="flex-1">
+                                <Label className="text-white">Button Label</Label>
+                                <Input
+                                  value={social.label}
+                                  onChange={(e) => {
+                                    const arr = [...(form.watch("customSocials") || [])];
+                                    arr[index] = { ...social, label: e.target.value };
+                                    form.setValue("customSocials", arr);
+                                  }}
+                                  className="bg-slate-700 border-slate-600 text-white"
+                                  placeholder="Button text"
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <Label className="text-white">Username/URL</Label>
+                                <Input
+                                  value={social.value}
+                                  onChange={(e) => {
+                                    const arr = [...(form.watch("customSocials") || [])];
+                                    arr[index] = { ...social, value: e.target.value };
+                                    form.setValue("customSocials", arr);
+                                  }}
+                                  className="bg-slate-700 border-slate-600 text-white"
+                                  placeholder="@username or URL"
+                                />
+                              </div>
+                              <div className="w-32">
+                                <Label className="text-white">Icon</Label>
+                                <Select
+                                  value={social.icon}
+                                  onValueChange={(v) => {
+                                    const arr = [...(form.watch("customSocials") || [])];
+                                    arr[index] = { ...social, icon: v };
+                                    form.setValue("customSocials", arr);
+                                  }}
+                                >
+                                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                                    <SelectValue>{social.icon && <i className={`${social.icon} mr-2`} />}</SelectValue>
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {getAvailableIcons().filter(i => i.category === "social").map(i => (
+                                      <SelectItem key={i.icon} value={i.icon}>
+                                        <div className="flex items-center"><i className={`${i.icon} mr-2`} />{i.name}</div>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => {
+                                  const arr = form.watch("customSocials")?.filter((_, i) => i !== index) || [];
+                                  form.setValue("customSocials", arr);
+                                }}
+                                className="mb-0"
+                              >
+                                <i className="fas fa-trash text-xs" />
+                              </Button>
+                            </div>
+                          </SortableItem>
+                        ))}
+                      </SortableContext>
+                    </DndContext>
                     <Button
                       type="button"
                       variant="outline"
