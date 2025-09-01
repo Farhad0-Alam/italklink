@@ -253,6 +253,22 @@ router.post('/users', requireOwner, async (req, res) => {
       });
     }
     
+    // Get plan details if planId is provided
+    let planType: 'free' | 'pro' | 'enterprise' = 'free';
+    let businessCardsLimit = 1;
+    
+    if (planId) {
+      const [selectedPlan] = await db.select()
+        .from(subscriptionPlans)
+        .where(eq(subscriptionPlans.id, Number(planId)))
+        .limit(1);
+      
+      if (selectedPlan) {
+        planType = selectedPlan.planType;
+        businessCardsLimit = selectedPlan.businessCardsLimit === -1 ? 999999 : selectedPlan.businessCardsLimit;
+      }
+    }
+    
     const hashedPassword = await bcryptjs.hash(password, 12);
     
     const [newUser] = await db.insert(users).values({
@@ -261,10 +277,11 @@ router.post('/users', requireOwner, async (req, res) => {
       lastName,
       password: hashedPassword,
       role: 'user',
-      planType: 'free'
+      planType,
+      businessCardsLimit
     }).returning();
     
-    await logAdminAction(req.user!.id, 'create', 'user', newUser.id, { email, planId });
+    await logAdminAction(req.user!.id, 'create', 'user', newUser.id, { email, planId, planType, businessCardsLimit });
     
     res.json({ message: 'User created successfully', user: newUser });
   } catch (error) {
@@ -348,6 +365,16 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
     const { id } = req.params;
     const { planId, startsAt, endsAt, note } = req.body;
     
+    // Get plan details to update user's plan type and limits
+    const [selectedPlan] = await db.select()
+      .from(subscriptionPlans)
+      .where(eq(subscriptionPlans.id, Number(planId)))
+      .limit(1);
+    
+    if (!selectedPlan) {
+      return res.status(400).json({ message: 'Plan not found' });
+    }
+    
     // Create user plan assignment
     await db.insert(userPlans).values({
       userId: id,
@@ -357,15 +384,23 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
       note
     });
     
-    // Update user's subscription info
+    // Update user's subscription info, plan type, and limits
     await db.update(users)
       .set({ 
+        planType: selectedPlan.planType,
+        businessCardsLimit: selectedPlan.businessCardsLimit === -1 ? 999999 : selectedPlan.businessCardsLimit,
         subscriptionEndsAt: endsAt ? new Date(endsAt) : null,
         updatedAt: new Date()
       })
       .where(eq(users.id, id));
     
-    await logAdminAction(req.user!.id, 'assign_plan', 'user', id, { planId, endsAt, note });
+    await logAdminAction(req.user!.id, 'assign_plan', 'user', id, { 
+      planId, 
+      planType: selectedPlan.planType, 
+      businessCardsLimit: selectedPlan.businessCardsLimit,
+      endsAt, 
+      note 
+    });
     
     res.json({ message: 'Plan assigned successfully' });
   } catch (error) {
