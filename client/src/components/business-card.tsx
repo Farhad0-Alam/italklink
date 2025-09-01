@@ -159,17 +159,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     };
     
 
-    // Generate gradient style if enabled
-    const gradientStyle = data.useGradient && data.gradientStops?.length > 0 
-      ? {
-          background: `linear-gradient(${data.gradientAngle || 90}deg, ${
-            data.gradientStops
-              .sort((a, b) => a.position - b.position)
-              .map(stop => `${stop.color} ${stop.position}%`)
-              .join(', ')
-          })`
-        }
-      : {};
+    // Simple gradient style for basic background support
+    const gradientStyle = {};
 
     return (
       <div 
@@ -183,19 +174,13 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
         }}
       >
         <div className="relative">
-          {/* Advanced Header Design */}
-          {data.advancedHeaderEnabled && data.headerTemplate ? (
-            <DynamicHeaderRenderer data={data} profileImageSrc={profileImageSrc} />
-          ) : (
-            <>
-              {/* Header Design - Cover + Logo */}
+          {/* Header Design - Cover + Logo */}
               {(data.headerDesign === 'cover-logo' || !data.headerDesign) && (
                 <div 
                   className="h-40 relative"
                   style={{ 
                     backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
-                    backgroundColor: !data.backgroundImage && !data.useGradient ? data.brandColor || '#22c55e' : undefined,
-                    ...(data.useGradient && !data.backgroundImage ? gradientStyle : {}),
+                    backgroundColor: !data.backgroundImage ? data.brandColor || '#22c55e' : undefined,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                   }}
@@ -232,8 +217,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   className="h-32 relative"
                   style={{ 
                     backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
-                    backgroundColor: !data.backgroundImage && !data.useGradient ? data.brandColor || '#22c55e' : undefined,
-                    ...(data.useGradient && !data.backgroundImage ? gradientStyle : {}),
+                    backgroundColor: !data.backgroundImage ? data.brandColor || '#22c55e' : undefined,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                   }}
@@ -272,8 +256,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     className="flex-1 relative"
                     style={{ 
                       backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
-                      backgroundColor: !data.backgroundImage && !data.useGradient ? data.brandColor || '#22c55e' : undefined,
-                      ...(data.useGradient && !data.backgroundImage ? gradientStyle : {}),
+                      backgroundColor: !data.backgroundImage ? data.brandColor || '#22c55e' : undefined,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center'
                     }}
@@ -307,13 +290,10 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   </div>
                 </div>
               )}
-            </>
-          )}
         </div>
           
         {/* Content */}
         <div className={`pb-8 px-6 text-center ${data.template === 'dark' ? 'text-white' : 'text-slate-800'} ${
-          data.advancedHeaderEnabled ? 'pt-8' : 
           data.headerDesign === 'profile-center' ? 'pt-20' : 
           data.headerDesign === 'split-design' ? 'pt-16' : 'pt-16'
         }`}>
@@ -322,8 +302,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             className="text-xl font-bold mb-1" 
             style={{
               color: getSectionStyle('basicInfo', 'nameColor') || data.headingColor || (data.template === 'dark' ? '#ffffff' : '#1f2937'),
-              fontSize: `${getSectionStyle('basicInfo', 'nameFontSize') || (data.headingSize || 20) + 4}px`,
-              fontWeight: getSectionStyle('basicInfo', 'nameFontWeight') || data.headingWeight || 600,
+              fontSize: `${getSectionStyle('basicInfo', 'nameFontSize') || (data.headingFontSize || 20) + 4}px`,
+              fontWeight: getSectionStyle('basicInfo', 'nameFontWeight') || data.headingFontWeight || 600,
               fontFamily: getSectionStyle('basicInfo', 'nameFont') || 'Inter, sans-serif',
               fontStyle: getSectionStyle('basicInfo', 'nameTextStyle') || 'normal'
             }}
@@ -335,8 +315,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             className="text-sm mb-2" 
             style={{
               color: getSectionStyle('basicInfo', 'titleColor') || data.paragraphColor || (data.template === 'dark' ? '#e5e7eb' : '#4b5563'),
-              fontSize: `${getSectionStyle('basicInfo', 'titleFontSize') || data.paragraphSize || 14}px`,
-              fontWeight: getSectionStyle('basicInfo', 'titleFontWeight') || data.paragraphWeight || 400,
+              fontSize: `${getSectionStyle('basicInfo', 'titleFontSize') || data.paragraphFontSize || 14}px`,
+              fontWeight: getSectionStyle('basicInfo', 'titleFontWeight') || data.paragraphFontWeight || 400,
               fontFamily: getSectionStyle('basicInfo', 'titleFont') || 'Inter, sans-serif',
               fontStyle: getSectionStyle('basicInfo', 'titleTextStyle') || 'normal'
             }}
@@ -349,8 +329,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               className="text-sm mb-4" 
               style={{
                 color: getSectionStyle('basicInfo', 'companyColor') || (data.template === 'dark' ? '#d1d5db' : '#6b7280'),
-                fontSize: `${getSectionStyle('basicInfo', 'companyFontSize') || data.paragraphSize || 14}px`,
-                fontWeight: getSectionStyle('basicInfo', 'companyFontWeight') || data.paragraphWeight || 400,
+                fontSize: `${getSectionStyle('basicInfo', 'companyFontSize') || data.paragraphFontSize || 14}px`,
+                fontWeight: getSectionStyle('basicInfo', 'companyFontWeight') || data.paragraphFontWeight || 400,
                 fontFamily: getSectionStyle('basicInfo', 'companyFont') || 'Inter, sans-serif',
                 fontStyle: getSectionStyle('basicInfo', 'companyTextStyle') || 'normal'
               }}
@@ -365,96 +345,129 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             {/* Grid of Contact Buttons ONLY - Responsive 2 rows of 4 */}
             <div className="space-y-2">
               {/* Row 1 - Top 4 buttons */}
-              <div className="grid grid-cols-3 gap-3 px-4">
+              <div className={`grid ${data.template === 'dark' ? 'grid-cols-3' : 'grid-cols-4'} gap-3 px-4`}>
                 {/* Call Button */}
                 {data.phone ? (
-                  <button 
-                    onClick={() => handleContactAction('phone', data.phone)}
-                    className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
-                    style={{ 
-                      backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
-                      color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
-                    }}
-                    data-testid="button-contact-phone"
-                  >
-                    <i className={`fas fa-phone ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
-                    {data.template === 'dark' && (
-                      <span className="text-xs font-medium">CALL ME</span>
+                  <div className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction('phone', data.phone)}
+                      className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
+                      style={{ 
+                        backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
+                        color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
+                      }}
+                      data-testid="button-contact-phone"
+                    >
+                      <i className={`fas fa-phone ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
+                      {data.template === 'dark' && (
+                        <span className="text-xs font-medium">CALL ME</span>
+                      )}
+                    </button>
+                    {data.template !== 'dark' && (
+                      <span 
+                        className="text-xs font-medium"
+                        style={{ 
+                          color: getSectionStyle('contactInfo', 'iconTextColor') || (data.template === 'dark' ? '#d1d5db' : '#374151')
+                        }}
+                      >
+                        Call
+                      </span>
                     )}
-                  </button>
+                  </div>
                 ) : (
                   <div></div>
-                )}
-                {data.template !== 'dark' && data.phone && (
-                  <span 
-                    className="text-xs font-medium text-center"
-                    style={{ 
-                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                    }}
-                  >
-                    Call
-                  </span>
                 )}
                 
                 {/* Email Button */}
                 {data.email ? (
-                  <button 
-                    onClick={() => handleContactAction('email', data.email)}
-                    className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
-                    style={{ 
-                      backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
-                      color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
-                    }}
-                    data-testid="button-contact-email"
-                  >
-                    <i className={`fas fa-envelope ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
-                    {data.template === 'dark' && (
-                      <span className="text-xs font-medium">EMAIL</span>
+                  <div className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction('email', data.email)}
+                      className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
+                      style={{ 
+                        backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
+                        color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
+                      }}
+                      data-testid="button-contact-email"
+                    >
+                      <i className={`fas fa-envelope ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
+                      {data.template === 'dark' && (
+                        <span className="text-xs font-medium">EMAIL</span>
+                      )}
+                    </button>
+                    {data.template !== 'dark' && (
+                      <span 
+                        className="text-xs font-medium"
+                        style={{ 
+                          color: getSectionStyle('contactInfo', 'iconTextColor') || (data.template === 'dark' ? '#d1d5db' : '#374151')
+                        }}
+                      >
+                        Email
+                      </span>
                     )}
-                  </button>
+                  </div>
                 ) : (
                   <div></div>
-                )}
-                {data.template !== 'dark' && data.email && (
-                  <span 
-                    className="text-xs font-medium text-center"
-                    style={{ 
-                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                    }}
-                  >
-                    Email
-                  </span>
                 )}
 
                 {/* Text Button */}
                 {data.phone ? (
-                  <button 
-                    onClick={() => handleContactAction('phone', `sms:${data.phone}`)}
-                    className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
-                    style={{ 
-                      backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
-                      color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
-                    }}
-                    data-testid="button-contact-text"
-                  >
-                    <i className={`fas fa-sms ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
-                    {data.template === 'dark' && (
-                      <span className="text-xs font-medium">TEXT</span>
+                  <div className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction('phone', `sms:${data.phone}`)}
+                      className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
+                      style={{ 
+                        backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
+                        color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
+                      }}
+                      data-testid="button-contact-text"
+                    >
+                      <i className={`fas fa-sms ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
+                      {data.template === 'dark' && (
+                        <span className="text-xs font-medium">TEXT</span>
+                      )}
+                    </button>
+                    {data.template !== 'dark' && (
+                      <span 
+                        className="text-xs font-medium"
+                        style={{ 
+                          color: getSectionStyle('contactInfo', 'iconTextColor') || (data.template === 'dark' ? '#d1d5db' : '#374151')
+                        }}
+                      >
+                        Text
+                      </span>
                     )}
-                  </button>
+                  </div>
                 ) : (
                   <div></div>
                 )}
-                {data.template !== 'dark' && data.phone && (
-                  <span 
-                    className="text-xs font-medium text-center"
-                    style={{ 
-                      color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                    }}
-                  >
-                    Text
-                  </span>
-                )}
+
+                {/* Website/Connect Button - Only for non-dark templates */}
+                {data.template !== 'dark' && data.website ? (
+                  <div className="flex flex-col items-center">
+                    <button 
+                      onClick={() => handleContactAction('website', data.website)}
+                      className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                      style={{ 
+                        backgroundColor: data.brandColor || '#22c55e',
+                        color: data.tertiaryColor || '#ffffff'
+                      }}
+                      data-testid="button-connect"
+                    >
+                      <i className="fas fa-link text-sm"></i>
+                    </button>
+                    <span 
+                      className="text-xs font-medium"
+                      style={{ 
+                        color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                      }}
+                    >
+                      Connect
+                    </span>
+                  </div>
+                ) : data.template !== 'dark' ? (
+                  <div></div>
+                ) : null}
 
               </div>
 
