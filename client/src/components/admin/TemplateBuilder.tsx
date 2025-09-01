@@ -185,13 +185,20 @@ export default function TemplateBuilder() {
               title: defaultData.title || 'Your Title', 
               company: defaultData.company || 'Your Company',
               backgroundColor: defaultData.backgroundColor || '#ffffff',
-              accentColor: defaultData.brandColor || '#22c55e',
+              textColor: defaultData.textColor || '#000000',
+              brandColor: defaultData.brandColor || '#22c55e',
+              secondaryColor: defaultData.secondaryColor || '#999999',
+              tertiaryColor: defaultData.tertiaryColor || '#ffffff',
+              accentColor: defaultData.accentColor || defaultData.brandColor || '#22c55e',
+              headingColor: defaultData.headingColor || '#000000',
+              paragraphColor: defaultData.paragraphColor || '#000000',
+              iconColor: defaultData.iconColor || '#3b82f6',
               template: defaultData.template || 'minimal',
               // Add other default fields as needed
-              email: 'sample@email.com',
-              phone: '+1 (555) 123-4567',
-              website: 'www.example.com',
-              linkedin: 'linkedin.com/in/sample'
+              email: defaultData.email || 'sample@email.com',
+              phone: defaultData.phone || '+1 (555) 123-4567',
+              website: defaultData.website || 'www.example.com',
+              linkedin: defaultData.linkedin || 'linkedin.com/in/sample'
             }));
           } else {
             // Legacy 2TalkLink format
