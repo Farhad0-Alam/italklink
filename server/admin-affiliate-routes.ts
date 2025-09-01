@@ -24,7 +24,7 @@ const router = express.Router();
 
 // Admin middleware (reuse from admin-routes.ts)
 const requireAdmin = (req: any, res: any, next: any) => {
-  if (!req.user || req.user.role !== 'admin') {
+  if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'owner')) {
     return res.status(403).json({ message: 'Admin access required' });
   }
   next();

@@ -31,6 +31,14 @@ import crypto from 'crypto';
 
 const router = express.Router();
 
+// Middleware for authenticated users (no affiliate requirement)
+const requireAuth = (req: any, res: any, next: any) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Authentication required' });
+  }
+  next();
+};
+
 // Middleware to check if user is affiliate
 const requireAffiliate = async (req: any, res: any, next: any) => {
   if (!req.user) {
@@ -146,10 +154,15 @@ router.post('/apply', async (req, res) => {
   }
 });
 
-// Get affiliate profile
-router.get('/me', requireAffiliate, async (req, res) => {
+// Get affiliate profile (accessible to all authenticated users)
+router.get('/me', requireAuth, async (req, res) => {
   try {
-    const affiliate = req.affiliate;
+    // Check if user has affiliate record
+    const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.userId, req.user.id)).limit(1);
+    
+    if (!affiliate) {
+      return res.status(404).json({ message: 'No affiliate account found' });
+    }
     
     // Get recent stats
     const [clicksResult] = await db.select({ count: count() })
