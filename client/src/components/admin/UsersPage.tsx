@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -63,6 +64,9 @@ export default function UsersPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [planFilter, setPlanFilter] = useState('all');
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const [editUserOpen, setEditUserOpen] = useState(false);
+  const [assignPlanOpen, setAssignPlanOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Form states for adding user
@@ -70,7 +74,17 @@ export default function UsersPage() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [plan, setPlan] = useState('free');
+  const [plan, setPlan] = useState('');
+  
+  // Form states for editing user
+  const [editFirstName, setEditFirstName] = useState('');
+  const [editLastName, setEditLastName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  
+  // Form states for assigning plan
+  const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [planEndsAt, setPlanEndsAt] = useState('');
+  const [planNote, setPlanNote] = useState('');
   
   const queryClient = useQueryClient();
 
@@ -89,15 +103,88 @@ export default function UsersPage() {
     initialData: []
   });
 
+  // Fetch available plans for assignment
+  const { data: availablePlans = [] } = useQuery({
+    queryKey: ['/api/admin/plans'],
+    queryFn: () => fetch('/api/admin/plans', { credentials: 'include' }).then(res => res.json()),
+    initialData: []
+  });
+
   const handleVisitUser = (userId: string) => {
     // Open user's business card in new tab
     window.open(`/share/${userId}`, '_blank');
   };
 
-  const handleEditUser = async (userId: string) => {
-    // TODO: Open edit user modal with current user data
-    console.log('Edit user:', userId);
-    alert('Edit user functionality will be implemented in next update');
+  const handleToggleUserStatus = async (userId: string, currentStatus: string) => {
+    try {
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      const subscriptionEndsAt = newStatus === 'inactive' ? new Date().toISOString() : null;
+      
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          subscriptionEndsAt: subscriptionEndsAt 
+        })
+      });
+      
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      } else {
+        const error = await response.json();
+        alert(`Failed to update user status: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      alert('Failed to update user status. Please try again.');
+    }
+  };
+
+  const handleEditUser = async (user: User) => {
+    setSelectedUser(user);
+    setEditFirstName(user.name.split(' ')[0] || '');
+    setEditLastName(user.name.split(' ').slice(1).join(' ') || '');
+    setEditEmail(user.email);
+    setEditUserOpen(true);
+  };
+
+  const handleSaveEditUser = async () => {
+    if (!selectedUser || !editFirstName.trim() || !editLastName.trim() || !editEmail.trim()) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`/api/admin/users/${selectedUser.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          firstName: editFirstName.trim(),
+          lastName: editLastName.trim(),
+          email: editEmail.trim()
+        })
+      });
+      
+      if (response.ok) {
+        setEditUserOpen(false);
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      } else {
+        const error = await response.json();
+        alert(`Failed to update user: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      alert('Failed to update user. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDeleteUser = async (userId: string) => {
@@ -112,7 +199,6 @@ export default function UsersPage() {
       });
       
       if (response.ok) {
-        // Refresh users list
         queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
         console.log('User deleted successfully');
       } else {
@@ -125,10 +211,48 @@ export default function UsersPage() {
     }
   };
 
-  const handleAssignPlan = (userId: string) => {
-    // TODO: Open assign plan modal
-    console.log('Assign plan to user:', userId);
-    alert('Assign plan functionality will be implemented with Plans page');
+  const handleAssignPlan = (user: User) => {
+    setSelectedUser(user);
+    setSelectedPlanId('');
+    setPlanEndsAt('');
+    setPlanNote('');
+    setAssignPlanOpen(true);
+  };
+
+  const handleSaveAssignPlan = async () => {
+    if (!selectedUser || !selectedPlanId) {
+      alert('Please select a plan');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`/api/admin/users/${selectedUser.id}/assign-plan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          planId: Number(selectedPlanId),
+          endsAt: planEndsAt || null,
+          note: planNote.trim() || null
+        })
+      });
+      
+      if (response.ok) {
+        setAssignPlanOpen(false);
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      } else {
+        const error = await response.json();
+        alert(`Failed to assign plan: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error assigning plan:', error);
+      alert('Failed to assign plan. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleAddUser = async () => {
@@ -144,7 +268,7 @@ export default function UsersPage() {
         lastName: lastName.trim(),
         email: email.trim(),
         password: password.trim(),
-        planId: plan
+        planId: plan || '1' // Default to first plan if none selected
       };
 
       const response = await fetch('/api/admin/users', {
@@ -162,7 +286,7 @@ export default function UsersPage() {
         setLastName('');
         setEmail('');
         setPassword('');
-        setPlan('free');
+        setPlan('');
         setAddUserOpen(false);
         
         // Refresh users list
@@ -256,9 +380,12 @@ export default function UsersPage() {
                     <SelectValue placeholder="Select plan" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="free">Free</SelectItem>
-                    <SelectItem value="pro">Pro</SelectItem>
-                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                    {availablePlans.map((planOption: any) => (
+                      <SelectItem key={planOption.id} value={String(planOption.id)}>
+                        {planOption.name} - {planOption.planType.charAt(0).toUpperCase() + planOption.planType.slice(1)}
+                        {planOption.price > 0 && ` ($${(planOption.price / 100).toFixed(2)}/${planOption.interval})`}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -308,9 +435,11 @@ export default function UsersPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Plans</SelectItem>
-                  <SelectItem value="free">Free</SelectItem>
-                  <SelectItem value="pro">Pro</SelectItem>
-                  <SelectItem value="enterprise">Enterprise</SelectItem>
+                  {availablePlans.map((planOption: any) => (
+                    <SelectItem key={planOption.id} value={planOption.planType}>
+                      {planOption.planType.charAt(0).toUpperCase() + planOption.planType.slice(1)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -393,12 +522,17 @@ export default function UsersPage() {
                     <TableCell className="text-gray-600">{user.registrationDate}</TableCell>
                     <TableCell className="text-gray-600">{user.planValidity}</TableCell>
                     <TableCell>
-                      <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="capitalize">
-                        <div className={`w-2 h-2 rounded-full mr-2 ${
-                          user.status === 'active' ? 'bg-green-500' : 'bg-gray-400'
-                        }`}></div>
-                        {user.status}
-                      </Badge>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={user.status === 'active'}
+                          onCheckedChange={() => handleToggleUserStatus(user.id, user.status)}
+                        />
+                        <span className={`text-sm font-medium ${
+                          user.status === 'active' ? 'text-green-600' : 'text-gray-400'
+                        }`}>
+                          {user.status}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end space-x-1">
@@ -413,7 +547,7 @@ export default function UsersPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEditUser(user.id)}
+                          onClick={() => handleEditUser(user)}
                           className="p-2"
                         >
                           <Edit className="h-4 w-4" />
@@ -429,7 +563,7 @@ export default function UsersPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleAssignPlan(user.id)}
+                          onClick={() => handleAssignPlan(user)}
                           className="p-2 text-green-600 hover:text-green-700"
                           title="Assign Plan"
                         >
@@ -459,6 +593,121 @@ export default function UsersPage() {
           </Button>
         </div>
       </div>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editUserOpen} onOpenChange={setEditUserOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Update user information for {selectedUser?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="editFirstName">First Name</Label>
+                <Input 
+                  id="editFirstName" 
+                  placeholder="John"
+                  value={editFirstName}
+                  onChange={(e) => setEditFirstName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editLastName">Last Name</Label>
+                <Input 
+                  id="editLastName" 
+                  placeholder="Doe"
+                  value={editLastName}
+                  onChange={(e) => setEditLastName(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="editEmail">Email</Label>
+              <Input 
+                id="editEmail" 
+                type="email" 
+                placeholder="john@example.com"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditUserOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveEditUser}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Plan Dialog */}
+      <Dialog open={assignPlanOpen} onOpenChange={setAssignPlanOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Assign Plan</DialogTitle>
+            <DialogDescription>
+              Assign a subscription plan to {selectedUser?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="planSelect">Plan</Label>
+              <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availablePlans.map((plan: any) => (
+                    <SelectItem key={plan.id} value={String(plan.id)}>
+                      {plan.name} - {plan.planType.charAt(0).toUpperCase() + plan.planType.slice(1)}
+                      {plan.price > 0 && ` ($${(plan.price / 100).toFixed(2)}/${plan.interval})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="planEnds">Plan Ends (Optional)</Label>
+              <Input 
+                id="planEnds" 
+                type="date"
+                value={planEndsAt}
+                onChange={(e) => setPlanEndsAt(e.target.value)}
+              />
+              <p className="text-sm text-gray-500">Leave empty for unlimited duration</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="planNote">Note (Optional)</Label>
+              <Input 
+                id="planNote" 
+                placeholder="Add a note about this plan assignment"
+                value={planNote}
+                onChange={(e) => setPlanNote(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignPlanOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveAssignPlan}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Assigning...' : 'Assign Plan'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
