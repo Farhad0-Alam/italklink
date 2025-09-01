@@ -17,6 +17,7 @@ import { Share } from "./pages/share";
 import CardEditor from "./pages/card-editor";
 import Admin from "./pages/admin";
 import Pricing from "./pages/pricing";
+import Affiliate from "./pages/affiliate";
 import NotFound from "@/pages/not-found";
 import i18n from "./lib/i18n";
 
@@ -36,7 +37,7 @@ function Router() {
       <Route path="/cards/create" component={CardEditor} />
       <Route path="/cards/:id/edit" component={CardEditor} />
       <Route path="/share" component={Share} />
-      <Route path="/affiliate" component={() => import('./pages/affiliate').then(m => ({ default: m.default }))} />
+      <Route path="/affiliate" component={Affiliate} />
       <Route path="/admin/templates/builder" component={() => <Admin />} />
       <Route path="/admin/templates/header-builder" component={() => <Admin />} />
       <Route path="/admin/header-builder" component={() => <Admin />} />
