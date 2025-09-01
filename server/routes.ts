@@ -28,6 +28,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup AI routes
   setupAIRoutes(app);
   
+  // Setup AI template design
+  const { setupAITemplateDesign } = await import('./ai-routes');
+  setupAITemplateDesign(app);
+  
   // Setup RAG routes
   app.use('/api', ragRoutes);
   

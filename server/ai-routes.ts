@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
 import multer from 'multer';
-import { requireAuth } from './auth';
+import { requireAuth, requireOwner } from './auth';
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -256,6 +256,83 @@ async function extractWebsiteText(url: string): Promise<string> {
     console.error('Error extracting website text from', url, ':', error);
     return '';
   }
+}
+
+// AI Template Design endpoint
+export function setupAITemplateDesign(app: Express) {
+  app.post('/api/admin/ai-design-template', requireOwner, async (req, res) => {
+    try {
+      const { prompt, currentTemplate } = req.body;
+
+      if (!prompt) {
+        return res.status(400).json({ error: 'Design prompt is required' });
+      }
+
+      const systemPrompt = `You are a professional business card designer. Based on the user's description, generate a complete design specification for a business card template.
+
+Current Template Context:
+${currentTemplate ? JSON.stringify(currentTemplate, null, 2) : 'No current template provided'}
+
+Respond with JSON in this exact format:
+{
+  "templateName": "string - creative name for this design",
+  "description": "string - brief description of the design concept",
+  "colors": {
+    "brandColor": "string - primary brand color (hex)",
+    "accentColor": "string - accent/highlight color (hex)", 
+    "textColor": "string - main text color (hex)",
+    "backgroundColor": "string - background color (hex)",
+    "headingColor": "string - heading text color (hex)",
+    "paragraphColor": "string - paragraph text color (hex)",
+    "secondaryColor": "string - secondary element color (hex)",
+    "tertiaryColor": "string - tertiary element color (hex)"
+  },
+  "layout": {
+    "template": "minimal|bold|photo|dark - choose template type",
+    "headerDesign": "cover-logo|split-design|profile-center - choose header layout"
+  },
+  "typography": {
+    "fontSize": "number - base font size in pixels (14-18)",
+    "fontWeight": "number - font weight (300-700)",
+    "fontFamily": "string - font family name"
+  },
+  "reasoning": "string - explain your design choices and why they work well"
+}
+
+Design Guidelines:
+- Consider modern business card trends and professional aesthetics
+- Ensure good contrast and readability
+- Choose colors that work well together
+- Make typography choices that enhance professionalism
+- Explain your reasoning for the design decisions`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+      });
+
+      const designData = JSON.parse(response.choices[0].message.content || '{}');
+      
+      // Validate the response structure
+      if (!designData.colors || !designData.layout || !designData.typography) {
+        throw new Error('Invalid AI response format');
+      }
+
+      res.json(designData);
+
+    } catch (error) {
+      console.error('AI template design failed:', error);
+      res.status(500).json({ 
+        error: 'Failed to generate design',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
 }
 
 export function setupAIRoutes(app: Express) {

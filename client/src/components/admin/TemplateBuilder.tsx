@@ -23,7 +23,8 @@ import {
   Type,
   Image as ImageIcon,
   Share2,
-  X
+  X,
+  Sparkles
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { BusinessCard } from '@shared/schema';
