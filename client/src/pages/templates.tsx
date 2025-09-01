@@ -33,87 +33,14 @@ interface User {
 interface Template {
   id: string;
   name: string;
+  description?: string;
   category: string;
   previewImage: string;
   backgroundColor: string;
   textColor: string;
+  templateData?: any;
 }
 
-// Use static templates for users - they shouldn't manage admin templates
-const templates: Template[] = [
-  {
-    id: "tangeria",
-    name: "Tangeria Theme",
-    category: "Modern",
-    previewImage: "",
-    backgroundColor: "#10B981",
-    textColor: "#FFFFFF"
-  },
-  {
-    id: "theme1",
-    name: "Theme 1", 
-    category: "Professional",
-    previewImage: "",
-    backgroundColor: "#10B981",
-    textColor: "#FFFFFF"
-  },
-  {
-    id: "theme2",
-    name: "Theme 2",
-    category: "Dark",
-    previewImage: "",
-    backgroundColor: "#1F2937",
-    textColor: "#FFFFFF"
-  },
-  {
-    id: "theme3",
-    name: "Theme 3",
-    category: "Warm",
-    previewImage: "",
-    backgroundColor: "#F97316", 
-    textColor: "#FFFFFF"
-  },
-  {
-    id: "theme4",
-    name: "Theme 4",
-    category: "Blue",
-    previewImage: "",
-    backgroundColor: "#0891B2",
-    textColor: "#FFFFFF"
-  },
-  {
-    id: "engels",
-    name: "Engels De Leon",
-    category: "Classic",
-    previewImage: "",
-    backgroundColor: "#1E3A8A",
-    textColor: "#FFFFFF"
-  },
-  {
-    id: "danyell",
-    name: "Danyell R Means",
-    category: "Teal",
-    previewImage: "",
-    backgroundColor: "#0D9488",
-    textColor: "#FFFFFF"
-  },
-  {
-    id: "rubie",
-    name: "Rubie Joy",
-    category: "Light",
-    previewImage: "",
-    backgroundColor: "#E5F3FF",
-    textColor: "#1F2937"
-  },
-  {
-    id: "emma",
-    name: "Emma Rose",
-    category: "Bold",
-    previewImage: "",
-    backgroundColor: "#DC2626",
-    textColor: "#FFFFFF"
-  }
-];
 
 export default function Templates() {
   const [, setLocation] = useLocation();
@@ -130,6 +57,60 @@ export default function Templates() {
     retry: false,
   });
 
+  // Fetch templates from API with fallback
+  const { data: apiTemplates, isLoading: templatesLoading, isError: templatesError } = useQuery<Template[]>({
+    queryKey: ['/api/templates'],
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    retry: 1,
+  });
+
+  // Fallback templates in case API fails or returns no templates
+  const fallbackTemplates: Template[] = [
+    {
+      id: "tangeria",
+      name: "Tangeria Theme",
+      category: "Modern",
+      previewImage: "",
+      backgroundColor: "#10B981",
+      textColor: "#FFFFFF"
+    },
+    {
+      id: "theme1",
+      name: "Professional Blue", 
+      category: "Professional",
+      previewImage: "",
+      backgroundColor: "#1E3A8A",
+      textColor: "#FFFFFF"
+    },
+    {
+      id: "theme2",
+      name: "Dark Theme",
+      category: "Dark",
+      previewImage: "",
+      backgroundColor: "#1F2937",
+      textColor: "#FFFFFF"
+    },
+    {
+      id: "theme3",
+      name: "Warm Orange",
+      category: "Warm",
+      previewImage: "",
+      backgroundColor: "#F97316", 
+      textColor: "#FFFFFF"
+    },
+    {
+      id: "theme4",
+      name: "Ocean Blue",
+      category: "Blue",
+      previewImage: "",
+      backgroundColor: "#0891B2",
+      textColor: "#FFFFFF"
+    }
+  ];
+
+  // Use API templates if available, otherwise fallback
+  const templates = apiTemplates && apiTemplates.length > 0 ? apiTemplates : fallbackTemplates;
+
   useEffect(() => {
     if (!userLoading && (userError || !user)) {
       toast({
@@ -141,7 +122,7 @@ export default function Templates() {
     }
   }, [user, userLoading, userError, setLocation, toast]);
 
-  if (userLoading) {
+  if (userLoading || templatesLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

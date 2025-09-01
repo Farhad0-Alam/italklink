@@ -1,9 +1,9 @@
 import { db } from './db';
 import { 
-  users, businessCards, teams, teamMembers, bulkGenerationJobs, subscriptionPlans,
+  users, businessCards, teams, teamMembers, bulkGenerationJobs, subscriptionPlans, globalTemplates,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
-  type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan
+  type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate
 } from '@shared/schema';
 import { eq, and, desc, count, inArray } from 'drizzle-orm';
 
@@ -64,6 +64,9 @@ export interface IStorage {
   
   // Plans operations
   getPlans(): Promise<SubscriptionPlan[]>;
+  
+  // Global templates operations
+  getGlobalTemplates(filters?: { isActive?: boolean }): Promise<GlobalTemplate[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -379,6 +382,17 @@ export class DatabaseStorage implements IStorage {
       .from(subscriptionPlans)
       .where(eq(subscriptionPlans.isActive, true))
       .orderBy(subscriptionPlans.price);
+  }
+
+  // Global templates operations
+  async getGlobalTemplates(filters?: { isActive?: boolean }): Promise<GlobalTemplate[]> {
+    let query = db.select().from(globalTemplates);
+    
+    if (filters?.isActive !== undefined) {
+      query = query.where(eq(globalTemplates.isActive, filters.isActive));
+    }
+    
+    return await query.orderBy(desc(globalTemplates.createdAt));
   }
 }
 

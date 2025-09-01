@@ -78,6 +78,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public templates endpoint for templates page
+  app.get("/api/templates", async (req, res) => {
+    try {
+      const templates = await storage.getGlobalTemplates({ isActive: true });
+      
+      // Map to frontend format
+      const publicTemplates = templates.map(template => ({
+        id: template.id,
+        name: template.name,
+        description: template.description,
+        category: template.templateData?.category || 'General',
+        previewImage: template.previewImage || '',
+        backgroundColor: template.templateData?.backgroundColor || '#10B981',
+        textColor: template.templateData?.textColor || '#FFFFFF',
+        templateData: template.templateData
+      }));
+      
+      res.json(publicTemplates);
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+      res.status(500).json({ message: 'Failed to fetch templates' });
+    }
+  });
+
   // Authentication routes
   app.get('/api/auth/google', 
     passport.authenticate('google', { scope: ['profile', 'email'] })
