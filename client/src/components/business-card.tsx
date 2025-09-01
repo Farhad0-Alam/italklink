@@ -411,32 +411,37 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 )}
 
 
-                {/* Website/Connect Button - Only for non-dark templates */}
-                {data.template !== 'dark' && data.website ? (
+                {/* Website/Connect Button - For ALL templates as 3rd main button */}
+                {data.website ? (
                   <div className="flex flex-col items-center">
                     <button 
                       onClick={() => handleContactAction('website', data.website)}
-                      className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                      className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
                       style={{ 
-                        backgroundColor: data.brandColor || '#22c55e',
-                        color: data.tertiaryColor || '#ffffff'
+                        backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.brandColor || '#22c55e'),
+                        color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
                       }}
-                      data-testid="button-connect"
+                      data-testid="button-contact-website"
                     >
-                      <i className="fas fa-link text-sm"></i>
+                      <i className={`fas fa-link ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
+                      {data.template === 'dark' && (
+                        <span className="text-xs font-medium">WEBSITE</span>
+                      )}
                     </button>
-                    <span 
-                      className="text-xs font-medium"
-                      style={{ 
-                        color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                      }}
-                    >
-                      Connect
-                    </span>
+                    {data.template !== 'dark' && (
+                      <span 
+                        className="text-xs font-medium"
+                        style={{ 
+                          color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                        }}
+                      >
+                        Connect
+                      </span>
+                    )}
                   </div>
-                ) : data.template !== 'dark' ? (
+                ) : (
                   <div></div>
-                ) : null}
+                )}
 
               </div>
 
@@ -447,7 +452,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     <div key={contact.id} className="flex flex-col items-center">
                       <button 
                         onClick={() => handleContactAction(contact.type, contact.value)}
-                        className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
+                        className={`${data.template === 'dark' ? 'w-full py-3 px-4 rounded-lg min-w-0' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
                         style={{ 
                           backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
                           color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
@@ -456,7 +461,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                       >
                         <i className={`${contact.icon} ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
                         {data.template === 'dark' && (
-                          <span className="text-xs font-medium">{contact.label}</span>
+                          <span className="text-xs font-medium whitespace-nowrap overflow-hidden text-ellipsis">{contact.label}</span>
                         )}
                       </button>
                       {data.template !== 'dark' && (
@@ -548,24 +553,6 @@ END:VCARD`;
               </button>
             </div>
 
-            {/* Website Button from Social Media Section */}
-            {data.website && (
-              <div className="px-4">
-                <button 
-                  onClick={() => handleContactAction('website', data.website)}
-                  className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
-                  style={{ 
-                    backgroundColor: data.brandColor || '#22c55e',
-                    color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
-                  }}
-                  data-testid="button-website"
-                >
-                  <i className="fas fa-desktop text-lg mr-3"></i>
-                  Website
-                </button>
-              </div>
-            )}
 
             {/* Social Media Buttons - Same Style as Website Button */}
             <div className="space-y-2 px-4">
