@@ -7,18 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Link } from "wouter";
 import { useTheme } from "@/components/theme-provider";
 import { Moon, Sun, Smartphone, Monitor } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 
-interface PublicPlan {
-  id: number;
-  name: string;
-  planType: string;
-  price: number;
-  interval: string;
-  description?: string;
-  features?: string[];
-  isPopular: boolean;
-}
 
 
 const features = [
@@ -191,12 +180,6 @@ export default function Landing() {
   const { scrollY } = useScroll();
   const { theme } = useTheme();
 
-  // Fetch dynamic plans from database
-  const { data: plans = [], isLoading: plansLoading } = useQuery<PublicPlan[]>({
-    queryKey: ['/api/plans'],
-    queryFn: () => fetch('/api/plans').then(res => res.json()),
-    initialData: []
-  });
   
   // Parallax effects
   const heroY = useTransform(scrollY, [0, 500], [0, -150]);
@@ -243,7 +226,7 @@ export default function Landing() {
             </motion.div>
             
             <div className="hidden md:flex items-center space-x-8">
-              {["Features", "Pricing", "Templates", "FAQ"].map((item, index) => (
+              {["Features", "Templates", "FAQ"].map((item, index) => (
                 <motion.a 
                   key={item}
                   href={`#${item.toLowerCase()}`}
@@ -460,185 +443,40 @@ export default function Landing() {
             viewport={{ once: true }}
             transition={{ delay: 0.3, duration: 0.6 }}
           >
-            <motion.div
-              whileHover={{ scale: 1.05, y: -3 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
-              <Button size="lg" className="bg-talklink-500 hover:bg-talklink-600 text-lg px-8 py-4 h-auto shadow-xl hover:shadow-2xl transition-shadow" asChild>
-                <Link href="/register">
-                  Start Building Your Card
-                  <motion.i 
-                    className="fas fa-arrow-right ml-2"
-                    animate={{ x: [0, 3, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  />
-                </Link>
-              </Button>
-            </motion.div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <motion.div
+                whileHover={{ scale: 1.05, y: -3 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button size="lg" className="bg-talklink-500 hover:bg-talklink-600 text-lg px-8 py-4 h-auto shadow-xl hover:shadow-2xl transition-shadow" asChild>
+                  <Link href="/register">
+                    Start Building Your Card
+                    <motion.i 
+                      className="fas fa-arrow-right ml-2"
+                      animate={{ x: [0, 3, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
+                  </Link>
+                </Button>
+              </motion.div>
+              
+              <motion.div
+                whileHover={{ scale: 1.05, y: -3 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button size="lg" variant="outline" className="text-lg px-8 py-4 h-auto border-2 border-slate-300 hover:border-talklink-500 hover:text-talklink-500 transition-colors" asChild>
+                  <Link href="/pricing">
+                    View Pricing
+                  </Link>
+                </Button>
+              </motion.div>
+            </div>
           </motion.div>
         </div>
       </motion.section>
 
-      {/* Pricing Section */}
-      <motion.section 
-        id="pricing" 
-        className="py-24 bg-background"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8 }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            className="text-center mb-20"
-            initial={{ opacity: 0, y: 60 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <motion.h2 
-              className="text-4xl lg:text-5xl font-black text-foreground mb-6 tracking-tight"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-            >
-              Choose Your
-              <span className="text-talklink-500 bg-gradient-to-r from-talklink-500 to-talklink-600 bg-clip-text text-transparent"> Growth Plan</span>
-            </motion.h2>
-            <motion.p 
-              className="text-xl text-muted-foreground max-w-2xl mx-auto font-light"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-            >
-              Start free. Scale as you grow. Cancel anytime.
-            </motion.p>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {plansLoading ? (
-              // Loading state
-              [...Array(3)].map((_, index) => (
-                <div key={index} className="relative">
-                  <div className="bg-white rounded-3xl p-8 h-full border border-slate-200 shadow-lg animate-pulse">
-                    <div className="text-center mb-8">
-                      <div className="h-6 bg-slate-200 rounded mb-2"></div>
-                      <div className="h-12 bg-slate-200 rounded mb-4"></div>
-                      <div className="h-4 bg-slate-200 rounded"></div>
-                    </div>
-                    <div className="space-y-4 mb-8">
-                      {[...Array(4)].map((_, i) => (
-                        <div key={i} className="h-4 bg-slate-200 rounded"></div>
-                      ))}
-                    </div>
-                    <div className="h-12 bg-slate-200 rounded"></div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              plans.map((plan, index) => {
-                const formatPrice = (price: number) => {
-                  if (price === 0) return '$0';
-                  return `$${(price / 100).toFixed(0)}`;
-                };
-                
-                const getButtonText = (planType: string) => {
-                  if (planType === 'free') return 'Get Started Free';
-                  if (planType === 'premium') return 'Start Pro Trial';
-                  return 'Contact Sales';
-                };
-
-                const getDescription = (plan: PublicPlan) => {
-                  if (plan.description) return plan.description;
-                  if (plan.planType === 'free') return 'Perfect for getting started';
-                  if (plan.planType === 'premium') return 'Best for professionals and entrepreneurs';
-                  return 'For teams and large organizations';
-                };
-
-                const getDefaultFeatures = (planType: string) => {
-                  if (planType === 'free') {
-                    return [
-                      "1 Digital Business Card",
-                      "Basic Templates",
-                      "QR Code Generation",
-                      "Contact Sharing",
-                      "Basic Analytics"
-                    ];
-                  }
-                  if (planType === 'premium') {
-                    return [
-                      "Unlimited Business Cards",
-                      "Premium Templates",
-                      "Custom Branding",
-                      "Advanced Analytics",
-                      "Custom Domains",
-                      "Priority Support"
-                    ];
-                  }
-                  return [
-                    "Everything in Pro",
-                    "Team Collaboration",
-                    "API Access",
-                    "White-label Solution",
-                    "Advanced Security",
-                    "Dedicated Support"
-                  ];
-                };
-
-                const planFeatures = plan.features && plan.features.length > 0 
-                  ? plan.features 
-                  : getDefaultFeatures(plan.planType);
-
-                return (
-                  <div key={plan.id} className={`relative ${plan.isPopular ? 'scale-105' : ''}`}>
-                    {plan.isPopular && (
-                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                        <div className="bg-talklink-500 text-white px-6 py-2 rounded-full text-sm font-medium">
-                          Most Popular
-                        </div>
-                      </div>
-                    )}
-                    <div className={`bg-white rounded-3xl p-8 h-full ${plan.isPopular ? 'border-2 border-talklink-500 shadow-2xl' : 'border border-slate-200 shadow-lg'} hover:shadow-xl transition-all duration-300`}>
-                      <div className="text-center mb-8">
-                        <h3 className="text-2xl font-bold text-slate-900 mb-2">{plan.name}</h3>
-                        <div className="mb-4">
-                          <span className="text-5xl font-black text-slate-900">{formatPrice(plan.price)}</span>
-                          <span className="text-slate-500 text-lg">/{plan.interval}</span>
-                        </div>
-                        <p className="text-slate-600">{getDescription(plan)}</p>
-                      </div>
-                      
-                      <ul className="space-y-4 mb-8">
-                        {planFeatures.map((feature, featureIndex) => (
-                          <li key={featureIndex} className="flex items-start">
-                            <div className="w-5 h-5 bg-talklink-100 rounded-full flex items-center justify-center mt-0.5 mr-3 flex-shrink-0">
-                              <i className="fas fa-check text-talklink-500 text-xs"></i>
-                            </div>
-                            <span className="text-slate-700">{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                      
-                      <Button 
-                        className={`w-full h-12 text-base font-medium ${plan.isPopular ? 'bg-talklink-500 hover:bg-talklink-600 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white'}`}
-                        asChild
-                        data-testid={`button-plan-${plan.planType}`}
-                      >
-                        <Link href="/register">
-                          {getButtonText(plan.planType)}
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      </motion.section>
 
       {/* Testimonials Section */}
       <section className="py-20 bg-white">
@@ -803,7 +641,7 @@ export default function Landing() {
               <h4 className="font-bold mb-6">Product</h4>
               <ul className="space-y-3 text-slate-400">
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
+                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
                 <li><a href="#templates" className="hover:text-white transition-colors">Templates</a></li>
                 <li><a href="/builder" className="hover:text-white transition-colors">Demo</a></li>
               </ul>

@@ -1,9 +1,9 @@
 import { db } from './db';
 import { 
-  users, businessCards, teams, teamMembers, bulkGenerationJobs,
+  users, businessCards, teams, teamMembers, bulkGenerationJobs, subscriptionPlans,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
-  type BulkGenerationJob, type InsertBulkGenerationJob
+  type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan
 } from '@shared/schema';
 import { eq, and, desc, count, inArray } from 'drizzle-orm';
 
@@ -61,6 +61,9 @@ export interface IStorage {
     totalCards: number;
     recentJobs: number;
   }>;
+  
+  // Plans operations
+  getPlans(): Promise<SubscriptionPlan[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -367,6 +370,15 @@ export class DatabaseStorage implements IStorage {
       totalCards: cards.length,
       recentJobs: recentJobs[0]?.count || 0,
     };
+  }
+  
+  // Plans operations
+  async getPlans(): Promise<SubscriptionPlan[]> {
+    return await db
+      .select()
+      .from(subscriptionPlans)
+      .where(eq(subscriptionPlans.isActive, true))
+      .orderBy(subscriptionPlans.price);
   }
 }
 
