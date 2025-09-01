@@ -36,6 +36,7 @@ function Router() {
       <Route path="/cards/create" component={CardEditor} />
       <Route path="/cards/:id/edit" component={CardEditor} />
       <Route path="/share" component={Share} />
+      <Route path="/affiliate" component={() => import('./pages/affiliate').then(m => ({ default: m.default }))} />
       <Route path="/admin/templates/builder" component={() => <Admin />} />
       <Route path="/admin/templates/header-builder" component={() => <Admin />} />
       <Route path="/admin/header-builder" component={() => <Admin />} />
@@ -44,6 +45,8 @@ function Router() {
       <Route path="/admin/users" component={() => <Admin />} />
       <Route path="/admin/plans" component={() => <Admin />} />
       <Route path="/admin/coupons" component={() => <Admin />} />
+      <Route path="/admin/affiliates" component={() => <Admin />} />
+      <Route path="/admin/conversions" component={() => <Admin />} />
       <Route path="/admin/icon-packs" component={() => <Admin />} />
       <Route path="/admin/settings" component={() => <Admin />} />
       <Route path="/admin" component={() => <Admin />} />

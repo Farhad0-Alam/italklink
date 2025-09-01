@@ -1,0 +1,138 @@
+Got it — you want the **latest/advanced features included**. Here’s a single, clean **copy-paste Replit prompt** (global system, USA HQ) **with all “latest updates”** baked in.
+
+---
+
+# Replit Prompt — Global Affiliate System (USA HQ) **with Latest Features**
+
+You are a senior full-stack engineer. Build a **production-ready, worldwide affiliate management system** for a **USA-based company** with advanced (latest) features.
+
+## Tech
+
+* **Frontend:** React 19 + Vite, TypeScript, Tailwind, React Router, TanStack Query, Zod
+* **Backend:** Node (Fastify), TypeScript, Drizzle ORM, PostgreSQL
+* **Auth:** JWT (access/refresh), roles: `admin`, `affiliate`, `staff`, optional magic link
+* **Email:** Resend or Nodemailer (SMTP)
+* **Payments:** Stripe (Checkout + Billing), **Stripe Connect** for affiliate payouts; optional PayPal
+* **Jobs:** node-cron / queue for settlements, retries, fraud scans
+* **Defaults:** Company HQ = USA, default currency **USD**, multi-currency enabled (EUR/GBP/INR/BDT, etc.)
+
+## Core Features (MVP + Latest)
+
+1. **Global Onboarding & KYC**
+
+   * Public sign-up (country, website/source, payout preference).
+   * USA tax forms: **W-9** (US) and **W-8BEN** (non-US).
+   * Admin review: approve/deny/suspend with reason & audit trail.
+
+2. **Links, Deep Links, Coupons**
+
+   * Referral link: `https://domain.com/?ref=CODE` and short `/r/CODE`.
+   * **Deep link builder** with whitelist: `&dest=/pricing`, `&dest=/blog/slug`.
+   * Coupon–affiliate binding, **leakage guard** (assign to correct affiliate), stacking rules, usage caps, channel locks.
+   * Asset library (logos/banners/CTAs) with per-asset stats.
+
+3. **Tracking & Attribution (Advanced)**
+
+   * First-party cookies + server-side logging; UTM + up to **sub1..sub5**.
+   * **Attribution modes:** first-touch, last-touch, linear multi-touch (per-plan override).
+   * De-dupe via idempotency keys; redirect `/r/:code` logs click, sets cookie.
+   * Anti-bot: hCaptcha on signup, velocity limits, IP/ASN/VPN flags, device fingerprint.
+
+4. **Conversions & Commission Engine**
+
+   * Status lifecycle: pending → approved → **paid** → reversed.
+   * Commission rules: global default, plan overrides, **tiered rates**, one-time & recurring.
+   * **Holdback & lock windows** (e.g., 10% holdback, 30-day lock).
+   * **Clawback** on refund/chargeback via Stripe webhooks; partial refund prorate.
+
+5. **Multi-Currency & Finance (Pro)**
+
+   * Convert at conversion time; store `fx_rate`, `home_amount_cents`, `home_currency="USD"`.
+   * **Immutable ledger** (double-entry) for affiliate balances & adjustments.
+   * Payouts: Stripe Connect (primary), PayPal optional, manual bank CSV export.
+   * **Maker/Checker** payout approvals (finance role): draft → maker\_approved → checker\_approved → paid.
+   * Min payout threshold (default \$50) and monthly schedule (15th).
+
+6. **Risk, Flags & Disputes**
+
+   * Rule engine (JSON/YAML) flags: abnormal CTR/CR, self-purchase, geo mismatch, device velocity.
+   * **Risk queue** for admins; resolve/annotate.
+   * **Affiliate dispute portal** (7-day window) with evidence upload.
+
+7. **Dashboards & Analytics**
+
+   * **Affiliate:** clicks, conversions, EPC, CR, AOV, LTV by cohort, unpaid/paid; charts; deep links, sub-IDs; coupon view; payouts & disputes.
+   * **Admin:** funnels & cohorts, geo/device breakdowns, leaderboard (opt-in/anonymized), commission rule editor, payouts, risk/disputes, feature flags.
+   * CSV/Excel exports everywhere; scheduled email reports (weekly/monthly).
+
+8. **Integrations & Reliability**
+
+   * **Stripe webhooks:** `checkout.session.completed`, `invoice.paid`, `charge.refunded` → create/approve/reverse conversions.
+   * **JS Pixel:** `window._2tlq.track('conversion', { orderId, amount, currency, planId })`.
+   * **Server Conversion API:** HMAC-signed `POST /api/track/conversion`.
+   * **Outbox table** + exponential retry for webhooks (idempotency), replay UI.
+   * **n8n** outbound webhooks for events (signed): `affiliate.approved`, `conversion.approved`, `payout.paid`.
+
+9. **Compliance & Privacy**
+
+   * US HQ: USD accounting, W-9/W-8BEN collection; downloadable payout/tax reports.
+   * GDPR/CCPA consent banner; cookie policy; “download my data” and delete requests.
+   * PII minimization: hash emails in conversions; store mapping separately with consent.
+   * Security headers (CSP), strict redirect/domain whitelists, rate limits, Zod validation.
+
+## Database (Drizzle/Postgres)
+
+* `users` (id, role, email, pass\_hash, status, created\_at)
+* `affiliates` (id FK users, code UNIQUE, country, kyc\_status, tax\_info\_json, payout\_method\_json, payout\_verification\_status)
+* `clicks` (id, affiliate\_id, ts, ip, ua, referrer, utm\_source, utm\_medium, utm\_campaign, sub1..sub5, geo\_country, landing\_path, fp\_hash)
+* `conversions` (id, affiliate\_id, order\_id UNIQUE, amount\_cents, currency, home\_amount\_cents, home\_currency, fx\_rate, plan\_id, customer\_hash, status, lock\_until, holdback\_cents, approved\_at, reversed\_at, meta\_json)
+* `commission_rules` (id, scope: global|plan|tier, type: percent|flat, value, recurring bool, effective\_from, effective\_to)
+* `payouts` (id, affiliate\_id, period\_start, period\_end, amount\_cents, currency, method, tx\_ref, approval\_state, approved\_by\_user\_ids\_json, status, created\_at, notes)
+* `balances` (id, affiliate\_id, delta\_cents, currency, kind: credit|debit, ref\_type, ref\_id, notes, ts)  **immutable ledger**
+* `coupons` (id, code UNIQUE, affiliate\_id, discount\_type, discount\_value, active, usage\_count, max\_redemptions, expires\_at, stack\_rule, channel\_lock, scopes\_json)
+* `flags` (id, entity: click|conversion|affiliate, entity\_id, rule\_code, severity, notes, ts)
+* `disputes` (id, conversion\_id, affiliate\_id, status: open|needs\_info|resolved|rejected, reason, evidence\_urls\_json, ts\_opened, ts\_closed)
+* `events_outbox` (id, type, payload\_json, status: pending|sent|failed, attempts, next\_attempt\_at, ts)
+* `audit_logs` (id, actor\_user\_id, action, entity, entity\_id, meta\_json, ts)
+* `fx_rates` (id, base\_currency, quote\_currency, rate, ts\_snapshot)
+
+Add indexes for performance (affiliate/time, order\_id unique, fp\_hash+ts for dedupe, outbox status+next\_attempt\_at).
+
+## API (Fastify)
+
+* **Auth:** `POST /api/auth/register|login|refresh`
+* **Affiliate:** `GET /api/me`, `PATCH /api/me/kyc`, `GET /api/me/stats`, `GET /api/me/conversions`, `GET /api/me/payouts`, `POST /api/affiliate/disputes`
+* **Tracking:** `POST /api/track/click`, `POST /api/track/conversion` (HMAC), `GET /r/:code`
+* **Admin:** `GET/SEARCH /api/admin/affiliates`, `PATCH /api/admin/affiliates/:id` (approve/suspend)
+  `GET /api/admin/conversions`, `PATCH /api/admin/conversions/:id` (approve/reverse)
+  `POST /api/admin/payouts/batch`, `POST /api/admin/payouts/:id/approve` (maker), `POST /api/admin/payouts/:id/check` (checker), `PATCH /api/admin/payouts/:id/mark-paid`
+  `POST /api/admin/flags/:id/resolve`, `POST /api/admin/disputes/:id/{request-info|resolve|reject}`
+  `GET /api/admin/leaderboard?period=month`, `POST /api/admin/feature-flags/:key`
+* **Webhooks:** `POST /api/webhooks/stripe` (verify signature)
+* **Integrations:** signed outbound to **n8n**; outbox replay endpoint.
+
+## Frontend (React + Tailwind)
+
+* Auth pages: `/login`, `/register`
+* **Affiliate:** `/affiliate/dashboard`, `/links`, `/analytics`, `/conversions`, `/payouts`, `/assets`, `/disputes`
+* **Admin:** `/admin/affiliates`, `/conversions`, `/payouts`, `/commissions`, `/coupons`, `/risk`, `/leaderboard`, `/integrations`, `/feature-flags`, `/settings`, `/audit`
+* Charts for trends; UTM/sub-ID builders; deep-link helper.
+
+## Testing & Deliverables
+
+* Drizzle migrations + `.env.example`
+* Seed: demo data showing multi-touch attribution, partial refund clawback, flagged conversion with dispute, maker/checker payout, leaderboard for current month.
+* Unit tests for commission calc, attribution modes, refunds, FX; integration tests for Stripe webhook & outbox retries.
+* Postman/Thunder tests or `.http` files.
+* README with runbook:
+
+  ```
+  npm install
+  npm run db:migrate
+  npm run seed
+  npm run dev
+  ```
+
+  * sections for **FX handling**, **holdback policy**, **disputes flow**, **webhook retries**, **n8n integration**.
+
+**Build everything above. Include all advanced (“latest”) features. Optimize for mobile dashboards and global scale.**

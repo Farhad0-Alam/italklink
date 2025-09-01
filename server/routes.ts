@@ -38,6 +38,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup admin routes
   app.use('/api/admin', adminRoutes);
   
+  // Setup affiliate routes
+  const affiliateRoutes = (await import('./affiliate-routes')).default;
+  app.use('/api/affiliate', affiliateRoutes);
+  
   // Setup template collections routes
   app.use('/api/collections', requireAuth, templateCollectionsRoutes);
   

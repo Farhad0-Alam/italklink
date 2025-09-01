@@ -25,6 +25,21 @@ export const iconTypeEnum = pgEnum('icon_type', ['url', 'email', 'phone', 'whats
 export const couponTypeEnum = pgEnum('coupon_type', ['percentage', 'fixed_amount']);
 export const couponStatusEnum = pgEnum('coupon_status', ['active', 'inactive', 'expired']);
 
+// Affiliate system enums
+export const affiliateStatusEnum = pgEnum('affiliate_status', ['pending', 'approved', 'suspended', 'rejected']);
+export const kycStatusEnum = pgEnum('kyc_status', ['pending', 'submitted', 'approved', 'rejected', 'expired']);
+export const conversionStatusEnum = pgEnum('conversion_status', ['pending', 'approved', 'paid', 'reversed']);
+export const payoutStatusEnum = pgEnum('payout_status', ['draft', 'maker_approved', 'checker_approved', 'paid', 'failed', 'cancelled']);
+export const payoutMethodEnum = pgEnum('payout_method', ['stripe_connect', 'paypal', 'bank_transfer', 'manual']);
+export const disputeStatusEnum = pgEnum('dispute_status', ['open', 'needs_info', 'resolved', 'rejected']);
+export const flagSeverityEnum = pgEnum('flag_severity', ['low', 'medium', 'high', 'critical']);
+export const eventStatusEnum = pgEnum('event_status', ['pending', 'sent', 'failed']);
+export const attributionModeEnum = pgEnum('attribution_mode', ['first_touch', 'last_touch', 'linear']);
+export const commissionTypeEnum = pgEnum('commission_type', ['percentage', 'flat']);
+export const commissionScopeEnum = pgEnum('commission_scope', ['global', 'plan', 'tier']);
+export const balanceKindEnum = pgEnum('balance_kind', ['credit', 'debit']);
+export const balanceRefTypeEnum = pgEnum('balance_ref_type', ['conversion', 'payout', 'adjustment', 'refund', 'chargeback', 'conversion_approval', 'conversion_reversal']);
+
 // Database Tables
 
 // Session storage table
@@ -542,6 +557,335 @@ export const links = pgTable("links", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// AFFILIATE SYSTEM TABLES
+
+// Affiliates table (extends users with affiliate-specific data)
+export const affiliates = pgTable("affiliates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  code: varchar("code").unique().notNull(), // Unique affiliate code (e.g., "JOHN123")
+  
+  // Basic info
+  country: varchar("country").notNull(),
+  website: varchar("website"),
+  sourceInfo: text("source_info"), // How they found us
+  
+  // KYC and compliance
+  kycStatus: kycStatusEnum("kyc_status").default('pending'),
+  taxInfo: jsonb("tax_info"), // W-9/W-8BEN data
+  kycDocuments: jsonb("kyc_documents"), // Document URLs/references
+  kycSubmittedAt: timestamp("kyc_submitted_at"),
+  kycApprovedAt: timestamp("kyc_approved_at"),
+  
+  // Payout settings
+  payoutMethod: payoutMethodEnum("payout_method").default('stripe_connect'),
+  payoutDetails: jsonb("payout_details"), // Stripe Connect account, PayPal email, etc.
+  payoutVerificationStatus: varchar("payout_verification_status").default('pending'),
+  minPayoutThreshold: integer("min_payout_threshold").default(5000), // $50.00 in cents
+  
+  // Status and settings
+  status: affiliateStatusEnum("status").default('pending'),
+  notes: text("notes"), // Admin notes
+  attribution: attributionModeEnum("attribution").default('last_touch'),
+  
+  // Approval workflow
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  suspendedAt: timestamp("suspended_at"),
+  suspensionReason: text("suspension_reason"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_affiliates_user_id").on(table.userId),
+  index("idx_affiliates_code").on(table.code),
+  index("idx_affiliates_status").on(table.status),
+]);
+
+// Click tracking table
+export const clicks = pgTable("clicks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").references(() => affiliates.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Tracking data
+  ip: varchar("ip"),
+  userAgent: text("user_agent"),
+  referrer: varchar("referrer"),
+  fingerprint: varchar("fingerprint_hash"), // Device fingerprint for deduplication
+  
+  // UTM and custom parameters
+  utmSource: varchar("utm_source"),
+  utmMedium: varchar("utm_medium"),
+  utmCampaign: varchar("utm_campaign"),
+  utmContent: varchar("utm_content"),
+  utmTerm: varchar("utm_term"),
+  sub1: varchar("sub1"),
+  sub2: varchar("sub2"),
+  sub3: varchar("sub3"),
+  sub4: varchar("sub4"),
+  sub5: varchar("sub5"),
+  
+  // Location and device
+  geoCountry: varchar("geo_country"),
+  geoRegion: varchar("geo_region"),
+  geoCity: varchar("geo_city"),
+  landingPath: varchar("landing_path"),
+  
+  // Anti-fraud
+  isBot: boolean("is_bot").default(false),
+  vpnDetected: boolean("vpn_detected").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_clicks_affiliate_id").on(table.affiliateId),
+  index("idx_clicks_created_at").on(table.createdAt),
+  index("idx_clicks_fingerprint_time").on(table.fingerprint, table.createdAt),
+]);
+
+// Conversions table
+export const conversions = pgTable("conversions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").references(() => affiliates.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Order details
+  orderId: varchar("order_id").unique().notNull(), // Stripe payment intent or order ID
+  customerId: varchar("customer_id"), // Stripe customer ID
+  customerHash: varchar("customer_hash"), // Hashed email for privacy
+  
+  // Financial details
+  amount: integer("amount").notNull(), // Original amount in cents
+  currency: varchar("currency").default('USD'),
+  homeAmount: integer("home_amount").notNull(), // Amount in USD (home currency)
+  homeCurrency: varchar("home_currency").default('USD'),
+  fxRate: varchar("fx_rate"), // Exchange rate used for conversion
+  
+  // Commission calculation
+  commissionAmount: integer("commission_amount").notNull(), // Commission in cents
+  commissionRate: varchar("commission_rate"), // Rate used (e.g., "0.15" for 15%)
+  holdbackAmount: integer("holdback_amount").default(0), // Amount held back
+  
+  // Plan and product info
+  planId: integer("plan_id").references(() => subscriptionPlans.id),
+  planType: planTypeEnum("plan_type"),
+  
+  // Status and lifecycle
+  status: conversionStatusEnum("status").default('pending'),
+  lockUntil: timestamp("lock_until"), // Lock period for refunds
+  approvedAt: timestamp("approved_at"),
+  reversedAt: timestamp("reversed_at"),
+  reversalReason: text("reversal_reason"),
+  
+  // Attribution
+  clickId: varchar("click_id").references(() => clicks.id),
+  attributionData: jsonb("attribution_data"), // Full attribution chain
+  
+  // Metadata
+  metadata: jsonb("metadata"), // Additional data (subscription details, etc.)
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Commission rules table
+export const commissionRules = pgTable("commission_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  
+  // Rule scope
+  scope: commissionScopeEnum("scope").notNull(), // global, plan, tier
+  scopeValue: varchar("scope_value"), // plan ID, tier name, etc.
+  
+  // Commission details
+  type: commissionTypeEnum("type").notNull(), // percentage, flat
+  value: varchar("value").notNull(), // "0.15" for 15% or "1500" for $15.00
+  recurringEnabled: boolean("recurring_enabled").default(false),
+  recurringValue: varchar("recurring_value"), // Different rate for recurring payments
+  
+  // Validity
+  effectiveFrom: timestamp("effective_from").defaultNow(),
+  effectiveTo: timestamp("effective_to"),
+  
+  // Settings
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(0), // Higher number = higher priority
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Payouts table
+export const payouts = pgTable("payouts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").references(() => affiliates.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Payout period
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  
+  // Financial details
+  amount: integer("amount").notNull(), // Amount in cents
+  currency: varchar("currency").default('USD'),
+  conversionCount: integer("conversion_count").default(0),
+  
+  // Payout method and reference
+  method: payoutMethodEnum("method").notNull(),
+  transactionRef: varchar("transaction_ref"), // Stripe transfer ID, PayPal transaction ID, etc.
+  
+  // Approval workflow (maker/checker)
+  status: payoutStatusEnum("status").default('draft'),
+  approvalState: jsonb("approval_state"), // Track who approved at each stage
+  makerUserId: varchar("maker_user_id").references(() => users.id),
+  checkerUserId: varchar("checker_user_id").references(() => users.id),
+  
+  // Processing details
+  processedAt: timestamp("processed_at"),
+  failureReason: text("failure_reason"),
+  notes: text("notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Immutable ledger for affiliate balances
+export const balances = pgTable("balances", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").references(() => affiliates.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Transaction details
+  delta: integer("delta").notNull(), // Amount change in cents (positive or negative)
+  currency: varchar("currency").default('USD'),
+  kind: balanceKindEnum("kind").notNull(), // credit, debit
+  
+  // Reference
+  refType: balanceRefTypeEnum("ref_type").notNull(), // conversion, payout, adjustment, etc.
+  refId: varchar("ref_id").notNull(), // ID of the referenced entity
+  
+  // Description and metadata
+  description: text("description").notNull(),
+  metadata: jsonb("metadata"),
+  
+  // Running balance (calculated)
+  runningBalance: integer("running_balance").notNull(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Enhanced coupons table for affiliate binding
+export const affiliateCoupons = pgTable("affiliate_coupons", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  couponId: varchar("coupon_id").references(() => coupons.id, { onDelete: 'cascade' }).notNull(),
+  affiliateId: varchar("affiliate_id").references(() => affiliates.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Anti-leakage settings
+  isExclusive: boolean("is_exclusive").default(false), // Only this affiliate gets credit
+  channelLock: varchar("channel_lock"), // email, social, paid, etc.
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Risk flags table
+export const riskFlags = pgTable("risk_flags", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Target entity
+  entityType: varchar("entity_type").notNull(), // click, conversion, affiliate
+  entityId: varchar("entity_id").notNull(),
+  
+  // Flag details
+  ruleCode: varchar("rule_code").notNull(), // Identifies which rule triggered
+  severity: flagSeverityEnum("severity").notNull(),
+  description: text("description").notNull(),
+  metadata: jsonb("metadata"), // Additional context
+  
+  // Resolution
+  isResolved: boolean("is_resolved").default(false),
+  resolvedBy: varchar("resolved_by").references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  resolutionNotes: text("resolution_notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Disputes table
+export const disputes = pgTable("disputes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  conversionId: varchar("conversion_id").references(() => conversions.id, { onDelete: 'cascade' }).notNull(),
+  affiliateId: varchar("affiliate_id").references(() => affiliates.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Dispute details
+  status: disputeStatusEnum("status").default('open'),
+  reason: text("reason").notNull(),
+  evidence: jsonb("evidence"), // URLs to uploaded evidence
+  
+  // Communication
+  messages: jsonb("messages"), // Array of messages between affiliate and admin
+  
+  // Resolution
+  resolvedBy: varchar("resolved_by").references(() => users.id),
+  resolution: text("resolution"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Events outbox for webhooks and integrations
+export const eventsOutbox = pgTable("events_outbox", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Event details
+  eventType: varchar("event_type").notNull(), // affiliate.approved, conversion.approved, etc.
+  payload: jsonb("payload").notNull(),
+  
+  // Delivery tracking
+  status: eventStatusEnum("status").default('pending'),
+  attempts: integer("attempts").default(0),
+  maxAttempts: integer("max_attempts").default(5),
+  nextAttemptAt: timestamp("next_attempt_at"),
+  lastError: text("last_error"),
+  
+  // Webhook details
+  webhookUrl: varchar("webhook_url"),
+  signature: varchar("signature"), // HMAC signature
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// FX rates table for multi-currency support
+export const fxRates = pgTable("fx_rates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  baseCurrency: varchar("base_currency").notNull(),
+  quoteCurrency: varchar("quote_currency").notNull(),
+  rate: varchar("rate").notNull(), // Decimal as string for precision
+  source: varchar("source").default('manual'), // manual, api, etc.
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Asset library for marketing materials
+export const marketingAssets = pgTable("marketing_assets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(), // banner, logo, cta, etc.
+  
+  // Asset details
+  assetUrl: varchar("asset_url").notNull(),
+  assetType: varchar("asset_type").notNull(), // image, video, html
+  dimensions: varchar("dimensions"), // 728x90, 300x250, etc.
+  fileSize: integer("file_size"),
+  
+  // Tracking
+  clickCount: integer("click_count").default(0),
+  downloadCount: integer("download_count").default(0),
+  
+  // Settings
+  isActive: boolean("is_active").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Daily counters for analytics
 export const countersDaily = pgTable("counters_daily", {
   day: varchar("day").notNull(), // YYYY-MM-DD format
@@ -558,6 +902,43 @@ export const countersDaily = pgTable("counters_daily", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type UpsertUser = typeof users.$inferInsert;
+
+// Affiliate system types
+export type Affiliate = typeof affiliates.$inferSelect;
+export type InsertAffiliate = typeof affiliates.$inferInsert;
+
+export type Click = typeof clicks.$inferSelect;
+export type InsertClick = typeof clicks.$inferInsert;
+
+export type Conversion = typeof conversions.$inferSelect;
+export type InsertConversion = typeof conversions.$inferInsert;
+
+export type CommissionRule = typeof commissionRules.$inferSelect;
+export type InsertCommissionRule = typeof commissionRules.$inferInsert;
+
+export type Payout = typeof payouts.$inferSelect;
+export type InsertPayout = typeof payouts.$inferInsert;
+
+export type Balance = typeof balances.$inferSelect;
+export type InsertBalance = typeof balances.$inferInsert;
+
+export type AffiliateCoupon = typeof affiliateCoupons.$inferSelect;
+export type InsertAffiliateCoupon = typeof affiliateCoupons.$inferInsert;
+
+export type RiskFlag = typeof riskFlags.$inferSelect;
+export type InsertRiskFlag = typeof riskFlags.$inferInsert;
+
+export type Dispute = typeof disputes.$inferSelect;
+export type InsertDispute = typeof disputes.$inferInsert;
+
+export type EventOutbox = typeof eventsOutbox.$inferSelect;
+export type InsertEventOutbox = typeof eventsOutbox.$inferInsert;
+
+export type FxRate = typeof fxRates.$inferSelect;
+export type InsertFxRate = typeof fxRates.$inferInsert;
+
+export type MarketingAsset = typeof marketingAssets.$inferSelect;
+export type InsertMarketingAsset = typeof marketingAssets.$inferInsert;
 
 export type DbBusinessCard = typeof businessCards.$inferSelect;
 export type InsertDbBusinessCard = typeof businessCards.$inferInsert;

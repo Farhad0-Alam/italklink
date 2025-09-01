@@ -14,7 +14,9 @@ import {
   ChevronDown,
   User,
   Layout,
-  Ticket
+  Ticket,
+  UserPlus,
+  TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -53,6 +55,16 @@ const sidebarNavItems = [
     title: 'Coupons',
     href: '/admin/coupons',
     icon: Ticket,
+  },
+  {
+    title: 'Affiliates',
+    href: '/admin/affiliates',
+    icon: UserPlus,
+  },
+  {
+    title: 'Conversions',
+    href: '/admin/conversions',
+    icon: TrendingUp,
   },
   {
     title: 'Templates',

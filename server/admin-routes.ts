@@ -1595,5 +1595,9 @@ router.post('/header-templates/:id/duplicate', requireOwner, async (req, res) =>
   }
 });
 
+// Mount affiliate admin routes
+const affiliateAdminRoutes = (await import('./admin-affiliate-routes')).default;
+router.use('/', affiliateAdminRoutes);
+
 export default router;
     

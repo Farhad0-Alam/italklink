@@ -9,6 +9,8 @@ import TemplateBuilder from '@/components/admin/TemplateBuilder';
 import HeaderBuilder from '@/components/admin/HeaderBuilder';
 import HeaderTemplatesPage from '@/components/admin/HeaderTemplatesPage';
 import IconPacksPage from '@/components/admin/IconPacksPage';
+import AffiliatesPage from '@/components/admin/AffiliatesPage';
+import AffiliateConversionsPage from '@/components/admin/AffiliateConversionsPage';
 const SettingsPage = () => <div className="p-6">Settings page coming soon...</div>;
 
 export default function Admin() {
@@ -33,6 +35,10 @@ export default function Admin() {
         return <TemplatesPage />;
       case '/admin/icon-packs':
         return <IconPacksPage />;
+      case '/admin/affiliates':
+        return <AffiliatesPage />;
+      case '/admin/conversions':
+        return <AffiliateConversionsPage />;
       case '/admin/settings':
         return <SettingsPage />;
       case '/admin':
