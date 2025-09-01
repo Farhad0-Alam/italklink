@@ -182,27 +182,17 @@ export default function TemplateBuilder() {
             const defaultData = data.templateData.defaultData;
             setBusinessCardData(prev => ({
               ...prev,
-              fullName: defaultData.fullName || 'Your Name',
-              title: defaultData.title || 'Your Title', 
-              company: defaultData.company || 'Your Company',
-              backgroundColor: defaultData.backgroundColor || '#ffffff',
-              textColor: defaultData.textColor || '#000000',
-              brandColor: defaultData.brandColor || '#22c55e',
-              secondaryColor: defaultData.secondaryColor || '#999999',
-              tertiaryColor: defaultData.tertiaryColor || '#ffffff',
-              accentColor: defaultData.accentColor || defaultData.brandColor || '#22c55e',
-              headingColor: defaultData.headingColor || '#000000',
-              paragraphColor: defaultData.paragraphColor || '#000000',
-              iconColor: defaultData.iconColor || '#3b82f6',
-              template: defaultData.template || 'minimal',
-              // Add other default fields as needed
-              email: defaultData.email || 'sample@email.com',
-              phone: defaultData.phone || '+1 (555) 123-4567',
-              website: defaultData.website || 'www.example.com',
-              linkedin: defaultData.linkedin || 'linkedin.com/in/sample'
+              ...defaultData // Use all data from defaultData to preserve template type and settings
+            }));
+          } else if (data.name === 'Template 2' || data.templateData.template === 'dark') {
+            // Template 2 should use dark template - ensure it maintains this setting
+            setBusinessCardData(prev => ({
+              ...prev,
+              ...data.templateData,
+              template: 'dark' // Force dark template for Template 2
             }));
           } else {
-            // Legacy 2TalkLink format
+            // Legacy 2TalkLink format or other templates
             const convertedData = convert2TalkLinkToBusinessCard(data.templateData);
             setBusinessCardData(prev => ({
               ...prev,
@@ -228,10 +218,15 @@ export default function TemplateBuilder() {
 
     setIsSaving(true);
     try {
+      // Ensure we maintain the proper template structure
+      const templateDataToSave = template.templateData?.defaultData 
+        ? { defaultData: businessCardData }  // New format with defaultData wrapper
+        : businessCardData; // Legacy format
+
       const templateData = {
         name: template.name,
         description: template.description,
-        templateData: JSON.stringify(businessCardData),
+        templateData: JSON.stringify(templateDataToSave),
         previewImage: await generatePreviewImage(),
         isActive: template.isActive
       };
