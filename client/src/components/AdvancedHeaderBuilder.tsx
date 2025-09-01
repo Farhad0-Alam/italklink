@@ -1,66 +1,25 @@
-import { useState, useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useRef, useCallback } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { HeaderTemplate, HeaderElement } from "@shared/schema";
 import { SVG_SHAPES_LIBRARY, applySVGShapeColors } from "@/lib/svg-shapes-library";
-import { fileToBase64, validateImageFile } from "@/lib/storage";
-
-interface HeaderElement {
-  id: string;
-  type: 'profile_picture' | 'logo' | 'header_image' | 'name' | 'title' | 'company' | 'svg_shape';
-  content: any;
-  position: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  styles: {
-    fontSize?: string;
-    fontWeight?: string;
-    color?: string;
-    backgroundColor?: string;
-    borderRadius?: string;
-    zIndex?: number;
-  };
-  visible: boolean;
-}
-
-interface HeaderTemplate {
-  id?: string;
-  name: string;
-  description?: string;
-  category: string;
-  isActive: boolean;
-  elements: HeaderElement[];
-  globalStyles: {
-    backgroundColor: string;
-    textColor: string;
-    accentColor: string;
-    fontFamily: string;
-    headerHeight: number;
-    headerWidth: number;
-  };
-}
 
 interface AdvancedHeaderBuilderProps {
-  onTemplateCreated?: (template: HeaderTemplate) => void;
-  editingTemplate?: HeaderTemplate | null;
+  editingTemplate?: HeaderTemplate;
 }
 
-export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
-  onTemplateCreated,
-  editingTemplate
+export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({ 
+  editingTemplate 
 }) => {
   const { toast } = useToast();
-  const [isUploading, setIsUploading] = useState(false);
+  const queryClient = useQueryClient();
+  
+  // Element interaction states
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -103,19 +62,6 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
       headerHeight: 300,
       headerWidth: 800,
     },
-    advancedLayout: editingTemplate?.advancedLayout || {
-      columns: 3,
-      rows: 2,
-      gridGap: '1rem',
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundEffects: {
-        gradients: [],
-        svgOverlays: [],
-        patterns: []
-      }
-    }
   });
 
   const toggleSection = (k: string) =>
@@ -132,19 +78,29 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
       if (!response.ok) throw new Error('Failed to save template');
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
+      toast({
+        title: "Template saved successfully!",
+        description: "Your header template has been saved",
+      });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/header-templates'] });
-      toast({ title: 'Template saved successfully!' });
-      onTemplateCreated?.(data);
     },
     onError: () => {
-      toast({ title: 'Failed to save template', variant: 'destructive' });
+      toast({
+        title: "Failed to save template",
+        description: "Please try again",
+        variant: "destructive",
+      });
     }
   });
 
   const handleSaveTemplate = () => {
     if (!headerTemplate.name.trim()) {
-      toast({ title: 'Please enter a template name', variant: 'destructive' });
+      toast({
+        title: "Template name required",
+        description: "Please enter a name for your template",
+        variant: "destructive",
+      });
       return;
     }
     saveTemplateMutation.mutate(headerTemplate);
@@ -152,60 +108,36 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
 
   const addElement = (type: HeaderElement['type']) => {
     const newElement: HeaderElement = {
-      id: `element-${Date.now()}`,
+      id: `element-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type,
-      content: getDefaultContent(type),
-      position: {
-        x: 50 + (headerTemplate.elements.length * 20),
-        y: 50 + (headerTemplate.elements.length * 20),
-        width: type === 'svg_shape' ? 60 : type.includes('image') || type === 'profile_picture' || type === 'logo' ? 100 : 200,
-        height: type === 'svg_shape' ? 60 : type.includes('image') || type === 'profile_picture' || type === 'logo' ? 100 : 40
-      },
-      styles: getDefaultStyles(type),
-      visible: true
+      position: { x: 50, y: 50, width: 200, height: 100 },
+      content: type === 'text' 
+        ? { text: 'Sample Text' }
+        : type === 'image'
+        ? { src: '', alt: 'Image' }
+        : type === 'svg_shape'
+        ? { 
+            shapeName: 'Rectangle',
+            svgCode: '<rect width="100%" height="100%" fill="{color1}" stroke="{color2}" stroke-width="2"/>',
+            viewBox: '0 0 100 100',
+            colors: { color1: '#22c55e', color2: '#16a34a' }
+          }
+        : {},
+      styles: {},
+      visible: true,
     };
 
     setHeaderTemplate(prev => ({
       ...prev,
       elements: [...prev.elements, newElement]
     }));
-  };
-
-  const getDefaultContent = (type: HeaderElement['type']) => {
-    switch (type) {
-      case 'profile_picture': return { src: '', alt: 'Profile Picture' };
-      case 'logo': return { src: '', alt: 'Logo', text: 'LOGO' };
-      case 'header_image': return { src: '', alt: 'Header Background' };
-      case 'name': return { text: 'Your Name' };
-      case 'title': return { text: 'Professional Title' };
-      case 'company': return { text: 'Company Name' };
-      case 'svg_shape': return { svgCode: '', shapeName: '', viewBox: '0 0 100 100', colors: { color1: '#ffffff', color2: '#22c55e' } };
-      default: return {};
-    }
-  };
-
-  const getDefaultStyles = (type: HeaderElement['type']) => {
-    const baseStyles = {
-      color: headerTemplate.globalStyles.textColor,
-      zIndex: 1
-    };
-
-    switch (type) {
-      case 'name': return { ...baseStyles, fontSize: '24px', fontWeight: '700' };
-      case 'title': return { ...baseStyles, fontSize: '16px', fontWeight: '400' };
-      case 'company': return { ...baseStyles, fontSize: '14px', fontWeight: '500' };
-      case 'profile_picture': return { borderRadius: '50%', zIndex: 2 };
-      case 'logo': return { borderRadius: '8px', zIndex: 2 };
-      case 'header_image': return { borderRadius: '0px', zIndex: 0 };
-      case 'svg_shape': return { zIndex: 1 };
-      default: return baseStyles;
-    }
+    setSelectedElement(newElement.id);
   };
 
   const updateElement = (id: string, updates: Partial<HeaderElement>) => {
     setHeaderTemplate(prev => ({
       ...prev,
-      elements: prev.elements.map(el => 
+      elements: prev.elements.map(el =>
         el.id === id ? { ...el, ...updates } : el
       )
     }));
@@ -243,7 +175,7 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
     if (activeTool === 'select' && elementId) {
       setSelectedElement(elementId);
       
-      if (activeTool === 'move' || !e.shiftKey) {
+      {
         setIsDragging(true);
         const element = headerTemplate.elements.find(el => el.id === elementId);
         if (element) {
@@ -259,9 +191,10 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
   const handleResizeMouseDown = (e: React.MouseEvent, elementId: string, handle: string) => {
     e.preventDefault();
     e.stopPropagation();
-    setSelectedElement(elementId);
+    
     setIsResizing(true);
     setResizeHandle(handle);
+    setSelectedElement(elementId);
     
     const element = headerTemplate.elements.find(el => el.id === elementId);
     if (element && previewRef.current) {
@@ -285,7 +218,7 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
     if (isDragging && selectedElement && !isResizing) {
       const newX = Math.max(0, Math.min(headerTemplate.globalStyles.headerWidth - 50, currentX - dragOffset.x));
       const newY = Math.max(0, Math.min(headerTemplate.globalStyles.headerHeight - 30, currentY - dragOffset.y));
-      
+
       updateElement(selectedElement, {
         position: {
           ...headerTemplate.elements.find(el => el.id === selectedElement)!.position,
@@ -299,48 +232,31 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
       const element = headerTemplate.elements.find(el => el.id === selectedElement)!;
       const deltaX = currentX - resizeStart.x;
       const deltaY = currentY - resizeStart.y;
-      
+
       let newWidth = resizeStart.width;
       let newHeight = resizeStart.height;
       let newX = element.position.x;
       let newY = element.position.y;
 
-      switch (resizeHandle) {
-        case 'se': // Bottom-right corner
-          newWidth = Math.max(20, resizeStart.width + deltaX);
-          newHeight = Math.max(20, resizeStart.height + deltaY);
-          break;
-        case 'sw': // Bottom-left corner
-          newWidth = Math.max(20, resizeStart.width - deltaX);
-          newHeight = Math.max(20, resizeStart.height + deltaY);
-          newX = element.position.x + (resizeStart.width - newWidth);
-          break;
-        case 'ne': // Top-right corner
-          newWidth = Math.max(20, resizeStart.width + deltaX);
-          newHeight = Math.max(20, resizeStart.height - deltaY);
-          newY = element.position.y + (resizeStart.height - newHeight);
-          break;
-        case 'nw': // Top-left corner
-          newWidth = Math.max(20, resizeStart.width - deltaX);
-          newHeight = Math.max(20, resizeStart.height - deltaY);
-          newX = element.position.x + (resizeStart.width - newWidth);
-          newY = element.position.y + (resizeStart.height - newHeight);
-          break;
-        case 'n': // Top edge
-          newHeight = Math.max(20, resizeStart.height - deltaY);
-          newY = element.position.y + (resizeStart.height - newHeight);
-          break;
-        case 's': // Bottom edge
-          newHeight = Math.max(20, resizeStart.height + deltaY);
-          break;
-        case 'e': // Right edge
-          newWidth = Math.max(20, resizeStart.width + deltaX);
-          break;
-        case 'w': // Left edge
-          newWidth = Math.max(20, resizeStart.width - deltaX);
-          newX = element.position.x + (resizeStart.width - newWidth);
-          break;
+      // Handle different resize directions
+      if (resizeHandle.includes('e')) {
+        newWidth = Math.max(20, resizeStart.width + deltaX);
       }
+      if (resizeHandle.includes('w')) {
+        newWidth = Math.max(20, resizeStart.width - deltaX);
+        newX = Math.min(element.position.x + element.position.width - 20, element.position.x + deltaX);
+      }
+      if (resizeHandle.includes('s')) {
+        newHeight = Math.max(20, resizeStart.height + deltaY);
+      }
+      if (resizeHandle.includes('n')) {
+        newHeight = Math.max(20, resizeStart.height - deltaY);
+        newY = Math.min(element.position.y + element.position.height - 20, element.position.y + deltaY);
+      }
+
+      // Constrain to canvas bounds
+      newWidth = Math.min(newWidth, headerTemplate.globalStyles.headerWidth - newX);
+      newHeight = Math.min(newHeight, headerTemplate.globalStyles.headerHeight - newY);
 
       updateElement(selectedElement, {
         position: {
@@ -372,7 +288,7 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
     
     // Create new SVG element
     const newElement: HeaderElement = {
-      id: generateId(),
+      id: `element-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type: 'svg_shape',
       position: {
         x: bounds.minX,
@@ -392,7 +308,6 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
         zIndex: 10
       },
       visible: true,
-      order: headerTemplate.elements.length
     };
 
     setHeaderTemplate(prev => ({
@@ -474,81 +389,23 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!validateImageFile(file)) {
+    if (!file.type.startsWith('image/')) {
       toast({
         title: "Invalid file type",
-        description: "Please upload a valid image file (JPEG, PNG, GIF, WebP)",
+        description: "Please select an image file",
         variant: "destructive",
       });
       return;
     }
 
-    setIsUploading(true);
-    try {
-      const base64 = await fileToBase64(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const src = e.target?.result as string;
       updateElement(elementId, {
-        content: { ...headerTemplate.elements.find(el => el.id === elementId)?.content, src: base64 }
+        content: { src, alt: file.name }
       });
-      toast({ title: "Image uploaded", description: "Your image has been uploaded successfully" });
-    } catch (e) {
-      toast({
-        title: "Upload failed",
-        description: e instanceof Error ? e.message : "Failed to upload image",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleSVGUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-    elementId: string
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.name.toLowerCase().endsWith('.svg')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a valid SVG file",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const svgContent = await file.text();
-      
-      // Extract viewBox if it exists
-      const viewBoxMatch = svgContent.match(/viewBox="([^"]+)"/);
-      const viewBox = viewBoxMatch ? viewBoxMatch[1] : "0 0 100 100";
-      
-      // Extract the inner SVG content (remove <svg> tags)
-      const svgCodeMatch = svgContent.match(/<svg[^>]*>(.*?)<\/svg>/s);
-      const svgCode = svgCodeMatch ? svgCodeMatch[1] : svgContent;
-
-      updateElement(elementId, {
-        content: {
-          ...headerTemplate.elements.find(el => el.id === elementId)?.content,
-          shapeName: `Custom: ${file.name}`,
-          svgCode: svgCode,
-          viewBox: viewBox,
-          isCustom: true
-        }
-      });
-      
-      toast({ title: "SVG uploaded", description: "Your custom SVG has been uploaded successfully" });
-    } catch (e) {
-      toast({
-        title: "Upload failed",
-        description: e instanceof Error ? e.message : "Failed to upload SVG",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
+    };
+    reader.readAsDataURL(file);
   };
 
   const selectedElementData = selectedElement 
@@ -646,16 +503,27 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
       width: `${element.position.width}px`,
       height: `${element.position.height}px`,
       zIndex: element.styles.zIndex || 1,
-      cursor: isDragging ? 'grabbing' : 'move',
-      border: isSelected ? '1px solid #22c55e' : '1px solid transparent',
-      outline: isSelected ? '1px solid rgba(34, 197, 94, 0.3)' : 'none',
-      ...element.styles
+      border: isSelected ? '2px solid #22c55e' : 'none',
+      cursor: activeTool === 'select' ? (isDragging ? 'grabbing' : 'grab') : 'default',
+      ...element.styles,
     };
 
     switch (element.type) {
-      case 'profile_picture':
-      case 'logo':
-      case 'header_image':
+      case 'text':
+        return (
+          <div key={element.id} style={{ position: 'relative' }}>
+            <div
+              style={style}
+              onMouseDown={(e) => activeTool === 'pen' ? handleMouseDown(e) : handleMouseDown(e, element.id)}
+              className="flex items-center justify-center text-center"
+            >
+              {element.content.text}
+            </div>
+            {renderSelectionHandles(element)}
+          </div>
+        );
+
+      case 'image':
         return (
           <div key={element.id} style={{ position: 'relative' }}>
             <div
@@ -666,29 +534,11 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
               {element.content.src ? (
                 <img src={element.content.src} alt={element.content.alt} className="w-full h-full object-cover" />
               ) : (
-                <div className="text-center text-slate-600 text-xs">
-                  <i className="fas fa-image mb-1" />
+                <div className="text-slate-600 text-center">
+                  <i className="fas fa-image text-2xl mb-2" />
                   <p>{element.type.replace('_', ' ')}</p>
                 </div>
               )}
-            </div>
-            {renderSelectionHandles(element)}
-          </div>
-        );
-
-      case 'name':
-      case 'title':
-      case 'company':
-        return (
-          <div key={element.id} style={{ position: 'relative' }}>
-            <div
-              style={style}
-              onMouseDown={(e) => activeTool === 'pen' ? handleMouseDown(e) : handleMouseDown(e, element.id)}
-              className="flex items-center justify-center"
-            >
-              <span style={{ fontSize: element.styles.fontSize, fontWeight: element.styles.fontWeight, color: element.styles.color }}>
-                {element.content.text || element.type}
-              </span>
             </div>
             {renderSelectionHandles(element)}
           </div>
@@ -714,831 +564,368 @@ export const AdvancedHeaderBuilder: React.FC<AdvancedHeaderBuilderProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="bg-slate-800 border-slate-700">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold flex items-center text-white">
+    <div className="min-h-screen bg-slate-900 text-slate-50">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold flex items-center text-white mb-2">
             <i className="fas fa-magic text-talklink-500 mr-3" />
             Advanced Header Builder
-          </CardTitle>
-        </CardHeader>
+          </h1>
+          <p className="text-slate-300">
+            Create professional header templates with drag & drop positioning, custom elements, and advanced styling
+          </p>
+        </div>
 
-        <CardContent className="space-y-6">
-          {/* Basic Information */}
-          <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
-            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("basicInfo")}>
-              <h3 className="text-lg font-semibold text-blue-300">Template Information</h3>
-              <i className={`fas ${collapsedSections.basicInfo ? "fa-chevron-down" : "fa-chevron-up"} text-blue-300`} />
-            </div>
-
-            {!collapsedSections.basicInfo && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-white">Template Name</Label>
-                  <Input
-                    value={headerTemplate.name}
-                    onChange={(e) => setHeaderTemplate(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter template name..."
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
-                
-                <div>
-                  <Label className="text-white">Category</Label>
-                  <Select
-                    value={headerTemplate.category}
-                    onValueChange={(value) => setHeaderTemplate(prev => ({ ...prev, category: value }))}
-                  >
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="general">General</SelectItem>
-                      <SelectItem value="business">Business</SelectItem>
-                      <SelectItem value="creative">Creative</SelectItem>
-                      <SelectItem value="professional">Professional</SelectItem>
-                      <SelectItem value="modern">Modern</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="md:col-span-2">
-                  <Label className="text-white">Description</Label>
-                  <Textarea
-                    value={headerTemplate.description}
-                    onChange={(e) => setHeaderTemplate(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Describe this template..."
-                    className="bg-slate-700 border-slate-600 text-white"
-                    rows={2}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Global Styles */}
-          <div className="bg-green-900/30 border border-green-600/30 rounded-lg p-4 space-y-4">
-            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("globalStyles")}>
-              <h3 className="text-lg font-semibold text-green-300">Header Dimensions & Colors</h3>
-              <i className={`fas ${collapsedSections.globalStyles ? "fa-chevron-down" : "fa-chevron-up"} text-green-300`} />
-            </div>
-
-            {!collapsedSections.globalStyles && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label className="text-white">Header Width</Label>
-                  <Input
-                    type="number"
-                    value={headerTemplate.globalStyles.headerWidth}
-                    onChange={(e) => setHeaderTemplate(prev => ({
-                      ...prev,
-                      globalStyles: { ...prev.globalStyles, headerWidth: parseInt(e.target.value) || 800 }
-                    }))}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-white">Header Height</Label>
-                  <Input
-                    type="number"
-                    value={headerTemplate.globalStyles.headerHeight}
-                    onChange={(e) => setHeaderTemplate(prev => ({
-                      ...prev,
-                      globalStyles: { ...prev.globalStyles, headerHeight: parseInt(e.target.value) || 300 }
-                    }))}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-white">Font Family</Label>
-                  <Select
-                    value={headerTemplate.globalStyles.fontFamily}
-                    onValueChange={(value) => setHeaderTemplate(prev => ({
-                      ...prev,
-                      globalStyles: { ...prev.globalStyles, fontFamily: value }
-                    }))}
-                  >
-                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Inter, sans-serif">Inter</SelectItem>
-                      <SelectItem value="Roboto, sans-serif">Roboto</SelectItem>
-                      <SelectItem value="Open Sans, sans-serif">Open Sans</SelectItem>
-                      <SelectItem value="Montserrat, sans-serif">Montserrat</SelectItem>
-                      <SelectItem value="Poppins, sans-serif">Poppins</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="text-white">Background Color</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="color"
-                      value={headerTemplate.globalStyles.backgroundColor}
-                      onChange={(e) => setHeaderTemplate(prev => ({
-                        ...prev,
-                        globalStyles: { ...prev.globalStyles, backgroundColor: e.target.value }
-                      }))}
-                      className="w-12 h-9 p-1"
-                    />
-                    <Input
-                      value={headerTemplate.globalStyles.backgroundColor}
-                      onChange={(e) => setHeaderTemplate(prev => ({
-                        ...prev,
-                        globalStyles: { ...prev.globalStyles, backgroundColor: e.target.value }
-                      }))}
-                      className="flex-1 bg-slate-700 border-slate-600 text-white"
-                    />
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Left Column: Element Controls */}
+          <div className="space-y-6">
+            <Card className="bg-slate-800 border-slate-700">
+              <CardContent className="p-6 space-y-6">
+                {/* Basic Information */}
+                <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("basicInfo")}>
+                    <h3 className="text-lg font-semibold text-blue-300">Template Information</h3>
+                    <i className={`fas ${collapsedSections.basicInfo ? "fa-chevron-down" : "fa-chevron-up"} text-blue-300`} />
                   </div>
-                </div>
 
-                <div>
-                  <Label className="text-white">Text Color</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="color"
-                      value={headerTemplate.globalStyles.textColor}
-                      onChange={(e) => setHeaderTemplate(prev => ({
-                        ...prev,
-                        globalStyles: { ...prev.globalStyles, textColor: e.target.value }
-                      }))}
-                      className="w-12 h-9 p-1"
-                    />
-                    <Input
-                      value={headerTemplate.globalStyles.textColor}
-                      onChange={(e) => setHeaderTemplate(prev => ({
-                        ...prev,
-                        globalStyles: { ...prev.globalStyles, textColor: e.target.value }
-                      }))}
-                      className="flex-1 bg-slate-700 border-slate-600 text-white"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-white">Accent Color</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="color"
-                      value={headerTemplate.globalStyles.accentColor}
-                      onChange={(e) => setHeaderTemplate(prev => ({
-                        ...prev,
-                        globalStyles: { ...prev.globalStyles, accentColor: e.target.value }
-                      }))}
-                      className="w-12 h-9 p-1"
-                    />
-                    <Input
-                      value={headerTemplate.globalStyles.accentColor}
-                      onChange={(e) => setHeaderTemplate(prev => ({
-                        ...prev,
-                        globalStyles: { ...prev.globalStyles, accentColor: e.target.value }
-                      }))}
-                      className="flex-1 bg-slate-700 border-slate-600 text-white"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Core Elements */}
-          <div className="bg-orange-900/30 border border-orange-600/30 rounded-lg p-4 space-y-4">
-            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("elements")}>
-              <h3 className="text-lg font-semibold text-orange-300">Core Elements</h3>
-              <i className={`fas ${collapsedSections.elements ? "fa-chevron-down" : "fa-chevron-up"} text-orange-300`} />
-            </div>
-
-            {!collapsedSections.elements && (
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-white">Add Core Elements</Label>
-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mt-2">
-                    {[
-                      { type: 'profile_picture', label: 'Profile', icon: 'fa-user-circle' },
-                      { type: 'logo', label: 'Logo', icon: 'fa-crown' },
-                      { type: 'header_image', label: 'Header Img', icon: 'fa-image' },
-                      { type: 'name', label: 'Name', icon: 'fa-font' },
-                      { type: 'title', label: 'Title', icon: 'fa-briefcase' },
-                      { type: 'company', label: 'Company', icon: 'fa-building' },
-                    ].map(({ type, label, icon }) => (
-                      <Button
-                        key={type}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addElement(type as HeaderElement['type'])}
-                        className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 flex flex-col items-center p-3 h-16"
-                      >
-                        <i className={`fas ${icon} mb-1`} />
-                        <span className="text-xs">{label}</span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Current Elements List */}
-                {headerTemplate.elements.filter(el => el.type !== 'svg_shape').length > 0 && (
-                  <div>
-                    <Label className="text-white">Current Elements</Label>
-                    <div className="space-y-2 mt-2">
-                      {headerTemplate.elements.filter(el => el.type !== 'svg_shape').map((element, index) => (
-                        <div
-                          key={element.id}
-                          className={`flex items-center justify-between p-3 rounded-lg border ${
-                            selectedElement === element.id
-                              ? "border-orange-500 bg-orange-500/10"
-                              : "border-slate-600 bg-slate-700"
-                          }`}
+                  {!collapsedSections.basicInfo && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-white">Template Name</Label>
+                        <Input
+                          value={headerTemplate.name}
+                          onChange={(e) => setHeaderTemplate(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="Enter template name..."
+                          className="bg-slate-700 border-slate-600 text-white"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label className="text-white">Category</Label>
+                        <Select
+                          value={headerTemplate.category}
+                          onValueChange={(value) => setHeaderTemplate(prev => ({ ...prev, category: value }))}
                         >
-                          <div className="flex items-center gap-3">
-                            <span className="text-white text-sm font-medium">
-                              {element.type.replace('_', ' ').toUpperCase()}
-                            </span>
-                            <span className="text-slate-400 text-xs">
-                              x:{element.position.x} y:{element.position.y}
-                            </span>
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="general">General</SelectItem>
+                            <SelectItem value="business">Business</SelectItem>
+                            <SelectItem value="creative">Creative</SelectItem>
+                            <SelectItem value="professional">Professional</SelectItem>
+                            <SelectItem value="modern">Modern</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Professional Tools */}
+                <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("svgShapes")}>
+                    <h3 className="text-lg font-semibold text-purple-300">Professional Tools</h3>
+                    <i className={`fas ${collapsedSections.svgShapes ? "fa-chevron-down" : "fa-chevron-up"} text-purple-300`} />
+                  </div>
+
+                  {!collapsedSections.svgShapes && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-3 gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setActiveTool('select')}
+                          className={`${
+                            activeTool === 'select' 
+                              ? "bg-blue-500 border-blue-400 hover:bg-blue-600" 
+                              : "bg-slate-700 border-slate-600 hover:bg-slate-600"
+                          } text-white`}
+                        >
+                          <i className="fas fa-mouse-pointer mr-2" />
+                          Select
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setActiveTool('pen');
+                            setSelectedElement(null);
+                          }}
+                          className={`${
+                            activeTool === 'pen' 
+                              ? "bg-purple-500 border-purple-400 hover:bg-purple-600" 
+                              : "bg-slate-700 border-slate-600 hover:bg-slate-600"
+                          } text-white`}
+                        >
+                          <i className="fas fa-pen mr-2" />
+                          Pen
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => addElement('svg_shape')}
+                          className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                        >
+                          <i className="fas fa-shapes mr-2" />
+                          Shape
+                        </Button>
+                      </div>
+
+                      {/* Add Element Buttons */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => addElement('text')}
+                          className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                        >
+                          <i className="fas fa-font mr-2" />
+                          Add Text
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => addElement('image')}
+                          className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                        >
+                          <i className="fas fa-image mr-2" />
+                          Add Image
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Element Editor */}
+                {selectedElementData && (
+                  <div className="bg-green-900/30 border border-green-600/30 rounded-lg p-4 space-y-4">
+                    <h3 className="text-lg font-semibold text-green-300">
+                      <i className="fas fa-edit mr-2" />
+                      Edit {selectedElementData.type.replace('_', ' ')}
+                    </h3>
+                    
+                    {selectedElementData.type === 'text' && (
+                      <div className="space-y-3">
+                        <div>
+                          <Label className="text-white">Text Content</Label>
+                          <Input
+                            value={selectedElementData.content.text || ''}
+                            onChange={(e) => updateElement(selectedElement!, {
+                              content: { ...selectedElementData.content, text: e.target.value }
+                            })}
+                            className="bg-slate-700 border-slate-600 text-white"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-white">Font Size</Label>
+                            <Input
+                              type="number"
+                              value={selectedElementData.styles.fontSize?.replace('px', '') || '16'}
+                              onChange={(e) => updateElement(selectedElement!, {
+                                styles: { ...selectedElementData.styles, fontSize: `${e.target.value}px` }
+                              })}
+                              className="bg-slate-700 border-slate-600 text-white"
+                            />
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedElement(
-                                selectedElement === element.id ? null : element.id
-                              )}
-                              className="text-white hover:bg-slate-600"
-                            >
-                              <i className="fas fa-edit" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeElement(element.id)}
-                              className="text-red-400 hover:bg-red-900/20"
-                            >
-                              <i className="fas fa-trash" />
-                            </Button>
+                          <div>
+                            <Label className="text-white">Color</Label>
+                            <Input
+                              type="color"
+                              value={selectedElementData.styles.color || '#ffffff'}
+                              onChange={(e) => updateElement(selectedElement!, {
+                                styles: { ...selectedElementData.styles, color: e.target.value }
+                              })}
+                              className="w-full h-9"
+                            />
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    )}
+
+                    {selectedElementData.type === 'image' && (
+                      <div>
+                        <Label className="text-white">Upload Image</Label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload(e, selectedElement!)}
+                          className="w-full bg-slate-700 border border-slate-600 text-white p-2 rounded"
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
+              </CardContent>
+            </Card>
           </div>
 
-          {/* SVG Shapes */}
-          <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
-            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("svgShapes")}>
-              <h3 className="text-lg font-semibold text-purple-300">SVG Shapes & Colors</h3>
-              <i className={`fas ${collapsedSections.svgShapes ? "fa-chevron-down" : "fa-chevron-up"} text-purple-300`} />
-            </div>
-
-            {!collapsedSections.svgShapes && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setActiveTool('select')}
-                    className={`${
-                      activeTool === 'select' 
-                        ? "bg-blue-500 border-blue-400 hover:bg-blue-600" 
-                        : "bg-slate-700 border-slate-600 hover:bg-slate-600"
-                    } text-white`}
-                  >
-                    <i className="fas fa-mouse-pointer mr-2" />
-                    Select
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setActiveTool('pen');
-                      setSelectedElement(null);
-                    }}
-                    className={`${
-                      activeTool === 'pen' 
-                        ? "bg-purple-500 border-purple-400 hover:bg-purple-600" 
-                        : "bg-slate-700 border-slate-600 hover:bg-slate-600"
-                    } text-white`}
-                  >
-                    <i className="fas fa-pen mr-2" />
-                    Pen
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => addElement('svg_shape')}
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
-                  >
-                    <i className="fas fa-shapes mr-2" />
-                    Shape
-                  </Button>
-                </div>
-
-                {headerTemplate.elements.filter(el => el.type === 'svg_shape').map((element) => (
-                  <div key={element.id} className="bg-slate-900/50 border border-slate-600 rounded-lg p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-white font-medium">SVG Shape</h4>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeElement(element.id)}
-                        className="text-red-400 hover:bg-red-900/20"
-                      >
-                        <i className="fas fa-trash" />
-                      </Button>
-                    </div>
-                    
-                    <div>
-                      <Label className="text-white">Select Shape</Label>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2 max-h-64 overflow-y-auto">
-                        {SVG_SHAPES_LIBRARY.map(shape => {
-                          const isSelected = element.content.shapeName === shape.name;
-                          const previewSvg = applySVGShapeColors(shape.svgCode, { color1: '#22c55e', color2: '#16a34a' });
-                          
-                          return (
-                            <div
-                              key={shape.name}
-                              className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
-                                isSelected 
-                                  ? "border-purple-500 bg-purple-500/10" 
-                                  : "border-slate-600 bg-slate-700 hover:border-purple-400"
-                              }`}
-                              onClick={() => {
-                                updateElement(element.id, {
-                                  content: {
-                                    ...element.content,
-                                    shapeName: shape.name,
-                                    svgCode: shape.svgCode,
-                                    viewBox: shape.viewBox
-                                  }
-                                });
+          {/* Right Column: Live Preview */}
+          <div className="space-y-6">
+            <Card className="bg-slate-800 border-slate-700 sticky top-8">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold flex items-center text-white">
+                  <i className="fas fa-eye text-talklink-500 mr-3"></i>
+                  Live Preview
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="bg-gray-900/30 border border-gray-600/30 rounded-lg p-4 space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-300">Drag Elements to Position</h3>
+                  
+                  <div className="bg-white rounded-lg p-4 overflow-hidden">
+                    <div
+                      ref={previewRef}
+                      style={{
+                        backgroundColor: headerTemplate.globalStyles.backgroundColor,
+                        width: `${headerTemplate.globalStyles.headerWidth}px`,
+                        height: `${headerTemplate.globalStyles.headerHeight}px`,
+                        position: 'relative',
+                        fontFamily: headerTemplate.globalStyles.fontFamily,
+                        margin: '0 auto',
+                        cursor: isDragging || isResizing ? 'grabbing' : 'default',
+                        userSelect: 'none'
+                      }}
+                      onMouseMove={handleMouseMove}
+                      onMouseUp={handleMouseUp}
+                      onMouseLeave={handleMouseUp}
+                      onClick={(e) => activeTool === 'pen' ? handleMouseDown(e) : undefined}
+                      onDoubleClick={() => isDrawing && finishPath()}
+                    >
+                      {headerTemplate.elements.map(renderElement)}
+                      
+                      {/* Pen Tool Drawing Overlay */}
+                      {activeTool === 'pen' && (
+                        <>
+                          {pathPoints.length > 0 && (
+                            <svg
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                pointerEvents: 'none',
+                                zIndex: 999
                               }}
                             >
-                              <div className="aspect-square mb-2 bg-white rounded flex items-center justify-center p-2">
-                                <div
-                                  style={{ width: '100%', height: '100%' }}
-                                  dangerouslySetInnerHTML={{ 
-                                    __html: `<svg viewBox="${shape.viewBox}" style="width: 100%; height: 100%;">${previewSvg}</svg>` 
-                                  }}
+                              {pathPoints.map((point, index) => (
+                                <circle
+                                  key={index}
+                                  cx={point.x}
+                                  cy={point.y}
+                                  r="4"
+                                  fill="#22c55e"
+                                  stroke="#ffffff"
+                                  strokeWidth="2"
                                 />
+                              ))}
+                            </svg>
+                          )}
+                          
+                          {/* Pen tool instructions */}
+                          <div
+                            style={{
+                              position: 'absolute',
+                              top: '10px',
+                              left: '10px',
+                              background: 'rgba(0, 0, 0, 0.9)',
+                              color: 'white',
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              fontSize: '12px',
+                              zIndex: 1000,
+                              maxWidth: '250px'
+                            }}
+                          >
+                            {!isDrawing ? (
+                              <div>
+                                <div><strong>Pen Tool Active</strong></div>
+                                <div>• Click to add points</div>
+                                <div>• Drag for curves</div>
                               </div>
-                              <p className="text-xs text-white text-center font-medium">{shape.name}</p>
-                              <p className="text-xs text-slate-400 text-center">{shape.category}</p>
+                            ) : (
+                              <div>
+                                <div><strong>Drawing Path</strong></div>
+                                <div>• Click to add points</div>
+                                <div>• Double-click to finish</div>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Drawing controls */}
+                          {isDrawing && (
+                            <div
+                              style={{
+                                position: 'absolute',
+                                bottom: '10px',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                display: 'flex',
+                                gap: '8px',
+                                zIndex: 1000
+                              }}
+                            >
+                              <Button
+                                size="sm"
+                                onClick={finishPath}
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                              >
+                                <i className="fas fa-check mr-1" />
+                                Finish Path
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={cancelPath}
+                                className="bg-red-600 hover:bg-red-700 text-white border-red-500"
+                              >
+                                <i className="fas fa-times mr-1" />
+                                Cancel
+                              </Button>
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className="text-white">Upload Custom SVG</Label>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => document.getElementById(`svg-upload-${element.id}`)?.click()}
-                        className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full mt-2"
-                      >
-                        <i className="fas fa-upload mr-2" />
-                        Upload SVG File
-                      </Button>
-                      <input
-                        id={`svg-upload-${element.id}`}
-                        type="file"
-                        accept=".svg"
-                        onChange={(e) => handleSVGUpload(e, element.id)}
-                        className="hidden"
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="text-white">Draw Custom Shape</Label>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          setActiveTool('pen');
-                          setSelectedElement(null);
-                        }}
-                        className="bg-purple-700 border-purple-600 text-white hover:bg-purple-600 w-full mt-2"
-                      >
-                        <i className="fas fa-pen mr-2" />
-                        Use Pen Tool
-                      </Button>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-white">Primary Color</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            type="color"
-                            value={element.content.colors?.color1 || '#ffffff'}
-                            onChange={(e) => updateElement(element.id, {
-                              content: {
-                                ...element.content,
-                                colors: { ...element.content.colors, color1: e.target.value }
-                              }
-                            })}
-                            className="w-12 h-9 p-1"
-                          />
-                          <Input
-                            value={element.content.colors?.color1 || '#ffffff'}
-                            onChange={(e) => updateElement(element.id, {
-                              content: {
-                                ...element.content,
-                                colors: { ...element.content.colors, color1: e.target.value }
-                              }
-                            })}
-                            className="flex-1 bg-slate-700 border-slate-600 text-white"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label className="text-white">Secondary Color</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            type="color"
-                            value={element.content.colors?.color2 || '#22c55e'}
-                            onChange={(e) => updateElement(element.id, {
-                              content: {
-                                ...element.content,
-                                colors: { ...element.content.colors, color2: e.target.value }
-                              }
-                            })}
-                            className="w-12 h-9 p-1"
-                          />
-                          <Input
-                            value={element.content.colors?.color2 || '#22c55e'}
-                            onChange={(e) => updateElement(element.id, {
-                              content: {
-                                ...element.content,
-                                colors: { ...element.content.colors, color2: e.target.value }
-                              }
-                            })}
-                            className="flex-1 bg-slate-700 border-slate-600 text-white"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Element Editor */}
-          {selectedElementData && (
-            <div className="bg-slate-900/50 border border-slate-600 rounded-lg p-4 space-y-3">
-              <h4 className="text-white font-medium">
-                Edit {selectedElementData.type.replace('_', ' ').toUpperCase()}
-              </h4>
-              
-              {(selectedElementData.type === 'name' || selectedElementData.type === 'title' || selectedElementData.type === 'company') && (
-                <div>
-                  <Label className="text-white">Text Content</Label>
-                  <Input
-                    value={selectedElementData.content.text || ''}
-                    onChange={(e) => updateElement(selectedElement!, {
-                      content: { ...selectedElementData.content, text: e.target.value }
-                    })}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
-              )}
-
-              {(selectedElementData.type === 'profile_picture' || selectedElementData.type === 'logo' || selectedElementData.type === 'header_image') && (
-                <div>
-                  <Label className="text-white">Upload Image</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById(`upload-${selectedElement}`)?.click()}
-                    disabled={isUploading}
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full"
-                  >
-                    <i className="fas fa-upload mr-2" />
-                    {isUploading ? 'Uploading...' : 'Upload Image'}
-                  </Button>
-                  <input
-                    id={`upload-${selectedElement}`}
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileUpload(e, selectedElement!)}
-                    className="hidden"
-                  />
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div>
-                  <Label className="text-white">X Position</Label>
-                  <Input
-                    type="number"
-                    value={selectedElementData.position.x}
-                    onChange={(e) => updateElement(selectedElement!, {
-                      position: { ...selectedElementData.position, x: parseInt(e.target.value) || 0 }
-                    })}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
-                <div>
-                  <Label className="text-white">Y Position</Label>
-                  <Input
-                    type="number"
-                    value={selectedElementData.position.y}
-                    onChange={(e) => updateElement(selectedElement!, {
-                      position: { ...selectedElementData.position, y: parseInt(e.target.value) || 0 }
-                    })}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
-                <div>
-                  <Label className="text-white">Width</Label>
-                  <Input
-                    type="number"
-                    value={selectedElementData.position.width}
-                    onChange={(e) => updateElement(selectedElement!, {
-                      position: { ...selectedElementData.position, width: parseInt(e.target.value) || 50 }
-                    })}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
-                <div>
-                  <Label className="text-white">Height</Label>
-                  <Input
-                    type="number"
-                    value={selectedElementData.position.height}
-                    onChange={(e) => updateElement(selectedElement!, {
-                      position: { ...selectedElementData.position, height: parseInt(e.target.value) || 30 }
-                    })}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                </div>
-              </div>
-
-              {(selectedElementData.type === 'name' || selectedElementData.type === 'title' || selectedElementData.type === 'company') && (
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label className="text-white">Font Size</Label>
-                    <Input
-                      value={selectedElementData.styles.fontSize || '16px'}
-                      onChange={(e) => updateElement(selectedElement!, {
-                        styles: { ...selectedElementData.styles, fontSize: e.target.value }
-                      })}
-                      className="bg-slate-700 border-slate-600 text-white"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-white">Font Weight</Label>
-                    <Select
-                      value={selectedElementData.styles.fontWeight || '400'}
-                      onValueChange={(value) => updateElement(selectedElement!, {
-                        styles: { ...selectedElementData.styles, fontWeight: value }
-                      })}
-                    >
-                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="300">Light</SelectItem>
-                        <SelectItem value="400">Normal</SelectItem>
-                        <SelectItem value="500">Medium</SelectItem>
-                        <SelectItem value="600">Semi Bold</SelectItem>
-                        <SelectItem value="700">Bold</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-white">Text Color</Label>
-                    <Input
-                      type="color"
-                      value={selectedElementData.styles.color || '#ffffff'}
-                      onChange={(e) => updateElement(selectedElement!, {
-                        styles: { ...selectedElementData.styles, color: e.target.value }
-                      })}
-                      className="w-full h-9"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Live Preview */}
-          <div className="bg-gray-900/30 border border-gray-600/30 rounded-lg p-4 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-300">Live Preview - Drag Elements to Position</h3>
-            
-            <div className="bg-white rounded-lg p-4 overflow-hidden">
-              <div
-                ref={previewRef}
-                style={{
-                  backgroundColor: headerTemplate.globalStyles.backgroundColor,
-                  width: `${headerTemplate.globalStyles.headerWidth}px`,
-                  height: `${headerTemplate.globalStyles.headerHeight}px`,
-                  position: 'relative',
-                  fontFamily: headerTemplate.globalStyles.fontFamily,
-                  margin: '0 auto',
-                  cursor: isDragging || isResizing ? 'grabbing' : 'default',
-                  userSelect: 'none'
-                }}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                onClick={(e) => activeTool === 'pen' ? handleMouseDown(e) : undefined}
-                onDoubleClick={() => isDrawing && finishPath()}
-              >
-                {headerTemplate.elements.map(renderElement)}
-                
-                {/* Pen Tool Drawing Overlay */}
-                {activeTool === 'pen' && (
-                  <>
-                    {/* Current drawing path preview */}
-                    {pathPoints.length > 0 && (
-                      <svg
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          pointerEvents: 'none',
-                          zIndex: 999
-                        }}
-                      >
-                        {/* Draw existing path points */}
-                        {pathPoints.map((point, index) => (
-                          <g key={index}>
-                            <circle
-                              cx={point.x}
-                              cy={point.y}
-                              r="4"
-                              fill="#22c55e"
-                              stroke="#ffffff"
-                              strokeWidth="2"
-                            />
-                            {/* Bezier handles */}
-                            {point.handleIn && (
-                              <>
-                                <line
-                                  x1={point.x}
-                                  y1={point.y}
-                                  x2={point.handleIn.x}
-                                  y2={point.handleIn.y}
-                                  stroke="#3b82f6"
-                                  strokeWidth="1"
-                                />
-                                <circle
-                                  cx={point.handleIn.x}
-                                  cy={point.handleIn.y}
-                                  r="2"
-                                  fill="#3b82f6"
-                                  stroke="#ffffff"
-                                  strokeWidth="1"
-                                />
-                              </>
-                            )}
-                            {point.handleOut && (
-                              <>
-                                <line
-                                  x1={point.x}
-                                  y1={point.y}
-                                  x2={point.handleOut.x}
-                                  y2={point.handleOut.y}
-                                  stroke="#3b82f6"
-                                  strokeWidth="1"
-                                />
-                                <circle
-                                  cx={point.handleOut.x}
-                                  cy={point.handleOut.y}
-                                  r="2"
-                                  fill="#3b82f6"
-                                  stroke="#ffffff"
-                                  strokeWidth="1"
-                                />
-                              </>
-                            )}
-                          </g>
-                        ))}
-                        
-                        {/* Draw path */}
-                        {pathPoints.length > 1 && (
-                          <path
-                            d={pathPointsToSVG(pathPoints.map(p => ({ ...p, x: p.x + getPathPointsBounds(pathPoints).minX, y: p.y + getPathPointsBounds(pathPoints).minY })))}
-                            stroke="#22c55e"
-                            strokeWidth="2"
-                            fill="none"
-                          />
-                        )}
-                      </svg>
-                    )}
-                    
-                    {/* Pen tool instructions */}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '10px',
-                        left: '10px',
-                        background: 'rgba(0, 0, 0, 0.9)',
-                        color: 'white',
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        zIndex: 1000,
-                        maxWidth: '250px'
-                      }}
-                    >
-                      {!isDrawing ? (
-                        <div>
-                          <div><strong>Pen Tool Active</strong></div>
-                          <div>• Click to add points</div>
-                          <div>• Drag for curves</div>
-                        </div>
-                      ) : (
-                        <div>
-                          <div><strong>Drawing Path</strong></div>
-                          <div>• Click to add points</div>
-                          <div>• Double-click to finish</div>
+                          )}
+                        </>
+                      )}
+                      
+                      {headerTemplate.elements.length === 0 && activeTool === 'select' && (
+                        <div className="absolute inset-0 flex items-center justify-center text-white opacity-60">
+                          <div className="text-center">
+                            <i className="fas fa-plus-circle text-4xl mb-2" />
+                            <p>Add elements to start building your header</p>
+                          </div>
                         </div>
                       )}
                     </div>
                     
-                    {/* Drawing controls */}
-                    {isDrawing && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          bottom: '10px',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          display: 'flex',
-                          gap: '8px',
-                          zIndex: 1000
-                        }}
-                      >
-                        <Button
-                          size="sm"
-                          onClick={finishPath}
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          <i className="fas fa-check mr-1" />
-                          Finish Path
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={cancelPath}
-                          className="bg-red-600 hover:bg-red-700 text-white border-red-500"
-                        >
-                          <i className="fas fa-times mr-1" />
-                          Cancel
-                        </Button>
-                      </div>
-                    )}
-                  </>
-                )}
-                
-                {headerTemplate.elements.length === 0 && activeTool === 'select' && (
-                  <div className="absolute inset-0 flex items-center justify-center text-white opacity-60">
-                    <div className="text-center">
-                      <i className="fas fa-plus-circle text-4xl mb-2" />
-                      <p>Add elements to start building your header</p>
+                    <div className="text-sm text-gray-400 text-center mt-4">
+                      💡 Use <strong>Select Tool</strong> to move/resize elements • <strong>Pen Tool</strong> to draw custom shapes
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
-            
-            <div className="text-sm text-gray-400 text-center">
-              💡 Use <strong>Select Tool</strong> to move/resize elements • <strong>Pen Tool</strong> to draw custom shapes • Drag elements to position
-            </div>
-          </div>
 
-          {/* Save Button */}
-          <div className="flex justify-end pt-4">
-            <Button
-              onClick={handleSaveTemplate}
-              disabled={saveTemplateMutation.isPending}
-              className="bg-talklink-500 hover:bg-talklink-600 text-white px-8"
-            >
-              {saveTemplateMutation.isPending ? (
-                <>
-                  <i className="fas fa-spinner fa-spin mr-2" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-save mr-2" />
-                  Save Template
-                </>
-              )}
-            </Button>
+                  {/* Save Button */}
+                  <div className="flex justify-end pt-4">
+                    <Button
+                      onClick={handleSaveTemplate}
+                      disabled={saveTemplateMutation.isPending}
+                      className="bg-talklink-500 hover:bg-talklink-600 text-white px-8"
+                    >
+                      {saveTemplateMutation.isPending ? (
+                        <>
+                          <i className="fas fa-spinner fa-spin mr-2" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-save mr-2" />
+                          Save Template
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,0 +1,128 @@
+Create a full-stack project (Node.js + Express + React + Tailwind) named “Header Builder”.
+
+GOALS
+- Admin-only header creation (RBAC).
+- Fixed canvas width: 430px.
+- Embedded Photopea iframe with Pen + Type tools and export (PNG/SVG).
+- A simple SVG HeaderBuilder.
+- Dynamic eCard binding: Preload from a user’s eCard (profile pic, logo, cover image, name, title, company/licence) into both the SVG builder and Photopea.
+- Save template with placeholders; render personalized header for any user later.
+
+DATA MODEL (Drizzle + SQLite or Prisma + SQLite)
+- User { id (uuid), name, email, role: "user" | "admin" }
+- Ecard {
+    id (uuid), userId (fk User),
+    displayName (string), title (string), companyOrLicence (string),
+    profileUrl (string), logoUrl (string), coverUrl (string),
+    themeBg (string, default "#22c55e"), themeText (string, default "#ffffff"), themeAccent (string, default "#1f6d4a")
+  }
+- HeaderTemplate {
+    id (uuid), name (string), json (json), // SVG builder config with tokens
+    createdBy (fk User), createdAt (datetime)
+  }
+
+TOKENS (for template JSON / text layers)
+- {{name}} -> ecard.displayName
+- {{title}} -> ecard.title
+- {{company}} -> ecard.companyOrLicence
+- {{profile}} -> ecard.profileUrl
+- {{logo}} -> ecard.logoUrl
+- {{cover}} -> ecard.coverUrl
+- {{bg}}, {{text}}, {{accent}} -> ecard theme colors
+
+AUTH & RBAC
+- JWT auth.
+- Middleware: requireAuth, requireAdmin.
+- Only admins can POST /api/headers and access /admin/header-builder.
+- Normal users can view rendered headers but not create.
+
+BACKEND: ROUTES
+- GET  /api/users/:userId/ecard            -> returns eCard by user
+- GET  /api/headers                         -> list templates (public fields)
+- GET  /api/headers/:id                     -> one template
+- POST /api/headers   (admin)               -> { name, json } save template
+- POST /api/render    (auth)                -> { templateId, userId } return rendered SVG (server merges tokens)
+  - Server-side renderer:
+    * Load template.json (SVG-builder JSON with tokens).
+    * Resolve tokens from the user’s eCard.
+    * Produce SVG string; optionally return PNG (use resvg/sharp if available or return SVG only).
+
+FRONTEND: PAGES
+- /admin/header-builder  (guarded by AdminRoute)
+  Layout: two tabs
+  A) “Photopea (Pen & Type)” – PhotopeaEmbed.jsx
+     - On load: new doc 430×240.
+     - Buttons: Pen, Type, Export PNG, Export SVG, Reload doc.
+     - “Load eCard into Photopea” button:
+       * Insert layers via Photopea script:
+         - Open coverUrl, logoUrl, profileUrl as layers (fit to artboard).
+         - Add text layers for {{name}}, {{title}}, {{company}} using eCard values and theme colors.
+       * Example script (use provided URLs):
+           const W=430,H=240;
+           app.documents.add(W,H,'Header430');
+           // open images by URL:
+           await app.open('%%COVER_URL%%'); // becomes a layer
+           await app.open('%%LOGO_URL%%');
+           await app.open('%%PROFILE_URL%%');
+           // position layers with bounds; scale to fit as needed.
+           var t1 = new TTextLayer();
+           t1.text='%%NAME%%'; t1.size=18; t1.color=App.parseColor('%%TEXT%%'); app.activeDocument.addLayer(t1);
+           t1.translate(96,152);
+           var t2 = new TTextLayer();
+           t2.text='%%TITLE%%'; t2.size=14; t2.color=App.parseColor('%%TEXT%%'); app.activeDocument.addLayer(t2);
+           t2.translate(96,176);
+           var t3 = new TTextLayer();
+           t3.text='%%COMPANY%%'; t3.size=14; t3.color=App.parseColor('%%ACCENT%%'); app.activeDocument.addLayer(t3);
+           t3.translate(96,198);
+     - When admin exports, capture blob via postMessage and allow “Use in SVG Builder” to set as cover/overlay.
+
+  B) “SVG Builder (430px)” – HeaderBuilder.jsx
+     - State shape includes:
+       size: { width:430, height:240 }
+       colors: { bg, text, accent } ← default to eCard theme on load
+       elements:
+         cover.url   ← ecard.coverUrl
+         profile.url ← ecard.profileUrl
+         logo.url    ← ecard.logoUrl
+         name.text   ← {{name}} (show live value from eCard, but keep token in template)
+         title.text  ← {{title}}
+         company.text← {{company}}
+     - Toggle “Bind to eCard”:
+       If ON → live preview uses eCard values; saved JSON keeps tokens.
+       If OFF → saved JSON stores literal strings.
+     - Drag to position, color pickers, Export SVG/PNG, Save Template.
+
+- /headers/:id/preview?userId=…  (public view)
+  - Client fetches template + user eCard, merges tokens client-side, displays rendered SVG; download PNG.
+
+UTILS
+- tokenReplace(str, ecard, colors) that maps {{…}} to eCard values & theme colors.
+- image loader that accepts direct URLs or data URLs.
+
+DELIVERABLE COMPONENTS
+- AdminRoute.jsx (guard)
+- PhotopeaEmbed.jsx
+  * postMessage bridge
+  * setTool('Pen'|'Type')
+  * initDoc(430, height)
+  * loadEcard(ecard) -> runs a script (replace %%PLACEHOLDERS%% with eCard values/URLs)
+  * exportPNG(), exportSVG()
+- HeaderBuilder.jsx (SVG)
+  * Inputs: ecard, bindToEcard (bool)
+  * Loads eCard assets/values into builder on mount
+  * Keeps tokens in JSON if bindToEcard=true
+  * Export buttons
+  * Save button -> POST /api/headers
+- Render server:
+  * POST /api/render returns { svg } (and optionally { png } if sharp/resvg available)
+  * Use template JSON + tokenReplace with eCard
+
+TEST DATA
+- Seed one admin user, one normal user, and one eCard record with example URLs (profile, logo, cover).
+- Provide a sample template using tokens so we can verify /api/render.
+
+QUALITY
+- TypeScript preferred if easy; otherwise JS.
+- Clean Tailwind UI.
+- Error toasts on fetch failures.
+- All secrets (JWT secret) via .env.
