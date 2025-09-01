@@ -340,92 +340,24 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             </p>
           )}
           
-          {/* New Button Layout - Top 8 Buttons from Contact Information */}
-          <div className="mb-6 space-y-2">
-            {/* Grid of Contact Buttons ONLY - Responsive 2 rows of 4 */}
-            <div className="space-y-2">
-              {/* Row 1 - Top 4 buttons */}
+          {/* Contact Information - Only Custom Contact Methods */}
+          {data.customContacts && data.customContacts.length > 0 && (
+            <div className="mb-6">
               <div className={`grid ${data.template === 'dark' ? 'grid-cols-3' : 'grid-cols-4'} gap-3 px-4`}>
-                {/* Call Button */}
-                {data.phone ? (
-                  <div className="flex flex-col items-center">
+                {data.customContacts.filter(contact => contact?.value && contact?.label).map((contact) => (
+                  <div key={contact.id} className="flex flex-col items-center">
                     <button 
-                      onClick={() => handleContactAction('phone', data.phone)}
-                      className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
+                      onClick={() => handleContactAction(contact.type, contact.value)}
+                      className={`${data.template === 'dark' ? 'w-full py-3 px-4 rounded-lg min-w-0' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
                       style={{ 
                         backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
                         color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
                       }}
-                      data-testid="button-contact-phone"
+                      data-testid={`button-custom-contact-${contact.id}`}
                     >
-                      <i className={`fas fa-phone ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
+                      <i className={`${contact.icon} ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
                       {data.template === 'dark' && (
-                        <span className="text-xs font-medium">CALL ME</span>
-                      )}
-                    </button>
-                    {data.template !== 'dark' && (
-                      <span 
-                        className="text-xs font-medium"
-                        style={{ 
-                          color: getSectionStyle('contactInfo', 'iconTextColor') || (data.template === 'dark' ? '#d1d5db' : '#374151')
-                        }}
-                      >
-                        Call
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div></div>
-                )}
-                
-                {/* Email Button */}
-                {data.email ? (
-                  <div className="flex flex-col items-center">
-                    <button 
-                      onClick={() => handleContactAction('email', data.email)}
-                      className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
-                      style={{ 
-                        backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
-                        color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
-                      }}
-                      data-testid="button-contact-email"
-                    >
-                      <i className={`fas fa-envelope ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
-                      {data.template === 'dark' && (
-                        <span className="text-xs font-medium">EMAIL</span>
-                      )}
-                    </button>
-                    {data.template !== 'dark' && (
-                      <span 
-                        className="text-xs font-medium"
-                        style={{ 
-                          color: getSectionStyle('contactInfo', 'iconTextColor') || (data.template === 'dark' ? '#d1d5db' : '#374151')
-                        }}
-                      >
-                        Email
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div></div>
-                )}
-
-
-                {/* Website/Connect Button - For ALL templates as 3rd main button */}
-                {data.website ? (
-                  <div className="flex flex-col items-center">
-                    <button 
-                      onClick={() => handleContactAction('website', data.website)}
-                      className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
-                      style={{ 
-                        backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.brandColor || '#22c55e'),
-                        color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
-                      }}
-                      data-testid="button-contact-website"
-                    >
-                      <i className={`fas fa-link ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
-                      {data.template === 'dark' && (
-                        <span className="text-xs font-medium">WEBSITE</span>
+                        <span className="text-xs font-medium whitespace-nowrap overflow-hidden text-ellipsis">{contact.label}</span>
                       )}
                     </button>
                     {data.template !== 'dark' && (
@@ -435,56 +367,20 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                           color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
                         }}
                       >
-                        Connect
+                        {contact.label}
                       </span>
                     )}
                   </div>
-                ) : (
-                  <div></div>
-                )}
-
+                ))}
               </div>
-
-              {/* Row 2 - Unlimited Custom Contact Methods */}
-              {data.customContacts && data.customContacts.length > 0 && (
-                <div className={`grid ${data.template === 'dark' ? 'grid-cols-3' : 'grid-cols-4'} gap-3 px-4`}>
-                  {data.customContacts.filter(contact => contact?.value && contact?.label).map((contact) => (
-                    <div key={contact.id} className="flex flex-col items-center">
-                      <button 
-                        onClick={() => handleContactAction(contact.type, contact.value)}
-                        className={`${data.template === 'dark' ? 'w-full py-3 px-4 rounded-lg min-w-0' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
-                        style={{ 
-                          backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
-                          color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
-                        }}
-                        data-testid={`button-custom-contact-${contact.id}`}
-                      >
-                        <i className={`${contact.icon} ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
-                        {data.template === 'dark' && (
-                          <span className="text-xs font-medium whitespace-nowrap overflow-hidden text-ellipsis">{contact.label}</span>
-                        )}
-                      </button>
-                      {data.template !== 'dark' && (
-                        <span 
-                          className="text-xs font-medium"
-                          style={{ 
-                            color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
-                          }}
-                        >
-                          {contact.label}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
+          )}
 
-            {/* Action Buttons Row */}
-            <div className="flex gap-3 px-4">
-              {/* Add to Contacts Button */}
-              <button 
-                onClick={() => {
+          {/* Action Buttons Row */}
+          <div className="flex gap-3 px-4">
+            {/* Add to Contacts Button */}
+            <button 
+              onClick={() => {
                   const vCard = `BEGIN:VCARD
 VERSION:3.0
 FN:${data.fullName || 'Contact'}
@@ -554,109 +450,27 @@ END:VCARD`;
             </div>
 
 
-            {/* Social Media Buttons - Same Style as Website Button */}
-            <div className="space-y-2 px-4">
-              {data.whatsapp && (
+          {/* Social Media - Only Custom Social Platforms */}
+          {data.customSocials && data.customSocials.length > 0 && (
+            <div className="space-y-2 px-4 mb-6">
+              {data.customSocials.filter(social => social?.value && social?.label).map((social) => (
                 <button 
-                  onClick={() => handleContactAction('whatsapp', data.whatsapp)}
+                  key={social.id}
+                  onClick={() => handleContactAction(social.platform, social.value)}
                   className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                   style={{ 
                     backgroundColor: data.brandColor || '#22c55e',
                     color: data.tertiaryColor || '#ffffff',
                     borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                   }}
-                  data-testid="button-social-whatsapp"
+                  data-testid={`button-custom-social-${social.id}`}
                 >
-                  <i className="fab fa-whatsapp text-lg mr-3"></i>
-                  WhatsApp
+                  <i className={`${social.icon} text-lg mr-3`}></i>
+                  {social.label}
                 </button>
-              )}
-              
-              {data.facebook && (
-                <button 
-                  onClick={() => handleContactAction('facebook', data.facebook)}
-                  className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
-                  style={{ 
-                    backgroundColor: data.brandColor || '#22c55e',
-                    color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
-                  }}
-                  data-testid="button-social-facebook"
-                >
-                  <i className="fab fa-facebook-f text-lg mr-3"></i>
-                  Facebook
-                </button>
-              )}
-              
-              {data.instagram && (
-                <button 
-                  onClick={() => handleContactAction('instagram', data.instagram)}
-                  className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
-                  style={{ 
-                    backgroundColor: data.brandColor || '#22c55e',
-                    color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
-                  }}
-                  data-testid="button-social-instagram"
-                >
-                  <i className="fab fa-instagram text-lg mr-3"></i>
-                  Instagram
-                </button>
-              )}
-
-              {data.linkedin && (
-                <button 
-                  onClick={() => handleContactAction('linkedin', data.linkedin)}
-                  className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
-                  style={{ 
-                    backgroundColor: data.brandColor || '#22c55e',
-                    color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
-                  }}
-                  data-testid="button-social-linkedin"
-                >
-                  <i className="fab fa-linkedin-in text-lg mr-3"></i>
-                  LinkedIn
-                </button>
-              )}
-
-              {data.twitter && (
-                <button 
-                  onClick={() => handleContactAction('twitter', data.twitter)}
-                  className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
-                  style={{ 
-                    backgroundColor: data.brandColor || '#22c55e',
-                    color: data.tertiaryColor || '#ffffff',
-                    borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
-                  }}
-                  data-testid="button-social-twitter"
-                >
-                  <i className="fab fa-twitter text-lg mr-3"></i>
-                  Twitter
-                </button>
-              )}
-
-              {/* Custom Social Media Platforms - Same Style */}
-              {data.customSocials?.map((social) => (
-                social.value && (
-                  <button 
-                    key={social.id}
-                    onClick={() => handleContactAction(social.platform, social.value)}
-                    className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
-                    style={{ 
-                      backgroundColor: data.brandColor || '#22c55e',
-                      color: data.tertiaryColor || '#ffffff',
-                      borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
-                    }}
-                    data-testid={`button-custom-social-${social.id}`}
-                  >
-                    <i className={`${social.icon} text-lg mr-3`}></i>
-                    {social.label || 'Social'}
-                  </button>
-                )
               ))}
             </div>
-          </div>
+          )}
 
 
           {/* Page Elements */}
