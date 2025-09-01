@@ -566,7 +566,7 @@ export default function Dashboard() {
                 Create your first digital business card link to get started.
               </p>
               <Button className="bg-orange-500 hover:bg-orange-600 text-white" asChild>
-                <Link href="/cards/create">
+                <Link href="/templates">
                   <i className="fas fa-plus mr-2"></i>
                   Create Your First Link
                 </Link>

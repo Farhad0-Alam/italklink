@@ -157,7 +157,7 @@ export default function Templates() {
       if (customUrl.trim()) {
         params.set('url', customUrl.trim());
       }
-      setLocation(`/builder?${params.toString()}`);
+      setLocation(`/cards/create?${params.toString()}`);
     }
   };
 

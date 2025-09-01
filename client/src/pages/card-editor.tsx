@@ -23,6 +23,10 @@ export default function CardEditor() {
   const [, setLocation] = useLocation();
   const cardRef = useRef<HTMLDivElement>(null);
   
+  // Get template from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const selectedTemplateId = urlParams.get('template');
+  
   const [cardData, setCardData] = useState<BusinessCard>({
     fullName: "",
     title: "",
@@ -46,6 +50,12 @@ export default function CardEditor() {
   const [shareUrl, setShareUrl] = useState("");
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   
+  // Fetch template data if template parameter is provided
+  const { data: templates } = useQuery({
+    queryKey: ['/api/templates'],
+    enabled: !!selectedTemplateId,
+  });
+  
   // Load existing card if editing
   const { data: existingCard, isLoading } = useQuery({
     queryKey: ['/api/business-cards', params.id],
@@ -56,6 +66,24 @@ export default function CardEditor() {
     },
     enabled: !!params.id,
   });
+
+  // Apply template when templates load and we have a template parameter
+  useEffect(() => {
+    if (selectedTemplateId && templates && !existingCard) {
+      const selectedTemplate = templates.find((t: any) => t.id === selectedTemplateId);
+      if (selectedTemplate) {
+        setCardData(prev => ({
+          ...prev,
+          template: selectedTemplate.id,
+          brandColor: selectedTemplate.brandColor || prev.brandColor,
+          accentColor: selectedTemplate.accentColor || prev.accentColor,
+          backgroundColor: selectedTemplate.backgroundColor || prev.backgroundColor,
+          textColor: selectedTemplate.textColor || prev.textColor,
+          font: selectedTemplate.font || prev.font,
+        }));
+      }
+    }
+  }, [selectedTemplateId, templates, existingCard]);
 
   // Update form data when existing card loads
   useEffect(() => {
