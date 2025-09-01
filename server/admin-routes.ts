@@ -3,7 +3,8 @@ import { db } from './db';
 import { 
   users, businessCards, adminLogs, analyticsEvents, globalTemplates, subscriptionPlans,
   features, planFeatures, planTemplates, userPlans, iconTypes, iconPacks, icons, 
-  links, countersDaily, headerTemplates, insertHeaderTemplateSchema
+  links, countersDaily, headerTemplates, insertHeaderTemplateSchema, coupons, couponUsages,
+  insertCouponSchema, insertCouponUsageSchema
 } from '@shared/schema';
 import { requireOwner } from './auth';
 import { eq, desc, count, sql, and, or, like, inArray } from 'drizzle-orm';
@@ -537,6 +538,340 @@ router.post('/plans/:id/templates', requireOwner, async (req, res) => {
     res.json({ message: 'Templates assigned successfully' });
   } catch (error) {
     console.error('Failed to assign templates:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// === COUPONS MANAGEMENT ENDPOINTS ===
+
+// Get all coupons
+router.get('/coupons', requireOwner, async (req, res) => {
+  try {
+    const { search, status, type } = req.query;
+    
+    let query = db.select().from(coupons);
+    const conditions = [];
+    
+    if (search) {
+      conditions.push(
+        or(
+          like(coupons.name, `%${search}%`),
+          like(coupons.code, `%${search}%`)
+        )
+      );
+    }
+    
+    if (status && status !== 'all') {
+      conditions.push(eq(coupons.status, String(status)));
+    }
+    
+    if (type && type !== 'all') {
+      conditions.push(eq(coupons.discountType, String(type)));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    const couponsData = await query.orderBy(desc(coupons.createdAt));
+    res.json(couponsData);
+  } catch (error) {
+    console.error('Failed to get coupons:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Create coupon
+router.post('/coupons', requireOwner, async (req, res) => {
+  try {
+    const validatedData = insertCouponSchema.parse({
+      ...req.body,
+      createdBy: req.user!.id,
+      startsAt: req.body.startsAt ? new Date(req.body.startsAt) : new Date(),
+      expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : null
+    });
+
+    // Check if coupon code already exists
+    const existingCoupon = await db.select()
+      .from(coupons)
+      .where(eq(coupons.code, validatedData.code))
+      .limit(1);
+
+    if (existingCoupon.length > 0) {
+      return res.status(409).json({ message: 'Coupon code already exists' });
+    }
+
+    const [newCoupon] = await db.insert(coupons)
+      .values(validatedData)
+      .returning();
+
+    await logAdminAction(req.user!.id, 'create', 'coupon', newCoupon.id, req.body);
+
+    res.json({ message: 'Coupon created successfully', coupon: newCoupon });
+  } catch (error) {
+    console.error('Failed to create coupon:', error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: 'Validation error', errors: error.errors });
+    }
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update coupon
+router.put('/coupons/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const validatedData = insertCouponSchema.partial().parse({
+      ...req.body,
+      startsAt: req.body.startsAt ? new Date(req.body.startsAt) : undefined,
+      expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : null,
+      updatedAt: new Date()
+    });
+
+    // If updating code, check for duplicates
+    if (req.body.code) {
+      const existingCoupon = await db.select()
+        .from(coupons)
+        .where(and(
+          eq(coupons.code, req.body.code),
+          sql`${coupons.id} != ${id}`
+        ))
+        .limit(1);
+
+      if (existingCoupon.length > 0) {
+        return res.status(409).json({ message: 'Coupon code already exists' });
+      }
+    }
+
+    const [updatedCoupon] = await db.update(coupons)
+      .set(validatedData)
+      .where(eq(coupons.id, id))
+      .returning();
+
+    if (!updatedCoupon) {
+      return res.status(404).json({ message: 'Coupon not found' });
+    }
+
+    await logAdminAction(req.user!.id, 'update', 'coupon', id, req.body);
+
+    res.json({ message: 'Coupon updated successfully', coupon: updatedCoupon });
+  } catch (error) {
+    console.error('Failed to update coupon:', error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: 'Validation error', errors: error.errors });
+    }
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Delete coupon
+router.delete('/coupons/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [deletedCoupon] = await db.delete(coupons)
+      .where(eq(coupons.id, id))
+      .returning();
+
+    if (!deletedCoupon) {
+      return res.status(404).json({ message: 'Coupon not found' });
+    }
+
+    await logAdminAction(req.user!.id, 'delete', 'coupon', id);
+
+    res.json({ message: 'Coupon deleted successfully' });
+  } catch (error) {
+    console.error('Failed to delete coupon:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Validate coupon
+router.post('/coupons/validate', requireOwner, async (req, res) => {
+  try {
+    const { code, planId, userId } = req.body;
+
+    if (!code) {
+      return res.status(400).json({ message: 'Coupon code is required' });
+    }
+
+    // Find coupon
+    const [coupon] = await db.select()
+      .from(coupons)
+      .where(and(
+        eq(coupons.code, code.toUpperCase()),
+        eq(coupons.isActive, true),
+        eq(coupons.status, 'active')
+      ))
+      .limit(1);
+
+    if (!coupon) {
+      return res.status(404).json({ message: 'Invalid coupon code' });
+    }
+
+    // Check if expired
+    if (coupon.expiresAt && new Date() > coupon.expiresAt) {
+      return res.status(400).json({ message: 'Coupon has expired' });
+    }
+
+    // Check if not yet valid
+    if (coupon.startsAt && new Date() < coupon.startsAt) {
+      return res.status(400).json({ message: 'Coupon is not yet valid' });
+    }
+
+    // Check usage limit
+    if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
+      return res.status(400).json({ message: 'Coupon usage limit reached' });
+    }
+
+    // Check user usage limit if userId provided
+    if (userId && coupon.userUsageLimit) {
+      const userUsageCount = await db.select({ count: count() })
+        .from(couponUsages)
+        .where(and(
+          eq(couponUsages.couponId, coupon.id),
+          eq(couponUsages.userId, userId)
+        ));
+
+      if (userUsageCount[0].count >= coupon.userUsageLimit) {
+        return res.status(400).json({ message: 'You have already used this coupon' });
+      }
+    }
+
+    // Check plan restrictions
+    if (planId && coupon.applicablePlans) {
+      const applicablePlans = Array.isArray(coupon.applicablePlans) ? coupon.applicablePlans : [];
+      if (applicablePlans.length > 0 && !applicablePlans.includes(Number(planId))) {
+        return res.status(400).json({ message: 'Coupon is not applicable to this plan' });
+      }
+    }
+
+    res.json({ 
+      message: 'Coupon is valid', 
+      coupon: {
+        id: coupon.id,
+        code: coupon.code,
+        name: coupon.name,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        maxDiscountAmount: coupon.maxDiscountAmount,
+        minimumOrderAmount: coupon.minimumOrderAmount
+      }
+    });
+  } catch (error) {
+    console.error('Failed to validate coupon:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Apply coupon and record usage
+router.post('/coupons/apply', requireOwner, async (req, res) => {
+  try {
+    const { couponId, userId, planId, originalAmount } = req.body;
+
+    if (!couponId || !userId || !originalAmount) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Get coupon details
+    const [coupon] = await db.select()
+      .from(coupons)
+      .where(eq(coupons.id, couponId))
+      .limit(1);
+
+    if (!coupon) {
+      return res.status(404).json({ message: 'Coupon not found' });
+    }
+
+    // Calculate discount
+    let discountAmount = 0;
+    if (coupon.discountType === 'percentage') {
+      discountAmount = Math.round((originalAmount * coupon.discountValue) / 100);
+      if (coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount) {
+        discountAmount = coupon.maxDiscountAmount;
+      }
+    } else {
+      discountAmount = coupon.discountValue;
+    }
+
+    // Ensure discount doesn't exceed original amount
+    discountAmount = Math.min(discountAmount, originalAmount);
+    const finalAmount = originalAmount - discountAmount;
+
+    // Record usage
+    await db.insert(couponUsages).values({
+      couponId,
+      userId,
+      planId: planId ? Number(planId) : null,
+      originalAmount,
+      discountAmount,
+      finalAmount
+    });
+
+    // Update coupon usage count
+    await db.update(coupons)
+      .set({ 
+        usageCount: sql`${coupons.usageCount} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(coupons.id, couponId));
+
+    await logAdminAction(req.user!.id, 'apply', 'coupon', couponId, { 
+      userId, planId, originalAmount, discountAmount, finalAmount 
+    });
+
+    res.json({
+      message: 'Coupon applied successfully',
+      discount: {
+        originalAmount,
+        discountAmount,
+        finalAmount,
+        couponCode: coupon.code
+      }
+    });
+  } catch (error) {
+    console.error('Failed to apply coupon:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get coupon usage statistics
+router.get('/coupons/:id/usage', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const usageStats = await db.select({
+      totalUsages: count(),
+      totalDiscount: sql`sum(${couponUsages.discountAmount})`.mapWith(Number),
+      totalRevenue: sql`sum(${couponUsages.finalAmount})`.mapWith(Number)
+    })
+    .from(couponUsages)
+    .where(eq(couponUsages.couponId, id));
+
+    const recentUsages = await db.select({
+      id: couponUsages.id,
+      userId: couponUsages.userId,
+      planId: couponUsages.planId,
+      originalAmount: couponUsages.originalAmount,
+      discountAmount: couponUsages.discountAmount,
+      finalAmount: couponUsages.finalAmount,
+      createdAt: couponUsages.createdAt,
+      userName: sql`${users.firstName} || ' ' || ${users.lastName}`.as('userName'),
+      userEmail: users.email
+    })
+    .from(couponUsages)
+    .leftJoin(users, eq(couponUsages.userId, users.id))
+    .where(eq(couponUsages.couponId, id))
+    .orderBy(desc(couponUsages.createdAt))
+    .limit(50);
+
+    res.json({
+      stats: usageStats[0] || { totalUsages: 0, totalDiscount: 0, totalRevenue: 0 },
+      recentUsages
+    });
+  } catch (error) {
+    console.error('Failed to get coupon usage:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

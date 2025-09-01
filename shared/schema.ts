@@ -22,6 +22,8 @@ export const teamRoleEnum = pgEnum('team_role', ['owner', 'admin', 'member']);
 export const teamMemberStatusEnum = pgEnum('team_member_status', ['active', 'invited', 'suspended']);
 export const frequencyEnum = pgEnum('frequency', ['monthly', 'yearly', 'custom']);
 export const iconTypeEnum = pgEnum('icon_type', ['url', 'email', 'phone', 'whatsapp', 'text', 'connect']);
+export const couponTypeEnum = pgEnum('coupon_type', ['percentage', 'fixed_amount']);
+export const couponStatusEnum = pgEnum('coupon_status', ['active', 'inactive', 'expired']);
 
 // Database Tables
 
@@ -82,6 +84,56 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   unlimitedPrice: integer("unlimited_price"), // price for unlimited cards in cents
   // Template limits
   templateLimit: integer("template_limit").default(-1), // -1 for unlimited, number for limit
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Coupons table
+export const coupons = pgTable("coupons", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code").unique().notNull(), // Coupon code (e.g., "SAVE20", "NEWUSER")
+  name: varchar("name").notNull(), // Display name for admin
+  description: text("description"), // Optional description
+  
+  // Discount configuration
+  discountType: couponTypeEnum("discount_type").notNull(), // 'percentage' or 'fixed_amount'
+  discountValue: integer("discount_value").notNull(), // Percentage (20) or amount in cents (2000)
+  maxDiscountAmount: integer("max_discount_amount"), // Max discount for percentage coupons in cents
+  
+  // Usage limits
+  usageLimit: integer("usage_limit"), // Total times coupon can be used (null = unlimited)
+  usageCount: integer("usage_count").default(0), // Current usage count
+  userUsageLimit: integer("user_usage_limit").default(1), // Times per user (1 = once per user)
+  
+  // Validity
+  startsAt: timestamp("starts_at").defaultNow(),
+  expiresAt: timestamp("expires_at"), // null = never expires
+  
+  // Plan restrictions
+  applicablePlans: jsonb("applicable_plans"), // Array of plan IDs (null = all plans)
+  minimumOrderAmount: integer("minimum_order_amount"), // Minimum order in cents
+  
+  // Status and settings
+  status: couponStatusEnum("status").default('active'),
+  isActive: boolean("is_active").default(true),
+  
+  // Metadata
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Coupon usage tracking table
+export const couponUsages = pgTable("coupon_usage", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  couponId: varchar("coupon_id").references(() => coupons.id, { onDelete: 'cascade' }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  planId: integer("plan_id").references(() => subscriptionPlans.id, { onDelete: 'cascade' }),
+  
+  // Usage details
+  originalAmount: integer("original_amount").notNull(), // Original price in cents
+  discountAmount: integer("discount_amount").notNull(), // Discount applied in cents
+  finalAmount: integer("final_amount").notNull(), // Final price in cents
+  
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -574,6 +626,12 @@ export type InsertLink = typeof links.$inferInsert;
 export type CounterDaily = typeof countersDaily.$inferSelect;
 export type InsertCounterDaily = typeof countersDaily.$inferInsert;
 
+export type Coupon = typeof coupons.$inferSelect;
+export type InsertCoupon = typeof coupons.$inferInsert;
+
+export type CouponUsage = typeof couponUsages.$inferSelect;
+export type InsertCouponUsage = typeof couponUsages.$inferInsert;
+
 // Zod schemas for database
 export const insertUserSchema = createInsertSchema(users);
 export const insertDbBusinessCardSchema = createInsertSchema(businessCards);
@@ -600,6 +658,8 @@ export const insertIconPackSchema = createInsertSchema(iconPacks);
 export const insertIconSchema = createInsertSchema(icons);
 export const insertLinkSchema = createInsertSchema(links);
 export const insertCounterDailySchema = createInsertSchema(countersDaily);
+export const insertCouponSchema = createInsertSchema(coupons);
+export const insertCouponUsageSchema = createInsertSchema(couponUsages);
 
 // Team invitation schema
 export const teamInvitationSchema = z.object({

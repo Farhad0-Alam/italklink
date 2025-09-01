@@ -13,7 +13,8 @@ import {
   Search,
   ChevronDown,
   User,
-  Layout
+  Layout,
+  Ticket
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -47,6 +48,11 @@ const sidebarNavItems = [
     title: 'Plans',
     href: '/admin/plans',
     icon: CreditCard,
+  },
+  {
+    title: 'Coupons',
+    href: '/admin/coupons',
+    icon: Ticket,
   },
   {
     title: 'Templates',
