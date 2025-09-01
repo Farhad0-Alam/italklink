@@ -1073,7 +1073,7 @@ export const businessCardSchema = z.object({
     "open-sans",
     "rubik"
   ]).default("inter"),
-  template: z.enum(["minimal", "bold", "photo"]).default("minimal"),
+  template: z.enum(["minimal", "bold", "photo", "dark"]).default("minimal"),
   headerDesign: z.enum(["cover-logo", "profile-center", "split-design"]).default("cover-logo"),
   
   // Additional Typography
