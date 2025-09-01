@@ -708,16 +708,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     {form.watch("customSocials")?.map((social, index) => (
                       <div key={social.id} className="flex gap-2 items-end">
                         <div className="flex-1">
-                          <Label className="text-white">Platform</Label>
+                          <Label className="text-white">Button Label</Label>
                           <Input
-                            value={social.platform}
+                            value={social.label}
                             onChange={(e) => {
                               const arr = [...(form.watch("customSocials") || [])];
-                              arr[index] = { ...social, platform: e.target.value };
+                              arr[index] = { ...social, label: e.target.value };
                               form.setValue("customSocials", arr);
                             }}
                             className="bg-slate-700 border-slate-600 text-white"
-                            placeholder="Platform name"
+                            placeholder="Button text"
                           />
                         </div>
                         <div className="flex-1">
@@ -775,7 +775,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       size="sm"
                       onClick={() => {
                         const currentTemplate = form.getValues("template"); // Preserve current template
-                        const newSocial = { id: generateFieldId(), label: "", value: "", icon: "fab fa-facebook", platform: "" };
+                        const newSocial = { id: generateFieldId(), label: "Social", value: "", icon: "fab fa-facebook", platform: "" };
                         form.setValue("customSocials", [...(form.watch("customSocials") || []), newSocial]);
                         // Explicitly preserve template type to prevent reverting to schema default
                         form.setValue("template", currentTemplate);
