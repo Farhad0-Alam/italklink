@@ -7,72 +7,19 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Link } from "wouter";
 import { useTheme } from "@/components/theme-provider";
 import { Moon, Sun, Smartphone, Monitor } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
-interface PricingPlan {
+interface PublicPlan {
+  id: number;
   name: string;
-  price: string;
-  period: string;
-  description: string;
-  features: string[];
-  popular?: boolean;
-  buttonText: string;
-  buttonVariant: "default" | "outline";
+  planType: string;
+  price: number;
+  interval: string;
+  description?: string;
+  features?: string[];
+  isPopular: boolean;
 }
 
-const pricingPlans: PricingPlan[] = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "/month",
-    description: "Perfect for getting started",
-    features: [
-      "1 Digital Business Card",
-      "Basic Templates",
-      "QR Code Generation",
-      "Contact Sharing",
-      "Basic Analytics"
-    ],
-    buttonText: "Get Started Free",
-    buttonVariant: "outline"
-  },
-  {
-    name: "Pro",
-    price: "$9",
-    period: "/month",
-    description: "Best for professionals and entrepreneurs",
-    features: [
-      "Unlimited Business Cards",
-      "Premium Templates",
-      "Custom Branding",
-      "Advanced Analytics",
-      "Custom Domains",
-      "Priority Support",
-      "Lead Capture Forms",
-      "Social Media Integration"
-    ],
-    popular: true,
-    buttonText: "Start Pro Trial",
-    buttonVariant: "default"
-  },
-  {
-    name: "Enterprise",
-    price: "$29",
-    period: "/month",
-    description: "For teams and large organizations",
-    features: [
-      "Everything in Pro",
-      "Team Collaboration",
-      "API Access",
-      "White-label Solution",
-      "Advanced Security",
-      "Dedicated Account Manager",
-      "Custom Integrations",
-      "Bulk Operations"
-    ],
-    buttonText: "Contact Sales",
-    buttonVariant: "outline"
-  }
-];
 
 const features = [
   {
@@ -243,6 +190,13 @@ export default function Landing() {
   const [isMobile, setIsMobile] = useState(false);
   const { scrollY } = useScroll();
   const { theme } = useTheme();
+
+  // Fetch dynamic plans from database
+  const { data: plans = [], isLoading: plansLoading } = useQuery<PublicPlan[]>({
+    queryKey: ['/api/plans'],
+    queryFn: () => fetch('/api/plans').then(res => res.json()),
+    initialData: []
+  });
   
   // Parallax effects
   const heroY = useTransform(scrollY, [0, 500], [0, -150]);
@@ -565,47 +519,123 @@ export default function Landing() {
           </motion.div>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {pricingPlans.map((plan, index) => (
-              <div key={index} className={`relative ${plan.popular ? 'scale-105' : ''}`}>
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                    <div className="bg-talklink-500 text-white px-6 py-2 rounded-full text-sm font-medium">
-                      Most Popular
+            {plansLoading ? (
+              // Loading state
+              [...Array(3)].map((_, index) => (
+                <div key={index} className="relative">
+                  <div className="bg-white rounded-3xl p-8 h-full border border-slate-200 shadow-lg animate-pulse">
+                    <div className="text-center mb-8">
+                      <div className="h-6 bg-slate-200 rounded mb-2"></div>
+                      <div className="h-12 bg-slate-200 rounded mb-4"></div>
+                      <div className="h-4 bg-slate-200 rounded"></div>
                     </div>
-                  </div>
-                )}
-                <div className={`bg-white rounded-3xl p-8 h-full ${plan.popular ? 'border-2 border-talklink-500 shadow-2xl' : 'border border-slate-200 shadow-lg'} hover:shadow-xl transition-all duration-300`}>
-                  <div className="text-center mb-8">
-                    <h3 className="text-2xl font-bold text-slate-900 mb-2">{plan.name}</h3>
-                    <div className="mb-4">
-                      <span className="text-5xl font-black text-slate-900">{plan.price}</span>
-                      <span className="text-slate-500 text-lg">{plan.period}</span>
+                    <div className="space-y-4 mb-8">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="h-4 bg-slate-200 rounded"></div>
+                      ))}
                     </div>
-                    <p className="text-slate-600">{plan.description}</p>
+                    <div className="h-12 bg-slate-200 rounded"></div>
                   </div>
-                  
-                  <ul className="space-y-4 mb-8">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start">
-                        <div className="w-5 h-5 bg-talklink-100 rounded-full flex items-center justify-center mt-0.5 mr-3 flex-shrink-0">
-                          <i className="fas fa-check text-talklink-500 text-xs"></i>
-                        </div>
-                        <span className="text-slate-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <Button 
-                    className={`w-full h-12 text-base font-medium ${plan.popular ? 'bg-talklink-500 hover:bg-talklink-600 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white'}`}
-                    asChild
-                  >
-                    <Link href="/register">
-                      {plan.buttonText}
-                    </Link>
-                  </Button>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              plans.map((plan, index) => {
+                const formatPrice = (price: number) => {
+                  if (price === 0) return '$0';
+                  return `$${(price / 100).toFixed(0)}`;
+                };
+                
+                const getButtonText = (planType: string) => {
+                  if (planType === 'free') return 'Get Started Free';
+                  if (planType === 'premium') return 'Start Pro Trial';
+                  return 'Contact Sales';
+                };
+
+                const getDescription = (plan: PublicPlan) => {
+                  if (plan.description) return plan.description;
+                  if (plan.planType === 'free') return 'Perfect for getting started';
+                  if (plan.planType === 'premium') return 'Best for professionals and entrepreneurs';
+                  return 'For teams and large organizations';
+                };
+
+                const getDefaultFeatures = (planType: string) => {
+                  if (planType === 'free') {
+                    return [
+                      "1 Digital Business Card",
+                      "Basic Templates",
+                      "QR Code Generation",
+                      "Contact Sharing",
+                      "Basic Analytics"
+                    ];
+                  }
+                  if (planType === 'premium') {
+                    return [
+                      "Unlimited Business Cards",
+                      "Premium Templates",
+                      "Custom Branding",
+                      "Advanced Analytics",
+                      "Custom Domains",
+                      "Priority Support"
+                    ];
+                  }
+                  return [
+                    "Everything in Pro",
+                    "Team Collaboration",
+                    "API Access",
+                    "White-label Solution",
+                    "Advanced Security",
+                    "Dedicated Support"
+                  ];
+                };
+
+                const planFeatures = plan.features && plan.features.length > 0 
+                  ? plan.features 
+                  : getDefaultFeatures(plan.planType);
+
+                return (
+                  <div key={plan.id} className={`relative ${plan.isPopular ? 'scale-105' : ''}`}>
+                    {plan.isPopular && (
+                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                        <div className="bg-talklink-500 text-white px-6 py-2 rounded-full text-sm font-medium">
+                          Most Popular
+                        </div>
+                      </div>
+                    )}
+                    <div className={`bg-white rounded-3xl p-8 h-full ${plan.isPopular ? 'border-2 border-talklink-500 shadow-2xl' : 'border border-slate-200 shadow-lg'} hover:shadow-xl transition-all duration-300`}>
+                      <div className="text-center mb-8">
+                        <h3 className="text-2xl font-bold text-slate-900 mb-2">{plan.name}</h3>
+                        <div className="mb-4">
+                          <span className="text-5xl font-black text-slate-900">{formatPrice(plan.price)}</span>
+                          <span className="text-slate-500 text-lg">/{plan.interval}</span>
+                        </div>
+                        <p className="text-slate-600">{getDescription(plan)}</p>
+                      </div>
+                      
+                      <ul className="space-y-4 mb-8">
+                        {planFeatures.map((feature, featureIndex) => (
+                          <li key={featureIndex} className="flex items-start">
+                            <div className="w-5 h-5 bg-talklink-100 rounded-full flex items-center justify-center mt-0.5 mr-3 flex-shrink-0">
+                              <i className="fas fa-check text-talklink-500 text-xs"></i>
+                            </div>
+                            <span className="text-slate-700">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      <Button 
+                        className={`w-full h-12 text-base font-medium ${plan.isPopular ? 'bg-talklink-500 hover:bg-talklink-600 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white'}`}
+                        asChild
+                        data-testid={`button-plan-${plan.planType}`}
+                      >
+                        <Link href="/register">
+                          {getButtonText(plan.planType)}
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </motion.section>

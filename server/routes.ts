@@ -49,6 +49,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ ok: true, timestamp: new Date().toISOString() });
   });
 
+  // Public plans endpoint for landing page
+  app.get("/api/plans", async (req, res) => {
+    try {
+      const plans = await storage.getPlans();
+      // Filter to only active plans and include only public information
+      const publicPlans = plans
+        .filter(plan => plan.isActive)
+        .map(plan => ({
+          id: plan.id,
+          name: plan.name,
+          planType: plan.planType,
+          price: plan.price,
+          interval: plan.interval,
+          description: plan.description,
+          features: plan.features,
+          isPopular: plan.isPopular || false
+        }))
+        .sort((a, b) => a.price - b.price); // Sort by price ascending
+      
+      res.json(publicPlans);
+    } catch (error) {
+      console.error('Failed to get public plans:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
   // Authentication routes
   app.get('/api/auth/google', 
     passport.authenticate('google', { scope: ['profile', 'email'] })
