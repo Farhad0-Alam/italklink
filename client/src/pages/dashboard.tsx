@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield } from "lucide-react";
+import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import { ContactSupportModal } from "@/components/contact-support-modal";
 
 interface User {
   id: string;
@@ -65,6 +66,7 @@ export default function Dashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
+  const [showContactModal, setShowContactModal] = useState(false);
 
   // All hooks must be called unconditionally at the top level
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
@@ -288,12 +290,18 @@ export default function Dashboard() {
                     Account
                   </DropdownMenuLabel>
                   
-                  <DropdownMenuItem className="flex items-center space-x-3 px-3 py-2 cursor-pointer">
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/profile')}
+                  >
                     <UserIcon className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">Edit Profile</span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem className="flex items-center space-x-3 px-3 py-2 cursor-pointer">
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/account-settings')}
+                  >
                     <Settings className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">Account Settings</span>
                   </DropdownMenuItem>
@@ -316,12 +324,18 @@ export default function Dashboard() {
                     </div>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem className="flex items-center space-x-3 px-3 py-2 cursor-pointer">
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/billing')}
+                  >
                     <CreditCard className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">Billing & Invoices</span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem className="flex items-center space-x-3 px-3 py-2 cursor-pointer">
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/usage')}
+                  >
                     <FileText className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">Usage & Limits</span>
                   </DropdownMenuItem>
@@ -333,12 +347,18 @@ export default function Dashboard() {
                     Support
                   </DropdownMenuLabel>
 
-                  <DropdownMenuItem className="flex items-center space-x-3 px-3 py-2 cursor-pointer">
-                    <FileText className="w-4 h-4 text-gray-500" />
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/help')}
+                  >
+                    <HelpCircle className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">Help Center</span>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem className="flex items-center space-x-3 px-3 py-2 cursor-pointer">
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setShowContactModal(true)}
+                  >
                     <i className="fas fa-envelope w-4 h-4 text-gray-500"></i>
                     <span className="text-sm">Contact Support</span>
                   </DropdownMenuItem>
@@ -683,6 +703,12 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* Contact Support Modal */}
+      <ContactSupportModal
+        open={showContactModal}
+        onOpenChange={setShowContactModal}
+      />
     </div>
   );
 }
