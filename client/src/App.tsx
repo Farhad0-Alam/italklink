@@ -16,6 +16,7 @@ import { Builder } from "./pages/builder";
 import { Share } from "./pages/share";
 import CardEditor from "./pages/card-editor";
 import Admin from "./pages/admin";
+import Pricing from "./pages/pricing";
 import NotFound from "@/pages/not-found";
 import i18n from "./lib/i18n";
 
@@ -24,6 +25,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/landing" component={Landing} />
+      <Route path="/pricing" component={Pricing} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/dashboard" component={Dashboard} />

@@ -26,6 +26,14 @@ export const Navigation = () => {
             <span className="text-xl font-bold text-white">CardPreview</span>
           </Link>
           
+          <div className="hidden md:flex items-center space-x-6">
+            <Link href="/pricing" data-testid="nav-pricing">
+              <span className="text-white hover:text-talklink-300 transition-colors font-medium">
+                Pricing
+              </span>
+            </Link>
+          </div>
+          
           <div className="flex items-center space-x-4">
             <Button
               variant="outline"
