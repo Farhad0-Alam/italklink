@@ -177,8 +177,9 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
         className="rounded-2xl shadow-2xl overflow-hidden w-full mx-auto card-shadow"
         style={{ 
           maxWidth: '430px',
-          backgroundColor: data.backgroundColor || '#ffffff',
-          fontFamily: data.font ? `var(--font-${data.font})` : 'var(--font-inter)'
+          backgroundColor: data.template === 'dark' ? '#1a1a1a' : (data.backgroundColor || '#ffffff'),
+          fontFamily: data.font ? `var(--font-${data.font})` : 'var(--font-inter)',
+          color: data.template === 'dark' ? '#ffffff' : (data.textColor || '#000000')
         }}
       >
         <div className="relative">
@@ -311,7 +312,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
         </div>
           
         {/* Content */}
-        <div className={`pb-8 px-6 text-center text-slate-800 ${
+        <div className={`pb-8 px-6 text-center ${data.template === 'dark' ? 'text-white' : 'text-slate-800'} ${
           data.advancedHeaderEnabled ? 'pt-8' : 
           data.headerDesign === 'profile-center' ? 'pt-20' : 
           data.headerDesign === 'split-design' ? 'pt-16' : 'pt-16'
@@ -320,7 +321,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           <h3 
             className="text-xl font-bold mb-1" 
             style={{
-              color: getSectionStyle('basicInfo', 'nameColor') || data.headingColor || '#1f2937',
+              color: getSectionStyle('basicInfo', 'nameColor') || data.headingColor || (data.template === 'dark' ? '#ffffff' : '#1f2937'),
               fontSize: `${getSectionStyle('basicInfo', 'nameFontSize') || (data.headingSize || 20) + 4}px`,
               fontWeight: getSectionStyle('basicInfo', 'nameFontWeight') || data.headingWeight || 600,
               fontFamily: getSectionStyle('basicInfo', 'nameFont') || 'Inter, sans-serif',
@@ -333,7 +334,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           <p 
             className="text-sm mb-2" 
             style={{
-              color: getSectionStyle('basicInfo', 'titleColor') || data.paragraphColor || '#4b5563',
+              color: getSectionStyle('basicInfo', 'titleColor') || data.paragraphColor || (data.template === 'dark' ? '#e5e7eb' : '#4b5563'),
               fontSize: `${getSectionStyle('basicInfo', 'titleFontSize') || data.paragraphSize || 14}px`,
               fontWeight: getSectionStyle('basicInfo', 'titleFontWeight') || data.paragraphWeight || 400,
               fontFamily: getSectionStyle('basicInfo', 'titleFont') || 'Inter, sans-serif',
@@ -347,7 +348,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             <p 
               className="text-sm mb-4" 
               style={{
-                color: getSectionStyle('basicInfo', 'companyColor') || '#6b7280',
+                color: getSectionStyle('basicInfo', 'companyColor') || (data.template === 'dark' ? '#d1d5db' : '#6b7280'),
                 fontSize: `${getSectionStyle('basicInfo', 'companyFontSize') || data.paragraphSize || 14}px`,
                 fontWeight: getSectionStyle('basicInfo', 'companyFontWeight') || data.paragraphWeight || 400,
                 fontFamily: getSectionStyle('basicInfo', 'companyFont') || 'Inter, sans-serif',
@@ -382,7 +383,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     <span 
                       className="text-xs font-medium"
                       style={{ 
-                        color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                        color: getSectionStyle('contactInfo', 'iconTextColor') || (data.template === 'dark' ? '#d1d5db' : '#374151')
                       }}
                     >
                       Call
@@ -409,7 +410,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     <span 
                       className="text-xs font-medium"
                       style={{ 
-                        color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                        color: getSectionStyle('contactInfo', 'iconTextColor') || (data.template === 'dark' ? '#d1d5db' : '#374151')
                       }}
                     >
                       Email
@@ -436,7 +437,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     <span 
                       className="text-xs font-medium"
                       style={{ 
-                        color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                        color: getSectionStyle('contactInfo', 'iconTextColor') || (data.template === 'dark' ? '#d1d5db' : '#374151')
                       }}
                     >
                       Text
@@ -528,27 +529,45 @@ END:VCARD`;
                   document.body.removeChild(link);
                   URL.revokeObjectURL(url);
                 }}
-                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                className={`py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors ${
+                  data.template === 'dark' ? 'border-2' : ''
+                }`}
                 style={{
-                  backgroundColor: data.secondaryColor || data.accentColor || '#16a34a',
-                  color: data.tertiaryColor || '#ffffff',
-                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`,
+                  backgroundColor: data.template === 'dark' 
+                    ? '#2a2a2a' 
+                    : (data.secondaryColor || data.accentColor || '#16a34a'),
+                  color: data.template === 'dark' 
+                    ? (data.brandColor || '#fbbf24') 
+                    : (data.tertiaryColor || '#ffffff'),
+                  borderColor: data.template === 'dark' ? (data.brandColor || '#fbbf24') : 'transparent',
+                  borderBottom: data.template === 'dark' 
+                    ? 'none' 
+                    : `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`,
                   width: '70%'
                 }}
-                data-testid="button-add-to-contacts"
+                data-testid="button-save-contact"
               >
                 <i className="fas fa-address-book text-lg mr-3"></i>
-                Add to Contacts
+                {data.template === 'dark' ? 'Save Contact' : 'Add to Contacts'}
               </button>
 
               {/* Share Button */}
               <button 
                 onClick={() => handleShare()}
-                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                className={`py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors ${
+                  data.template === 'dark' ? 'border-2' : ''
+                }`}
                 style={{ 
-                  backgroundColor: data.brandColor || '#22c55e',
-                  color: data.tertiaryColor || '#ffffff',
-                  borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
+                  backgroundColor: data.template === 'dark' 
+                    ? 'transparent' 
+                    : (data.brandColor || '#22c55e'),
+                  color: data.template === 'dark' 
+                    ? (data.brandColor || '#fbbf24') 
+                    : (data.tertiaryColor || '#ffffff'),
+                  borderColor: data.template === 'dark' ? (data.brandColor || '#fbbf24') : 'transparent',
+                  borderBottom: data.template === 'dark' 
+                    ? 'none' 
+                    : `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
                   width: '30%'
                 }}
                 data-testid="button-share-main"
@@ -707,7 +726,7 @@ END:VCARD`;
               </div>
               <p 
                 className="text-xs mt-2 font-medium"
-                style={{ color: data.brandColor || '#22c55e' }}
+                style={{ color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.brandColor || '#22c55e') }}
               >
                 Share my eCardURL
               </p>

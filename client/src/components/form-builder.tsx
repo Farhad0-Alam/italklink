@@ -988,6 +988,27 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             {!collapsedSections.appearance && (
               <>
                 <div className="space-y-6">
+                  {/* Template Selection */}
+                  <div>
+                    <h4 className="text-md font-medium text-purple-200 mb-3">Template Style</h4>
+                    <div>
+                      <Label className="text-white text-sm">Template</Label>
+                      <Select 
+                        value={watchedValues.template || "minimal"} 
+                        onValueChange={(v) => form.setValue("template", v as any)}
+                      >
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="minimal">Minimal</SelectItem>
+                          <SelectItem value="bold">Bold</SelectItem>
+                          <SelectItem value="photo">Photo</SelectItem>
+                          <SelectItem value="dark">Dark</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                   {/* Default Colors Section */}
                   <div>
                     <h4 className="text-md font-medium text-purple-200 mb-3">Default Colors</h4>
