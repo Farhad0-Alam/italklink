@@ -594,56 +594,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             {!collapsedSections.contactInfo && (
               <>
                 <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="phone" className="text-white">{t("field.phone")}</Label>
-                    <Input
-                      id="phone"
-                      {...form.register("phone")}
-                      placeholder="+1 (555) 123-4567"
-                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                      data-testid="input-phone"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="email" className="text-white">{t("field.email")}</Label>
-                    <Input
-                      id="email" type="email"
-                      {...form.register("email")}
-                      placeholder="john@example.com"
-                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                      data-testid="input-email"
-                    />
-                    {form.formState.errors.email && <p className="text-red-400 text-sm mt-1">{form.formState.errors.email.message}</p>}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="website" className="text-white">{t("field.website")}</Label>
-                    <Input
-                      id="website"
-                      {...form.register("website")}
-                      placeholder="https://johndoe.com"
-                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                      data-testid="input-website"
-                    />
-                    {form.formState.errors.website && <p className="text-red-400 text-sm mt-1">{form.formState.errors.website.message}</p>}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="location" className="text-white">{t("field.location")}</Label>
-                    <Input
-                      id="location"
-                      {...form.register("location")}
-                      placeholder="New York, NY"
-                      className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                      data-testid="input-location"
-                    />
-                  </div>
-
-                  {/* Additional Contact Methods */}
-                  <div className="space-y-4">
-                    <h4 className="text-md font-medium text-purple-300">Additional Contact Methods</h4>
-                    {form.watch("customContacts")?.map((contact, index) => (
+                  <h4 className="text-md font-medium text-purple-300">Custom Contact Methods</h4>
+                  {form.watch("customContacts")?.map((contact, index) => (
                       <div key={contact.id} className="flex gap-2 items-end">
                         <div className="flex-1">
                           <Label className="text-white">Label</Label>
@@ -728,133 +680,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </Button>
                   </div>
 
-                  {/* Section & Icon styling */}
-                  <div className="border-t border-purple-600/30 pt-4 space-y-3">
-                    <h4 className="text-sm font-medium text-purple-200">Section Styling</h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-white text-xs">Section Background</Label>
-                        <div className="flex items-center gap-1">
-                          <input
-                            type="color"
-                            value={watchedValues.sectionStyles?.contactInfo?.sectionBackgroundColor || "#9333ea"}
-                            onChange={(e) => form.setValue("sectionStyles.contactInfo.sectionBackgroundColor", e.target.value)}
-                            className="w-8 h-6 rounded cursor-pointer"
-                          />
-                          <Input
-                            value={watchedValues.sectionStyles?.contactInfo?.sectionBackgroundColor || ""}
-                            onChange={(e) => form.setValue("sectionStyles.contactInfo.sectionBackgroundColor", e.target.value)}
-                            className="bg-slate-700 border-slate-600 text-white text-xs"
-                            placeholder="#9333ea"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-white text-xs">Section Border</Label>
-                        <div className="flex items-center gap-1">
-                          <input
-                            type="color"
-                            value={watchedValues.sectionStyles?.contactInfo?.sectionBorderColor || "#a855f7"}
-                            onChange={(e) => form.setValue("sectionStyles.contactInfo.sectionBorderColor", e.target.value)}
-                            className="w-8 h-6 rounded cursor-pointer"
-                          />
-                          <Input
-                            value={watchedValues.sectionStyles?.contactInfo?.sectionBorderColor || ""}
-                            onChange={(e) => form.setValue("sectionStyles.contactInfo.sectionBorderColor", e.target.value)}
-                            className="bg-slate-700 border-slate-600 text-white text-xs"
-                            placeholder="#a855f7"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <h4 className="text-sm font-medium text-purple-200 pt-2">Icon Styling (Optional)</h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        ["Icon Color","iconColor","#ffffff"],
-                        ["Icon Background","iconBackgroundColor","#475569"],
-                        ["Icon Text Color","iconTextColor","#64748b"],
-                      ].map(([label, key, def]) => (
-                        <div key={key as string}>
-                          <Label className="text-white text-xs">{label}</Label>
-                          <div className="flex items-center gap-1">
-                            <input
-                              type="color"
-                              value={(watchedValues.sectionStyles?.contactInfo as any)?.[key as string] || (def as string)}
-                              onChange={(e) => form.setValue(`sectionStyles.contactInfo.${key}` as any, e.target.value)}
-                              className="w-8 h-6 rounded cursor-pointer"
-                            />
-                            <Input
-                              value={(watchedValues.sectionStyles?.contactInfo as any)?.[key as string] || (def as string)}
-                              onChange={(e) => form.setValue(`sectionStyles.contactInfo.${key}` as any, e.target.value)}
-                              className="bg-slate-700 border-slate-600 text-white text-xs"
-                              placeholder={def as string}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
-                      <h5 className="text-xs font-medium text-purple-200">Icon Text Typography</h5>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <Label className="text-white text-xs">Font</Label>
-                          <Select
-                            value={watchedValues.sectionStyles?.contactInfo?.iconTextFont || ""}
-                            onValueChange={(v) => form.setValue("sectionStyles.contactInfo.iconTextFont", v)}
-                          >
-                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                              <SelectValue placeholder="Choose font" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {[
-                                "Inter","Roboto","Open Sans","Lato","Montserrat","Poppins","Source Sans Pro","Nunito","Raleway","Ubuntu","PT Sans",
-                                "Merriweather","Playfair Display","Oswald","Libre Baskerville","Crimson Text","Work Sans","Fira Sans","DM Sans","Space Grotesk"
-                              ].map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label className="text-white text-xs">Weight</Label>
-                          <Select
-                            value={watchedValues.sectionStyles?.contactInfo?.iconTextWeight || ""}
-                            onValueChange={(v) => form.setValue("sectionStyles.contactInfo.iconTextWeight", v as any)}
-                          >
-                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                              <SelectValue placeholder="Weight" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {[
-                                ["300","Light"],["400","Regular"],["500","Medium"],
-                                ["600","Semi Bold"],["700","Bold"],["800","Extra Bold"],
-                              ].map(([v,l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label className="text-white text-xs">Size: {watchedValues.sectionStyles?.contactInfo?.iconTextSize || 12}px</Label>
-                          <input
-                            type="range"
-                            value={watchedValues.sectionStyles?.contactInfo?.iconTextSize || 12}
-                            onChange={(e) => form.setValue("sectionStyles.contactInfo.iconTextSize", parseInt(e.target.value))}
-                            className="custom-range w-full"
-                            min={8}
-                            max={20}
-                          />
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="contactTextItalic"
-                            checked={watchedValues.sectionStyles?.contactInfo?.iconTextStyle === "italic"}
-                            onCheckedChange={(c) => form.setValue("sectionStyles.contactInfo.iconTextStyle", c ? "italic" : "normal")}
-                          />
-                          <Label htmlFor="contactTextItalic" className="text-white text-xs">Italic</Label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </>
             )}
           </div>
@@ -878,28 +703,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             </div>
             {!collapsedSections.customization && (
               <>
-                <div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {[
-                      ["whatsapp","WhatsApp","+1234567890","input-whatsapp"],
-                      ["linkedin","LinkedIn","linkedin.com/in/johndoe","input-linkedin"],
-                      ["instagram","Instagram","@johndoe","input-instagram"],
-                      ["twitter","Twitter/X","@johndoe","input-twitter"],
-                    ].map(([key, label, ph, tid]) => (
-                      <div key={key}>
-                        <Label htmlFor={key} className="text-white">{label}</Label>
-                        <Input
-                          id={key}
-                          {...form.register(key as any)}
-                          placeholder={ph as string}
-                          className="bg-slate-700 border-slate-600 text-white focus:ring-talklink-500"
-                          data-testid={tid as string}
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-4">
+                <div className="space-y-4">
                     <h4 className="text-md font-medium text-talklink-300">Additional Social Platforms</h4>
                     {form.watch("customSocials")?.map((social, index) => (
                       <div key={social.id} className="flex gap-2 items-end">
@@ -982,9 +786,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </Button>
                   </div>
 
-                  {/* Section styling + typography etc. */}
-                  {/* ... (unchanged, same as previous message) ... */}
-                </div>
               </>
             )}
           </div>
