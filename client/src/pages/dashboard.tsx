@@ -8,12 +8,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp } from "lucide-react";
+import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 
 interface User {
@@ -236,32 +238,127 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
-                  <AvatarFallback className="bg-orange-500 text-white">
-                    {user.firstName?.[0]}{user.lastName?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-gray-700">Hi {user.firstName}</span>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <i className="fas fa-chevron-down"></i>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => logoutMutation.mutate()}>
-                      {logoutMutation.isPending ? (
-                        <i className="fas fa-spinner fa-spin mr-2"></i>
-                      ) : (
-                        <i className="fas fa-sign-out-alt mr-2"></i>
-                      )}
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              {/* Profile Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center space-x-3 h-10 px-3 rounded-lg hover:bg-gray-50">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-orange-500 text-white text-sm font-medium">
+                        {user.firstName?.[0]}{user.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium text-gray-900">
+                        {user.firstName} {user.lastName}
+                      </span>
+                      <span className="text-xs text-gray-500">{user.email}</span>
+                    </div>
+                    <i className="fas fa-chevron-down text-xs text-gray-400"></i>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64 p-2" sideOffset={8}>
+                  {/* User Info Header */}
+                  <div className="flex items-center space-x-3 p-3 mb-2 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-orange-500 text-white">
+                        {user.firstName?.[0]}{user.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {user.firstName} {user.lastName}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                      <div className="flex items-center mt-1">
+                        <Badge className={`text-xs ${getPlanBadgeColor(user.planType)}`}>
+                          {user.planType === 'enterprise' && <Crown className="w-3 h-3 mr-1" />}
+                          {user.planType === 'pro' && <Shield className="w-3 h-3 mr-1" />}
+                          {user.planType.charAt(0).toUpperCase() + user.planType.slice(1)}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Profile Section */}
+                  <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider px-2">
+                    Account
+                  </DropdownMenuLabel>
+                  
+                  <DropdownMenuItem className="flex items-center space-x-3 px-3 py-2 cursor-pointer">
+                    <UserIcon className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">Edit Profile</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem className="flex items-center space-x-3 px-3 py-2 cursor-pointer">
+                    <Settings className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">Account Settings</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Billing Section */}
+                  <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider px-2">
+                    Billing
+                  </DropdownMenuLabel>
+
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/pricing')}
+                  >
+                    <Crown className="w-4 h-4 text-gray-500" />
+                    <div className="flex flex-col flex-1">
+                      <span className="text-sm">Upgrade Plan</span>
+                      <span className="text-xs text-gray-500">Get more features</span>
+                    </div>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem className="flex items-center space-x-3 px-3 py-2 cursor-pointer">
+                    <CreditCard className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">Billing & Invoices</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem className="flex items-center space-x-3 px-3 py-2 cursor-pointer">
+                    <FileText className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">Usage & Limits</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Support Section */}
+                  <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider px-2">
+                    Support
+                  </DropdownMenuLabel>
+
+                  <DropdownMenuItem className="flex items-center space-x-3 px-3 py-2 cursor-pointer">
+                    <FileText className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">Help Center</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem className="flex items-center space-x-3 px-3 py-2 cursor-pointer">
+                    <i className="fas fa-envelope w-4 h-4 text-gray-500"></i>
+                    <span className="text-sm">Contact Support</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Logout */}
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => logoutMutation.mutate()}
+                  >
+                    {logoutMutation.isPending ? (
+                      <i className="fas fa-spinner fa-spin w-4 h-4"></i>
+                    ) : (
+                      <LogOut className="w-4 h-4" />
+                    )}
+                    <span className="text-sm font-medium">Sign Out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
