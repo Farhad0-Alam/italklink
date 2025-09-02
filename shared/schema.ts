@@ -1403,6 +1403,28 @@ export const ragKnowledgeElementSchema = baseElementSchema.extend({
   }),
 });
 
+export const appleWalletElementSchema = baseElementSchema.extend({
+  type: z.literal("appleWallet"),
+  data: z.object({
+    title: z.string().default("Add to Apple Wallet"),
+    subtitle: z.string().default("Save this business card to your iPhone or Mac"),
+    buttonStyle: z.enum(["default", "minimal", "full"]).default("default"),
+    showIcon: z.boolean().default(true),
+    customColor: z.string().default(""),
+  }),
+});
+
+export const googleWalletElementSchema = baseElementSchema.extend({
+  type: z.literal("googleWallet"),
+  data: z.object({
+    title: z.string().default("Add to Google Wallet"),
+    subtitle: z.string().default("Save this business card to your Android phone"),
+    buttonStyle: z.enum(["default", "minimal", "full"]).default("default"),
+    showIcon: z.boolean().default(true),
+    customColor: z.string().default(""),
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   headingElementSchema,
@@ -1420,6 +1442,8 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   googleMapsElementSchema,
   aiChatbotElementSchema,
   ragKnowledgeElementSchema,
+  appleWalletElementSchema,
+  googleWalletElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;

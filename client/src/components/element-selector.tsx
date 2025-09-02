@@ -102,6 +102,20 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       icon: "fas fa-brain",
       color: "bg-indigo-100",
       description: "Advanced URL knowledge ingestion with vector search"
+    },
+    {
+      type: "appleWallet",
+      title: "Apple Wallet",
+      icon: "fas fa-wallet",
+      color: "bg-black",
+      description: "Add to Apple Wallet button"
+    },
+    {
+      type: "googleWallet",
+      title: "Google Wallet",
+      icon: "fas fa-credit-card",
+      color: "bg-blue-100",
+      description: "Add to Google Wallet button"
     }
   ];
 
@@ -318,6 +332,36 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             showIngestForm: true,
             showChatBox: true,
             primaryColor: "#22c55e",
+          }
+        };
+        break;
+      
+      case "appleWallet":
+        element = {
+          id,
+          type: "appleWallet",
+          order: Date.now(),
+          data: {
+            title: "Add to Apple Wallet",
+            subtitle: "Save this business card to your iPhone or Mac",
+            buttonStyle: "default" as const,
+            showIcon: true,
+            customColor: ""
+          }
+        };
+        break;
+      
+      case "googleWallet":
+        element = {
+          id,
+          type: "googleWallet",
+          order: Date.now(),
+          data: {
+            title: "Add to Google Wallet",
+            subtitle: "Save this business card to your Android phone",
+            buttonStyle: "default" as const,
+            showIcon: true,
+            customColor: ""
           }
         };
         break;

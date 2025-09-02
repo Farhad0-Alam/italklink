@@ -2174,6 +2174,205 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
           </div>
         );
 
+      case "appleWallet":
+        return (
+          <div className="mb-4">
+            {isEditing ? (
+              <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-semibold text-slate-800">Apple Wallet Element</h3>
+                  <Button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <i className={`fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-slate-600`}></i>
+                  </Button>
+                </div>
+                
+                {isExpanded && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm text-slate-600 mb-1 block">Button Title</label>
+                      <Input
+                        value={element.data.title}
+                        onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                        placeholder="Add to Apple Wallet"
+                        className="text-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-600 mb-1 block">Subtitle</label>
+                      <Input
+                        value={element.data.subtitle}
+                        onChange={(e) => handleDataUpdate({ subtitle: e.target.value })}
+                        placeholder="Save this business card to your iPhone or Mac"
+                        className="text-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-600 mb-1 block">Button Style</label>
+                      <select
+                        value={element.data.buttonStyle}
+                        onChange={(e) => handleDataUpdate({ buttonStyle: e.target.value as "default" | "minimal" | "full" })}
+                        className="w-full p-2 border border-slate-300 rounded text-black"
+                      >
+                        <option value="default">Default</option>
+                        <option value="minimal">Minimal</option>
+                        <option value="full">Full Width</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center">
+                <Button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch(`/api/wallet/apple/${cardData?.id || ''}/create`, {
+                        method: 'POST',
+                      });
+                      
+                      if (response.status === 501) {
+                        alert('Apple Wallet integration is being set up. Coming soon!');
+                        return;
+                      }
+                      
+                      if (!response.ok) {
+                        throw new Error('Failed to generate Apple pass');
+                      }
+                      
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${cardData?.fullName || 'BusinessCard'}.pkpass`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      window.URL.revokeObjectURL(url);
+                    } catch (error) {
+                      console.error('Error generating Apple pass:', error);
+                      alert('Failed to create Apple Wallet pass. Please try again.');
+                    }
+                  }}
+                  className={`
+                    ${element.data.buttonStyle === 'full' ? 'w-full' : element.data.buttonStyle === 'minimal' ? 'px-4 py-2' : 'px-6 py-3'}
+                    bg-black hover:bg-gray-800 text-white border-black
+                    transition-all duration-200
+                  `}
+                  style={element.data.customColor ? { backgroundColor: element.data.customColor } : {}}
+                  data-testid="button-apple-wallet-element"
+                >
+                  {element.data.showIcon && <i className="fas fa-wallet mr-2"></i>}
+                  {element.data.title}
+                </Button>
+                {element.data.subtitle && (
+                  <p className="text-xs text-slate-500 mt-2">{element.data.subtitle}</p>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      
+      case "googleWallet":
+        return (
+          <div className="mb-4">
+            {isEditing ? (
+              <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-semibold text-slate-800">Google Wallet Element</h3>
+                  <Button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <i className={`fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-slate-600`}></i>
+                  </Button>
+                </div>
+                
+                {isExpanded && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm text-slate-600 mb-1 block">Button Title</label>
+                      <Input
+                        value={element.data.title}
+                        onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                        placeholder="Add to Google Wallet"
+                        className="text-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-600 mb-1 block">Subtitle</label>
+                      <Input
+                        value={element.data.subtitle}
+                        onChange={(e) => handleDataUpdate({ subtitle: e.target.value })}
+                        placeholder="Save this business card to your Android phone"
+                        className="text-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-600 mb-1 block">Button Style</label>
+                      <select
+                        value={element.data.buttonStyle}
+                        onChange={(e) => handleDataUpdate({ buttonStyle: e.target.value as "default" | "minimal" | "full" })}
+                        className="w-full p-2 border border-slate-300 rounded text-black"
+                      >
+                        <option value="default">Default</option>
+                        <option value="minimal">Minimal</option>
+                        <option value="full">Full Width</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center">
+                <Button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch(`/api/wallet/google/${cardData?.id || ''}/create`, {
+                        method: 'POST',
+                      });
+                      
+                      if (response.status === 501) {
+                        alert('Google Wallet integration is being set up. Coming soon!');
+                        return;
+                      }
+                      
+                      if (!response.ok) {
+                        throw new Error('Failed to generate Google pass');
+                      }
+                      
+                      const result = await response.json();
+                      if (result.addToGoogleWalletUrl) {
+                        window.open(result.addToGoogleWalletUrl, '_blank');
+                      }
+                    } catch (error) {
+                      console.error('Error generating Google pass:', error);
+                      alert('Failed to create Google Wallet pass. Please try again.');
+                    }
+                  }}
+                  className={`
+                    ${element.data.buttonStyle === 'full' ? 'w-full' : element.data.buttonStyle === 'minimal' ? 'px-4 py-2' : 'px-6 py-3'}
+                    bg-blue-600 hover:bg-blue-700 text-white border-blue-600
+                    transition-all duration-200
+                  `}
+                  style={element.data.customColor ? { backgroundColor: element.data.customColor } : {}}
+                  data-testid="button-google-wallet-element"
+                >
+                  {element.data.showIcon && <i className="fas fa-credit-card mr-2"></i>}
+                  {element.data.title}
+                </Button>
+                {element.data.subtitle && (
+                  <p className="text-xs text-slate-500 mt-2">{element.data.subtitle}</p>
+                )}
+              </div>
+            )}
+          </div>
+        );
+
       default:
         return (
           <div className="mb-4 p-4 bg-slate-100 rounded-lg text-center text-slate-600">
