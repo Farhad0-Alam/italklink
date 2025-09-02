@@ -94,15 +94,17 @@ export default function CardEditor() {
       console.log('Found template:', selectedTemplate);
       if (selectedTemplate) {
         console.log('Applying template:', selectedTemplate.name);
-        setCardData(prev => ({
-          ...prev,
+        const newCardData = {
+          ...cardData,
           template: selectedTemplate.id,
-          brandColor: selectedTemplate.brandColor || prev.brandColor,
-          accentColor: selectedTemplate.accentColor || prev.accentColor,
-          backgroundColor: selectedTemplate.backgroundColor || prev.backgroundColor,
-          textColor: selectedTemplate.textColor || prev.textColor,
-          font: selectedTemplate.font || prev.font,
-        }));
+          brandColor: selectedTemplate.brandColor || cardData.brandColor,
+          accentColor: selectedTemplate.accentColor || cardData.accentColor,
+          backgroundColor: selectedTemplate.backgroundColor || cardData.backgroundColor,
+          textColor: selectedTemplate.textColor || cardData.textColor,
+          font: selectedTemplate.font || cardData.font,
+        };
+        console.log('New card data with template:', newCardData);
+        setCardData(newCardData);
       }
     }
   }, [selectedTemplateId, templates, existingCard]);
@@ -115,33 +117,33 @@ export default function CardEditor() {
     }
   }, [existingCard]);
 
-  // Auto-save functionality
-  useEffect(() => {
-    // Don't auto-save if we don't have required fields or user is not authenticated
-    if (!cardData.fullName || !cardData.title || !user) {
-      return;
-    }
+  // Auto-save functionality - disabled to prevent page interruptions
+  // useEffect(() => {
+  //   // Don't auto-save if we don't have required fields or user is not authenticated
+  //   if (!cardData.fullName || !cardData.title || !user) {
+  //     return;
+  //   }
 
-    // Clear existing timeout
-    if (autoSaveTimeout) {
-      clearTimeout(autoSaveTimeout);
-    }
+  //   // Clear existing timeout
+  //   if (autoSaveTimeout) {
+  //     clearTimeout(autoSaveTimeout);
+  //   }
 
-    // Set new timeout for auto-save (2 seconds after last change)
-    const timeout = setTimeout(() => {
-      console.log('Auto-saving card data:', cardData);
-      saveMutation.mutate(cardData);
-    }, 2000);
+  //   // Set new timeout for auto-save (2 seconds after last change)
+  //   const timeout = setTimeout(() => {
+  //     console.log('Auto-saving card data:', cardData);
+  //     saveMutation.mutate(cardData);
+  //   }, 2000);
 
-    setAutoSaveTimeout(timeout);
+  //   setAutoSaveTimeout(timeout);
 
-    // Cleanup timeout on unmount
-    return () => {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-    };
-  }, [cardData, params.id, user]); // eslint-disable-line react-hooks/exhaustive-deps
+  //   // Cleanup timeout on unmount
+  //   return () => {
+  //     if (timeout) {
+  //       clearTimeout(timeout);
+  //     }
+  //   };
+  // }, [cardData, params.id, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateShareUrl = (card: any) => {
     if (card.shareSlug) {
