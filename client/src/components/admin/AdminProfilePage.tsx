@@ -175,8 +175,8 @@ export default function AdminProfilePage() {
       });
       
       preferencesForm.reset({
-        timezone: user.timezone || "UTC",
-        preferredLanguage: user.preferredLanguage || "en",
+        timezone: String(user.timezone || "UTC"),
+        preferredLanguage: String(user.preferredLanguage || "en"),
       });
       
       setTwoFactorEnabled(user.twoFactorEnabled || false);
@@ -327,7 +327,12 @@ export default function AdminProfilePage() {
   };
 
   const onSubmitPreferences = (data: PreferencesFormData) => {
-    updatePreferencesMutation.mutate(data);
+    // Ensure data is clean before submitting
+    const cleanData = {
+      timezone: String(data.timezone || 'UTC'),
+      preferredLanguage: String(data.preferredLanguage || 'en')
+    };
+    updatePreferencesMutation.mutate(cleanData);
   };
 
   const handleToggle2FA = () => {
@@ -830,7 +835,10 @@ export default function AdminProfilePage() {
                     <div>
                       <Label htmlFor="timezone">Timezone</Label>
                       <Select 
-                        value={preferencesForm.watch('timezone')}
+                        value={(() => {
+                          const val = preferencesForm.watch('timezone');
+                          return typeof val === 'string' ? val : 'UTC';
+                        })()}
                         onValueChange={(value) => preferencesForm.setValue('timezone', value)}
                       >
                         <SelectTrigger data-testid="select-timezone">
@@ -858,7 +866,10 @@ export default function AdminProfilePage() {
                     <div>
                       <Label htmlFor="language">Preferred Language</Label>
                       <Select 
-                        value={preferencesForm.watch('preferredLanguage')}
+                        value={(() => {
+                          const val = preferencesForm.watch('preferredLanguage');
+                          return typeof val === 'string' ? val : 'en';
+                        })()}
                         onValueChange={(value) => preferencesForm.setValue('preferredLanguage', value)}
                       >
                         <SelectTrigger data-testid="select-language">
