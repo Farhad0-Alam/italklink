@@ -1,0 +1,209 @@
+You are a senior full-stack engineer. Add digital wallet passes to every e-card in a 2TalkLink-style app (React 19 + Vite, Node/Fastify, TypeScript, Drizzle ORM, PostgreSQL).
+Company HQ is USA, users are worldwide.
+
+Goal
+
+For each e-card, show two buttons:
+
+Add to Apple Wallet → generate and return a signed .pkpass
+
+Save to Google Wallet → return a JWT “Save to Google Wallet” URL (or button) for a Generic Pass
+
+Data Model (Drizzle/Postgres)
+
+Add a table wallet_passes linked to each ecard:
+
+id (pk)
+
+ecard_id (fk → ecards.id, unique)
+
+apple_pass_serial (nullable, string)
+
+google_object_id (nullable, string)
+
+last_generated_at (timestamptz)
+
+theme_hex (string, from ecard brand)
+
+indexes: unique on ecard_id; btree on last_generated_at
+
+Ensure each ecard already has: display_name, title, company, phone, email, website, avatar_url, logo_url, cover_url, and a canonical public ecard URL like https://2talklink.com/u/:slug (needed for the QR in the pass).
+
+Backend (Fastify, TypeScript)
+
+Implement endpoints:
+
+Apple Wallet
+POST /api/wallet/apple/:ecardId/create → returns application/vnd.apple.pkpass
+
+Build a Generic Apple pass (PassKit) with:
+
+Primary fields: display_name (name), title (subtitle)
+
+Secondary fields: company, phone, email
+
+Back fields: website, ecard_url
+
+Barcode/QR: encode the public ecard URL
+
+Branding: logo.png, icon.png, optional strip.png using ecard’s theme color
+
+Sign using Pass Type ID certificate & Apple WWDR; update wallet_passes.apple_pass_serial
+
+Cache by ecardId; if already generated and data unchanged, re-use existing; on ecard update, re-generate and bump serial.
+
+Google Wallet
+POST /api/wallet/google/:ecardId/create → returns { saveUrl } where saveUrl is a “Save to Google Wallet” JWT URL
+
+Use Google Wallet API (Generic Pass):
+
+Create Class (once) if not exists (e.g., issuerId.2talklink_generic_card)
+
+Create Object per ecard with:
+
+header = display_name
+
+subheader = title
+
+textModulesData for company/phone/email/website
+
+linksModuleData linking to public ecard URL
+
+imageModulesData with logo_url/avatar_url
+
+barcode or qrCode for the ecard URL
+
+hexBackgroundColor from theme_hex
+
+Sign JWT (service account) that wraps the object; return a Save URL
+
+Store object id to wallet_passes.google_object_id
+
+Common
+
+GET /api/wallet/status/:ecardId → { hasApple, hasGoogle, lastGeneratedAt }
+
+Validate ownership/permissions for private dashboards; public add is allowed via signed short-lived token or rate limit.
+
+Packages (Node)
+
+Apple: use a maintained PassKit lib (e.g., passkit-generator or similar) to create/sign .pkpass
+
+Google: google-auth-library for service account + JWT; call Google Wallet API (Generic Pass)
+
+QR: qrcode to generate PNG for pass barcode if needed
+
+File: stream .pkpass as attachment with correct MIME
+
+Environment & Secrets
+
+Set these variables and load safely (no logs):
+
+Apple
+
+APPLE_TEAM_ID
+
+APPLE_PASS_TYPE_ID (e.g., pass.com.yourcompany.2talklink)
+
+APPLE_KEY_ID
+
+APPLE_CERT_P12_BASE64 (base64-encoded .p12)
+
+APPLE_CERT_PASSWORD
+
+APPLE_WWDR_CERT_BASE64
+
+Google
+
+GOOGLE_WALLET_ISSUER_ID
+
+GOOGLE_WALLET_CLASS_ID (e.g., issuerId.2talklink_generic_card)
+
+GOOGLE_SERVICE_ACCOUNT_JSON_BASE64 (the service account key JSON, base64)
+
+App
+
+PUBLIC_APP_URL (e.g., https://2talklink.com
+)
+
+Frontend (React + Tailwind)
+
+On every ecard public page and dashboard view:
+
+Detect platform (iOS/Android); still show both buttons with badges that follow Apple/Google branding.
+
+Add to Apple Wallet → calls /api/wallet/apple/:ecardId/create and triggers file download.
+
+Save to Google Wallet → calls /api/wallet/google/:ecardId/create, receives { saveUrl }, opens in new tab.
+
+Show small helper text: “Wallet passes update when you edit your e-card—re-add to refresh.”
+
+For desktop users, show both buttons; for mobile Safari, focus Apple; for mobile Chrome/Android, focus Google.
+
+Pass Content Rules
+
+The QR/Barcode always encodes the public ecard URL.
+
+Use ecard theme color for background/strip (Apple) and hexBackgroundColor (Google).
+
+If images missing, fall back to company logo.
+
+Localize labels (en default); prepare i18n keys.
+
+Admin UX
+
+In Admin → E-cards → “Wallet” tab:
+
+Show apple/google status, lastGeneratedAt, regenerate buttons.
+
+Global settings for Apple/Google credentials with validation pings.
+
+Download sample .pkpass for test.
+
+Security & Compliance
+
+Rate-limit wallet endpoints; require auth for dashboard actions.
+
+Never log PII or raw cert material.
+
+Validate ecardId belongs to tenant/workspace.
+
+Keep certificates in secrets store; rotate keys supported.
+
+Drizzle Migrations & Seeds
+
+Create wallet_passes table/migration.
+
+Seed one demo ecard and generate both passes (behind a SEED_WALLET=true flag).
+
+Deliverables
+
+Drizzle models + migrations
+
+Fastify routes for Apple/Google
+
+React components: <WalletButtons ecardId={...} />
+
+.env.example with required keys
+
+README “Wallet Setup” section with:
+
+How to create Apple Pass Type ID (Certificates, Identifiers & Profiles)
+
+How to get Google Wallet Issuer ID & service account and enable API
+
+How to set GOOGLE_WALLET_CLASS_ID
+
+Branding badge usage guidelines
+
+Runbook
+npm install
+npm run db:migrate
+npm run dev
+# test Apple .pkpass:
+curl -X POST -L http://localhost:3000/api/wallet/apple/ECARD_ID/create -o ecard.pkpass
+# test Google Save URL:
+curl -X POST http://localhost:3000/api/wallet/google/ECARD_ID/create
+
+
+Build exactly the above wallet features so every ecard gets working Apple & Google Wallet buttons.

@@ -10,6 +10,7 @@ import { storage } from "@/lib/storage";
 import { generateShareUrl, copyToClipboard, logEvent } from "@/lib/share";
 import { useToast } from "@/hooks/use-toast";
 import { defaultCardData } from "@/lib/card-data";
+import { WalletButtons } from "@/components/WalletButtons";
 
 export const Builder = () => {
   const { t } = useTranslation();
@@ -147,6 +148,23 @@ export const Builder = () => {
                     <i className="fas fa-share-alt mr-2"></i>
                     {t('action.shareLink')}
                   </Button>
+                  
+                  {/* Digital Wallet Buttons */}
+                  <div className="bg-slate-800 rounded-lg p-3 border border-slate-700">
+                    <div className="text-center mb-2">
+                      <h4 className="text-xs font-medium text-slate-300 mb-1">Save to Wallet</h4>
+                      <p className="text-xs text-slate-500">Add to your phone's digital wallet</p>
+                    </div>
+                    <WalletButtons
+                      ecardId={cardData.id || ''}
+                      cardData={{
+                        fullName: cardData.fullName,
+                        brandColor: cardData.brandColor
+                      }}
+                      showLabels={false}
+                      size="sm"
+                    />
+                  </div>
                   
                   <Button
                     asChild

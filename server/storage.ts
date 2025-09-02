@@ -1,9 +1,10 @@
 import { db } from './db';
 import { 
-  users, businessCards, teams, teamMembers, bulkGenerationJobs, subscriptionPlans, globalTemplates,
+  users, businessCards, teams, teamMembers, bulkGenerationJobs, subscriptionPlans, globalTemplates, walletPasses,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
-  type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate
+  type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
+  type WalletPass, type InsertWalletPass
 } from '@shared/schema';
 import { eq, and, desc, count, inArray } from 'drizzle-orm';
 
@@ -67,6 +68,11 @@ export interface IStorage {
   
   // Global templates operations
   getGlobalTemplates(filters?: { isActive?: boolean }): Promise<GlobalTemplate[]>;
+  
+  // Wallet pass operations
+  getWalletPass(ecardId: string): Promise<WalletPass | undefined>;
+  createWalletPass(passData: InsertWalletPass): Promise<WalletPass>;
+  updateWalletPass(ecardId: string, passData: Partial<InsertWalletPass>): Promise<WalletPass>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -400,6 +406,26 @@ export class DatabaseStorage implements IStorage {
     }
     
     return await query.orderBy(desc(globalTemplates.createdAt));
+  }
+
+  // Wallet pass operations
+  async getWalletPass(ecardId: string): Promise<WalletPass | undefined> {
+    const [pass] = await db.select().from(walletPasses).where(eq(walletPasses.ecardId, ecardId));
+    return pass;
+  }
+
+  async createWalletPass(passData: InsertWalletPass): Promise<WalletPass> {
+    const [pass] = await db.insert(walletPasses).values(passData).returning();
+    return pass;
+  }
+
+  async updateWalletPass(ecardId: string, passData: Partial<InsertWalletPass>): Promise<WalletPass> {
+    const [pass] = await db
+      .update(walletPasses)
+      .set({ ...passData, updatedAt: new Date() })
+      .where(eq(walletPasses.ecardId, ecardId))
+      .returning();
+    return pass;
   }
 }
 

@@ -38,6 +38,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup admin routes
   app.use('/api/admin', adminRoutes);
   
+  // Setup wallet routes
+  const walletRoutes = (await import('./wallet-routes')).default;
+  app.use('/api/wallet', walletRoutes);
+  
   // Setup affiliate routes
   const affiliateRoutes = (await import('./affiliate-routes')).default;
   app.use('/api/affiliate', affiliateRoutes);

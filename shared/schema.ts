@@ -248,6 +248,32 @@ export const businessCards = pgTable("business_cards", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Wallet passes table
+export const walletPasses = pgTable("wallet_passes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ecardId: varchar("ecard_id").references(() => businessCards.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Apple Wallet data
+  applePassSerial: varchar("apple_pass_serial"),
+  
+  // Google Wallet data  
+  googleObjectId: varchar("google_object_id"),
+  
+  // Tracking
+  lastGeneratedAt: timestamp("last_generated_at").defaultNow(),
+  themeHex: varchar("theme_hex").notNull(), // From ecard brand color
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  uniqueEcardId: index("unique_ecard_id").on(table.ecardId),
+  lastGeneratedIdx: index("last_generated_idx").on(table.lastGeneratedAt),
+}));
+
+// Wallet Pass types
+export type WalletPass = typeof walletPasses.$inferSelect;
+export type InsertWalletPass = typeof walletPasses.$inferInsert;
+
 // Payment history table
 export const payments = pgTable("payments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -1016,6 +1042,7 @@ export type InsertCouponUsage = typeof couponUsages.$inferInsert;
 // Zod schemas for database
 export const insertUserSchema = createInsertSchema(users);
 export const insertDbBusinessCardSchema = createInsertSchema(businessCards);
+export const insertWalletPassSchema = createInsertSchema(walletPasses);
 export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans);
 export const insertPaymentSchema = createInsertSchema(payments);
 export const insertTeamSchema = createInsertSchema(teams);
