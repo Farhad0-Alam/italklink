@@ -27,8 +27,39 @@ export default function TemplatePreview() {
     if (templates && params.templateId) {
       const template = templates.find((t: any) => t.id === params.templateId);
       
-      if (template && template.templateData) {
-        setCardData(template.templateData);
+      if (template) {
+        // Use templateData if available, otherwise create sample data for preview
+        if (template.templateData) {
+          setCardData(template.templateData);
+        } else {
+          // Create sample business card data for preview
+          const sampleData: BusinessCard = {
+            id: 'preview',
+            fullName: 'John Doe',
+            title: 'Software Engineer',
+            company: 'Tech Company',
+            email: 'john@example.com',
+            phone: '+1 (555) 123-4567',
+            website: 'https://johndoe.com',
+            socialLinks: [
+              { platform: 'LinkedIn', url: 'https://linkedin.com/in/johndoe', icon: 'fab fa-linkedin' },
+              { platform: 'Twitter', url: 'https://twitter.com/johndoe', icon: 'fab fa-twitter' }
+            ],
+            backgroundColor: template.backgroundColor || '#ffffff',
+            textColor: template.textColor || '#000000',
+            brandColor: '#22c55e',
+            template: template.id,
+            profileImageUrl: '',
+            contactButtons: [
+              { type: 'phone', value: '+1 (555) 123-4567', icon: 'fas fa-phone', label: 'Call' },
+              { type: 'email', value: 'john@example.com', icon: 'fas fa-envelope', label: 'Email' },
+              { type: 'website', value: 'https://johndoe.com', icon: 'fas fa-globe', label: 'Website' },
+              { type: 'whatsapp', value: '+1 (555) 123-4567', icon: 'fab fa-whatsapp', label: 'WhatsApp' }
+            ],
+            dynamicHeaders: []
+          };
+          setCardData(sampleData);
+        }
         setError(null);
       } else {
         setError("Template not found");

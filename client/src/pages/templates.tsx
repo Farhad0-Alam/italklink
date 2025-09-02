@@ -167,55 +167,14 @@ export default function Templates() {
   };
 
   const renderTemplatePreview = (template: Template) => {
-    // For database templates, use the template data to create a proper preview
-    if (template.templateData) {
-      const data = template.templateData;
-      const bgColor = data.backgroundColor || "#ffffff";
-      const brandColor = data.brandColor || "#22c55e";
-      const textColor = data.textColor || "#000000";
-      
+    // For database templates, use the previewImage if available
+    if (template.previewImage) {
       return (
-        <div 
-          className="w-full h-full flex flex-col items-center justify-center rounded-lg p-4"
-          style={{ backgroundColor: bgColor, color: textColor }}
-        >
-          {/* Profile section */}
-          <div className="text-center mb-4">
-            <div 
-              className="w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center"
-              style={{ backgroundColor: brandColor }}
-            >
-              <span className="text-white font-bold text-lg">
-                {data.fullName?.[0] || "J"}
-              </span>
-            </div>
-            <h3 className="font-bold text-sm" style={{ color: textColor }}>
-              {data.fullName || "John Doe"}
-            </h3>
-            <p className="text-xs opacity-75">
-              {data.title || "Professional"}
-            </p>
-          </div>
-          
-          {/* Contact buttons */}
-          <div className="flex space-x-1 mb-3">
-            {[1, 2, 3, 4].map((i) => (
-              <div 
-                key={i} 
-                className="w-6 h-6 rounded flex items-center justify-center"
-                style={{ backgroundColor: brandColor }}
-              >
-                <i className="fas fa-phone text-white text-xs"></i>
-              </div>
-            ))}
-          </div>
-          
-          {/* Info section */}
-          <div className="text-center space-y-1">
-            <div className="text-xs opacity-75">{data.company || "Company Name"}</div>
-            <div className="text-xs opacity-75">{data.email || "email@example.com"}</div>
-          </div>
-        </div>
+        <img 
+          src={template.previewImage} 
+          alt={template.name}
+          className="w-full h-full object-cover"
+        />
       );
     }
 
