@@ -67,14 +67,6 @@ interface AdminUser {
   permissions?: string[];
 }
 
-interface AdminActivity {
-  id: string;
-  action: string;
-  targetType: string;
-  targetId?: string;
-  details?: string;
-  createdAt: string;
-}
 
 interface AdminSession {
   id: string;
@@ -155,10 +147,6 @@ export default function AdminProfilePage() {
   });
 
   // Additional data queries
-  const { data: activities } = useQuery<AdminActivity[]>({
-    queryKey: ['/api/admin/profile/activities'],
-    retry: false,
-  });
 
   const { data: sessions } = useQuery<AdminSession[]>({
     queryKey: ['/api/admin/profile/sessions'],
@@ -372,7 +360,7 @@ export default function AdminProfilePage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center space-x-2">
             <User className="w-4 h-4" />
             <span>Profile</span>
@@ -380,10 +368,6 @@ export default function AdminProfilePage() {
           <TabsTrigger value="security" className="flex items-center space-x-2">
             <Lock className="w-4 h-4" />
             <span>Security</span>
-          </TabsTrigger>
-          <TabsTrigger value="activity" className="flex items-center space-x-2">
-            <Activity className="w-4 h-4" />
-            <span>Activity</span>
           </TabsTrigger>
           <TabsTrigger value="sessions" className="flex items-center space-x-2">
             <Shield className="w-4 h-4" />
@@ -730,42 +714,6 @@ export default function AdminProfilePage() {
           </div>
         </TabsContent>
 
-        {/* Activity Tab */}
-        <TabsContent value="activity">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Activity className="w-5 h-5" />
-                <span>Recent Activity</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {activities && activities.length > 0 ? (
-                <div className="space-y-4">
-                  {activities.map((activity) => (
-                    <div key={activity.id} className="flex items-start space-x-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="flex-shrink-0">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">{activity.action}</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">{activity.details}</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(activity.createdAt).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 dark:text-gray-300">No recent activity found</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* Sessions Tab */}
         <TabsContent value="sessions">
