@@ -308,6 +308,7 @@ interface PageElementProps {
 
 export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, cardData }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   
   // Define sensors for drag and drop
   const sensors = useSensors(
