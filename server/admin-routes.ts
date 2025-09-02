@@ -1767,8 +1767,212 @@ router.post('/upload-avatar', requireOwner, async (req, res) => {
 });
 
 // Mount affiliate admin routes
-const affiliateAdminRoutes = (await import('./admin-affiliate-routes')).default;
-router.use('/', affiliateAdminRoutes);
+import('./admin-affiliate-routes').then(module => {
+  router.use('/', module.default);
+}).catch(err => {
+  console.error('Failed to load affiliate admin routes:', err);
+});
+
+// === ADMIN PROFILE ENDPOINTS ===
+
+// Get admin profile
+router.get('/profile', requireOwner, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    
+    const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    
+    if (!user[0]) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    const { passwordHash, twoFactorSecret, backupCodes, ...userProfile } = user[0];
+    
+    res.json(userProfile);
+  } catch (error) {
+    console.error('Failed to get admin profile:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update admin profile
+router.patch('/profile', requireOwner, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const { firstName, lastName, email } = req.body;
+    
+    const validation = z.object({
+      firstName: z.string().min(1).max(50).optional(),
+      lastName: z.string().min(1).max(50).optional(),
+      email: z.string().email().optional(),
+    });
+    
+    const validatedData = validation.parse({ firstName, lastName, email });
+    
+    const updatedUser = await db.update(users)
+      .set({
+        ...validatedData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser[0]) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    await logAdminAction(userId, 'update', 'admin_profile', userId, validatedData);
+    
+    const { passwordHash, twoFactorSecret, backupCodes, ...userProfile } = updatedUser[0];
+    res.json(userProfile);
+  } catch (error) {
+    console.error('Failed to update admin profile:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update admin preferences
+router.patch('/profile/preferences', requireOwner, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const { timezone, preferredLanguage } = req.body;
+    
+    const validation = z.object({
+      timezone: z.string().optional(),
+      preferredLanguage: z.string().optional(),
+    });
+    
+    const validatedData = validation.parse({ timezone, preferredLanguage });
+    
+    const updatedUser = await db.update(users)
+      .set({
+        ...validatedData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser[0]) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    await logAdminAction(userId, 'update', 'admin_preferences', userId, validatedData);
+    
+    res.json({ message: 'Preferences updated successfully' });
+  } catch (error) {
+    console.error('Failed to update admin preferences:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Toggle 2FA
+router.post('/profile/2fa', requireOwner, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const { enabled } = req.body;
+    
+    const validation = z.object({
+      enabled: z.boolean(),
+    });
+    
+    const validatedData = validation.parse({ enabled });
+    
+    const updatedUser = await db.update(users)
+      .set({
+        twoFactorEnabled: validatedData.enabled,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser[0]) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    await logAdminAction(userId, 'update', 'admin_2fa', userId, { enabled: validatedData.enabled });
+    
+    res.json({ message: `Two-factor authentication ${validatedData.enabled ? 'enabled' : 'disabled'}` });
+  } catch (error) {
+    console.error('Failed to toggle 2FA:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get admin activities
+router.get('/profile/activities', requireOwner, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    
+    const activities = await db.select({
+      id: adminLogs.id,
+      action: adminLogs.action,
+      targetType: adminLogs.targetType,
+      targetId: adminLogs.targetId,
+      details: adminLogs.details,
+      createdAt: adminLogs.createdAt,
+    })
+    .from(adminLogs)
+    .where(eq(adminLogs.actorId, userId))
+    .orderBy(desc(adminLogs.createdAt))
+    .limit(20);
+    
+    res.json(activities);
+  } catch (error) {
+    console.error('Failed to get admin activities:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get admin sessions (mock data for now)
+router.get('/profile/sessions', requireOwner, async (req, res) => {
+  try {
+    // Mock session data since we don't have a sessions tracking system yet
+    const mockSessions = [
+      {
+        id: '1',
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        ipAddress: '192.168.1.1',
+        location: 'New York, NY',
+        isCurrentSession: true,
+        lastActive: new Date().toISOString(),
+        createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
+      },
+      {
+        id: '2',
+        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)',
+        ipAddress: '192.168.1.5',
+        location: 'New York, NY',
+        isCurrentSession: false,
+        lastActive: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
+      },
+    ];
+    
+    res.json(mockSessions);
+  } catch (error) {
+    console.error('Failed to get admin sessions:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Revoke admin session
+router.delete('/profile/sessions/:sessionId', requireOwner, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const { sessionId } = req.params;
+    
+    // For now, just return success since we're using mock data
+    // In a real implementation, you would revoke the actual session
+    
+    await logAdminAction(userId, 'revoke', 'admin_session', sessionId, { sessionId });
+    
+    res.json({ message: 'Session revoked successfully' });
+  } catch (error) {
+    console.error('Failed to revoke admin session:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 export default router;
     

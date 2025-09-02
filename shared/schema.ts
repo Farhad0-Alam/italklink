@@ -60,7 +60,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  password: varchar("password"), // For email/password authentication (null for OAuth users)
+  passwordHash: varchar("password_hash"), // For email/password authentication (null for OAuth users)
   role: userRoleEnum("role").default('user'),
   
   // Subscription fields
@@ -73,6 +73,17 @@ export const users = pgTable("users", {
   // Usage limits
   businessCardsCount: integer("business_cards_count").default(0),
   businessCardsLimit: integer("business_cards_limit").default(1), // Free plan limit
+  
+  // Admin profile fields
+  lastLoginAt: timestamp("last_login_at"),
+  isActive: boolean("is_active").default(true),
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  twoFactorSecret: varchar("two_factor_secret"),
+  backupCodes: jsonb("backup_codes"), // Array of backup codes
+  loginAttempts: integer("login_attempts").default(0),
+  lockedUntil: timestamp("locked_until"),
+  timezone: varchar("timezone").default('UTC'),
+  preferredLanguage: varchar("preferred_language").default('en'),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
