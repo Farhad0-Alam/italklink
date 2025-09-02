@@ -23,6 +23,24 @@ export default function CardEditor() {
   const [, setLocation] = useLocation();
   const cardRef = useRef<HTMLDivElement>(null);
   
+  // Check authentication first
+  const { data: user, isLoading: userLoading, error: userError } = useQuery({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+  });
+  
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (userError && !userLoading) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to create or edit business cards.",
+        variant: "destructive",
+      });
+      setLocation('/login');
+    }
+  }, [userError, userLoading, setLocation, toast]);
+  
   // Get template from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
   const selectedTemplateId = urlParams.get('template');
@@ -95,8 +113,8 @@ export default function CardEditor() {
 
   // Auto-save functionality
   useEffect(() => {
-    // Don't auto-save if we don't have required fields
-    if (!cardData.fullName || !cardData.title) {
+    // Don't auto-save if we don't have required fields or user is not authenticated
+    if (!cardData.fullName || !cardData.title || !user) {
       return;
     }
 
@@ -107,6 +125,7 @@ export default function CardEditor() {
 
     // Set new timeout for auto-save (2 seconds after last change)
     const timeout = setTimeout(() => {
+      console.log('Auto-saving card data:', cardData);
       saveMutation.mutate(cardData);
     }, 2000);
 
@@ -118,7 +137,7 @@ export default function CardEditor() {
         clearTimeout(timeout);
       }
     };
-  }, [cardData, params.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cardData, params.id, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateShareUrl = (card: any) => {
     if (card.shareSlug) {
@@ -151,10 +170,11 @@ export default function CardEditor() {
         description: "Your business card has been saved successfully.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('Save error:', error);
       toast({
-        title: "Error",
-        description: "Failed to auto-save card. Please try again.",
+        title: "Save Failed",
+        description: error.message || "Failed to save card. Please check your login status and try again.",
         variant: "destructive",
       });
     },
@@ -188,6 +208,34 @@ export default function CardEditor() {
     } else {
       copyShareUrl();
     }
+  };
+
+  const downloadVCard = () => {
+    const vCardData = `BEGIN:VCARD
+VERSION:3.0
+FN:${cardData.fullName}
+ORG:${cardData.company || ''}
+TITLE:${cardData.title}
+TEL:${cardData.phone || ''}
+EMAIL:${cardData.email || ''}
+URL:${cardData.website || ''}
+NOTE:${cardData.about || ''}
+END:VCARD`;
+
+    const blob = new Blob([vCardData], { type: 'text/vcard' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${cardData.fullName || 'contact'}.vcf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Contact Downloaded",
+      description: "VCard file downloaded successfully. You can now add it to your contacts.",
+    });
   };
 
   if (isLoading) {
@@ -241,6 +289,16 @@ export default function CardEditor() {
                   >
                     <Share2 className="w-4 h-4 mr-1" />
                     Share
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={downloadVCard}
+                    className="bg-green-100 hover:bg-green-200 text-green-700"
+                    data-testid="button-download-vcard"
+                  >
+                    <i className="fas fa-download w-4 h-4 mr-1"></i>
+                    Save Contact
                   </Button>
                 </>
               )}
