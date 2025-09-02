@@ -168,9 +168,9 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
         className="rounded-2xl shadow-2xl overflow-hidden w-full mx-auto card-shadow"
         style={{ 
           maxWidth: '430px',
-          backgroundColor: data.template === 'dark' ? '#1a1a1a' : (data.backgroundColor || '#ffffff'),
+          backgroundColor: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#1a1a1a' : (data.backgroundColor || '#ffffff'),
           fontFamily: data.font ? `var(--font-${data.font})` : 'var(--font-inter)',
-          color: data.template === 'dark' ? '#ffffff' : (data.textColor || '#000000')
+          color: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#ffffff' : (data.textColor || '#000000')
         }}
       >
         <div className="relative">
@@ -293,7 +293,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
         </div>
           
         {/* Content */}
-        <div className={`pb-8 px-6 text-center ${data.template === 'dark' ? 'text-white' : 'text-slate-800'} ${
+        <div className={`pb-8 px-6 text-center ${data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? 'text-white' : 'text-slate-800'} ${
           data.headerDesign === 'profile-center' ? 'pt-20' : 
           data.headerDesign === 'split-design' ? 'pt-16' : 'pt-16'
         }`}>
@@ -301,7 +301,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           <h3 
             className="text-xl font-bold mb-1" 
             style={{
-              color: getSectionStyle('basicInfo', 'nameColor') || data.headingColor || (data.template === 'dark' ? '#ffffff' : '#1f2937'),
+              color: getSectionStyle('basicInfo', 'nameColor') || data.headingColor || (data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#ffffff' : '#1f2937'),
               fontSize: `${getSectionStyle('basicInfo', 'nameFontSize') || (data.headingFontSize || 20) + 4}px`,
               fontWeight: getSectionStyle('basicInfo', 'nameFontWeight') || data.headingFontWeight || 600,
               fontFamily: getSectionStyle('basicInfo', 'nameFont') || 'Inter, sans-serif',
@@ -314,7 +314,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           <p 
             className="text-sm mb-2" 
             style={{
-              color: getSectionStyle('basicInfo', 'titleColor') || data.paragraphColor || (data.template === 'dark' ? '#e5e7eb' : '#4b5563'),
+              color: getSectionStyle('basicInfo', 'titleColor') || data.paragraphColor || (data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#e5e7eb' : '#4b5563'),
               fontSize: `${getSectionStyle('basicInfo', 'titleFontSize') || data.paragraphFontSize || 14}px`,
               fontWeight: getSectionStyle('basicInfo', 'titleFontWeight') || data.paragraphFontWeight || 400,
               fontFamily: getSectionStyle('basicInfo', 'titleFont') || 'Inter, sans-serif',
@@ -328,7 +328,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             <p 
               className="text-sm mb-4" 
               style={{
-                color: getSectionStyle('basicInfo', 'companyColor') || (data.template === 'dark' ? '#d1d5db' : '#6b7280'),
+                color: getSectionStyle('basicInfo', 'companyColor') || (data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#d1d5db' : '#6b7280'),
                 fontSize: `${getSectionStyle('basicInfo', 'companyFontSize') || data.paragraphFontSize || 14}px`,
                 fontWeight: getSectionStyle('basicInfo', 'companyFontWeight') || data.paragraphFontWeight || 400,
                 fontFamily: getSectionStyle('basicInfo', 'companyFont') || 'Inter, sans-serif',
@@ -345,26 +345,26 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
             {/* Grid of Contact Buttons ONLY - Responsive 2 rows of 4 */}
             <div className="space-y-2">
               {/* Row 1 - Top 4 buttons */}
-              <div className={`grid ${data.template === 'dark' ? 'grid-cols-3' : 'grid-cols-4'} gap-3 px-4`}>
+              <div className={`grid ${data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? 'grid-cols-3' : 'grid-cols-4'} gap-3 px-4`}>
 
               </div>
 
               {/* Row 2 - Unlimited Custom Contact Methods */}
               {data.customContacts && data.customContacts.length > 0 && (
-                <div className={`grid ${data.template === 'dark' ? 'grid-cols-3' : 'grid-cols-4'} gap-3 px-4`}>
+                <div className={`grid ${data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? 'grid-cols-3' : 'grid-cols-4'} gap-3 px-4`}>
                   {data.customContacts.filter(contact => contact?.value && contact?.label).map((contact) => (
                     <div key={contact.id} className="flex flex-col items-center">
                       <button 
                         onClick={() => handleContactAction(contact.type, contact.value)}
-                        className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
+                        className={`${data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? 'mb-0' : 'mb-1'}`}
                         style={{ 
-                          backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
-                          color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
+                          backgroundColor: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
+                          color: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
                         }}
                         data-testid={`button-custom-contact-${contact.id}`}
                       >
-                        <i className={`${contact.icon} ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
-                        {data.template === 'dark' && (
+                        <i className={`${contact.icon} ${data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? 'text-lg mb-1' : 'text-sm'}`}></i>
+                        {data.template === '73c23253-4f67-4395-8375-1ea1db209920' && (
                           <span className="text-xs font-medium">{contact.label}</span>
                         )}
                       </button>
@@ -410,17 +410,17 @@ END:VCARD`;
                   URL.revokeObjectURL(url);
                 }}
                 className={`py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors ${
-                  data.template === 'dark' ? 'border-2' : ''
+                  data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? 'border-2' : ''
                 }`}
                 style={{
-                  backgroundColor: data.template === 'dark' 
+                  backgroundColor: data.template === '73c23253-4f67-4395-8375-1ea1db209920' 
                     ? '#2a2a2a' 
                     : (data.secondaryColor || data.accentColor || '#16a34a'),
-                  color: data.template === 'dark' 
+                  color: data.template === '73c23253-4f67-4395-8375-1ea1db209920' 
                     ? (data.brandColor || '#fbbf24') 
                     : (data.tertiaryColor || '#ffffff'),
-                  borderColor: data.template === 'dark' ? (data.brandColor || '#fbbf24') : 'transparent',
-                  borderBottom: data.template === 'dark' 
+                  borderColor: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? (data.brandColor || '#fbbf24') : 'transparent',
+                  borderBottom: data.template === '73c23253-4f67-4395-8375-1ea1db209920' 
                     ? 'none' 
                     : `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`,
                   width: '70%'
@@ -428,24 +428,24 @@ END:VCARD`;
                 data-testid="button-save-contact"
               >
                 <i className="fas fa-address-book text-lg mr-3"></i>
-                {data.template === 'dark' ? 'Save Contact' : 'Add to Contacts'}
+                {data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? 'Save Contact' : 'Add to Contacts'}
               </button>
 
               {/* Share Button */}
               <button 
                 onClick={() => handleShare()}
                 className={`py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors ${
-                  data.template === 'dark' ? 'border-2' : ''
+                  data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? 'border-2' : ''
                 }`}
                 style={{ 
-                  backgroundColor: data.template === 'dark' 
+                  backgroundColor: data.template === '73c23253-4f67-4395-8375-1ea1db209920' 
                     ? 'transparent' 
                     : (data.brandColor || '#22c55e'),
-                  color: data.template === 'dark' 
+                  color: data.template === '73c23253-4f67-4395-8375-1ea1db209920' 
                     ? (data.brandColor || '#fbbf24') 
                     : (data.tertiaryColor || '#ffffff'),
-                  borderColor: data.template === 'dark' ? (data.brandColor || '#fbbf24') : 'transparent',
-                  borderBottom: data.template === 'dark' 
+                  borderColor: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? (data.brandColor || '#fbbf24') : 'transparent',
+                  borderBottom: data.template === '73c23253-4f67-4395-8375-1ea1db209920' 
                     ? 'none' 
                     : `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
                   width: '30%'
@@ -459,11 +459,11 @@ END:VCARD`;
 
 
             {/* Custom Social Media Platforms */}
-            <div className={`${data.template === 'dark' ? 'grid grid-cols-4 gap-3' : 'space-y-2'} px-4`}>
+            <div className={`${data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? 'grid grid-cols-4 gap-3' : 'space-y-2'} px-4`}>
               {/* Custom Social Media Platforms */}
               {data.customSocials?.map((social) => (
                 social.value && (
-                  data.template === 'dark' ? (
+                  data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? (
                     // Template 2 (dark): Circular social buttons
                     <div key={social.id} className="flex flex-col items-center">
                       <button 
@@ -534,7 +534,7 @@ END:VCARD`;
               </div>
               <p 
                 className="text-xs mt-2 font-medium"
-                style={{ color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.brandColor || '#22c55e') }}
+                style={{ color: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? (data.brandColor || '#fbbf24') : (data.brandColor || '#22c55e') }}
               >
                 Share my eCardURL
               </p>
