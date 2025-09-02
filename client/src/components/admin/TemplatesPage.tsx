@@ -212,13 +212,13 @@ export default function TemplatesPage() {
       </Card>
 
       {/* Templates Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-4">
         {isLoading ? (
           // Loading skeleton
           [...Array(8)].map((_, i) => (
             <Card key={i} className="overflow-hidden">
-              <div className="aspect-[3/4] bg-gray-200 animate-pulse"></div>
-              <CardContent className="p-4">
+              <div className="aspect-[5/6] bg-gray-200 animate-pulse"></div>
+              <CardContent className="p-3">
                 <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
                 <div className="h-3 bg-gray-200 rounded w-2/3 animate-pulse"></div>
               </CardContent>
@@ -245,7 +245,7 @@ export default function TemplatesPage() {
           filteredTemplates.map((template) => (
             <Card key={template.id} className="group overflow-hidden hover:shadow-lg transition-all duration-200">
               {/* Template Preview */}
-              <div className="aspect-[3/4] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 relative overflow-hidden">
+              <div className="aspect-[5/6] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 relative overflow-hidden">
                 {template.previewImage ? (
                   <img 
                     src={template.previewImage} 
@@ -330,7 +330,7 @@ export default function TemplatesPage() {
               </div>
               
               {/* Template Info */}
-              <CardContent className="p-4">
+              <CardContent className="p-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-gray-900 dark:text-white truncate">
