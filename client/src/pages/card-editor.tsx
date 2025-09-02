@@ -194,7 +194,7 @@ export default function CardEditor() {
       
       // Update the URL without page reload if creating new card
       if (!params.id && savedCard.id) {
-        window.history.replaceState(null, '', `/card-editor/${savedCard.id}${window.location.search}`);
+        window.history.replaceState(null, '', `/card-editor/${savedCard.id}`);
       }
       
       toast({

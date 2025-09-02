@@ -42,6 +42,8 @@ function Router() {
       <Route path="/builder" component={Builder} />
       <Route path="/cards/create" component={CardEditor} />
       <Route path="/cards/:id/edit" component={CardEditor} />
+      <Route path="/card-editor/:id?" component={CardEditor} />
+      <Route path="/card-editor" component={CardEditor} />
       <Route path="/share" component={Share} />
       <Route path="/template-preview/:templateId" component={TemplatePreview} />
       <Route path="/affiliate" component={Affiliate} />
