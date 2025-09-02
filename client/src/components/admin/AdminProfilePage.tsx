@@ -850,7 +850,7 @@ export default function AdminProfilePage() {
                       </Select>
                       {preferencesForm.formState.errors.timezone && (
                         <p className="text-sm text-red-600 mt-1">
-                          {preferencesForm.formState.errors.timezone.message}
+                          {String(preferencesForm.formState.errors.timezone.message || preferencesForm.formState.errors.timezone)}
                         </p>
                       )}
                     </div>
@@ -876,7 +876,7 @@ export default function AdminProfilePage() {
                       </Select>
                       {preferencesForm.formState.errors.preferredLanguage && (
                         <p className="text-sm text-red-600 mt-1">
-                          {preferencesForm.formState.errors.preferredLanguage.message}
+                          {String(preferencesForm.formState.errors.preferredLanguage.message || preferencesForm.formState.errors.preferredLanguage)}
                         </p>
                       )}
                     </div>
