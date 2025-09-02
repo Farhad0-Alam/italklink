@@ -149,18 +149,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </div>
             </div>
 
-            {/* Right side: Search + Actions */}
+            {/* Right side: Actions */}
             <div className="flex items-center space-x-3">
-              <div className="hidden md:flex items-center">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input 
-                    className="pl-10 w-48" 
-                    placeholder="Search..." 
-                  />
-                </div>
-              </div>
-              
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
               </Button>
