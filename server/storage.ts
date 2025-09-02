@@ -129,7 +129,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBusinessCardBySlug(shareSlug: string): Promise<DbBusinessCard | undefined> {
-    const [card] = await db.select().from(businessCards).where(eq(businessCards.shareSlug, shareSlug));
+    // First try to find by customUrl, then by shareSlug
+    let [card] = await db.select().from(businessCards).where(eq(businessCards.customUrl, shareSlug));
+    if (!card) {
+      [card] = await db.select().from(businessCards).where(eq(businessCards.shareSlug, shareSlug));
+    }
     return card;
   }
 

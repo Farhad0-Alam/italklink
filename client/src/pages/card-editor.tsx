@@ -146,8 +146,10 @@ export default function CardEditor() {
   // }, [cardData, params.id, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateShareUrl = (card: any) => {
-    if (card.shareSlug) {
-      setShareUrl(`${window.location.origin}/cards/${card.shareSlug}`);
+    if (card.customUrl) {
+      setShareUrl(`${window.location.origin}/${card.customUrl}`);
+    } else if (card.shareSlug) {
+      setShareUrl(`${window.location.origin}/${card.shareSlug}`);
     }
   };
 

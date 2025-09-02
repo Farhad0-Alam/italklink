@@ -24,8 +24,17 @@ export const decodeCardData = (encodedData: string): BusinessCard | null => {
 
 // Generate share URL
 export const generateShareUrl = (cardData: BusinessCard): string => {
-  const encodedData = encodeCardData(cardData);
   const baseUrl = window.location.origin;
+  
+  // Use custom URL or shareSlug for clean URLs
+  if (cardData.customUrl) {
+    return `${baseUrl}/${cardData.customUrl}`;
+  } else if (cardData.shareSlug) {
+    return `${baseUrl}/${cardData.shareSlug}`;
+  }
+  
+  // Fallback to encoded data
+  const encodedData = encodeCardData(cardData);
   return `${baseUrl}/share#${encodedData}`;
 };
 

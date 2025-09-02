@@ -18,26 +18,49 @@ export const Share: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    
-    if (hash) {
-      try {
-        const decodedData = decodeCardData(hash);
-        if (decodedData) {
-          setCardData(decodedData);
-          logEvent("share_view");
-        } else {
-          setError("Invalid share link");
+    const loadCardData = async () => {
+      const hash = window.location.hash.slice(1);
+      const pathParts = location.split('/');
+      const shareSlug = pathParts[1]; // Get the slug from URL like domain.com/customname
+      
+      // Try to load by shareSlug first (for clean URLs)
+      if (shareSlug && shareSlug !== 'share' && !hash) {
+        try {
+          const response = await fetch(`/api/business-cards/slug/${shareSlug}`);
+          if (response.ok) {
+            const cardData = await response.json();
+            setCardData(cardData);
+            logEvent("share_view");
+            setIsLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error("Failed to load card by slug:", error);
         }
-      } catch (error) {
-        console.error("Failed to decode card data:", error);
-        setError("Failed to load shared card");
       }
-    } else {
-      setError("No card data found in URL");
-    }
+      
+      // Fallback to hash-based sharing
+      if (hash) {
+        try {
+          const decodedData = decodeCardData(hash);
+          if (decodedData) {
+            setCardData(decodedData);
+            logEvent("share_view");
+          } else {
+            setError("Invalid share link");
+          }
+        } catch (error) {
+          console.error("Failed to decode card data:", error);
+          setError("Failed to load shared card");
+        }
+      } else {
+        setError("No card data found in URL");
+      }
+      
+      setIsLoading(false);
+    };
     
-    setIsLoading(false);
+    loadCardData();
   }, [location]);
 
   if (isLoading) {

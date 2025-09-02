@@ -560,6 +560,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public route to get business card by shareSlug or customUrl (for clean URLs)
+  app.get('/api/business-cards/slug/:slug', async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const card = await storage.getBusinessCardBySlug(slug);
+      
+      if (!card || !card.isPublic) {
+        return res.status(404).json({ message: 'Business card not found or not public' });
+      }
+      
+      // Increment view count
+      await storage.incrementBusinessCardViews(card.id);
+      
+      res.json(card);
+    } catch (error) {
+      console.error('Error fetching business card by slug:', error);
+      res.status(500).json({ message: 'Failed to fetch business card' });
+    }
+  });
+
   app.get('/api/business-cards/:id', requireAuth, async (req, res) => {
     try {
       const user = req.user as User;

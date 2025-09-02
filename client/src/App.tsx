@@ -65,6 +65,7 @@ function Router() {
       <Route path="/admin/icon-packs" component={() => <Admin />} />
       <Route path="/admin/settings" component={() => <Admin />} />
       <Route path="/admin" component={() => <Admin />} />
+      <Route path="/:shareSlug" component={Share} />
       <Route component={NotFound} />
     </Switch>
   );
