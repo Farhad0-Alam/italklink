@@ -104,136 +104,160 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
   };
 
-  const SidebarContent = () => (
-    <div className="h-full px-3 py-4 overflow-y-auto bg-white dark:bg-gray-800 border-r">
-      <div className="flex items-center mb-5 px-3">
-        <Link href="/admin" className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">2T</span>
-          </div>
-          <span className="text-xl font-semibold text-gray-800 dark:text-white">
-            2TalkLink
-          </span>
-        </Link>
-      </div>
-      
-      <ul className="space-y-2 font-medium">
-        {sidebarNavItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location === item.href;
-          
-          return (
-            <li key={item.href}>
-                <Link href={item.href} className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ${
-                isActive ? 'bg-gray-100 dark:bg-gray-700' : ''
-              }`}>
-                <Icon className={`w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white ${
-                  isActive ? 'text-gray-900 dark:text-white' : ''
-                }`} />
-                <span className="ms-3">{item.title}</span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+  const HorizontalNavContent = () => (
+    <div className="flex items-center space-x-1 overflow-x-auto">
+      {sidebarNavItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = location === item.href;
+        
+        return (
+          <Link key={item.href} href={item.href} className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
+            isActive 
+              ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' 
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700'
+          }`}>
+            <Icon className={`w-4 h-4 mr-2 ${
+              isActive ? 'text-green-600 dark:text-green-300' : ''
+            }`} />
+            {item.title}
+          </Link>
+        );
+      })}
     </div>
   );
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Mobile sidebar */}
-      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <div className="fixed top-0 left-0 z-40 w-64 h-screen md:hidden">
-          <SheetContent side="left" className="p-0">
-            <SidebarContent />
-          </SheetContent>
-        </div>
-      </Sheet>
-
-      {/* Desktop sidebar */}
-      <aside className="fixed top-0 left-0 z-40 w-64 h-screen hidden md:block">
-        <SidebarContent />
-      </aside>
-
-      {/* Main content */}
-      <div className="md:ml-64">
-        {/* Header */}
-        <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
-          <div className="mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center">
-                <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="md:hidden">
-                      <Menu className="h-6 w-6" />
-                    </Button>
-                  </SheetTrigger>
-                </Sheet>
-                
-                <div className="hidden md:flex items-center space-x-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input 
-                      className="pl-10 w-80" 
-                      placeholder="Search..." 
-                    />
-                  </div>
+      {/* Header with horizontal navigation */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b sticky top-0 z-50">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Top row with logo and user actions */}
+          <div className="flex items-center justify-between h-16 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-6">
+              <Link href="/admin" className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">2T</span>
+                </div>
+                <span className="text-xl font-semibold text-gray-800 dark:text-white">
+                  2TalkLink Admin
+                </span>
+              </Link>
+              
+              <div className="hidden md:flex items-center">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input 
+                    className="pl-10 w-64" 
+                    placeholder="Search..." 
+                  />
                 </div>
               </div>
+            </div>
 
-              <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="icon">
-                  <Bell className="h-5 w-5" />
-                </Button>
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" size="icon">
+                <Bell className="h-5 w-5" />
+              </Button>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src="" alt="Admin" />
-                        <AvatarFallback className="bg-green-600 text-white">
-                          AB
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">abdur321</p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          admin@2talklink.com
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="" alt="Admin" />
+                      <AvatarFallback className="bg-green-600 text-white">
+                        AB
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">abdur321</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        admin@2talklink.com
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
-        </header>
-
-        {/* Page content */}
-        <main className="py-6">
-          <div className="mx-auto px-4 sm:px-6 lg:px-8">
-            {children}
+          
+          {/* Horizontal navigation menu */}
+          <div className="py-3">
+            <div className="hidden md:block">
+              <HorizontalNavContent />
+            </div>
+            
+            {/* Mobile dropdown menu */}
+            <div className="md:hidden">
+              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Menu className="h-4 w-4 mr-2" />
+                    Navigation Menu
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0">
+                  <div className="h-full px-3 py-4 overflow-y-auto bg-white dark:bg-gray-800">
+                    <div className="flex items-center mb-5 px-3">
+                      <Link href="/admin" className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">2T</span>
+                        </div>
+                        <span className="text-xl font-semibold text-gray-800 dark:text-white">
+                          2TalkLink
+                        </span>
+                      </Link>
+                    </div>
+                    <ul className="space-y-2 font-medium">
+                      {sidebarNavItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = location === item.href;
+                        
+                        return (
+                          <li key={item.href}>
+                            <Link href={item.href} className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ${
+                              isActive ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            }`}>
+                              <Icon className={`w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white ${
+                                isActive ? 'text-gray-900 dark:text-white' : ''
+                              }`} />
+                              <span className="ms-3">{item.title}</span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </header>
+
+      {/* Page content */}
+      <main className="py-6">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }
