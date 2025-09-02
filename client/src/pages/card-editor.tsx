@@ -72,6 +72,7 @@ export default function CardEditor() {
   const { data: templates } = useQuery({
     queryKey: ['/api/templates'],
     enabled: !!selectedTemplateId,
+    staleTime: 1000 * 60 * 10, // 10 minutes
   });
   
   // Load existing card if editing
@@ -89,7 +90,10 @@ export default function CardEditor() {
   useEffect(() => {
     if (selectedTemplateId && templates && !existingCard) {
       const selectedTemplate = templates.find((t: any) => t.id === selectedTemplateId);
+      console.log('Selected template ID:', selectedTemplateId);
+      console.log('Found template:', selectedTemplate);
       if (selectedTemplate) {
+        console.log('Applying template:', selectedTemplate.name);
         setCardData(prev => ({
           ...prev,
           template: selectedTemplate.id,
@@ -185,10 +189,12 @@ export default function CardEditor() {
     onSuccess: (savedCard) => {
       queryClient.invalidateQueries({ queryKey: ['/api/business-cards'] });
       
-      // Update share URL and redirect to edit mode if creating
+      // Update share URL but DON'T redirect to avoid disrupting design work
       updateShareUrl(savedCard);
+      
+      // Update the URL without page reload if creating new card
       if (!params.id && savedCard.id) {
-        setLocation(`/cards/${savedCard.id}/edit`);
+        window.history.replaceState(null, '', `/card-editor/${savedCard.id}${window.location.search}`);
       }
       
       toast({

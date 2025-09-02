@@ -162,7 +162,9 @@ export default function Templates() {
       if (customUrl.trim()) {
         params.set('url', customUrl.trim());
       }
-      setLocation(`/cards/create?${params.toString()}`);
+      console.log('Template selection - redirecting to:', `/card-editor?${params.toString()}`);
+      console.log('Selected template:', selectedTemplate);
+      setLocation(`/card-editor?${params.toString()}`);
     }
   };
 
