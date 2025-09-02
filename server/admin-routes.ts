@@ -1700,12 +1700,12 @@ router.post('/change-password', requireOwner, async (req, res) => {
     // Get current user to verify password
     const currentUser = await db.select().from(users).where(eq(users.id, userId)).limit(1);
     
-    if (!currentUser[0] || !currentUser[0].passwordHash) {
+    if (!currentUser[0] || !currentUser[0].password) {
       return res.status(400).json({ message: 'Password not set or user not found' });
     }
     
     // Verify current password
-    const isCurrentPasswordValid = await bcryptjs.compare(validatedData.currentPassword, currentUser[0].passwordHash);
+    const isCurrentPasswordValid = await bcryptjs.compare(validatedData.currentPassword, currentUser[0].password);
     
     if (!isCurrentPasswordValid) {
       return res.status(400).json({ message: 'Current password is incorrect' });
@@ -1718,7 +1718,7 @@ router.post('/change-password', requireOwner, async (req, res) => {
     // Update password
     await db.update(users)
       .set({
-        passwordHash: newPasswordHash,
+        password: newPasswordHash,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
@@ -1786,7 +1786,7 @@ router.get('/profile', requireOwner, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    const { passwordHash, twoFactorSecret, backupCodes, ...userProfile } = user[0];
+    const { password, ...userProfile } = user[0];
     
     res.json(userProfile);
   } catch (error) {
@@ -1823,7 +1823,7 @@ router.patch('/profile', requireOwner, async (req, res) => {
     
     await logAdminAction(userId, 'update', 'admin_profile', userId, validatedData);
     
-    const { passwordHash, twoFactorSecret, backupCodes, ...userProfile } = updatedUser[0];
+    const { password, ...userProfile } = updatedUser[0];
     res.json(userProfile);
   } catch (error) {
     console.error('Failed to update admin profile:', error);
@@ -1973,6 +1973,56 @@ router.delete('/profile/sessions/:sessionId', requireOwner, async (req, res) => 
   }
 });
 
+
+// Simple admin login for testing - only uses existing DB fields
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password required' });
+    }
+    
+    // Find admin user using basic query
+    const adminUser = await db.select({
+      id: users.id,
+      email: users.email,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      role: users.role,
+      planType: users.planType,
+      password: users.password,
+      profileImageUrl: users.profileImageUrl
+    }).from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+    
+    if (!adminUser[0] || !adminUser[0].password) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    
+    // Check if user is admin/owner
+    if (adminUser[0].role !== 'admin' && adminUser[0].role !== 'owner') {
+      return res.status(403).json({ message: 'Insufficient permissions' });
+    }
+    
+    // Verify password
+    const isValidPassword = await bcryptjs.compare(password, adminUser[0].password);
+    
+    if (!isValidPassword) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    
+    // Set user in session - simplified for testing
+    (req as any).user = adminUser[0];
+    
+    const { password: _, ...userProfile } = adminUser[0];
+    res.json(userProfile);
+  } catch (error) {
+    console.error('Failed to login admin:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 export default router;
     
