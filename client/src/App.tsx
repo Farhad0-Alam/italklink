@@ -52,6 +52,7 @@ function Router() {
       <Route path="/billing" component={Billing} />
       <Route path="/usage" component={Usage} />
       <Route path="/help" component={Help} />
+      <Route path="/admin/templates/import" component={() => <Admin />} />
       <Route path="/admin/templates/builder" component={() => <Admin />} />
       <Route path="/admin/templates/header-builder" component={() => <Admin />} />
       <Route path="/admin/header-builder" component={() => <Admin />} />

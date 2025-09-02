@@ -6,6 +6,7 @@ import UsersPage from '@/components/admin/UsersPage';
 import PlansPage from '@/components/admin/PlansPage';
 import CouponsPage from '@/components/admin/CouponsPage';
 import TemplatesPage from '@/components/admin/TemplatesPage';
+import TemplateImportPage from '@/components/admin/TemplateImportPage';
 import TemplateBuilder from '@/components/admin/TemplateBuilder';
 import HeaderBuilder from '@/components/admin/HeaderBuilder';
 import HeaderTemplatesPage from '@/components/admin/HeaderTemplatesPage';
@@ -77,6 +78,8 @@ export default function Admin() {
         return <TemplateBuilder />;
       case '/admin/header-templates':
         return <HeaderTemplatesPage />;
+      case '/admin/templates/import':
+        return <TemplateImportPage />;
       case '/admin/templates':
         return <TemplatesPage />;
       case '/admin/icon-packs':

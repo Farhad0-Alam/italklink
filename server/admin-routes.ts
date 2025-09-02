@@ -1107,6 +1107,89 @@ router.post('/templates/:id/duplicate', requireOwner, async (req, res) => {
   }
 });
 
+// Import templates from JSON file
+router.post('/templates/import', requireOwner, async (req, res) => {
+  try {
+    const importData = req.body;
+    
+    // Validate import data structure
+    if (!importData.templates || !Array.isArray(importData.templates)) {
+      return res.status(400).json({ message: 'Invalid format. Expected "templates" array.' });
+    }
+    
+    const templates = importData.templates;
+    let imported = 0;
+    const errors = [];
+    
+    for (const template of templates) {
+      try {
+        // Validate required fields
+        if (!template.id || !template.name || !template.templateData) {
+          errors.push(`Template missing required fields: id, name, or templateData`);
+          continue;
+        }
+        
+        // Check if template already exists
+        const [existing] = await db.select()
+          .from(globalTemplates)
+          .where(eq(globalTemplates.id, template.id));
+        
+        if (existing) {
+          // Update existing template
+          await db.update(globalTemplates)
+            .set({
+              name: template.name,
+              description: template.description || '',
+              templateData: typeof template.templateData === 'string' 
+                ? template.templateData 
+                : JSON.stringify(template.templateData),
+              previewImage: template.previewImage || null,
+              isActive: template.isActive !== false, // Default to true
+              updatedAt: new Date()
+            })
+            .where(eq(globalTemplates.id, template.id));
+        } else {
+          // Insert new template
+          await db.insert(globalTemplates).values({
+            id: template.id,
+            name: template.name,
+            description: template.description || '',
+            templateData: typeof template.templateData === 'string' 
+              ? template.templateData 
+              : JSON.stringify(template.templateData),
+            previewImage: template.previewImage || null,
+            isActive: template.isActive !== false, // Default to true
+            createdBy: req.user!.id
+          });
+        }
+        
+        imported++;
+      } catch (error) {
+        console.error(`Failed to import template ${template.id}:`, error);
+        errors.push(`Template ${template.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+    
+    // Log the import action
+    await logAdminAction(req.user!.id, 'import', 'template', 'bulk', { 
+      imported, 
+      total: templates.length,
+      errors: errors.length 
+    });
+    
+    res.json({ 
+      message: `Import completed. ${imported} templates imported successfully.`,
+      count: imported,
+      total: templates.length,
+      errors: errors.length > 0 ? errors : undefined
+    });
+    
+  } catch (error) {
+    console.error('Failed to import templates:', error);
+    res.status(500).json({ message: 'Import failed', error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
 // === ICON PACKS & TYPES ENDPOINTS ===
 
 // Get all icon packs with icon counts
