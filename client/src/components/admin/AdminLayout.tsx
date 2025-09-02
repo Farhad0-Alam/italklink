@@ -128,33 +128,39 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header with horizontal navigation */}
+      {/* Single row header with everything */}
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b sticky top-0 z-50">
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Top row with logo and user actions */}
-          <div className="flex items-center justify-between h-16 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center space-x-6">
-              <Link href="/admin" className="flex items-center space-x-2">
+          <div className="flex items-center justify-between h-16">
+            {/* Left side: Logo + Navigation */}
+            <div className="flex items-center space-x-6 flex-1 min-w-0">
+              <Link href="/admin" className="flex items-center space-x-2 flex-shrink-0">
                 <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">2T</span>
                 </div>
-                <span className="text-xl font-semibold text-gray-800 dark:text-white">
+                <span className="text-lg font-semibold text-gray-800 dark:text-white">
                   2TalkLink Admin
                 </span>
               </Link>
               
+              {/* Horizontal navigation */}
+              <div className="hidden lg:block flex-1 min-w-0">
+                <HorizontalNavContent />
+              </div>
+            </div>
+
+            {/* Right side: Search + Actions */}
+            <div className="flex items-center space-x-3">
               <div className="hidden md:flex items-center">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input 
-                    className="pl-10 w-64" 
+                    className="pl-10 w-48" 
                     placeholder="Search..." 
                   />
                 </div>
               </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
+              
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
               </Button>
@@ -195,22 +201,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-          </div>
-          
-          {/* Horizontal navigation menu */}
-          <div className="py-3">
-            <div className="hidden md:block">
-              <HorizontalNavContent />
-            </div>
-            
-            {/* Mobile dropdown menu */}
-            <div className="md:hidden">
+              
+              {/* Mobile menu button */}
               <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Menu className="h-4 w-4 mr-2" />
-                    Navigation Menu
+                  <Button variant="ghost" size="icon" className="lg:hidden">
+                    <Menu className="h-6 w-6" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="p-0">
