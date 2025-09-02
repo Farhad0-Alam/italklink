@@ -2223,6 +2223,34 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         <option value="full">Full Width</option>
                       </select>
                     </div>
+                    <div>
+                      <label className="text-sm text-slate-600 mb-1 block">Custom Color (optional)</label>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="color"
+                          value={element.data.customColor || "#000000"}
+                          onChange={(e) => handleDataUpdate({ customColor: e.target.value })}
+                          className="w-12 h-10 p-1"
+                        />
+                        <Input
+                          type="text"
+                          value={element.data.customColor || ""}
+                          onChange={(e) => handleDataUpdate({ customColor: e.target.value })}
+                          placeholder="#000000 or leave empty for default black"
+                          className="flex-1 text-black"
+                        />
+                        {element.data.customColor && (
+                          <Button
+                            onClick={() => handleDataUpdate({ customColor: "" })}
+                            variant="ghost"
+                            size="sm"
+                            className="text-slate-500 hover:text-red-500"
+                          >
+                            <i className="fas fa-times"></i>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -2324,6 +2352,34 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         <option value="minimal">Minimal</option>
                         <option value="full">Full Width</option>
                       </select>
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-600 mb-1 block">Custom Color (optional)</label>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="color"
+                          value={element.data.customColor || "#2563eb"}
+                          onChange={(e) => handleDataUpdate({ customColor: e.target.value })}
+                          className="w-12 h-10 p-1"
+                        />
+                        <Input
+                          type="text"
+                          value={element.data.customColor || ""}
+                          onChange={(e) => handleDataUpdate({ customColor: e.target.value })}
+                          placeholder="#2563eb or leave empty for default blue"
+                          className="flex-1 text-black"
+                        />
+                        {element.data.customColor && (
+                          <Button
+                            onClick={() => handleDataUpdate({ customColor: "" })}
+                            variant="ghost"
+                            size="sm"
+                            className="text-slate-500 hover:text-red-500"
+                          >
+                            <i className="fas fa-times"></i>
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
