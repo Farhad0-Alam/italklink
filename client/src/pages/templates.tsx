@@ -49,9 +49,7 @@ export default function Templates() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showUrlModal, setShowUrlModal] = useState(false);
-  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [customUrl, setCustomUrl] = useState("");
 
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
@@ -153,8 +151,8 @@ export default function Templates() {
   };
 
   const handleTemplatePreview = (template: Template) => {
-    setPreviewTemplate(template);
-    setShowPreviewModal(true);
+    // Open template preview in new window
+    window.open(`/template-preview/${template.id}`, '_blank', 'width=1200,height=800');
   };
 
   const handleContinue = () => {
@@ -501,62 +499,6 @@ export default function Templates() {
         </DialogContent>
       </Dialog>
 
-      {/* Template Preview Modal */}
-      <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-semibold text-gray-700">
-                Template Preview: {previewTemplate?.name}
-              </DialogTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowPreviewModal(false)}
-                className="h-6 w-6 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <DialogDescription className="text-gray-500">
-              See how this template will look for your business card
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            {/* Large Template Preview */}
-            <div className="w-full h-80 border border-gray-200 rounded-lg overflow-hidden">
-              {previewTemplate && renderTemplatePreview(previewTemplate)}
-            </div>
-          </div>
-
-          <DialogFooter className="mt-6">
-            <div className="flex space-x-2 w-full">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowPreviewModal(false)}
-                className="flex-1"
-                data-testid="button-preview-close"
-              >
-                Close
-              </Button>
-              <Button 
-                onClick={() => {
-                  setShowPreviewModal(false);
-                  if (previewTemplate) {
-                    handleTemplateSelect(previewTemplate);
-                  }
-                }}
-                className="bg-orange-500 hover:bg-orange-600 text-white flex-1"
-                data-testid="button-preview-select"
-              >
-                Select This Template
-                <i className="fas fa-arrow-right ml-2"></i>
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -14,6 +14,7 @@ import Templates from "./pages/templates";
 import Collections from "./pages/collections";
 import { Builder } from "./pages/builder";
 import { Share } from "./pages/share";
+import TemplatePreview from "./pages/template-preview";
 import CardEditor from "./pages/card-editor";
 import Admin from "./pages/admin";
 import Pricing from "./pages/pricing";
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/cards/create" component={CardEditor} />
       <Route path="/cards/:id/edit" component={CardEditor} />
       <Route path="/share" component={Share} />
+      <Route path="/template-preview/:templateId" component={TemplatePreview} />
       <Route path="/affiliate" component={Affiliate} />
       <Route path="/profile" component={Profile} />
       <Route path="/account-settings" component={AccountSettings} />
