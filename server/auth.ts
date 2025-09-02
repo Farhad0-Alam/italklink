@@ -153,7 +153,7 @@ export const requireOwner: RequestHandler = (req, res, next) => {
   }
   
   const user = req.user as any;
-  if (user.role !== 'owner') {
+  if (user.role !== 'owner' && user.role !== 'admin') {
     return res.status(403).json({ message: 'Owner access required' });
   }
   

@@ -1983,17 +1983,8 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Email and password required' });
     }
     
-    // Find admin user using basic query
-    const adminUser = await db.select({
-      id: users.id,
-      email: users.email,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      role: users.role,
-      planType: users.planType,
-      password: users.password,
-      profileImageUrl: users.profileImageUrl
-    }).from(users)
+    // Find admin user using full query to get complete user object
+    const adminUser = await db.select().from(users)
       .where(eq(users.email, email))
       .limit(1);
     
@@ -2013,11 +2004,21 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
-    // Set user in session - simplified for testing
-    (req as any).user = adminUser[0];
+    // Set up session manually for admin login
+    // Create a new session and store user info
+    req.session.passport = { user: adminUser[0].id };
+    req.user = adminUser[0];
     
-    const { password: _, ...userProfile } = adminUser[0];
-    res.json(userProfile);
+    // Save session explicitly
+    req.session.save((err) => {
+      if (err) {
+        console.error('Failed to save session:', err);
+        return res.status(500).json({ message: 'Failed to save session' });
+      }
+      
+      const { password: _, ...userProfile } = adminUser[0];
+      res.json(userProfile);
+    });
   } catch (error) {
     console.error('Failed to login admin:', error);
     res.status(500).json({ message: 'Internal server error' });
