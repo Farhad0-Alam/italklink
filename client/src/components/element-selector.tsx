@@ -376,8 +376,8 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-white">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl bg-white max-h-[80vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="text-2xl font-bold text-center text-slate-800">
             Add New Element
           </DialogTitle>
@@ -386,20 +386,22 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           </p>
         </DialogHeader>
         
-        <div className="grid grid-cols-3 gap-4 p-4">
-          {elementTypes.map((elementType) => (
-            <Button
-              key={elementType.type}
-              onClick={() => handleAddElement(elementType.type)}
-              variant="ghost"
-              className="h-auto p-4 flex flex-col items-center space-y-2 hover:bg-slate-50 border border-slate-200 rounded-lg"
-            >
-              <div className={`w-12 h-12 rounded-lg ${elementType.color} flex items-center justify-center`}>
-                <i className={`${elementType.icon} text-lg text-slate-700`}></i>
-              </div>
-              <span className="font-medium text-slate-800">{elementType.title}</span>
-            </Button>
-          ))}
+        <div className="flex-1 overflow-y-auto px-4 pb-4">
+          <div className="grid grid-cols-3 gap-4 py-4">
+            {elementTypes.map((elementType) => (
+              <Button
+                key={elementType.type}
+                onClick={() => handleAddElement(elementType.type)}
+                variant="ghost"
+                className="h-auto p-4 flex flex-col items-center space-y-2 hover:bg-slate-50 border border-slate-200 rounded-lg"
+              >
+                <div className={`w-12 h-12 rounded-lg ${elementType.color} flex items-center justify-center`}>
+                  <i className={`${elementType.icon} text-lg text-slate-700`}></i>
+                </div>
+                <span className="font-medium text-slate-800">{elementType.title}</span>
+              </Button>
+            ))}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
