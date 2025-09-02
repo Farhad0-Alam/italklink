@@ -95,8 +95,8 @@ export default function CardEditor() {
 
   // Auto-save functionality
   useEffect(() => {
-    // Don't auto-save if this is the initial load or if we don't have required fields
-    if (!cardData.fullName || !cardData.title || !params.id) {
+    // Don't auto-save if we don't have required fields
+    if (!cardData.fullName || !cardData.title) {
       return;
     }
 
@@ -145,6 +145,11 @@ export default function CardEditor() {
       if (!params.id && savedCard.id) {
         setLocation(`/cards/${savedCard.id}/edit`);
       }
+      
+      toast({
+        title: "Card saved!",
+        description: "Your business card has been saved successfully.",
+      });
     },
     onError: (error) => {
       toast({
@@ -274,13 +279,37 @@ export default function CardEditor() {
               onGenerateQR={() => {}}
             />
             
-            {/* Auto-save indicator */}
-            <div className="mt-6 flex justify-center">
-              <div className="flex items-center space-x-2 text-slate-600 bg-slate-100 px-4 py-2 rounded-lg">
-                <div className={`w-2 h-2 rounded-full ${saveMutation.isPending ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}></div>
-                <span className="text-sm">
-                  {saveMutation.isPending ? 'Saving...' : 'All changes saved'}
-                </span>
+            {/* Save Card Button */}
+            <div className="mt-6 space-y-4">
+              <div className="flex justify-center">
+                <Button
+                  onClick={() => saveMutation.mutate(cardData)}
+                  disabled={!cardData.fullName || !cardData.title || saveMutation.isPending}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-2"
+                  data-testid="button-save-card"
+                >
+                  {saveMutation.isPending ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-save mr-2"></i>
+                      {params.id ? 'Update Card' : 'Save Card'}
+                    </>
+                  )}
+                </Button>
+              </div>
+              
+              {/* Auto-save indicator */}
+              <div className="flex justify-center">
+                <div className="flex items-center space-x-2 text-slate-600 bg-slate-100 px-4 py-2 rounded-lg">
+                  <div className={`w-2 h-2 rounded-full ${saveMutation.isPending ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}></div>
+                  <span className="text-sm">
+                    {saveMutation.isPending ? 'Saving...' : 'Auto-save enabled'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
