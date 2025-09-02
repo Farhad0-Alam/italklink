@@ -74,10 +74,17 @@ export default function Dashboard() {
     retry: false,
   });
 
-  const { data: businessCards = [], isLoading: cardsLoading } = useQuery<BusinessCard[]>({
+  const { data: businessCards = [], isLoading: cardsLoading, refetch: refetchCards } = useQuery<BusinessCard[]>({
     queryKey: ['/api/business-cards'],
     enabled: !!user,
+    refetchInterval: 5000, // Refresh every 5 seconds to catch new cards
   });
+
+  // Debug log for business cards
+  useEffect(() => {
+    console.log('Dashboard - Business cards data:', businessCards);
+    console.log('Dashboard - Cards loading:', cardsLoading);
+  }, [businessCards, cardsLoading]);
 
   // Fetch affiliate data
   const { data: affiliate } = useQuery<AffiliateProfile>({

@@ -585,11 +585,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Business card not found' });
       }
       
-      const updatedCard = await storage.updateBusinessCard(req.params.id, req.body);
+      // Clean the data - remove fields that shouldn't be updated
+      const { id, userId, createdAt, updatedAt, ...cleanData } = req.body;
+      
+      console.log('PUT /api/business-cards - Clean data:', JSON.stringify(cleanData, null, 2));
+      
+      const updatedCard = await storage.updateBusinessCard(req.params.id, cleanData);
       res.json(updatedCard);
     } catch (error) {
       console.error('Error updating business card:', error);
-      res.status(500).json({ message: 'Failed to update business card' });
+      res.status(500).json({ message: 'Failed to update business card', error: error.message });
     }
   });
 
@@ -603,11 +608,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Business card not found' });
       }
       
-      const updatedCard = await storage.updateBusinessCard(req.params.id, req.body);
+      // Clean the data - remove fields that shouldn't be updated
+      const { id, userId, createdAt, updatedAt, ...cleanData } = req.body;
+      
+      const updatedCard = await storage.updateBusinessCard(req.params.id, cleanData);
       res.json(updatedCard);
     } catch (error) {
       console.error('Error updating business card:', error);
-      res.status(500).json({ message: 'Failed to update business card' });
+      res.status(500).json({ message: 'Failed to update business card', error: error.message });
     }
   });
 

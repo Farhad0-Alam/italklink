@@ -146,9 +146,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateBusinessCard(id: string, cardData: Partial<InsertDbBusinessCard>): Promise<DbBusinessCard> {
+    // Remove problematic fields that shouldn't be updated
+    const { id: cardId, createdAt, updatedAt, ...cleanCardData } = cardData;
+    
     const [card] = await db
       .update(businessCards)
-      .set({ ...cardData, updatedAt: new Date() })
+      .set({ ...cleanCardData, updatedAt: new Date() })
       .where(eq(businessCards.id, id))
       .returning();
     return card;
