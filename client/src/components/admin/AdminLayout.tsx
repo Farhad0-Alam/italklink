@@ -132,17 +132,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b sticky top-0 z-50">
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Left side: Logo + Navigation */}
-            <div className="flex items-center space-x-6 flex-1 min-w-0">
-              <Link href="/admin" className="flex items-center space-x-2 flex-shrink-0">
-                <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">2T</span>
-                </div>
-                <span className="text-lg font-semibold text-gray-800 dark:text-white">
-                  2TalkLink Admin
-                </span>
-              </Link>
-              
+            {/* Left side: Navigation */}
+            <div className="flex items-center flex-1 min-w-0">
               {/* Horizontal navigation */}
               <div className="hidden lg:block flex-1 min-w-0">
                 <HorizontalNavContent />
