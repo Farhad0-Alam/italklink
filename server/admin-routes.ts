@@ -1630,6 +1630,142 @@ router.post('/header-templates/:id/duplicate', requireOwner, async (req, res) =>
   }
 });
 
+// === ADMIN PROFILE ENDPOINTS ===
+
+// Get admin profile
+router.get('/profile', requireOwner, async (req, res) => {
+  try {
+    const user = req.user!;
+    res.json(user);
+  } catch (error) {
+    console.error('Failed to get admin profile:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update admin profile
+router.patch('/profile', requireOwner, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const { firstName, lastName, email } = req.body;
+    
+    // Validate input
+    const updateSchema = z.object({
+      firstName: z.string().min(1).max(50).optional(),
+      lastName: z.string().min(1).max(50).optional(),
+      email: z.string().email().optional(),
+    });
+    
+    const validatedData = updateSchema.parse({ firstName, lastName, email });
+    
+    // Update user in database
+    const updatedUser = await db.update(users)
+      .set({
+        ...validatedData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser[0]) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    await logAdminAction(userId, 'update', 'admin_profile', userId, validatedData);
+    
+    res.json(updatedUser[0]);
+  } catch (error) {
+    console.error('Failed to update admin profile:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Change admin password
+router.post('/change-password', requireOwner, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const { currentPassword, newPassword } = req.body;
+    
+    // Validate input
+    const passwordSchema = z.object({
+      currentPassword: z.string().min(1),
+      newPassword: z.string().min(8)
+        .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+        .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+        .regex(/[0-9]/, "Password must contain at least one number"),
+    });
+    
+    const validatedData = passwordSchema.parse({ currentPassword, newPassword });
+    
+    // Get current user to verify password
+    const currentUser = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    
+    if (!currentUser[0] || !currentUser[0].passwordHash) {
+      return res.status(400).json({ message: 'Password not set or user not found' });
+    }
+    
+    // Verify current password
+    const isCurrentPasswordValid = await bcryptjs.compare(validatedData.currentPassword, currentUser[0].passwordHash);
+    
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+    
+    // Hash new password
+    const saltRounds = 12;
+    const newPasswordHash = await bcryptjs.hash(validatedData.newPassword, saltRounds);
+    
+    // Update password
+    await db.update(users)
+      .set({
+        passwordHash: newPasswordHash,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+    
+    await logAdminAction(userId, 'change_password', 'admin_profile', userId);
+    
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Failed to change admin password:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Upload admin avatar
+router.post('/upload-avatar', requireOwner, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    
+    // For now, return a mock response since we don't have file upload configured
+    // In a real implementation, you would handle file upload to cloud storage here
+    const mockImageUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${req.user!.firstName}${req.user!.lastName}`;
+    
+    // Update user's profile image URL
+    const updatedUser = await db.update(users)
+      .set({
+        profileImageUrl: mockImageUrl,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser[0]) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    await logAdminAction(userId, 'update', 'admin_avatar', userId, { imageUrl: mockImageUrl });
+    
+    res.json({ 
+      message: 'Avatar updated successfully',
+      imageUrl: mockImageUrl 
+    });
+  } catch (error) {
+    console.error('Failed to upload admin avatar:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Mount affiliate admin routes
 const affiliateAdminRoutes = (await import('./admin-affiliate-routes')).default;
 router.use('/', affiliateAdminRoutes);

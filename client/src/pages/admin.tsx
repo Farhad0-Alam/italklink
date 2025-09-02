@@ -11,7 +11,7 @@ import HeaderTemplatesPage from '@/components/admin/HeaderTemplatesPage';
 import IconPacksPage from '@/components/admin/IconPacksPage';
 import AffiliatesPage from '@/components/admin/AffiliatesPage';
 import AffiliateConversionsPage from '@/components/admin/AffiliateConversionsPage';
-const SettingsPage = () => <div className="p-6">Settings page coming soon...</div>;
+import AdminProfilePage from '@/components/admin/AdminProfilePage';
 
 export default function Admin() {
   const [location] = useLocation();
@@ -39,8 +39,8 @@ export default function Admin() {
         return <AffiliatesPage />;
       case '/admin/conversions':
         return <AffiliateConversionsPage />;
-      case '/admin/settings':
-        return <SettingsPage />;
+      case '/admin/profile':
+        return <AdminProfilePage />;
       case '/admin':
       default:
         return <DashboardPage />;

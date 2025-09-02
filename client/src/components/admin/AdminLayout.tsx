@@ -81,11 +81,6 @@ const sidebarNavItems = [
     href: '/admin/icon-packs',
     icon: Image,
   },
-  {
-    title: 'Settings',
-    href: '/admin/settings',
-    icon: Settings,
-  },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
@@ -142,9 +137,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
             {/* Right side: Actions */}
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="icon">
-                <Bell className="h-5 w-5" />
-              </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -167,13 +159,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/profile" className="flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
