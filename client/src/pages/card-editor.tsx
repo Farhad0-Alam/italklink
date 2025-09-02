@@ -148,13 +148,39 @@ export default function CardEditor() {
   // Save card mutation
   const saveMutation = useMutation({
     mutationFn: async (data: BusinessCard) => {
-      let response;
-      if (params.id) {
-        response = await apiRequest('PUT', `/api/business-cards/${params.id}`, data);
-      } else {
-        response = await apiRequest('POST', '/api/business-cards', data);
+      console.log('=== SAVE MUTATION STARTED ===');
+      console.log('Saving business card:', data);
+      console.log('User ID:', user?.id);
+      console.log('Params ID:', params.id);
+      
+      try {
+        let response;
+        if (params.id) {
+          console.log('Updating existing card...');
+          response = await apiRequest('PUT', `/api/business-cards/${params.id}`, data);
+        } else {
+          console.log('Creating new card...');
+          response = await apiRequest('POST', '/api/business-cards', data);
+        }
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Save failed - Response text:', errorText);
+          throw new Error(`Save failed: ${response.status} ${errorText}`);
+        }
+        
+        const result = await response.json();
+        console.log('Save result:', result);
+        console.log('=== SAVE MUTATION SUCCESS ===');
+        return result;
+      } catch (error) {
+        console.error('=== SAVE MUTATION ERROR ===');
+        console.error('Error details:', error);
+        throw error;
       }
-      return await response.json();
     },
     onSuccess: (savedCard) => {
       queryClient.invalidateQueries({ queryKey: ['/api/business-cards'] });
@@ -341,8 +367,29 @@ END:VCARD`;
             <div className="mt-6 space-y-4">
               <div className="flex justify-center">
                 <Button
-                  onClick={() => saveMutation.mutate(cardData)}
-                  disabled={!cardData.fullName || !cardData.title || saveMutation.isPending}
+                  onClick={() => {
+                    console.log('Save button clicked, cardData:', cardData);
+                    console.log('User:', user);
+                    console.log('Is user authenticated:', !!user);
+                    if (!user) {
+                      toast({
+                        title: "Please log in",
+                        description: "You need to be logged in to save business cards.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    if (!cardData.fullName || !cardData.title) {
+                      toast({
+                        title: "Missing information",
+                        description: "Please fill in your name and title before saving.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    saveMutation.mutate(cardData);
+                  }}
+                  disabled={saveMutation.isPending}
                   className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-2"
                   data-testid="button-save-card"
                 >

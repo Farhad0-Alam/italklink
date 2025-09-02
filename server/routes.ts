@@ -523,8 +523,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as User;
       const cardData = req.body;
       
+      console.log('POST /api/business-cards - User ID:', user.id);
+      console.log('POST /api/business-cards - Card data:', JSON.stringify(cardData, null, 2));
+      
+      // Validate required fields
+      if (!cardData.fullName || !cardData.title) {
+        console.log('Missing required fields:', { fullName: cardData.fullName, title: cardData.title });
+        return res.status(400).json({ 
+          message: 'Full name and title are required fields.' 
+        });
+      }
+      
       // Check if user has reached their limit (Pro and Enterprise users have unlimited cards)
       const userCards = await storage.getUserBusinessCards(user.id);
+      console.log('Current user cards count:', userCards.length);
+      console.log('User plan type:', user.planType);
+      console.log('User business cards limit:', user.businessCardsLimit);
+      
       if (user.planType === 'free' && userCards.length >= (user.businessCardsLimit || 1)) {
         return res.status(403).json({ 
           message: `You have reached your business card limit (${user.businessCardsLimit}). Upgrade to Pro for unlimited cards.` 
@@ -537,10 +552,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shareSlug: cardData.shareSlug || `${user.firstName?.toLowerCase()}-${user.lastName?.toLowerCase()}-${Date.now()}`,
       });
       
+      console.log('Created business card:', businessCard);
       res.status(201).json(businessCard);
     } catch (error) {
       console.error('Error creating business card:', error);
-      res.status(500).json({ message: 'Failed to create business card' });
+      res.status(500).json({ message: 'Failed to create business card', error: error.message });
     }
   });
 
