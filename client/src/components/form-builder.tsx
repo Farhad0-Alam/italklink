@@ -104,6 +104,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     refetchOnWindowFocus: false
   });
 
+  const [builderMode, setBuilderMode] = useState<'card' | 'page'>('card');
+  
   const [collapsedSections, setCollapsedSections] = useState<{ [key: string]: boolean }>({
     coverLogo: true,
     basicInfo: true,
@@ -210,15 +212,52 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     <div className="space-y-6">
       <Card className="bg-slate-800 border-slate-700">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold flex items-center text-white">
-            <i className="fas fa-edit text-talklink-500 mr-3" />
-            {t("form.title")}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-2xl font-bold flex items-center text-white">
+              <i className="fas fa-edit text-talklink-500 mr-3" />
+              {t("form.title")}
+            </CardTitle>
+            
+            {/* Builder Mode Toggle */}
+            <div className="flex items-center bg-slate-700 rounded-lg p-1">
+              <Button
+                type="button"
+                variant={builderMode === 'card' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setBuilderMode('card')}
+                className={`${builderMode === 'card' 
+                  ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                  : 'text-gray-300 hover:text-white hover:bg-slate-600'
+                } transition-all duration-200`}
+                data-testid="button-card-mode"
+              >
+                <i className="fas fa-id-card mr-2"></i>
+                Card
+              </Button>
+              <Button
+                type="button"
+                variant={builderMode === 'page' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setBuilderMode('page')}
+                className={`${builderMode === 'page' 
+                  ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                  : 'text-gray-300 hover:text-white hover:bg-slate-600'
+                } transition-all duration-200`}
+                data-testid="button-page-mode"
+              >
+                <i className="fas fa-sitemap mr-2"></i>
+                Page
+              </Button>
+            </div>
+          </div>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Pages Section */}
-          <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
+          {/* Show different content based on builder mode */}
+          {builderMode === 'card' && (
+            <>
+              {/* Pages Section */}
+              <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("pages")}>
               <h3 className="text-lg font-semibold text-blue-300 flex items-center">
                 <i className="fas fa-sitemap mr-2"></i>
@@ -1694,16 +1733,28 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             )}
           </div>
 
-          {/* Auto Save */}
-          <div className="flex items-center justify-center p-3 bg-slate-700/50 rounded-lg border border-slate-600">
-            <div className="flex items-center space-x-2 text-slate-300">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-sm">Auto-saving changes...</span>
-            </div>
-          </div>
+              {/* Auto Save */}
+              <div className="flex items-center justify-center p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                <div className="flex items-center space-x-2 text-slate-300">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-sm">Auto-saving changes...</span>
+                </div>
+              </div>
+            </>
+          )}
 
-          {/* Page Builder */}
+          {/* Page Builder - Always visible, but with different context */}
           <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
+            {builderMode === 'page' && (
+              <div className="mb-4 p-3 bg-blue-900/30 border border-blue-600/30 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <i className="fas fa-info-circle text-blue-300"></i>
+                  <div className="text-sm text-blue-200">
+                    <strong>Page Mode:</strong> You're now editing page elements only. Switch to "Card" mode to edit basic business card information.
+                  </div>
+                </div>
+              </div>
+            )}
             <PageBuilder
               elements={form.watch("pageElements") || []}
               onElementsChange={(elements: PageElement[]) => form.setValue("pageElements", elements)}
