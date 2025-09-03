@@ -32,7 +32,7 @@ interface SortableElementProps {
 }
 
 function SortableElement({ element, onUpdate, onDelete, cardData }: SortableElementProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const {
     attributes,
     listeners,
