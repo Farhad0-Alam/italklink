@@ -3,20 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp } from "lucide-react";
+import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { ContactSupportModal } from "@/components/contact-support-modal";
-import { DashboardLayout } from "@/components/DashboardLayout";
 
 interface User {
   id: string;
@@ -28,6 +29,12 @@ interface User {
   businessCardsCount: number;
   businessCardsLimit: number;
   createdAt: string;
+  stats?: {
+    totalBusinessCards: number;
+    totalViews: number;
+    planType: string;
+    businessCardsLimit: number;
+  };
 }
 
 interface BusinessCard {
@@ -61,21 +68,49 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showContactModal, setShowContactModal] = useState(false);
 
+  // All hooks must be called unconditionally at the top level
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
     queryKey: ['/api/auth/user'],
     retry: false,
   });
 
-  const { data: businessCards = [], isLoading: cardsLoading } = useQuery<BusinessCard[]>({
+  const { data: businessCards = [], isLoading: cardsLoading, refetch: refetchCards } = useQuery<BusinessCard[]>({
     queryKey: ['/api/business-cards'],
     enabled: !!user,
-    staleTime: 1000 * 60 * 5,
+    refetchInterval: 5000, // Refresh every 5 seconds to catch new cards
   });
 
+  // Debug log for business cards
+  useEffect(() => {
+    console.log('Dashboard - Business cards data:', businessCards);
+    console.log('Dashboard - Cards loading:', cardsLoading);
+  }, [businessCards, cardsLoading]);
+
+  // Fetch affiliate data
   const { data: affiliate } = useQuery<AffiliateProfile>({
     queryKey: ['/api/affiliate/me'],
     enabled: !!user,
-    staleTime: 1000 * 60 * 5,
+    retry: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/auth/logout'),
+    onSuccess: () => {
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+      });
+      queryClient.clear();
+      setLocation('/');
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Logout failed",
+        description: error.message || "Something went wrong while logging out.",
+        variant: "destructive",
+      });
+    },
   });
 
   const deleteCardMutation = useMutation({
@@ -96,6 +131,26 @@ export default function Dashboard() {
     },
   });
 
+  const toggleCardStatus = useMutation({
+    mutationFn: ({ id, isPublic }: { id: string, isPublic: boolean }) => 
+      apiRequest('PATCH', `/api/business-cards/${id}`, { isPublic }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/business-cards'] });
+      toast({
+        title: "Card updated",
+        description: "Card status updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update card status.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Effects after hooks
   useEffect(() => {
     if (!userLoading && (userError || !user)) {
       toast({
@@ -107,6 +162,7 @@ export default function Dashboard() {
     }
   }, [user, userLoading, userError, setLocation, toast]);
 
+  // Helper functions
   const copyUrl = async (shareSlug: string) => {
     const url = `${window.location.origin}/share/${shareSlug}`;
     await navigator.clipboard.writeText(url);
@@ -116,6 +172,23 @@ export default function Dashboard() {
     });
   };
 
+  const getPlanBadgeColor = (planType: string) => {
+    switch (planType) {
+      case 'pro': return 'bg-blue-100 text-blue-700';
+      case 'enterprise': return 'bg-purple-100 text-purple-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getPlanFeatures = (planType: string) => {
+    switch (planType) {
+      case 'pro': return ['Unlimited Cards', 'Analytics', 'Custom Branding', 'Priority Support'];
+      case 'enterprise': return ['Everything in Pro', 'Team Features', 'API Access', 'White-label'];
+      default: return ['1 Business Card', 'Basic Templates', 'QR Code Generation'];
+    }
+  };
+
+  // Conditional rendering after all hooks
   if (userLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -128,16 +201,196 @@ export default function Dashboard() {
   }
 
   if (!user) {
-    return null;
+    return null; // Will redirect to login
   }
 
+  // Calculate pagination after ensuring we have data
   const itemsPerPage = 10;
   const totalPages = Math.ceil(businessCards.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCards = businessCards.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <DashboardLayout>
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-8">
+              <Link href="/" className="flex items-center space-x-2">
+                <div className="text-2xl font-bold">
+                  <span className="text-blue-600">2talk</span>
+                  <span className="text-orange-500">Link</span>
+                </div>
+              </Link>
+              
+              <div className="hidden md:flex items-center space-x-8">
+                <Link href="/dashboard" className="text-gray-900 font-medium hover:text-blue-600">
+                  Dashboard
+                </Link>
+                <Link href="/dashboard" className="text-gray-500 hover:text-gray-700">
+                  My Links
+                </Link>
+                <Link href="/templates" className="text-gray-500 hover:text-gray-700">
+                  Templates
+                </Link>
+                <Link href="/collections" className="text-gray-500 hover:text-gray-700">
+                  Collections
+                </Link>
+                <Link href="/affiliate" className="text-gray-500 hover:text-gray-700">
+                  Affiliate
+                </Link>
+                <Link href="/pricing" className="text-gray-500 hover:text-gray-700">
+                  Pricing
+                </Link>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              {/* Profile Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center space-x-3 h-10 px-3 rounded-lg hover:bg-gray-50">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-orange-500 text-white text-sm font-medium">
+                        {user.firstName?.[0]}{user.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium text-gray-900">
+                        {user.firstName} {user.lastName}
+                      </span>
+                      <span className="text-xs text-gray-500">{user.email}</span>
+                    </div>
+                    <i className="fas fa-chevron-down text-xs text-gray-400"></i>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64 p-2" sideOffset={8}>
+                  {/* User Info Header */}
+                  <div className="flex items-center space-x-3 p-3 mb-2 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-orange-500 text-white">
+                        {user.firstName?.[0]}{user.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {user.firstName} {user.lastName}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                      <div className="flex items-center mt-1">
+                        <Badge className={`text-xs ${getPlanBadgeColor(user.planType)}`}>
+                          {user.planType === 'enterprise' && <Crown className="w-3 h-3 mr-1" />}
+                          {user.planType === 'pro' && <Shield className="w-3 h-3 mr-1" />}
+                          {user.planType.charAt(0).toUpperCase() + user.planType.slice(1)}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Profile Section */}
+                  <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider px-2">
+                    Account
+                  </DropdownMenuLabel>
+                  
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/profile')}
+                  >
+                    <UserIcon className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">Edit Profile</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/account-settings')}
+                  >
+                    <Settings className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">Account Settings</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Billing Section */}
+                  <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider px-2">
+                    Billing
+                  </DropdownMenuLabel>
+
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/pricing')}
+                  >
+                    <Crown className="w-4 h-4 text-gray-500" />
+                    <div className="flex flex-col flex-1">
+                      <span className="text-sm">Upgrade Plan</span>
+                      <span className="text-xs text-gray-500">Get more features</span>
+                    </div>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/billing')}
+                  >
+                    <CreditCard className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">Billing & Invoices</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/usage')}
+                  >
+                    <FileText className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">Usage & Limits</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Support Section */}
+                  <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider px-2">
+                    Support
+                  </DropdownMenuLabel>
+
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/help')}
+                  >
+                    <HelpCircle className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">Help Center</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setShowContactModal(true)}
+                  >
+                    <i className="fas fa-envelope w-4 h-4 text-gray-500"></i>
+                    <span className="text-sm">Contact Support</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Logout */}
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => logoutMutation.mutate()}
+                  >
+                    {logoutMutation.isPending ? (
+                      <i className="fas fa-spinner fa-spin w-4 h-4"></i>
+                    ) : (
+                      <LogOut className="w-4 h-4" />
+                    )}
+                    <span className="text-sm font-medium">Sign Out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
@@ -201,6 +454,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
+          {/* Affiliate Stats Card */}
           <Card className="bg-white shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -292,14 +546,14 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Business Cards Section */}
+        {/* Newly Created Links Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-900">Business Cards</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Newly Created Links</h2>
             <Button className="bg-orange-500 hover:bg-orange-600 text-white" asChild>
-              <Link href="/templates" data-testid="button-create-card">
+              <Link href="/templates" data-testid="button-create-link">
                 <i className="fas fa-plus mr-2"></i>
-                Create New Card
+                Create New Link
               </Link>
             </Button>
           </div>
@@ -307,27 +561,27 @@ export default function Dashboard() {
           {cardsLoading ? (
             <div className="text-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading your cards...</p>
+              <p className="text-gray-600">Loading your links...</p>
             </div>
           ) : businessCards.length === 0 ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="fas fa-id-card text-gray-400 text-2xl"></i>
+                <i className="fas fa-link text-gray-400 text-2xl"></i>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No business cards yet</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No links created yet</h3>
               <p className="text-gray-600 mb-6">
-                Create your first digital business card to get started.
+                Create your first digital business card link to get started.
               </p>
               <Button className="bg-orange-500 hover:bg-orange-600 text-white" asChild>
                 <Link href="/templates">
                   <i className="fas fa-plus mr-2"></i>
-                  Create Your First Card
+                  Create Your First Link
                 </Link>
               </Button>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {paginatedCards.map((card) => (
+              {paginatedCards.map((card, index) => (
                 <div key={card.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -342,99 +596,115 @@ export default function Dashboard() {
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
                           <h3 className="text-lg font-semibold text-gray-900">{card.fullName}</h3>
-                          <Badge variant={card.isPublic ? "default" : "secondary"}>
-                            {card.isPublic ? "Public" : "Private"}
-                          </Badge>
+                          <i className="fas fa-edit text-orange-500 text-sm"></i>
                         </div>
-                        <p className="text-sm text-gray-600">{card.title}</p>
                         <div className="flex items-center space-x-4 mt-1">
+                          <p className="text-sm text-gray-600">
+                            {card.shareSlug ? `https://2talklink.com/${card.shareSlug}` : `https://2talklink.com/${card.id.slice(0, 8)}`}
+                          </p>
+                          <i className="fas fa-copy text-gray-400 text-xs cursor-pointer hover:text-gray-600"></i>
+                          <i className="fas fa-external-link-alt text-gray-400 text-xs cursor-pointer hover:text-gray-600"></i>
+                        </div>
+                        <div className="flex items-center space-x-6 mt-2">
                           <span className="text-sm text-gray-500">
-                            <BarChart3 className="w-4 h-4 inline mr-1" />
-                            {card.viewCount} views
+                            <i className="fas fa-eye mr-1 text-orange-500"></i>
+                            Visitor ({card.viewCount})
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            <i className="fas fa-mouse-pointer mr-1 text-green-500"></i>
+                            Clicks (0)
                           </span>
                         </div>
                       </div>
                     </div>
-
-                    <div className="flex items-center space-x-2">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/card-editor?id=${card.id}`}>
-                              <Edit className="w-4 h-4 mr-2" />
-                              Edit
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => copyUrl(card.shareSlug || card.id.slice(0, 8))}>
-                            <Copy className="w-4 h-4 mr-2" />
-                            Copy URL
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <a href={`/share/${card.shareSlug || card.id.slice(0, 8)}`} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="w-4 h-4 mr-2" />
-                              View
-                            </a>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            onClick={() => deleteCardMutation.mutate(card.id)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    
+                    <div className="flex items-center space-x-4">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-orange-500 border-orange-200 hover:bg-orange-50"
+                        asChild
+                      >
+                        <Link href={`/cards/${card.id}/edit`} data-testid={`button-edit-${card.id}`}>
+                          Edit
+                        </Link>
+                      </Button>
+                      
+                      <Switch 
+                        checked={card.isPublic} 
+                        onCheckedChange={(checked) => 
+                          toggleCardStatus.mutate({ id: card.id, isPublic: checked })
+                        }
+                        className="data-[state=checked]:bg-green-500"
+                        data-testid={`switch-status-${card.id}`}
+                      />
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-blue-600"
+                        data-testid={`button-stats-${card.id}`}
+                      >
+                        <BarChart3 className="h-4 w-4" />
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-red-600"
+                        onClick={() => deleteCardMutation.mutate(card.id)}
+                        disabled={deleteCardMutation.isPending}
+                        data-testid={`button-delete-${card.id}`}
+                      >
+                        {deleteCardMutation.isPending ? (
+                          <i className="fas fa-spinner fa-spin"></i>
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
-
+          
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700">
-                  Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, businessCards.length)} of {businessCards.length} results
-                </div>
+          {businessCards.length > 0 && totalPages > 1 && (
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-center">
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  data-testid="button-prev-page"
+                >
+                  <i className="fas fa-chevron-left"></i>
+                </Button>
                 
-                <div className="flex items-center space-x-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <Button
-                    variant="outline"
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(page)}
+                    className={currentPage === page ? "bg-orange-500 hover:bg-orange-600" : ""}
+                    data-testid={`button-page-${page}`}
                   >
-                    Previous
+                    {page}
                   </Button>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </Button>
-                  ))}
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    Next
-                  </Button>
-                </div>
+                ))}
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  data-testid="button-next-page"
+                >
+                  <i className="fas fa-chevron-right"></i>
+                </Button>
               </div>
             </div>
           )}
@@ -446,6 +716,6 @@ export default function Dashboard() {
         open={showContactModal}
         onOpenChange={setShowContactModal}
       />
-    </DashboardLayout>
+    </div>
   );
 }

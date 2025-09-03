@@ -9,7 +9,6 @@ import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, Camera, User, Mail, Save } from "lucide-react";
-import { DashboardLayout } from "@/components/DashboardLayout";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -166,12 +165,25 @@ export default function Profile() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Profile Settings</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage your personal information</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back to Dashboard</span>
+                </Button>
+              </Link>
+              <h1 className="text-xl font-semibold text-gray-900">Edit Profile</h1>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Image Section */}
           <Card>
@@ -300,6 +312,6 @@ export default function Profile() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }
