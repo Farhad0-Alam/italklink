@@ -462,10 +462,7 @@ END:VCARD`;
                       {/* Card Content */}
                       <div 
                         ref={cardRef}
-                        className="pt-8 pb-4 px-4 h-full"
-                        style={{
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                        }}
+                        className="pt-8 h-full overflow-y-auto"
                       >
                         <BusinessCardComponent data={cardData} />
                       </div>
