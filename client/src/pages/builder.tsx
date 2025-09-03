@@ -128,8 +128,8 @@ export const Builder = () => {
                       }}
                     >
                       {/* Screen Content Area */}
-                      <div className="absolute top-[160px] left-[50px] right-[52px] bottom-[165px] overflow-hidden rounded-[35px] z-50">
-                        <div className="h-full overflow-y-auto relative z-50">
+                      <div className="absolute top-[160px] left-[50px] right-[52px] bottom-[165px] overflow-hidden rounded-[35px]">
+                        <div className="h-full overflow-y-auto">
                           <BusinessCardComponent
                             ref={cardRef}
                             data={cardData}

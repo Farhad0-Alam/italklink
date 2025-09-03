@@ -450,10 +450,10 @@ END:VCARD`;
                 }}
               >
                 {/* Screen Content Area */}
-                <div className="absolute top-[20px] left-[35px] right-[35px] bottom-[20px] overflow-hidden rounded-[30px] z-[9999]">
+                <div className="absolute top-[20px] left-[35px] right-[35px] bottom-[20px] overflow-hidden rounded-[30px]">
                   <div 
                     ref={cardRef}
-                    className="h-full overflow-y-auto relative z-[9999]"
+                    className="h-full overflow-y-auto"
                   >
                     <BusinessCardComponent 
                       data={cardData} 
