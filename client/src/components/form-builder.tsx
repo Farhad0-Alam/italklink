@@ -39,7 +39,6 @@ interface FormBuilderProps {
   cardData: BusinessCard;
   onDataChange: (data: BusinessCard) => void;
   onGenerateQR: () => void;
-  currentPageId?: string;
 }
 
 // Sortable Item Component
@@ -112,6 +111,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     customization: true,
     appearance: true,
     seo: true,
+    pages: false, // Pages section expanded by default
     pageBuilder: true,
     // subsections inside Basic Info
     nameStyling: true,
@@ -217,6 +217,145 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
         </CardHeader>
 
         <CardContent className="space-y-6">
+          {/* Pages Section */}
+          <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("pages")}>
+              <h3 className="text-lg font-semibold text-blue-300 flex items-center">
+                <i className="fas fa-sitemap mr-2"></i>
+                Pages
+              </h3>
+              <i className={`fas ${collapsedSections.pages ? "fa-chevron-down" : "fa-chevron-up"} text-blue-300`} />
+            </div>
+
+            {!collapsedSections.pages && (
+              <div className="space-y-4">
+                {/* Current Pages List */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-md font-medium text-blue-200">Current Pages</h4>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        const newPage = {
+                          id: `page-${Date.now()}`,
+                          key: `page-${Date.now()}`,
+                          path: 'new-page',
+                          label: 'New Page',
+                          visible: true,
+                          elements: []
+                        };
+                        const currentPages = watchedValues.pages || [
+                          { id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }
+                        ];
+                        form.setValue('pages', [...currentPages, newPage]);
+                      }}
+                      size="sm"
+                      className="bg-blue-700 hover:bg-blue-600 text-white"
+                      data-testid="button-add-new-page"
+                    >
+                      <i className="fas fa-plus mr-2"></i>
+                      Add New Page
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {((watchedValues.pages as any[]) || [
+                      { id: 'home', key: 'home', path: '', label: 'Home (Default)', visible: true, elements: [] }
+                    ]).map((page: any, index: number) => (
+                      <div 
+                        key={page.id} 
+                        className="flex items-center justify-between p-3 bg-slate-700 rounded-lg border border-slate-600"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <i className={`fas ${page.key === 'home' ? 'fa-home' : 'fa-file-alt'} text-blue-300`}></i>
+                          <div>
+                            <div className="font-medium text-white">{page.label}</div>
+                            <div className="text-xs text-gray-400">
+                              /{page.path || 'home'}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          {page.key !== 'home' && (
+                            <>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="bg-slate-600 border-slate-500 text-white hover:bg-slate-500"
+                                data-testid={`button-edit-page-${index}`}
+                              >
+                                <i className="fas fa-edit text-xs"></i>
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => {
+                                  const currentPages = watchedValues.pages as any[] || [];
+                                  const updatedPages = currentPages.filter(p => p.id !== page.id);
+                                  form.setValue('pages', updatedPages);
+                                }}
+                                data-testid={`button-delete-page-${index}`}
+                              >
+                                <i className="fas fa-trash text-xs"></i>
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Page Settings */}
+                <div className="border-t border-slate-600 pt-4">
+                  <h4 className="text-md font-medium text-blue-200 mb-3">Page Settings</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="enableMultiPage"
+                        checked={((watchedValues.pages as any[]) || []).length > 1}
+                        onCheckedChange={(checked) => {
+                          if (!checked) {
+                            // Reset to single home page
+                            form.setValue('pages', [
+                              { id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }
+                            ]);
+                          }
+                        }}
+                        className="border-slate-600"
+                      />
+                      <Label htmlFor="enableMultiPage" className="text-white text-sm">
+                        Enable Multi-Page
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-blue-800/30 p-3 rounded border border-blue-600/50">
+                  <div className="flex items-start space-x-2">
+                    <i className="fas fa-info-circle text-blue-300 mt-0.5"></i>
+                    <div className="text-sm text-blue-200">
+                      <strong>Pages Feature:</strong> Create multiple interconnected pages for your business card. 
+                      Each additional page will only show the "Page Elements" section for editing.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Page Builder */}
+          <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
+            <PageBuilder
+              elements={form.watch("pageElements") || []}
+              onElementsChange={(elements: PageElement[]) => form.setValue("pageElements", elements)}
+              cardData={watchedValues}
+            />
+          </div>
+
           {/* Cover & Logo */}
           <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("coverLogo")}>
@@ -1553,6 +1692,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 </div>
               </>
             )}
+          </div>
+
+          {/* Auto Save */}
+          <div className="flex items-center justify-center p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+            <div className="flex items-center space-x-2 text-slate-300">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-sm">Auto-saving changes...</span>
+            </div>
           </div>
 
           {/* Page Builder */}
