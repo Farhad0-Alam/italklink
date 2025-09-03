@@ -474,7 +474,7 @@ END:VCARD`;
                     <BusinessCardComponent 
                       data={cardData} 
                       isMobilePreview={true}
-                    />
+                  
                   </div>
                 </div>
               </div>
@@ -489,7 +489,6 @@ END:VCARD`;
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
+     
+    );
 }
