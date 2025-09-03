@@ -602,8 +602,21 @@ export default function Dashboard() {
                           <p className="text-sm text-gray-600">
                             {card.shareSlug ? `https://2talklink.com/${card.shareSlug}` : `https://2talklink.com/${card.id.slice(0, 8)}`}
                           </p>
-                          <i className="fas fa-copy text-gray-400 text-xs cursor-pointer hover:text-gray-600"></i>
-                          <i className="fas fa-external-link-alt text-gray-400 text-xs cursor-pointer hover:text-gray-600"></i>
+                          <i 
+                            className="fas fa-copy text-gray-400 text-xs cursor-pointer hover:text-gray-600 transition-colors" 
+                            onClick={() => copyUrl(card.shareSlug || card.id)}
+                            title="Copy link to clipboard"
+                            data-testid={`icon-copy-${card.id}`}
+                          ></i>
+                          <i 
+                            className="fas fa-external-link-alt text-gray-400 text-xs cursor-pointer hover:text-gray-600 transition-colors"
+                            onClick={() => window.open(
+                              `${window.location.origin}/share/${card.shareSlug || card.id}`, 
+                              '_blank'
+                            )}
+                            title="Open in new tab"
+                            data-testid={`icon-external-${card.id}`}
+                          ></i>
                         </div>
                         <div className="flex items-center space-x-6 mt-2">
                           <span className="text-sm text-gray-500">
