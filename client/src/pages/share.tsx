@@ -98,11 +98,11 @@ export const Share: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-50">
+    <div className="min-h-screen bg-slate-900 text-slate-50 md:bg-slate-900">
       {/* Dynamic SEO Head Component */}
       <SEOHead cardData={cardData} />
       
-      <div className="w-full max-w-[470px] mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <div className="w-full max-w-[470px] mx-auto px-0 py-0 md:px-4 md:py-8 sm:px-6 lg:px-8">
         {/* Shared Card Display - Mobile Responsive Layout */}
         <div className="flex justify-center">
           <div className="w-full">

@@ -165,7 +165,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     return (
       <div 
         ref={ref} 
-        className="rounded-2xl shadow-2xl overflow-hidden w-full mx-auto card-shadow"
+        className="rounded-none md:rounded-2xl shadow-none md:shadow-2xl overflow-hidden w-full mx-auto card-shadow"
         style={{ 
           maxWidth: '430px',
           backgroundColor: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#1a1a1a' : (data.backgroundColor || '#ffffff'),
