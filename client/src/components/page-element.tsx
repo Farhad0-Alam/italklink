@@ -2442,9 +2442,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       <label className="block text-sm font-medium mb-1">Section Title</label>
                       <Input
                         value={element.data.title || 'Save to Digital Wallet'}
-                        onChange={(e) => onUpdate && onUpdate(element.id, { 
-                          ...element.data, 
-                          title: e.target.value 
+                        onChange={(e) => onUpdate && onUpdate({ 
+                          ...element, 
+                          data: { 
+                            ...element.data, 
+                            title: e.target.value 
+                          } 
                         })}
                         placeholder="Section title"
                       />
@@ -2453,9 +2456,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       <label className="block text-sm font-medium mb-1">Layout</label>
                       <select
                         value={element.data.layout || 'stacked'}
-                        onChange={(e) => onUpdate && onUpdate(element.id, { 
-                          ...element.data, 
-                          layout: e.target.value 
+                        onChange={(e) => onUpdate && onUpdate({ 
+                          ...element, 
+                          data: { 
+                            ...element.data, 
+                            layout: e.target.value as "stacked" | "columns"
+                          } 
                         })}
                         className="w-full p-2 border rounded"
                       >
@@ -2469,9 +2475,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <label className="block text-sm font-medium mb-1">Subtitle</label>
                     <Input
                       value={element.data.subtitle || 'Add this business card to your phone\'s wallet'}
-                      onChange={(e) => onUpdate && onUpdate(element.id, { 
-                        ...element.data, 
-                        subtitle: e.target.value 
+                      onChange={(e) => onUpdate && onUpdate({ 
+                        ...element, 
+                        data: { 
+                          ...element.data, 
+                          subtitle: e.target.value 
+                        } 
                       })}
                       placeholder="Description text"
                     />
@@ -2483,9 +2492,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         <input
                           type="checkbox"
                           checked={element.data.showApple !== false}
-                          onChange={(e) => onUpdate && onUpdate(element.id, { 
-                            ...element.data, 
-                            showApple: e.target.checked 
+                          onChange={(e) => onUpdate && onUpdate({ 
+                            ...element, 
+                            data: { 
+                              ...element.data, 
+                              showApple: e.target.checked 
+                            } 
                           })}
                           className="sr-only peer"
                         />
@@ -2498,9 +2510,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         <input
                           type="checkbox"
                           checked={element.data.showGoogle !== false}
-                          onChange={(e) => onUpdate && onUpdate(element.id, { 
-                            ...element.data, 
-                            showGoogle: e.target.checked 
+                          onChange={(e) => onUpdate && onUpdate({ 
+                            ...element, 
+                            data: { 
+                              ...element.data, 
+                              showGoogle: e.target.checked 
+                            } 
                           })}
                           className="sr-only peer"
                         />
@@ -2516,9 +2531,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       <Input
                         type="color"
                         value={element.data.appleButtonColor || '#000000'}
-                        onChange={(e) => onUpdate && onUpdate(element.id, { 
-                          ...element.data, 
-                          appleButtonColor: e.target.value 
+                        onChange={(e) => onUpdate && onUpdate({ 
+                          ...element, 
+                          data: { 
+                            ...element.data, 
+                            appleButtonColor: e.target.value 
+                          } 
                         })}
                         className="h-10"
                         disabled={!element.data.showApple}
@@ -2529,9 +2547,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       <Input
                         type="color"
                         value={element.data.googleButtonColor || '#2563eb'}
-                        onChange={(e) => onUpdate && onUpdate(element.id, { 
-                          ...element.data, 
-                          googleButtonColor: e.target.value 
+                        onChange={(e) => onUpdate && onUpdate({ 
+                          ...element, 
+                          data: { 
+                            ...element.data, 
+                            googleButtonColor: e.target.value 
+                          } 
                         })}
                         className="h-10"
                         disabled={!element.data.showGoogle}
@@ -2545,9 +2566,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       <Input
                         type="color"
                         value={element.data.backgroundColor || '#1e293b'}
-                        onChange={(e) => onUpdate && onUpdate(element.id, { 
-                          ...element.data, 
-                          backgroundColor: e.target.value 
+                        onChange={(e) => onUpdate && onUpdate({ 
+                          ...element, 
+                          data: { 
+                            ...element.data, 
+                            backgroundColor: e.target.value 
+                          } 
                         })}
                         className="h-10"
                       />
@@ -2557,9 +2581,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       <Input
                         type="color"
                         value={element.data.textColor || '#ffffff'}
-                        onChange={(e) => onUpdate && onUpdate(element.id, { 
-                          ...element.data, 
-                          textColor: e.target.value 
+                        onChange={(e) => onUpdate && onUpdate({ 
+                          ...element, 
+                          data: { 
+                            ...element.data, 
+                            textColor: e.target.value 
+                          } 
                         })}
                         className="h-10"
                       />
@@ -2570,9 +2597,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <label className="block text-sm font-medium mb-1">Font Family</label>
                     <select
                       value={element.data.fontFamily || 'Inter'}
-                      onChange={(e) => onUpdate && onUpdate(element.id, { 
-                        ...element.data, 
-                        fontFamily: e.target.value 
+                      onChange={(e) => onUpdate && onUpdate({ 
+                        ...element, 
+                        data: { 
+                          ...element.data, 
+                          fontFamily: e.target.value 
+                        } 
                       })}
                       className="w-full p-2 border rounded"
                     >
@@ -2592,9 +2622,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         type="checkbox"
                         id={`show-download-qr-${element.id}`}
                         checked={element.data.showQRDownload || false}
-                        onChange={(e) => onUpdate && onUpdate(element.id, { 
-                          ...element.data, 
-                          showQRDownload: e.target.checked 
+                        onChange={(e) => onUpdate && onUpdate({ 
+                          ...element, 
+                          data: { 
+                            ...element.data, 
+                            showQRDownload: e.target.checked 
+                          } 
                         })}
                         className="rounded"
                       />
@@ -2607,9 +2640,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         type="checkbox"
                         id={`modern-style-${element.id}`}
                         checked={element.data.modernStyle || false}
-                        onChange={(e) => onUpdate && onUpdate(element.id, { 
-                          ...element.data, 
-                          modernStyle: e.target.checked 
+                        onChange={(e) => onUpdate && onUpdate({ 
+                          ...element, 
+                          data: { 
+                            ...element.data, 
+                            modernStyle: e.target.checked 
+                          } 
                         })}
                         className="rounded"
                       />

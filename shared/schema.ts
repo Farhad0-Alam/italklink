@@ -1436,6 +1436,24 @@ export const googleWalletElementSchema = baseElementSchema.extend({
   }),
 });
 
+export const digitalWalletElementSchema = baseElementSchema.extend({
+  type: z.literal("digitalWallet"),
+  data: z.object({
+    title: z.string().default("Save to Digital Wallet"),
+    subtitle: z.string().default("Add this business card to your phone's wallet"),
+    layout: z.enum(["stacked", "columns"]).default("stacked"),
+    showApple: z.boolean().default(true),
+    showGoogle: z.boolean().default(true),
+    showQRDownload: z.boolean().default(false),
+    modernStyle: z.boolean().default(false),
+    backgroundColor: z.string().default("#1e293b"),
+    textColor: z.string().default("#ffffff"),
+    fontFamily: z.string().default("Inter"),
+    appleButtonColor: z.string().default("#000000"),
+    googleButtonColor: z.string().default("#2563eb"),
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   headingElementSchema,
@@ -1455,6 +1473,7 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   ragKnowledgeElementSchema,
   appleWalletElementSchema,
   googleWalletElementSchema,
+  digitalWalletElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;
