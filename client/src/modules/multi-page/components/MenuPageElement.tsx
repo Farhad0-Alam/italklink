@@ -27,6 +27,8 @@ interface MenuElementData {
     fgActive: string;
     sticky: boolean;
     mobileCollapse: boolean;
+    position: 'default' | 'header' | 'footer' | 'floating-top-right' | 'floating-top-left' | 'sidebar-left' | 'sidebar-right';
+    fixed: boolean;
   };
 }
 
@@ -93,15 +95,32 @@ export function MenuPageElement({ data, isEditing, onChange, availablePages = []
   const renderMenuPreview = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     
-    const menuClasses = [
-      'relative bg-white rounded-lg shadow-sm border overflow-hidden',
-      data.style.sticky ? 'sticky top-0 z-40' : '',
-    ].join(' ');
+    const visibleItems = data.items
+      .filter(item => item.visible)
+      .sort((a, b) => a.order - b.order);
 
-    const desktopMenuClasses = [
-      'hidden md:flex gap-2 p-4',
-      data.style.orientation === 'vertical' ? 'flex-col' : 'flex-row flex-wrap',
-    ].join(' ');
+    // Position-based wrapper classes
+    const getWrapperClasses = () => {
+      const baseClasses = 'bg-white shadow-sm border overflow-hidden';
+      const fixed = data.style.fixed ? 'fixed z-50' : 'relative';
+      
+      switch (data.style.position) {
+        case 'header':
+          return `${baseClasses} ${fixed} top-0 left-0 right-0 ${data.style.sticky ? 'sticky' : ''}`;
+        case 'footer':
+          return `${baseClasses} ${fixed} bottom-0 left-0 right-0`;
+        case 'floating-top-right':
+          return `${baseClasses} ${fixed} top-4 right-4 rounded-lg shadow-lg max-w-xs`;
+        case 'floating-top-left':
+          return `${baseClasses} ${fixed} top-4 left-4 rounded-lg shadow-lg max-w-xs`;
+        case 'sidebar-left':
+          return `${baseClasses} ${fixed} top-0 left-0 h-full w-64`;
+        case 'sidebar-right':
+          return `${baseClasses} ${fixed} top-0 right-0 h-full w-64`;
+        default:
+          return `${baseClasses} rounded-lg`;
+      }
+    };
 
     const itemClasses = [
       'px-3 py-2 transition-all duration-200 cursor-pointer hover:opacity-80',
@@ -113,94 +132,110 @@ export function MenuPageElement({ data, isEditing, onChange, availablePages = []
       data.style.size === 'lg' ? 'text-lg px-4 py-3' : '',
     ].join(' ');
 
-    const visibleItems = data.items
-      .filter(item => item.visible)
-      .sort((a, b) => a.order - b.order);
+    // Floating hamburger menu (top right corner style)
+    if (data.style.position === 'floating-top-right' || data.style.position === 'floating-top-left') {
+      return (
+        <div className={getWrapperClasses()}>
+          {/* Hamburger Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-3 transition-colors hover:bg-gray-50"
+            style={{
+              backgroundColor: data.style.bg,
+              color: data.style.fg,
+            }}
+          >
+            <div className="w-6 h-6 relative">
+              {isMobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </div>
+          </button>
+
+          {/* Dropdown Menu */}
+          <div className={`absolute ${data.style.position === 'floating-top-right' ? 'right-0' : 'left-0'} top-full mt-2 w-48 bg-white rounded-lg shadow-lg border transition-all duration-300 ease-in-out ${
+            isMobileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
+          }`}>
+            <div className="py-2">
+              {visibleItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="block px-4 py-3 text-left transition-all duration-200 cursor-pointer hover:bg-gray-50"
+                  style={{ color: data.style.fg }}
+                  onClick={() => handleMenuItemClick(item)}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>{item.label}</span>
+                    {item.type === 'external' && (
+                      <span className="ml-2 text-xs opacity-70">↗</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Sidebar menu
+    if (data.style.position === 'sidebar-left' || data.style.position === 'sidebar-right') {
+      return (
+        <div className={getWrapperClasses()}>
+          <div className="flex flex-col h-full">
+            <div className="p-4 border-b">
+              <h3 className="font-semibold" style={{ color: data.style.fg }}>
+                {data.title}
+              </h3>
+            </div>
+            <div className="flex-1 py-4">
+              {visibleItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="block px-4 py-3 text-left transition-all duration-200 cursor-pointer hover:bg-gray-50"
+                  style={{ color: data.style.fg }}
+                  onClick={() => handleMenuItemClick(item)}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>{item.label}</span>
+                    {item.type === 'external' && (
+                      <span className="ml-2 text-xs opacity-70">↗</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Header/Footer/Default menu styles
+    const getMenuClasses = () => {
+      if (data.style.position === 'header') {
+        return 'flex items-center justify-between p-4';
+      }
+      if (data.style.position === 'footer') {
+        return 'flex items-center justify-center p-4';
+      }
+      return data.style.orientation === 'vertical' ? 'flex flex-col gap-2 p-4' : 'flex flex-row flex-wrap gap-2 p-4';
+    };
 
     return (
-      <div className={menuClasses}>
-        {/* Desktop Menu */}
-        <div className={desktopMenuClasses}>
-          {visibleItems.map((item) => (
-            <div
-              key={item.id}
-              className={itemClasses}
-              onClick={() => handleMenuItemClick(item)}
-              style={{
-                backgroundColor: data.style.bg,
-                color: data.style.fg,
-                borderRadius: data.style.radius === 'none' ? 0 : 
-                  data.style.radius === 'sm' ? '4px' :
-                  data.style.radius === 'md' ? '6px' :
-                  data.style.radius === 'lg' ? '8px' :
-                  data.style.radius === 'xl' ? '12px' : '16px',
-              }}
-            >
-              {item.label}
-              {item.type === 'external' && <span className="ml-1 text-xs opacity-70">↗</span>}
+      <div className={getWrapperClasses()}>
+        {/* Header style with brand area */}
+        {data.style.position === 'header' && (
+          <div className="flex items-center justify-between p-4">
+            <div className="font-semibold" style={{ color: data.style.fg }}>
+              {data.title}
             </div>
-          ))}
-        </div>
-
-        {/* Mobile Menu */}
-        {data.style.mobileCollapse && (
-          <>
-            {/* Mobile Menu Button */}
-            <div className="md:hidden flex items-center justify-between p-4">
-              <span className="font-medium" style={{ color: data.style.fg }}>
-                {data.title}
-              </span>
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-lg transition-colors"
-                style={{
-                  backgroundColor: data.style.bg,
-                  color: data.style.fg,
-                }}
-              >
-                <div className={`w-5 h-5 relative transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-90' : ''}`}>
-                  {isMobileMenuOpen ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                  )}
-                </div>
-              </button>
-            </div>
-
-            {/* Mobile Dropdown */}
-            <div className={`md:hidden transition-all duration-300 ease-in-out border-t ${
-              isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
-            }`}>
-              <div className="p-2 space-y-1">
-                {visibleItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`block px-4 py-3 text-left transition-all duration-200 cursor-pointer hover:bg-gray-50 rounded-lg`}
-                    style={{ color: data.style.fg }}
-                    onClick={() => handleMenuItemClick(item)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>{item.label}</span>
-                      {item.type === 'external' && (
-                        <span className="ml-2 text-xs opacity-70">↗</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Non-collapsible mobile menu */}
-        {!data.style.mobileCollapse && (
-          <div className="md:hidden p-4">
-            <div className="space-y-2">
+            <div className="hidden md:flex gap-2">
               {visibleItems.map((item) => (
                 <div
                   key={item.id}
@@ -218,6 +253,137 @@ export function MenuPageElement({ data, isEditing, onChange, availablePages = []
                 >
                   {item.label}
                   {item.type === 'external' && <span className="ml-1 text-xs opacity-70">↗</span>}
+                </div>
+              ))}
+            </div>
+            {/* Mobile hamburger for header */}
+            <button
+              className="md:hidden p-2"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              style={{ color: data.style.fg }}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* Footer style */}
+        {data.style.position === 'footer' && (
+          <div className="flex items-center justify-center p-4 gap-4">
+            {visibleItems.map((item) => (
+              <div
+                key={item.id}
+                className={itemClasses}
+                onClick={() => handleMenuItemClick(item)}
+                style={{
+                  backgroundColor: data.style.bg,
+                  color: data.style.fg,
+                  borderRadius: data.style.radius === 'none' ? 0 : 
+                    data.style.radius === 'sm' ? '4px' :
+                    data.style.radius === 'md' ? '6px' :
+                    data.style.radius === 'lg' ? '8px' :
+                    data.style.radius === 'xl' ? '12px' : '16px',
+                }}
+              >
+                {item.label}
+                {item.type === 'external' && <span className="ml-1 text-xs opacity-70">↗</span>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Default menu style */}
+        {data.style.position === 'default' && (
+          <div className={getMenuClasses()}>
+            {/* Desktop Menu */}
+            <div className={`hidden md:flex gap-2 ${data.style.orientation === 'vertical' ? 'flex-col' : 'flex-row flex-wrap'}`}>
+              {visibleItems.map((item) => (
+                <div
+                  key={item.id}
+                  className={itemClasses}
+                  onClick={() => handleMenuItemClick(item)}
+                  style={{
+                    backgroundColor: data.style.bg,
+                    color: data.style.fg,
+                    borderRadius: data.style.radius === 'none' ? 0 : 
+                      data.style.radius === 'sm' ? '4px' :
+                      data.style.radius === 'md' ? '6px' :
+                      data.style.radius === 'lg' ? '8px' :
+                      data.style.radius === 'xl' ? '12px' : '16px',
+                  }}
+                >
+                  {item.label}
+                  {item.type === 'external' && <span className="ml-1 text-xs opacity-70">↗</span>}
+                </div>
+              ))}
+            </div>
+
+            {/* Mobile Menu for default style */}
+            {data.style.mobileCollapse && (
+              <>
+                <div className="md:hidden flex items-center justify-between p-4">
+                  <span className="font-medium" style={{ color: data.style.fg }}>
+                    {data.title}
+                  </span>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    className="p-2 rounded-lg transition-colors"
+                    style={{
+                      backgroundColor: data.style.bg,
+                      color: data.style.fg,
+                    }}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className={`md:hidden transition-all duration-300 ease-in-out border-t ${
+                  isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+                }`}>
+                  <div className="p-2 space-y-1">
+                    {visibleItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="block px-4 py-3 text-left transition-all duration-200 cursor-pointer hover:bg-gray-50 rounded-lg"
+                        style={{ color: data.style.fg }}
+                        onClick={() => handleMenuItemClick(item)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>{item.label}</span>
+                          {item.type === 'external' && (
+                            <span className="ml-2 text-xs opacity-70">↗</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Mobile dropdown for header */}
+        {data.style.position === 'header' && isMobileMenuOpen && (
+          <div className="md:hidden border-t bg-white">
+            <div className="py-2">
+              {visibleItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="block px-4 py-3 text-left transition-all duration-200 cursor-pointer hover:bg-gray-50"
+                  style={{ color: data.style.fg }}
+                  onClick={() => handleMenuItemClick(item)}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>{item.label}</span>
+                    {item.type === 'external' && (
+                      <span className="ml-2 text-xs opacity-70">↗</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -316,7 +482,34 @@ export function MenuPageElement({ data, isEditing, onChange, availablePages = []
           </div>
         </div>
 
+        <div>
+          <label className="block text-sm font-medium mb-2">Menu Position</label>
+          <Select value={data.style.position || 'default'} onValueChange={(value: any) => updateStyle({ position: value })}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">Default</SelectItem>
+              <SelectItem value="header">Modern Header</SelectItem>
+              <SelectItem value="footer">Footer Menu</SelectItem>
+              <SelectItem value="floating-top-right">Floating Top Right (Hamburger)</SelectItem>
+              <SelectItem value="floating-top-left">Floating Top Left</SelectItem>
+              <SelectItem value="sidebar-left">Sidebar Left</SelectItem>
+              <SelectItem value="sidebar-right">Sidebar Right</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={data.style.fixed || false}
+              onCheckedChange={(checked) => updateStyle({ fixed: checked })}
+              data-testid="switch-fixed"
+            />
+            <label className="text-sm font-medium">Fixed Position</label>
+          </div>
+
           <div className="flex items-center gap-2">
             <Switch
               checked={data.style.sticky}

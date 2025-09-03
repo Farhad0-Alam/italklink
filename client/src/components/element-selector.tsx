@@ -383,7 +383,9 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
               fg: '#0f172a',
               fgActive: '#111827',
               sticky: true,
-              mobileCollapse: true
+              mobileCollapse: true,
+              position: 'default',
+              fixed: false
             }
           }
         };
