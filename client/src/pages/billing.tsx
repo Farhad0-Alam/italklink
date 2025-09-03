@@ -6,7 +6,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { ArrowLeft, CreditCard, Download, Eye, Calendar, Crown, Shield, DollarSign } from "lucide-react";
+import { ArrowLeft, CreditCard, Download, Eye, Calendar, Crown, Shield, DollarSign, Plus, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface User {
   id: string;
@@ -38,9 +43,30 @@ interface Subscription {
   interval: 'monthly' | 'annual';
 }
 
+interface PaymentMethod {
+  id: string;
+  type: 'card' | 'bank_account';
+  brand?: string;
+  last4: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+  isDefault: boolean;
+  createdAt: string;
+}
+
 export default function Billing() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isAddingPaymentMethod, setIsAddingPaymentMethod] = useState(false);
+  const [newPaymentMethod, setNewPaymentMethod] = useState({
+    cardNumber: '',
+    expiryMonth: '',
+    expiryYear: '',
+    cvc: '',
+    name: '',
+    type: 'card'
+  });
 
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
     queryKey: ['/api/auth/user'],
@@ -94,6 +120,69 @@ export default function Billing() {
     ],
     enabled: !!user,
     staleTime: 1000 * 60 * 5,
+  });
+
+  // Query for payment methods
+  const { data: paymentMethods = [] } = useQuery<PaymentMethod[]>({
+    queryKey: ['/api/billing/payment-methods'],
+    queryFn: () => [], // Will be empty initially - ready for real integration
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Mutation to add payment method
+  const addPaymentMethodMutation = useMutation({
+    mutationFn: async (paymentMethodData: any) => {
+      // For now, show a message that Stripe needs to be configured
+      throw new Error('Payment processing requires Stripe configuration. Please contact support.');
+    },
+    onSuccess: () => {
+      toast({
+        title: "Payment method added",
+        description: "Your payment method has been added successfully.",
+      });
+      setIsAddingPaymentMethod(false);
+      setNewPaymentMethod({
+        cardNumber: '',
+        expiryMonth: '',
+        expiryYear: '',
+        cvc: '',
+        name: '',
+        type: 'card'
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/billing/payment-methods'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to add payment method",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation to remove payment method
+  const removePaymentMethodMutation = useMutation({
+    mutationFn: async (paymentMethodId: string) => {
+      const response = await apiRequest(`/api/billing/payment-methods/${paymentMethodId}`, {
+        method: 'DELETE',
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Payment method removed",
+        description: "Your payment method has been removed successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/billing/payment-methods'] });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to remove payment method",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    },
   });
 
   useEffect(() => {
@@ -323,22 +412,150 @@ export default function Billing() {
         {/* Payment Methods */}
         <Card className="mt-8">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <CreditCard className="w-5 h-5" />
-              <span>Payment Methods</span>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <CreditCard className="w-5 h-5" />
+                <span>Payment Methods</span>
+              </div>
+              <Dialog open={isAddingPaymentMethod} onOpenChange={setIsAddingPaymentMethod}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="flex items-center space-x-2">
+                    <Plus className="w-4 h-4" />
+                    <span>Add Payment Method</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Add Payment Method</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="type">Payment Type</Label>
+                      <Select value={newPaymentMethod.type} onValueChange={(value) => 
+                        setNewPaymentMethod(prev => ({ ...prev, type: value }))
+                      }>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select payment type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="card">Credit/Debit Card</SelectItem>
+                          <SelectItem value="bank_account">Bank Account</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {newPaymentMethod.type === 'card' && (
+                      <>
+                        <div className="grid gap-2">
+                          <Label htmlFor="cardNumber">Card Number</Label>
+                          <Input
+                            id="cardNumber"
+                            placeholder="1234 5678 9012 3456"
+                            value={newPaymentMethod.cardNumber}
+                            onChange={(e) => setNewPaymentMethod(prev => ({ ...prev, cardNumber: e.target.value }))}
+                          />
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <Label htmlFor="expiryMonth">Month</Label>
+                            <Input
+                              id="expiryMonth"
+                              placeholder="MM"
+                              value={newPaymentMethod.expiryMonth}
+                              onChange={(e) => setNewPaymentMethod(prev => ({ ...prev, expiryMonth: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="expiryYear">Year</Label>
+                            <Input
+                              id="expiryYear"
+                              placeholder="YY"
+                              value={newPaymentMethod.expiryYear}
+                              onChange={(e) => setNewPaymentMethod(prev => ({ ...prev, expiryYear: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="cvc">CVC</Label>
+                            <Input
+                              id="cvc"
+                              placeholder="123"
+                              value={newPaymentMethod.cvc}
+                              onChange={(e) => setNewPaymentMethod(prev => ({ ...prev, cvc: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="name">Cardholder Name</Label>
+                          <Input
+                            id="name"
+                            placeholder="John Doe"
+                            value={newPaymentMethod.name}
+                            onChange={(e) => setNewPaymentMethod(prev => ({ ...prev, name: e.target.value }))}
+                          />
+                        </div>
+                      </>
+                    )}
+                    
+                    <div className="flex justify-end space-x-2 pt-4">
+                      <Button variant="outline" onClick={() => setIsAddingPaymentMethod(false)}>
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={() => addPaymentMethodMutation.mutate(newPaymentMethod)}
+                        disabled={addPaymentMethodMutation.isPending}
+                      >
+                        {addPaymentMethodMutation.isPending ? 'Adding...' : 'Add Payment Method'}
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8">
-              <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No payment methods</h3>
-              <p className="text-gray-600 mb-4">
-                Add a payment method to manage your subscription.
-              </p>
-              <Button variant="outline">
-                Add Payment Method
-              </Button>
-            </div>
+            {paymentMethods.length > 0 ? (
+              <div className="space-y-4">
+                {paymentMethods.map((method) => (
+                  <div key={method.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <CreditCard className="w-6 h-6 text-gray-400" />
+                      <div>
+                        <div className="font-medium">
+                          {method.brand ? `${method.brand} ` : ''}**** {method.last4}
+                        </div>
+                        {method.expiryMonth && method.expiryYear && (
+                          <div className="text-sm text-gray-500">
+                            Expires {method.expiryMonth.toString().padStart(2, '0')}/{method.expiryYear}
+                          </div>
+                        )}
+                        {method.isDefault && (
+                          <Badge variant="secondary" className="text-xs">Default</Badge>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removePaymentMethodMutation.mutate(method.id)}
+                      disabled={removePaymentMethodMutation.isPending}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No payment methods</h3>
+                <p className="text-gray-600 mb-4">
+                  Add a payment method to manage your subscription and enable automatic billing.
+                </p>
+                <div className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                  <strong>Note:</strong> Payment processing requires Stripe integration. Contact support to enable payments.
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
