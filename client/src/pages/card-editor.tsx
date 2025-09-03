@@ -85,6 +85,25 @@ export default function CardEditor() {
     return (cardData as any).currentSelectedPage;
   };
   
+  // Enhanced navigation function that switches to page mode and sets the page
+  const handleNavigatePage = (pageId: string) => {
+    setCurrentPageId(pageId);
+    // Update the card data to switch to page preview mode with the specific page
+    const pages = (cardData as any).pages || [];
+    const targetPage = pages.find((p: any) => p.id === pageId);
+    if (targetPage) {
+      setCardData(prev => ({
+        ...prev,
+        currentPreviewMode: 'page',
+        currentSelectedPage: {
+          id: targetPage.id,
+          label: targetPage.label,
+          elements: targetPage.elements || []
+        }
+      }));
+    }
+  };
+  
   // Fetch template data if template parameter is provided
   const { data: templates } = useQuery({
     queryKey: ['/api/templates'],
@@ -388,7 +407,7 @@ END:VCARD`;
               cardData={cardData}
               onDataChange={(data) => setCardData(data)}
               onGenerateQR={() => {}}
-              onNavigationChange={setCurrentPageId}
+              onNavigationChange={handleNavigatePage}
             />
             
             {/* Save Card Button */}
@@ -478,12 +497,13 @@ END:VCARD`;
                       <PagePreview 
                         pageData={getCurrentPageData()}
                         cardData={cardData}
-                        onNavigatePage={setCurrentPageId}
+                        onNavigatePage={handleNavigatePage}
                       />
                     ) : (
                       <BusinessCardComponent 
                         data={cardData} 
                         isMobilePreview={true}
+                        onNavigatePage={handleNavigatePage}
                       />
                     )}
                   </div>

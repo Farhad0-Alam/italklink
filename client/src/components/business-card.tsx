@@ -34,10 +34,11 @@ interface BusinessCardProps {
   showQR?: boolean;
   isInteractive?: boolean;
   isMobilePreview?: boolean;
+  onNavigatePage?: (pageId: string) => void;
 }
 
 export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProps>(
-  ({ data, showQR = false, isInteractive = true, isMobilePreview = false }, ref) => {
+  ({ data, showQR = false, isInteractive = true, isMobilePreview = false, onNavigatePage }, ref) => {
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const [showShareMenu, setShowShareMenu] = useState(false);
     const { toast } = useToast();
@@ -519,7 +520,7 @@ END:VCARD`;
           {data.pageElements && data.pageElements.length > 0 && (
             <div className="space-y-4 mb-6">
               {data.pageElements.map((element) => (
-                <PageElementRenderer key={element.id} element={element} isInteractive={isInteractive} cardData={data} />
+                <PageElementRenderer key={element.id} element={element} isInteractive={isInteractive} cardData={data} onNavigatePage={onNavigatePage} />
               ))}
             </div>
           )}
