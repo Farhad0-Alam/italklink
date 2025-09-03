@@ -29,9 +29,10 @@ interface SortableElementProps {
   onUpdate: (element: PageElement) => void;
   onDelete: (elementId: string) => void;
   cardData?: any;
+  onNavigatePage?: (pageId: string) => void;
 }
 
-function SortableElement({ element, onUpdate, onDelete, cardData }: SortableElementProps) {
+function SortableElement({ element, onUpdate, onDelete, cardData, onNavigatePage }: SortableElementProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const {
     attributes,
@@ -210,6 +211,7 @@ export function PageBuilder({ elements, onElementsChange, cardData, onNavigatePa
                   onUpdate={handleUpdateElement}
                   onDelete={handleDeleteElement}
                   cardData={cardData}
+                  onNavigatePage={onNavigatePage}
                 />
               ))}
             </div>
