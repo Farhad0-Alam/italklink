@@ -99,24 +99,24 @@ export function MenuPageElement({ data, isEditing, onChange, availablePages = []
       .filter(item => item.visible)
       .sort((a, b) => a.order - b.order);
 
-    // Position-based wrapper classes
+    // Position-based wrapper classes - relative to card container, not full page
     const getWrapperClasses = () => {
       const baseClasses = 'bg-white shadow-sm border overflow-hidden';
-      const fixed = data.style.fixed ? 'fixed z-50' : 'relative';
+      const positioning = data.style.fixed ? 'absolute z-50' : 'relative'; // Use absolute instead of fixed for card container
       
       switch (data.style.position) {
         case 'header':
-          return `${baseClasses} ${fixed} top-0 left-0 right-0 ${data.style.sticky ? 'sticky' : ''}`;
+          return `${baseClasses} ${positioning} top-0 left-0 right-0 ${data.style.sticky ? 'sticky' : ''}`;
         case 'footer':
-          return `${baseClasses} ${fixed} bottom-0 left-0 right-0`;
+          return `${baseClasses} ${positioning} bottom-0 left-0 right-0`;
         case 'floating-top-right':
-          return `${baseClasses} ${fixed} top-4 right-4 rounded-lg shadow-lg max-w-xs`;
+          return `${baseClasses} ${positioning} top-2 right-2 rounded-lg shadow-lg max-w-xs`;
         case 'floating-top-left':
-          return `${baseClasses} ${fixed} top-4 left-4 rounded-lg shadow-lg max-w-xs`;
+          return `${baseClasses} ${positioning} top-2 left-2 rounded-lg shadow-lg max-w-xs`;
         case 'sidebar-left':
-          return `${baseClasses} ${fixed} top-0 left-0 h-full w-64`;
+          return `${baseClasses} ${positioning} top-0 left-0 bottom-0 w-48`;
         case 'sidebar-right':
-          return `${baseClasses} ${fixed} top-0 right-0 h-full w-64`;
+          return `${baseClasses} ${positioning} top-0 right-0 bottom-0 w-48`;
         default:
           return `${baseClasses} rounded-lg`;
       }

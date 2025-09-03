@@ -167,7 +167,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     return (
       <div 
         ref={ref} 
-        className={`overflow-hidden w-full mx-auto ${
+        className={`overflow-hidden w-full mx-auto relative ${
           isMobilePreview 
             ? 'rounded-none shadow-none min-h-full' 
             : 'rounded-none md:rounded-2xl shadow-none md:shadow-2xl card-shadow'

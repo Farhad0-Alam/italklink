@@ -29,8 +29,8 @@ export function PagePreview({ pageData, cardData, onNavigatePage }: PagePreviewP
   }
 
   return (
-    <div className="h-full bg-white overflow-y-auto">
-      <div className="min-h-full">
+    <div className="h-full bg-white overflow-y-auto relative">
+      <div className="min-h-full relative">
         {pageData.elements
           .sort((a, b) => a.order - b.order)
           .map((element) => (
