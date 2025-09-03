@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { BusinessCardComponent } from "@/components/business-card";
 import { FormBuilder } from "@/components/form-builder";
+import { PagesSidebar } from "@/components/PagesSidebar";
 import { Copy, Share2, Settings, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import type { BusinessCard } from "@shared/schema";
@@ -63,10 +64,15 @@ export default function CardEditor() {
     brandColor: "#22c55e",
     accentColor: "#16a34a",
     font: "inter",
+    // Initialize pages with default home page
+    pages: [
+      { id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }
+    ]
   });
 
   const [shareUrl, setShareUrl] = useState("");
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [currentPageId, setCurrentPageId] = useState('home');
   
   // Fetch template data if template parameter is provided
   const { data: templates } = useQuery({
@@ -363,15 +369,26 @@ END:VCARD`;
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left Panel - Form Builder */}
-          <div>
-            <FormBuilder
-              cardData={cardData}
-              onDataChange={(data) => setCardData(data)}
-              onGenerateQR={() => {}}
-            />
+      <div className="flex h-[calc(100vh-80px)]">
+        {/* Pages Sidebar */}
+        <PagesSidebar
+          pages={cardData.pages || [{ id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }]}
+          currentPageId={currentPageId}
+          onPageChange={setCurrentPageId}
+          onPagesUpdate={(pages) => setCardData({ ...cardData, pages })}
+        />
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex">
+          <div className="flex-1 grid lg:grid-cols-2 gap-8 p-8">
+            {/* Left Panel - Form Builder */}
+            <div>
+              <FormBuilder
+                cardData={cardData}
+                onDataChange={(data) => setCardData(data)}
+                onGenerateQR={() => {}}
+                currentPageId={currentPageId}
+              />
             
             {/* Save Card Button */}
             <div className="mt-6 space-y-4">
@@ -427,10 +444,9 @@ END:VCARD`;
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Right Panel - Mobile Preview */}
-          <div className="lg:sticky lg:top-8 lg:h-fit">
+            {/* Right Panel - Mobile Preview */}
+            <div className="lg:sticky lg:top-8 lg:h-fit">
             <div className="text-center mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Live Preview</h3>
               <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
@@ -469,6 +485,7 @@ END:VCARD`;
                 <span className="w-2 h-2 bg-blue-500 rounded-full inline-block mr-2"></span>
                 Mobile Optimized
               </Badge>
+            </div>
             </div>
           </div>
         </div>
