@@ -2912,8 +2912,9 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     variant="outline"
                     className="w-full h-10 border-slate-500 hover:bg-slate-700 hover:text-white transition-all duration-200 flex items-center justify-center space-x-2"
                     style={{
-                      borderColor: element.data.textColor ? `${element.data.textColor}50` : '#64748b',
-                      color: element.data.textColor || '#94a3b8'
+                      borderColor: element.data.qrButtonColor || '#000000',
+                      backgroundColor: element.data.qrButtonColor || '#000000',
+                      color: '#ffffff'
                     }}
                     data-testid="button-download-qr"
                   >
