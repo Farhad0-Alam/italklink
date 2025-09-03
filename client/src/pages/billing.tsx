@@ -65,7 +65,15 @@ export default function Billing() {
     expiryYear: '',
     cvc: '',
     name: '',
-    type: 'card'
+    type: 'card',
+    address: {
+      line1: '',
+      line2: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: 'US'
+    }
   });
 
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
@@ -133,8 +141,8 @@ export default function Billing() {
   // Mutation to add payment method
   const addPaymentMethodMutation = useMutation({
     mutationFn: async (paymentMethodData: any) => {
-      // For now, show a message that Stripe needs to be configured
-      throw new Error('Payment processing requires Stripe configuration. Please contact support.');
+      // For demo purposes, show a helpful message about Stripe setup
+      throw new Error('Payment integration is not yet configured. Please contact your administrator to set up Stripe payment processing.');
     },
     onSuccess: () => {
       toast({
@@ -148,7 +156,15 @@ export default function Billing() {
         expiryYear: '',
         cvc: '',
         name: '',
-        type: 'card'
+        type: 'card',
+        address: {
+          line1: '',
+          line2: '',
+          city: '',
+          state: '',
+          postalCode: '',
+          country: 'US'
+        }
       });
       queryClient.invalidateQueries({ queryKey: ['/api/billing/payment-methods'] });
     },
@@ -164,10 +180,10 @@ export default function Billing() {
   // Mutation to remove payment method
   const removePaymentMethodMutation = useMutation({
     mutationFn: async (paymentMethodId: string) => {
-      const response = await apiRequest(`/api/billing/payment-methods/${paymentMethodId}`, {
+      const response = await fetch(`/api/billing/payment-methods/${paymentMethodId}`, {
         method: 'DELETE',
       });
-      return response;
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -492,6 +508,97 @@ export default function Billing() {
                             value={newPaymentMethod.name}
                             onChange={(e) => setNewPaymentMethod(prev => ({ ...prev, name: e.target.value }))}
                           />
+                        </div>
+                        
+                        {/* Billing Address */}
+                        <div className="grid gap-4 pt-4 border-t">
+                          <h4 className="font-medium">Billing Address</h4>
+                          <div className="grid gap-2">
+                            <Label htmlFor="line1">Address Line 1</Label>
+                            <Input
+                              id="line1"
+                              placeholder="123 Main Street"
+                              value={newPaymentMethod.address.line1}
+                              onChange={(e) => setNewPaymentMethod(prev => ({ 
+                                ...prev, 
+                                address: { ...prev.address, line1: e.target.value }
+                              }))}
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="line2">Address Line 2 (Optional)</Label>
+                            <Input
+                              id="line2"
+                              placeholder="Apartment, suite, etc."
+                              value={newPaymentMethod.address.line2}
+                              onChange={(e) => setNewPaymentMethod(prev => ({ 
+                                ...prev, 
+                                address: { ...prev.address, line2: e.target.value }
+                              }))}
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label htmlFor="city">City</Label>
+                              <Input
+                                id="city"
+                                placeholder="New York"
+                                value={newPaymentMethod.address.city}
+                                onChange={(e) => setNewPaymentMethod(prev => ({ 
+                                  ...prev, 
+                                  address: { ...prev.address, city: e.target.value }
+                                }))}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="state">State</Label>
+                              <Input
+                                id="state"
+                                placeholder="NY"
+                                value={newPaymentMethod.address.state}
+                                onChange={(e) => setNewPaymentMethod(prev => ({ 
+                                  ...prev, 
+                                  address: { ...prev.address, state: e.target.value }
+                                }))}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label htmlFor="postalCode">ZIP/Postal Code</Label>
+                              <Input
+                                id="postalCode"
+                                placeholder="10001"
+                                value={newPaymentMethod.address.postalCode}
+                                onChange={(e) => setNewPaymentMethod(prev => ({ 
+                                  ...prev, 
+                                  address: { ...prev.address, postalCode: e.target.value }
+                                }))}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="country">Country</Label>
+                              <Select 
+                                value={newPaymentMethod.address.country} 
+                                onValueChange={(value) => setNewPaymentMethod(prev => ({ 
+                                  ...prev, 
+                                  address: { ...prev.address, country: value }
+                                }))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select country" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="US">United States</SelectItem>
+                                  <SelectItem value="CA">Canada</SelectItem>
+                                  <SelectItem value="GB">United Kingdom</SelectItem>
+                                  <SelectItem value="AU">Australia</SelectItem>
+                                  <SelectItem value="DE">Germany</SelectItem>
+                                  <SelectItem value="FR">France</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
                         </div>
                       </>
                     )}
