@@ -482,52 +482,57 @@ export function MenuPageElement({ data, isEditing, onChange, availablePages = []
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Menu Position</label>
-          <Select value={data.style.position || 'default'} onValueChange={(value: any) => updateStyle({ position: value })}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="default">Default</SelectItem>
-              <SelectItem value="header">Modern Header</SelectItem>
-              <SelectItem value="footer">Footer Menu</SelectItem>
-              <SelectItem value="floating-top-right">Floating Top Right (Hamburger)</SelectItem>
-              <SelectItem value="floating-top-left">Floating Top Left</SelectItem>
-              <SelectItem value="sidebar-left">Sidebar Left</SelectItem>
-              <SelectItem value="sidebar-right">Sidebar Right</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Hide positioning controls in builder, only show in card view */}
+        {!isEditing && (
+          <>
+            <div>
+              <label className="block text-sm font-medium mb-2">Menu Position</label>
+              <Select value={data.style.position || 'default'} onValueChange={(value: any) => updateStyle({ position: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Default</SelectItem>
+                  <SelectItem value="header">Modern Header</SelectItem>
+                  <SelectItem value="footer">Footer Menu</SelectItem>
+                  <SelectItem value="floating-top-right">Floating Top Right (Hamburger)</SelectItem>
+                  <SelectItem value="floating-top-left">Floating Top Left</SelectItem>
+                  <SelectItem value="sidebar-left">Sidebar Left</SelectItem>
+                  <SelectItem value="sidebar-right">Sidebar Right</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={data.style.fixed || false}
-              onCheckedChange={(checked) => updateStyle({ fixed: checked })}
-              data-testid="switch-fixed"
-            />
-            <label className="text-sm font-medium">Fixed Position</label>
-          </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={data.style.fixed || false}
+                  onCheckedChange={(checked) => updateStyle({ fixed: checked })}
+                  data-testid="switch-fixed"
+                />
+                <label className="text-sm font-medium">Fixed Position</label>
+              </div>
 
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={data.style.sticky}
-              onCheckedChange={(checked) => updateStyle({ sticky: checked })}
-              data-testid="switch-sticky"
-            />
-            <label className="text-sm font-medium">Sticky Menu</label>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={data.style.mobileCollapse}
-              onCheckedChange={(checked) => updateStyle({ mobileCollapse: checked })}
-              data-testid="switch-mobile-collapse"
-            />
-            <label className="text-sm font-medium">Mobile Collapse</label>
-          </div>
-        </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={data.style.sticky}
+                  onCheckedChange={(checked) => updateStyle({ sticky: checked })}
+                  data-testid="switch-sticky"
+                />
+                <label className="text-sm font-medium">Sticky Menu</label>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={data.style.mobileCollapse}
+                  onCheckedChange={(checked) => updateStyle({ mobileCollapse: checked })}
+                  data-testid="switch-mobile-collapse"
+                />
+                <label className="text-sm font-medium">Mobile Collapse</label>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Menu Items */}
