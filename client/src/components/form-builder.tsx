@@ -105,17 +105,17 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   });
 
   const [collapsedSections, setCollapsedSections] = useState<{ [key: string]: boolean }>({
-    coverLogo: false,
-    basicInfo: false,
-    contactInfo: false,
-    customization: false,
-    appearance: false,
-    seo: false,
-    pageBuilder: false,
+    coverLogo: true,
+    basicInfo: true,
+    contactInfo: true,
+    customization: true,
+    appearance: true,
+    seo: true,
+    pageBuilder: true,
     // subsections inside Basic Info
-    nameStyling: false,
-    titleStyling: false,
-    companyStyling: false,
+    nameStyling: true,
+    titleStyling: true,
+    companyStyling: true,
   });
 
   const form = useForm<BusinessCard>({
