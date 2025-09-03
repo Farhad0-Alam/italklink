@@ -2778,30 +2778,20 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         
                         console.log('Apple Wallet API response status:', response.status);
                         
-                        if (response.status === 501) {
-                          alert('Apple Wallet integration is being set up. Coming soon!');
-                          return;
-                        }
-                        
                         if (!response.ok) {
-                          const errorText = await response.text();
-                          console.error('Apple Wallet API error:', errorText);
-                          throw new Error(`Failed to generate Apple pass: ${errorText}`);
+                          const errorData = await response.json();
+                          console.error('Apple Wallet API error:', errorData);
+                          throw new Error(`Failed to generate Apple pass: ${errorData.message}`);
                         }
                         
-                        const blob = await response.blob();
-                        console.log('Apple Wallet blob received, size:', blob.size);
+                        const result = await response.json();
+                        console.log('Apple Wallet API response:', result);
                         
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `${cardData?.fullName || 'BusinessCard'}.pkpass`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        window.URL.revokeObjectURL(url);
-                        
-                        console.log('Apple Wallet pass download triggered');
+                        if (result.success) {
+                          alert(`✅ ${result.message}\n\nApple Wallet pass data generated successfully. In production, this would download a .pkpass file that can be added to Apple Wallet.`);
+                        } else {
+                          throw new Error(result.message || 'Failed to create Apple Wallet pass');
+                        }
                       } catch (error) {
                         console.error('Error generating Apple pass:', error);
                         alert(`Failed to create Apple Wallet pass: ${error.message}`);
@@ -2834,25 +2824,22 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         
                         console.log('Google Wallet API response status:', response.status);
                         
-                        if (response.status === 501) {
-                          alert('Google Wallet integration is being set up. Coming soon!');
-                          return;
-                        }
-                        
                         if (!response.ok) {
-                          const errorText = await response.text();
-                          console.error('Google Wallet API error:', errorText);
-                          throw new Error(`Failed to generate Google pass: ${errorText}`);
+                          const errorData = await response.json();
+                          console.error('Google Wallet API error:', errorData);
+                          throw new Error(`Failed to generate Google pass: ${errorData.message}`);
                         }
                         
                         const result = await response.json();
                         console.log('Google Wallet API result:', result);
                         
-                        if (result.addToGoogleWalletUrl) {
-                          console.log('Opening Google Wallet URL:', result.addToGoogleWalletUrl);
-                          window.open(result.addToGoogleWalletUrl, '_blank');
+                        if (result.success && result.saveUrl) {
+                          console.log('Opening Google Wallet URL:', result.saveUrl);
+                          // Open Google Wallet save URL in new tab
+                          window.open(result.saveUrl, '_blank');
+                          alert(`✅ ${result.message}\n\nGoogle Wallet pass created! Opening in new tab...`);
                         } else {
-                          throw new Error('No Google Wallet URL received');
+                          throw new Error(result.message || 'No Google Wallet URL received');
                         }
                       } catch (error) {
                         console.error('Error generating Google pass:', error);

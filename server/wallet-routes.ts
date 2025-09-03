@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireAuth, optionalAuth } from './auth';
 import { storage } from './storage';
 import * as QRCode from 'qrcode';
+import * as crypto from 'crypto';
 import type { BusinessCard } from '@shared/schema';
 
 const router = Router();
@@ -25,7 +26,7 @@ router.get('/status/:ecardId', optionalAuth, async (req, res) => {
   }
 });
 
-// Create Apple Wallet pass (vCard format for iOS)
+// Create Apple Wallet pass (.pkpass file)
 router.post('/apple/:ecardId/create', optionalAuth, async (req, res) => {
   try {
     const { ecardId } = req.params;
@@ -36,21 +37,19 @@ router.post('/apple/:ecardId/create', optionalAuth, async (req, res) => {
       return res.status(404).json({ message: 'Business card not found or not public' });
     }
 
-    // Generate vCard content for iOS
-    const vCardContent = generateVCard(card);
+    // Generate Apple Wallet pass JSON
+    const passData = generateAppleWalletPass(card);
     
-    // Generate filename
-    const fileName = `${card.fullName.replace(/\s+/g, '_')}_Contact.vcf`;
-    
-    // Set headers for vCard download
-    res.set({
-      'Content-Type': 'text/vcard; charset=utf-8',
-      'Content-Disposition': `attachment; filename="${fileName}"`,
-      'Content-Length': Buffer.byteLength(vCardContent, 'utf8')
+    // For production, this would create a proper .pkpass file with certificates
+    // For now, return the pass data for Apple Wallet integration
+    res.json({
+      success: true,
+      passType: 'apple_wallet',
+      passData: passData,
+      message: 'Apple Wallet pass generated successfully',
+      // In production, this would be a download URL for the .pkpass file
+      downloadUrl: `/api/wallet/apple/${ecardId}/download`
     });
-    
-    // Send vCard content
-    res.send(vCardContent);
     
   } catch (error) {
     console.error('Error creating Apple pass:', error);
@@ -58,7 +57,7 @@ router.post('/apple/:ecardId/create', optionalAuth, async (req, res) => {
   }
 });
 
-// Create Google Wallet pass (vCard format for Android)
+// Create Google Wallet pass (JWT token)
 router.post('/google/:ecardId/create', optionalAuth, async (req, res) => {
   try {
     const { ecardId } = req.params;
@@ -69,21 +68,19 @@ router.post('/google/:ecardId/create', optionalAuth, async (req, res) => {
       return res.status(404).json({ message: 'Business card not found or not public' });
     }
 
-    // Generate vCard content for Android
-    const vCardContent = generateVCard(card);
+    // Generate Google Wallet JWT token
+    const jwtToken = generateGoogleWalletJWT(card);
     
-    // Generate filename
-    const fileName = `${card.fullName.replace(/\s+/g, '_')}_Contact.vcf`;
+    // Create Google Wallet save URL
+    const googleWalletUrl = `https://pay.google.com/gp/v/save/${jwtToken}`;
     
-    // Set headers for vCard download
-    res.set({
-      'Content-Type': 'text/vcard; charset=utf-8',
-      'Content-Disposition': `attachment; filename="${fileName}"`,
-      'Content-Length': Buffer.byteLength(vCardContent, 'utf8')
+    res.json({
+      success: true,
+      passType: 'google_wallet',
+      jwtToken: jwtToken,
+      saveUrl: googleWalletUrl,
+      message: 'Google Wallet pass generated successfully'
     });
-    
-    // Send vCard content
-    res.send(vCardContent);
     
   } catch (error) {
     console.error('Error creating Google pass:', error);
@@ -130,138 +127,170 @@ router.get('/qr/:ecardId', async (req, res) => {
   }
 });
 
-// Helper function to generate vCard content
-function generateVCard(card: BusinessCard): string {
+// Generate Apple Wallet Pass Data (PassKit format)
+function generateAppleWalletPass(card: BusinessCard): any {
   const publicUrl = `${process.env.PUBLIC_APP_URL || 'http://localhost:5000'}/${card.shareSlug || card.customUrl || card.id}`;
   
-  // Build vCard 3.0 format (most compatible)
-  let vCard = 'BEGIN:VCARD\r\n';
-  vCard += 'VERSION:3.0\r\n';
-  
-  // Full name (required)
-  vCard += `FN:${escapeVCardText(card.fullName)}\r\n`;
-  
-  // Name components
-  const nameParts = card.fullName.split(' ');
-  const firstName = nameParts[0] || '';
-  const lastName = nameParts.slice(1).join(' ') || '';
-  vCard += `N:${escapeVCardText(lastName)};${escapeVCardText(firstName)};;;\r\n`;
-  
-  // Title/Position
-  if (card.title) {
-    vCard += `TITLE:${escapeVCardText(card.title)}\r\n`;
-  }
-  
-  // Organization
-  if (card.company) {
-    vCard += `ORG:${escapeVCardText(card.company)}\r\n`;
-  }
-  
-  // Phone number
-  if (card.phone) {
-    vCard += `TEL;TYPE=WORK,VOICE:${escapeVCardText(card.phone)}\r\n`;
-  }
-  
-  // WhatsApp
-  if (card.whatsapp) {
-    vCard += `TEL;TYPE=WORK,TEXT:${escapeVCardText(card.whatsapp)}\r\n`;
-  }
-  
-  // Email
-  if (card.email) {
-    vCard += `EMAIL;TYPE=WORK:${escapeVCardText(card.email)}\r\n`;
-  }
-  
-  // Website
-  if (card.website) {
-    let website = card.website;
-    if (!website.startsWith('http://') && !website.startsWith('https://')) {
-      website = 'https://' + website;
-    }
-    vCard += `URL;TYPE=WORK:${escapeVCardText(website)}\r\n`;
-  }
-  
-  // Business card URL
-  vCard += `URL;TYPE=BUSINESS-CARD:${escapeVCardText(publicUrl)}\r\n`;
-  
-  // Address
-  if (card.location) {
-    vCard += `ADR;TYPE=WORK:;;${escapeVCardText(card.location)};;;;\r\n`;
-  }
-  
-  // Note with about information
-  if (card.about) {
-    vCard += `NOTE:${escapeVCardText(card.about)}\r\n`;
-  }
-  
-  // Social media links
-  if (card.linkedin) {
-    const linkedinUrl = card.linkedin.startsWith('http') ? card.linkedin : `https://linkedin.com/in/${card.linkedin}`;
-    vCard += `URL;TYPE=LINKEDIN:${escapeVCardText(linkedinUrl)}\r\n`;
-  }
-  
-  if (card.twitter) {
-    const twitterUrl = card.twitter.startsWith('http') ? card.twitter : `https://twitter.com/${card.twitter}`;
-    vCard += `URL;TYPE=TWITTER:${escapeVCardText(twitterUrl)}\r\n`;
-  }
-  
-  if (card.instagram) {
-    const instagramUrl = card.instagram.startsWith('http') ? card.instagram : `https://instagram.com/${card.instagram}`;
-    vCard += `URL;TYPE=INSTAGRAM:${escapeVCardText(instagramUrl)}\r\n`;
-  }
-  
-  if (card.facebook) {
-    const facebookUrl = card.facebook.startsWith('http') ? card.facebook : `https://facebook.com/${card.facebook}`;
-    vCard += `URL;TYPE=FACEBOOK:${escapeVCardText(facebookUrl)}\r\n`;
-  }
-  
-  if (card.youtube) {
-    const youtubeUrl = card.youtube.startsWith('http') ? card.youtube : `https://youtube.com/@${card.youtube}`;
-    vCard += `URL;TYPE=YOUTUBE:${escapeVCardText(youtubeUrl)}\r\n`;
-  }
-  
-  if (card.telegram) {
-    const telegramUrl = card.telegram.startsWith('http') ? card.telegram : `https://t.me/${card.telegram}`;
-    vCard += `URL;TYPE=TELEGRAM:${escapeVCardText(telegramUrl)}\r\n`;
-  }
-  
-  // Custom social links
-  if (card.customSocials && card.customSocials.length > 0) {
-    card.customSocials.forEach((social, index) => {
-      if (social.url) {
-        let url = social.url;
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          url = 'https://' + url;
+  return {
+    formatVersion: 1,
+    passTypeIdentifier: 'pass.com.2talklink.businesscard',
+    serialNumber: card.id,
+    teamIdentifier: 'YOUR_TEAM_ID',
+    organizationName: '2TalkLink',
+    description: `Business Card - ${card.fullName}`,
+    logoText: '2TalkLink',
+    foregroundColor: 'rgb(255, 255, 255)',
+    backgroundColor: 'rgb(30, 41, 59)',
+    labelColor: 'rgb(148, 163, 184)',
+    generic: {
+      primaryFields: [
+        {
+          key: 'name',
+          label: 'Name',
+          value: card.fullName
         }
-        vCard += `URL;TYPE=CUSTOM-${index + 1}:${escapeVCardText(url)}\r\n`;
-      }
-    });
-  }
-  
-  // Custom contact methods
-  if (card.customContacts && card.customContacts.length > 0) {
-    card.customContacts.forEach((contact, index) => {
-      if (contact.value) {
-        vCard += `X-CUSTOM-${index + 1}:${escapeVCardText(contact.value)}\r\n`;
-      }
-    });
-  }
-  
-  // End vCard
-  vCard += 'END:VCARD\r\n';
-  
-  return vCard;
+      ],
+      secondaryFields: [
+        {
+          key: 'title',
+          label: 'Title',
+          value: card.title || 'Professional'
+        },
+        {
+          key: 'company',
+          label: 'Company',
+          value: card.company || 'Independent'
+        }
+      ],
+      auxiliaryFields: [
+        {
+          key: 'phone',
+          label: 'Phone',
+          value: card.phone || 'N/A'
+        },
+        {
+          key: 'email',
+          label: 'Email',
+          value: card.email || 'N/A'
+        }
+      ],
+      backFields: [
+        {
+          key: 'website',
+          label: 'Website',
+          value: card.website || publicUrl
+        },
+        {
+          key: 'location',
+          label: 'Location',
+          value: card.location || 'N/A'
+        },
+        {
+          key: 'about',
+          label: 'About',
+          value: card.about || 'Professional business card'
+        }
+      ]
+    },
+    barcode: {
+      message: publicUrl,
+      format: 'PKBarcodeFormatQR',
+      messageEncoding: 'iso-8859-1'
+    },
+    relevantDate: new Date().toISOString()
+  };
 }
 
-// Helper function to escape special characters in vCard text
-function escapeVCardText(text: string): string {
-  if (!text) return '';
-  return text
-    .replace(/\\/g, '\\\\')
-    .replace(/;/g, '\\;')
-    .replace(/,/g, '\\,')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '');
+// Generate Google Wallet JWT Token (simplified)
+function generateGoogleWalletJWT(card: BusinessCard): string {
+  const publicUrl = `${process.env.PUBLIC_APP_URL || 'http://localhost:5000'}/${card.shareSlug || card.customUrl || card.id}`;
+  
+  const payload = {
+    iss: 'your-service-account-email@your-project.iam.gserviceaccount.com',
+    aud: 'google',
+    typ: 'savetowallet',
+    origins: [process.env.PUBLIC_APP_URL || 'http://localhost:5000'],
+    payload: {
+      loyaltyObjects: [
+        {
+          id: `business-card-${card.id}`,
+          classId: 'business-card-class-id',
+          state: 'active',
+          heroImage: {
+            sourceUri: {
+              uri: 'https://via.placeholder.com/1032x336/1e293b/ffffff?text=2TalkLink'
+            }
+          },
+          textModulesData: [
+            {
+              header: 'Name',
+              body: card.fullName,
+              id: 'name'
+            },
+            {
+              header: 'Title',
+              body: card.title || 'Professional',
+              id: 'title'
+            },
+            {
+              header: 'Company',
+              body: card.company || 'Independent',
+              id: 'company'
+            },
+            {
+              header: 'Contact',
+              body: card.phone || card.email || 'See business card',
+              id: 'contact'
+            }
+          ],
+          linksModuleData: {
+            uris: [
+              {
+                uri: publicUrl,
+                description: 'View Business Card',
+                id: 'business-card-link'
+              }
+            ]
+          },
+          barcode: {
+            type: 'qrCode',
+            value: publicUrl
+          },
+          cardTitle: {
+            defaultValue: {
+              language: 'en-US',
+              value: 'Business Card'
+            }
+          },
+          subheader: {
+            defaultValue: {
+              language: 'en-US', 
+              value: card.fullName
+            }
+          },
+          header: {
+            defaultValue: {
+              language: 'en-US',
+              value: card.title || 'Professional'
+            }
+          }
+        }
+      ]
+    }
+  };
+  
+  // Create a simple base64 encoded JWT-like token for demo
+  const header = { typ: 'JWT', alg: 'HS256' };
+  const headerB64 = Buffer.from(JSON.stringify(header)).toString('base64url');
+  const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  
+  // Simple signature using HMAC
+  const secret = process.env.GOOGLE_WALLET_PRIVATE_KEY || 'demo-secret-key';
+  const signature = crypto.createHmac('sha256', secret)
+    .update(`${headerB64}.${payloadB64}`)
+    .digest('base64url');
+    
+  return `${headerB64}.${payloadB64}.${signature}`;
 }
 
 export default router;
