@@ -2430,6 +2430,193 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
           </div>
         );
 
+      case 'digitalWallet':
+        return (
+          <div className="mb-6">
+            {isEditing && (
+              <div className="mb-4 p-4 bg-slate-100 rounded-lg">
+                <h3 className="font-medium mb-3">Digital Wallet Settings</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Section Title</label>
+                    <Input
+                      value={element.data.title || 'Save to Digital Wallet'}
+                      onChange={(e) => onUpdate && onUpdate(element.id, { 
+                        ...element.data, 
+                        title: e.target.value 
+                      })}
+                      placeholder="Section title"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Subtitle</label>
+                    <Input
+                      value={element.data.subtitle || 'Add this business card to your phone\'s wallet'}
+                      onChange={(e) => onUpdate && onUpdate(element.id, { 
+                        ...element.data, 
+                        subtitle: e.target.value 
+                      })}
+                      placeholder="Description text"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`show-download-qr-${element.id}`}
+                      checked={element.data.showQRDownload || false}
+                      onChange={(e) => onUpdate && onUpdate(element.id, { 
+                        ...element.data, 
+                        showQRDownload: e.target.checked 
+                      })}
+                      className="rounded"
+                    />
+                    <label htmlFor={`show-download-qr-${element.id}`} className="text-sm">
+                      Show QR Download Option
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`modern-style-${element.id}`}
+                      checked={element.data.modernStyle || false}
+                      onChange={(e) => onUpdate && onUpdate(element.id, { 
+                        ...element.data, 
+                        modernStyle: e.target.checked 
+                      })}
+                      className="rounded"
+                    />
+                    <label htmlFor={`modern-style-${element.id}`} className="text-sm">
+                      Use Modern Card Style
+                    </label>
+                  </div>
+                  {onDelete && (
+                    <Button
+                      onClick={() => onDelete(element.id)}
+                      variant="ghost"
+                      size="sm"
+                      className="text-slate-500 hover:text-red-500"
+                    >
+                      <i className="fas fa-times"></i>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Digital Wallet Container */}
+            <div className={`
+              ${element.data.modernStyle 
+                ? 'bg-gradient-to-r from-slate-800 to-slate-700 border border-slate-600' 
+                : 'bg-slate-800 border border-slate-700'
+              } 
+              rounded-xl p-6 shadow-lg
+            `}>
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  {element.data.title || 'Save to Digital Wallet'}
+                </h3>
+                <p className="text-sm text-slate-400">
+                  {element.data.subtitle || 'Add this business card to your phone\'s wallet'}
+                </p>
+              </div>
+              
+              <div className="space-y-3">
+                {/* Apple Wallet Button */}
+                <Button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch(`/api/wallet/apple/${cardData?.id || ''}/create`, {
+                        method: 'POST',
+                      });
+                      
+                      if (response.status === 501) {
+                        alert('Apple Wallet integration is being set up. Coming soon!');
+                        return;
+                      }
+                      
+                      if (!response.ok) {
+                        throw new Error('Failed to generate Apple pass');
+                      }
+                      
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${cardData?.fullName || 'BusinessCard'}.pkpass`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      window.URL.revokeObjectURL(url);
+                    } catch (error) {
+                      console.error('Error generating Apple pass:', error);
+                      alert('Failed to create Apple Wallet pass. Please try again.');
+                    }
+                  }}
+                  className="w-full h-12 bg-black hover:bg-gray-800 text-white border-black transition-all duration-200 flex items-center justify-center space-x-3"
+                  data-testid="button-add-apple-wallet"
+                >
+                  <i className="fas fa-wallet text-lg"></i>
+                  <span className="font-medium">Add to Apple Wallet</span>
+                </Button>
+
+                {/* Google Wallet Button */}
+                <Button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch(`/api/wallet/google/${cardData?.id || ''}/create`, {
+                        method: 'POST',
+                      });
+                      
+                      if (response.status === 501) {
+                        alert('Google Wallet integration is being set up. Coming soon!');
+                        return;
+                      }
+                      
+                      if (!response.ok) {
+                        throw new Error('Failed to generate Google pass');
+                      }
+                      
+                      const result = await response.json();
+                      if (result.addToGoogleWalletUrl) {
+                        window.open(result.addToGoogleWalletUrl, '_blank');
+                      }
+                    } catch (error) {
+                      console.error('Error generating Google pass:', error);
+                      alert('Failed to create Google Wallet pass. Please try again.');
+                    }
+                  }}
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 transition-all duration-200 flex items-center justify-center space-x-3"
+                  data-testid="button-add-google-wallet"
+                >
+                  <i className="fas fa-credit-card text-lg"></i>
+                  <span className="font-medium">Add to Google Wallet</span>
+                </Button>
+
+                {/* QR Download Option */}
+                {element.data.showQRDownload && (
+                  <Button
+                    onClick={() => {
+                      const qrUrl = `/api/wallet/qr/${cardData?.id || ''}`;
+                      const a = document.createElement('a');
+                      a.href = qrUrl;
+                      a.download = `${cardData?.fullName || 'BusinessCard'}-QR.png`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                    }}
+                    variant="outline"
+                    className="w-full h-10 text-slate-400 border-slate-600 hover:bg-slate-700 hover:text-white transition-all duration-200 flex items-center justify-center space-x-2"
+                    data-testid="button-download-qr"
+                  >
+                    <i className="fas fa-download"></i>
+                    <span>Download QR Code</span>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="mb-4 p-4 bg-slate-100 rounded-lg text-center text-slate-600">

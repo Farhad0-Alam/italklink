@@ -9,7 +9,6 @@ import { decodeCardData, logEvent } from "@/lib/share";
 import { defaultCardData } from "@/lib/card-data";
 import { BusinessCardPWAInstaller } from "@/components/BusinessCardPWAInstaller";
 import { SEOHead } from "@/components/SEOHead";
-import { WalletButtons } from "@/components/WalletButtons";
 
 export const Share: React.FC = () => {
   const { t } = useTranslation();
@@ -115,24 +114,6 @@ export const Share: React.FC = () => {
           </div>
         </div>
         
-        {/* Digital Wallet Buttons */}
-        <div className="mt-6 flex justify-center">
-          <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-            <div className="text-center mb-3">
-              <h3 className="text-sm font-medium text-slate-300 mb-1">Save to Digital Wallet</h3>
-              <p className="text-xs text-slate-400">Add this business card to your phone's wallet</p>
-            </div>
-            <WalletButtons
-              ecardId={cardData.id || ''}
-              cardData={{
-                fullName: cardData.fullName,
-                brandColor: cardData.brandColor
-              }}
-              showLabels={true}
-              size="md"
-            />
-          </div>
-        </div>
         
         {/* PWA Install Button */}
         <BusinessCardPWAInstaller cardData={cardData} />

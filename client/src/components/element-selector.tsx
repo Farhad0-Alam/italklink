@@ -104,18 +104,11 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       description: "Advanced URL knowledge ingestion with vector search"
     },
     {
-      type: "appleWallet",
-      title: "Apple Wallet",
+      type: "digitalWallet",
+      title: "Digital Wallet",
       icon: "fas fa-wallet",
-      color: "bg-black",
-      description: "Add to Apple Wallet button"
-    },
-    {
-      type: "googleWallet",
-      title: "Google Wallet",
-      icon: "fas fa-credit-card",
-      color: "bg-blue-100",
-      description: "Add to Google Wallet button"
+      color: "bg-gradient-to-r from-black to-blue-600",
+      description: "Save to Apple & Google Wallet"
     }
   ];
 
@@ -336,32 +329,16 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         };
         break;
       
-      case "appleWallet":
+      case "digitalWallet":
         element = {
           id,
-          type: "appleWallet",
+          type: "digitalWallet",
           order: Date.now(),
           data: {
-            title: "Add to Apple Wallet",
-            subtitle: "Save this business card to your iPhone or Mac",
-            buttonStyle: "default" as const,
-            showIcon: true,
-            customColor: ""
-          }
-        };
-        break;
-      
-      case "googleWallet":
-        element = {
-          id,
-          type: "googleWallet",
-          order: Date.now(),
-          data: {
-            title: "Add to Google Wallet",
-            subtitle: "Save this business card to your Android phone",
-            buttonStyle: "default" as const,
-            showIcon: true,
-            customColor: ""
+            title: "Save to Digital Wallet",
+            subtitle: "Add this business card to your phone's wallet",
+            showQRDownload: false,
+            modernStyle: false
           }
         };
         break;
