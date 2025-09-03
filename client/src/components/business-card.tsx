@@ -33,10 +33,11 @@ interface BusinessCardProps {
   data: BusinessCard;
   showQR?: boolean;
   isInteractive?: boolean;
+  isMobilePreview?: boolean;
 }
 
 export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProps>(
-  ({ data, showQR = false, isInteractive = true }, ref) => {
+  ({ data, showQR = false, isInteractive = true, isMobilePreview = false }, ref) => {
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const [showShareMenu, setShowShareMenu] = useState(false);
     const { toast } = useToast();
@@ -165,9 +166,13 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     return (
       <div 
         ref={ref} 
-        className="rounded-none md:rounded-2xl shadow-none md:shadow-2xl overflow-hidden w-full mx-auto card-shadow"
+        className={`overflow-hidden w-full mx-auto ${
+          isMobilePreview 
+            ? 'rounded-none shadow-none' 
+            : 'rounded-none md:rounded-2xl shadow-none md:shadow-2xl card-shadow'
+        }`}
         style={{ 
-          maxWidth: '430px',
+          maxWidth: isMobilePreview ? '100%' : '430px',
           backgroundColor: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#1a1a1a' : (data.backgroundColor || '#ffffff'),
           fontFamily: data.font ? `var(--font-${data.font})` : 'var(--font-inter)',
           color: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#ffffff' : (data.textColor || '#000000')

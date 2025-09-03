@@ -464,7 +464,10 @@ END:VCARD`;
                         ref={cardRef}
                         className="pt-8 h-full overflow-y-auto"
                       >
-                        <BusinessCardComponent data={cardData} />
+                        <BusinessCardComponent 
+                          data={cardData} 
+                          isMobilePreview={true}
+                        />
                       </div>
                     </div>
                   </div>

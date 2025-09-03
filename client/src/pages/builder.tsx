@@ -135,6 +135,7 @@ export const Builder = () => {
                                 data={cardData}
                                 showQR={showQR}
                                 isInteractive={true}
+                                isMobilePreview={true}
                               />
                             </div>
                           </div>
