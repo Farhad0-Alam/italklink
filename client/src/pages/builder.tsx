@@ -116,39 +116,29 @@ export const Builder = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Card Preview Container - iPhone 16 Pro Max Mockup */}
+                {/* Card Preview Container - Professional Mobile Frame */}
                 <div className="flex justify-center">
                   <div className="relative">
-                    {/* iPhone 16 Pro Max Frame */}
-                    <div className="relative bg-black rounded-[3rem] p-2 shadow-2xl">
-                      {/* Screen */}
-                      <div className="relative bg-black rounded-[2.5rem] overflow-hidden">
-                        {/* Dynamic Island */}
-                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-full z-50"></div>
-                        
-                        {/* Screen Content */}
-                        <div className="w-[430px] h-[932px] bg-white relative overflow-hidden">
-                          <div className="h-full overflow-y-auto">
-                            <div className="w-full">
-                              <BusinessCardComponent
-                                ref={cardRef}
-                                data={cardData}
-                                showQR={showQR}
-                                isInteractive={true}
-                                isMobilePreview={true}
-                              />
-                            </div>
-                          </div>
+                    {/* Mobile Frame with Custom Image as Background */}
+                    <div 
+                      className="relative w-[350px] h-[700px] bg-cover bg-center bg-no-repeat shadow-2xl"
+                      style={{
+                        backgroundImage: `url(@assets/Mobile-Preview-Frame_1756898350108.png)`,
+                        backgroundSize: 'contain'
+                      }}
+                    >
+                      {/* Screen Content Area */}
+                      <div className="absolute top-[60px] left-[25px] right-[25px] bottom-[60px] bg-white overflow-hidden rounded-[25px]">
+                        <div className="h-full overflow-y-auto">
+                          <BusinessCardComponent
+                            ref={cardRef}
+                            data={cardData}
+                            showQR={showQR}
+                            isInteractive={true}
+                            isMobilePreview={true}
+                          />
                         </div>
                       </div>
-                      
-                      {/* Volume Buttons */}
-                      <div className="absolute left-0 top-24 w-1 h-8 bg-gray-800 rounded-r"></div>
-                      <div className="absolute left-0 top-36 w-1 h-6 bg-gray-800 rounded-r"></div>
-                      <div className="absolute left-0 top-44 w-1 h-6 bg-gray-800 rounded-r"></div>
-                      
-                      {/* Power Button */}
-                      <div className="absolute right-0 top-32 w-1 h-12 bg-gray-800 rounded-l"></div>
                     </div>
                   </div>
                 </div>

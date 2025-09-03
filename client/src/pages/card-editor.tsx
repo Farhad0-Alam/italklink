@@ -441,40 +441,26 @@ END:VCARD`;
             
             {/* Mobile Phone Mockup */}
             <div className="relative mx-auto max-w-sm">
-              {/* Phone Frame */}
-              <div className="relative bg-gray-900 rounded-[3rem] p-2 shadow-2xl">
-                <div className="bg-black rounded-[2.5rem] p-1">
-                  <div className="bg-white rounded-[2rem] overflow-hidden">
-                    {/* Phone Screen */}
-                    <div className="relative h-[640px] overflow-y-auto scrollbar-hide">
-                      {/* Status Bar */}
-                      <div className="absolute top-0 left-0 right-0 h-8 bg-black rounded-t-[2rem] z-10">
-                        <div className="flex items-center justify-between px-6 h-full text-white text-xs">
-                          <span className="font-semibold">9:41</span>
-                          <div className="flex items-center space-x-1">
-                            <div className="w-4 h-2 border border-white rounded-sm">
-                              <div className="w-3 h-1 bg-white rounded-sm m-0.5"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Card Content */}
-                      <div 
-                        ref={cardRef}
-                        className="pt-8 h-full overflow-y-auto"
-                      >
-                        <BusinessCardComponent 
-                          data={cardData} 
-                          isMobilePreview={true}
-                        />
-                      </div>
-                    </div>
+              {/* Professional Mobile Frame */}
+              <div 
+                className="relative w-[300px] h-[600px] bg-cover bg-center bg-no-repeat shadow-2xl"
+                style={{
+                  backgroundImage: `url(@assets/Mobile-Preview-Frame_1756898350108.png)`,
+                  backgroundSize: 'contain'
+                }}
+              >
+                {/* Screen Content Area */}
+                <div className="absolute top-[50px] left-[20px] right-[20px] bottom-[50px] bg-white overflow-hidden rounded-[20px]">
+                  <div 
+                    ref={cardRef}
+                    className="h-full overflow-y-auto"
+                  >
+                    <BusinessCardComponent 
+                      data={cardData} 
+                      isMobilePreview={true}
+                    />
                   </div>
                 </div>
-                
-                {/* Home Indicator */}
-                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gray-600 rounded-full"></div>
               </div>
             </div>
             
