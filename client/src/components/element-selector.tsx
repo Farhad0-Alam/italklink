@@ -346,7 +346,12 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             textColor: "#ffffff",
             fontFamily: "Inter",
             appleButtonColor: "#000000",
-            googleButtonColor: "#2563eb"
+            googleButtonColor: "#2563eb",
+            appleButtonText: "Add to Apple Wallet",
+            googleButtonText: "Add to Google Wallet",
+            qrButtonText: "Download QR Code",
+            qrBackgroundColor: "#ffffff",
+            qrForegroundColor: "#000000"
           }
         };
         break;

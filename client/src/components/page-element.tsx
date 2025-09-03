@@ -2527,6 +2527,39 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
+                      <label className="block text-sm font-medium mb-1">Apple Button Text</label>
+                      <Input
+                        value={element.data.appleButtonText || 'Add to Apple Wallet'}
+                        onChange={(e) => onUpdate && onUpdate({ 
+                          ...element, 
+                          data: { 
+                            ...element.data, 
+                            appleButtonText: e.target.value 
+                          } 
+                        })}
+                        placeholder="Apple button text"
+                        disabled={!element.data.showApple}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Google Button Text</label>
+                      <Input
+                        value={element.data.googleButtonText || 'Add to Google Wallet'}
+                        onChange={(e) => onUpdate && onUpdate({ 
+                          ...element, 
+                          data: { 
+                            ...element.data, 
+                            googleButtonText: e.target.value 
+                          } 
+                        })}
+                        placeholder="Google button text"
+                        disabled={!element.data.showGoogle}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
                       <label className="block text-sm font-medium mb-1">Apple Button Color</label>
                       <Input
                         type="color"
@@ -2616,6 +2649,57 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     </select>
                   </div>
                   
+                  <div>
+                    <label className="block text-sm font-medium mb-1">QR Download Button Text</label>
+                    <Input
+                      value={element.data.qrButtonText || 'Download QR Code'}
+                      onChange={(e) => onUpdate && onUpdate({ 
+                        ...element, 
+                        data: { 
+                          ...element.data, 
+                          qrButtonText: e.target.value 
+                        } 
+                      })}
+                      placeholder="QR button text"
+                      disabled={!element.data.showQRDownload}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">QR Background Color</label>
+                      <Input
+                        type="color"
+                        value={element.data.qrBackgroundColor || '#ffffff'}
+                        onChange={(e) => onUpdate && onUpdate({ 
+                          ...element, 
+                          data: { 
+                            ...element.data, 
+                            qrBackgroundColor: e.target.value 
+                          } 
+                        })}
+                        className="h-10"
+                        disabled={!element.data.showQRDownload}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">QR Foreground Color</label>
+                      <Input
+                        type="color"
+                        value={element.data.qrForegroundColor || '#000000'}
+                        onChange={(e) => onUpdate && onUpdate({ 
+                          ...element, 
+                          data: { 
+                            ...element.data, 
+                            qrForegroundColor: e.target.value 
+                          } 
+                        })}
+                        className="h-10"
+                        disabled={!element.data.showQRDownload}
+                      />
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex items-center space-x-2">
                       <input
@@ -2749,7 +2833,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     data-testid="button-add-apple-wallet"
                   >
                     <i className="fab fa-apple text-lg"></i>
-                    <span className="font-medium">Add to Apple Wallet</span>
+                    <span className="font-medium">{element.data.appleButtonText || 'Add to Apple Wallet'}</span>
                   </Button>
                 )}
 
@@ -2801,7 +2885,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     data-testid="button-add-google-wallet"
                   >
                     <i className="fab fa-google text-lg"></i>
-                    <span className="font-medium">Add to Google Wallet</span>
+                    <span className="font-medium">{element.data.googleButtonText || 'Add to Google Wallet'}</span>
                   </Button>
                 )}
               </div>
@@ -2817,7 +2901,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         const shareUrl = `${window.location.origin}/${cardData?.shareSlug || cardData?.id}`;
                         console.log('Share URL for QR:', shareUrl);
                         
-                        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&data=${encodeURIComponent(shareUrl)}`;
+                        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&bgcolor=${element.data.qrBackgroundColor?.replace('#', '') || 'ffffff'}&color=${element.data.qrForegroundColor?.replace('#', '') || '000000'}&data=${encodeURIComponent(shareUrl)}`;
                         console.log('QR API URL:', qrUrl);
                         
                         // Fetch the QR code image
@@ -2852,7 +2936,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     data-testid="button-download-qr"
                   >
                     <i className="fas fa-download"></i>
-                    <span>Download QR Code</span>
+                    <span>{element.data.qrButtonText || 'Download QR Code'}</span>
                   </Button>
                 </div>
               )}
