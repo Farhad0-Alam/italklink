@@ -128,7 +128,7 @@ router.get('/qr/:ecardId', async (req, res) => {
 });
 
 // Generate Apple Wallet Pass Data (PassKit format)
-function generateAppleWalletPass(card: BusinessCard): any {
+function generateAppleWalletPass(card: any): any {
   const publicUrl = `${process.env.PUBLIC_APP_URL || 'http://localhost:5000'}/${card.shareSlug || card.customUrl || card.id}`;
   
   return {
@@ -202,7 +202,7 @@ function generateAppleWalletPass(card: BusinessCard): any {
 }
 
 // Generate Google Wallet JWT Token (simplified)
-function generateGoogleWalletJWT(card: BusinessCard): string {
+function generateGoogleWalletJWT(card: any): string {
   const publicUrl = `${process.env.PUBLIC_APP_URL || 'http://localhost:5000'}/${card.shareSlug || card.customUrl || card.id}`;
   
   const payload = {
