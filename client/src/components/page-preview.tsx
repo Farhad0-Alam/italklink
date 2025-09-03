@@ -9,9 +9,10 @@ interface PagePreviewProps {
     elements: PageElement[];
   };
   cardData: BusinessCard;
+  onNavigatePage?: (pageId: string) => void;
 }
 
-export function PagePreview({ pageData, cardData }: PagePreviewProps) {
+export function PagePreview({ pageData, cardData, onNavigatePage }: PagePreviewProps) {
   if (!pageData.elements || pageData.elements.length === 0) {
     return (
       <div className="h-full bg-white flex items-center justify-center">
@@ -40,6 +41,7 @@ export function PagePreview({ pageData, cardData }: PagePreviewProps) {
                 onUpdate={() => {}}
                 onDelete={() => {}}
                 cardData={cardData}
+                onNavigatePage={onNavigatePage}
               />
             </div>
           ))}

@@ -68,6 +68,22 @@ export default function CardEditor() {
 
   const [shareUrl, setShareUrl] = useState("");
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [currentPageId, setCurrentPageId] = useState<string>('home');
+  
+  // Helper function to get current page data based on currentPageId
+  const getCurrentPageData = () => {
+    const pages = (cardData as any).pages || [];
+    const page = pages.find((p: any) => p.id === currentPageId);
+    if (page) {
+      return {
+        id: page.id,
+        label: page.label,
+        elements: page.elements || []
+      };
+    }
+    // Return the currentSelectedPage from FormBuilder as fallback
+    return (cardData as any).currentSelectedPage;
+  };
   
   // Fetch template data if template parameter is provided
   const { data: templates } = useQuery({
@@ -372,6 +388,7 @@ END:VCARD`;
               cardData={cardData}
               onDataChange={(data) => setCardData(data)}
               onGenerateQR={() => {}}
+              onNavigationChange={setCurrentPageId}
             />
             
             {/* Save Card Button */}
@@ -457,10 +474,11 @@ END:VCARD`;
                     className="h-full overflow-y-auto"
                   >
                     {/* Check if we're in page mode by looking at current focus or form data */}
-                    {(cardData as any).currentPreviewMode === 'page' && (cardData as any).currentSelectedPage ? (
+                    {(cardData as any).currentPreviewMode === 'page' && getCurrentPageData() ? (
                       <PagePreview 
-                        pageData={(cardData as any).currentSelectedPage}
+                        pageData={getCurrentPageData()}
                         cardData={cardData}
+                        onNavigatePage={setCurrentPageId}
                       />
                     ) : (
                       <BusinessCardComponent 

@@ -39,6 +39,7 @@ interface FormBuilderProps {
   cardData: BusinessCard;
   onDataChange: (data: BusinessCard) => void;
   onGenerateQR: () => void;
+  onNavigationChange?: (pageId: string) => void;
 }
 
 // Sortable Item Component
@@ -84,6 +85,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   cardData,
   onDataChange,
   onGenerateQR,
+  onNavigationChange,
 }) => {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -106,6 +108,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
   const [builderMode, setBuilderMode] = useState<'card' | 'page'>('card');
   const [selectedPageId, setSelectedPageId] = useState<string>('home');
+  
+  // Notify parent about page navigation changes
+  useEffect(() => {
+    onNavigationChange?.(selectedPageId);
+  }, [selectedPageId, onNavigationChange]);
   
   const [collapsedSections, setCollapsedSections] = useState<{ [key: string]: boolean }>({
     coverLogo: true,
