@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { BusinessCardComponent } from "@/components/business-card";
+import { PagePreview } from "@/components/page-preview";
 import { FormBuilder } from "@/components/form-builder";
 import { Copy, Share2, Settings, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
@@ -455,10 +456,18 @@ END:VCARD`;
                     ref={cardRef}
                     className="h-full overflow-y-auto"
                   >
-                    <BusinessCardComponent 
-                      data={cardData} 
-                      isMobilePreview={true}
-                    />
+                    {/* Check if we're in page mode by looking at current focus or form data */}
+                    {(cardData as any).currentPreviewMode === 'page' && (cardData as any).currentSelectedPage ? (
+                      <PagePreview 
+                        pageData={(cardData as any).currentSelectedPage}
+                        cardData={cardData}
+                      />
+                    ) : (
+                      <BusinessCardComponent 
+                        data={cardData} 
+                        isMobilePreview={true}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

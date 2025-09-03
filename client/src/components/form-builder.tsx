@@ -181,6 +181,17 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     return page?.elements || [];
   };
 
+  // Add preview mode info to card data without triggering infinite loops
+  const enhancedCardData = {
+    ...watchedValues,
+    currentPreviewMode: builderMode,
+    currentSelectedPage: builderMode === 'page' && selectedPageId ? {
+      id: selectedPageId,
+      label: (((watchedValues as any).pages || []).find((p: any) => p.id === selectedPageId)?.label || 'Page'),
+      elements: getPageElements(selectedPageId)
+    } : null
+  };
+
   // Helper function to update elements for a specific page
   const updatePageElements = (pageId: string, elements: PageElement[]) => {
     const currentPages = (watchedValues as any).pages || [
@@ -197,12 +208,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   };
   
   useEffect(() => {
-    const s = JSON.stringify(watchedValues);
+    const s = JSON.stringify(enhancedCardData);
     if (s !== prevDataRef.current) {
       prevDataRef.current = s;
-      memoizedOnDataChange(watchedValues);
+      memoizedOnDataChange(enhancedCardData);
     }
-  }, [watchedValues, memoizedOnDataChange]);
+  }, [enhancedCardData, memoizedOnDataChange]);
 
   // Auto-select first page when switching to page mode or when pages change
   useEffect(() => {
