@@ -337,8 +337,14 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           data: {
             title: "Save to Digital Wallet",
             subtitle: "Add this business card to your phone's wallet",
+            layout: "stacked",
+            showApple: true,
+            showGoogle: true,
             showQRDownload: false,
-            modernStyle: false
+            modernStyle: false,
+            backgroundColor: "#1e293b",
+            textColor: "#ffffff",
+            fontFamily: "Inter"
           }
         };
         break;

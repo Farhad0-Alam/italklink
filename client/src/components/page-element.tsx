@@ -2436,18 +2436,35 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             {isEditing && (
               <div className="mb-4 p-4 bg-slate-100 rounded-lg">
                 <h3 className="font-medium mb-3">Digital Wallet Settings</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Section Title</label>
-                    <Input
-                      value={element.data.title || 'Save to Digital Wallet'}
-                      onChange={(e) => onUpdate && onUpdate(element.id, { 
-                        ...element.data, 
-                        title: e.target.value 
-                      })}
-                      placeholder="Section title"
-                    />
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Section Title</label>
+                      <Input
+                        value={element.data.title || 'Save to Digital Wallet'}
+                        onChange={(e) => onUpdate && onUpdate(element.id, { 
+                          ...element.data, 
+                          title: e.target.value 
+                        })}
+                        placeholder="Section title"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Layout</label>
+                      <select
+                        value={element.data.layout || 'stacked'}
+                        onChange={(e) => onUpdate && onUpdate(element.id, { 
+                          ...element.data, 
+                          layout: e.target.value 
+                        })}
+                        className="w-full p-2 border rounded"
+                      >
+                        <option value="stacked">Stacked (1 Column)</option>
+                        <option value="columns">Side by Side (2 Columns)</option>
+                      </select>
+                    </div>
                   </div>
+                  
                   <div>
                     <label className="block text-sm font-medium mb-1">Subtitle</label>
                     <Input
@@ -2459,36 +2476,120 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       placeholder="Description text"
                     />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`show-download-qr-${element.id}`}
-                      checked={element.data.showQRDownload || false}
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`show-apple-${element.id}`}
+                        checked={element.data.showApple !== false}
+                        onChange={(e) => onUpdate && onUpdate(element.id, { 
+                          ...element.data, 
+                          showApple: e.target.checked 
+                        })}
+                        className="rounded"
+                      />
+                      <label htmlFor={`show-apple-${element.id}`} className="text-sm">
+                        Show Apple Wallet
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`show-google-${element.id}`}
+                        checked={element.data.showGoogle !== false}
+                        onChange={(e) => onUpdate && onUpdate(element.id, { 
+                          ...element.data, 
+                          showGoogle: e.target.checked 
+                        })}
+                        className="rounded"
+                      />
+                      <label htmlFor={`show-google-${element.id}`} className="text-sm">
+                        Show Google Wallet
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Background Color</label>
+                      <Input
+                        type="color"
+                        value={element.data.backgroundColor || '#1e293b'}
+                        onChange={(e) => onUpdate && onUpdate(element.id, { 
+                          ...element.data, 
+                          backgroundColor: e.target.value 
+                        })}
+                        className="h-10"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Text Color</label>
+                      <Input
+                        type="color"
+                        value={element.data.textColor || '#ffffff'}
+                        onChange={(e) => onUpdate && onUpdate(element.id, { 
+                          ...element.data, 
+                          textColor: e.target.value 
+                        })}
+                        className="h-10"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Font Family</label>
+                    <select
+                      value={element.data.fontFamily || 'Inter'}
                       onChange={(e) => onUpdate && onUpdate(element.id, { 
                         ...element.data, 
-                        showQRDownload: e.target.checked 
+                        fontFamily: e.target.value 
                       })}
-                      className="rounded"
-                    />
-                    <label htmlFor={`show-download-qr-${element.id}`} className="text-sm">
-                      Show QR Download Option
-                    </label>
+                      className="w-full p-2 border rounded"
+                    >
+                      <option value="Inter">Inter (Default)</option>
+                      <option value="Arial">Arial</option>
+                      <option value="Helvetica">Helvetica</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="Roboto">Roboto</option>
+                      <option value="Open Sans">Open Sans</option>
+                    </select>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`modern-style-${element.id}`}
-                      checked={element.data.modernStyle || false}
-                      onChange={(e) => onUpdate && onUpdate(element.id, { 
-                        ...element.data, 
-                        modernStyle: e.target.checked 
-                      })}
-                      className="rounded"
-                    />
-                    <label htmlFor={`modern-style-${element.id}`} className="text-sm">
-                      Use Modern Card Style
-                    </label>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`show-download-qr-${element.id}`}
+                        checked={element.data.showQRDownload || false}
+                        onChange={(e) => onUpdate && onUpdate(element.id, { 
+                          ...element.data, 
+                          showQRDownload: e.target.checked 
+                        })}
+                        className="rounded"
+                      />
+                      <label htmlFor={`show-download-qr-${element.id}`} className="text-sm">
+                        Show QR Download Option
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`modern-style-${element.id}`}
+                        checked={element.data.modernStyle || false}
+                        onChange={(e) => onUpdate && onUpdate(element.id, { 
+                          ...element.data, 
+                          modernStyle: e.target.checked 
+                        })}
+                        className="rounded"
+                      />
+                      <label htmlFor={`modern-style-${element.id}`} className="text-sm">
+                        Use Modern Card Style
+                      </label>
+                    </div>
                   </div>
+
                   {onDelete && (
                     <Button
                       onClick={() => onDelete(element.id)}
@@ -2496,7 +2597,8 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       size="sm"
                       className="text-slate-500 hover:text-red-500"
                     >
-                      <i className="fas fa-times"></i>
+                      <i className="fas fa-times mr-2"></i>
+                      Remove Element
                     </Button>
                   )}
                 </div>
@@ -2504,115 +2606,137 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             )}
             
             {/* Digital Wallet Container */}
-            <div className={`
-              ${element.data.modernStyle 
-                ? 'bg-gradient-to-r from-slate-800 to-slate-700 border border-slate-600' 
-                : 'bg-slate-800 border border-slate-700'
-              } 
-              rounded-xl p-6 shadow-lg
-            `}>
+            <div 
+              className={`
+                ${element.data.modernStyle 
+                  ? 'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 border-2 border-slate-500 shadow-2xl' 
+                  : 'border border-slate-700 shadow-lg'
+                } 
+                rounded-xl p-6
+              `}
+              style={{
+                backgroundColor: element.data.modernStyle ? undefined : (element.data.backgroundColor || '#1e293b'),
+                color: element.data.textColor || '#ffffff',
+                fontFamily: element.data.fontFamily || 'Inter'
+              }}
+            >
               <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold text-white mb-2">
+                <h3 className="text-lg font-semibold mb-2">
                   {element.data.title || 'Save to Digital Wallet'}
                 </h3>
-                <p className="text-sm text-slate-400">
+                <p className="text-sm opacity-80">
                   {element.data.subtitle || 'Add this business card to your phone\'s wallet'}
                 </p>
               </div>
               
-              <div className="space-y-3">
+              <div className={`
+                ${element.data.layout === 'columns' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'space-y-3'}
+              `}>
                 {/* Apple Wallet Button */}
-                <Button
-                  onClick={async () => {
-                    try {
-                      const response = await fetch(`/api/wallet/apple/${cardData?.id || ''}/create`, {
-                        method: 'POST',
-                      });
-                      
-                      if (response.status === 501) {
-                        alert('Apple Wallet integration is being set up. Coming soon!');
-                        return;
+                {element.data.showApple !== false && (
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(`/api/wallet/apple/${cardData?.id || ''}/create`, {
+                          method: 'POST',
+                        });
+                        
+                        if (response.status === 501) {
+                          alert('Apple Wallet integration is being set up. Coming soon!');
+                          return;
+                        }
+                        
+                        if (!response.ok) {
+                          throw new Error('Failed to generate Apple pass');
+                        }
+                        
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${cardData?.fullName || 'BusinessCard'}.pkpass`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                      } catch (error) {
+                        console.error('Error generating Apple pass:', error);
+                        alert('Failed to create Apple Wallet pass. Please try again.');
                       }
-                      
-                      if (!response.ok) {
-                        throw new Error('Failed to generate Apple pass');
-                      }
-                      
-                      const blob = await response.blob();
-                      const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = `${cardData?.fullName || 'BusinessCard'}.pkpass`;
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                      window.URL.revokeObjectURL(url);
-                    } catch (error) {
-                      console.error('Error generating Apple pass:', error);
-                      alert('Failed to create Apple Wallet pass. Please try again.');
-                    }
-                  }}
-                  className="w-full h-12 bg-black hover:bg-gray-800 text-white border-black transition-all duration-200 flex items-center justify-center space-x-3"
-                  data-testid="button-add-apple-wallet"
-                >
-                  <i className="fas fa-wallet text-lg"></i>
-                  <span className="font-medium">Add to Apple Wallet</span>
-                </Button>
+                    }}
+                    className="w-full h-12 bg-black hover:bg-gray-800 text-white border-black transition-all duration-200 flex items-center justify-center space-x-3"
+                    data-testid="button-add-apple-wallet"
+                  >
+                    <i className="fas fa-wallet text-lg"></i>
+                    <span className="font-medium">Add to Apple Wallet</span>
+                  </Button>
+                )}
 
                 {/* Google Wallet Button */}
-                <Button
-                  onClick={async () => {
-                    try {
-                      const response = await fetch(`/api/wallet/google/${cardData?.id || ''}/create`, {
-                        method: 'POST',
-                      });
-                      
-                      if (response.status === 501) {
-                        alert('Google Wallet integration is being set up. Coming soon!');
-                        return;
+                {element.data.showGoogle !== false && (
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(`/api/wallet/google/${cardData?.id || ''}/create`, {
+                          method: 'POST',
+                        });
+                        
+                        if (response.status === 501) {
+                          alert('Google Wallet integration is being set up. Coming soon!');
+                          return;
+                        }
+                        
+                        if (!response.ok) {
+                          throw new Error('Failed to generate Google pass');
+                        }
+                        
+                        const result = await response.json();
+                        if (result.addToGoogleWalletUrl) {
+                          window.open(result.addToGoogleWalletUrl, '_blank');
+                        }
+                      } catch (error) {
+                        console.error('Error generating Google pass:', error);
+                        alert('Failed to create Google Wallet pass. Please try again.');
                       }
-                      
-                      if (!response.ok) {
-                        throw new Error('Failed to generate Google pass');
-                      }
-                      
-                      const result = await response.json();
-                      if (result.addToGoogleWalletUrl) {
-                        window.open(result.addToGoogleWalletUrl, '_blank');
-                      }
-                    } catch (error) {
-                      console.error('Error generating Google pass:', error);
-                      alert('Failed to create Google Wallet pass. Please try again.');
-                    }
-                  }}
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 transition-all duration-200 flex items-center justify-center space-x-3"
-                  data-testid="button-add-google-wallet"
-                >
-                  <i className="fas fa-credit-card text-lg"></i>
-                  <span className="font-medium">Add to Google Wallet</span>
-                </Button>
+                    }}
+                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 transition-all duration-200 flex items-center justify-center space-x-3"
+                    data-testid="button-add-google-wallet"
+                  >
+                    <i className="fas fa-credit-card text-lg"></i>
+                    <span className="font-medium">Add to Google Wallet</span>
+                  </Button>
+                )}
+              </div>
 
-                {/* QR Download Option */}
-                {element.data.showQRDownload && (
+              {/* QR Download Option */}
+              {element.data.showQRDownload && (
+                <div className="mt-4">
                   <Button
                     onClick={() => {
-                      const qrUrl = `/api/wallet/qr/${cardData?.id || ''}`;
+                      // Generate QR code download link for business card
+                      const shareUrl = `${window.location.origin}/${cardData?.shareSlug || cardData?.id}`;
+                      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(shareUrl)}`;
                       const a = document.createElement('a');
                       a.href = qrUrl;
                       a.download = `${cardData?.fullName || 'BusinessCard'}-QR.png`;
+                      a.target = '_blank';
                       document.body.appendChild(a);
                       a.click();
                       document.body.removeChild(a);
                     }}
                     variant="outline"
-                    className="w-full h-10 text-slate-400 border-slate-600 hover:bg-slate-700 hover:text-white transition-all duration-200 flex items-center justify-center space-x-2"
+                    className="w-full h-10 border-slate-500 hover:bg-slate-700 hover:text-white transition-all duration-200 flex items-center justify-center space-x-2"
+                    style={{
+                      borderColor: element.data.textColor ? `${element.data.textColor}50` : '#64748b',
+                      color: element.data.textColor || '#94a3b8'
+                    }}
                     data-testid="button-download-qr"
                   >
                     <i className="fas fa-download"></i>
                     <span>Download QR Code</span>
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         );
