@@ -49,7 +49,7 @@ const testimonials = [
     role: "Marketing Director",
     company: "TechCorp",
     image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-    content: "CardFlow transformed how I network. I've generated 10x more leads since switching from paper cards."
+    content: "2TalkLink transformed how I network. I've generated 10x more leads since switching from paper cards."
   },
   {
     name: "Michael Chen",
@@ -69,8 +69,8 @@ const testimonials = [
 
 const faqs = [
   {
-    question: "How does CardFlow compare to traditional business cards?",
-    answer: "CardFlow digital business cards are environmentally friendly, always up-to-date, include rich media like videos and links, provide analytics, and cost less than constantly reprinting paper cards."
+    question: "How does 2TalkLink compare to traditional business cards?",
+    answer: "2TalkLink digital business cards are environmentally friendly, always up-to-date, include rich media like videos and links, provide analytics, and cost less than constantly reprinting paper cards."
   },
   {
     question: "Can I customize the design to match my brand?",
@@ -222,7 +222,7 @@ export default function Landing() {
               >
                 <i className="fas fa-address-card text-white text-sm"></i>
               </motion.div>
-              <span className="text-xl font-bold text-foreground">CardFlow</span>
+              <span className="text-xl font-bold text-foreground">2TalkLink</span>
             </motion.div>
             
             <div className="hidden md:flex items-center space-x-8">
@@ -486,7 +486,7 @@ export default function Landing() {
               Loved by Professionals Worldwide
             </h2>
             <p className="text-xl text-slate-600">
-              Join thousands of professionals who've transformed their networking with CardFlow
+              Join thousands of professionals who've transformed their networking with 2TalkLink
             </p>
           </div>
           
@@ -529,7 +529,7 @@ export default function Landing() {
               Frequently Asked Questions
             </h2>
             <p className="text-xl text-slate-600">
-              Everything you need to know about CardFlow
+              Everything you need to know about 2TalkLink
             </p>
           </div>
           
@@ -616,7 +616,7 @@ export default function Landing() {
                 <div className="w-8 h-8 bg-gradient-to-br from-talklink-500 to-talklink-600 rounded-lg flex items-center justify-center">
                   <i className="fas fa-address-card text-white text-sm"></i>
                 </div>
-                <span className="text-xl font-bold">CardFlow</span>
+                <span className="text-xl font-bold">2TalkLink</span>
               </div>
               <p className="text-slate-400 mb-6">
                 The future of business networking is here. Create beautiful, interactive digital business cards that work.
@@ -669,7 +669,7 @@ export default function Landing() {
           </div>
           
           <div className="border-t border-slate-800 mt-12 pt-8 text-center text-slate-400">
-            <p>&copy; 2024 CardFlow. All rights reserved. Made with ❤️ for the future of networking.</p>
+            <p>&copy; 2024 2TalkLink. All rights reserved. Made with ❤️ for the future of networking.</p>
           </div>
         </div>
       </footer>

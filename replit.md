@@ -1,8 +1,8 @@
-# Digital Business Card Preview Generator
+# 2TalkLink - Digital Business Card Platform
 
 ## Overview
 
-This is a React-based web application that generates digital business card previews as a lead magnet for 2TalkLink. Users can create professional digital business card previews in under 60 seconds using a comprehensive form builder with live preview functionality. The app supports multiple templates, QR code generation, PNG export, and link sharing capabilities. All user data remains client-side with no server storage requirements.
+This is a React-based web application that creates professional digital business cards for the 2TalkLink platform. Users can create professional digital business card previews in under 60 seconds using a comprehensive form builder with live preview functionality. The app supports multiple templates, QR code generation, PNG export, and link sharing capabilities. All user data remains client-side with no server storage requirements.
 
 ## User Preferences
 
