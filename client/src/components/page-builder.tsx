@@ -107,6 +107,7 @@ function SortableElement({ element, onUpdate, onDelete, cardData }: SortableElem
                 onUpdate={onUpdate}
                 onDelete={onDelete}
                 cardData={cardData}
+                onNavigatePage={onNavigatePage}
               />
             </div>
           </CollapsibleContent>
@@ -120,9 +121,10 @@ interface PageBuilderProps {
   elements: PageElement[];
   onElementsChange: (elements: PageElement[]) => void;
   cardData?: any; // Business card data for theme colors
+  onNavigatePage?: (pageId: string) => void;
 }
 
-export function PageBuilder({ elements, onElementsChange, cardData }: PageBuilderProps) {
+export function PageBuilder({ elements, onElementsChange, cardData, onNavigatePage }: PageBuilderProps) {
   const [showElementSelector, setShowElementSelector] = useState(false);
   
   const sensors = useSensors(

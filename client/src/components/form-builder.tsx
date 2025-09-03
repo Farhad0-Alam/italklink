@@ -1853,7 +1853,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   onElementsChange={(elements: PageElement[]) => {
                     updatePageElements(selectedPageId, elements);
                   }}
-                  cardData={watchedValues}
+                  cardData={enhancedCardData}
+                  onNavigatePage={setSelectedPageId}
                 />
               ) : (
                 <div className="text-center py-8">

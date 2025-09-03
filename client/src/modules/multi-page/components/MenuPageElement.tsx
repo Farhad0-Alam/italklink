@@ -39,9 +39,10 @@ interface MenuPageElementProps {
     label: string;
     path: string;
   }>;
+  onNavigate?: (pageId: string) => void;
 }
 
-export function MenuPageElement({ data, isEditing, onChange, availablePages = [] }: MenuPageElementProps) {
+export function MenuPageElement({ data, isEditing, onChange, availablePages = [], onNavigate }: MenuPageElementProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
 
   const updateData = (updates: Partial<MenuElementData>) => {
@@ -74,6 +75,19 @@ export function MenuPageElement({ data, isEditing, onChange, availablePages = []
   const removeMenuItem = (id: string) => {
     const updatedItems = data.items.filter(item => item.id !== id);
     updateData({ items: updatedItems });
+  };
+
+  const handleMenuItemClick = (item: any) => {
+    if (item.type === 'internal' && item.path && onNavigate) {
+      // Find the page by path and navigate to its ID
+      const targetPage = availablePages.find(page => page.path === item.path);
+      if (targetPage) {
+        onNavigate(targetPage.id);
+      }
+    } else if (item.type === 'external' && item.href) {
+      // Open external links in new tab
+      window.open(item.href, item.target || '_blank');
+    }
   };
 
   const renderMenuPreview = () => {
@@ -111,6 +125,7 @@ export function MenuPageElement({ data, isEditing, onChange, availablePages = []
             <div
               key={item.id}
               className={itemClasses}
+              onClick={() => handleMenuItemClick(item)}
               style={{
                 backgroundColor: data.style.bg,
                 color: data.style.fg,
@@ -167,6 +182,7 @@ export function MenuPageElement({ data, isEditing, onChange, availablePages = []
                     key={item.id}
                     className={`block px-4 py-3 text-left transition-all duration-200 cursor-pointer hover:bg-gray-50 rounded-lg`}
                     style={{ color: data.style.fg }}
+                    onClick={() => handleMenuItemClick(item)}
                   >
                     <div className="flex items-center justify-between">
                       <span>{item.label}</span>
@@ -189,6 +205,7 @@ export function MenuPageElement({ data, isEditing, onChange, availablePages = []
                 <div
                   key={item.id}
                   className={itemClasses}
+                  onClick={() => handleMenuItemClick(item)}
                   style={{
                     backgroundColor: data.style.bg,
                     color: data.style.fg,

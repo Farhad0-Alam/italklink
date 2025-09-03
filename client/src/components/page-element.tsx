@@ -305,9 +305,10 @@ interface PageElementProps {
   onDelete?: (elementId: string) => void;
   isInteractive?: boolean;
   cardData?: any; // Business card data for theme colors
+  onNavigatePage?: (pageId: string) => void;
 }
 
-export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, cardData }: PageElementProps) {
+export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, cardData, onNavigatePage }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   
@@ -2950,6 +2951,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
             isEditing={isEditing}
             onChange={(data) => onUpdate && onUpdate({ ...element, data })}
             availablePages={availablePages}
+            onNavigate={onNavigatePage}
           />
         );
 
