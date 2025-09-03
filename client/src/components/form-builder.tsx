@@ -314,6 +314,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               elements={form.watch("pageElements") || []}
               onElementsChange={(elements: PageElement[]) => form.setValue("pageElements", elements)}
               cardData={watchedValues}
+              onNavigatePage={setSelectedPageId}
             />
           </div>
 
@@ -1807,6 +1808,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   form.setValue("pageElements", elements);
                 }}
                 cardData={watchedValues}
+                onNavigatePage={setSelectedPageId}
               />
             </div>
           )}
