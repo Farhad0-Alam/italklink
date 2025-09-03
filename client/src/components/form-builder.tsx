@@ -1642,182 +1642,118 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             </>
           )}
 
-          {/* Page Mode - Show Pages management and Page Builder */}
+          {/* Page Mode - Show Page Toggles */}
           {builderMode === 'page' && (
             <>
-              {/* Pages Section */}
+              {/* Page Toggles Section */}
               <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
-                <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("pages")}>
+                <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-blue-300 flex items-center">
                     <i className="fas fa-sitemap mr-2"></i>
-                    Pages Management
+                    Page Editor
                   </h3>
-                  <i className={`fas ${collapsedSections.pages ? "fa-chevron-down" : "fa-chevron-up"} text-blue-300`} />
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      const newPageId = `page-${Date.now()}`;
+                      const newPage = {
+                        id: newPageId,
+                        key: newPageId,
+                        path: `page-${((watchedValues as any).pages || []).length + 1}`,
+                        label: `Page ${((watchedValues as any).pages || []).length + 1}`,
+                        visible: true,
+                        elements: []
+                      };
+                      const currentPages = (watchedValues as any).pages || [
+                        { id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }
+                      ];
+                      form.setValue('pages' as any, [...currentPages, newPage]);
+                      setSelectedPageId(newPageId); // Auto-select the new page
+                    }}
+                    size="sm"
+                    className="bg-blue-700 hover:bg-blue-600 text-white"
+                    data-testid="button-add-new-page"
+                  >
+                    <i className="fas fa-plus mr-2"></i>
+                    Add New Page
+                  </Button>
                 </div>
 
-                {!collapsedSections.pages && (
-                  <div className="space-y-4">
-                    {/* Current Pages List */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-md font-medium text-blue-200">Current Pages</h4>
+                {/* Page Toggles/Tabs */}
+                <div className="flex flex-wrap gap-2">
+                  {(((watchedValues as any).pages as any[]) || [
+                    { id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }
+                  ]).map((page: any, index: number) => (
+                    <div key={page.id} className="relative group">
+                      <Button
+                        type="button"
+                        variant={selectedPageId === page.id ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSelectedPageId(page.id)}
+                        className={`${
+                          selectedPageId === page.id 
+                            ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500' 
+                            : 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600'
+                        } pr-8 transition-all duration-200`}
+                        data-testid={`button-page-toggle-${index}`}
+                      >
+                        <i className={`fas ${page.key === 'home' ? 'fa-home' : 'fa-file-alt'} mr-2`}></i>
+                        {page.label}
+                        {selectedPageId === page.id && (
+                          <div className="ml-2 text-xs bg-blue-400 px-1 rounded">
+                            {getPageElements(page.id).length}
+                          </div>
+                        )}
+                      </Button>
+                      
+                      {/* Delete button for non-home pages */}
+                      {page.key !== 'home' && (
                         <Button
                           type="button"
-                          onClick={() => {
-                            const newPage = {
-                              id: `page-${Date.now()}`,
-                              key: `page-${Date.now()}`,
-                              path: 'new-page',
-                              label: 'New Page',
-                              visible: true,
-                              elements: []
-                            };
-                            const currentPages = (watchedValues as any).pages || [
-                              { id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }
-                            ];
-                            form.setValue('pages' as any, [...currentPages, newPage]);
-                          }}
+                          variant="destructive"
                           size="sm"
-                          className="bg-blue-700 hover:bg-blue-600 text-white"
-                          data-testid="button-add-new-page"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const currentPages = (watchedValues as any).pages as any[] || [];
+                            const updatedPages = currentPages.filter(p => p.id !== page.id);
+                            form.setValue('pages' as any, updatedPages);
+                            // Switch to home page if deleting current page
+                            if (selectedPageId === page.id) {
+                              setSelectedPageId('home');
+                            }
+                          }}
+                          className="absolute -top-2 -right-2 w-5 h-5 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          data-testid={`button-delete-page-${index}`}
                         >
-                          <i className="fas fa-plus mr-2"></i>
-                          Add New Page
+                          <i className="fas fa-times text-xs"></i>
                         </Button>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        {(((watchedValues as any).pages as any[]) || [
-                          { id: 'home', key: 'home', path: '', label: 'Home (Default)', visible: true, elements: [] }
-                        ]).map((page: any, index: number) => (
-                          <div 
-                            key={page.id} 
-                            className={`flex items-center justify-between p-3 rounded-lg border transition-colors cursor-pointer ${
-                              selectedPageId === page.id 
-                                ? 'bg-blue-600 border-blue-500' 
-                                : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
-                            }`}
-                            onClick={() => setSelectedPageId(page.id)}
-                          >
-                            <div className="flex items-center space-x-3">
-                              <i className={`fas ${page.key === 'home' ? 'fa-home' : 'fa-file-alt'} ${
-                                selectedPageId === page.id ? 'text-white' : 'text-blue-300'
-                              }`}></i>
-                              <div>
-                                <div className={`font-medium ${
-                                  selectedPageId === page.id ? 'text-white' : 'text-white'
-                                }`}>{page.label}</div>
-                                <div className={`text-xs ${
-                                  selectedPageId === page.id ? 'text-blue-200' : 'text-gray-400'
-                                }`}>
-                                  /{page.path || 'home'}
-                                  {selectedPageId === page.id && ' (Editing)'}
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center space-x-2">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className={`${selectedPageId === page.id 
-                                  ? 'bg-blue-500 border-blue-400 text-white hover:bg-blue-400' 
-                                  : 'bg-slate-600 border-slate-500 text-white hover:bg-slate-500'
-                                }`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedPageId(page.id);
-                                }}
-                                data-testid={`button-edit-page-${index}`}
-                              >
-                                <i className="fas fa-edit text-xs"></i>
-                              </Button>
-                              {page.key !== 'home' && (
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    const currentPages = (watchedValues as any).pages as any[] || [];
-                                    const updatedPages = currentPages.filter(p => p.id !== page.id);
-                                    form.setValue('pages' as any, updatedPages);
-                                    // Switch to home page if deleting current page
-                                    if (selectedPageId === page.id) {
-                                      setSelectedPageId('home');
-                                    }
-                                  }}
-                                  data-testid={`button-delete-page-${index}`}
-                                >
-                                  <i className="fas fa-trash text-xs"></i>
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Current Page Info */}
+                <div className="bg-blue-800/30 p-3 rounded border border-blue-600/50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <i className="fas fa-paint-brush text-blue-300"></i>
+                      <div className="text-sm text-blue-200">
+                        <strong>Editing:</strong> {
+                          (((watchedValues as any).pages || []).find((p: any) => p.id === selectedPageId)?.label || 'Home')
+                        }
                       </div>
                     </div>
-
-                    {/* Page Settings */}
-                    <div className="border-t border-slate-600 pt-4">
-                      <h4 className="text-md font-medium text-blue-200 mb-3">Page Settings</h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="enableMultiPage"
-                            checked={(((watchedValues as any).pages as any[]) || []).length > 1}
-                            onCheckedChange={(checked) => {
-                              if (!checked) {
-                                // Reset to single home page
-                                form.setValue('pages' as any, [
-                                  { id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }
-                                ]);
-                              }
-                            }}
-                            className="border-slate-600"
-                          />
-                          <Label htmlFor="enableMultiPage" className="text-white text-sm">
-                            Enable Multi-Page
-                          </Label>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-blue-800/30 p-3 rounded border border-blue-600/50">
-                      <div className="flex items-start space-x-2">
-                        <i className="fas fa-info-circle text-blue-300 mt-0.5"></i>
-                        <div className="text-sm text-blue-200">
-                          <strong>Page Mode:</strong> Manage your pages and edit page elements. 
-                          Switch to "Card" mode to edit basic business card information.
-                        </div>
-                      </div>
+                    <div className="text-xs text-blue-300">
+                      {getPageElements(selectedPageId).length} elements added
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             </>
           )}
 
           {/* Page Builder - Always visible, but with different context */}
           <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
-            {builderMode === 'page' && (
-              <div className="mb-4 p-3 bg-blue-900/30 border border-blue-600/30 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <i className="fas fa-paint-brush text-blue-300"></i>
-                    <div className="text-sm text-blue-200">
-                      <strong>Editing Page:</strong> {
-                        (((watchedValues as any).pages || []).find((p: any) => p.id === selectedPageId)?.label || 'Home')
-                      }
-                    </div>
-                  </div>
-                  <div className="text-xs text-blue-300">
-                    {getPageElements(selectedPageId).length} elements
-                  </div>
-                </div>
-              </div>
-            )}
             <PageBuilder
               elements={builderMode === 'page' ? getPageElements(selectedPageId) : (form.watch("pageElements") || [])}
               onElementsChange={(elements: PageElement[]) => {
