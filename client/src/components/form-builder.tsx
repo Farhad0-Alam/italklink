@@ -1656,17 +1656,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     type="button"
                     onClick={() => {
                       const newPageId = `page-${Date.now()}`;
+                      const currentPages = (watchedValues as any).pages || [];
+                      const pageNumber = currentPages.filter((p: any) => p.key !== 'home').length + 1;
                       const newPage = {
                         id: newPageId,
                         key: newPageId,
-                        path: `page-${((watchedValues as any).pages || []).length + 1}`,
-                        label: `Page ${((watchedValues as any).pages || []).length + 1}`,
+                        path: `page-${pageNumber}`,
+                        label: `Page ${pageNumber}`,
                         visible: true,
                         elements: []
                       };
-                      const currentPages = (watchedValues as any).pages || [
-                        { id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }
-                      ];
                       form.setValue('pages' as any, [...currentPages, newPage]);
                       setSelectedPageId(newPageId); // Auto-select the new page
                     }}
@@ -1681,73 +1680,97 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
                 {/* Page Toggles/Tabs */}
                 <div className="flex flex-wrap gap-2">
-                  {(((watchedValues as any).pages as any[]) || [
-                    { id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }
-                  ]).map((page: any, index: number) => (
+                  {(((watchedValues as any).pages as any[]) || []).filter((page: any) => page.key !== 'home').map((page: any, index: number) => (
                     <div key={page.id} className="relative group">
-                      <Button
-                        type="button"
-                        variant={selectedPageId === page.id ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setSelectedPageId(page.id)}
+                      <div 
                         className={`${
                           selectedPageId === page.id 
-                            ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500' 
-                            : 'bg-slate-700 border-slate-600 text-white hover:bg-slate-600'
-                        } pr-8 transition-all duration-200`}
+                            ? 'bg-blue-600 border-blue-500' 
+                            : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
+                        } border rounded-md px-3 py-2 pr-8 transition-all duration-200 cursor-pointer flex items-center`}
+                        onClick={() => setSelectedPageId(page.id)}
                         data-testid={`button-page-toggle-${index}`}
                       >
-                        <i className={`fas ${page.key === 'home' ? 'fa-home' : 'fa-file-alt'} mr-2`}></i>
-                        {page.label}
+                        <i className="fas fa-file-alt mr-2 text-white"></i>
+                        <input
+                          type="text"
+                          value={page.label}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            const currentPages = (watchedValues as any).pages as any[] || [];
+                            const updatedPages = currentPages.map((p: any) => 
+                              p.id === page.id ? { ...p, label: e.target.value } : p
+                            );
+                            form.setValue('pages' as any, updatedPages);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="bg-transparent text-white text-sm font-medium border-none outline-none focus:bg-white/10 rounded px-1 min-w-0 flex-1"
+                          placeholder="Page Name"
+                        />
                         {selectedPageId === page.id && (
-                          <div className="ml-2 text-xs bg-blue-400 px-1 rounded">
+                          <div className="ml-2 text-xs bg-blue-400 px-1 rounded text-white">
                             {getPageElements(page.id).length}
                           </div>
                         )}
-                      </Button>
+                      </div>
                       
-                      {/* Delete button for non-home pages */}
-                      {page.key !== 'home' && (
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const currentPages = (watchedValues as any).pages as any[] || [];
-                            const updatedPages = currentPages.filter(p => p.id !== page.id);
-                            form.setValue('pages' as any, updatedPages);
-                            // Switch to home page if deleting current page
-                            if (selectedPageId === page.id) {
-                              setSelectedPageId('home');
+                      {/* Delete button */}
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const currentPages = (watchedValues as any).pages as any[] || [];
+                          const updatedPages = currentPages.filter(p => p.id !== page.id);
+                          form.setValue('pages' as any, updatedPages);
+                          // Switch to first available page if deleting current page
+                          if (selectedPageId === page.id) {
+                            const remainingPages = updatedPages.filter((p: any) => p.key !== 'home');
+                            if (remainingPages.length > 0) {
+                              setSelectedPageId(remainingPages[0].id);
                             }
-                          }}
-                          className="absolute -top-2 -right-2 w-5 h-5 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          data-testid={`button-delete-page-${index}`}
-                        >
-                          <i className="fas fa-times text-xs"></i>
-                        </Button>
-                      )}
+                          }
+                        }}
+                        className="absolute -top-2 -right-2 w-5 h-5 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        data-testid={`button-delete-page-${index}`}
+                      >
+                        <i className="fas fa-times text-xs"></i>
+                      </Button>
                     </div>
                   ))}
                 </div>
 
                 {/* Current Page Info */}
-                <div className="bg-blue-800/30 p-3 rounded border border-blue-600/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <i className="fas fa-paint-brush text-blue-300"></i>
+                {(((watchedValues as any).pages as any[]) || []).filter((page: any) => page.key !== 'home').length === 0 ? (
+                  <div className="bg-blue-800/30 p-4 rounded border border-blue-600/50 text-center">
+                    <div className="flex flex-col items-center space-y-2">
+                      <i className="fas fa-plus-circle text-blue-300 text-2xl"></i>
                       <div className="text-sm text-blue-200">
-                        <strong>Editing:</strong> {
-                          (((watchedValues as any).pages || []).find((p: any) => p.id === selectedPageId)?.label || 'Home')
-                        }
+                        <strong>No pages created yet</strong>
+                      </div>
+                      <div className="text-xs text-blue-300">
+                        Click "Add New Page" to create your first custom page
                       </div>
                     </div>
-                    <div className="text-xs text-blue-300">
-                      {getPageElements(selectedPageId).length} elements added
+                  </div>
+                ) : selectedPageId && (((watchedValues as any).pages || []).find((p: any) => p.id === selectedPageId)) ? (
+                  <div className="bg-blue-800/30 p-3 rounded border border-blue-600/50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <i className="fas fa-paint-brush text-blue-300"></i>
+                        <div className="text-sm text-blue-200">
+                          <strong>Editing:</strong> {
+                            (((watchedValues as any).pages || []).find((p: any) => p.id === selectedPageId)?.label || 'Untitled Page')
+                          }
+                        </div>
+                      </div>
+                      <div className="text-xs text-blue-300">
+                        {getPageElements(selectedPageId).length} elements added
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : null}
               </div>
             </>
           )}

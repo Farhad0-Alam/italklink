@@ -72,23 +72,37 @@ export function MenuPageElement({ data, isEditing, onChange }: MenuPageElementPr
   };
 
   const renderMenuPreview = () => {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    
     const menuClasses = [
-      'flex gap-2 p-4 bg-white rounded-lg shadow-sm border',
+      'relative bg-white rounded-lg shadow-sm border overflow-hidden',
+      data.style.sticky ? 'sticky top-0 z-40' : '',
+    ].join(' ');
+
+    const desktopMenuClasses = [
+      'hidden md:flex gap-2 p-4',
       data.style.orientation === 'vertical' ? 'flex-col' : 'flex-row flex-wrap',
     ].join(' ');
 
     const itemClasses = [
-      'px-3 py-2 transition-colors',
+      'px-3 py-2 transition-all duration-200 cursor-pointer hover:opacity-80',
       data.style.variant === 'pills' ? 'rounded-full' : '',
-      data.style.variant === 'tabs' ? 'border-b-2 border-transparent' : '',
+      data.style.variant === 'tabs' ? 'border-b-2 border-transparent hover:border-current' : '',
+      data.style.variant === 'underline' ? 'border-b-2 border-transparent hover:border-current' : '',
+      data.style.variant === 'ghost' ? 'hover:bg-gray-100' : '',
+      data.style.size === 'sm' ? 'text-sm px-2 py-1' : '',
+      data.style.size === 'lg' ? 'text-lg px-4 py-3' : '',
     ].join(' ');
+
+    const visibleItems = data.items
+      .filter(item => item.visible)
+      .sort((a, b) => a.order - b.order);
 
     return (
       <div className={menuClasses}>
-        {data.items
-          .filter(item => item.visible)
-          .sort((a, b) => a.order - b.order)
-          .map((item) => (
+        {/* Desktop Menu */}
+        <div className={desktopMenuClasses}>
+          {visibleItems.map((item) => (
             <div
               key={item.id}
               className={itemClasses}
@@ -103,9 +117,90 @@ export function MenuPageElement({ data, isEditing, onChange }: MenuPageElementPr
               }}
             >
               {item.label}
-              {item.type === 'external' && <span className="ml-1 text-xs">↗</span>}
+              {item.type === 'external' && <span className="ml-1 text-xs opacity-70">↗</span>}
             </div>
           ))}
+        </div>
+
+        {/* Mobile Menu */}
+        {data.style.mobileCollapse && (
+          <>
+            {/* Mobile Menu Button */}
+            <div className="md:hidden flex items-center justify-between p-4">
+              <span className="font-medium" style={{ color: data.style.fg }}>
+                {data.title}
+              </span>
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 rounded-lg transition-colors"
+                style={{
+                  backgroundColor: data.style.bg,
+                  color: data.style.fg,
+                }}
+              >
+                <div className={`w-5 h-5 relative transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-90' : ''}`}>
+                  {isMobileMenuOpen ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  )}
+                </div>
+              </button>
+            </div>
+
+            {/* Mobile Dropdown */}
+            <div className={`md:hidden transition-all duration-300 ease-in-out border-t ${
+              isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+            }`}>
+              <div className="p-2 space-y-1">
+                {visibleItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`block px-4 py-3 text-left transition-all duration-200 cursor-pointer hover:bg-gray-50 rounded-lg`}
+                    style={{ color: data.style.fg }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>{item.label}</span>
+                      {item.type === 'external' && (
+                        <span className="ml-2 text-xs opacity-70">↗</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Non-collapsible mobile menu */}
+        {!data.style.mobileCollapse && (
+          <div className="md:hidden p-4">
+            <div className="space-y-2">
+              {visibleItems.map((item) => (
+                <div
+                  key={item.id}
+                  className={itemClasses}
+                  style={{
+                    backgroundColor: data.style.bg,
+                    color: data.style.fg,
+                    borderRadius: data.style.radius === 'none' ? 0 : 
+                      data.style.radius === 'sm' ? '4px' :
+                      data.style.radius === 'md' ? '6px' :
+                      data.style.radius === 'lg' ? '8px' :
+                      data.style.radius === 'xl' ? '12px' : '16px',
+                  }}
+                >
+                  {item.label}
+                  {item.type === 'external' && <span className="ml-1 text-xs opacity-70">↗</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
