@@ -443,17 +443,17 @@ END:VCARD`;
             <div className="relative mx-auto max-w-sm">
               {/* Professional Mobile Frame */}
               <div 
-                className="relative w-[430px] h-[815px] bg-cover bg-center bg-no-repeat shadow-2xl"
+                className="relative w-[430px] h-[815px] bg-cover bg-center bg-no-repeat shadow-2xl z-1000"
                 style={{
                   backgroundImage: `url(/mobile-frame.png)`,
                   backgroundSize: 'contain'
                 }}
               >
                 {/* Screen Content Area */}
-                <div className="absolute top-[40px] left-[35px] right-[35px] bottom-[20px] overflow-hidden rounded-[30px]">
+                <div className="absolute top-[20px] left-[35px] right-[35px] bottom-[20px] overflow-hidden rounded-[30px] z-[9999]">
                   <div 
                     ref={cardRef}
-                    className="h-full overflow-y-auto"
+                    className="h-full overflow-y-auto relative z-[9999]"
                   >
                     <BusinessCardComponent 
                       data={cardData} 

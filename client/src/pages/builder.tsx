@@ -121,15 +121,15 @@ export const Builder = () => {
                   <div className="relative">
                     {/* Mobile Frame with Custom Image as Background */}
                     <div 
-                      className="relative w-[430px] h-[800px] bg-cover bg-center bg-no-repeat shadow-2xl"
+                      className="relative w-[430px] h-[800px] bg-cover bg-center bg-no-repeat shadow-2xl z-10"
                       style={{
                         backgroundImage: `url(/mobile-frame.png)`,
                         backgroundSize: 'contain'
                       }}
                     >
                       {/* Screen Content Area */}
-                      <div className="absolute top-[160px] left-[50px] right-[52px] bottom-[165px] overflow-hidden rounded-[35px]">
-                        <div className="h-full overflow-y-auto">
+                      <div className="absolute top-[160px] left-[50px] right-[52px] bottom-[165px] overflow-hidden rounded-[35px] z-50">
+                        <div className="h-full overflow-y-auto relative z-50">
                           <BusinessCardComponent
                             ref={cardRef}
                             data={cardData}
