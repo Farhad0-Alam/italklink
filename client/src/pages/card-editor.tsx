@@ -443,14 +443,14 @@ END:VCARD`;
             <div className="relative mx-auto max-w-sm">
               {/* Professional Mobile Frame */}
               <div 
-                className="relative w-[430px] h-[815px] bg-cover bg-center bg-no-repeat shadow-2xl z-1000"
+                className="relative w-[430px] h-[815px] bg-cover bg-center bg-no-repeat shadow-2xl z-99999999"
                 style={{
                   backgroundImage: `url(/mobile-frame.png)`,
                   backgroundSize: 'contain'
                 }}
               >
                 {/* Screen Content Area */}
-                <div className="absolute top-[20px] left-[35px] right-[35px] bottom-[20px] overflow-hidden rounded-[30px]">
+                <div className="absolute top-[17px] left-[35px] right-[35px] bottom-[17px] overflow-hidden rounded-[50px]">
                   <div 
                     ref={cardRef}
                     className="h-full overflow-y-auto"
