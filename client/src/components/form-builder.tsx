@@ -204,6 +204,18 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     }
   }, [watchedValues, memoizedOnDataChange]);
 
+  // Auto-select first page when switching to page mode or when pages change
+  useEffect(() => {
+    if (builderMode === 'page') {
+      const availablePages = ((watchedValues as any).pages as any[]) || [];
+      const nonHomePages = availablePages.filter((page: any) => page.key !== 'home');
+      
+      if (nonHomePages.length > 0 && (!selectedPageId || !nonHomePages.find(p => p.id === selectedPageId))) {
+        setSelectedPageId(nonHomePages[0].id);
+      }
+    }
+  }, [builderMode, (watchedValues as any).pages, selectedPageId]);
+
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
     field: "profilePhoto" | "logo" | "backgroundImage" | "ogImage"
@@ -1775,20 +1787,78 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             </>
           )}
 
-          {/* Page Builder - Always visible, but with different context */}
-          <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
-            <PageBuilder
-              elements={builderMode === 'page' ? getPageElements(selectedPageId) : (form.watch("pageElements") || [])}
-              onElementsChange={(elements: PageElement[]) => {
-                if (builderMode === 'page') {
-                  updatePageElements(selectedPageId, elements);
-                } else {
+          {/* Page Builder - Show based on mode and page selection */}
+          {builderMode === 'card' && (
+            <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
+              <PageBuilder
+                elements={form.watch("pageElements") || []}
+                onElementsChange={(elements: PageElement[]) => {
                   form.setValue("pageElements", elements);
-                }
-              }}
-              cardData={watchedValues}
-            />
-          </div>
+                }}
+                cardData={watchedValues}
+              />
+            </div>
+          )}
+
+          {builderMode === 'page' && (
+            <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
+              {(((watchedValues as any).pages as any[]) || []).filter((page: any) => page.key !== 'home').length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="flex flex-col items-center space-y-4">
+                    <i className="fas fa-plus-circle text-teal-300 text-4xl"></i>
+                    <div className="text-teal-200">
+                      <div className="text-lg font-semibold mb-2">No Pages Created Yet</div>
+                      <div className="text-sm opacity-75">
+                        Create your first page to start adding custom elements and designing your multi-page experience.
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        const newPageId = `page-${Date.now()}`;
+                        const currentPages = (watchedValues as any).pages || [];
+                        const pageNumber = currentPages.filter((p: any) => p.key !== 'home').length + 1;
+                        const newPage = {
+                          id: newPageId,
+                          key: newPageId,
+                          path: `page-${pageNumber}`,
+                          label: `Page ${pageNumber}`,
+                          visible: true,
+                          elements: []
+                        };
+                        form.setValue('pages' as any, [...currentPages, newPage]);
+                        setSelectedPageId(newPageId);
+                      }}
+                      className="bg-teal-600 hover:bg-teal-700 text-white"
+                    >
+                      <i className="fas fa-plus mr-2"></i>
+                      Create Your First Page
+                    </Button>
+                  </div>
+                </div>
+              ) : selectedPageId && (((watchedValues as any).pages || []).find((p: any) => p.id === selectedPageId)) ? (
+                <PageBuilder
+                  elements={getPageElements(selectedPageId)}
+                  onElementsChange={(elements: PageElement[]) => {
+                    updatePageElements(selectedPageId, elements);
+                  }}
+                  cardData={watchedValues}
+                />
+              ) : (
+                <div className="text-center py-8">
+                  <div className="flex flex-col items-center space-y-4">
+                    <i className="fas fa-hand-pointer text-teal-300 text-4xl"></i>
+                    <div className="text-teal-200">
+                      <div className="text-lg font-semibold mb-2">Select a Page to Edit</div>
+                      <div className="text-sm opacity-75">
+                        Click on any page toggle above to start adding elements and designing that page.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Auto Save */}
           <div className="flex items-center justify-center p-3 bg-slate-700/50 rounded-lg border border-slate-600">
