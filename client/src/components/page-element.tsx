@@ -2833,13 +2833,32 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         const result = await response.json();
                         console.log('Google Wallet API result:', result);
                         
-                        if (result.success && result.saveUrl) {
-                          console.log('Opening Google Wallet URL:', result.saveUrl);
-                          // Open Google Wallet save URL in new tab
-                          window.open(result.saveUrl, '_blank');
-                          alert(`✅ ${result.message}\n\nGoogle Wallet pass created! Opening in new tab...`);
+                        if (result.success) {
+                          if (result.saveUrl) {
+                            console.log('Opening Google Wallet URL:', result.saveUrl);
+                            // Production mode - open Google Wallet save URL
+                            window.open(result.saveUrl, '_blank');
+                            alert(`✅ ${result.message}\n\nGoogle Wallet pass created! Opening in new tab...`);
+                          } else if (result.passType === 'google_wallet_demo') {
+                            // Demo mode - show explanation
+                            const demoInfo = result.demoInfo;
+                            alert(`🔧 ${result.message}
+
+📋 Business Card Data Ready:
+• Name: ${demoInfo.businessCardData.name}
+• Title: ${demoInfo.businessCardData.title}
+• Company: ${demoInfo.businessCardData.company}
+• Contact: ${demoInfo.businessCardData.contact}
+
+🚀 For Production Setup:
+${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
+
+💡 In production, this would open Google Wallet to save the business card pass.`);
+                          } else {
+                            throw new Error('Unknown response format');
+                          }
                         } else {
-                          throw new Error(result.message || 'No Google Wallet URL received');
+                          throw new Error(result.message || 'Failed to create Google Wallet pass');
                         }
                       } catch (error) {
                         console.error('Error generating Google pass:', error);

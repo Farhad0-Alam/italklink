@@ -68,10 +68,39 @@ router.post('/google/:ecardId/create', optionalAuth, async (req, res) => {
       return res.status(404).json({ message: 'Business card not found or not public' });
     }
 
-    // Generate Google Wallet JWT token
+    // Check if this is production with real Google Wallet credentials
+    const hasRealCredentials = process.env.GOOGLE_WALLET_ISSUER_ID && 
+                              process.env.GOOGLE_WALLET_PRIVATE_KEY && 
+                              process.env.GOOGLE_WALLET_PRIVATE_KEY !== 'demo-secret-key';
+
+    if (!hasRealCredentials) {
+      // Demo mode - provide explanation instead of broken link
+      res.json({
+        success: true,
+        passType: 'google_wallet_demo',
+        message: 'Google Wallet Demo Mode',
+        demoInfo: {
+          status: 'Demo mode - Google Wallet requires production setup',
+          requirements: [
+            'Google Cloud Project with Wallet API enabled',
+            'Service account with Google Wallet permissions', 
+            'Pass class configured in Google Wallet Console',
+            'Environment variables: GOOGLE_WALLET_ISSUER_ID, GOOGLE_WALLET_PRIVATE_KEY'
+          ],
+          businessCardData: {
+            name: card.fullName,
+            title: card.title || 'Professional',
+            company: card.company || 'Independent',
+            contact: card.phone || card.email || 'Contact available on business card',
+            cardUrl: `${process.env.PUBLIC_APP_URL || 'http://localhost:5000'}/${card.shareSlug || card.customUrl || card.id}`
+          }
+        }
+      });
+      return;
+    }
+
+    // Production mode - generate real JWT token
     const jwtToken = generateGoogleWalletJWT(card);
-    
-    // Create Google Wallet save URL
     const googleWalletUrl = `https://pay.google.com/gp/v/save/${jwtToken}`;
     
     res.json({
