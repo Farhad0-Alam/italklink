@@ -12,6 +12,7 @@ import { URLManager } from "@/components/URLManager";
 import { DocumentManager, DocumentItem } from "@/components/DocumentManager";
 import { RAGChatBox } from "@/components/RAGChatBox";
 import { MessageCircle } from "lucide-react";
+import { MenuPageElement } from "@/modules/multi-page/components/MenuPageElement";
 import {
   DndContext,
   closestCenter,
@@ -2934,19 +2935,12 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
         );
 
       case 'navigationMenu':
-        // Import the menu element from our multi-page module
-        const MenuPageElement = React.lazy(() => 
-          import('@/modules/multi-page/components/MenuPageElement').then(m => ({ default: m.MenuPageElement }))
-        );
-        
         return (
-          <React.Suspense fallback={<div>Loading menu...</div>}>
-            <MenuPageElement 
-              data={element.data}
-              isEditing={isEditing}
-              onChange={(data) => onUpdate && onUpdate({ ...element, data })}
-            />
-          </React.Suspense>
+          <MenuPageElement 
+            data={element.data}
+            isEditing={isEditing}
+            onChange={(data) => onUpdate && onUpdate({ ...element, data })}
+          />
         );
 
       default:
