@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -86,26 +86,23 @@ export default function CardEditor() {
   };
   
   // Enhanced navigation function that switches to page mode and sets the page
-  const handleNavigatePage = useCallback((pageId: string) => {
+  const handleNavigatePage = (pageId: string) => {
     setCurrentPageId(pageId);
     // Update the card data to switch to page preview mode with the specific page
-    setCardData(prev => {
-      const pages = (prev as any).pages || [];
-      const targetPage = pages.find((p: any) => p.id === pageId);
-      if (targetPage) {
-        return {
-          ...prev,
-          currentPreviewMode: 'page',
-          currentSelectedPage: {
-            id: targetPage.id,
-            label: targetPage.label,
-            elements: targetPage.elements || []
-          }
-        };
-      }
-      return prev;
-    });
-  }, []);
+    const pages = (cardData as any).pages || [];
+    const targetPage = pages.find((p: any) => p.id === pageId);
+    if (targetPage) {
+      setCardData(prev => ({
+        ...prev,
+        currentPreviewMode: 'page',
+        currentSelectedPage: {
+          id: targetPage.id,
+          label: targetPage.label,
+          elements: targetPage.elements || []
+        }
+      }));
+    }
+  };
   
   // Fetch template data if template parameter is provided
   const { data: templates } = useQuery({

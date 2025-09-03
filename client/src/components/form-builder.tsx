@@ -109,13 +109,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const [builderMode, setBuilderMode] = useState<'card' | 'page'>('card');
   const [selectedPageId, setSelectedPageId] = useState<string>('home');
   
-  // Notify parent about page navigation changes (with dependency control to prevent loops)
-  useEffect(() => {
-    if (onNavigationChange) {
-      onNavigationChange(selectedPageId);
-    }
-  }, [selectedPageId]); // Remove onNavigationChange from dependencies to prevent infinite loop
-  
   const [collapsedSections, setCollapsedSections] = useState<{ [key: string]: boolean }>({
     coverLogo: true,
     basicInfo: true,
