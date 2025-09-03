@@ -2665,39 +2665,21 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">QR Background Color</label>
-                      <Input
-                        type="color"
-                        value={element.data.qrBackgroundColor || '#ffffff'}
-                        onChange={(e) => onUpdate && onUpdate({ 
-                          ...element, 
-                          data: { 
-                            ...element.data, 
-                            qrBackgroundColor: e.target.value 
-                          } 
-                        })}
-                        className="h-10"
-                        disabled={!element.data.showQRDownload}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">QR Foreground Color</label>
-                      <Input
-                        type="color"
-                        value={element.data.qrForegroundColor || '#000000'}
-                        onChange={(e) => onUpdate && onUpdate({ 
-                          ...element, 
-                          data: { 
-                            ...element.data, 
-                            qrForegroundColor: e.target.value 
-                          } 
-                        })}
-                        className="h-10"
-                        disabled={!element.data.showQRDownload}
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">QR Code Button Color</label>
+                    <Input
+                      type="color"
+                      value={element.data.qrButtonColor || '#000000'}
+                      onChange={(e) => onUpdate && onUpdate({ 
+                        ...element, 
+                        data: { 
+                          ...element.data, 
+                          qrButtonColor: e.target.value 
+                        } 
+                      })}
+                      className="h-10"
+                      disabled={!element.data.showQRDownload}
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -2901,7 +2883,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         const shareUrl = `${window.location.origin}/${cardData?.shareSlug || cardData?.id}`;
                         console.log('Share URL for QR:', shareUrl);
                         
-                        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&bgcolor=${element.data.qrBackgroundColor?.replace('#', '') || 'ffffff'}&color=${element.data.qrForegroundColor?.replace('#', '') || '000000'}&data=${encodeURIComponent(shareUrl)}`;
+                        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&bgcolor=ffffff&color=${element.data.qrButtonColor?.replace('#', '') || '000000'}&data=${encodeURIComponent(shareUrl)}`;
                         console.log('QR API URL:', qrUrl);
                         
                         // Fetch the QR code image

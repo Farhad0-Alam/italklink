@@ -350,8 +350,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             appleButtonText: "Add to Apple Wallet",
             googleButtonText: "Add to Google Wallet",
             qrButtonText: "Download QR Code",
-            qrBackgroundColor: "#ffffff",
-            qrForegroundColor: "#000000"
+            qrButtonColor: "#000000"
           }
         };
         break;

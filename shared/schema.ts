@@ -1454,8 +1454,7 @@ export const digitalWalletElementSchema = baseElementSchema.extend({
     appleButtonText: z.string().default("Add to Apple Wallet"),
     googleButtonText: z.string().default("Add to Google Wallet"),
     qrButtonText: z.string().default("Download QR Code"),
-    qrBackgroundColor: z.string().default("#ffffff"),
-    qrForegroundColor: z.string().default("#000000"),
+    qrButtonColor: z.string().default("#000000"),
   }),
 });
 
