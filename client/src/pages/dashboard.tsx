@@ -163,8 +163,9 @@ export default function Dashboard() {
   }, [user, userLoading, userError, setLocation, toast]);
 
   // Helper functions
-  const copyUrl = async (shareSlug: string) => {
-    const url = `${window.location.origin}/share/${shareSlug}`;
+  const copyUrl = async (card: BusinessCard) => {
+    const slug = card.shareSlug || card.fullName.toLowerCase().replace(/\s+/g, '-');
+    const url = `${window.location.origin}/${slug}`;
     await navigator.clipboard.writeText(url);
     toast({
       title: "URL copied!",
@@ -600,20 +601,20 @@ export default function Dashboard() {
                         </div>
                         <div className="flex items-center space-x-4 mt-1">
                           <p className="text-sm text-gray-600">
-                            {card.shareSlug ? `https://2talklink.com/${card.shareSlug}` : `https://2talklink.com/${card.id.slice(0, 8)}`}
+                            {window.location.origin}/{card.shareSlug || card.fullName.toLowerCase().replace(/\s+/g, '-')}
                           </p>
                           <i 
                             className="fas fa-copy text-gray-400 text-xs cursor-pointer hover:text-gray-600 transition-colors" 
-                            onClick={() => copyUrl(card.shareSlug || card.id)}
+                            onClick={() => copyUrl(card)}
                             title="Copy link to clipboard"
                             data-testid={`icon-copy-${card.id}`}
                           ></i>
                           <i 
                             className="fas fa-external-link-alt text-gray-400 text-xs cursor-pointer hover:text-gray-600 transition-colors"
-                            onClick={() => window.open(
-                              `${window.location.origin}/share/${card.shareSlug || card.id}`, 
-                              '_blank'
-                            )}
+                            onClick={() => {
+                              const slug = card.shareSlug || card.fullName.toLowerCase().replace(/\s+/g, '-');
+                              window.open(`${window.location.origin}/${slug}`, '_blank');
+                            }}
                             title="Open in new tab"
                             data-testid={`icon-external-${card.id}`}
                           ></i>

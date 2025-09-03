@@ -552,10 +552,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Generate a clean shareSlug from fullName if not provided
+      const generateSlug = (name: string): string => {
+        return name
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+          .replace(/\s+/g, '-') // Replace spaces with hyphens
+          .replace(/-+/g, '-') // Replace multiple hyphens with single
+          .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+      };
+
+      const autoSlug = generateSlug(cardData.fullName);
+      
       const businessCard = await storage.createBusinessCard({
         ...cardData,
         userId: user.id,
-        shareSlug: cardData.shareSlug || `${user.firstName?.toLowerCase()}-${user.lastName?.toLowerCase()}-${Date.now()}`,
+        shareSlug: cardData.shareSlug || autoSlug,
       });
       
       console.log('Created business card:', businessCard);
@@ -613,6 +625,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Clean the data - remove fields that shouldn't be updated
       const { id, userId, createdAt, updatedAt, ...cleanData } = req.body;
+      
+      // Generate a clean shareSlug if fullName changed and no custom shareSlug provided
+      if (cleanData.fullName && (!cleanData.shareSlug || !card.shareSlug || card.shareSlug.includes('talklink'))) {
+        const generateSlug = (name: string): string => {
+          return name
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+            .replace(/\s+/g, '-') // Replace spaces with hyphens
+            .replace(/-+/g, '-') // Replace multiple hyphens with single
+            .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+        };
+        cleanData.shareSlug = generateSlug(cleanData.fullName);
+      }
       
       console.log('PUT /api/business-cards - Clean data:', JSON.stringify(cleanData, null, 2));
       
