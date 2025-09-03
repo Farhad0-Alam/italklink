@@ -105,6 +105,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   });
 
   const [builderMode, setBuilderMode] = useState<'card' | 'page'>('card');
+  const [selectedPageId, setSelectedPageId] = useState<string>('home');
   
   const [collapsedSections, setCollapsedSections] = useState<{ [key: string]: boolean }>({
     coverLogo: true,
@@ -170,6 +171,30 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const prevDataRef = useRef<string>("");
   
   const memoizedOnDataChange = useCallback(onDataChange, []);
+
+  // Helper function to get elements for a specific page
+  const getPageElements = (pageId: string) => {
+    const pages = (watchedValues as any).pages || [
+      { id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }
+    ];
+    const page = pages.find((p: any) => p.id === pageId);
+    return page?.elements || [];
+  };
+
+  // Helper function to update elements for a specific page
+  const updatePageElements = (pageId: string, elements: PageElement[]) => {
+    const currentPages = (watchedValues as any).pages || [
+      { id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }
+    ];
+    
+    const updatedPages = currentPages.map((page: any) => 
+      page.id === pageId 
+        ? { ...page, elements } 
+        : page
+    );
+    
+    form.setValue('pages' as any, updatedPages);
+  };
   
   useEffect(() => {
     const s = JSON.stringify(watchedValues);
@@ -1667,44 +1692,66 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         ]).map((page: any, index: number) => (
                           <div 
                             key={page.id} 
-                            className="flex items-center justify-between p-3 bg-slate-700 rounded-lg border border-slate-600"
+                            className={`flex items-center justify-between p-3 rounded-lg border transition-colors cursor-pointer ${
+                              selectedPageId === page.id 
+                                ? 'bg-blue-600 border-blue-500' 
+                                : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
+                            }`}
+                            onClick={() => setSelectedPageId(page.id)}
                           >
                             <div className="flex items-center space-x-3">
-                              <i className={`fas ${page.key === 'home' ? 'fa-home' : 'fa-file-alt'} text-blue-300`}></i>
+                              <i className={`fas ${page.key === 'home' ? 'fa-home' : 'fa-file-alt'} ${
+                                selectedPageId === page.id ? 'text-white' : 'text-blue-300'
+                              }`}></i>
                               <div>
-                                <div className="font-medium text-white">{page.label}</div>
-                                <div className="text-xs text-gray-400">
+                                <div className={`font-medium ${
+                                  selectedPageId === page.id ? 'text-white' : 'text-white'
+                                }`}>{page.label}</div>
+                                <div className={`text-xs ${
+                                  selectedPageId === page.id ? 'text-blue-200' : 'text-gray-400'
+                                }`}>
                                   /{page.path || 'home'}
+                                  {selectedPageId === page.id && ' (Editing)'}
                                 </div>
                               </div>
                             </div>
                             
                             <div className="flex items-center space-x-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className={`${selectedPageId === page.id 
+                                  ? 'bg-blue-500 border-blue-400 text-white hover:bg-blue-400' 
+                                  : 'bg-slate-600 border-slate-500 text-white hover:bg-slate-500'
+                                }`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedPageId(page.id);
+                                }}
+                                data-testid={`button-edit-page-${index}`}
+                              >
+                                <i className="fas fa-edit text-xs"></i>
+                              </Button>
                               {page.key !== 'home' && (
-                                <>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="bg-slate-600 border-slate-500 text-white hover:bg-slate-500"
-                                    data-testid={`button-edit-page-${index}`}
-                                  >
-                                    <i className="fas fa-edit text-xs"></i>
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => {
-                                      const currentPages = (watchedValues as any).pages as any[] || [];
-                                      const updatedPages = currentPages.filter(p => p.id !== page.id);
-                                      form.setValue('pages' as any, updatedPages);
-                                    }}
-                                    data-testid={`button-delete-page-${index}`}
-                                  >
-                                    <i className="fas fa-trash text-xs"></i>
-                                  </Button>
-                                </>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const currentPages = (watchedValues as any).pages as any[] || [];
+                                    const updatedPages = currentPages.filter(p => p.id !== page.id);
+                                    form.setValue('pages' as any, updatedPages);
+                                    // Switch to home page if deleting current page
+                                    if (selectedPageId === page.id) {
+                                      setSelectedPageId('home');
+                                    }
+                                  }}
+                                  data-testid={`button-delete-page-${index}`}
+                                >
+                                  <i className="fas fa-trash text-xs"></i>
+                                </Button>
                               )}
                             </div>
                           </div>
@@ -1754,9 +1801,32 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
           {/* Page Builder - Always visible, but with different context */}
           <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
+            {builderMode === 'page' && (
+              <div className="mb-4 p-3 bg-blue-900/30 border border-blue-600/30 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <i className="fas fa-paint-brush text-blue-300"></i>
+                    <div className="text-sm text-blue-200">
+                      <strong>Editing Page:</strong> {
+                        (((watchedValues as any).pages || []).find((p: any) => p.id === selectedPageId)?.label || 'Home')
+                      }
+                    </div>
+                  </div>
+                  <div className="text-xs text-blue-300">
+                    {getPageElements(selectedPageId).length} elements
+                  </div>
+                </div>
+              </div>
+            )}
             <PageBuilder
-              elements={form.watch("pageElements") || []}
-              onElementsChange={(elements: PageElement[]) => form.setValue("pageElements", elements)}
+              elements={builderMode === 'page' ? getPageElements(selectedPageId) : (form.watch("pageElements") || [])}
+              onElementsChange={(elements: PageElement[]) => {
+                if (builderMode === 'page') {
+                  updatePageElements(selectedPageId, elements);
+                } else {
+                  form.setValue("pageElements", elements);
+                }
+              }}
               cardData={watchedValues}
             />
           </div>
