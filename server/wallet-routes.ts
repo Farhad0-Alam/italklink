@@ -71,9 +71,11 @@ router.post('/google/:ecardId/create', optionalAuth, async (req, res) => {
     // Check if this is production with real Google Wallet credentials
     const hasRealCredentials = process.env.GOOGLE_WALLET_ISSUER_ID && 
                               process.env.GOOGLE_WALLET_PRIVATE_KEY && 
-                              process.env.GOOGLE_WALLET_PRIVATE_KEY !== 'demo-secret-key';
+                              process.env.GOOGLE_WALLET_PRIVATE_KEY !== 'demo-secret-key' &&
+                              process.env.GOOGLE_WALLET_ISSUER_ID !== 'your-issuer-id';
 
-    if (!hasRealCredentials) {
+    // Force demo mode for now since we don't have real credentials
+    if (true) {
       // Demo mode - provide explanation instead of broken link
       res.json({
         success: true,
