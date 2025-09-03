@@ -2935,11 +2935,21 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
         );
 
       case 'navigationMenu':
+        // Extract available pages from cardData
+        const availablePages = ((cardData?.pages as any[]) || [])
+          .filter((page: any) => page.key !== 'home') // Exclude home/card page
+          .map((page: any) => ({
+            id: page.id,
+            label: page.label,
+            path: page.path || page.key || page.id
+          }));
+
         return (
           <MenuPageElement 
             data={element.data}
             isEditing={isEditing}
             onChange={(data) => onUpdate && onUpdate({ ...element, data })}
+            availablePages={availablePages}
           />
         );
 

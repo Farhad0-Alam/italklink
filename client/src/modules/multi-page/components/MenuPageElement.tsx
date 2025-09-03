@@ -34,9 +34,14 @@ interface MenuPageElementProps {
   data: MenuElementData;
   isEditing: boolean;
   onChange: (data: MenuElementData) => void;
+  availablePages?: Array<{
+    id: string;
+    label: string;
+    path: string;
+  }>;
 }
 
-export function MenuPageElement({ data, isEditing, onChange }: MenuPageElementProps) {
+export function MenuPageElement({ data, isEditing, onChange, availablePages = [] }: MenuPageElementProps) {
   const [editingItem, setEditingItem] = useState<string | null>(null);
 
   const updateData = (updates: Partial<MenuElementData>) => {
@@ -361,13 +366,31 @@ export function MenuPageElement({ data, isEditing, onChange }: MenuPageElementPr
 
               <div className="flex items-center gap-2">
                 {item.type === 'internal' ? (
-                  <Input
-                    value={item.path || ''}
-                    onChange={(e) => updateMenuItem(item.id, { path: e.target.value })}
-                    placeholder="page-path (e.g., about, services)"
-                    className="flex-1"
-                    data-testid={`input-menu-path-${index}`}
-                  />
+                  availablePages.length > 0 ? (
+                    <Select
+                      value={item.path || ''}
+                      onValueChange={(value) => updateMenuItem(item.id, { path: value })}
+                    >
+                      <SelectTrigger className="flex-1" data-testid={`select-menu-page-${index}`}>
+                        <SelectValue placeholder="Select a page" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availablePages.map((page) => (
+                          <SelectItem key={page.id} value={page.path}>
+                            {page.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      value={item.path || ''}
+                      onChange={(e) => updateMenuItem(item.id, { path: e.target.value })}
+                      placeholder="page-path (e.g., about, services)"
+                      className="flex-1"
+                      data-testid={`input-menu-path-${index}`}
+                    />
+                  )
                 ) : (
                   <Input
                     value={item.href || ''}
