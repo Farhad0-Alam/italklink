@@ -168,14 +168,15 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
         ref={ref} 
         className={`overflow-hidden w-full mx-auto ${
           isMobilePreview 
-            ? 'rounded-none shadow-none' 
+            ? 'rounded-none shadow-none min-h-full' 
             : 'rounded-none md:rounded-2xl shadow-none md:shadow-2xl card-shadow'
         }`}
         style={{ 
           maxWidth: isMobilePreview ? '100%' : '430px',
-          backgroundColor: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#1a1a1a' : (data.backgroundColor || '#ffffff'),
+          backgroundColor: isMobilePreview ? 'transparent' : (data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#1a1a1a' : (data.backgroundColor || '#ffffff')),
           fontFamily: data.font ? `var(--font-${data.font})` : 'var(--font-inter)',
-          color: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#ffffff' : (data.textColor || '#000000')
+          color: data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? '#ffffff' : (data.textColor || '#000000'),
+          minHeight: isMobilePreview ? '100%' : 'auto'
         }}
       >
         <div className="relative">
