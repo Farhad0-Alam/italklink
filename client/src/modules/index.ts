@@ -6,9 +6,10 @@
  * import { ModuleName } from '@/modules';
  */
 
-// Modules will be automatically added here when created
-// Example: export * from './analytics';export * from './business-cards';
+// Main module exports for 2TalkLink
+export * from './business-cards';
 export * from './form-builder';
-export * from './user-management';
 export * from './digital-wallet';
+export * from './user-management';
 export * from './admin-panel';
+export * from './multi-page';

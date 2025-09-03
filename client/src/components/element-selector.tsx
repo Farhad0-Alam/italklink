@@ -109,6 +109,13 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       icon: "fas fa-wallet",
       color: "bg-gradient-to-r from-black to-blue-600",
       description: "Save to Apple & Google Wallet"
+    },
+    {
+      type: "navigationMenu",
+      title: "Navigation Menu",
+      icon: "fas fa-bars",
+      color: "bg-gradient-to-r from-slate-500 to-slate-700",
+      description: "Multi-page navigation menu"
     }
   ];
 
@@ -351,6 +358,33 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             googleButtonText: "Add to Google Wallet",
             qrButtonText: "Download QR Code",
             qrButtonColor: "#000000"
+          }
+        };
+        break;
+
+      case "navigationMenu":
+        element = {
+          id,
+          type: "navigationMenu",
+          order: Date.now(),
+          data: {
+            title: "Navigation Menu",
+            items: [
+              { id: `home-${Date.now()}`, type: 'internal', label: 'Home', path: '', visible: true, order: 0 },
+              { id: `about-${Date.now()}`, type: 'internal', label: 'About', path: 'about', visible: true, order: 1 },
+              { id: `contact-${Date.now()}`, type: 'internal', label: 'Contact', path: 'contact', visible: true, order: 2 }
+            ],
+            style: {
+              variant: 'tabs',
+              orientation: 'horizontal',
+              radius: 'lg',
+              size: 'md',
+              bg: 'transparent',
+              fg: '#0f172a',
+              fgActive: '#111827',
+              sticky: true,
+              mobileCollapse: true
+            }
           }
         };
         break;

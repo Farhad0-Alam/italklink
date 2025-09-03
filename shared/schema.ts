@@ -248,6 +248,10 @@ export const businessCards = pgTable("business_cards", {
   // Custom URL for sharing
   customUrl: varchar("custom_url"),
   
+  // Multi-page system
+  pages: jsonb("pages"), // [{ key, path, label, visible }]
+  menu: jsonb("menu"), // Array of menu items with styling
+  
   // Settings
   isPublic: boolean("is_public").default(true),
   shareSlug: varchar("share_slug").unique(),

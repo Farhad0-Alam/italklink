@@ -6,6 +6,7 @@ import { ThemeProvider } from "./components/theme-provider";
 import { Navigation } from "./components/navigation";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { CardRoutes } from "@/modules/multi-page";
 import Landing from "./pages/landing";
 import Login from "./pages/login";
 import Register from "./pages/register";
@@ -66,6 +67,10 @@ function Router() {
       <Route path="/admin/icon-packs" component={() => <Admin />} />
       <Route path="/admin/profile" component={() => <Admin />} />
       <Route path="/admin" component={() => <Admin />} />
+      
+      {/* Multi-page card routes */}
+      <CardRoutes />
+      
       <Route path="/:shareSlug" component={Share} />
       <Route component={NotFound} />
     </Switch>

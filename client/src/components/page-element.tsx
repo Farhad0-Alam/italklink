@@ -2933,6 +2933,22 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
           </div>
         );
 
+      case 'navigationMenu':
+        // Import the menu element from our multi-page module
+        const MenuPageElement = React.lazy(() => 
+          import('@/modules/multi-page/components/MenuPageElement').then(m => ({ default: m.MenuPageElement }))
+        );
+        
+        return (
+          <React.Suspense fallback={<div>Loading menu...</div>}>
+            <MenuPageElement 
+              data={element.data}
+              isEditing={isEditing}
+              onChange={(data) => onUpdate && onUpdate({ ...element, data })}
+            />
+          </React.Suspense>
+        );
+
       default:
         return (
           <div className="mb-4 p-4 bg-slate-100 rounded-lg text-center text-slate-600">
