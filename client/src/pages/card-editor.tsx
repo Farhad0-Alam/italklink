@@ -450,7 +450,7 @@ END:VCARD`;
                 }}
               >
                 {/* Screen Content Area */}
-                <div className="absolute top-[80px] left-[30px] right-[30px] bottom-[80px] overflow-hidden rounded-[25px]">
+                <div className="absolute top-[100px] left-[35px] right-[35px] bottom-[100px] overflow-hidden rounded-[30px]">
                   <div 
                     ref={cardRef}
                     className="h-full overflow-y-auto"
