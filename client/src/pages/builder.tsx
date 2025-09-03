@@ -123,7 +123,7 @@ export const Builder = () => {
                     <div 
                       className="relative w-[350px] h-[700px] bg-cover bg-center bg-no-repeat shadow-2xl"
                       style={{
-                        backgroundImage: `url(@assets/Mobile-Preview-Frame_1756898350108.png)`,
+                        backgroundImage: `url(/mobile-frame.png)`,
                         backgroundSize: 'contain'
                       }}
                     >

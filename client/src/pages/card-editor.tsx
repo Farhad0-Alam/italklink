@@ -445,7 +445,7 @@ END:VCARD`;
               <div 
                 className="relative w-[300px] h-[600px] bg-cover bg-center bg-no-repeat shadow-2xl"
                 style={{
-                  backgroundImage: `url(@assets/Mobile-Preview-Frame_1756898350108.png)`,
+                  backgroundImage: `url(/mobile-frame.png)`,
                   backgroundSize: 'contain'
                 }}
               >
