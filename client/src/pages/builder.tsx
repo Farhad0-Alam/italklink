@@ -116,15 +116,39 @@ export const Builder = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Card Preview Container - 430px Business Card */}
+                {/* Card Preview Container - iPhone 16 Pro Max Mockup */}
                 <div className="flex justify-center">
-                  <div className="w-full max-w-[430px]">
-                    <BusinessCardComponent
-                      ref={cardRef}
-                      data={cardData}
-                      showQR={showQR}
-                      isInteractive={true}
-                    />
+                  <div className="relative">
+                    {/* iPhone 16 Pro Max Frame */}
+                    <div className="relative bg-black rounded-[3rem] p-2 shadow-2xl">
+                      {/* Screen */}
+                      <div className="relative bg-black rounded-[2.5rem] overflow-hidden">
+                        {/* Dynamic Island */}
+                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-full z-50"></div>
+                        
+                        {/* Screen Content */}
+                        <div className="w-[430px] h-[932px] bg-white relative overflow-hidden">
+                          <div className="h-full overflow-y-auto">
+                            <div className="w-full">
+                              <BusinessCardComponent
+                                ref={cardRef}
+                                data={cardData}
+                                showQR={showQR}
+                                isInteractive={true}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Volume Buttons */}
+                      <div className="absolute left-0 top-24 w-1 h-8 bg-gray-800 rounded-r"></div>
+                      <div className="absolute left-0 top-36 w-1 h-6 bg-gray-800 rounded-r"></div>
+                      <div className="absolute left-0 top-44 w-1 h-6 bg-gray-800 rounded-r"></div>
+                      
+                      {/* Power Button */}
+                      <div className="absolute right-0 top-32 w-1 h-12 bg-gray-800 rounded-l"></div>
+                    </div>
                   </div>
                 </div>
 
