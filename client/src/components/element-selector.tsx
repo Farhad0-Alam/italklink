@@ -344,7 +344,9 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             modernStyle: false,
             backgroundColor: "#1e293b",
             textColor: "#ffffff",
-            fontFamily: "Inter"
+            fontFamily: "Inter",
+            appleButtonColor: "#000000",
+            googleButtonColor: "#2563eb"
           }
         };
         break;

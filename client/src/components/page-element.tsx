@@ -2479,34 +2479,63 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`show-apple-${element.id}`}
-                        checked={element.data.showApple !== false}
-                        onChange={(e) => onUpdate && onUpdate(element.id, { 
-                          ...element.data, 
-                          showApple: e.target.checked 
-                        })}
-                        className="rounded"
-                      />
-                      <label htmlFor={`show-apple-${element.id}`} className="text-sm">
-                        Show Apple Wallet
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={element.data.showApple !== false}
+                          onChange={(e) => onUpdate && onUpdate(element.id, { 
+                            ...element.data, 
+                            showApple: e.target.checked 
+                          })}
+                          className="sr-only peer"
+                        />
+                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <span className="ml-3 text-sm font-medium">Apple Wallet</span>
                       </label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`show-google-${element.id}`}
-                        checked={element.data.showGoogle !== false}
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={element.data.showGoogle !== false}
+                          onChange={(e) => onUpdate && onUpdate(element.id, { 
+                            ...element.data, 
+                            showGoogle: e.target.checked 
+                          })}
+                          className="sr-only peer"
+                        />
+                        <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                        <span className="ml-3 text-sm font-medium">Google Wallet</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Apple Button Color</label>
+                      <Input
+                        type="color"
+                        value={element.data.appleButtonColor || '#000000'}
                         onChange={(e) => onUpdate && onUpdate(element.id, { 
                           ...element.data, 
-                          showGoogle: e.target.checked 
+                          appleButtonColor: e.target.value 
                         })}
-                        className="rounded"
+                        className="h-10"
+                        disabled={!element.data.showApple}
                       />
-                      <label htmlFor={`show-google-${element.id}`} className="text-sm">
-                        Show Google Wallet
-                      </label>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Google Button Color</label>
+                      <Input
+                        type="color"
+                        value={element.data.googleButtonColor || '#2563eb'}
+                        onChange={(e) => onUpdate && onUpdate(element.id, { 
+                          ...element.data, 
+                          googleButtonColor: e.target.value 
+                        })}
+                        className="h-10"
+                        disabled={!element.data.showGoogle}
+                      />
                     </div>
                   </div>
 
@@ -2637,9 +2666,15 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   <Button
                     onClick={async () => {
                       try {
+                        console.log('Apple Wallet button clicked for card:', cardData?.id);
                         const response = await fetch(`/api/wallet/apple/${cardData?.id || ''}/create`, {
                           method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
                         });
+                        
+                        console.log('Apple Wallet API response status:', response.status);
                         
                         if (response.status === 501) {
                           alert('Apple Wallet integration is being set up. Coming soon!');
@@ -2647,10 +2682,14 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         }
                         
                         if (!response.ok) {
-                          throw new Error('Failed to generate Apple pass');
+                          const errorText = await response.text();
+                          console.error('Apple Wallet API error:', errorText);
+                          throw new Error(`Failed to generate Apple pass: ${errorText}`);
                         }
                         
                         const blob = await response.blob();
+                        console.log('Apple Wallet blob received, size:', blob.size);
+                        
                         const url = window.URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url;
@@ -2659,15 +2698,21 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         a.click();
                         document.body.removeChild(a);
                         window.URL.revokeObjectURL(url);
+                        
+                        console.log('Apple Wallet pass download triggered');
                       } catch (error) {
                         console.error('Error generating Apple pass:', error);
-                        alert('Failed to create Apple Wallet pass. Please try again.');
+                        alert(`Failed to create Apple Wallet pass: ${error.message}`);
                       }
                     }}
-                    className="w-full h-12 bg-black hover:bg-gray-800 text-white border-black transition-all duration-200 flex items-center justify-center space-x-3"
+                    className="w-full h-12 text-white transition-all duration-200 flex items-center justify-center space-x-3 hover:opacity-90"
+                    style={{
+                      backgroundColor: element.data.appleButtonColor || '#000000',
+                      borderColor: element.data.appleButtonColor || '#000000'
+                    }}
                     data-testid="button-add-apple-wallet"
                   >
-                    <i className="fas fa-wallet text-lg"></i>
+                    <i className="fab fa-apple text-lg"></i>
                     <span className="font-medium">Add to Apple Wallet</span>
                   </Button>
                 )}
@@ -2677,9 +2722,15 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   <Button
                     onClick={async () => {
                       try {
+                        console.log('Google Wallet button clicked for card:', cardData?.id);
                         const response = await fetch(`/api/wallet/google/${cardData?.id || ''}/create`, {
                           method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
                         });
+                        
+                        console.log('Google Wallet API response status:', response.status);
                         
                         if (response.status === 501) {
                           alert('Google Wallet integration is being set up. Coming soon!');
@@ -2687,22 +2738,33 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         }
                         
                         if (!response.ok) {
-                          throw new Error('Failed to generate Google pass');
+                          const errorText = await response.text();
+                          console.error('Google Wallet API error:', errorText);
+                          throw new Error(`Failed to generate Google pass: ${errorText}`);
                         }
                         
                         const result = await response.json();
+                        console.log('Google Wallet API result:', result);
+                        
                         if (result.addToGoogleWalletUrl) {
+                          console.log('Opening Google Wallet URL:', result.addToGoogleWalletUrl);
                           window.open(result.addToGoogleWalletUrl, '_blank');
+                        } else {
+                          throw new Error('No Google Wallet URL received');
                         }
                       } catch (error) {
                         console.error('Error generating Google pass:', error);
-                        alert('Failed to create Google Wallet pass. Please try again.');
+                        alert(`Failed to create Google Wallet pass: ${error.message}`);
                       }
                     }}
-                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 transition-all duration-200 flex items-center justify-center space-x-3"
+                    className="w-full h-12 text-white transition-all duration-200 flex items-center justify-center space-x-3 hover:opacity-90"
+                    style={{
+                      backgroundColor: element.data.googleButtonColor || '#2563eb',
+                      borderColor: element.data.googleButtonColor || '#2563eb'
+                    }}
                     data-testid="button-add-google-wallet"
                   >
-                    <i className="fas fa-credit-card text-lg"></i>
+                    <i className="fab fa-google text-lg"></i>
                     <span className="font-medium">Add to Google Wallet</span>
                   </Button>
                 )}
@@ -2712,17 +2774,38 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
               {element.data.showQRDownload && (
                 <div className="mt-4">
                   <Button
-                    onClick={() => {
-                      // Generate QR code download link for business card
-                      const shareUrl = `${window.location.origin}/${cardData?.shareSlug || cardData?.id}`;
-                      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(shareUrl)}`;
-                      const a = document.createElement('a');
-                      a.href = qrUrl;
-                      a.download = `${cardData?.fullName || 'BusinessCard'}-QR.png`;
-                      a.target = '_blank';
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
+                    onClick={async () => {
+                      try {
+                        console.log('QR Download button clicked for card:', cardData?.id);
+                        // Generate QR code download link for business card
+                        const shareUrl = `${window.location.origin}/${cardData?.shareSlug || cardData?.id}`;
+                        console.log('Share URL for QR:', shareUrl);
+                        
+                        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&data=${encodeURIComponent(shareUrl)}`;
+                        console.log('QR API URL:', qrUrl);
+                        
+                        // Fetch the QR code image
+                        const response = await fetch(qrUrl);
+                        if (!response.ok) {
+                          throw new Error('Failed to generate QR code');
+                        }
+                        
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${cardData?.fullName || 'BusinessCard'}-QR.png`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                        
+                        console.log('QR code download triggered');
+                      } catch (error) {
+                        console.error('Error downloading QR code:', error);
+                        alert(`Failed to download QR code: ${error.message}`);
+                      }
                     }}
                     variant="outline"
                     className="w-full h-10 border-slate-500 hover:bg-slate-700 hover:text-white transition-all duration-200 flex items-center justify-center space-x-2"
