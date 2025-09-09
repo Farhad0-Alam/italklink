@@ -5,8 +5,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { QRCodeSVG } from "qrcode.react";
 import { generateShareUrl } from "@/lib/share";
 import { PageElementRenderer } from "./page-element";
-import DynamicHeaderRenderer from "./DynamicHeaderRenderer";
-import { ShapeDividerHeaderRenderer } from "./ShapeDividerHeaderRenderer";
+// Header components will be imported here
 import { Share2, Copy, Facebook, Twitter, Linkedin, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 

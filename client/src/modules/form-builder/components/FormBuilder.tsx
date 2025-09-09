@@ -14,8 +14,7 @@ import { fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
 import { PageBuilder } from "./page-builder";
-import { ShapeDividerBuilder } from "@/components/ShapeDividerBuilder";
-import type { ShapeDividerHeaderConfig } from "@/components/ShapeDividerBuilder";
+// Header builder will be imported here
 import { useQuery } from "@tanstack/react-query";
 import {
   DndContext,
