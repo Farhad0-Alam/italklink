@@ -5,7 +5,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { QRCodeSVG } from "qrcode.react";
 import { generateShareUrl } from "@/lib/share";
 import { PageElementRenderer } from "./page-element";
-// Header components will be imported here
+import { HeaderPreview } from "./header-builder/HeaderPreview";
+import { defaultHeaderPreset } from "@/lib/header-schema";
 import { Share2, Copy, Facebook, Twitter, Linkedin, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -299,11 +300,11 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               )}
 
               {/* Header Design - Shape Divider */}
-              {data.headerDesign === 'shape-divider' && data.shapeDividerHeader && (
-                <ShapeDividerHeaderRenderer
-                  data={data}
+              {data.headerDesign === 'shape-divider' && (
+                <HeaderPreview
+                  headerPreset={data.headerPreset || defaultHeaderPreset}
+                  cardData={data}
                   profileImageSrc={profileImageSrc}
-                  headerConfig={data.shapeDividerHeader}
                 />
               )}
         </div>

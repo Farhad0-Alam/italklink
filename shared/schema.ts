@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { sql } from 'drizzle-orm';
+import { headerPresetSchema } from "../client/src/lib/header-schema";
 import {
   boolean,
   index,
@@ -1606,125 +1607,8 @@ export const businessCardSchema = z.object({
   template: z.enum(["minimal", "bold", "photo", "dark"]).default("minimal"),
   headerDesign: z.enum(["cover-logo", "profile-center", "split-design", "shape-divider"]).default("cover-logo"),
   
-  // Shape Divider Header Configuration
-  shapeDividerHeader: z.object({
-    backgroundImage: z.string().optional(),
-    backgroundColor: z.string().default('#22c55e'),
-    height: z.number().default(200),
-    topShape: z.object({
-      enabled: z.boolean().default(false),
-      position: z.literal('top'),
-      shape: z.string().default('wave1'),
-      color: z.string().default('#ffffff'),
-      width: z.number().default(100),
-      height: z.number().default(100),
-      flip: z.boolean().default(false),
-      bringToFront: z.boolean().default(false)
-    }).optional(),
-    bottomShape: z.object({
-      enabled: z.boolean().default(false),
-      position: z.literal('bottom'),
-      shape: z.string().default('wave1'),
-      color: z.string().default('#ffffff'),
-      width: z.number().default(100),
-      height: z.number().default(100),
-      flip: z.boolean().default(false),
-      bringToFront: z.boolean().default(false)
-    }).optional(),
-    elements: z.object({
-      profilePic: z.object({
-        visible: z.boolean().default(true),
-        fontSize: z.number().default(16),
-        fontWeight: z.number().default(400),
-        color: z.string().default('#ffffff'),
-        textAlign: z.enum(['left', 'center', 'right']).default('center'),
-        marginTop: z.number().default(0),
-        marginBottom: z.number().default(8),
-        size: z.number().default(80),
-        borderRadius: z.number().default(50),
-        borderWidth: z.number().default(0),
-        borderColor: z.string().default('#ffffff')
-      }).default({
-        visible: true, fontSize: 16, fontWeight: 400, color: '#ffffff',
-        textAlign: 'center', marginTop: 0, marginBottom: 8, size: 80,
-        borderRadius: 50, borderWidth: 0, borderColor: '#ffffff'
-      }),
-      logo: z.object({
-        visible: z.boolean().default(false),
-        fontSize: z.number().default(16),
-        fontWeight: z.number().default(400),
-        color: z.string().default('#ffffff'),
-        textAlign: z.enum(['left', 'center', 'right']).default('center'),
-        marginTop: z.number().default(0),
-        marginBottom: z.number().default(0),
-        size: z.number().default(40),
-        position: z.enum(['top-left', 'top-right', 'center']).default('top-left')
-      }).default({
-        visible: false, fontSize: 16, fontWeight: 400, color: '#ffffff',
-        textAlign: 'center', marginTop: 0, marginBottom: 0, size: 40,
-        position: 'top-left'
-      }),
-      name: z.object({
-        visible: z.boolean().default(true),
-        fontSize: z.number().default(24),
-        fontWeight: z.number().default(600),
-        color: z.string().default('#ffffff'),
-        textAlign: z.enum(['left', 'center', 'right']).default('center'),
-        marginTop: z.number().default(0),
-        marginBottom: z.number().default(4)
-      }).default({
-        visible: true, fontSize: 24, fontWeight: 600, color: '#ffffff',
-        textAlign: 'center', marginTop: 0, marginBottom: 4
-      }),
-      title: z.object({
-        visible: z.boolean().default(true),
-        fontSize: z.number().default(16),
-        fontWeight: z.number().default(400),
-        color: z.string().default('#ffffff'),
-        textAlign: z.enum(['left', 'center', 'right']).default('center'),
-        marginTop: z.number().default(0),
-        marginBottom: z.number().default(2)
-      }).default({
-        visible: true, fontSize: 16, fontWeight: 400, color: '#ffffff',
-        textAlign: 'center', marginTop: 0, marginBottom: 2
-      }),
-      company: z.object({
-        visible: z.boolean().default(true),
-        fontSize: z.number().default(14),
-        fontWeight: z.number().default(400),
-        color: z.string().default('#ffffff'),
-        textAlign: z.enum(['left', 'center', 'right']).default('center'),
-        marginTop: z.number().default(0),
-        marginBottom: z.number().default(0)
-      }).default({
-        visible: true, fontSize: 14, fontWeight: 400, color: '#ffffff',
-        textAlign: 'center', marginTop: 0, marginBottom: 0
-      })
-    }).default({
-      profilePic: {
-        visible: true, fontSize: 16, fontWeight: 400, color: '#ffffff',
-        textAlign: 'center', marginTop: 0, marginBottom: 8, size: 80,
-        borderRadius: 50, borderWidth: 0, borderColor: '#ffffff'
-      },
-      logo: {
-        visible: false, fontSize: 16, fontWeight: 400, color: '#ffffff',
-        textAlign: 'center', marginTop: 0, marginBottom: 0, size: 40,
-        position: 'top-left'
-      },
-      name: {
-        visible: true, fontSize: 24, fontWeight: 600, color: '#ffffff',
-        textAlign: 'center', marginTop: 0, marginBottom: 4
-      },
-      title: {
-        visible: true, fontSize: 16, fontWeight: 400, color: '#ffffff',
-        textAlign: 'center', marginTop: 0, marginBottom: 2
-      },
-      company: {
-        visible: true, fontSize: 14, fontWeight: 400, color: '#ffffff',
-        textAlign: 'center', marginTop: 0, marginBottom: 0
-      }
-    })
-  }).optional(),
+  // Header Preset Configuration (New System)
+  headerPreset: headerPresetSchema.optional(),
   
   // Additional Typography
   headingFont: z.string().default("inter"),

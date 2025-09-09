@@ -14,7 +14,8 @@ import { fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
 import { PageBuilder } from "./page-builder";
-// Header builder will be imported here
+import { HeaderBuilder } from "@/components/header-builder";
+import { defaultHeaderPreset } from "@/lib/header-schema";
 import { useQuery } from "@tanstack/react-query";
 import {
   DndContext,
@@ -968,41 +969,19 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </div>
                   </div>
                   
-                  {/* Shape Divider Builder */}
+                  {/* Header Builder */}
                   {watchedValues.headerDesign === 'shape-divider' && (
                     <div>
-                      <h4 className="text-md font-medium text-purple-200 mb-3">Shape Divider Configuration</h4>
-                      <ShapeDividerBuilder
-                        config={watchedValues.shapeDividerHeader || {
-                          backgroundColor: '#22c55e',
-                          height: 200,
-                          elements: {
-                            profilePic: {
-                              visible: true, fontSize: 16, fontWeight: 400, color: '#ffffff',
-                              textAlign: 'center', marginTop: 0, marginBottom: 8, size: 80,
-                              borderRadius: 50, borderWidth: 0, borderColor: '#ffffff'
-                            },
-                            logo: {
-                              visible: false, fontSize: 16, fontWeight: 400, color: '#ffffff',
-                              textAlign: 'center', marginTop: 0, marginBottom: 0, size: 40,
-                              position: 'top-left'
-                            },
-                            name: {
-                              visible: true, fontSize: 24, fontWeight: 600, color: '#ffffff',
-                              textAlign: 'center', marginTop: 0, marginBottom: 4
-                            },
-                            title: {
-                              visible: true, fontSize: 16, fontWeight: 400, color: '#ffffff',
-                              textAlign: 'center', marginTop: 0, marginBottom: 2
-                            },
-                            company: {
-                              visible: true, fontSize: 14, fontWeight: 400, color: '#ffffff',
-                              textAlign: 'center', marginTop: 0, marginBottom: 0
-                            }
-                          }
-                        }}
-                        onChange={(config) => form.setValue("shapeDividerHeader", config)}
-                      />
+                      <h4 className="text-md font-medium text-purple-200 mb-3">Header Builder</h4>
+                      <div className="bg-white rounded-lg p-4">
+                        <HeaderBuilder
+                          headerPreset={watchedValues.headerPreset || defaultHeaderPreset}
+                          onPresetChange={(preset) => form.setValue("headerPreset", preset)}
+                          cardData={watchedValues}
+                          profileImageSrc={profileImage}
+                          className="w-full"
+                        />
+                      </div>
                     </div>
                   )}
                   
