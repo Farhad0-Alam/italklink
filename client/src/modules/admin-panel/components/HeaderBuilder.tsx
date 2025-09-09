@@ -11,8 +11,6 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { HeaderPreview } from '@/components/header-builder/HeaderPreview';
-import { DragStack } from '@/components/header-builder/DragStack';
-import { ShapeDivider } from '@/components/header-builder/ShapeDivider';
 import { defaultHeaderPreset, SHAPE_PRESETS, type HeaderPreset, type HeaderElement, type ShapeDivider as ShapeDividerType } from '@/lib/header-schema';
 import { BusinessCard } from '@shared/schema';
 import { 
@@ -21,25 +19,6 @@ import {
   RotateCw, FlipVertical, Minus, Grid, Move, Type, Settings
 } from 'lucide-react';
 import { useLocation } from 'wouter';
-import { 
-  DndContext, 
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import {
-  useSortable
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
 interface HeaderTemplate {
   id?: string;
@@ -257,39 +236,6 @@ export default function HeaderBuilder() {
         ...currentTemplate.headerPreset[`${position}Divider`], 
         ...dividerUpdates 
       }
-    };
-    handlePresetChange(newPreset);
-  };
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleElementOrderChange = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (!over || active.id === over.id) return;
-
-    const elements = currentTemplate.headerPreset.elements;
-    const oldIndex = elements.findIndex(el => el.id === active.id);
-    const newIndex = elements.findIndex(el => el.id === over.id);
-
-    if (oldIndex === -1 || newIndex === -1) return;
-
-    const reorderedElements = arrayMove(elements, oldIndex, newIndex);
-    
-    // Update order values
-    const updatedElements = reorderedElements.map((el, index) => ({
-      ...el,
-      order: index
-    }));
-
-    const newPreset = {
-      ...currentTemplate.headerPreset,
-      elements: updatedElements
     };
     handlePresetChange(newPreset);
   };
@@ -602,15 +548,13 @@ export default function HeaderBuilder() {
                               />
                             </div>
 
-                            <div className="flex items-center gap-4">
-                              <div className="flex items-center space-x-2">
-                                <Switch
-                                  checked={currentTemplate.headerPreset.topDivider.flip}
-                                  onCheckedChange={(checked) => updateDivider('top', { flip: checked })}
-                                  data-testid="switch-top-divider-flip"
-                                />
-                                <Label className="text-white text-sm">Flip Shape</Label>
-                              </div>
+                            <div className="flex items-center space-x-2">
+                              <Switch
+                                checked={currentTemplate.headerPreset.topDivider.flip}
+                                onCheckedChange={(checked) => updateDivider('top', { flip: checked })}
+                                data-testid="switch-top-divider-flip"
+                              />
+                              <Label className="text-white text-sm">Flip Shape</Label>
                             </div>
                           </div>
                         )}
@@ -753,76 +697,58 @@ export default function HeaderBuilder() {
                         </div>
                       </div>
 
-                      {/* Elements List with Drag & Drop */}
+                      {/* Elements List */}
                       <div className="space-y-3">
-                        <Label className="text-white">Drag Elements to Position</Label>
-                        <DragDropContext onDragEnd={handleElementOrderChange}>
-                          <Droppable droppableId="elements-list">
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.droppableProps}
-                                className="space-y-2"
-                                data-testid="elements-drag-list"
-                              >
-                                {currentTemplate.headerPreset.elements.map((element, index) => (
-                                  <Draggable key={element.id} draggableId={element.id} index={index}>
-                                    {(provided, snapshot) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        className={`flex items-center justify-between p-3 rounded border ${
-                                          selectedElement === element.id 
-                                            ? 'border-green-500 bg-green-500/10' 
-                                            : 'border-slate-600 bg-slate-700'
-                                        } ${snapshot.isDragging ? 'shadow-lg' : ''}`}
-                                        data-testid={`element-item-${element.type}`}
-                                      >
-                                        <div className="flex items-center gap-3">
-                                          <Move className="w-4 h-4 text-slate-400" />
-                                          <div>
-                                            <div className="text-white capitalize font-medium">{element.type}</div>
-                                            <div className="text-slate-400 text-sm">
-                                              {element.position.x}, {element.position.y} • {element.position.width}×{element.position.height}
-                                            </div>
-                                          </div>
-                                        </div>
-                                        
-                                        <div className="flex items-center gap-2">
-                                          <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => setSelectedElement(element.id)}
-                                            className={selectedElement === element.id ? 'text-green-400' : 'text-slate-400'}
-                                            data-testid={`button-select-element-${element.type}`}
-                                          >
-                                            <Settings className="w-4 h-4" />
-                                          </Button>
-                                          <Switch
-                                            checked={element.visible}
-                                            onCheckedChange={() => toggleElementVisibility(element.id)}
-                                            data-testid={`switch-element-visibility-${element.type}`}
-                                          />
-                                          <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => removeElement(element.id)}
-                                            className="text-red-400 hover:text-red-300"
-                                            data-testid={`button-remove-element-${element.type}`}
-                                          >
-                                            <Trash2 className="w-4 h-4" />
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                ))}
-                                {provided.placeholder}
+                        <Label className="text-white">Current Elements</Label>
+                        <div className="space-y-2" data-testid="elements-list">
+                          {currentTemplate.headerPreset.elements.map((element) => (
+                            <div
+                              key={element.id}
+                              className={`flex items-center justify-between p-3 rounded border ${
+                                selectedElement === element.id 
+                                  ? 'border-green-500 bg-green-500/10' 
+                                  : 'border-slate-600 bg-slate-700'
+                              }`}
+                              data-testid={`element-item-${element.type}`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <Move className="w-4 h-4 text-slate-400" />
+                                <div>
+                                  <div className="text-white capitalize font-medium">{element.type}</div>
+                                  <div className="text-slate-400 text-sm">
+                                    {element.position.x}, {element.position.y} • {element.position.width}×{element.position.height}
+                                  </div>
+                                </div>
                               </div>
-                            )}
-                          </Droppable>
-                        </DragDropContext>
+                              
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => setSelectedElement(element.id)}
+                                  className={selectedElement === element.id ? 'text-green-400' : 'text-slate-400'}
+                                  data-testid={`button-select-element-${element.type}`}
+                                >
+                                  <Settings className="w-4 h-4" />
+                                </Button>
+                                <Switch
+                                  checked={element.visible}
+                                  onCheckedChange={() => toggleElementVisibility(element.id)}
+                                  data-testid={`switch-element-visibility-${element.type}`}
+                                />
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => removeElement(element.id)}
+                                  className="text-red-400 hover:text-red-300"
+                                  data-testid={`button-remove-element-${element.type}`}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
 
                       {/* Selected Element Properties */}
@@ -951,7 +877,7 @@ export default function HeaderBuilder() {
                 </div>
                 
                 <div className="text-center text-slate-400 text-sm mt-4">
-                  💡 Use Select Tool to move/resize elements • Pen Tool to draw custom shapes
+                  💡 Use the tabs above to customize background, shapes, and elements
                 </div>
               </CardContent>
             </Card>
