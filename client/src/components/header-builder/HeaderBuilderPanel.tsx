@@ -334,11 +334,21 @@ export const HeaderBuilderPanel = ({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="wave">Wave</SelectItem>
-                      <SelectItem value="curve">Curve</SelectItem>
-                      <SelectItem value="tilt">Tilt</SelectItem>
+                      <SelectItem value="waves-brush">Waves Brush</SelectItem>
+                      <SelectItem value="clouds">Clouds</SelectItem>
                       <SelectItem value="zigzag">Zigzag</SelectItem>
-                      <SelectItem value="mountain">Mountain</SelectItem>
-                      <SelectItem value="custom">Custom</SelectItem>
+                      <SelectItem value="triangle">Triangle</SelectItem>
+                      <SelectItem value="triangle-asymmetrical">Triangle Asymmetrical</SelectItem>
+                      <SelectItem value="tilt">Tilt</SelectItem>
+                      <SelectItem value="tilt-opacity">Tilt Opacity</SelectItem>
+                      <SelectItem value="fan-opacity">Fan Opacity</SelectItem>
+                      <SelectItem value="curve">Curve</SelectItem>
+                      <SelectItem value="curve-asymmetrical">Curve Asymmetrical</SelectItem>
+                      <SelectItem value="drop">Drop</SelectItem>
+                      <SelectItem value="mountain">Mountains</SelectItem>
+                      <SelectItem value="opacity-fan-alt">Opacity Fan Alt</SelectItem>
+                      <SelectItem value="book">Book</SelectItem>
+                      <SelectItem value="custom">Custom SVG</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -414,11 +424,21 @@ export const HeaderBuilderPanel = ({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="wave">Wave</SelectItem>
-                      <SelectItem value="curve">Curve</SelectItem>
-                      <SelectItem value="tilt">Tilt</SelectItem>
+                      <SelectItem value="waves-brush">Waves Brush</SelectItem>
+                      <SelectItem value="clouds">Clouds</SelectItem>
                       <SelectItem value="zigzag">Zigzag</SelectItem>
-                      <SelectItem value="mountain">Mountain</SelectItem>
-                      <SelectItem value="custom">Custom</SelectItem>
+                      <SelectItem value="triangle">Triangle</SelectItem>
+                      <SelectItem value="triangle-asymmetrical">Triangle Asymmetrical</SelectItem>
+                      <SelectItem value="tilt">Tilt</SelectItem>
+                      <SelectItem value="tilt-opacity">Tilt Opacity</SelectItem>
+                      <SelectItem value="fan-opacity">Fan Opacity</SelectItem>
+                      <SelectItem value="curve">Curve</SelectItem>
+                      <SelectItem value="curve-asymmetrical">Curve Asymmetrical</SelectItem>
+                      <SelectItem value="drop">Drop</SelectItem>
+                      <SelectItem value="mountain">Mountains</SelectItem>
+                      <SelectItem value="opacity-fan-alt">Opacity Fan Alt</SelectItem>
+                      <SelectItem value="book">Book</SelectItem>
+                      <SelectItem value="custom">Custom SVG</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
