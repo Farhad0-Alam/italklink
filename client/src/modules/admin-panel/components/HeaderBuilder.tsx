@@ -21,7 +21,25 @@ import {
   RotateCw, FlipVertical, Minus, Grid, Move, Type, Settings
 } from 'lucide-react';
 import { useLocation } from 'wouter';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { 
+  DndContext, 
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface HeaderTemplate {
   id?: string;
@@ -243,15 +261,28 @@ export default function HeaderBuilder() {
     handlePresetChange(newPreset);
   };
 
-  const handleElementOrderChange = (result: DropResult) => {
-    if (!result.destination) return;
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
-    const elements = [...currentTemplate.headerPreset.elements];
-    const [reorderedElement] = elements.splice(result.source.index, 1);
-    elements.splice(result.destination.index, 0, reorderedElement);
+  const handleElementOrderChange = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) return;
 
+    const elements = currentTemplate.headerPreset.elements;
+    const oldIndex = elements.findIndex(el => el.id === active.id);
+    const newIndex = elements.findIndex(el => el.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reorderedElements = arrayMove(elements, oldIndex, newIndex);
+    
     // Update order values
-    const updatedElements = elements.map((el, index) => ({
+    const updatedElements = reorderedElements.map((el, index) => ({
       ...el,
       order: index
     }));
