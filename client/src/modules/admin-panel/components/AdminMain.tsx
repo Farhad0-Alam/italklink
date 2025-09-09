@@ -8,7 +8,7 @@ import CouponsPage from '@/components/admin/CouponsPage';
 import TemplatesPage from '@/components/admin/TemplatesPage';
 import TemplateImportPage from '@/components/admin/TemplateImportPage';
 import TemplateBuilder from '@/components/admin/TemplateBuilder';
-import HeaderBuilder from '@/components/admin/HeaderBuilder';
+import HeaderBuilder from './HeaderBuilder';
 import HeaderTemplatesPage from '@/components/admin/HeaderTemplatesPage';
 import IconPacksPage from '@/components/admin/IconPacksPage';
 import AffiliatesPage from '@/components/admin/AffiliatesPage';
