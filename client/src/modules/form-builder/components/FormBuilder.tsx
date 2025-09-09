@@ -14,6 +14,8 @@ import { fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
 import { PageBuilder } from "./page-builder";
+import { ShapeDividerBuilder } from "@/components/ShapeDividerBuilder";
+import type { ShapeDividerHeaderConfig } from "@/components/ShapeDividerBuilder";
 import { useQuery } from "@tanstack/react-query";
 import {
   DndContext,
@@ -944,6 +946,67 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       </Select>
                     </div>
                   </div>
+                  
+                  {/* Header Design Selection */}
+                  <div>
+                    <h4 className="text-md font-medium text-purple-200 mb-3">Header Design</h4>
+                    <div>
+                      <Label className="text-white text-sm">Header Style</Label>
+                      <Select 
+                        value={watchedValues.headerDesign || "cover-logo"} 
+                        onValueChange={(v) => form.setValue("headerDesign", v as any)}
+                      >
+                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cover-logo">Cover + Logo</SelectItem>
+                          <SelectItem value="profile-center">Profile Center</SelectItem>
+                          <SelectItem value="split-design">Split Design</SelectItem>
+                          <SelectItem value="shape-divider">Shape Divider</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  {/* Shape Divider Builder */}
+                  {watchedValues.headerDesign === 'shape-divider' && (
+                    <div>
+                      <h4 className="text-md font-medium text-purple-200 mb-3">Shape Divider Configuration</h4>
+                      <ShapeDividerBuilder
+                        config={watchedValues.shapeDividerHeader || {
+                          backgroundColor: '#22c55e',
+                          height: 200,
+                          elements: {
+                            profilePic: {
+                              visible: true, fontSize: 16, fontWeight: 400, color: '#ffffff',
+                              textAlign: 'center', marginTop: 0, marginBottom: 8, size: 80,
+                              borderRadius: 50, borderWidth: 0, borderColor: '#ffffff'
+                            },
+                            logo: {
+                              visible: false, fontSize: 16, fontWeight: 400, color: '#ffffff',
+                              textAlign: 'center', marginTop: 0, marginBottom: 0, size: 40,
+                              position: 'top-left'
+                            },
+                            name: {
+                              visible: true, fontSize: 24, fontWeight: 600, color: '#ffffff',
+                              textAlign: 'center', marginTop: 0, marginBottom: 4
+                            },
+                            title: {
+                              visible: true, fontSize: 16, fontWeight: 400, color: '#ffffff',
+                              textAlign: 'center', marginTop: 0, marginBottom: 2
+                            },
+                            company: {
+                              visible: true, fontSize: 14, fontWeight: 400, color: '#ffffff',
+                              textAlign: 'center', marginTop: 0, marginBottom: 0
+                            }
+                          }
+                        }}
+                        onChange={(config) => form.setValue("shapeDividerHeader", config)}
+                      />
+                    </div>
+                  )}
+                  
                   {/* Default Colors Section */}
                   <div>
                     <h4 className="text-md font-medium text-purple-200 mb-3">Default Colors</h4>

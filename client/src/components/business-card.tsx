@@ -6,6 +6,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { generateShareUrl } from "@/lib/share";
 import { PageElementRenderer } from "./page-element";
 import DynamicHeaderRenderer from "./DynamicHeaderRenderer";
+import { ShapeDividerHeaderRenderer } from "./ShapeDividerHeaderRenderer";
 import { Share2, Copy, Facebook, Twitter, Linkedin, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -297,12 +298,22 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   </div>
                 </div>
               )}
+
+              {/* Header Design - Shape Divider */}
+              {data.headerDesign === 'shape-divider' && data.shapeDividerHeader && (
+                <ShapeDividerHeaderRenderer
+                  data={data}
+                  profileImageSrc={profileImageSrc}
+                  headerConfig={data.shapeDividerHeader}
+                />
+              )}
         </div>
           
         {/* Content */}
         <div className={`pb-8 px-6 text-center ${data.template === '73c23253-4f67-4395-8375-1ea1db209920' ? 'text-white' : 'text-slate-800'} ${
           data.headerDesign === 'profile-center' ? 'pt-20' : 
-          data.headerDesign === 'split-design' ? 'pt-16' : 'pt-16'
+          data.headerDesign === 'split-design' ? 'pt-16' :
+          data.headerDesign === 'shape-divider' ? 'pt-8' : 'pt-16'
         }`}>
           {/* Name, Title, Company */}
           <h3 
