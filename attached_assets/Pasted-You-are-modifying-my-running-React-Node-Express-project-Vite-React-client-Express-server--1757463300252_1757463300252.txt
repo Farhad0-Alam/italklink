@@ -1,0 +1,700 @@
+You are modifying my running React + Node (Express) project (Vite + React client; Express server).
+Implement a professional OneSignal push notifications feature with:
+1) Per-card sends (User → Client subscribers) from the list row where I've marked “Push notification”.
+2) Admin broadcast (Admin → Users) from a simple panel.
+3) Worldwide tags (card_id, role, plan, locale, country), graceful errors, and minimal rate limits.
+
+=== GLOBAL RULES ===
+- Keep changes modular and backward-compatible. Do not break existing routes or UI.
+- Auto-detect TypeScript vs JavaScript for both client and server; create files with the correct extensions.
+- Use Tailwind classes if available; otherwise inline styles/CSS modules.
+- Use environment variables; never hardcode secrets.
+- Show me the final list of created/updated files and key code snippets at the end.
+
+====================================================
+A) FRONTEND – OneSignal init + Tags (if not already present)
+====================================================
+1) Add dependency:
+   npm i react-onesignal
+
+2) Create/ensure OneSignal init in client:
+   File: client/src/modules/notifications/onesignal.(ts|js)
+   - Export an async init function that calls:
+       OneSignal.init({
+         appId: import.meta.env.VITE_ONESIGNAL_APP_ID,
+         allowLocalhostAsSecureOrigin: true,
+         notifyButton: { enable: true }
+       });
+   - After init, set common tags when information is available:
+       - If logged-in user exists: role="user", owner_user_id=<user.id>, plan=<user.plan||"free">.
+       - locale = navigator.language.split("-")[0] (e.g., "en","bn","es").
+       - Optional: country if you already capture it.
+   - Export helper: tagCardVisitor(card) that sets:
+       audience="visitor", card_id=<card.id>, card_slug=<card.slug>.
+
+3) Call the init once during app bootstrap (client/src/main.tsx or App.tsx).
+
+====================================================
+B) FRONTEND – List Row “Notify” Button (exact spot I marked)
+====================================================
+4) Create a reusable button + modal component that lives in the row UI:
+   File: client/src/components/NotifyCardButton.(tsx|jsx)
+   Requirements:
+   - Props: { cardId: string|number; cardTitle?: string }
+   - Renders a small "Notify" button.
+   - On click → modal opens with fields: Title (required), Message (required), URL (optional).
+   - Submit → POST /api/notify/card with { cardId, title, message, url }.
+   - Show loading, success, and error states. Close on success.
+   - Accessibility: modal traps focus and closes on ESC.
+
+5) Integrate in the list where the screenshot mark is:
+   - Import and render <NotifyCardButton cardId={card.id} cardTitle={card.title}/> inline with Edit/toggle icons.
+   - Use existing styling so it looks native to the row.
+
+====================================================
+C) FRONTEND – Admin Broadcast Button (simple)
+====================================================
+6) Create a small admin control (button + modal) reachable from your admin area/top bar:
+   File: client/src/components/AdminBroadcastButton.(tsx|jsx)
+   - Props: none.
+   - Modal fields: Title, Message, URL (optional), Segment (all|paid|free), Locales (comma list), Countries (comma list ISO-2).
+   - Submit → POST /api/notify/admin with payload:
+       { title, message, url, segment, locales?: string[], countries?: string[] }
+   - Show loading/success/error.
+
+====================================================
+D) SERVER – Express routes (modular)
+====================================================
+7) Create module folder for notifications:
+   server/modules/notifications/
+     - routes.(ts|js)
+     - controller.(ts|js)
+     - service.(ts|js)
+     - index.(ts|js) → export router
+
+8) Service (OneSignal REST wrapper):
+   - Function sendByTags({ headings, contents, url, filters, send_after? }):
+       POST https://api.onesignal.com/notifications
+       Headers: Authorization: Basic ${ONESIGNAL_API_KEY}, Content-Type: application/json
+       Body: { app_id: ONESIGNAL_APP_ID, headings, contents, url, filters, send_after? }
+   - Parse and throw friendly errors from OneSignal.
+
+9) Controllers:
+   a) notifyCardSubscribers(req,res)
+      Input: { cardId, title, message, url }
+      Validations:
+        - auth required
+        - assert caller owns cardId (stub a placeholder middleware and call it now)
+        - rate limit: max 3 sends per card per 24h per user_id (simple in-memory map or your preferred store)
+      Build filters: [{ field:"tag", key:"card_id", relation:"=", value:String(cardId) }]
+      Call service and return { ok:true, data }.
+
+   b) notifyAdminBroadcast(req,res)
+      Input: { title, message, url, segment="all", locales?, countries? }
+      Validations:
+        - admin auth required
+        - rate limit: max 2 broadcasts / 24h / admin user_id
+      Base filters: role == "user"
+        - if segment=="paid": plan IN ["pro","premium"]
+        - if segment=="free": plan == "free"
+        - if locales provided: locale IN locales
+        - if countries provided: country IN countries
+      Call service and return { ok:true, data }.
+
+10) Routes:
+   - POST /api/notify/card   → notifyCardSubscribers
+   - POST /api/notify/admin  → notifyAdminBroadcast
+
+11) Wire routes:
+   In server/routes.(ts|js) or main server/index, mount the module under /api (e.g., app.use(require("./modules/notifications"))).
+
+12) Env:
+   - ONESIGNAL_APP_ID=YOUR_APP_ID
+   - ONESIGNAL_API_KEY=YOUR_REST_API_KEY
+   - Document frontend env too: VITE_ONESIGNAL_APP_ID=YOUR_APP_ID
+
+13) Ownership & Auth middleware (minimum):
+   - requireAuth: ensure req.user exists; otherwise 401.
+   - assertOwnsCard: ensure the cardId belongs to req.user.id; otherwise 403.
+   (If you cannot check DB here, create stubs that always pass, but include TODO comments where to plug the real checks.)
+
+14) Rate limiting (simple, safe defaults):
+   - In-memory token bucket per (user_id, cardId) for /notify/card → 3/day.
+   - In-memory per admin user_id for /notify/admin → 2/day.
+   - Return 429 with JSON { ok:false, error:"rate_limited" } on exceed.
+
+====================================================
+E) TAGGING REMINDERS (client)
+====================================================
+15) Public card view page:
+   - On mount call tagCardVisitor(card) from onesignal util.
+   - Provide a “Get Updates” CTA:
+       OneSignal.Slidedown.promptPush()
+
+16) Logged-in areas:
+   - After init, set role/owner_user_id/plan/locale tags as described.
+
+====================================================
+F) ACCEPTANCE CRITERIA (must pass)
+====================================================
+17) Functionality:
+   - From the list row, clicking “Notify” opens modal; sending pushes subscribers where tag card_id = selected card.
+   - From admin control, broadcast reaches users (role=user) and respects segment/locales/countries if provided.
+   - Errors are gracefully surfaced to the UI; loading state is shown.
+
+18) Worldwide readiness:
+   - locale tag set on devices.
+   - Optional country tag placeholder supported if available from client or OneSignal geo.
+
+19) Safety:
+   - No existing routes/UI broken.
+   - ENV used for secrets; no leaks in client bundle (REST key never shipped to client).
+   - Rate limits enforced; unauthorized users blocked.
+
+20) Deliverables to show me:
+   - File tree of added/updated files (paths).
+   - Key snippets from:
+       client/src/components/NotifyCardButton.(tsx|jsx)
+       client/src/components/AdminBroadcastButton.(tsx|jsx)
+       client/src/modules/notifications/onesignal.(ts|js)
+       server/modules/notifications/service.(ts|js)
+       server/modules/notifications/controller.(ts|js)
+       server/modules/notifications/routes.(ts|js)
+   - Example cURL for both endpoints.
+   - A brief note on how to test end-to-end (opt-in → send → receive).
+If you want, I can also provide the exact code for each file in TS or JS, matching your repo structure.
+
+
+
+
+
+
+
+You said:
+yes include
+
+
+ChatGPT said:
+Awesome — here’s the complete, production-ready code (TypeScript first).
+If your project is plain JS, see the quick note at the end to convert (it’s just require/module.exports + remove types).
+
+📁 Files to add (copy these paths)
+markdown
+Copy code
+client/
+  src/
+    modules/
+      notifications/
+        onesignal.ts
+    components/
+      NotifyCardButton.tsx
+      AdminBroadcastButton.tsx
+
+server/
+  modules/
+    notifications/
+      service.ts
+      controller.ts
+      routes.ts
+      index.ts
+      mw.ts
+Make sure you have env set:
+
+Client: VITE_ONESIGNAL_APP_ID=YOUR-APP-ID
+
+Server: ONESIGNAL_APP_ID=YOUR-APP-ID, ONESIGNAL_API_KEY=YOUR-REST-API-KEY
+
+client/src/modules/notifications/onesignal.ts
+ts
+Copy code
+import OneSignal from "react-onesignal";
+
+/** Call once in app bootstrap (e.g., main.tsx or App.tsx) */
+export async function initOneSignal() {
+  await OneSignal.init({
+    appId: import.meta.env.VITE_ONESIGNAL_APP_ID,
+    allowLocalhostAsSecureOrigin: true,
+    notifyButton: { enable: true },
+  });
+
+  try {
+    const user = (window as any).__AUTH?.user;
+    if (user) {
+      OneSignal.sendTag("role", "user");
+      OneSignal.sendTag("owner_user_id", String(user.id));
+      OneSignal.sendTag("plan", user.plan ?? "free");
+    }
+    const locale = navigator.language?.split("-")[0] || "en";
+    OneSignal.sendTag("locale", locale);
+  } catch {
+    // ignore tagging failures
+  }
+}
+
+/** Tag a visitor on a public card page */
+export function tagCardVisitor(card: { id: string | number; slug?: string }) {
+  OneSignal.sendTag("audience", "visitor");
+  OneSignal.sendTag("card_id", String(card.id));
+  if (card.slug) OneSignal.sendTag("card_slug", card.slug);
+}
+
+/** Optional helper to prompt subscription */
+export function promptPush() {
+  return OneSignal.Slidedown.promptPush();
+}
+client/src/components/NotifyCardButton.tsx
+tsx
+Copy code
+import { useEffect, useState } from "react";
+
+type Props = { cardId: string | number; cardTitle?: string };
+
+export default function NotifyCardButton({ cardId, cardTitle }: Props) {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [message, setMessage] = useState("");
+  const [url, setUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function send() {
+    setLoading(true);
+    setErr(null);
+    try {
+      const r = await fetch("/api/notify/card", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cardId, title, message, url }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || "Failed to send");
+      setOpen(false);
+      setTitle("");
+      setMessage("");
+      setUrl("");
+    } catch (e: any) {
+      setErr(e.message || "Request failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // close on escape
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, []);
+
+  return (
+    <>
+      <button
+        className="px-3 py-1.5 rounded-md border text-sm hover:bg-gray-50"
+        title="Send push notification"
+        onClick={() => setOpen(true)}
+      >
+        Notify
+      </button>
+
+      {open && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-md rounded-xl bg-white p-4 shadow-xl">
+            <div className="mb-3">
+              <h3 className="text-lg font-semibold">
+                Send Push {cardTitle ? `— ${cardTitle}` : ""}
+              </h3>
+              <p className="text-xs text-gray-500">
+                Targets subscribers of this card (tag <code>card_id={String(cardId)}</code>)
+              </p>
+            </div>
+
+            <label className="block text-sm mb-1">Title</label>
+            <input
+              className="w-full mb-3 rounded border px-3 py-2"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="New offer 🎉"
+            />
+
+            <label className="block text-sm mb-1">Message</label>
+            <textarea
+              className="w-full mb-3 rounded border px-3 py-2"
+              rows={3}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="This week only — 20% OFF!"
+            />
+
+            <label className="block text-sm mb-1">URL (optional)</label>
+            <input
+              className="w-full mb-4 rounded border px-3 py-2"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://yourdomain.com/card/slug/offer"
+            />
+
+            {err && <div className="mb-2 text-sm text-red-600">{err}</div>}
+
+            <div className="flex items-center justify-end gap-2">
+              <button className="px-3 py-2 text-sm" onClick={() => setOpen(false)} disabled={loading}>
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 text-sm rounded-md bg-black text-white disabled:opacity-50"
+                onClick={send}
+                disabled={loading || !title || !message}
+              >
+                {loading ? "Sending..." : "Send"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+Place this button in the row where you marked it:
+
+tsx
+Copy code
+import NotifyCardButton from "@/components/NotifyCardButton";
+// ...
+<NotifyCardButton cardId={card.id} cardTitle={card.title} />
+client/src/components/AdminBroadcastButton.tsx
+tsx
+Copy code
+import { useState } from "react";
+
+export default function AdminBroadcastButton() {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [message, setMessage] = useState("");
+  const [url, setUrl] = useState("");
+  const [segment, setSegment] = useState<"all" | "paid" | "free">("all");
+  const [locales, setLocales] = useState("");   // "en,bn"
+  const [countries, setCountries] = useState(""); // "US,BD"
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function send() {
+    setLoading(true); setErr(null);
+    try {
+      const r = await fetch("/api/notify/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title, message, url, segment,
+          locales: locales ? locales.split(",").map(s => s.trim()) : undefined,
+          countries: countries ? countries.split(",").map(s => s.trim()) : undefined
+        })
+      });
+      const data = await r.json();
+      if (!r.ok || !data.ok) throw new Error(data.error || "Failed");
+      setOpen(false); setTitle(""); setMessage(""); setUrl("");
+      setLocales(""); setCountries("");
+    } catch (e:any) { setErr(e.message || "Error"); }
+    finally { setLoading(false); }
+  }
+
+  return (
+    <>
+      <button className="px-3 py-1.5 rounded-md border text-sm" onClick={() => setOpen(true)}>
+        Admin Broadcast
+      </button>
+
+      {open && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-md rounded-xl bg-white p-4 shadow-xl">
+            <h3 className="text-lg font-semibold mb-2">Broadcast to Users</h3>
+
+            <label className="block text-sm mb-1">Title</label>
+            <input className="w-full mb-3 rounded border px-3 py-2" value={title} onChange={(e)=>setTitle(e.target.value)} />
+
+            <label className="block text-sm mb-1">Message</label>
+            <textarea className="w-full mb-3 rounded border px-3 py-2" rows={3} value={message} onChange={(e)=>setMessage(e.target.value)} />
+
+            <label className="block text-sm mb-1">URL (optional)</label>
+            <input className="w-full mb-3 rounded border px-3 py-2" value={url} onChange={(e)=>setUrl(e.target.value)} />
+
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="block text-sm mb-1">Segment</label>
+                <select className="w-full rounded border px-3 py-2" value={segment} onChange={(e)=>setSegment(e.target.value as any)}>
+                  <option value="all">All users</option>
+                  <option value="paid">Paid (pro/premium)</option>
+                  <option value="free">Free</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Locales (comma)</label>
+                <input className="w-full rounded border px-3 py-2" placeholder="en,bn" value={locales} onChange={(e)=>setLocales(e.target.value)} />
+              </div>
+            </div>
+
+            <label className="block text-sm mb-1">Countries (ISO-2, comma)</label>
+            <input className="w-full mb-3 rounded border px-3 py-2" placeholder="US,BD" value={countries} onChange={(e)=>setCountries(e.target.value)} />
+
+            {err && <div className="mb-2 text-sm text-red-600">{err}</div>}
+
+            <div className="flex items-center justify-end gap-2">
+              <button className="px-3 py-2 text-sm" onClick={()=>setOpen(false)} disabled={loading}>Cancel</button>
+              <button className="px-4 py-2 text-sm rounded-md bg-black text-white disabled:opacity-50" onClick={send} disabled={loading || !title || !message}>
+                {loading ? "Sending..." : "Send"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+server/modules/notifications/mw.ts
+ts
+Copy code
+import { Request, Response, NextFunction } from "express";
+
+/** Replace with your real auth */
+export function requireAuth(req: Request, res: Response, next: NextFunction) {
+  // assume req.user is set by your existing auth middleware
+  const user = (req as any).user;
+  if (!user) return res.status(401).json({ ok: false, error: "unauthorized" });
+  next();
+}
+
+/** Replace with a real admin check */
+export function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  const user = (req as any).user;
+  if (!user || user.role !== "admin") return res.status(403).json({ ok: false, error: "forbidden" });
+  next();
+}
+
+/** Verify the card belongs to user (plug your DB lookup here) */
+export async function assertOwnsCard(req: Request, res: Response, next: NextFunction) {
+  // TODO: query DB: select owner_user_id from cards where id = cardId
+  // if (owner_user_id !== req.user.id) return res.status(403).json({ok:false,error:"forbidden"});
+  next();
+}
+
+/** naive in-memory rate limit */
+const buckets = new Map<string, { count: number; resetAt: number }>();
+
+export function rateLimit(key: string, limit: number) {
+  const now = Date.now();
+  const rec = buckets.get(key);
+  if (!rec || rec.resetAt < now) {
+    buckets.set(key, { count: 1, resetAt: now + 24 * 60 * 60 * 1000 });
+    return { ok: true };
+  }
+  if (rec.count >= limit) return { ok: false, retryAt: rec.resetAt };
+  rec.count += 1;
+  return { ok: true };
+}
+server/modules/notifications/service.ts
+ts
+Copy code
+import fetch from "node-fetch";
+
+const ONE_URL = "https://api.onesignal.com/notifications";
+
+type SendArgs = {
+  headings: Record<string, string>;
+  contents: Record<string, string>;
+  url?: string;
+  filters: any[];
+  send_after?: string; // ISO
+};
+
+export async function sendByTags(args: SendArgs) {
+  const body = {
+    app_id: process.env.ONESIGNAL_APP_ID,
+    ...args,
+  };
+
+  const r = await fetch(ONE_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${process.env.ONESIGNAL_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await r.json();
+  if (!r.ok) {
+    const msg = (data && (data.errors || data.error)) || "onesignal_failed";
+    throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+  }
+  return data;
+}
+server/modules/notifications/controller.ts
+ts
+Copy code
+import { Request, Response } from "express";
+import { sendByTags } from "./service";
+import { rateLimit } from "./mw";
+
+export async function notifyCardSubscribers(req: Request, res: Response) {
+  try {
+    const user = (req as any).user || { id: "u" };
+    const { cardId, title, message, url } = req.body || {};
+    if (!cardId || !title || !message) {
+      return res.status(400).json({ ok: false, error: "cardId, title, message required" });
+    }
+
+    const key = `card:${user.id}:${cardId}`;
+    const rl = rateLimit(key, 3);
+    if (!rl.ok) return res.status(429).json({ ok: false, error: "rate_limited" });
+
+    const data = await sendByTags({
+      headings: { en: String(title) },
+      contents: { en: String(message) },
+      url,
+      filters: [{ field: "tag", key: "card_id", relation: "=", value: String(cardId) }],
+    });
+
+    res.json({ ok: true, data });
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e.message || "error" });
+  }
+}
+
+export async function notifyAdminBroadcast(req: Request, res: Response) {
+  try {
+    const user = (req as any).user || { id: "admin" };
+    const { title, message, url, segment = "all", locales, countries } = req.body || {};
+    if (!title || !message) return res.status(400).json({ ok: false, error: "title, message required" });
+
+    const key = `admin:${user.id}`;
+    const rl = rateLimit(key, 2);
+    if (!rl.ok) return res.status(429).json({ ok: false, error: "rate_limited" });
+
+    const filters: any[] = [{ field: "tag", key: "role", relation: "=", value: "user" }];
+
+    if (segment === "paid") {
+      filters.push({ operator: "OR" });
+      filters.push({ field: "tag", key: "plan", relation: "=", value: "pro" });
+      filters.push({ operator: "OR" });
+      filters.push({ field: "tag", key: "plan", relation: "=", value: "premium" });
+    } else if (segment === "free") {
+      filters.push({ operator: "AND" });
+      filters.push({ field: "tag", key: "plan", relation: "=", value: "free" });
+    }
+
+    const pushIn = (arr?: string[], key?: string) => {
+      if (!arr || !arr.length || !key) return;
+      // Build (key IN arr) as OR chain
+      filters.push({ operator: "AND" });
+      arr.forEach((v, i) => {
+        if (i > 0) filters.push({ operator: "OR" });
+        filters.push({ field: "tag", key, relation: "=", value: v });
+      });
+    };
+
+    pushIn(locales, "locale");
+    pushIn(countries, "country");
+
+    const data = await sendByTags({
+      headings: { en: String(title) },
+      contents: { en: String(message) },
+      url,
+      filters,
+    });
+
+    res.json({ ok: true, data });
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e.message || "error" });
+  }
+}
+server/modules/notifications/routes.ts
+ts
+Copy code
+import { Router } from "express";
+import { notifyAdminBroadcast, notifyCardSubscribers } from "./controller";
+import { requireAdmin, requireAuth, assertOwnsCard } from "./mw";
+
+const r = Router();
+
+r.post("/api/notify/card", requireAuth, assertOwnsCard, notifyCardSubscribers);
+r.post("/api/notify/admin", requireAuth, requireAdmin, notifyAdminBroadcast);
+
+export default r;
+server/modules/notifications/index.ts
+ts
+Copy code
+import routes from "./routes";
+export default routes;
+Wire the server routes (if you aggregate)
+In server/routes.ts (or your main server/index.ts) ensure you mount:
+
+ts
+Copy code
+import notifRoutes from "./modules/notifications";
+app.use(notifRoutes);
+🔌 How to use
+1) Initialize OneSignal once (client)
+
+ts
+Copy code
+// e.g., client/src/main.tsx
+import { initOneSignal } from "@/modules/notifications/onesignal";
+initOneSignal();
+2) Tag visitors on the card page
+
+tsx
+Copy code
+import { tagCardVisitor, promptPush } from "@/modules/notifications/onesignal";
+
+useEffect(() => {
+  tagCardVisitor({ id: card.id, slug: card.slug });
+}, [card.id]);
+
+<button onClick={promptPush}>Get Updates</button>
+3) Show Notify button in your list row
+
+tsx
+Copy code
+import NotifyCardButton from "@/components/NotifyCardButton";
+<NotifyCardButton cardId={card.id} cardTitle={card.title} />
+4) (Optional) Admin broadcast
+
+tsx
+Copy code
+import AdminBroadcastButton from "@/components/AdminBroadcastButton";
+<AdminBroadcastButton />
+✅ Quick test
+Open a card page → click Get Updates and allow notifications.
+
+From your list row, click Notify, fill Title/Message, Send → device receives push.
+
+From admin UI, send broadcast with segment/locale → your tagged user devices receive it.
+
+JS version (quick tips)
+If your repo is plain JS:
+
+Replace import with const X = require("X")
+
+Replace export with module.exports = ...
+
+Remove type annotations (: string, Request, etc.)
+
+Example for service.js:
+
+js
+Copy code
+const fetch = require("node-fetch");
+const ONE_URL = "https://api.onesignal.com/notifications";
+async function sendByTags(args) {
+  const body = { app_id: process.env.ONESIGNAL_APP_ID, ...args };
+  const r = await fetch(ONE_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${process.env.ONESIGNAL_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error((data && (data.errors || data.error)) || "onesignal_failed");
+  return data;
+}
+module.exports = { sendByTags };
