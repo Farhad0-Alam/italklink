@@ -3,19 +3,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberEmail, setRememberEmail] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, login, getRememberedEmail } = useAuth();
+
+  // Load remembered email on component mount
+  useEffect(() => {
+    const rememberedEmail = getRememberedEmail();
+    if (rememberedEmail) {
+      setEmail(rememberedEmail);
+      setRememberEmail(true);
+    }
+  }, [getRememberedEmail]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -27,43 +36,6 @@ export default function Login() {
       }
     }
   }, [isAuthenticated, user, setLocation]);
-
-  const loginMutation = useMutation({
-    mutationFn: async (loginData: { email: string; password: string }) => {
-      const response = await apiRequest('POST', '/api/auth/login', loginData);
-      return response;
-    },
-    onSuccess: async () => {
-      toast({
-        title: 'Login Successful',
-        description: 'Welcome back!',
-      });
-      // Invalidate and refetch user data
-      await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      
-      // Wait for user query to be updated and redirect based on role
-      setTimeout(async () => {
-        try {
-          const updatedUserQuery = await queryClient.fetchQuery({ queryKey: ['/api/auth/user'] });
-          if (updatedUserQuery && (updatedUserQuery as any).role === 'owner') {
-            setLocation('/admin');
-          } else {
-            setLocation('/dashboard');
-          }
-        } catch (error) {
-          // Fallback to dashboard if user data fetch fails
-          setLocation('/dashboard');
-        }
-      }, 100);
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Login Failed',
-        description: error.message || 'Invalid email or password',
-        variant: 'destructive',
-      });
-    },
-  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,11 +49,37 @@ export default function Login() {
       return;
     }
     
-    loginMutation.mutate({ email: email.trim(), password });
+    setIsLoading(true);
+    
+    try {
+      const result = await login(email.trim(), password, rememberEmail);
+      
+      if (result.success) {
+        toast({
+          title: 'Login Successful',
+          description: 'Welcome back!',
+        });
+        
+        // Redirect will happen automatically via useEffect when auth state updates
+      } else {
+        toast({
+          title: 'Login Failed',
+          description: result.error || 'Invalid email or password',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Login Failed',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleLogin = () => {
-    // TODO: Implement Google OAuth
     window.location.href = "/api/auth/google";
   };
 
@@ -114,7 +112,7 @@ export default function Login() {
               variant="outline"
               className="w-full"
               onClick={handleGoogleLogin}
-              disabled={loginMutation.isPending}
+              disabled={isLoading}
             >
               <i className="fab fa-google mr-2 text-red-500"></i>
               Continue with Google
@@ -139,7 +137,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  disabled={loginMutation.isPending}
+                  disabled={isLoading}
                 />
               </div>
               
@@ -157,16 +155,32 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={loginMutation.isPending}
+                  disabled={isLoading}
                 />
+              </div>
+
+              {/* Remember Email Checkbox */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="remember-email"
+                  checked={rememberEmail}
+                  onCheckedChange={(checked) => setRememberEmail(checked as boolean)}
+                  disabled={isLoading}
+                />
+                <Label 
+                  htmlFor="remember-email" 
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Remember my email address
+                </Label>
               </div>
 
               <Button 
                 type="submit" 
                 className="w-full bg-talklink-500 hover:bg-talklink-600 h-12 text-base font-medium mt-6"
-                disabled={loginMutation.isPending}
+                disabled={isLoading}
               >
-                {loginMutation.isPending ? (
+                {isLoading ? (
                   <>
                     <i className="fas fa-spinner fa-spin mr-2"></i>
                     Signing In...

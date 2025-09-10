@@ -55,6 +55,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup notification routes
   const notificationRoutes = (await import('./modules/notifications')).default;
   app.use('/api/notify', notificationRoutes);
+  
+  // Setup JWT authentication routes
+  const jwtAuthRoutes = (await import('./modules/auth/routes')).default;
+  app.use('/api/auth', jwtAuthRoutes);
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {
@@ -110,12 +114,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Authentication routes
-  app.get('/api/auth/google', 
+  // Legacy session-based auth routes (keeping for backwards compatibility)
+  app.get('/api/auth/google-legacy', 
     passport.authenticate('google', { scope: ['profile', 'email'] })
   );
 
-  app.get('/api/auth/google/callback',
+  app.get('/api/auth/google/callback-legacy',
     passport.authenticate('google', { failureRedirect: '/login' }),
     (req, res) => {
       // Successful authentication, redirect to dashboard
@@ -123,7 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.post('/api/auth/logout', (req, res) => {
+  app.post('/api/auth/logout-legacy', (req, res) => {
     req.logout((err) => {
       if (err) {
         return res.status(500).json({ message: 'Logout failed' });
@@ -136,17 +140,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json({ message: 'Logged out successfully' });
       });
     });
-  });
-
-  // Get current user
-  app.get('/api/auth/user', optionalAuth, (req, res) => {
-    if (req.isAuthenticated()) {
-      const user = req.user as any;
-      const { password, ...userProfile } = user;
-      res.json(userProfile);
-    } else {
-      res.status(401).json({ message: 'Not authenticated' });
-    }
   });
 
   // Email/password registration
