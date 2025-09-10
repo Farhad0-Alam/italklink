@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ContactSupportModal } from "@/components/contact-support-modal";
 import NotifyCardButton from "@/components/NotifyCardButton";
+import NotifyAllCardsButton from "@/components/NotifyAllCardsButton";
 
 interface User {
   id: string;
@@ -552,12 +553,17 @@ export default function Dashboard() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-900">Newly Created Links</h2>
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white" asChild>
-              <Link href="/templates" data-testid="button-create-link">
-                <i className="fas fa-plus mr-2"></i>
-                Create New Link
-              </Link>
-            </Button>
+            <div className="flex items-center space-x-3">
+              <NotifyAllCardsButton 
+                totalCards={businessCards.length}
+              />
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white" asChild>
+                <Link href="/templates" data-testid="button-create-link">
+                  <i className="fas fa-plus mr-2"></i>
+                  Create New Link
+                </Link>
+              </Button>
+            </div>
           </div>
 
           {cardsLoading ? (

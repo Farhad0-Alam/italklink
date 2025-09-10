@@ -17,7 +17,7 @@ import router from './routes';
 
 export { OneSignalService } from './service';
 export { RateLimiter } from './rate-limiter';
-export { notifyCardSubscribers, notifyAdminBroadcast, testNotificationService } from './controller';
+export { notifyCardSubscribers, notifyAllCardSubscribers, notifyAdminBroadcast, testNotificationService } from './controller';
 export { requireAuth, requireAdmin, assertOwnsCard, validateNotificationRequest, handleNotificationError } from './middleware';
 
 export default router;
