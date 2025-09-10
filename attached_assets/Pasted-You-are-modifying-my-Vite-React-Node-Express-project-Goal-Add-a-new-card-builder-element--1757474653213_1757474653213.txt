@@ -1,0 +1,368 @@
+You are modifying my Vite + React + Node (Express) project.
+
+Goal
+Add a new card builder element “AR Preview (MindAR)” and an auto-setup flow:
+- User picks a “card front” image in the builder
+- Backend endpoint POST /api/ar/compile receives the image
+- Backend forwards to an external compiler (AR_COMPILER_PROXY_URL) which returns a .mind file
+- Backend uploads the .mind to my CDN (Cloudinary) and returns mindFileUrl
+- Builder auto-fills the element’s mindFileUrl + planeTextureUrl
+
+Rules
+- Keep code modular and non-breaking.
+- TS first; if project is JS, generate .js variants.
+- Use Tailwind if present; otherwise minimal CSS inline.
+- Don’t hardcode secrets. Use env variables.
+
+====================================================
+A) ENV (add to Replit Secrets)
+====================================================
+# Required for CDN upload (Cloudinary raw file support)
+CLOUDINARY_URL=cloudinary://<key>:<secret>@<cloud_name>
+
+# Optional but recommended (external compiler)
+AR_COMPILER_PROXY_URL=https://<your-compiler-service>/compile   # accepts image -> returns mind file
+
+# Branding defaults (optional)
+AR_DEFAULT_POSTER=https://cdn.example.com/posters/ar-fallback.jpg
+
+====================================================
+B) CLIENT — Element component
+====================================================
+Create: client/src/elements/ARPreviewMindAR.tsx
+
+- Same as earlier (MindAR via CDN, clickable CTA overlay).
+- Props: { mindFileUrl, posterUrl?, planeTextureUrl?, planeWidth?, planeHeight?, ctas?, accent? }
+- Clickable box triggers first CTA; overlay buttons trigger actions reliably.
+
+(Implement the file with the version that:
+- Lazy-imports MindAR from CDN
+- Renders a textured plane and a small 3D CTA cube
+- Adds a CTA overlay bar
+)
+
+====================================================
+C) CLIENT — Builder registry + Auto-compile inspector UI
+====================================================
+Create/update: client/src/builder/registerElements.ts
+
+- Register element "arPreviewMindAR" with defaults:
+  {
+    mindFileUrl: "",
+    posterUrl: import.meta.env.VITE_AR_DEFAULT_POSTER || "",
+    planeTextureUrl: "",
+    planeWidth: 0.8,
+    planeHeight: 0.45,
+    accent: "#0ea5e9",
+    ctas: [
+      { label: "View Offer", action: "link", value: "https://yourdomain.com/card/slug/offers" },
+      { label: "WhatsApp", action: "whatsapp", value: "+88017XXXXXXXX" }
+    ]
+  }
+
+- Inspector controls:
+  - Text: mindFileUrl (read-only when auto-generated)
+  - Upload button: “Generate from Card Image”
+    * opens file picker (accept image/*)
+    * POST to /api/ar/compile (multipart)
+    * On success → set mindFileUrl to returned URL
+    * Also set planeTextureUrl to the original image CDN URL if present
+  - Text: planeTextureUrl
+  - Number: planeWidth / planeHeight
+  - Color: accent
+  - Array editor: ctas (label/action/value)
+
+- Provide an info note when AR_COMPILER_PROXY_URL is missing:
+  “Auto-compile disabled. Paste a .mind URL or set AR_COMPILER_PROXY_URL.”
+
+Implement a small helper: client/src/builder/api/ar.ts
+- export async function compileMind(file: File): Promise<{mindFileUrl:string, textureUrl?:string}>
+
+====================================================
+D) SERVER — /api/ar/compile
+====================================================
+Create folder: server/modules/ar/
+
+Files:
+- upload.ts     → multer config
+- cloudinary.ts → raw upload helper
+- compile.ts    → handler that calls AR_COMPILER_PROXY_URL
+- routes.ts     → POST /api/ar/compile
+- index.ts      → export router
+
+Behavior:
+- Accept multipart form-data with field "image"
+- Upload the original image to Cloudinary (type: auto / resource_type: image)
+- If AR_COMPILER_PROXY_URL present:
+   - POST image (binary) to proxy, expect { ok:true, mindBufferBase64 } or { ok:true, mindUrl }
+   - If base64 provided, upload to Cloudinary as raw (extension .mind)
+   - Return JSON { ok:true, mindFileUrl, textureUrl }
+- Else:
+   - Return 501 with helpful message
+
+====================================================
+E) Cloud compiler (sketch)
+====================================================
+(Provide a small reference snippet for a proxy service — e.g., Cloudflare Worker/Server script — that takes the image, runs MindAR compiler, returns the .mind as base64. Do not implement heavy headless here; just outline the expected interface.)
+
+====================================================
+F) Acceptance
+====================================================
+- In builder, clicking “Generate from Card Image” lets me pick a JPG/PNG.
+- After upload, mindFileUrl auto-fills and the element preview works.
+- If AR_COMPILER_PROXY_URL is missing, inspector shows a clear message and still allows manual mindFileUrl.
+- No existing routes broken. Secrets not leaked to client.
+✅ Code you can drop in now
+1) Element (client/src/elements/ARPreviewMindAR.tsx)
+(Same robust component I gave earlier; shortened here to save space. If you need the full file again, say the word and I’ll paste it as-is.)
+
+You already have this code from the previous message. It:
+
+loads MindAR CDN,
+
+starts AR scene,
+
+shows plane + clickable cube,
+
+overlay CTA buttons,
+
+poster fallback.
+
+2) Builder helper (client/src/builder/api/ar.ts)
+ts
+Copy code
+export async function compileMind(file: File) {
+  const fd = new FormData();
+  fd.append("image", file);
+  const r = await fetch("/api/ar/compile", { method: "POST", body: fd });
+  const d = await r.json();
+  if (!r.ok || !d.ok) throw new Error(d.error || "Compile failed");
+  return d as { ok: true; mindFileUrl: string; textureUrl?: string };
+}
+3) Registry snippet (client/src/builder/registerElements.ts)
+ts
+Copy code
+import ARPreviewMindAR from "@/elements/ARPreviewMindAR";
+import { compileMind } from "@/builder/api/ar";
+
+addElement("arPreviewMindAR", {
+  label: "AR Preview (MindAR)",
+  component: ARPreviewMindAR,
+  defaults: {
+    mindFileUrl: "",
+    posterUrl: import.meta.env.VITE_AR_DEFAULT_POSTER || "",
+    planeTextureUrl: "",
+    planeWidth: 0.8,
+    planeHeight: 0.45,
+    accent: "#0ea5e9",
+    ctas: [
+      { label: "View Offer", action: "link", value: "https://yourdomain.com/card/slug/offers" },
+      { label: "WhatsApp", action: "whatsapp", value: "+88017XXXXXXXX" }
+    ]
+  },
+  inspector: [
+    { type: "note", text: "Upload your card front image to auto-generate a MindAR target." },
+    {
+      type: "button",
+      label: "Generate from Card Image",
+      onClick: async (ctx: any) => {
+        try {
+          const file = await ctx.pickFile({ accept: "image/*" });
+          if (!file) return;
+          ctx.setBusy(true);
+          const res = await compileMind(file);
+          ctx.update("mindFileUrl", res.mindFileUrl);
+          if (res.textureUrl) ctx.update("planeTextureUrl", res.textureUrl);
+          ctx.toast("Target generated ✅");
+        } catch (e:any) {
+          ctx.toast(e.message || "Failed to generate", "error");
+        } finally {
+          ctx.setBusy(false);
+        }
+      }
+    },
+    { type: "text", path: "mindFileUrl", label: "Mind (.mind) URL" },
+    { type: "text", path: "posterUrl", label: "Poster URL (fallback)" },
+    { type: "text", path: "planeTextureUrl", label: "Plane Texture URL" },
+    { type: "number", path: "planeWidth", label: "Plane Width (m)", min: 0.1, max: 2, step: 0.05 },
+    { type: "number", path: "planeHeight", label: "Plane Height (m)", min: 0.1, max: 2, step: 0.05 },
+    { type: "color", path: "accent", label: "Accent" },
+    {
+      type: "array", path: "ctas", label: "CTAs", of: [
+        { type: "text", path: "label", label: "Label" },
+        { type: "select", path: "action", label: "Action", options: [
+          {label:"Open Link", value:"link"},
+          {label:"WhatsApp", value:"whatsapp"},
+          {label:"Call", value:"tel"},
+          {label:"Email", value:"mailto"}
+        ]},
+        { type: "text", path: "value", label: "Value (URL/number/email)" }
+      ]
+    }
+  ]
+});
+If your builder API has different hooks (pickFile, toast, update, etc.), map them accordingly.
+
+4) Server: Cloudinary helper (server/modules/ar/cloudinary.ts)
+ts
+Copy code
+import fetch from "node-fetch";
+
+const CLOUDINARY_URL = process.env.CLOUDINARY_URL!; // cloudinary://key:secret@cloud
+if (!CLOUDINARY_URL) {
+  // We won't crash; we'll throw only when used
+}
+
+function parseCloudinaryUrl() {
+  const m = CLOUDINARY_URL.match(/^cloudinary:\/\/([^:]+):([^@]+)@([^/]+)$/);
+  if (!m) throw new Error("Invalid CLOUDINARY_URL");
+  return { key: m[1], secret: m[2], cloud: m[3] };
+}
+
+export async function uploadImageToCloudinary(filename: string, buffer: Buffer) {
+  if (!CLOUDINARY_URL) throw new Error("CLOUDINARY_URL not set");
+  const { key, secret, cloud } = parseCloudinaryUrl();
+  const url = `https://api.cloudinary.com/v1_1/${cloud}/image/upload`;
+  const ts = Math.floor(Date.now()/1000);
+  const form = new FormData();
+  form.append("file", new Blob([buffer]), filename);
+  form.append("timestamp", String(ts));
+  form.append("api_key", key);
+  form.append("upload_preset", ""); // optional preset; leave blank if you sign manually
+
+  // unsigned is tricky; sign the request:
+  const toSign = new URLSearchParams({ timestamp: String(ts) }).toString();
+  const crypto = await import("crypto");
+  const signature = crypto.createHash("sha1").update(toSign + secret).digest("hex");
+  form.append("signature", signature);
+
+  const r = await fetch(url, { method: "POST", body: form as any });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d?.error?.message || "cloudinary_image_failed");
+  return d.secure_url as string;
+}
+
+export async function uploadRawToCloudinary(filename: string, buffer: Buffer) {
+  if (!CLOUDINARY_URL) throw new Error("CLOUDINARY_URL not set");
+  const { key, secret, cloud } = parseCloudinaryUrl();
+  const url = `https://api.cloudinary.com/v1_1/${cloud}/raw/upload`;
+  const ts = Math.floor(Date.now()/1000);
+  const form = new FormData();
+  form.append("file", new Blob([buffer]), filename);
+  form.append("timestamp", String(ts));
+  form.append("api_key", key);
+
+  const toSign = new URLSearchParams({ timestamp: String(ts) }).toString();
+  const crypto = await import("crypto");
+  const signature = crypto.createHash("sha1").update(toSign + secret).digest("hex");
+  form.append("signature", signature);
+
+  const r = await fetch(url, { method: "POST", body: form as any });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d?.error?.message || "cloudinary_raw_failed");
+  return d.secure_url as string;
+}
+(If you already use Cloudinary SDK, you can swap this with your existing uploader.)
+
+5) Server: multer upload (server/modules/ar/upload.ts)
+ts
+Copy code
+import multer from "multer";
+export const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } }); // 8MB
+6) Server: compile handler (server/modules/ar/compile.ts)
+ts
+Copy code
+import fetch from "node-fetch";
+import { uploadImageToCloudinary, uploadRawToCloudinary } from "./cloudinary";
+
+const PROXY = process.env.AR_COMPILER_PROXY_URL;
+
+export async function handleCompile(imageBuffer: Buffer, originalName: string) {
+  // 1) Upload the original image (for planeTextureUrl + record)
+  const textureUrl = await uploadImageToCloudinary(originalName || "card-front.jpg", imageBuffer);
+
+  if (!PROXY) {
+    return {
+      ok: false,
+      status: 501,
+      error: "Auto-compile not configured. Set AR_COMPILER_PROXY_URL or paste a .mind URL manually.",
+      textureUrl
+    };
+  }
+
+  // 2) Send to proxy compiler
+  const fd = new FormData();
+  fd.append("image", new Blob([imageBuffer]), originalName || "card-front.jpg");
+
+  const r = await fetch(PROXY, { method: "POST", body: fd as any });
+  const d = await r.json().catch(() => ({}));
+
+  if (!r.ok || !d?.ok) {
+    return { ok: false, status: 502, error: d?.error || "compiler_failed", textureUrl };
+  }
+
+  if (d.mindUrl) {
+    // Proxy already hosted a .mind file
+    return { ok: true, mindFileUrl: d.mindUrl as string, textureUrl };
+  }
+
+  if (d.mindBufferBase64) {
+    // 3) Upload compiled .mind to Cloudinary as raw
+    const buf = Buffer.from(d.mindBufferBase64, "base64");
+    const mindFileUrl = await uploadRawToCloudinary("targets.mind", buf);
+    return { ok: true, mindFileUrl, textureUrl };
+  }
+
+  return { ok: false, status: 500, error: "invalid_compiler_response", textureUrl };
+}
+7) Server: routes (server/modules/ar/routes.ts)
+ts
+Copy code
+import { Router } from "express";
+import { upload } from "./upload";
+import { handleCompile } from "./compile";
+
+const r = Router();
+
+r.post("/api/ar/compile", upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file?.buffer) return res.status(400).json({ ok:false, error:"image required" });
+    const result = await handleCompile(req.file.buffer, req.file.originalname);
+    if (!result.ok) return res.status(result.status || 500).json(result);
+    res.json({ ok: true, mindFileUrl: result.mindFileUrl, textureUrl: result.textureUrl });
+  } catch (e:any) {
+    res.status(500).json({ ok:false, error: e.message || "error" });
+  }
+});
+
+export default r;
+8) Server: index (server/modules/ar/index.ts)
+ts
+Copy code
+import routes from "./routes";
+export default routes;
+Wire it once in your server bootstrap
+
+ts
+Copy code
+import arRoutes from "./modules/ar";
+app.use(arRoutes);
+(Optional) Your own compiler proxy (reference)
+If you can’t find a hosted compiler, deploy a tiny service that takes an image, runs the MindAR image compiler, and returns { ok:true, mindBufferBase64 }.
+
+Interface expected: POST /compile with multipart image → JSON { ok:true, mindBufferBase64 } (or { ok:true, mindUrl }).
+
+Important: running the official web compiler requires a headless browser (Playwright/Puppeteer) to load their page and export the .mind. That’s why I recommend hosting this as a Cloud Worker/VM, not on Replit.
+
+🧪 How to test (5 minutes)
+In builder, add AR Preview (MindAR) to a card.
+
+Click Generate from Card Image → pick a JPG/PNG.
+
+If AR_COMPILER_PROXY_URL is set and reachable:
+
+You’ll get mindFileUrl auto-filled, planeTextureUrl set to the uploaded image.
+
+Open card preview → your AR element should track the printed/on-screen card image.
+
+If the proxy isn’t set: you’ll get a friendly 501. Paste a .mind URL manually to continue.
