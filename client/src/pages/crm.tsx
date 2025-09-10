@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Target, CheckSquare, Activity, BarChart3 } from "lucide-react";
+import { Users, Target, CheckSquare, Activity, BarChart3, Zap } from "lucide-react";
 import { 
   CRMStats,
   ContactsManager,
@@ -9,6 +9,7 @@ import {
   TasksManager,
   ActivitiesTimeline
 } from "@/modules/crm";
+import AutomationManager from "@/modules/crm/components/AutomationManager";
 
 export default function CRM() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -33,7 +34,7 @@ export default function CRM() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5" data-testid="tabs-crm-navigation">
+          <TabsList className="grid w-full grid-cols-6 lg:w-fit lg:grid-cols-6" data-testid="tabs-crm-navigation">
             <TabsTrigger value="overview" className="flex items-center space-x-2" data-testid="tab-overview">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -53,6 +54,10 @@ export default function CRM() {
             <TabsTrigger value="activities" className="flex items-center space-x-2" data-testid="tab-activities">
               <Activity className="h-4 w-4" />
               <span className="hidden sm:inline">Activities</span>
+            </TabsTrigger>
+            <TabsTrigger value="automations" className="flex items-center space-x-2" data-testid="tab-automations">
+              <Zap className="h-4 w-4" />
+              <span className="hidden sm:inline">Automations</span>
             </TabsTrigger>
           </TabsList>
 
@@ -74,6 +79,10 @@ export default function CRM() {
 
           <TabsContent value="activities" className="space-y-6">
             <ActivitiesTimeline />
+          </TabsContent>
+
+          <TabsContent value="automations" className="space-y-6">
+            <AutomationManager />
           </TabsContent>
         </Tabs>
       </div>

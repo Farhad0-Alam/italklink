@@ -268,3 +268,95 @@ export function usePipelines() {
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 }
+
+// Automation hooks
+export function useAutomations() {
+  return useQuery({
+    queryKey: ['/api/automations'],
+    staleTime: 1000 * 60, // 1 minute
+  });
+}
+
+export function useAutomation(automationId: string) {
+  return useQuery({
+    queryKey: ['/api/automations', automationId],
+    enabled: !!automationId,
+  });
+}
+
+export function useCreateAutomation() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (data: any) => 
+      apiRequest('POST', '/api/automations', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/automations'] });
+    },
+  });
+}
+
+export function useUpdateAutomation(automationId: string) {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (data: any) => 
+      apiRequest('PUT', `/api/automations/${automationId}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/automations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/automations', automationId] });
+    },
+  });
+}
+
+export function useDeleteAutomation() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (automationId: string) => 
+      apiRequest('DELETE', `/api/automations/${automationId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/automations'] });
+    },
+  });
+}
+
+export function useToggleAutomation() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (automationId: string) => 
+      apiRequest('PATCH', `/api/automations/${automationId}/toggle`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/automations'] });
+    },
+  });
+}
+
+export function useAutomationRuns(automationId?: string, limit?: number) {
+  const queryParams = new URLSearchParams();
+  if (limit) queryParams.append('limit', limit.toString());
+  
+  const queryString = queryParams.toString();
+  const endpoint = automationId 
+    ? `/api/automations/${automationId}/runs${queryString ? `?${queryString}` : ''}`
+    : `/api/automation-runs${queryString ? `?${queryString}` : ''}`;
+  
+  return useQuery({
+    queryKey: [endpoint],
+    staleTime: 1000 * 30, // 30 seconds
+  });
+}
+
+export function useTestAutomation() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ automationId, testData }: { automationId: string; testData?: any }) => 
+      apiRequest('POST', `/api/automations/${automationId}/test`, { testData }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/automations/${variables.automationId}/runs`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/automation-runs'] });
+    },
+  });
+}
