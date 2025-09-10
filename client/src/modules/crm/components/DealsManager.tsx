@@ -136,6 +136,45 @@ export function DealsManager() {
     }, 0);
   };
 
+  const handleCreateDefaultPipeline = async () => {
+    try {
+      // Create a default sales pipeline
+      const response = await fetch('/api/crm/pipelines', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: 'Sales Pipeline',
+          description: 'Default sales pipeline for tracking deals',
+          stages: [
+            { name: 'Lead', probability: 10, color: '#6366f1' },
+            { name: 'Qualified', probability: 25, color: '#8b5cf6' },
+            { name: 'Proposal', probability: 50, color: '#06b6d4' },
+            { name: 'Negotiation', probability: 75, color: '#f59e0b' },
+            { name: 'Closed Won', probability: 100, color: '#10b981' },
+          ]
+        })
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Pipeline created!",
+          description: "Your default sales pipeline has been created successfully.",
+        });
+        // Refresh the page to load the new pipeline
+        window.location.reload();
+      } else {
+        throw new Error('Failed to create pipeline');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error creating pipeline",
+        description: error.message || "Failed to create default pipeline.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (dealsLoading || pipelinesLoading) {
     return (
       <div className="space-y-6">
@@ -179,7 +218,25 @@ export function DealsManager() {
             </h2>
             <p className="text-gray-600 mt-1">No pipeline found. Create your first pipeline to start tracking deals.</p>
           </div>
+          <Button onClick={handleCreateDefaultPipeline} data-testid="button-create-pipeline">
+            Create your first pipeline
+          </Button>
         </div>
+        
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Target className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to start tracking deals?</h3>
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              A sales pipeline helps you organize and track your deals through different stages, 
+              from initial contact to closing the sale.
+            </p>
+            <Button onClick={handleCreateDefaultPipeline} size="lg" data-testid="button-create-default-pipeline">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Default Pipeline
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }

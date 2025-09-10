@@ -31,7 +31,7 @@ export function ActivitiesTimeline() {
 
   // API hook
   const { data: activities = [], isLoading: activitiesLoading, error: activitiesError } = useActivities({
-    type: typeFilter || undefined,
+    type: typeFilter === "all" ? undefined : typeFilter,
     limit: 100,
   });
 
