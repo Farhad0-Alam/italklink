@@ -1,0 +1,127 @@
+You are extending my running Vite + React + Express CRM project.
+
+Goal
+Add a new **Automation module** to the CRM dashboard. This will allow users to build workflows like HubSpot or Zoho, but lightweight:
+- Triggers (lead created, task overdue, stage changed, etc.)
+- Conditions (filters: country, value, tags)
+- Actions (send email, send SMS, send WhatsApp, place call/voice, push notification, create task)
+- UI: drag-drop or block-based automation builder
+- Logs: show execution history
+
+====================================================
+A) ENV (add in Replit Secrets)
+====================================================
+# Email (Resend or Postmark or Mailgun)
+RESEND_API_KEY=
+
+# SMS / WhatsApp / Voice (Twilio)
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_PHONE_NUMBER=+12025550123
+TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+
+# Push (OneSignal if already configured)
+ONESIGNAL_APP_ID=
+ONESIGNAL_API_KEY=
+
+====================================================
+B) Server — Database Models (Prisma)
+====================================================
+Extend schema.prisma with:
+
+model Automation {
+  id        String   @id @default(cuid())
+  name      String
+  enabled   Boolean  @default(true)
+  triggers  Json
+  conditions Json
+  actions   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  runs      AutomationRun[]
+}
+
+model AutomationRun {
+  id           String   @id @default(cuid())
+  automationId String
+  automation   Automation @relation(fields: [automationId], references: [id])
+  eventType    String
+  status       String    // success, failed, pending
+  log          Json?
+  createdAt    DateTime @default(now())
+}
+
+====================================================
+C) Server — Automation Engine
+====================================================
+- Event Bus: use existing emit() system from CRM (lead.created, task.overdue, pipeline.moved).
+- Runner: when event emitted, find all enabled automations with matching trigger.
+- Condition evaluator: check JSON conditions (simple operators only: equals, contains, gt, lt).
+- Action executor:
+  - email.send → Resend API
+  - sms.send → Twilio SMS
+  - whatsapp.send → Twilio WhatsApp
+  - call.voice → Twilio Voice (TwiML <Say>)
+  - push.send → OneSignal (optional)
+  - task.create → create CRM Task
+- Delay support: { type:"delay", ms:60000 }
+- Log each step in AutomationRun.
+
+====================================================
+D) Client — CRM Dashboard Updates
+====================================================
+Add new tab: **Automations** (next to Overview, Contacts, Deals, Tasks, Activities).
+Inside Automations:
+- List existing automations with status (enabled/disabled).
+- Button: "Create Automation".
+- Builder UI:
+  - Choose Trigger: (Lead Created, Task Overdue, Stage Changed)
+  - Add Conditions: (Field, Operator, Value)
+  - Add Actions: (Email, SMS, Call, Voice, Push, Create Task)
+  - Save Automation.
+- Execution Logs: show last 10 runs with status + time.
+
+====================================================
+E) UI Example (React + Tailwind)
+====================================================
+AutomationBuilder.tsx
+- Step 1: Select Trigger (dropdown)
+- Step 2: Add Conditions (dynamic form)
+- Step 3: Add Actions (array of actions; each has type + config fields)
+- Step 4: Save
+
+AutomationList.tsx
+- Show table of automations (name, enabled, createdAt, last run)
+- Toggle enable/disable
+
+AutomationRuns.tsx
+- Table of run logs (automation name, trigger, status, timestamp, log snippet)
+
+====================================================
+F) Example Automations
+====================================================
+1. Lead Capture → Email + SMS
+Trigger: lead.created
+Actions:
+- email.send { to: "{{payload.email}}", template:"welcome" }
+- sms.send { to: "{{payload.phone}}", text:"Thanks for connecting!" }
+
+2. Task Overdue → Voice Call
+Trigger: task.overdue
+Actions:
+- call.voice { to:"+8801XXXXXXXXX", message:"Reminder! You have an overdue task." }
+
+3. Stage Changed → WhatsApp
+Trigger: pipeline.stage.changed
+Actions:
+- whatsapp.send { to:"{{payload.phone}}", text:"Your deal moved to Proposal stage." }
+
+====================================================
+G) Acceptance
+====================================================
+- Automations tab visible in CRM dashboard.
+- Users can create, enable/disable, and delete automations.
+- On event emit, matching automations execute actions (email, sms, whatsapp, call, push).
+- Execution logs stored in AutomationRun and visible in UI.
+- Secure: only logged-in user can manage their automations.
+- No secrets exposed to client bundle.

@@ -1546,6 +1546,66 @@ export const emailTemplates = pgTable("email_templates", {
   index("idx_email_templates_category").on(table.category),
 ]);
 
+// ===== AUTOMATION WORKFLOW SYSTEM =====
+
+// Main Automations table (workflow definitions)
+export const automations = pgTable("automations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerUserId: varchar("owner_user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Basic information
+  name: varchar("name").notNull(),
+  description: text("description"),
+  
+  // Workflow configuration
+  triggers: jsonb("triggers").notNull(), // Array of trigger objects
+  conditions: jsonb("conditions").default('[]'), // Array of condition objects
+  actions: jsonb("actions").notNull(), // Array of action objects
+  
+  // Settings
+  enabled: boolean("enabled").default(true),
+  
+  // Metadata
+  lastTriggered: timestamp("last_triggered"),
+  totalRuns: integer("total_runs").default(0),
+  successfulRuns: integer("successful_runs").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_automations_owner").on(table.ownerUserId),
+  index("idx_automations_enabled").on(table.enabled),
+]);
+
+// Automation execution logs
+export const automationRuns = pgTable("automation_runs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  automationId: varchar("automation_id").references(() => automations.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Execution details
+  triggerEvent: varchar("trigger_event").notNull(), // e.g., 'lead.created', 'task.overdue'
+  triggerPayload: jsonb("trigger_payload"), // The data that triggered this run
+  
+  // Execution status
+  status: varchar("status").notNull(), // 'success', 'failed', 'pending', 'partial'
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  
+  // Logs and results
+  executionLog: jsonb("execution_log").default('[]'), // Array of step execution logs
+  errorMessage: text("error_message"),
+  
+  // Results
+  actionsExecuted: integer("actions_executed").default(0),
+  actionsFailed: integer("actions_failed").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_automation_runs_automation").on(table.automationId),
+  index("idx_automation_runs_status").on(table.status),
+  index("idx_automation_runs_trigger").on(table.triggerEvent),
+]);
+
 export type KbDoc = typeof kbDocs.$inferSelect;
 export type InsertKbDoc = typeof kbDocs.$inferInsert;
 
@@ -1587,6 +1647,12 @@ export type InsertCrmSequence = typeof crmSequences.$inferInsert;
 export type EmailTemplate = typeof emailTemplates.$inferSelect;
 export type InsertEmailTemplate = typeof emailTemplates.$inferInsert;
 
+export type Automation = typeof automations.$inferSelect;
+export type InsertAutomation = typeof automations.$inferInsert;
+
+export type AutomationRun = typeof automationRuns.$inferSelect;
+export type InsertAutomationRun = typeof automationRuns.$inferInsert;
+
 export const insertHeaderTemplateSchema = createInsertSchema(headerTemplates);
 export const insertButtonInteractionSchema = createInsertSchema(buttonInteractions);
 export const insertAutomationConfigSchema = createInsertSchema(automationConfigs);
@@ -1601,6 +1667,8 @@ export const insertCrmStageSchema = createInsertSchema(crmStages);
 export const insertCrmDealSchema = createInsertSchema(crmDeals);
 export const insertCrmSequenceSchema = createInsertSchema(crmSequences);
 export const insertEmailTemplateSchema = createInsertSchema(emailTemplates);
+export const insertAutomationSchema = createInsertSchema(automations);
+export const insertAutomationRunSchema = createInsertSchema(automationRuns);
 
 // CSV import schema
 export const csvMemberSchema = z.object({
