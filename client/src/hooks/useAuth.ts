@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
-import { authClient } from '@/lib/auth-client';
-import type { AuthState } from '@/lib/auth-client';
+import { useQuery } from '@tanstack/react-query';
 
 export interface User {
   id: string;
@@ -17,23 +15,18 @@ export interface User {
 }
 
 export function useAuth() {
-  const [authState, setAuthState] = useState<AuthState>(authClient.getState());
-
-  useEffect(() => {
-    const unsubscribe = authClient.subscribe(setAuthState);
-    return unsubscribe;
-  }, []);
+  const { data: user, isLoading, error, refetch } = useQuery<User>({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   return {
-    user: authState.user,
-    isLoading: authState.isLoading,
-    isAuthenticated: authState.isAuthenticated,
-    login: authClient.login.bind(authClient),
-    register: authClient.register.bind(authClient),
-    logout: authClient.logout.bind(authClient),
-    logoutAll: authClient.logoutAll.bind(authClient),
-    getRememberedEmail: authClient.getRememberedEmail.bind(authClient),
-    clearRememberedEmail: authClient.clearRememberedEmail.bind(authClient),
+    user,
+    isLoading,
+    isAuthenticated: !!user,
+    error,
+    refetch,
   };
 }
 

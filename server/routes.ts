@@ -55,10 +55,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup notification routes
   const notificationRoutes = (await import('./modules/notifications')).default;
   app.use('/api/notify', notificationRoutes);
-  
-  // Setup JWT authentication routes
-  const jwtAuthRoutes = (await import('./modules/auth/routes')).default;
-  app.use('/api/auth', jwtAuthRoutes);
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {
@@ -114,12 +110,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Legacy session-based auth routes (keeping for backwards compatibility)
-  app.get('/api/auth/google-legacy', 
+  // Authentication routes
+  app.get('/api/auth/google', 
     passport.authenticate('google', { scope: ['profile', 'email'] })
   );
 
-  app.get('/api/auth/google/callback-legacy',
+  app.get('/api/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/login' }),
     (req, res) => {
       // Successful authentication, redirect to dashboard
@@ -127,7 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.post('/api/auth/logout-legacy', (req, res) => {
+  app.post('/api/auth/logout', (req, res) => {
     req.logout((err) => {
       if (err) {
         return res.status(500).json({ message: 'Logout failed' });
@@ -142,11 +138,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Legacy email/password registration (moved to JWT auth module)
-  // Removed - now handled by /api/auth/register
+  // Get current user
+  app.get('/api/auth/user', optionalAuth, (req, res) => {
+    if (req.isAuthenticated()) {
+      const user = req.user as any;
+      const { password, ...userProfile } = user;
+      res.json(userProfile);
+    } else {
+      res.status(401).json({ message: 'Not authenticated' });
+    }
+  });
 
-  // Legacy email/password login (moved to JWT auth module)  
-  // Removed - now handled by /api/auth/login
+  // Email/password registration
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const { firstName, lastName, email, password } = req.body;
+      
+      // Validate required fields
+      if (!email || !password || !firstName || !lastName) {
+        return res.status(400).json({ 
+          message: 'All fields are required: firstName, lastName, email, password' 
+        });
+      }
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: 'Invalid email format' });
+      }
+      
+      // Validate password strength
+      if (password.length < 8) {
+        return res.status(400).json({ 
+          message: 'Password must be at least 8 characters long' 
+        });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ 
+          message: 'An account with this email already exists' 
+        });
+      }
+      
+      // Hash password
+      const saltRounds = 12;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      
+      // Create user
+      const newUser = await storage.createUser({
+        email,
+        firstName,
+        lastName,
+        password: hashedPassword,
+        planType: 'free',
+        businessCardsLimit: 1,
+        businessCardsCount: 0,
+      });
+      
+      // Log the user in
+      req.login(newUser as any, (err) => {
+        if (err) {
+          console.error('Auto-login after registration failed:', err);
+          return res.status(201).json({ 
+            message: 'Account created successfully. Please log in.',
+            userId: newUser.id 
+          });
+        }
+        
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = newUser as any;
+        res.status(201).json({ 
+          message: 'Account created and logged in successfully',
+          user: userWithoutPassword 
+        });
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ message: 'Failed to create account' });
+    }
+  });
+
+  // Email/password login
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Validate required fields
+      if (!email || !password) {
+        return res.status(400).json({ 
+          message: 'Email and password are required' 
+        });
+      }
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ 
+          message: 'Invalid email or password' 
+        });
+      }
+      
+      // Check if user has a password (Google OAuth users might not)
+      if (!user.password) {
+        return res.status(401).json({ 
+          message: 'This account was created with Google. Please use Google Sign-In.' 
+        });
+      }
+      
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ 
+          message: 'Invalid email or password' 
+        });
+      }
+      
+      // Log the user in
+      req.login(user as any, (err) => {
+        if (err) {
+          console.error('Login error:', err);
+          return res.status(500).json({ message: 'Login failed' });
+        }
+        
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = user as any;
+        res.json({ 
+          message: 'Login successful',
+          user: userWithoutPassword 
+        });
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Login failed' });
+    }
+  });
 
   // Teams API  
   app.get('/api/teams', requireAuth, async (req, res) => {
