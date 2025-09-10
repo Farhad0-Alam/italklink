@@ -4,10 +4,12 @@ import passport from 'passport';
 import bcrypt from 'bcryptjs';
 import { setupAuth, requireAuth, optionalAuth, requireAdmin } from './auth';
 import { storage } from './storage';
-import type { User, Team, TeamMember } from '@shared/schema';
+import type { User, Team, TeamMember, CrmContact, CrmActivity, CrmTask, CrmPipeline, CrmStage, CrmDeal, CrmSequence, EmailTemplate } from '@shared/schema';
 import { 
   insertUserSchema, teamInvitationSchema, teamSettingsSchema,
-  insertTeamMemberSchema
+  insertTeamMemberSchema, insertCrmContactSchema, insertCrmActivitySchema, 
+  insertCrmTaskSchema, insertCrmPipelineSchema, insertCrmStageSchema, 
+  insertCrmDealSchema, insertCrmSequenceSchema
 } from '@shared/schema';
 import { z } from 'zod';
 import { setupAIRoutes } from './ai-routes';
@@ -81,9 +83,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           planType: plan.planType,
           price: plan.price,
           interval: plan.interval,
-          description: plan.description,
+          description: plan.cardLabel || '', // Use cardLabel as description fallback
           features: plan.features,
-          isPopular: plan.isPopular || false
+          isPopular: false // Default value since isPopular doesn't exist in schema
         }))
         .sort((a, b) => a.price - b.price); // Sort by price ascending
       
@@ -100,16 +102,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const templates = await storage.getGlobalTemplates({ isActive: true });
       
       // Map to frontend format
-      const publicTemplates = templates.map(template => ({
-        id: template.id,
-        name: template.name,
-        description: template.description,
-        category: template.templateData?.category || 'General',
-        previewImage: template.previewImage || '',
-        backgroundColor: template.templateData?.backgroundColor || '#10B981',
-        textColor: template.templateData?.textColor || '#FFFFFF',
-        templateData: template.templateData
-      }));
+      const publicTemplates = templates.map(template => {
+        const templateData = template.templateData as any || {};
+        return {
+          id: template.id,
+          name: template.name,
+          description: template.description,
+          category: templateData.category || 'General',
+          previewImage: template.previewImage || '',
+          backgroundColor: templateData.backgroundColor || '#10B981',
+          textColor: templateData.textColor || '#FFFFFF',
+          templateData: template.templateData
+        };
+      });
       
       res.json(publicTemplates);
     } catch (error) {
@@ -586,7 +591,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(businessCard);
     } catch (error) {
       console.error('Error creating business card:', error);
-      res.status(500).json({ message: 'Failed to create business card', error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({ message: 'Failed to create business card', error: errorMessage });
     }
   });
 
@@ -657,7 +663,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedCard);
     } catch (error) {
       console.error('Error updating business card:', error);
-      res.status(500).json({ message: 'Failed to update business card', error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({ message: 'Failed to update business card', error: errorMessage });
     }
   });
 
@@ -678,7 +685,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedCard);
     } catch (error) {
       console.error('Error updating business card:', error);
-      res.status(500).json({ message: 'Failed to update business card', error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({ message: 'Failed to update business card', error: errorMessage });
     }
   });
 
@@ -848,6 +856,749 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     res.json({ success: true });
+  });
+
+  // =============================================================================
+  // CRM API ENDPOINTS
+  // =============================================================================
+
+  // Contact Management Endpoints
+  
+  // Get all contacts for the authenticated user with search and filtering
+  app.get('/api/crm/contacts', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const { search, tags, lifecycleStage, limit = '50', offset = '0' } = req.query;
+      
+      const filters: any = {};
+      if (search) filters.search = search as string;
+      if (tags) filters.tags = (tags as string).split(',');
+      if (lifecycleStage) filters.lifecycleStage = lifecycleStage as string;
+      
+      const contacts = await storage.getContactsByUser(user.id, filters);
+      
+      // Apply pagination
+      const startIndex = parseInt(offset as string);
+      const pageSize = Math.min(parseInt(limit as string), 100); // Max 100 per page
+      const paginatedContacts = contacts.slice(startIndex, startIndex + pageSize);
+      
+      res.json({
+        contacts: paginatedContacts,
+        total: contacts.length,
+        hasMore: startIndex + pageSize < contacts.length
+      });
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+      res.status(500).json({ message: 'Failed to fetch contacts' });
+    }
+  });
+
+  // Get single contact with activity timeline
+  app.get('/api/crm/contacts/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const contact = await storage.getContact(req.params.id);
+      
+      if (!contact || contact.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+      
+      // Get contact's recent activities and tasks
+      const [activities, tasks] = await Promise.all([
+        storage.getContactActivities(contact.id, { limit: 20 }),
+        storage.getContactTasks(contact.id)
+      ]);
+      
+      res.json({
+        ...contact,
+        recentActivities: activities,
+        openTasks: tasks.filter(t => t.status !== 'done')
+      });
+    } catch (error) {
+      console.error('Error fetching contact:', error);
+      res.status(500).json({ message: 'Failed to fetch contact' });
+    }
+  });
+
+  // Create new contact
+  app.post('/api/crm/contacts', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const contactData = insertCrmContactSchema.parse({
+        ...req.body,
+        ownerUserId: user.id
+      });
+      
+      // Check for existing contact with same email
+      if (contactData.email) {
+        const existingContact = await storage.getContactByEmail(contactData.email, user.id);
+        if (existingContact) {
+          return res.status(400).json({ 
+            message: 'A contact with this email already exists',
+            existingContactId: existingContact.id
+          });
+        }
+      }
+      
+      const contact = await storage.createContact(contactData);
+      
+      res.status(201).json(contact);
+    } catch (error) {
+      console.error('Error creating contact:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid contact data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Failed to create contact' });
+    }
+  });
+
+  // Update contact
+  app.put('/api/crm/contacts/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const contact = await storage.getContact(req.params.id);
+      
+      if (!contact || contact.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+      
+      const updateData = req.body;
+      delete updateData.id;
+      delete updateData.ownerUserId;
+      delete updateData.createdAt;
+      delete updateData.updatedAt;
+      
+      const updatedContact = await storage.updateContact(req.params.id, updateData);
+      
+      res.json(updatedContact);
+    } catch (error) {
+      console.error('Error updating contact:', error);
+      res.status(500).json({ message: 'Failed to update contact' });
+    }
+  });
+
+  // Delete contact
+  app.delete('/api/crm/contacts/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const contact = await storage.getContact(req.params.id);
+      
+      if (!contact || contact.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+      
+      await storage.deleteContact(req.params.id);
+      
+      res.json({ message: 'Contact deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting contact:', error);
+      res.status(500).json({ message: 'Failed to delete contact' });
+    }
+  });
+
+  // Merge duplicate contacts
+  app.post('/api/crm/contacts/:id/merge', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const primaryContact = await storage.getContact(req.params.id);
+      
+      if (!primaryContact || primaryContact.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Primary contact not found' });
+      }
+      
+      const { duplicateIds } = req.body;
+      if (!Array.isArray(duplicateIds) || duplicateIds.length === 0) {
+        return res.status(400).json({ message: 'duplicateIds array is required' });
+      }
+      
+      // Verify all duplicate contacts belong to user
+      for (const duplicateId of duplicateIds) {
+        const duplicate = await storage.getContact(duplicateId);
+        if (!duplicate || duplicate.ownerUserId !== user.id) {
+          return res.status(403).json({ message: 'Access denied to one or more duplicate contacts' });
+        }
+      }
+      
+      const mergedContact = await storage.mergeContacts(req.params.id, duplicateIds);
+      
+      res.json(mergedContact);
+    } catch (error) {
+      console.error('Error merging contacts:', error);
+      res.status(500).json({ message: 'Failed to merge contacts' });
+    }
+  });
+
+  // Activity Management Endpoints
+  
+  // Get user's recent activities
+  app.get('/api/crm/activities', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const { contactId, type, limit = '20' } = req.query;
+      
+      const filters: any = { limit: parseInt(limit as string) };
+      if (contactId) filters.contactId = contactId as string;
+      if (type) filters.type = type as string;
+      
+      const activities = await storage.getUserActivities(user.id, filters);
+      
+      res.json(activities);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      res.status(500).json({ message: 'Failed to fetch activities' });
+    }
+  });
+
+  // Get contact's activity timeline
+  app.get('/api/crm/contacts/:id/activities', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const contact = await storage.getContact(req.params.id);
+      
+      if (!contact || contact.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+      
+      const { type, limit = '50' } = req.query;
+      const filters: any = { limit: parseInt(limit as string) };
+      if (type) filters.type = type as string;
+      
+      const activities = await storage.getContactActivities(req.params.id, filters);
+      
+      res.json(activities);
+    } catch (error) {
+      console.error('Error fetching contact activities:', error);
+      res.status(500).json({ message: 'Failed to fetch contact activities' });
+    }
+  });
+
+  // Create activity/note
+  app.post('/api/crm/activities', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      
+      // Verify contact belongs to user
+      const contact = await storage.getContact(req.body.contactId);
+      if (!contact || contact.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+      
+      const activityData = insertCrmActivitySchema.parse({
+        ...req.body,
+        createdBy: user.id
+      });
+      
+      const activity = await storage.createActivity(activityData);
+      
+      res.status(201).json(activity);
+    } catch (error) {
+      console.error('Error creating activity:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid activity data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Failed to create activity' });
+    }
+  });
+
+  // Update activity
+  app.put('/api/crm/activities/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const activity = await storage.getActivity(req.params.id);
+      
+      if (!activity || activity.createdBy !== user.id) {
+        return res.status(404).json({ message: 'Activity not found' });
+      }
+      
+      const updateData = req.body;
+      delete updateData.id;
+      delete updateData.contactId;
+      delete updateData.createdBy;
+      delete updateData.createdAt;
+      
+      const updatedActivity = await storage.updateActivity(req.params.id, updateData);
+      
+      res.json(updatedActivity);
+    } catch (error) {
+      console.error('Error updating activity:', error);
+      res.status(500).json({ message: 'Failed to update activity' });
+    }
+  });
+
+  // Delete activity
+  app.delete('/api/crm/activities/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const activity = await storage.getActivity(req.params.id);
+      
+      if (!activity || activity.createdBy !== user.id) {
+        return res.status(404).json({ message: 'Activity not found' });
+      }
+      
+      await storage.deleteActivity(req.params.id);
+      
+      res.json({ message: 'Activity deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      res.status(500).json({ message: 'Failed to delete activity' });
+    }
+  });
+
+  // Task Management Endpoints
+  
+  // Get user's tasks with filtering
+  app.get('/api/crm/tasks', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const { status, type, assignedTo = user.id } = req.query;
+      
+      const filters: any = { assignedTo: assignedTo as string };
+      if (status) filters.status = status as string;
+      if (type) filters.type = type as string;
+      
+      const tasks = await storage.getUserTasks(user.id, filters);
+      
+      res.json(tasks);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      res.status(500).json({ message: 'Failed to fetch tasks' });
+    }
+  });
+
+  // Get contact's tasks
+  app.get('/api/crm/contacts/:id/tasks', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const contact = await storage.getContact(req.params.id);
+      
+      if (!contact || contact.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+      
+      const { status, assignedTo } = req.query;
+      const filters: any = {};
+      if (status) filters.status = status as string;
+      if (assignedTo) filters.assignedTo = assignedTo as string;
+      
+      const tasks = await storage.getContactTasks(req.params.id, filters);
+      
+      res.json(tasks);
+    } catch (error) {
+      console.error('Error fetching contact tasks:', error);
+      res.status(500).json({ message: 'Failed to fetch contact tasks' });
+    }
+  });
+
+  // Create task
+  app.post('/api/crm/tasks', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      
+      // Verify contact belongs to user
+      const contact = await storage.getContact(req.body.contactId);
+      if (!contact || contact.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+      
+      const taskData = insertCrmTaskSchema.parse({
+        ...req.body,
+        createdBy: user.id,
+        assignedTo: req.body.assignedTo || user.id
+      });
+      
+      const task = await storage.createTask(taskData);
+      
+      res.status(201).json(task);
+    } catch (error) {
+      console.error('Error creating task:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid task data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Failed to create task' });
+    }
+  });
+
+  // Update task
+  app.put('/api/crm/tasks/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const task = await storage.getTask(req.params.id);
+      
+      if (!task || (task.createdBy !== user.id && task.assignedTo !== user.id)) {
+        return res.status(404).json({ message: 'Task not found' });
+      }
+      
+      const updateData = req.body;
+      delete updateData.id;
+      delete updateData.contactId;
+      delete updateData.createdBy;
+      delete updateData.createdAt;
+      
+      const updatedTask = await storage.updateTask(req.params.id, updateData);
+      
+      res.json(updatedTask);
+    } catch (error) {
+      console.error('Error updating task:', error);
+      res.status(500).json({ message: 'Failed to update task' });
+    }
+  });
+
+  // Mark task complete
+  app.put('/api/crm/tasks/:id/complete', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const task = await storage.getTask(req.params.id);
+      
+      if (!task || (task.createdBy !== user.id && task.assignedTo !== user.id)) {
+        return res.status(404).json({ message: 'Task not found' });
+      }
+      
+      const completedTask = await storage.markTaskComplete(req.params.id);
+      
+      res.json(completedTask);
+    } catch (error) {
+      console.error('Error completing task:', error);
+      res.status(500).json({ message: 'Failed to complete task' });
+    }
+  });
+
+  // Delete task
+  app.delete('/api/crm/tasks/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const task = await storage.getTask(req.params.id);
+      
+      if (!task || (task.createdBy !== user.id && task.assignedTo !== user.id)) {
+        return res.status(404).json({ message: 'Task not found' });
+      }
+      
+      await storage.deleteTask(req.params.id);
+      
+      res.json({ message: 'Task deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      res.status(500).json({ message: 'Failed to delete task' });
+    }
+  });
+
+  // Pipeline & Deal Management Endpoints
+  
+  // Get user's pipelines with stages
+  app.get('/api/crm/pipelines', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const pipelines = await storage.getUserPipelines(user.id);
+      
+      // Get stages for each pipeline
+      const pipelinesWithStages = await Promise.all(
+        pipelines.map(async (pipeline) => {
+          const stages = await storage.getPipelineStages(pipeline.id);
+          return { ...pipeline, stages };
+        })
+      );
+      
+      res.json(pipelinesWithStages);
+    } catch (error) {
+      console.error('Error fetching pipelines:', error);
+      res.status(500).json({ message: 'Failed to fetch pipelines' });
+    }
+  });
+
+  // Create pipeline
+  app.post('/api/crm/pipelines', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const pipelineData = insertCrmPipelineSchema.parse({
+        ...req.body,
+        ownerUserId: user.id
+      });
+      
+      const pipeline = await storage.createPipeline(pipelineData);
+      
+      // Create default stages if none provided
+      if (req.body.stages && Array.isArray(req.body.stages)) {
+        for (let i = 0; i < req.body.stages.length; i++) {
+          const stageData = req.body.stages[i];
+          await storage.createStage({
+            pipelineId: pipeline.id,
+            name: stageData.name,
+            description: stageData.description,
+            order: i,
+            probability: stageData.probability || 0,
+            isClosedWon: stageData.isClosedWon || false,
+            isClosedLost: stageData.isClosedLost || false
+          });
+        }
+      }
+      
+      res.status(201).json(pipeline);
+    } catch (error) {
+      console.error('Error creating pipeline:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid pipeline data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Failed to create pipeline' });
+    }
+  });
+
+  // Update pipeline
+  app.put('/api/crm/pipelines/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const pipeline = await storage.getPipeline(req.params.id);
+      
+      if (!pipeline || pipeline.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Pipeline not found' });
+      }
+      
+      const updateData = req.body;
+      delete updateData.id;
+      delete updateData.ownerUserId;
+      delete updateData.createdAt;
+      delete updateData.updatedAt;
+      
+      const updatedPipeline = await storage.updatePipeline(req.params.id, updateData);
+      
+      res.json(updatedPipeline);
+    } catch (error) {
+      console.error('Error updating pipeline:', error);
+      res.status(500).json({ message: 'Failed to update pipeline' });
+    }
+  });
+
+  // Delete pipeline
+  app.delete('/api/crm/pipelines/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const pipeline = await storage.getPipeline(req.params.id);
+      
+      if (!pipeline || pipeline.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Pipeline not found' });
+      }
+      
+      await storage.deletePipeline(req.params.id);
+      
+      res.json({ message: 'Pipeline deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting pipeline:', error);
+      res.status(500).json({ message: 'Failed to delete pipeline' });
+    }
+  });
+
+  // Get user's deals
+  app.get('/api/crm/deals', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const { status, pipelineId } = req.query;
+      
+      const filters: any = {};
+      if (status) filters.status = status as string;
+      if (pipelineId) filters.pipelineId = pipelineId as string;
+      
+      const deals = await storage.getUserDeals(user.id, filters);
+      
+      res.json(deals);
+    } catch (error) {
+      console.error('Error fetching deals:', error);
+      res.status(500).json({ message: 'Failed to fetch deals' });
+    }
+  });
+
+  // Get deals in specific pipeline
+  app.get('/api/crm/pipelines/:id/deals', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const pipeline = await storage.getPipeline(req.params.id);
+      
+      if (!pipeline || pipeline.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Pipeline not found' });
+      }
+      
+      const { stageId, status } = req.query;
+      const filters: any = {};
+      if (stageId) filters.stageId = stageId as string;
+      if (status) filters.status = status as string;
+      
+      const deals = await storage.getDealsByPipeline(req.params.id, filters);
+      
+      res.json(deals);
+    } catch (error) {
+      console.error('Error fetching pipeline deals:', error);
+      res.status(500).json({ message: 'Failed to fetch pipeline deals' });
+    }
+  });
+
+  // Create deal
+  app.post('/api/crm/deals', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      
+      // Verify pipeline belongs to user
+      const pipeline = await storage.getPipeline(req.body.pipelineId);
+      if (!pipeline || pipeline.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Pipeline not found' });
+      }
+      
+      // Verify stage belongs to pipeline
+      const stage = await storage.getStage(req.body.stageId);
+      if (!stage || stage.pipelineId !== req.body.pipelineId) {
+        return res.status(400).json({ message: 'Invalid stage for this pipeline' });
+      }
+      
+      // Verify contact if provided
+      if (req.body.primaryContactId) {
+        const contact = await storage.getContact(req.body.primaryContactId);
+        if (!contact || contact.ownerUserId !== user.id) {
+          return res.status(404).json({ message: 'Contact not found' });
+        }
+      }
+      
+      const dealData = insertCrmDealSchema.parse({
+        ...req.body,
+        ownerUserId: user.id
+      });
+      
+      const deal = await storage.createDeal(dealData);
+      
+      res.status(201).json(deal);
+    } catch (error) {
+      console.error('Error creating deal:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid deal data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Failed to create deal' });
+    }
+  });
+
+  // Update deal
+  app.put('/api/crm/deals/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const deal = await storage.getDeal(req.params.id);
+      
+      if (!deal || deal.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Deal not found' });
+      }
+      
+      const updateData = req.body;
+      delete updateData.id;
+      delete updateData.ownerUserId;
+      delete updateData.createdAt;
+      delete updateData.updatedAt;
+      
+      const updatedDeal = await storage.updateDeal(req.params.id, updateData);
+      
+      res.json(updatedDeal);
+    } catch (error) {
+      console.error('Error updating deal:', error);
+      res.status(500).json({ message: 'Failed to update deal' });
+    }
+  });
+
+  // Move deal to different stage
+  app.put('/api/crm/deals/:id/move', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const deal = await storage.getDeal(req.params.id);
+      
+      if (!deal || deal.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Deal not found' });
+      }
+      
+      const { stageId } = req.body;
+      if (!stageId) {
+        return res.status(400).json({ message: 'stageId is required' });
+      }
+      
+      // Verify stage belongs to same pipeline
+      const stage = await storage.getStage(stageId);
+      if (!stage || stage.pipelineId !== deal.pipelineId) {
+        return res.status(400).json({ message: 'Invalid stage for this deal\'s pipeline' });
+      }
+      
+      const movedDeal = await storage.moveDealToStage(req.params.id, stageId);
+      
+      res.json(movedDeal);
+    } catch (error) {
+      console.error('Error moving deal:', error);
+      res.status(500).json({ message: 'Failed to move deal' });
+    }
+  });
+
+  // Delete deal
+  app.delete('/api/crm/deals/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const deal = await storage.getDeal(req.params.id);
+      
+      if (!deal || deal.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Deal not found' });
+      }
+      
+      await storage.deleteDeal(req.params.id);
+      
+      res.json({ message: 'Deal deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting deal:', error);
+      res.status(500).json({ message: 'Failed to delete deal' });
+    }
+  });
+
+  // Analytics & Statistics Endpoints
+  
+  // Get comprehensive CRM stats for dashboard
+  app.get('/api/crm/stats', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      
+      const [contactStats, dealStats, activityStats] = await Promise.all([
+        storage.getContactStats(user.id),
+        storage.getDealStats(user.id),
+        storage.getActivityStats(user.id)
+      ]);
+      
+      res.json({
+        contacts: contactStats,
+        deals: dealStats,
+        activities: activityStats,
+        summary: {
+          totalContacts: contactStats.totalContacts,
+          totalDeals: dealStats.totalDeals,
+          totalValue: dealStats.totalValue,
+          conversionRate: dealStats.conversionRate,
+          activitiesThisWeek: activityStats.activitiesThisWeek
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching CRM stats:', error);
+      res.status(500).json({ message: 'Failed to fetch CRM statistics' });
+    }
+  });
+
+  // Get detailed contact analytics
+  app.get('/api/crm/analytics/contacts', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const contactStats = await storage.getContactStats(user.id);
+      
+      res.json(contactStats);
+    } catch (error) {
+      console.error('Error fetching contact analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch contact analytics' });
+    }
+  });
+
+  // Get deal analytics and pipeline health
+  app.get('/api/crm/analytics/deals', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const dealStats = await storage.getDealStats(user.id);
+      
+      res.json(dealStats);
+    } catch (error) {
+      console.error('Error fetching deal analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch deal analytics' });
+    }
   });
 
   const httpServer = createServer(app);
