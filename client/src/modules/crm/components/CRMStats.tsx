@@ -67,7 +67,7 @@ export function CRMStats() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-gray-900">{currentStats.totalContacts}</p>
+                <p className="text-2xl font-bold text-gray-900">{currentStats.totalContacts || 0}</p>
                 <p className="text-sm text-gray-600">Total Contacts</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-full">
@@ -86,7 +86,7 @@ export function CRMStats() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-gray-900">{currentStats.totalDeals}</p>
+                <p className="text-2xl font-bold text-gray-900">{currentStats.totalDeals || 0}</p>
                 <p className="text-sm text-gray-600">Active Deals</p>
               </div>
               <div className="p-3 bg-orange-100 rounded-full">
@@ -95,7 +95,7 @@ export function CRMStats() {
             </div>
             <div className="mt-4 flex items-center text-sm">
               <span className="text-gray-600">Value: </span>
-              <span className="font-medium ml-1">${(currentStats.totalDealValue / 1000).toFixed(0)}k</span>
+              <span className="font-medium ml-1">${((currentStats.totalDealValue || 0) / 1000).toFixed(0)}k</span>
             </div>
           </CardContent>
         </Card>
@@ -104,7 +104,7 @@ export function CRMStats() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-gray-900">{currentStats.conversionRate}%</p>
+                <p className="text-2xl font-bold text-gray-900">{currentStats.conversionRate || 0}%</p>
                 <p className="text-sm text-gray-600">Conversion Rate</p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
@@ -112,7 +112,7 @@ export function CRMStats() {
               </div>
             </div>
             <div className="mt-4">
-              <Progress value={currentStats.conversionRate} className="h-2" />
+              <Progress value={currentStats.conversionRate || 0} className="h-2" />
             </div>
           </CardContent>
         </Card>
@@ -121,7 +121,7 @@ export function CRMStats() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-gray-900">${(currentStats.wonDealValue / 1000).toFixed(0)}k</p>
+                <p className="text-2xl font-bold text-gray-900">${((currentStats.wonDealValue || 0) / 1000).toFixed(0)}k</p>
                 <p className="text-sm text-gray-600">Revenue Won</p>
               </div>
               <div className="p-3 bg-purple-100 rounded-full">
@@ -130,7 +130,7 @@ export function CRMStats() {
             </div>
             <div className="mt-4 flex items-center text-sm">
               <span className="text-gray-600">Avg Deal: </span>
-              <span className="font-medium ml-1">${currentStats.averageDealSize.toLocaleString()}</span>
+              <span className="font-medium ml-1">${currentStats.averageDealSize?.toLocaleString() || '0'}</span>
             </div>
           </CardContent>
         </Card>
