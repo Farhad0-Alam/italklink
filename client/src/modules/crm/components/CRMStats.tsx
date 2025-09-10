@@ -148,7 +148,7 @@ export function CRMStats() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {currentStats.dealsByStage.map((stage, index) => (
+              {(currentStats.dealsByStage || []).map((stage, index) => (
                 <div key={stage.stageName} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <div className="w-3 h-3 rounded-full bg-blue-500" style={{ 
@@ -165,7 +165,7 @@ export function CRMStats() {
                       <div 
                         className="h-2 rounded-full bg-blue-500" 
                         style={{ 
-                          width: `${(stage.value / currentStats.totalDealValue) * 100}%`,
+                          width: `${(stage.value / (currentStats.totalDealValue || 1)) * 100}%`,
                           backgroundColor: `hsl(${220 + index * 30}, 70%, 50%)` 
                         }}
                       ></div>
@@ -189,16 +189,16 @@ export function CRMStats() {
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
                 <div>
-                  <p className="text-2xl font-bold text-green-700">{currentStats.activeTasks}</p>
+                  <p className="text-2xl font-bold text-green-700">{currentStats.activeTasks || 0}</p>
                   <p className="text-sm text-green-600">Active Tasks</p>
                 </div>
                 <CheckSquare className="h-8 w-8 text-green-600" />
               </div>
               
-              {currentStats.overdueTasks > 0 && (
+              {(currentStats.overdueTasks || 0) > 0 && (
                 <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
                   <div>
-                    <p className="text-2xl font-bold text-red-700">{currentStats.overdueTasks}</p>
+                    <p className="text-2xl font-bold text-red-700">{currentStats.overdueTasks || 0}</p>
                     <p className="text-sm text-red-600">Overdue Tasks</p>
                   </div>
                   <AlertCircle className="h-8 w-8 text-red-600" />
@@ -228,39 +228,39 @@ export function CRMStats() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <span className="text-sm font-medium">Low ({currentStats.leadScoreDistribution.low})</span>
+                  <span className="text-sm font-medium">Low ({currentStats.leadScoreDistribution?.low || 0})</span>
                 </div>
                 <div className="flex-1 mx-3">
-                  <Progress value={(currentStats.leadScoreDistribution.low / currentStats.totalContacts) * 100} className="h-2" />
+                  <Progress value={((currentStats.leadScoreDistribution?.low || 0) / (currentStats.totalContacts || 1)) * 100} className="h-2" />
                 </div>
                 <span className="text-sm text-gray-500">
-                  {Math.round((currentStats.leadScoreDistribution.low / currentStats.totalContacts) * 100)}%
+                  {Math.round(((currentStats.leadScoreDistribution?.low || 0) / (currentStats.totalContacts || 1)) * 100)}%
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                  <span className="text-sm font-medium">Medium ({currentStats.leadScoreDistribution.medium})</span>
+                  <span className="text-sm font-medium">Medium ({currentStats.leadScoreDistribution?.medium || 0})</span>
                 </div>
                 <div className="flex-1 mx-3">
-                  <Progress value={(currentStats.leadScoreDistribution.medium / currentStats.totalContacts) * 100} className="h-2" />
+                  <Progress value={((currentStats.leadScoreDistribution?.medium || 0) / (currentStats.totalContacts || 1)) * 100} className="h-2" />
                 </div>
                 <span className="text-sm text-gray-500">
-                  {Math.round((currentStats.leadScoreDistribution.medium / currentStats.totalContacts) * 100)}%
+                  {Math.round(((currentStats.leadScoreDistribution?.medium || 0) / (currentStats.totalContacts || 1)) * 100)}%
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="text-sm font-medium">High ({currentStats.leadScoreDistribution.high})</span>
+                  <span className="text-sm font-medium">High ({currentStats.leadScoreDistribution?.high || 0})</span>
                 </div>
                 <div className="flex-1 mx-3">
-                  <Progress value={(currentStats.leadScoreDistribution.high / currentStats.totalContacts) * 100} className="h-2" />
+                  <Progress value={((currentStats.leadScoreDistribution?.high || 0) / (currentStats.totalContacts || 1)) * 100} className="h-2" />
                 </div>
                 <span className="text-sm text-gray-500">
-                  {Math.round((currentStats.leadScoreDistribution.high / currentStats.totalContacts) * 100)}%
+                  {Math.round(((currentStats.leadScoreDistribution?.high || 0) / (currentStats.totalContacts || 1)) * 100)}%
                 </span>
               </div>
             </div>
