@@ -303,8 +303,7 @@ export async function getCardLeadProfiles(cardOwnerId: string, limit: number = 1
         location: leadProfiles.location,
         devicePreference: leadProfiles.devicePreference,
         behaviorTags: leadProfiles.behaviorTags,
-        lastSeenAt: leadProfiles.lastSeenAt,
-        createdAt: leadProfiles.createdAt
+        lastSeenAt: leadProfiles.lastSeenAt
       })
       .from(leadProfiles)
       .where(eq(leadProfiles.cardOwnerId, cardOwnerId))
