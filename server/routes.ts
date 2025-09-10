@@ -1339,18 +1339,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create default stages if none provided
       if (req.body.stages && Array.isArray(req.body.stages)) {
+        console.log('Creating stages for pipeline:', pipeline.id, req.body.stages);
         for (let i = 0; i < req.body.stages.length; i++) {
           const stageData = req.body.stages[i];
-          await storage.createStage({
-            pipelineId: pipeline.id,
-            name: stageData.name,
-            description: stageData.description,
-            order: i,
-            probability: stageData.probability || 0,
-            isClosedWon: stageData.isClosedWon || false,
-            isClosedLost: stageData.isClosedLost || false
-          });
+          try {
+            const createdStage = await storage.createStage({
+              pipelineId: pipeline.id,
+              name: stageData.name,
+              description: stageData.description || '',
+              order: i,
+              probability: stageData.probability || 50,
+              isClosedWon: stageData.isClosedWon || false,
+              isClosedLost: stageData.isClosedLost || false
+            });
+            console.log('Stage created successfully:', createdStage.name);
+          } catch (stageError) {
+            console.error('Failed to create stage:', stageData.name, stageError);
+          }
         }
+      } else {
+        console.log('No stages provided in request body, stages:', req.body.stages);
       }
       
       res.status(201).json(pipeline);
