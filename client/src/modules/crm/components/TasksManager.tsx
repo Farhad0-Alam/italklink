@@ -50,19 +50,24 @@ import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek, isPast } 
 export function TasksManager() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("list");
-  const [statusFilter, setStatusFilter] = useState<string>("");
-  const [priorityFilter, setPriorityFilter] = useState<string>("");
-  const [typeFilter, setTypeFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   // API hooks
-  const { data: tasks = [], isLoading: tasksLoading, error: tasksError } = useTasks({
-    status: statusFilter || undefined,
-    priority: priorityFilter || undefined,
+  const { data: tasksResponse, isLoading: tasksLoading, error: tasksError } = useTasks({
+    status: statusFilter === "all" ? undefined : statusFilter,
+    priority: priorityFilter === "all" ? undefined : priorityFilter,
   });
-  const { data: contacts = [] } = useContacts();
-  const { data: deals = [] } = useDeals();
+  const { data: contactsResponse } = useContacts();
+  const { data: dealsResponse } = useDeals();
+  
+  // Handle API response structure
+  const tasks = tasksResponse?.tasks || tasksResponse || [];
+  const contacts = contactsResponse?.contacts || contactsResponse || [];
+  const deals = dealsResponse?.deals || dealsResponse || [];
   
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask(selectedTask?.id || "");
@@ -316,7 +321,7 @@ export function TasksManager() {
                 <SelectValue placeholder="Filter by Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
@@ -329,7 +334,7 @@ export function TasksManager() {
                 <SelectValue placeholder="Filter by Priority" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Priorities</SelectItem>
+                <SelectItem value="all">All Priorities</SelectItem>
                 <SelectItem value="high">High</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="low">Low</SelectItem>
@@ -341,7 +346,7 @@ export function TasksManager() {
                 <SelectValue placeholder="Filter by Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="call">Call</SelectItem>
                 <SelectItem value="email">Email</SelectItem>
                 <SelectItem value="meeting">Meeting</SelectItem>

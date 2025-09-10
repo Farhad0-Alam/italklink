@@ -36,11 +36,16 @@ export function DealsManager() {
   const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
 
   // API hooks
-  const { data: deals = [], isLoading: dealsLoading, error: dealsError } = useDeals({ 
+  const { data: dealsResponse, isLoading: dealsLoading, error: dealsError } = useDeals({ 
     pipelineId: selectedPipelineId || undefined 
   });
-  const { data: pipelines = [], isLoading: pipelinesLoading, error: pipelinesError } = usePipelines();
-  const { data: contacts = [] } = useContacts();
+  const { data: pipelinesResponse, isLoading: pipelinesLoading, error: pipelinesError } = usePipelines();
+  const { data: contactsResponse } = useContacts();
+  
+  // Handle API response structure
+  const deals = dealsResponse?.deals || dealsResponse || [];
+  const pipelines = pipelinesResponse?.pipelines || pipelinesResponse || [];
+  const contacts = contactsResponse?.contacts || contactsResponse || [];
   
   const createDealMutation = useCreateDeal();
   const updateDealMutation = useUpdateDeal(selectedDeal?.id || "");

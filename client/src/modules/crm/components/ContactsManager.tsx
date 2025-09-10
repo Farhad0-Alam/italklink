@@ -32,17 +32,17 @@ import { formatDistanceToNow } from "date-fns";
 export function ContactsManager() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [lifecycleFilter, setLifecycleFilter] = useState<string>("");
-  const [priorityFilter, setPriorityFilter] = useState<string>("");
+  const [lifecycleFilter, setLifecycleFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   // API hooks
-  const { data: contacts = [], isLoading: contactsLoading, error: contactsError, refetch } = useContacts({
+  const { data: contactsResponse, isLoading: contactsLoading, error: contactsError, refetch } = useContacts({
     search: searchTerm,
-    lifecycleStage: lifecycleFilter || undefined,
-    priority: priorityFilter || undefined,
+    lifecycleStage: lifecycleFilter === "all" ? undefined : lifecycleFilter,
+    priority: priorityFilter === "all" ? undefined : priorityFilter,
   });
 
   const { data: contactActivities = [], isLoading: activitiesLoading } = useContactActivities(
@@ -53,7 +53,8 @@ export function ContactsManager() {
   const updateContactMutation = useUpdateContact(selectedContact?.id || "");
   const deleteContactMutation = useDeleteContact();
 
-  // Use real data from API - no mock fallback to ensure consistency
+  // Handle API response structure
+  const contacts = contactsResponse?.contacts || [];
   const displayContacts = contacts;
 
   const getLifecycleStageColor = (stage: string) => {
@@ -207,7 +208,7 @@ export function ContactsManager() {
             <SelectValue placeholder="Lifecycle Stage" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Stages</SelectItem>
+            <SelectItem value="all">All Stages</SelectItem>
             <SelectItem value="subscriber">Subscriber</SelectItem>
             <SelectItem value="lead">Lead</SelectItem>
             <SelectItem value="marketing_qualified_lead">Marketing Qualified</SelectItem>
@@ -222,7 +223,7 @@ export function ContactsManager() {
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Priorities</SelectItem>
+            <SelectItem value="all">All Priorities</SelectItem>
             <SelectItem value="high">High</SelectItem>
             <SelectItem value="medium">Medium</SelectItem>
             <SelectItem value="low">Low</SelectItem>
