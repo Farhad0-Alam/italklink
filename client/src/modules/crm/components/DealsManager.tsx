@@ -43,9 +43,9 @@ export function DealsManager() {
   const { data: contactsResponse } = useContacts();
   
   // Handle API response structure
-  const deals = dealsResponse?.deals || dealsResponse || [];
-  const pipelines = pipelinesResponse?.pipelines || pipelinesResponse || [];
-  const contacts = contactsResponse?.contacts || contactsResponse || [];
+  const deals = Array.isArray(dealsResponse) ? dealsResponse : (dealsResponse?.deals || []);
+  const pipelines = Array.isArray(pipelinesResponse) ? pipelinesResponse : (pipelinesResponse?.pipelines || []);
+  const contacts = Array.isArray(contactsResponse) ? contactsResponse : (contactsResponse?.contacts || []);
   
   const createDealMutation = useCreateDeal();
   const updateDealMutation = useUpdateDeal(selectedDeal?.id || "");
@@ -55,14 +55,14 @@ export function DealsManager() {
   // Use real data from API - no mock fallback to ensure consistency
   const displayPipelines = pipelines;
   const displayDeals = deals;
-  const currentPipeline = displayPipelines.find(p => p.id === selectedPipelineId) || displayPipelines[0];
+  const currentPipeline = displayPipelines.find((p: any) => p.id === selectedPipelineId) || displayPipelines[0];
 
   const getDealsByStage = (stageId: string) => {
-    return displayDeals.filter(deal => deal.stage === stageId);
+    return displayDeals.filter((deal: any) => deal.stage === stageId);
   };
 
   const getStageColor = (stageId: string) => {
-    const stage = currentPipeline?.stages.find(s => s.id === stageId);
+    const stage = currentPipeline?.stages?.find((s: any) => s.id === stageId);
     return stage?.color || "#6B7280";
   };
 
@@ -126,12 +126,12 @@ export function DealsManager() {
   };
 
   const getTotalPipelineValue = () => {
-    return displayDeals.reduce((sum, deal) => sum + deal.value, 0);
+    return displayDeals.reduce((sum: number, deal: any) => sum + deal.value, 0);
   };
 
   const getWeightedPipelineValue = () => {
-    return displayDeals.reduce((sum, deal) => {
-      const stage = currentPipeline?.stages.find(s => s.id === deal.stage);
+    return displayDeals.reduce((sum: number, deal: any) => {
+      const stage = currentPipeline?.stages?.find((s: any) => s.id === deal.stage);
       return sum + (deal.value * (stage?.probability || 0) / 100);
     }, 0);
   };

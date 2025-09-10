@@ -65,9 +65,9 @@ export function TasksManager() {
   const { data: dealsResponse } = useDeals();
   
   // Handle API response structure
-  const tasks = tasksResponse?.tasks || tasksResponse || [];
-  const contacts = contactsResponse?.contacts || contactsResponse || [];
-  const deals = dealsResponse?.deals || dealsResponse || [];
+  const tasks = Array.isArray(tasksResponse) ? tasksResponse : (tasksResponse?.tasks || []);
+  const contacts = Array.isArray(contactsResponse) ? contactsResponse : (contactsResponse?.contacts || []);
+  const deals = Array.isArray(dealsResponse) ? dealsResponse : (dealsResponse?.deals || []);
   
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask(selectedTask?.id || "");
