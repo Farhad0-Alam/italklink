@@ -189,6 +189,78 @@ export async function notifyAdminBroadcast(req: AuthenticatedRequest, res: Respo
 }
 
 /**
+ * Send notification to all user's card subscribers
+ * POST /api/notify/all-cards
+ */
+export async function notifyAllCardSubscribers(req: AuthenticatedRequest, res: Response) {
+  try {
+    const { title, message, url } = req.body;
+    const userId = req.user?.id;
+
+    // Validation
+    if (!title || !message) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Missing required fields: title, message',
+      });
+    }
+
+    if (!userId) {
+      return res.status(401).json({
+        ok: false,
+        error: 'Authentication required',
+      });
+    }
+
+    // Rate limiting (2 bulk notifications per user per day)
+    const rateLimitKey = `bulk:${userId}`;
+    if (!rateLimiter.checkLimit(rateLimitKey, 2, 24 * 60 * 60 * 1000)) {
+      return res.status(429).json({
+        ok: false,
+        error: 'Rate limit exceeded. Maximum 2 bulk notifications per day.',
+      });
+    }
+
+    // TODO: Get user's business cards from database
+    // const userCards = await getUserBusinessCards(userId);
+    // if (!userCards || userCards.length === 0) {
+    //   return res.status(404).json({
+    //     ok: false,
+    //     error: 'No business cards found',
+    //   });
+    // }
+
+    // For now, simulate with owner_user_id tag
+    const result = await oneSignalService.sendToAllUserCards(
+      String(userId),
+      String(title).slice(0, 100),
+      String(message).slice(0, 300),
+      url ? String(url) : undefined
+    );
+
+    // Record rate limit usage
+    rateLimiter.recordUsage(rateLimitKey);
+
+    res.json({
+      ok: true,
+      data: {
+        notificationId: result.id,
+        recipients: result.recipients,
+        userId,
+        targetType: 'all_user_cards',
+      },
+    });
+
+  } catch (error: any) {
+    console.error('Bulk notification error:', error);
+    res.status(500).json({
+      ok: false,
+      error: error.message || 'Failed to send bulk notification',
+    });
+  }
+}
+
+/**
  * Test OneSignal connection (admin only)
  * GET /api/notify/test
  */

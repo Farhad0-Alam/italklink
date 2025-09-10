@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { notifyCardSubscribers, notifyAdminBroadcast, testNotificationService } from './controller';
+import { notifyCardSubscribers, notifyAllCardSubscribers, notifyAdminBroadcast, testNotificationService } from './controller';
 import { requireAuth, requireAdmin, assertOwnsCard, validateNotificationRequest, handleNotificationError } from './middleware';
 
 const router = Router();
@@ -14,6 +14,17 @@ router.post(
   validateNotificationRequest,
   assertOwnsCard,
   notifyCardSubscribers
+);
+
+/**
+ * Send notification to all user's card subscribers
+ * POST /api/notify/all-cards
+ */
+router.post(
+  '/all-cards',
+  requireAuth,
+  validateNotificationRequest,
+  notifyAllCardSubscribers
 );
 
 /**

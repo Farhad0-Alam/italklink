@@ -111,6 +111,22 @@ export class OneSignalService {
   }
 
   /**
+   * Send notification to all cards owned by a user
+   */
+  async sendToAllUserCards(userId: string, title: string, message: string, url?: string): Promise<OneSignalResponse> {
+    const notification: OneSignalNotification = {
+      headings: { en: title },
+      contents: { en: message },
+      url,
+      filters: [
+        { field: 'tag', key: 'owner_user_id', relation: '=', value: userId }
+      ],
+    };
+
+    return this.sendByTags(notification);
+  }
+
+  /**
    * Send admin broadcast to users
    */
   async sendAdminBroadcast(
