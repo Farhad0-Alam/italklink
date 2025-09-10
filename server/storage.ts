@@ -2,6 +2,7 @@ import { db } from './db';
 import { 
   users, businessCards, teams, teamMembers, bulkGenerationJobs, subscriptionPlans, globalTemplates, walletPasses,
   crmContacts, crmActivities, crmTasks, crmPipelines, crmStages, crmDeals, crmSequences, emailTemplates,
+  automations, automationRuns,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -9,7 +10,8 @@ import {
   type CrmContact, type InsertCrmContact, type CrmActivity, type InsertCrmActivity,
   type CrmTask, type InsertCrmTask, type CrmPipeline, type InsertCrmPipeline,
   type CrmStage, type InsertCrmStage, type CrmDeal, type InsertCrmDeal,
-  type CrmSequence, type InsertCrmSequence, type EmailTemplate, type InsertEmailTemplate
+  type CrmSequence, type InsertCrmSequence, type EmailTemplate, type InsertEmailTemplate,
+  type Automation, type InsertAutomation, type AutomationRun, type InsertAutomationRun
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -1047,6 +1049,131 @@ export class DatabaseStorage implements IStorage {
     }
     
     return await this.updateSequence(id, { isActive: !sequence.isActive });
+  }
+
+  // ===== AUTOMATION OPERATIONS =====
+  async createAutomation(automationData: InsertAutomation): Promise<Automation> {
+    const [automation] = await db.insert(automations).values(automationData).returning();
+    return automation;
+  }
+
+  async getAutomation(id: string): Promise<Automation | undefined> {
+    const [automation] = await db.select().from(automations).where(eq(automations.id, id));
+    return automation;
+  }
+
+  async getUserAutomations(userId: string): Promise<Automation[]> {
+    return await db
+      .select()
+      .from(automations)
+      .where(eq(automations.ownerUserId, userId))
+      .orderBy(desc(automations.createdAt));
+  }
+
+  async updateAutomation(id: string, automationData: Partial<InsertAutomation>): Promise<Automation> {
+    const [automation] = await db
+      .update(automations)
+      .set({ ...automationData, updatedAt: new Date() })
+      .where(eq(automations.id, id))
+      .returning();
+    return automation;
+  }
+
+  async deleteAutomation(id: string): Promise<void> {
+    await db.delete(automations).where(eq(automations.id, id));
+  }
+
+  async getEnabledAutomations(userId: string): Promise<Automation[]> {
+    return await db
+      .select()
+      .from(automations)
+      .where(and(
+        eq(automations.ownerUserId, userId),
+        eq(automations.enabled, true)
+      ))
+      .orderBy(desc(automations.createdAt));
+  }
+
+  async incrementAutomationRuns(automationId: string, successful: boolean): Promise<void> {
+    const automation = await this.getAutomation(automationId);
+    if (!automation) return;
+
+    await db
+      .update(automations)
+      .set({
+        totalRuns: automation.totalRuns + 1,
+        successfulRuns: successful ? automation.successfulRuns + 1 : automation.successfulRuns,
+        lastTriggered: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(automations.id, automationId));
+  }
+
+  // ===== AUTOMATION RUN OPERATIONS =====
+  async createAutomationRun(runData: InsertAutomationRun): Promise<AutomationRun> {
+    const [run] = await db.insert(automationRuns).values(runData).returning();
+    return run;
+  }
+
+  async getAutomationRun(id: string): Promise<AutomationRun | undefined> {
+    const [run] = await db.select().from(automationRuns).where(eq(automationRuns.id, id));
+    return run;
+  }
+
+  async getAutomationRuns(automationId: string, limit = 50): Promise<AutomationRun[]> {
+    return await db
+      .select()
+      .from(automationRuns)
+      .where(eq(automationRuns.automationId, automationId))
+      .orderBy(desc(automationRuns.createdAt))
+      .limit(limit);
+  }
+
+  async getUserAutomationRuns(userId: string, limit = 100): Promise<AutomationRun[]> {
+    return await db
+      .select({
+        id: automationRuns.id,
+        automationId: automationRuns.automationId,
+        triggerEvent: automationRuns.triggerEvent,
+        triggerPayload: automationRuns.triggerPayload,
+        status: automationRuns.status,
+        startedAt: automationRuns.startedAt,
+        completedAt: automationRuns.completedAt,
+        executionLog: automationRuns.executionLog,
+        errorMessage: automationRuns.errorMessage,
+        actionsExecuted: automationRuns.actionsExecuted,
+        actionsFailed: automationRuns.actionsFailed,
+        createdAt: automationRuns.createdAt,
+        automationName: automations.name
+      })
+      .from(automationRuns)
+      .innerJoin(automations, eq(automationRuns.automationId, automations.id))
+      .where(eq(automations.ownerUserId, userId))
+      .orderBy(desc(automationRuns.createdAt))
+      .limit(limit);
+  }
+
+  async updateAutomationRun(id: string, runData: Partial<InsertAutomationRun>): Promise<AutomationRun> {
+    const [run] = await db
+      .update(automationRuns)
+      .set(runData)
+      .where(eq(automationRuns.id, id))
+      .returning();
+    return run;
+  }
+
+  async completeAutomationRun(id: string, status: string, executionLog: any[], errorMessage?: string): Promise<void> {
+    await db
+      .update(automationRuns)
+      .set({
+        status,
+        completedAt: new Date(),
+        executionLog,
+        errorMessage,
+        actionsExecuted: executionLog.filter(log => log.status === 'success').length,
+        actionsFailed: executionLog.filter(log => log.status === 'failed').length
+      })
+      .where(eq(automationRuns.id, id));
   }
 
   // ===== EMAIL TEMPLATE OPERATIONS =====

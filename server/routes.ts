@@ -1629,6 +1629,177 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== AUTOMATION WORKFLOW ENDPOINTS =====
+  
+  // Get user's automations
+  app.get('/api/automations', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const automations = await storage.getUserAutomations(user.id);
+      res.json(automations);
+    } catch (error) {
+      console.error('Error fetching automations:', error);
+      res.status(500).json({ message: 'Failed to fetch automations' });
+    }
+  });
+
+  // Create new automation
+  app.post('/api/automations', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const automationData = {
+        ...req.body,
+        ownerUserId: user.id
+      };
+
+      const automation = await storage.createAutomation(automationData);
+      res.status(201).json(automation);
+    } catch (error) {
+      console.error('Error creating automation:', error);
+      res.status(500).json({ message: 'Failed to create automation' });
+    }
+  });
+
+  // Get specific automation
+  app.get('/api/automations/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const automation = await storage.getAutomation(req.params.id);
+      
+      if (!automation || automation.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Automation not found' });
+      }
+      
+      res.json(automation);
+    } catch (error) {
+      console.error('Error fetching automation:', error);
+      res.status(500).json({ message: 'Failed to fetch automation' });
+    }
+  });
+
+  // Update automation
+  app.put('/api/automations/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const automation = await storage.getAutomation(req.params.id);
+      
+      if (!automation || automation.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Automation not found' });
+      }
+
+      const updatedAutomation = await storage.updateAutomation(req.params.id, req.body);
+      res.json(updatedAutomation);
+    } catch (error) {
+      console.error('Error updating automation:', error);
+      res.status(500).json({ message: 'Failed to update automation' });
+    }
+  });
+
+  // Delete automation
+  app.delete('/api/automations/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const automation = await storage.getAutomation(req.params.id);
+      
+      if (!automation || automation.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Automation not found' });
+      }
+
+      await storage.deleteAutomation(req.params.id);
+      res.json({ message: 'Automation deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting automation:', error);
+      res.status(500).json({ message: 'Failed to delete automation' });
+    }
+  });
+
+  // Toggle automation enabled/disabled
+  app.patch('/api/automations/:id/toggle', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const automation = await storage.getAutomation(req.params.id);
+      
+      if (!automation || automation.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Automation not found' });
+      }
+
+      const updatedAutomation = await storage.updateAutomation(req.params.id, {
+        enabled: !automation.enabled
+      });
+      
+      res.json(updatedAutomation);
+    } catch (error) {
+      console.error('Error toggling automation:', error);
+      res.status(500).json({ message: 'Failed to toggle automation' });
+    }
+  });
+
+  // Get automation execution history
+  app.get('/api/automations/:id/runs', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const automation = await storage.getAutomation(req.params.id);
+      
+      if (!automation || automation.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Automation not found' });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 50;
+      const runs = await storage.getAutomationRuns(req.params.id, limit);
+      
+      res.json(runs);
+    } catch (error) {
+      console.error('Error fetching automation runs:', error);
+      res.status(500).json({ message: 'Failed to fetch automation runs' });
+    }
+  });
+
+  // Get all automation runs for user (for global logs view)
+  app.get('/api/automation-runs', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const limit = parseInt(req.query.limit as string) || 100;
+      const runs = await storage.getUserAutomationRuns(user.id, limit);
+      
+      res.json(runs);
+    } catch (error) {
+      console.error('Error fetching automation runs:', error);
+      res.status(500).json({ message: 'Failed to fetch automation runs' });
+    }
+  });
+
+  // Test automation trigger (for testing purposes)
+  app.post('/api/automations/:id/test', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const automation = await storage.getAutomation(req.params.id);
+      
+      if (!automation || automation.ownerUserId !== user.id) {
+        return res.status(404).json({ message: 'Automation not found' });
+      }
+
+      // Import automation engine for testing
+      const { automationEngine } = await import('./automation-engine');
+      
+      // Create test payload
+      const testPayload = {
+        userId: user.id,
+        entityId: 'test-entity',
+        entityType: 'test',
+        data: req.body.testData || {},
+        timestamp: new Date()
+      };
+
+      // Trigger automation with test event
+      await automationEngine.triggerAutomations('test.trigger', testPayload);
+      
+      res.json({ message: 'Test automation triggered successfully' });
+    } catch (error) {
+      console.error('Error testing automation:', error);
+      res.status(500).json({ message: 'Failed to test automation' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
