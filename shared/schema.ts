@@ -26,6 +26,12 @@ export const iconTypeEnum = pgEnum('icon_type', ['url', 'email', 'phone', 'whats
 export const couponTypeEnum = pgEnum('coupon_type', ['percentage', 'fixed_amount']);
 export const couponStatusEnum = pgEnum('coupon_status', ['active', 'inactive', 'expired']);
 
+// Automation system enums
+export const automationActionEnum = pgEnum('automation_action', ['crm_contact', 'email_sequence', 'lead_score', 'notification', 'google_sheet', 'webhook']);
+export const crmProviderEnum = pgEnum('crm_provider', ['hubspot', 'salesforce', 'zoho', 'google_sheets', 'pipedrive', 'custom_webhook']);
+export const leadPriorityEnum = pgEnum('lead_priority', ['low', 'medium', 'high', 'hot']);
+export const automationStatusEnum = pgEnum('automation_status', ['active', 'paused', 'failed']);
+
 // Affiliate system enums
 export const affiliateStatusEnum = pgEnum('affiliate_status', ['pending', 'approved', 'suspended', 'rejected']);
 export const kycStatusEnum = pgEnum('kyc_status', ['pending', 'submitted', 'approved', 'rejected', 'expired']);
@@ -1161,13 +1167,159 @@ export const headerTemplates = pgTable("header_templates", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Button interaction tracking for automation
+export const buttonInteractions = pgTable("button_interactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Reference data
+  cardId: varchar("card_id").references(() => businessCards.id, { onDelete: 'cascade' }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  elementId: varchar("element_id").notNull(), // Page element ID
+  
+  // Interaction details
+  interactionType: varchar("interaction_type").notNull(), // 'click', 'view', 'download'
+  buttonLabel: varchar("button_label").notNull(),
+  buttonAction: varchar("button_action").notNull(), // 'link', 'call', 'email', 'download'
+  targetValue: text("target_value"), // URL, phone, email address
+  
+  // Visitor information
+  visitorIp: varchar("visitor_ip"),
+  visitorUserAgent: text("visitor_user_agent"),
+  visitorLocation: jsonb("visitor_location"), // {country, city, region}
+  visitorDevice: varchar("visitor_device"), // mobile, desktop, tablet
+  referrer: text("referrer"),
+  
+  // Context data
+  sessionId: varchar("session_id"),
+  leadScore: integer("lead_score").default(10), // Points assigned to this interaction
+  leadPriority: leadPriorityEnum("lead_priority").default('medium'),
+  
+  // Automation tracking
+  automationsTriggered: jsonb("automations_triggered").default('[]'), // Array of automation IDs
+  crmSynced: boolean("crm_synced").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_button_interactions_card_id").on(table.cardId),
+  index("idx_button_interactions_user_id").on(table.userId),
+  index("idx_button_interactions_created_at").on(table.createdAt),
+]);
+
+// CRM and automation configurations per user
+export const automationConfigs = pgTable("automation_configs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // User association
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull().unique(),
+  
+  // CRM integrations
+  crmConnections: jsonb("crm_connections").default('[]'), // Array of CRM configs
+  /*
+  Example CRM connection:
+  {
+    provider: 'hubspot',
+    status: 'active',
+    apiKey: 'encrypted_key',
+    config: { portalId: '12345', defaultPipeline: 'sales' },
+    lastSyncAt: '2024-01-01T00:00:00Z'
+  }
+  */
+  
+  // Default automation settings
+  defaultLeadScore: integer("default_lead_score").default(10),
+  autoLeadCapture: boolean("auto_lead_capture").default(true),
+  smartNotifications: boolean("smart_notifications").default(true),
+  
+  // Button-specific automations
+  buttonAutomations: jsonb("button_automations").default('{}'),
+  /*
+  Example button automation:
+  {
+    "call-button": {
+      actions: ['crm_contact', 'lead_score', 'notification'],
+      leadScore: 25,
+      crmFields: { source: 'digital_card', status: 'new' }
+    }
+  }
+  */
+  
+  // Analytics preferences
+  analyticsEnabled: boolean("analytics_enabled").default(true),
+  weeklyReports: boolean("weekly_reports").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Lead scoring and behavior analysis
+export const leadProfiles = pgTable("lead_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Identification
+  visitorFingerprint: varchar("visitor_fingerprint").notNull(), // Unique visitor identifier
+  cardId: varchar("card_id").references(() => businessCards.id, { onDelete: 'cascade' }).notNull(),
+  cardOwnerId: varchar("card_owner_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Contact information (when captured)
+  email: varchar("email"),
+  phone: varchar("phone"),
+  name: varchar("name"),
+  company: varchar("company"),
+  
+  // Behavioral data
+  totalInteractions: integer("total_interactions").default(0),
+  totalSessions: integer("total_sessions").default(0),
+  lastSessionDuration: integer("last_session_duration"), // in seconds
+  avgSessionDuration: integer("avg_session_duration"), // in seconds
+  
+  // Lead scoring
+  leadScore: integer("lead_score").default(0),
+  leadPriority: leadPriorityEnum("lead_priority").default('low'),
+  engagementLevel: varchar("engagement_level").default('cold'), // cold, warm, hot
+  
+  // Behavioral patterns
+  preferredInteractionTime: varchar("preferred_interaction_time"), // morning, afternoon, evening
+  devicePreference: varchar("device_preference"), // mobile, desktop
+  behaviorTags: jsonb("behavior_tags").default('[]'), // ['repeat_visitor', 'quick_engager', 'info_seeker']
+  
+  // Geographic data
+  location: jsonb("location"), // Latest location data
+  timezone: varchar("timezone"),
+  
+  // CRM integration
+  crmContactId: varchar("crm_contact_id"), // ID in external CRM
+  crmProvider: crmProviderEnum("crm_provider"),
+  lastCrmSync: timestamp("last_crm_sync"),
+  
+  firstSeenAt: timestamp("first_seen_at").defaultNow(),
+  lastSeenAt: timestamp("last_seen_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_lead_profiles_fingerprint").on(table.visitorFingerprint),
+  index("idx_lead_profiles_card_id").on(table.cardId),
+  index("idx_lead_profiles_lead_score").on(table.leadScore),
+]);
+
 export type KbDoc = typeof kbDocs.$inferSelect;
 export type InsertKbDoc = typeof kbDocs.$inferInsert;
 
 export type HeaderTemplate = typeof headerTemplates.$inferSelect;
 export type InsertHeaderTemplate = typeof headerTemplates.$inferInsert;
 
+// Automation system types
+export type ButtonInteraction = typeof buttonInteractions.$inferSelect;
+export type InsertButtonInteraction = typeof buttonInteractions.$inferInsert;
+
+export type AutomationConfig = typeof automationConfigs.$inferSelect;
+export type InsertAutomationConfig = typeof automationConfigs.$inferInsert;
+
+export type LeadProfile = typeof leadProfiles.$inferSelect;
+export type InsertLeadProfile = typeof leadProfiles.$inferInsert;
+
 export const insertHeaderTemplateSchema = createInsertSchema(headerTemplates);
+export const insertButtonInteractionSchema = createInsertSchema(buttonInteractions);
+export const insertAutomationConfigSchema = createInsertSchema(automationConfigs);
+export const insertLeadProfileSchema = createInsertSchema(leadProfiles);
 
 // CSV import schema
 export const csvMemberSchema = z.object({
