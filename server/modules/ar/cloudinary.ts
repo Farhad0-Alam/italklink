@@ -5,7 +5,7 @@ const CLOUDINARY_URL = process.env.CLOUDINARY_URL;
 
 function parseCloudinaryUrl() {
   if (!CLOUDINARY_URL) {
-    throw new Error("CLOUDINARY_URL not configured");
+    throw new Error("CLOUDINARY_URL not configured. Please set up Cloudinary integration for file hosting.");
   }
   
   const match = CLOUDINARY_URL.match(/^cloudinary:\/\/([^:]+):([^@]+)@([^/]+)$/);

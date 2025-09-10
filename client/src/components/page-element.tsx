@@ -2978,7 +2978,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       
                       try {
                         const result = await compileMind(file);
-                        updateData({
+                        handleDataUpdate({
                           mindFileUrl: result.mindFileUrl,
                           planeTextureUrl: result.textureUrl || element.data.planeTextureUrl
                         });
@@ -3001,7 +3001,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   </label>
                   <Input
                     value={element.data.mindFileUrl || ''}
-                    onChange={(e) => updateData({ mindFileUrl: e.target.value })}
+                    onChange={(e) => handleDataUpdate({ mindFileUrl: e.target.value })}
                     placeholder="https://example.com/targets.mind"
                     className="text-sm"
                   />
@@ -3017,7 +3017,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   </label>
                   <Input
                     value={element.data.posterUrl || ''}
-                    onChange={(e) => updateData({ posterUrl: e.target.value })}
+                    onChange={(e) => handleDataUpdate({ posterUrl: e.target.value })}
                     placeholder="https://example.com/poster.jpg"
                     className="text-sm"
                   />
@@ -3030,7 +3030,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   </label>
                   <Input
                     value={element.data.planeTextureUrl || ''}
-                    onChange={(e) => updateData({ planeTextureUrl: e.target.value })}
+                    onChange={(e) => handleDataUpdate({ planeTextureUrl: e.target.value })}
                     placeholder="https://example.com/texture.jpg"
                     className="text-sm"
                   />
@@ -3048,7 +3048,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       max="2"
                       step="0.05"
                       value={element.data.planeWidth || 0.8}
-                      onChange={(e) => updateData({ planeWidth: parseFloat(e.target.value) })}
+                      onChange={(e) => handleDataUpdate({ planeWidth: parseFloat(e.target.value) })}
                       className="text-sm"
                     />
                   </div>
@@ -3062,7 +3062,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       max="2"
                       step="0.05"
                       value={element.data.planeHeight || 0.45}
-                      onChange={(e) => updateData({ planeHeight: parseFloat(e.target.value) })}
+                      onChange={(e) => handleDataUpdate({ planeHeight: parseFloat(e.target.value) })}
                       className="text-sm"
                     />
                   </div>
@@ -3076,7 +3076,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <input
                     type="color"
                     value={element.data.accent || '#0ea5e9'}
-                    onChange={(e) => updateData({ accent: e.target.value })}
+                    onChange={(e) => handleDataUpdate({ accent: e.target.value })}
                     className="w-full h-10 rounded border border-gray-300"
                   />
                 </div>
@@ -3094,7 +3094,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                           onChange={(e) => {
                             const newCtas = [...(element.data.ctas || [])];
                             newCtas[index] = { ...cta, label: e.target.value };
-                            updateData({ ctas: newCtas });
+                            handleDataUpdate({ ctas: newCtas });
                           }}
                           placeholder="Button label"
                           className="text-sm"
@@ -3104,7 +3104,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                           onChange={(e) => {
                             const newCtas = [...(element.data.ctas || [])];
                             newCtas[index] = { ...cta, action: e.target.value };
-                            updateData({ ctas: newCtas });
+                            handleDataUpdate({ ctas: newCtas });
                           }}
                           className="text-sm border rounded px-2 py-1"
                         >
@@ -3118,7 +3118,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                           onChange={(e) => {
                             const newCtas = [...(element.data.ctas || [])];
                             newCtas[index] = { ...cta, value: e.target.value };
-                            updateData({ ctas: newCtas });
+                            handleDataUpdate({ ctas: newCtas });
                           }}
                           placeholder="URL/phone/email"
                           className="text-sm"
@@ -3126,7 +3126,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                         <Button
                           onClick={() => {
                             const newCtas = (element.data.ctas || []).filter((_: any, i: number) => i !== index);
-                            updateData({ ctas: newCtas });
+                            handleDataUpdate({ ctas: newCtas });
                           }}
                           variant="outline"
                           size="sm"
@@ -3139,7 +3139,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <Button
                       onClick={() => {
                         const newCtas = [...(element.data.ctas || []), { label: 'New Action', action: 'link', value: '' }];
-                        updateData({ ctas: newCtas });
+                        handleDataUpdate({ ctas: newCtas });
                       }}
                       variant="outline"
                       size="sm"

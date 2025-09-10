@@ -16,11 +16,17 @@ export async function handleCompile(
   originalName: string
 ): Promise<CompileResult> {
   try {
-    // 1) Upload the original image to Cloudinary (for planeTextureUrl)
-    const textureUrl = await uploadImageToCloudinary(
-      originalName || "card-front.jpg", 
-      imageBuffer
-    );
+    // 1) Try to upload the original image to Cloudinary (for planeTextureUrl)
+    let textureUrl: string | undefined;
+    try {
+      textureUrl = await uploadImageToCloudinary(
+        originalName || "card-front.jpg", 
+        imageBuffer
+      );
+    } catch (cloudinaryError) {
+      console.warn("Cloudinary upload failed, continuing without texture URL:", cloudinaryError);
+      // Continue without texture URL - user can still manually enter URLs
+    }
 
     // 2) Check if AR compiler proxy is configured
     if (!AR_COMPILER_PROXY_URL) {
@@ -63,9 +69,20 @@ export async function handleCompile(
     }
 
     if (data.mindBufferBase64) {
-      // 5) Upload compiled .mind file to Cloudinary as raw file
-      const mindBuffer = Buffer.from(data.mindBufferBase64, "base64");
-      const mindFileUrl = await uploadRawToCloudinary("targets.mind", mindBuffer);
+      // 5) Try to upload compiled .mind file to Cloudinary as raw file
+      let mindFileUrl: string | undefined;
+      try {
+        const mindBuffer = Buffer.from(data.mindBufferBase64, "base64");
+        mindFileUrl = await uploadRawToCloudinary("targets.mind", mindBuffer);
+      } catch (cloudinaryError) {
+        console.warn("Cloudinary .mind upload failed:", cloudinaryError);
+        return {
+          ok: false,
+          status: 502,
+          error: "AR target compiled but upload failed. Configure CLOUDINARY_URL to enable file hosting.",
+          textureUrl
+        };
+      }
       
       return {
         ok: true,
@@ -92,7 +109,7 @@ export async function handleCompile(
         imageBuffer
       );
     } catch (uploadError) {
-      console.error("Failed to upload texture:", uploadError);
+      console.warn("Failed to upload texture during error handling:", uploadError);
     }
 
     return {
