@@ -25,6 +25,7 @@ import AccountSettings from "./pages/account-settings";
 import Billing from "./pages/billing";
 import Usage from "./pages/usage";
 import Help from "./pages/help";
+import Automation from "./pages/automation";
 import NotFound from "@/pages/not-found";
 import i18n from "./lib/i18n";
 
@@ -52,6 +53,7 @@ function Router() {
       <Route path="/account-settings" component={AccountSettings} />
       <Route path="/billing" component={Billing} />
       <Route path="/usage" component={Usage} />
+      <Route path="/automation" component={Automation} />
       <Route path="/help" component={Help} />
       <Route path="/admin/templates/import" component={() => <Admin />} />
       <Route path="/admin/templates/builder" component={() => <Admin />} />

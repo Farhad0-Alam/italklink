@@ -9,6 +9,7 @@ import { decodeCardData, logEvent } from "@/lib/share";
 import { defaultCardData } from "@/lib/card-data";
 import { BusinessCardPWAInstaller } from "@/components/BusinessCardPWAInstaller";
 import { SEOHead } from "@/components/SEOHead";
+import { useButtonTracking } from "@/modules/automation/useButtonTracking";
 
 export const Share: React.FC = () => {
   const { t } = useTranslation();
@@ -16,6 +17,7 @@ export const Share: React.FC = () => {
   const [cardData, setCardData] = useState<BusinessCard>(defaultCardData);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { trackPageView } = useButtonTracking();
 
   useEffect(() => {
     const loadCardData = async () => {
@@ -31,6 +33,10 @@ export const Share: React.FC = () => {
             const cardData = await response.json();
             setCardData(cardData);
             logEvent("share_view");
+            // Track page view for automation
+            if (cardData.id) {
+              trackPageView(cardData.id, 'page_view', window.location.href);
+            }
             setIsLoading(false);
             return;
           }
@@ -46,6 +52,10 @@ export const Share: React.FC = () => {
           if (decodedData) {
             setCardData(decodedData);
             logEvent("share_view");
+            // Track page view for automation (hash-based sharing)
+            if (decodedData.id) {
+              trackPageView(decodedData.id, 'page_view', window.location.href);
+            }
           } else {
             setError("Invalid share link");
           }
