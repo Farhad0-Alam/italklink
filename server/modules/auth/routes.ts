@@ -143,7 +143,7 @@ router.post('/register', async (req, res) => {
 // Refresh access token
 router.post('/refresh', async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.cookies?.refreshToken;
     
     if (!refreshToken) {
       return res.status(401).json({ message: 'No refresh token provided' });
@@ -180,7 +180,7 @@ router.get('/user', jwtAuth, (req, res) => {
 // Logout from current device
 router.post('/logout', async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.cookies?.refreshToken;
     
     if (refreshToken) {
       await authService.revokeRefreshToken(refreshToken);
