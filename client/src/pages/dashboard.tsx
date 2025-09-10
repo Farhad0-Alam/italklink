@@ -18,6 +18,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { ContactSupportModal } from "@/components/contact-support-modal";
+import NotifyCardButton from "@/components/NotifyCardButton";
 
 interface User {
   id: string;
@@ -643,6 +644,11 @@ export default function Dashboard() {
                           Edit
                         </Link>
                       </Button>
+                      
+                      <NotifyCardButton 
+                        cardId={card.id}
+                        cardTitle={card.fullName}
+                      />
                       
                       <Switch 
                         checked={card.isPublic} 

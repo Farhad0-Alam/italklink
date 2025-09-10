@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useQuery } from '@tanstack/react-query';
+import AdminBroadcastButton from '@/components/AdminBroadcastButton';
 
 interface DashboardMetrics {
   weeklyClicks: number;
@@ -78,6 +79,7 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">
           {greeting} Abdur
         </h1>
+        <AdminBroadcastButton />
       </div>
 
       {/* Metrics Cards */}
