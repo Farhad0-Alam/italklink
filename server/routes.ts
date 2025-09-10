@@ -59,6 +59,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup AR routes
   const arRoutes = (await import('./modules/ar')).default;
   app.use('/api/ar', arRoutes);
+  
+  // Setup automation routes
+  const { automationRoutes } = await import('./modules/automation/routes');
+  app.use('/api/automation', automationRoutes);
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {
