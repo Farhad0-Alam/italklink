@@ -15,6 +15,7 @@ interface TrackingResult {
   interactionId?: string;
   leadScore?: number;
   isRepeatVisitor?: boolean;
+  crmContactCreated?: boolean;
   error?: string;
 }
 
@@ -41,20 +42,24 @@ export function useButtonTracking() {
         };
       }
 
-      // Optional: Show success feedback for high-value interactions
+      // Optional: Show success feedback for high-value interactions or new CRM contacts
       if (data.leadScore >= 50) {
         toast({
           title: 'High-value interaction detected!',
           description: `Lead score: ${data.leadScore}${data.isRepeatVisitor ? ' (returning visitor)' : ''}`,
           duration: 3000,
         });
+      } else if (data.crmContactCreated && data.leadScore >= 20) {
+        // Subtle feedback for CRM contact creation
+        console.log(`CRM contact ${data.isRepeatVisitor ? 'updated' : 'created'} with lead score: ${data.leadScore}`);
       }
 
       return {
         success: true,
         interactionId: data.interactionId,
         leadScore: data.leadScore,
-        isRepeatVisitor: data.isRepeatVisitor
+        isRepeatVisitor: data.isRepeatVisitor,
+        crmContactCreated: data.crmContactCreated
       };
 
     } catch (error: any) {

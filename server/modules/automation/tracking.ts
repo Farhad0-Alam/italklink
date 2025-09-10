@@ -4,10 +4,15 @@ import {
   buttonInteractions, 
   leadProfiles, 
   automationConfigs,
+  businessCards,
+  crmContacts,
+  crmActivities,
   InsertButtonInteraction,
-  InsertLeadProfile 
+  InsertLeadProfile,
+  InsertCrmContact,
+  InsertCrmActivity
 } from '../../../shared/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, or } from 'drizzle-orm';
 
 // Visitor fingerprinting for anonymous tracking
 export function generateVisitorFingerprint(req: Request): string {
@@ -285,6 +290,292 @@ export async function getCardInteractions(cardId: string, limit: number = 50) {
   } catch (error) {
     console.error('Get card interactions error:', error);
     return [];
+  }
+}
+
+// Extract contact information from business card interaction
+export async function extractContactFromInteraction(data: {
+  cardId: string;
+  buttonAction: string;
+  targetValue?: string;
+  visitorFingerprint: string;
+  location: any;
+  device: string;
+  leadScore: number;
+}) {
+  try {
+    // Get business card information for context
+    const card = await db
+      .select()
+      .from(businessCards)
+      .where(eq(businessCards.id, data.cardId))
+      .limit(1);
+    
+    if (card.length === 0) {
+      return null;
+    }
+    
+    const businessCard = card[0];
+    
+    // Extract contact data based on button action
+    const contactData: Partial<InsertCrmContact> = {
+      ownerUserId: businessCard.userId!,
+      source: 'business_card',
+      leadScore: data.leadScore,
+      leadPriority: calculateLeadPriority(data.leadScore, 1, 0) as 'low' | 'medium' | 'high' | 'hot',
+      lifecycleStage: 'visitor',
+      tags: [
+        `card:${businessCard.fullName}`,
+        `device:${data.device}`,
+        `action:${data.buttonAction}`
+      ],
+      location: data.location,
+      notes: `Device: ${data.device}, Interaction: ${data.buttonAction}, UserAgent will be updated later`
+    };
+    
+    // Extract specific contact info based on button action
+    switch (data.buttonAction) {
+      case 'email':
+        if (data.targetValue && data.targetValue.includes('@')) {
+          contactData.email = data.targetValue;
+          // Higher lead score for email interactions
+          contactData.leadScore = Math.min((contactData.leadScore || 0) + 10, 100);
+          contactData.lifecycleStage = 'lead'; // Email interaction suggests more interest
+        }
+        break;
+        
+      case 'call':
+        if (data.targetValue) {
+          contactData.phone = data.targetValue;
+          // Very high lead score for call attempts
+          contactData.leadScore = Math.min((contactData.leadScore || 0) + 20, 100);
+          contactData.lifecycleStage = 'lead';
+        }
+        break;
+        
+      case 'link':
+        if (data.targetValue) {
+          contactData.website = data.targetValue;
+          contactData.notes = `Visited website: ${data.targetValue}`;
+        }
+        break;
+        
+      case 'whatsapp':
+        if (data.targetValue) {
+          contactData.phone = data.targetValue;
+          contactData.leadScore = Math.min((contactData.leadScore || 0) + 15, 100);
+          contactData.lifecycleStage = 'lead';
+        }
+        break;
+    }
+    
+    // Add business card owner's company context
+    if (businessCard.company) {
+      contactData.company = `Interested in ${businessCard.company}`;
+    }
+    
+    // Generate a lead name based on available data or use placeholder
+    if (!contactData.firstName && !contactData.lastName) {
+      contactData.firstName = 'Lead';
+      contactData.lastName = `from ${businessCard.fullName}`;
+    }
+    
+    return {
+      contactData,
+      businessCard
+    };
+    
+  } catch (error) {
+    console.error('Extract contact from interaction error:', error);
+    return null;
+  }
+}
+
+// Find existing CRM contact by various identifiers
+export async function findExistingCrmContact(
+  ownerUserId: string,
+  identifiers: {
+    email?: string;
+    phone?: string;
+    visitorFingerprint?: string;
+  }
+) {
+  try {
+    const conditions = [];
+    
+    // Search by email (highest priority)
+    if (identifiers.email) {
+      conditions.push(eq(crmContacts.email, identifiers.email));
+    }
+    
+    // Search by phone if no email
+    if (identifiers.phone && !identifiers.email) {
+      conditions.push(eq(crmContacts.phone, identifiers.phone));
+    }
+    
+    // Search by visitor fingerprint in custom fields (fallback)
+    if (identifiers.visitorFingerprint && !identifiers.email && !identifiers.phone) {
+      // Note: This would require JSON search in customFields, 
+      // for now we'll rely on email/phone matching
+    }
+    
+    if (conditions.length === 0) {
+      return null;
+    }
+    
+    const existingContact = await db
+      .select()
+      .from(crmContacts)
+      .where(
+        and(
+          eq(crmContacts.ownerUserId, ownerUserId),
+          or(...conditions)
+        )
+      )
+      .limit(1);
+    
+    return existingContact.length > 0 ? existingContact[0] : null;
+    
+  } catch (error) {
+    console.error('Find existing CRM contact error:', error);
+    return null;
+  }
+}
+
+// Create or update CRM contact from business card interaction
+export async function createOrUpdateCrmContact(data: {
+  cardId: string;
+  userId: string;
+  buttonAction: string;
+  targetValue?: string;
+  visitorFingerprint: string;
+  location: any;
+  device: string;
+  leadScore: number;
+  userAgent: string;
+}) {
+  try {
+    // Extract contact information
+    const extracted = await extractContactFromInteraction({
+      cardId: data.cardId,
+      buttonAction: data.buttonAction,
+      targetValue: data.targetValue,
+      visitorFingerprint: data.visitorFingerprint,
+      location: data.location,
+      device: data.device,
+      leadScore: data.leadScore
+    });
+    
+    if (!extracted) {
+      return { success: false, error: 'Could not extract contact data' };
+    }
+    
+    const { contactData, businessCard } = extracted;
+    
+    // Add user agent to notes
+    if (contactData.notes) {
+      contactData.notes = contactData.notes.replace('UserAgent will be updated later', `UserAgent: ${data.userAgent}`);
+    }
+    
+    // Try to find existing contact
+    const existingContact = await findExistingCrmContact(
+      data.userId,
+      {
+        email: contactData.email || undefined,
+        phone: contactData.phone || undefined,
+        visitorFingerprint: data.visitorFingerprint
+      }
+    );
+    
+    let contactId: string;
+    let isNewContact = false;
+    
+    if (existingContact) {
+      // Update existing contact
+      const updatedLeadScore = Math.min(
+        (existingContact.leadScore || 0) + (contactData.leadScore || 0),
+        1000
+      );
+      
+      const updatedPriority = calculateLeadPriority(
+        updatedLeadScore,
+        1, // No totalInteractions field, use 1
+        0
+      ) as 'low' | 'medium' | 'high' | 'hot';
+      
+      // Update notes with new interaction info
+      const interactionInfo = `\n${new Date().toISOString()}: ${data.buttonAction} interaction (score: ${data.leadScore})`;
+      const updatedNotes = (existingContact.notes || '') + interactionInfo;
+      
+      // Merge tags
+      const existingTags = (existingContact.tags as string[]) || [];
+      const contactTags = Array.isArray(contactData.tags) ? contactData.tags : [];
+      const newTags = Array.from(new Set([...existingTags, ...contactTags]));
+      
+      await db
+        .update(crmContacts)
+        .set({
+          leadScore: updatedLeadScore,
+          leadPriority: updatedPriority,
+          tags: newTags,
+          notes: updatedNotes,
+          // Update lifecycle stage if it's progressing
+          lifecycleStage: contactData.lifecycleStage === 'lead' && 
+                         existingContact.lifecycleStage === 'visitor' 
+                         ? 'lead' : existingContact.lifecycleStage,
+          updatedAt: new Date()
+        })
+        .where(eq(crmContacts.id, existingContact.id));
+      
+      contactId = existingContact.id;
+      
+    } else {
+      // Create new contact
+      isNewContact = true;
+      // No need to track in custom fields - use existing schema fields
+      
+      const [newContact] = await db
+        .insert(crmContacts)
+        .values(contactData as InsertCrmContact)
+        .returning();
+      
+      contactId = newContact.id;
+    }
+    
+    // Create activity record for this interaction
+    const activityData: InsertCrmActivity = {
+      contactId,
+      type: data.buttonAction === 'call' ? 'call' :
+            data.buttonAction === 'email' ? 'email' :
+            data.buttonAction === 'link' ? 'page_view' :
+            'button_click',
+      title: `${data.buttonAction.charAt(0).toUpperCase() + data.buttonAction.slice(1)} interaction`,
+      description: `Visitor clicked ${data.buttonAction} button on ${businessCard.fullName}'s business card`,
+      payload: {
+        cardId: data.cardId,
+        buttonAction: data.buttonAction,
+        targetValue: data.targetValue,
+        device: data.device,
+        location: data.location,
+        leadScore: data.leadScore
+      }
+    };
+    
+    await db.insert(crmActivities).values(activityData);
+    
+    return {
+      success: true,
+      contactId,
+      isNewContact,
+      leadScore: contactData.leadScore
+    };
+    
+  } catch (error: any) {
+    console.error('Create/update CRM contact error:', error);
+    return {
+      success: false,
+      error: error.message || 'Unknown error occurred'
+    };
   }
 }
 

@@ -5,7 +5,8 @@ import {
   trackButtonInteraction, 
   getUserAutomationConfig, 
   getCardInteractions, 
-  getCardLeadProfiles 
+  getCardLeadProfiles,
+  createOrUpdateCrmContact 
 } from './tracking';
 import { syncContactToCRMs, testCRMConnection, CRMConfig } from './crm';
 import { 
@@ -86,12 +87,39 @@ router.post('/track', async (req: Request, res: Response) => {
     const automationConfig = await getUserAutomationConfig(userId);
     
     if (automationConfig && automationConfig.autoLeadCapture) {
-      // Trigger CRM sync if configured
+      // Create or update CRM contact from interaction (primary integration)
+      const { generateVisitorFingerprint, getVisitorLocation, getDeviceType } = await import('./tracking');
+      const visitorFingerprint = generateVisitorFingerprint(req);
+      const userAgent = req.headers['user-agent'] || '';
+      const location = getVisitorLocation(req);
+      const device = getDeviceType(userAgent);
+      
+      const crmResult = await createOrUpdateCrmContact({
+        cardId: data.cardId,
+        userId,
+        buttonAction: data.buttonAction,
+        targetValue: data.targetValue,
+        visitorFingerprint,
+        location,
+        device,
+        leadScore: result.leadScore,
+        userAgent
+      });
+      
+      if (crmResult.success) {
+        console.log(`CRM contact ${crmResult.isNewContact ? 'created' : 'updated'}:`, crmResult.contactId);
+      } else {
+        console.error('CRM contact creation failed:', crmResult.error);
+      }
+      
+      // Also sync to external CRM systems if configured
       const crmConnections = (automationConfig.crmConnections as CRMConfig[]) || [];
       
       if (crmConnections.length > 0) {
-        // Extract contact info from interaction
+        // Extract contact info for external CRM sync
         const contact = {
+          email: data.buttonAction === 'email' ? data.targetValue : undefined,
+          phone: data.buttonAction === 'call' || data.buttonAction === 'whatsapp' ? data.targetValue : undefined,
           source: 'Digital Business Card',
           leadScore: result.leadScore,
           customFields: {
@@ -99,18 +127,23 @@ router.post('/track', async (req: Request, res: Response) => {
             elementId: data.elementId,
             buttonAction: data.buttonAction,
             buttonLabel: data.buttonLabel,
-            interactionType: data.interactionType
+            interactionType: data.interactionType,
+            device: device,
+            location: location.country || 'Unknown'
           }
         };
         
-        // Sync to CRMs in background (don't wait)
-        syncContactToCRMs(crmConnections, contact)
-          .then(results => {
-            console.log('CRM sync results:', results);
-          })
-          .catch(error => {
-            console.error('CRM sync error:', error);
-          });
+        // Only sync if we have identifiable contact info
+        if (contact.email || contact.phone) {
+          // Sync to external CRMs in background (don't wait)
+          syncContactToCRMs(crmConnections, contact)
+            .then(results => {
+              console.log('External CRM sync results:', results);
+            })
+            .catch(error => {
+              console.error('External CRM sync error:', error);
+            });
+        }
       }
     }
     
@@ -118,7 +151,8 @@ router.post('/track', async (req: Request, res: Response) => {
       success: true,
       interactionId: result.interaction.id,
       leadScore: result.leadScore,
-      isRepeatVisitor: result.isRepeatVisitor
+      isRepeatVisitor: result.isRepeatVisitor,
+      crmContactCreated: automationConfig?.autoLeadCapture || false
     });
     
   } catch (error: any) {
