@@ -21,6 +21,7 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
+import { CRMIntegrationPanel } from './CRMIntegrationPanel';
 
 interface AutomationConfig {
   defaultLeadScore: number;
@@ -350,6 +351,13 @@ export function AutomationManager() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="crm" className="space-y-6">
+          <CRMIntegrationPanel 
+            connections={config.crmConnections || []}
+            onConnectionsUpdate={(connections) => updateConfig({ crmConnections: connections })}
+          />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">

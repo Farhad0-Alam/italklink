@@ -9,6 +9,7 @@ import { HeaderPreview } from "./header-builder/HeaderPreview";
 import { defaultHeaderPreset } from "@/lib/header-schema";
 import { Share2, Copy, Facebook, Twitter, Linkedin, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useButtonTracking } from "@/modules/automation/useButtonTracking";
 
 // Helper function to adjust color brightness
 const adjustColor = (color: string, amount: number): string => {
@@ -43,6 +44,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const [showShareMenu, setShowShareMenu] = useState(false);
     const { toast } = useToast();
+    const { trackButtonClick } = useButtonTracking();
 
     const toggleSection = (section: string) => {
       if (!isInteractive) return;
@@ -52,8 +54,38 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
       }));
     };
 
-    const handleContactAction = (type: string, value?: string) => {
+    const handleContactAction = async (type: string, value?: string) => {
       if (!isInteractive || !value) return;
+      
+      // Track button click for automation
+      if (data.id) {
+        const buttonActionMap: Record<string, 'call' | 'email' | 'link' | 'whatsapp'> = {
+          'phone': 'call',
+          'email': 'email', 
+          'whatsapp': 'whatsapp',
+          'website': 'link',
+          'linkedin': 'link',
+          'instagram': 'link',
+          'twitter': 'link',
+          'facebook': 'link'
+        };
+        
+        const buttonAction = buttonActionMap[type] || 'link';
+        const buttonLabel = type === 'phone' ? 'Call' : 
+                           type === 'email' ? 'Email' :
+                           type === 'whatsapp' ? 'WhatsApp' :
+                           type === 'website' ? 'Website' :
+                           type.charAt(0).toUpperCase() + type.slice(1);
+        
+        // Track interaction (don't wait for response)
+        trackButtonClick(
+          data.id, 
+          `${type}-button`, 
+          buttonLabel, 
+          buttonAction, 
+          value
+        ).catch(console.error);
+      }
       
       switch (type) {
         case 'phone':

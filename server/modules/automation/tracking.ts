@@ -292,7 +292,20 @@ export async function getCardInteractions(cardId: string, limit: number = 50) {
 export async function getCardLeadProfiles(cardOwnerId: string, limit: number = 100) {
   try {
     const profiles = await db
-      .select()
+      .select({
+        id: leadProfiles.id,
+        visitorFingerprint: leadProfiles.visitorFingerprint,
+        cardId: leadProfiles.cardId,
+        totalInteractions: leadProfiles.totalInteractions,
+        leadScore: leadProfiles.leadScore,
+        leadPriority: leadProfiles.leadPriority,
+        engagementLevel: leadProfiles.engagementLevel,
+        location: leadProfiles.location,
+        devicePreference: leadProfiles.devicePreference,
+        behaviorTags: leadProfiles.behaviorTags,
+        lastSeenAt: leadProfiles.lastSeenAt,
+        createdAt: leadProfiles.createdAt
+      })
       .from(leadProfiles)
       .where(eq(leadProfiles.cardOwnerId, cardOwnerId))
       .orderBy(desc(leadProfiles.leadScore))
