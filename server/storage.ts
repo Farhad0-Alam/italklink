@@ -537,7 +537,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getContact(id: string): Promise<CrmContact | undefined> {
-    const [contact] = await db.select().from(crmContacts).where(eq(crmContacts.id, id));
+    const [contact] = await db
+      .select({
+        id: crmContacts.id,
+        ownerUserId: crmContacts.ownerUserId,
+        email: crmContacts.email,
+        phone: crmContacts.phone,
+        firstName: crmContacts.firstName,
+        lastName: crmContacts.lastName,
+        company: crmContacts.company,
+        jobTitle: crmContacts.jobTitle,
+        website: crmContacts.website,
+        source: crmContacts.source,
+        tags: crmContacts.tags,
+        notes: crmContacts.notes,
+        leadScore: crmContacts.leadScore,
+        leadPriority: crmContacts.leadPriority,
+        lifecycleStage: crmContacts.lifecycleStage,
+        consentEmail: crmContacts.consentEmail,
+        consentSms: crmContacts.consentSms,
+        mergedFrom: crmContacts.mergedFrom,
+        location: crmContacts.location,
+        timezone: crmContacts.timezone,
+        linkedin: crmContacts.linkedin,
+        twitter: crmContacts.twitter,
+        createdAt: crmContacts.createdAt,
+        updatedAt: crmContacts.updatedAt
+      })
+      .from(crmContacts)
+      .where(eq(crmContacts.id, id));
     return contact;
   }
 
@@ -553,8 +581,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getContactsByUser(userId: string, filters?: { search?: string; tags?: string[]; lifecycleStage?: string }): Promise<CrmContact[]> {
-    let query = db.select().from(crmContacts).where(eq(crmContacts.ownerUserId, userId));
-    
     const conditions = [eq(crmContacts.ownerUserId, userId)];
     
     if (filters?.search) {
@@ -573,7 +599,32 @@ export class DatabaseStorage implements IStorage {
     }
     
     return await db
-      .select()
+      .select({
+        id: crmContacts.id,
+        ownerUserId: crmContacts.ownerUserId,
+        email: crmContacts.email,
+        phone: crmContacts.phone,
+        firstName: crmContacts.firstName,
+        lastName: crmContacts.lastName,
+        company: crmContacts.company,
+        jobTitle: crmContacts.jobTitle,
+        website: crmContacts.website,
+        source: crmContacts.source,
+        tags: crmContacts.tags,
+        notes: crmContacts.notes,
+        leadScore: crmContacts.leadScore,
+        leadPriority: crmContacts.leadPriority,
+        lifecycleStage: crmContacts.lifecycleStage,
+        consentEmail: crmContacts.consentEmail,
+        consentSms: crmContacts.consentSms,
+        mergedFrom: crmContacts.mergedFrom,
+        location: crmContacts.location,
+        timezone: crmContacts.timezone,
+        linkedin: crmContacts.linkedin,
+        twitter: crmContacts.twitter,
+        createdAt: crmContacts.createdAt,
+        updatedAt: crmContacts.updatedAt
+      })
       .from(crmContacts)
       .where(and(...conditions))
       .orderBy(desc(crmContacts.createdAt));
@@ -730,10 +781,7 @@ export class DatabaseStorage implements IStorage {
 
   async getUserTasks(userId: string, filters?: { status?: string; type?: string; assignedTo?: string }): Promise<CrmTask[]> {
     const conditions = [
-      or(
-        eq(crmTasks.assignedTo, userId),
-        eq(crmTasks.createdBy, userId)
-      )!
+      eq(crmTasks.assignedTo, userId)
     ];
     
     if (filters?.status) {
@@ -788,7 +836,16 @@ export class DatabaseStorage implements IStorage {
 
   async getUserPipelines(userId: string): Promise<CrmPipeline[]> {
     return await db
-      .select()
+      .select({
+        id: crmPipelines.id,
+        ownerUserId: crmPipelines.ownerUserId,
+        name: crmPipelines.name,
+        description: crmPipelines.description,
+        isDefault: crmPipelines.isDefault,
+        isActive: crmPipelines.isActive,
+        createdAt: crmPipelines.createdAt,
+        updatedAt: crmPipelines.updatedAt
+      })
       .from(crmPipelines)
       .where(eq(crmPipelines.ownerUserId, userId))
       .orderBy(desc(crmPipelines.isDefault), desc(crmPipelines.createdAt));
@@ -1187,10 +1244,7 @@ export class DatabaseStorage implements IStorage {
       .select({ count: count() })
       .from(crmTasks)
       .where(and(
-        or(
-          eq(crmTasks.assignedTo, userId),
-          eq(crmTasks.createdBy, userId)
-        )!,
+        eq(crmTasks.assignedTo, userId),
         eq(crmTasks.status, 'open'),
         gte(crmTasks.dueAt, now)
       ));
@@ -1199,10 +1253,7 @@ export class DatabaseStorage implements IStorage {
       .select({ count: count() })
       .from(crmTasks)
       .where(and(
-        or(
-          eq(crmTasks.assignedTo, userId),
-          eq(crmTasks.createdBy, userId)
-        )!,
+        eq(crmTasks.assignedTo, userId),
         eq(crmTasks.status, 'open'),
         lte(crmTasks.dueAt, now)
       ));

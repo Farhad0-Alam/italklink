@@ -120,7 +120,15 @@ export async function trackButtonInteraction(data: {
     
     // Check if this is a repeat visitor
     const existingProfile = await db
-      .select()
+      .select({
+        id: leadProfiles.id,
+        cardId: leadProfiles.cardId,
+        cardOwnerId: leadProfiles.cardOwnerId,
+        visitorFingerprint: leadProfiles.visitorFingerprint,
+        email: leadProfiles.email,
+        leadScore: leadProfiles.leadScore,
+        totalInteractions: leadProfiles.totalInteractions
+      })
       .from(leadProfiles)
       .where(
         and(
@@ -401,40 +409,43 @@ export async function findExistingCrmContact(
   }
 ) {
   try {
-    const conditions = [];
-    
-    // Search by email (highest priority)
+    // Search by email first (highest priority)
     if (identifiers.email) {
-      conditions.push(eq(crmContacts.email, identifiers.email));
-    }
-    
-    // Search by phone if no email
-    if (identifiers.phone && !identifiers.email) {
-      conditions.push(eq(crmContacts.phone, identifiers.phone));
-    }
-    
-    // Search by visitor fingerprint in custom fields (fallback)
-    if (identifiers.visitorFingerprint && !identifiers.email && !identifiers.phone) {
-      // Note: This would require JSON search in customFields, 
-      // for now we'll rely on email/phone matching
-    }
-    
-    if (conditions.length === 0) {
-      return null;
-    }
-    
-    const existingContact = await db
-      .select()
-      .from(crmContacts)
-      .where(
-        and(
-          eq(crmContacts.ownerUserId, ownerUserId),
-          or(...conditions)
+      const existingContact = await db
+        .select()
+        .from(crmContacts)
+        .where(
+          and(
+            eq(crmContacts.ownerUserId, ownerUserId),
+            eq(crmContacts.email, identifiers.email)
+          )
         )
-      )
-      .limit(1);
+        .limit(1);
+      
+      if (existingContact.length > 0) {
+        return existingContact[0];
+      }
+    }
     
-    return existingContact.length > 0 ? existingContact[0] : null;
+    // Search by phone if no email match found
+    if (identifiers.phone) {
+      const existingContact = await db
+        .select()
+        .from(crmContacts)
+        .where(
+          and(
+            eq(crmContacts.ownerUserId, ownerUserId),
+            eq(crmContacts.phone, identifiers.phone)
+          )
+        )
+        .limit(1);
+        
+      if (existingContact.length > 0) {
+        return existingContact[0];
+      }
+    }
+    
+    return null;
     
   } catch (error) {
     console.error('Find existing CRM contact error:', error);

@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Target, CheckSquare, Activity, BarChart3 } from "lucide-react";
-import { CRMStats } from "@/modules/crm/components/CRMStats";
-import { ContactsManager } from "@/modules/crm/components/ContactsManager";
-import { DealsManager } from "@/modules/crm/components/DealsManager";
-import { TasksManager } from "@/modules/crm/components/TasksManager";
-import { ActivitiesTimeline } from "@/modules/crm/components/ActivitiesTimeline";
+import { 
+  CRMStats,
+  ContactsManager,
+  DealsManager,
+  TasksManager,
+  ActivitiesTimeline
+} from "@/modules/crm";
 
 export default function CRM() {
   const [activeTab, setActiveTab] = useState("overview");
