@@ -204,7 +204,7 @@ export default function ConditionBuilder({ onSelect, onCancel, initialConditions
         .map(condition => ({
           type: 'field_equals' as const,
           field: condition.field,
-          operator: condition.operator,
+          operator: condition.operator as 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'is_empty' | 'is_not_empty',
           value: condition.value,
           logicOperator: group.logicOperator
         }))

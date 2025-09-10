@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Contact, Deal, Task, Activity, CRMStats, ContactCreateInput, DealCreateInput, TaskCreateInput } from "../types";
+import { Contact, Deal, Task, Activity, CRMStats, ContactCreateInput, DealCreateInput, TaskCreateInput, AutomationWorkflow, AutomationRun } from "../types";
 
 // CRM Stats hooks
 export function useCRMStats() {
@@ -58,10 +58,10 @@ export function useUpdateContact(contactId: string) {
     mutationFn: (data: Partial<Contact>) => 
       apiRequest('PATCH', `/api/crm/contacts/${contactId}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
-        query.queryKey[0].startsWith('/api/crm/contacts')
-      });
+      queryClient.invalidateQueries({ predicate: (query) => {
+        return !!(query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
+        query.queryKey[0].startsWith('/api/crm/contacts'));
+      } });
       queryClient.invalidateQueries({ queryKey: ['/api/crm/stats'] });
     },
   });
@@ -126,10 +126,10 @@ export function useUpdateDeal(dealId: string) {
     mutationFn: (data: Partial<Deal>) => 
       apiRequest('PATCH', `/api/crm/deals/${dealId}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
-        query.queryKey[0].startsWith('/api/crm/deals')
-      });
+      queryClient.invalidateQueries({ predicate: (query) => {
+        return !!(query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
+        query.queryKey[0].startsWith('/api/crm/deals'));
+      } });
       queryClient.invalidateQueries({ queryKey: ['/api/crm/stats'] });
     },
   });
@@ -144,10 +144,10 @@ export function useMoveDeal() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/crm/deals'] });
       queryClient.invalidateQueries({ queryKey: ['/api/crm/stats'] });
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
-        query.queryKey[0].startsWith('/api/crm/activities')
-      });
+      queryClient.invalidateQueries({ predicate: (query) => {
+        return !!(query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
+        query.queryKey[0].startsWith('/api/crm/activities'));
+      } });
     },
   });
 }
@@ -206,10 +206,10 @@ export function useUpdateTask(taskId: string) {
     mutationFn: (data: Partial<Task>) => 
       apiRequest('PATCH', `/api/crm/tasks/${taskId}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
-        query.queryKey[0].startsWith('/api/crm/tasks')
-      });
+      queryClient.invalidateQueries({ predicate: (query) => {
+        return !!(query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
+        query.queryKey[0].startsWith('/api/crm/tasks'));
+      } });
       queryClient.invalidateQueries({ queryKey: ['/api/crm/stats'] });
     },
   });
@@ -224,10 +224,10 @@ export function useCompleteTask() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/crm/tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/crm/stats'] });
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
-        query.queryKey[0].startsWith('/api/crm/activities')
-      });
+      queryClient.invalidateQueries({ predicate: (query) => {
+        return !!(query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
+        query.queryKey[0].startsWith('/api/crm/activities'));
+      } });
     },
   });
 }
@@ -271,14 +271,14 @@ export function usePipelines() {
 
 // Automation hooks
 export function useAutomations() {
-  return useQuery({
+  return useQuery<AutomationWorkflow[]>({
     queryKey: ['/api/automations'],
     staleTime: 1000 * 60, // 1 minute
   });
 }
 
 export function useAutomation(automationId: string) {
-  return useQuery({
+  return useQuery<AutomationWorkflow>({
     queryKey: ['/api/automations', automationId],
     enabled: !!automationId,
   });
@@ -342,7 +342,7 @@ export function useAutomationRuns(automationId?: string, limit?: number) {
     ? `/api/automations/${automationId}/runs${queryString ? `?${queryString}` : ''}`
     : `/api/automation-runs${queryString ? `?${queryString}` : ''}`;
   
-  return useQuery({
+  return useQuery<AutomationRun[]>({
     queryKey: [endpoint],
     staleTime: 1000 * 30, // 30 seconds
   });

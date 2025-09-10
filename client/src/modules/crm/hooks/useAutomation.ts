@@ -43,10 +43,10 @@ export function useUpdateAutomation(automationId: string) {
     mutationFn: (data: Partial<AutomationWorkflow>) => 
       apiRequest('PUT', `/api/automations/${automationId}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ predicate: (query) => 
-        query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
-        query.queryKey[0].startsWith('/api/automations')
-      });
+      queryClient.invalidateQueries({ predicate: (query) => {
+        return !!(query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
+        query.queryKey[0].startsWith('/api/automations'));
+      } });
     },
   });
 }

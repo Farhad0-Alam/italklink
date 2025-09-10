@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Save, Play, AlertTriangle, CheckCircle, Zap, Plus, 
-  Settings, Template, FileText, TestTube, Clock, Users
+  Settings, Layout, FileText, TestTube, Clock, Users
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { nanoid } from "nanoid";
@@ -298,7 +298,8 @@ export default function AutomationBuilder({
       triggers,
       conditions,
       actions,
-      connections
+      connections,
+      enabled: true
     });
 
     setActivePanel('canvas');
@@ -372,7 +373,7 @@ export default function AutomationBuilder({
                 <Plus className="h-3 w-3" />
               </TabsTrigger>
               <TabsTrigger value="templates" data-testid="tab-templates">
-                <Template className="h-3 w-3" />
+                <Layout className="h-3 w-3" />
               </TabsTrigger>
             </TabsList>
           </div>

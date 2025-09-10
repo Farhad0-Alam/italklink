@@ -10,6 +10,7 @@ import {
   FileText, Webhook, Play
 } from "lucide-react";
 import type { AutomationTemplate, AutomationWorkflow } from "../../types";
+import { nanoid } from "nanoid";
 
 const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
   {
@@ -24,6 +25,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       description: 'Automatically welcome new contacts with a personalized email',
       triggers: [
         {
+          id: 'trigger-welcome-contact',
           type: 'contact.created',
           label: 'New Contact Created',
           icon: 'UserPlus',
@@ -36,6 +38,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       conditions: [],
       actions: [
         {
+          id: 'action-welcome-email',
           type: 'send_email',
           label: 'Send Welcome Email',
           icon: 'Mail',
@@ -51,11 +54,10 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       connections: [
         {
           id: 'conn-1',
-          source: 'trigger-1',
-          target: 'action-1'
+          source: 'trigger-welcome-contact',
+          target: 'action-welcome-email'
         }
-      ],
-      enabled: true
+      ]
     }
   },
   {
@@ -70,6 +72,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       description: 'Automatically create follow-up tasks for qualified leads',
       triggers: [
         {
+          id: 'trigger-stage-changed',
           type: 'stage.changed',
           label: 'Stage Changed to Qualified',
           icon: 'Zap',
@@ -81,6 +84,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       ],
       conditions: [
         {
+          id: 'condition-lead-score',
           type: 'field_greater_than',
           field: 'leadScore',
           operator: 'greater_than',
@@ -91,6 +95,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       ],
       actions: [
         {
+          id: 'action-create-task',
           type: 'create_task',
           label: 'Create Follow-up Call',
           icon: 'Calendar',
@@ -116,8 +121,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           source: 'condition-1',
           target: 'action-1'
         }
-      ],
-      enabled: true
+      ]
     }
   },
   {
@@ -131,6 +135,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       description: 'Multi-step email sequence for cold leads',
       triggers: [
         {
+          id: 'trigger-cold-leads',
           type: 'contact.created',
           label: 'New Contact Created',
           icon: 'UserPlus',
@@ -142,6 +147,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       ],
       conditions: [
         {
+          id: 'condition-lead-score',
           type: 'field_less_than',
           field: 'leadScore',
           operator: 'less_than',
@@ -152,6 +158,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       ],
       actions: [
         {
+          id: 'action-wait-delay',
           type: 'wait_delay',
           label: 'Wait 1 Day',
           icon: 'Clock',
@@ -162,6 +169,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           position: { x: 100, y: 400 }
         },
         {
+          id: 'action-nurture-email',
           type: 'send_email',
           label: 'Send Nurture Email 1',
           icon: 'Mail',
@@ -190,8 +198,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           source: 'action-1',
           target: 'action-2'
         }
-      ],
-      enabled: true
+      ]
     }
   },
   {
@@ -205,6 +212,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       description: 'Onboard new customers and celebrate wins',
       triggers: [
         {
+          id: 'trigger-deal-won',
           type: 'stage.changed',
           label: 'Deal Won',
           icon: 'DollarSign',
@@ -217,6 +225,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       conditions: [],
       actions: [
         {
+          id: 'action-congratulations-email',
           type: 'send_email',
           label: 'Send Congratulations',
           icon: 'Mail',
@@ -229,6 +238,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           position: { x: 100, y: 250 }
         },
         {
+          id: 'action-schedule-onboarding',
           type: 'create_task',
           label: 'Schedule Onboarding',
           icon: 'Calendar',
@@ -243,6 +253,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           position: { x: 100, y: 400 }
         },
         {
+          id: 'action-tag-customer',
           type: 'add_tag',
           label: 'Tag as Customer',
           icon: 'Tag',
@@ -268,8 +279,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           source: 'action-2',
           target: 'action-3'
         }
-      ],
-      enabled: true
+      ]
     }
   },
   {
@@ -283,6 +293,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       description: 'Remind team members about overdue tasks',
       triggers: [
         {
+          id: 'trigger-task-overdue',
           type: 'task.overdue',
           label: 'Task Overdue',
           icon: 'AlertTriangle',
@@ -295,6 +306,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       conditions: [],
       actions: [
         {
+          id: 'action-reminder-email',
           type: 'send_email',
           label: 'Send Reminder',
           icon: 'Mail',
@@ -307,6 +319,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           position: { x: 100, y: 250 }
         },
         {
+          id: 'action-escalate-task',
           type: 'create_task',
           label: 'Escalate to Manager',
           icon: 'Calendar',
@@ -332,8 +345,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           source: 'action-1',
           target: 'action-2'
         }
-      ],
-      enabled: true
+      ]
     }
   },
   {
@@ -347,6 +359,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       description: 'Alert team about high-value deals',
       triggers: [
         {
+          id: 'trigger-high-value-deal',
           type: 'deal.created',
           label: 'New Deal Created',
           icon: 'DollarSign',
@@ -358,9 +371,10 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       ],
       conditions: [
         {
+          id: 'condition-deal-value',
           type: 'field_greater_than',
           field: 'dealValue',
-          operator: 'greater_than_or_equal',
+          operator: 'greater_than',
           value: 10000,
           logicOperator: 'AND',
           position: { x: 100, y: 250 }
@@ -368,6 +382,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
       ],
       actions: [
         {
+          id: 'action-slack-notification',
           type: 'send_webhook',
           label: 'Slack Notification',
           icon: 'Webhook',
@@ -379,6 +394,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           position: { x: 100, y: 400 }
         },
         {
+          id: 'action-assign-senior-rep',
           type: 'create_task',
           label: 'Assign to Senior Rep',
           icon: 'Calendar',
@@ -409,8 +425,7 @@ const AUTOMATION_TEMPLATES: AutomationTemplate[] = [
           source: 'action-1',
           target: 'action-2'
         }
-      ],
-      enabled: true
+      ]
     }
   }
 ];
