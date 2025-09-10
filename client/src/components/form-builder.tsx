@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
-import { PageBuilder } from "./page-builder";
+import { PageBuilder } from "@/modules/form-builder/components/PageBuilder";
 import { useQuery } from "@tanstack/react-query";
 import {
   DndContext,

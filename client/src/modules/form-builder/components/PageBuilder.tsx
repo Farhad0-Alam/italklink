@@ -21,8 +21,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { PageElement } from '@shared/schema';
-import { PageElementRenderer } from './page-element';
-import { ElementSelector } from './element-selector';
+import { PageElementRenderer } from '@/components/page-element';
+import { ElementSelector } from '@/components/element-selector';
 
 interface SortableElementProps {
   element: PageElement;
