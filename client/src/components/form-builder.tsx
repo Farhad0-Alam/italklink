@@ -310,16 +310,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           {builderMode === 'card' && (
             <>
 
-          {/* Page Builder */}
-          <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
-            <PageBuilder
-              elements={form.watch("pageElements") || []}
-              onElementsChange={(elements: PageElement[]) => form.setValue("pageElements", elements)}
-              cardData={watchedValues}
-              onNavigatePage={setSelectedPageId}
-            />
-          </div>
-
           {/* Cover & Logo */}
           <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("coverLogo")}>
