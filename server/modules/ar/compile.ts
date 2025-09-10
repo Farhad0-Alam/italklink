@@ -16,7 +16,7 @@ export async function handleCompile(
   originalName: string
 ): Promise<CompileResult> {
   try {
-    // 1) Try to upload the original image to Cloudinary (for planeTextureUrl)
+    // 1) Try to create a local data URL for the texture (fallback when Cloudinary not available)
     let textureUrl: string | undefined;
     try {
       textureUrl = await uploadImageToCloudinary(
@@ -24,16 +24,19 @@ export async function handleCompile(
         imageBuffer
       );
     } catch (cloudinaryError) {
-      console.warn("Cloudinary upload failed, continuing without texture URL:", cloudinaryError);
-      // Continue without texture URL - user can still manually enter URLs
+      console.warn("Cloudinary upload failed, using local data URL:", cloudinaryError);
+      // Create a base64 data URL as fallback
+      const base64 = imageBuffer.toString('base64');
+      const mimeType = originalName?.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+      textureUrl = `data:${mimeType};base64,${base64}`;
     }
 
     // 2) Check if AR compiler proxy is configured
     if (!AR_COMPILER_PROXY_URL) {
       return {
-        ok: false,
-        status: 501,
-        error: "Auto-compile not configured. Set AR_COMPILER_PROXY_URL environment variable or paste a .mind URL manually.",
+        ok: true, // Changed to true to indicate partial success
+        status: 200,
+        error: "Auto-compile not available. Please manually enter a .mind file URL below. You can use MindAR's online compiler to generate one from your image.",
         textureUrl
       };
     }

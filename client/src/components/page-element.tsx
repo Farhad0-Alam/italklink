@@ -2982,9 +2982,16 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                           mindFileUrl: result.mindFileUrl,
                           planeTextureUrl: result.textureUrl || element.data.planeTextureUrl
                         });
-                        alert('AR target generated successfully!');
+                        
+                        if (result.mindFileUrl) {
+                          alert('AR target generated successfully!');
+                        } else if (result.message) {
+                          alert(`Image uploaded successfully!\n\n${result.message}`);
+                        } else {
+                          alert('Image uploaded successfully! Please enter a .mind file URL manually.');
+                        }
                       } catch (error: any) {
-                        alert(`Failed to generate AR target: ${error.message}`);
+                        alert(`Failed to process image: ${error.message}`);
                       }
                     }}
                     className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
