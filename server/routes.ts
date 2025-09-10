@@ -4,6 +4,7 @@ import passport from 'passport';
 import bcrypt from 'bcryptjs';
 import { setupAuth, requireAuth, optionalAuth, requireAdmin } from './auth';
 import { storage } from './storage';
+import { emitAutomationEvent } from './automation-engine';
 import type { User, Team, TeamMember, CrmContact, CrmActivity, CrmTask, CrmPipeline, CrmStage, CrmDeal, CrmSequence, EmailTemplate } from '@shared/schema';
 import { 
   insertUserSchema, teamInvitationSchema, teamSettingsSchema,
@@ -966,6 +967,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const contact = await storage.createContact(contactData);
+
+      // Trigger automation for new contact creation
+      emitAutomationEvent('contact.created', {
+        userId: user.id,
+        entityId: contact.id,
+        entityType: 'contact',
+        data: contact,
+        timestamp: new Date()
+      });
       
       res.status(201).json(contact);
     } catch (error) {
@@ -1488,6 +1498,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const deal = await storage.createDeal(dealData);
+
+      // Trigger automation for new deal creation
+      emitAutomationEvent('deal.created', {
+        userId: user.id,
+        entityId: deal.id,
+        entityType: 'deal',
+        data: deal,
+        timestamp: new Date()
+      });
       
       res.status(201).json(deal);
     } catch (error) {
@@ -1542,6 +1561,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const movedDeal = await storage.moveDealToStage(req.params.id, stageId);
+
+      // Trigger automation for stage change
+      emitAutomationEvent('stage.changed', {
+        userId: user.id,
+        entityId: deal.id,
+        entityType: 'deal',
+        data: {
+          deal: movedDeal,
+          previousStageId: deal.stageId,
+          newStageId: stageId,
+          stage: stage
+        },
+        timestamp: new Date()
+      });
       
       res.json(movedDeal);
     } catch (error) {
