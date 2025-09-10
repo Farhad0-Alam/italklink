@@ -18,6 +18,53 @@ import { eq } from 'drizzle-orm';
 
 const router = Router();
 
+// Simple in-memory rate limiting for tracking endpoint
+// In production, use Redis or a proper rate limiting service
+const trackingRateLimit = new Map<string, { count: number; resetTime: number }>();
+const MAX_TRACKING_REQUESTS_PER_MINUTE = 60; // Allow 60 requests per minute per IP
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute in milliseconds
+
+// Rate limit middleware for tracking endpoint
+function checkTrackingRateLimit(req: Request, res: Response, next: Function) {
+  const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+  const now = Date.now();
+  
+  // Clean up old entries
+  for (const [ip, data] of trackingRateLimit.entries()) {
+    if (now > data.resetTime) {
+      trackingRateLimit.delete(ip);
+    }
+  }
+  
+  // Check rate limit for this IP
+  const rateLimitData = trackingRateLimit.get(clientIP);
+  
+  if (!rateLimitData) {
+    // First request from this IP
+    trackingRateLimit.set(clientIP, {
+      count: 1,
+      resetTime: now + RATE_LIMIT_WINDOW
+    });
+    next();
+  } else if (now > rateLimitData.resetTime) {
+    // Reset the window
+    rateLimitData.count = 1;
+    rateLimitData.resetTime = now + RATE_LIMIT_WINDOW;
+    next();
+  } else if (rateLimitData.count < MAX_TRACKING_REQUESTS_PER_MINUTE) {
+    // Within limit, increment count
+    rateLimitData.count++;
+    next();
+  } else {
+    // Rate limit exceeded
+    res.status(429).json({
+      success: false,
+      error: 'Too many tracking requests. Please try again later.',
+      retryAfter: Math.ceil((rateLimitData.resetTime - now) / 1000)
+    });
+  }
+}
+
 // Validation schemas
 const trackInteractionSchema = z.object({
   cardId: z.string(),
@@ -45,7 +92,7 @@ const updateAutomationConfigSchema = z.object({
 });
 
 // POST /api/automation/track - Track button interaction
-router.post('/track', async (req: Request, res: Response) => {
+router.post('/track', checkTrackingRateLimit, async (req: Request, res: Response) => {
   try {
     const data = trackInteractionSchema.parse(req.body);
     

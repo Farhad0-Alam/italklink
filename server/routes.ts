@@ -12,6 +12,31 @@ import {
   insertCrmDealSchema, insertCrmSequenceSchema
 } from '@shared/schema';
 import { z } from 'zod';
+
+// Create update schemas for CRM entities (omit immutable fields)
+const updateCrmContactSchema = insertCrmContactSchema.omit({ 
+  id: true, ownerUserId: true, createdAt: true, updatedAt: true 
+}).partial();
+
+const updateCrmActivitySchema = insertCrmActivitySchema.omit({ 
+  id: true, contactId: true, createdBy: true, createdAt: true 
+}).partial();
+
+const updateCrmTaskSchema = insertCrmTaskSchema.omit({ 
+  id: true, contactId: true, createdBy: true, createdAt: true 
+}).partial();
+
+const updateCrmPipelineSchema = insertCrmPipelineSchema.omit({ 
+  id: true, ownerUserId: true, createdAt: true, updatedAt: true 
+}).partial();
+
+const updateCrmDealSchema = insertCrmDealSchema.omit({ 
+  id: true, ownerUserId: true, createdAt: true, updatedAt: true 
+}).partial();
+
+const moveDealSchema = z.object({
+  stageId: z.string().min(1, 'Stage ID is required')
+});
 import { setupAIRoutes } from './ai-routes';
 import adminRoutes from './admin-routes';
 import { templateCollectionsRoutes } from './template-collections-routes';
@@ -962,17 +987,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Contact not found' });
       }
       
-      const updateData = req.body;
-      delete updateData.id;
-      delete updateData.ownerUserId;
-      delete updateData.createdAt;
-      delete updateData.updatedAt;
+      const updateData = updateCrmContactSchema.parse(req.body);
       
       const updatedContact = await storage.updateContact(req.params.id, updateData);
       
       res.json(updatedContact);
     } catch (error) {
       console.error('Error updating contact:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid contact data', errors: error.errors });
+      }
       res.status(500).json({ message: 'Failed to update contact' });
     }
   });
@@ -1110,17 +1134,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Activity not found' });
       }
       
-      const updateData = req.body;
-      delete updateData.id;
-      delete updateData.contactId;
-      delete updateData.createdBy;
-      delete updateData.createdAt;
+      const updateData = updateCrmActivitySchema.parse(req.body);
       
       const updatedActivity = await storage.updateActivity(req.params.id, updateData);
       
       res.json(updatedActivity);
     } catch (error) {
       console.error('Error updating activity:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid activity data', errors: error.errors });
+      }
       res.status(500).json({ message: 'Failed to update activity' });
     }
   });
@@ -1228,17 +1251,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Task not found' });
       }
       
-      const updateData = req.body;
-      delete updateData.id;
-      delete updateData.contactId;
-      delete updateData.createdBy;
-      delete updateData.createdAt;
+      const updateData = updateCrmTaskSchema.parse(req.body);
       
       const updatedTask = await storage.updateTask(req.params.id, updateData);
       
       res.json(updatedTask);
     } catch (error) {
       console.error('Error updating task:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid task data', errors: error.errors });
+      }
       res.status(500).json({ message: 'Failed to update task' });
     }
   });
@@ -1351,17 +1373,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Pipeline not found' });
       }
       
-      const updateData = req.body;
-      delete updateData.id;
-      delete updateData.ownerUserId;
-      delete updateData.createdAt;
-      delete updateData.updatedAt;
+      const updateData = updateCrmPipelineSchema.parse(req.body);
       
       const updatedPipeline = await storage.updatePipeline(req.params.id, updateData);
       
       res.json(updatedPipeline);
     } catch (error) {
       console.error('Error updating pipeline:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid pipeline data', errors: error.errors });
+      }
       res.status(500).json({ message: 'Failed to update pipeline' });
     }
   });
@@ -1480,17 +1501,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Deal not found' });
       }
       
-      const updateData = req.body;
-      delete updateData.id;
-      delete updateData.ownerUserId;
-      delete updateData.createdAt;
-      delete updateData.updatedAt;
+      const updateData = updateCrmDealSchema.parse(req.body);
       
       const updatedDeal = await storage.updateDeal(req.params.id, updateData);
       
       res.json(updatedDeal);
     } catch (error) {
       console.error('Error updating deal:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid deal data', errors: error.errors });
+      }
       res.status(500).json({ message: 'Failed to update deal' });
     }
   });
@@ -1505,10 +1525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Deal not found' });
       }
       
-      const { stageId } = req.body;
-      if (!stageId) {
-        return res.status(400).json({ message: 'stageId is required' });
-      }
+      const { stageId } = moveDealSchema.parse(req.body);
       
       // Verify stage belongs to same pipeline
       const stage = await storage.getStage(stageId);
@@ -1521,6 +1538,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(movedDeal);
     } catch (error) {
       console.error('Error moving deal:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid request data', errors: error.errors });
+      }
       res.status(500).json({ message: 'Failed to move deal' });
     }
   });

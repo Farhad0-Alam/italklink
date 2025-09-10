@@ -240,6 +240,9 @@ export default function Dashboard() {
                 <Link href="/collections" className="text-gray-500 hover:text-gray-700">
                   Collections
                 </Link>
+                <Link href="/crm" className="text-gray-500 hover:text-gray-700" data-testid="link-crm">
+                  CRM
+                </Link>
                 <Link href="/affiliate" className="text-gray-500 hover:text-gray-700">
                   Affiliate
                 </Link>

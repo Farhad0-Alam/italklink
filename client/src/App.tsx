@@ -27,6 +27,7 @@ import Usage from "./pages/usage";
 import Help from "./pages/help";
 import Automation from "./pages/automation";
 import NotFound from "@/pages/not-found";
+import CRM from "./pages/crm";
 import i18n from "./lib/i18n";
 
 function Router() {
@@ -54,6 +55,7 @@ function Router() {
       <Route path="/billing" component={Billing} />
       <Route path="/usage" component={Usage} />
       <Route path="/automation" component={Automation} />
+      <Route path="/crm" component={CRM} />
       <Route path="/help" component={Help} />
       <Route path="/admin/templates/import" component={() => <Admin />} />
       <Route path="/admin/templates/builder" component={() => <Admin />} />
