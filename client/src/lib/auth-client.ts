@@ -218,14 +218,7 @@ class AuthClient {
         // Invalidate query cache
         queryClient.invalidateQueries();
         
-        // Redirect based on user role
-        if (data.user?.role === 'owner' || data.user?.role === 'admin') {
-          window.location.href = '/admin';
-        } else {
-          window.location.href = '/dashboard';
-        }
-        
-        return { success: true };
+        return { success: true, user: data.user };
       } else {
         return { success: false, error: data.message || 'Login failed' };
       }

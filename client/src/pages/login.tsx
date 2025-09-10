@@ -29,7 +29,7 @@ export default function Login() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role === 'owner') {
+      if (user.role === 'owner' || user.role === 'admin') {
         setLocation('/admin');
       } else {
         setLocation('/dashboard');
@@ -60,7 +60,13 @@ export default function Login() {
           description: 'Welcome back!',
         });
         
-        // Redirect will happen automatically via useEffect when auth state updates
+        // Immediate redirect based on user role
+        const userRole = (result as any).user?.role;
+        if (userRole === 'owner' || userRole === 'admin') {
+          setLocation('/admin');
+        } else {
+          setLocation('/dashboard');
+        }
       } else {
         toast({
           title: 'Login Failed',

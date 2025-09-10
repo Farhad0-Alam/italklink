@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Link } from "wouter";
 import { useTheme } from "@/components/theme-provider";
+import { useAuth } from "@/hooks/useAuth";
 import { Moon, Sun, Smartphone, Monitor } from "lucide-react";
 
 
@@ -179,6 +180,7 @@ export default function Landing() {
   const [isMobile, setIsMobile] = useState(false);
   const { scrollY } = useScroll();
   const { theme } = useTheme();
+  const { isAuthenticated, user } = useAuth();
 
   
   // Parallax effects
@@ -250,16 +252,35 @@ export default function Landing() {
             
             <div className="flex items-center space-x-2">
               <ThemeToggle />
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button variant="ghost" asChild>
-                  <Link href="/login">Sign In</Link>
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button asChild className="bg-talklink-500 hover:bg-talklink-600">
-                  <Link href="/register">Get Started Free</Link>
-                </Button>
-              </motion.div>
+              {isAuthenticated && user ? (
+                <>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button variant="ghost" asChild>
+                      <Link href="/dashboard">Dashboard</Link>
+                    </Button>
+                  </motion.div>
+                  {(user.role === 'admin' || user.role === 'owner') && (
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button variant="outline" asChild>
+                        <Link href="/admin">Admin</Link>
+                      </Button>
+                    </motion.div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button variant="ghost" asChild>
+                      <Link href="/login">Sign In</Link>
+                    </Button>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button asChild className="bg-talklink-500 hover:bg-talklink-600">
+                      <Link href="/register">Get Started Free</Link>
+                    </Button>
+                  </motion.div>
+                </>
+              )}
             </div>
           </div>
         </div>
