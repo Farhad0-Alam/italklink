@@ -41,6 +41,40 @@ export default function AutomationManager() {
   const updateAutomation = useUpdateAutomation(editingAutomation?.id || '');
   const { toast } = useToast();
 
+  const handleSaveAutomation = useCallback(async (workflow: AutomationWorkflow) => {
+    if (isSaving) return; // Prevent multiple submissions
+    
+    setIsSaving(true);
+    try {
+      if (editingAutomation) {
+        await updateAutomation.mutateAsync(workflow);
+        toast({
+          title: "Success",
+          description: "Automation updated successfully",
+        });
+      } else {
+        await createAutomation.mutateAsync(workflow);
+        toast({
+          title: "Success",
+          description: "Automation created successfully",
+        });
+      }
+      setShowBuilder(false);
+      setEditingAutomation(null);
+      setSelectedAutomation(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: editingAutomation 
+          ? "Failed to update automation" 
+          : "Failed to create automation",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [isSaving, editingAutomation, updateAutomation, createAutomation, toast]);
+
   const handleToggleAutomation = async (automationId: string, currentState: boolean) => {
     try {
       await toggleAutomation.mutateAsync(automationId);
@@ -386,39 +420,7 @@ export default function AutomationManager() {
             } : undefined}
             isEditing={!!editingAutomation}
             isSaving={isSaving}
-            onSave={useCallback(async (workflow: AutomationWorkflow) => {
-              if (isSaving) return; // Prevent multiple submissions
-              
-              setIsSaving(true);
-              try {
-                if (editingAutomation) {
-                  await updateAutomation.mutateAsync(workflow);
-                  toast({
-                    title: "Success",
-                    description: "Automation updated successfully",
-                  });
-                } else {
-                  await createAutomation.mutateAsync(workflow);
-                  toast({
-                    title: "Success",
-                    description: "Automation created successfully",
-                  });
-                }
-                setShowBuilder(false);
-                setEditingAutomation(null);
-                setSelectedAutomation(null);
-              } catch (error) {
-                toast({
-                  title: "Error",
-                  description: editingAutomation 
-                    ? "Failed to update automation" 
-                    : "Failed to create automation",
-                  variant: "destructive",
-                });
-              } finally {
-                setIsSaving(false);
-              }
-            }, [isSaving, editingAutomation, updateAutomation, createAutomation, toast, setShowBuilder, setEditingAutomation, setSelectedAutomation])}
+            onSave={handleSaveAutomation}
             onCancel={() => {
               setShowBuilder(false);
               setEditingAutomation(null);
