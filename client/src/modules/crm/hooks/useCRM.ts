@@ -17,15 +17,23 @@ export function useContacts(filters?: {
   priority?: string;
   tags?: string[];
 }) {
+  const queryParams = new URLSearchParams();
+  if (filters?.search) queryParams.append('search', filters.search);
+  if (filters?.lifecycleStage) queryParams.append('lifecycleStage', filters.lifecycleStage);
+  if (filters?.priority) queryParams.append('priority', filters.priority);
+  if (filters?.tags?.length) queryParams.append('tags', filters.tags.join(','));
+  
+  const queryString = queryParams.toString();
+  
   return useQuery<Contact[]>({
-    queryKey: ['/api/crm/contacts', filters],
+    queryKey: [`/api/crm/contacts${queryString ? `?${queryString}` : ''}`],
     staleTime: 1000 * 30, // 30 seconds
   });
 }
 
 export function useContact(contactId: string) {
   return useQuery<Contact>({
-    queryKey: ['/api/crm/contacts', contactId],
+    queryKey: [`/api/crm/contacts/${contactId}`],
     enabled: !!contactId,
   });
 }
@@ -50,8 +58,10 @@ export function useUpdateContact(contactId: string) {
     mutationFn: (data: Partial<Contact>) => 
       apiRequest('PATCH', `/api/crm/contacts/${contactId}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/crm/contacts'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/crm/contacts', contactId] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
+        query.queryKey[0].startsWith('/api/crm/contacts')
+      });
       queryClient.invalidateQueries({ queryKey: ['/api/crm/stats'] });
     },
   });
@@ -76,8 +86,15 @@ export function useDeals(filters?: {
   stage?: string;
   contactId?: string;
 }) {
+  const queryParams = new URLSearchParams();
+  if (filters?.pipelineId) queryParams.append('pipelineId', filters.pipelineId);
+  if (filters?.stage) queryParams.append('stage', filters.stage);
+  if (filters?.contactId) queryParams.append('contactId', filters.contactId);
+  
+  const queryString = queryParams.toString();
+  
   return useQuery<Deal[]>({
-    queryKey: ['/api/crm/deals', filters],
+    queryKey: [`/api/crm/deals${queryString ? `?${queryString}` : ''}`],
     staleTime: 1000 * 30, // 30 seconds
   });
 }
@@ -109,8 +126,10 @@ export function useUpdateDeal(dealId: string) {
     mutationFn: (data: Partial<Deal>) => 
       apiRequest('PATCH', `/api/crm/deals/${dealId}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/crm/deals'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/crm/deals', dealId] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
+        query.queryKey[0].startsWith('/api/crm/deals')
+      });
       queryClient.invalidateQueries({ queryKey: ['/api/crm/stats'] });
     },
   });
@@ -125,7 +144,10 @@ export function useMoveDeal() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/crm/deals'] });
       queryClient.invalidateQueries({ queryKey: ['/api/crm/stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/crm/activities'] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
+        query.queryKey[0].startsWith('/api/crm/activities')
+      });
     },
   });
 }
@@ -140,8 +162,19 @@ export function useTasks(filters?: {
   dueDateFrom?: string;
   dueDateTo?: string;
 }) {
+  const queryParams = new URLSearchParams();
+  if (filters?.status) queryParams.append('status', filters.status);
+  if (filters?.priority) queryParams.append('priority', filters.priority);
+  if (filters?.contactId) queryParams.append('contactId', filters.contactId);
+  if (filters?.dealId) queryParams.append('dealId', filters.dealId);
+  if (filters?.assignedTo) queryParams.append('assignedTo', filters.assignedTo);
+  if (filters?.dueDateFrom) queryParams.append('dueDateFrom', filters.dueDateFrom);
+  if (filters?.dueDateTo) queryParams.append('dueDateTo', filters.dueDateTo);
+  
+  const queryString = queryParams.toString();
+  
   return useQuery<Task[]>({
-    queryKey: ['/api/crm/tasks', filters],
+    queryKey: [`/api/crm/tasks${queryString ? `?${queryString}` : ''}`],
     staleTime: 1000 * 30, // 30 seconds
   });
 }
@@ -173,8 +206,10 @@ export function useUpdateTask(taskId: string) {
     mutationFn: (data: Partial<Task>) => 
       apiRequest('PATCH', `/api/crm/tasks/${taskId}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/crm/tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/crm/tasks', taskId] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
+        query.queryKey[0].startsWith('/api/crm/tasks')
+      });
       queryClient.invalidateQueries({ queryKey: ['/api/crm/stats'] });
     },
   });
@@ -189,7 +224,10 @@ export function useCompleteTask() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/crm/tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/crm/stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/crm/activities'] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] && typeof query.queryKey[0] === 'string' && 
+        query.queryKey[0].startsWith('/api/crm/activities')
+      });
     },
   });
 }
@@ -201,15 +239,23 @@ export function useActivities(filters?: {
   type?: string;
   limit?: number;
 }) {
+  const queryParams = new URLSearchParams();
+  if (filters?.contactId) queryParams.append('contactId', filters.contactId);
+  if (filters?.dealId) queryParams.append('dealId', filters.dealId);
+  if (filters?.type) queryParams.append('type', filters.type);
+  if (filters?.limit) queryParams.append('limit', filters.limit.toString());
+  
+  const queryString = queryParams.toString();
+  
   return useQuery<Activity[]>({
-    queryKey: ['/api/crm/activities', filters],
+    queryKey: [`/api/crm/activities${queryString ? `?${queryString}` : ''}`],
     staleTime: 1000 * 30, // 30 seconds
   });
 }
 
 export function useContactActivities(contactId: string) {
   return useQuery<Activity[]>({
-    queryKey: ['/api/crm/activities', { contactId }],
+    queryKey: [`/api/crm/activities?contactId=${contactId}`],
     enabled: !!contactId,
     staleTime: 1000 * 30, // 30 seconds
   });
