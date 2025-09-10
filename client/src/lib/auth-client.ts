@@ -119,13 +119,9 @@ class AuthClient {
   }
 
   private async fetchUser() {
-    if (!this.state.accessToken) {
-      console.log('fetchUser: No access token available');
-      return;
-    }
+    if (!this.state.accessToken) return;
 
     try {
-      console.log('fetchUser: Making request with token:', this.state.accessToken?.substring(0, 20) + '...');
       const response = await fetch('/api/auth/user', {
         headers: {
           'Authorization': `Bearer ${this.state.accessToken}`,
@@ -133,14 +129,10 @@ class AuthClient {
         credentials: 'include',
       });
 
-      console.log('fetchUser response:', response.status);
-
       if (response.ok) {
         const user = await response.json();
-        console.log('fetchUser: Success, got user:', user.email);
         this.setState({ user });
       } else if (response.status === 401) {
-        console.log('fetchUser: Got 401, trying to refresh token');
         // Token is invalid, try to refresh
         await this.refreshToken();
       }
@@ -201,7 +193,6 @@ class AuthClient {
 
   async login(email: string, password: string, rememberEmail?: boolean): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('Login attempt starting...');
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -212,10 +203,8 @@ class AuthClient {
       });
 
       const data = await response.json();
-      console.log('Login response:', { status: response.status, data });
 
       if (response.ok) {
-        console.log('Login successful, setting access token...');
         this.setAccessToken(data.accessToken);
         this.setState({ user: data.user });
         
@@ -229,7 +218,13 @@ class AuthClient {
         // Invalidate query cache
         queryClient.invalidateQueries();
         
-        console.log('Login completed successfully');
+        // Redirect based on user role
+        if (data.user?.role === 'owner' || data.user?.role === 'admin') {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/dashboard';
+        }
+        
         return { success: true };
       } else {
         return { success: false, error: data.message || 'Login failed' };
