@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle } from "lucide-react";
+import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -314,6 +314,17 @@ export default function Dashboard() {
                   >
                     <Settings className="w-4 h-4 text-gray-500" />
                     <span className="text-sm">Account Settings</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem 
+                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
+                    onClick={() => setLocation('/automation')}
+                  >
+                    <Zap className="w-4 h-4 text-gray-500" />
+                    <div className="flex flex-col flex-1">
+                      <span className="text-sm">Automation</span>
+                      <span className="text-xs text-gray-500">CRM & lead tracking</span>
+                    </div>
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
