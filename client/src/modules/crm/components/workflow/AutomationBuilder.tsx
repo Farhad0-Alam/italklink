@@ -42,6 +42,7 @@ interface AutomationBuilderProps {
   onCancel: () => void;
   onTest?: (workflow: AutomationWorkflow) => void;
   isEditing?: boolean;
+  isSaving?: boolean;
 }
 
 export default function AutomationBuilder({
@@ -49,7 +50,8 @@ export default function AutomationBuilder({
   onSave,
   onCancel,
   onTest,
-  isEditing = false
+  isEditing = false,
+  isSaving = false
 }: AutomationBuilderProps) {
   const [workflow, setWorkflow] = useState<AutomationWorkflow>(() => ({
     name: initialWorkflow?.name || '',
@@ -529,11 +531,11 @@ export default function AutomationBuilder({
               </Button>
               <Button
                 onClick={handleSave}
-                disabled={hasErrors}
+                disabled={hasErrors || isSaving}
                 data-testid="button-save-workflow"
               >
                 <Save className="h-4 w-4 mr-2" />
-                Save Automation
+                {isSaving ? 'Saving...' : 'Save Automation'}
               </Button>
             </div>
           </div>

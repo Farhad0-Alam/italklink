@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useAutomations, useDeleteAutomation, useToggleAutomation, useTestAutomation, useAutomationRuns } from "../hooks/useCRM";
 import { useCreateAutomation, useUpdateAutomation } from "../hooks/useAutomation";
 import AutomationBuilder from "./workflow/AutomationBuilder";
@@ -29,7 +29,8 @@ export default function AutomationManager() {
   const [selectedAutomation, setSelectedAutomation] = useState<string | null>(null);
   const [showBuilder, setShowBuilder] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
-  const [editingAutomation, setEditingAutomation] = useState<any | null>(null);
+  const [editingAutomation, setEditingAutomation] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
   
   const { data: automations = [], isLoading } = useAutomations();
   const { data: automationRuns = [] } = useAutomationRuns(undefined, 50);
@@ -384,7 +385,11 @@ export default function AutomationManager() {
               enabled: editingAutomation.enabled
             } : undefined}
             isEditing={!!editingAutomation}
-            onSave={async (workflow: AutomationWorkflow) => {
+            isSaving={isSaving}
+            onSave={useCallback(async (workflow: AutomationWorkflow) => {
+              if (isSaving) return; // Prevent multiple submissions
+              
+              setIsSaving(true);
               try {
                 if (editingAutomation) {
                   await updateAutomation.mutateAsync(workflow);
@@ -410,8 +415,10 @@ export default function AutomationManager() {
                     : "Failed to create automation",
                   variant: "destructive",
                 });
+              } finally {
+                setIsSaving(false);
               }
-            }}
+            }, [isSaving, editingAutomation, updateAutomation, createAutomation, toast, setShowBuilder, setEditingAutomation, setSelectedAutomation])}
             onCancel={() => {
               setShowBuilder(false);
               setEditingAutomation(null);
