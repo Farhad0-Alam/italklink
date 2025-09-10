@@ -744,7 +744,7 @@ function TaskForm({ task, contacts, deals, onSubmit, onCancel, isLoading }: Task
                 <SelectValue placeholder="Select contact" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="none">None</SelectItem>
                 {contacts.map((contact) => (
                   <SelectItem key={contact.id} value={contact.id}>
                     {contact.firstName} {contact.lastName} {contact.company && `(${contact.company})`}
@@ -761,7 +761,7 @@ function TaskForm({ task, contacts, deals, onSubmit, onCancel, isLoading }: Task
                 <SelectValue placeholder="Select deal" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="none">None</SelectItem>
                 {deals.map((deal) => (
                   <SelectItem key={deal.id} value={deal.id}>
                     {deal.title} (${deal.value.toLocaleString()})

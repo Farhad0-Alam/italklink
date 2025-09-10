@@ -26,7 +26,7 @@ import { formatDistanceToNow, format, isToday, isYesterday } from "date-fns";
 
 export function ActivitiesTimeline() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string>("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [dateRange, setDateRange] = useState<string>("all");
 
   // API hook
@@ -192,7 +192,7 @@ export function ActivitiesTimeline() {
             <SelectValue placeholder="Filter by Type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Types</SelectItem>
+            <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="contact_created">Contact Created</SelectItem>
             <SelectItem value="deal_created">Deal Created</SelectItem>
             <SelectItem value="deal_moved">Deal Moved</SelectItem>
