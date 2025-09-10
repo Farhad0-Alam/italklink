@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useAutomations, useDeleteAutomation, useToggleAutomation, useTestAutomation, useAutomationRuns } from "../hooks/useCRM";
+import { useCreateAutomation, useUpdateAutomation } from "../hooks/useAutomation";
+import AutomationBuilder from "./workflow/AutomationBuilder";
+import type { AutomationWorkflow } from "../types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,12 +29,15 @@ export default function AutomationManager() {
   const [selectedAutomation, setSelectedAutomation] = useState<string | null>(null);
   const [showBuilder, setShowBuilder] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
+  const [editingAutomation, setEditingAutomation] = useState<any | null>(null);
   
   const { data: automations = [], isLoading } = useAutomations();
   const { data: automationRuns = [] } = useAutomationRuns(undefined, 50);
   const deleteAutomation = useDeleteAutomation();
   const toggleAutomation = useToggleAutomation();
   const testAutomation = useTestAutomation();
+  const createAutomation = useCreateAutomation();
+  const updateAutomation = useUpdateAutomation(editingAutomation?.id || '');
   const { toast } = useToast();
 
   const handleToggleAutomation = async (automationId: string, currentState: boolean) => {
@@ -143,7 +149,10 @@ export default function AutomationManager() {
           </p>
         </div>
         <Button 
-          onClick={() => setShowBuilder(true)} 
+          onClick={() => {
+            setEditingAutomation(null);
+            setShowBuilder(true);
+          }} 
           data-testid="button-create-automation"
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -265,6 +274,7 @@ export default function AutomationManager() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
+                            setEditingAutomation(automation);
                             setSelectedAutomation(automation.id);
                             setShowBuilder(true);
                           }}
@@ -359,34 +369,66 @@ export default function AutomationManager() {
         </TabsContent>
       </Tabs>
 
-      {/* Automation Builder Dialog - Placeholder for now */}
+      {/* Automation Builder Dialog */}
       <Dialog open={showBuilder} onOpenChange={setShowBuilder}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedAutomation ? 'Edit Automation' : 'Create New Automation'}
-            </DialogTitle>
-            <DialogDescription>
-              Build workflows that automate your sales processes
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-6">
-            <div className="text-center py-12 border-2 border-dashed border-muted rounded-lg">
-              <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Automation Builder</h3>
-              <p className="text-muted-foreground">
-                Visual workflow builder coming soon...
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowBuilder(false)}>
-              Cancel
-            </Button>
-            <Button disabled>
-              Save Automation
-            </Button>
-          </DialogFooter>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
+          <AutomationBuilder
+            initialWorkflow={editingAutomation ? {
+              id: editingAutomation.id,
+              name: editingAutomation.name,
+              description: editingAutomation.description,
+              triggers: editingAutomation.triggers || [],
+              conditions: editingAutomation.conditions || [],
+              actions: editingAutomation.actions || [],
+              connections: editingAutomation.connections || [],
+              enabled: editingAutomation.enabled
+            } : undefined}
+            isEditing={!!editingAutomation}
+            onSave={async (workflow: AutomationWorkflow) => {
+              try {
+                if (editingAutomation) {
+                  await updateAutomation.mutateAsync(workflow);
+                  toast({
+                    title: "Success",
+                    description: "Automation updated successfully",
+                  });
+                } else {
+                  await createAutomation.mutateAsync(workflow);
+                  toast({
+                    title: "Success",
+                    description: "Automation created successfully",
+                  });
+                }
+                setShowBuilder(false);
+                setEditingAutomation(null);
+                setSelectedAutomation(null);
+              } catch (error) {
+                toast({
+                  title: "Error",
+                  description: editingAutomation 
+                    ? "Failed to update automation" 
+                    : "Failed to create automation",
+                  variant: "destructive",
+                });
+              }
+            }}
+            onCancel={() => {
+              setShowBuilder(false);
+              setEditingAutomation(null);
+              setSelectedAutomation(null);
+            }}
+            onTest={async (workflow: AutomationWorkflow) => {
+              if (editingAutomation) {
+                await handleTestAutomation(editingAutomation.id);
+              } else {
+                toast({
+                  title: "Test Unavailable",
+                  description: "Please save the automation first to test it",
+                  variant: "destructive",
+                });
+              }
+            }}
+          />
         </DialogContent>
       </Dialog>
     </div>
