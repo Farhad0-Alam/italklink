@@ -51,6 +51,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup PWA routes
   app.use('/api/pwa', pwaRouter);
+  
+  // Setup notification routes
+  const notificationRoutes = (await import('./modules/notifications')).default;
+  app.use('/api/notify', notificationRoutes);
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {
