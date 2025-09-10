@@ -23,16 +23,18 @@ export interface OneSignalResponse {
 }
 
 export class OneSignalService {
-  private readonly appId: string;
-  private readonly apiKey: string;
+  private readonly appId: string | null;
+  private readonly apiKey: string | null;
   private readonly baseUrl = 'https://onesignal.com/api/v1';
+  private readonly isConfigured: boolean;
 
   constructor() {
-    this.appId = process.env.ONESIGNAL_APP_ID!;
-    this.apiKey = process.env.ONESIGNAL_API_KEY!;
+    this.appId = process.env.ONESIGNAL_APP_ID || null;
+    this.apiKey = process.env.ONESIGNAL_API_KEY || null;
+    this.isConfigured = !!(this.appId && this.apiKey);
     
-    if (!this.appId || !this.apiKey) {
-      throw new Error('OneSignal configuration missing: ONESIGNAL_APP_ID and ONESIGNAL_API_KEY required');
+    if (!this.isConfigured) {
+      console.warn('OneSignal not configured. Notification features will be disabled. Set ONESIGNAL_APP_ID and ONESIGNAL_API_KEY environment variables to enable.');
     }
   }
 
@@ -40,8 +42,16 @@ export class OneSignalService {
    * Send notification by tags with advanced filtering
    */
   async sendByTags(notification: OneSignalNotification): Promise<OneSignalResponse> {
+    if (!this.isConfigured) {
+      console.warn('OneSignal not configured - simulating notification send');
+      return {
+        id: 'mock-notification-' + Date.now(),
+        recipients: 0,
+        external_id: 'mock'
+      };
+    }
     const payload = {
-      app_id: this.appId,
+      app_id: this.appId!,
       headings: notification.headings,
       contents: notification.contents,
       url: notification.url,
@@ -57,7 +67,7 @@ export class OneSignalService {
       const response = await fetch(`${this.baseUrl}/notifications`, {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${this.apiKey}`,
+          'Authorization': `Basic ${this.apiKey!}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
@@ -185,10 +195,14 @@ export class OneSignalService {
    * Test OneSignal connection
    */
   async testConnection(): Promise<boolean> {
+    if (!this.isConfigured) {
+      return false;
+    }
+    
     try {
       const response = await fetch(`${this.baseUrl}/apps/${this.appId}`, {
         headers: {
-          'Authorization': `Basic ${this.apiKey}`,
+          'Authorization': `Basic ${this.apiKey!}`,
         },
       });
       return response.ok;
