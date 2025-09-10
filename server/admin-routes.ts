@@ -6,7 +6,7 @@ import {
   links, countersDaily, headerTemplates, insertHeaderTemplateSchema, coupons, couponUsages,
   insertCouponSchema, insertCouponUsageSchema
 } from '@shared/schema';
-import { requireOwner } from './auth';
+import { jwtAdminAuth } from './modules/auth/routes';
 import { eq, desc, count, sql, and, or, like, inArray } from 'drizzle-orm';
 import bcryptjs from 'bcryptjs';
 import { z } from 'zod';
@@ -31,7 +31,7 @@ const logAdminAction = async (actorId: string, action: string, targetType: strin
 // === DASHBOARD ENDPOINTS ===
 
 // Dashboard metrics (KPIs)
-router.get('/metrics/summary', requireOwner, async (req, res) => {
+router.get('/metrics/summary', jwtAdminAuth, async (req, res) => {
   try {
     const [
       weeklyClicksResult,
@@ -88,7 +88,7 @@ router.get('/metrics/summary', requireOwner, async (req, res) => {
 });
 
 // Dashboard timeseries for chart
-router.get('/metrics/timeseries', requireOwner, async (req, res) => {
+router.get('/metrics/timeseries', jwtAdminAuth, async (req, res) => {
   try {
     const { range = '30d' } = req.query;
     const days = range === '30d' ? 30 : 7;
@@ -119,7 +119,7 @@ router.get('/metrics/timeseries', requireOwner, async (req, res) => {
 });
 
 // All Links list for dashboard
-router.get('/links', requireOwner, async (req, res) => {
+router.get('/links', jwtAdminAuth, async (req, res) => {
   try {
     const allLinks = await db.select({
       id: businessCards.id,
@@ -160,7 +160,7 @@ router.get('/links', requireOwner, async (req, res) => {
 // === USERS MANAGEMENT ENDPOINTS ===
 
 // Get users with search, filters, pagination
-router.get('/users', requireOwner, async (req, res) => {
+router.get('/users', jwtAdminAuth, async (req, res) => {
   try {
     const { search, status, planId, page = 1, size = 50 } = req.query;
     const offset = (Number(page) - 1) * Number(size);
@@ -239,7 +239,7 @@ router.get('/users', requireOwner, async (req, res) => {
 });
 
 // Add new user
-router.post('/users', requireOwner, async (req, res) => {
+router.post('/users', jwtAdminAuth, async (req, res) => {
   try {
     const { email, firstName, lastName, password, planId } = req.body;
     
@@ -300,7 +300,7 @@ router.post('/users', requireOwner, async (req, res) => {
 });
 
 // Update user
-router.patch('/users/:id', requireOwner, async (req, res) => {
+router.patch('/users/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -344,7 +344,7 @@ router.patch('/users/:id', requireOwner, async (req, res) => {
 });
 
 // Delete user
-router.delete('/users/:id', requireOwner, async (req, res) => {
+router.delete('/users/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -360,7 +360,7 @@ router.delete('/users/:id', requireOwner, async (req, res) => {
 });
 
 // Assign plan to user
-router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
+router.post('/users/:id/assign-plan', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { planId, startsAt, endsAt, note } = req.body;
@@ -412,7 +412,7 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
 // === PLANS MANAGEMENT ENDPOINTS ===
 
 // Get all plans
-router.get('/plans', requireOwner, async (req, res) => {
+router.get('/plans', jwtAdminAuth, async (req, res) => {
   try {
     const plans = await db.select().from(subscriptionPlans).orderBy(subscriptionPlans.createdAt);
     res.json(plans);
@@ -423,7 +423,7 @@ router.get('/plans', requireOwner, async (req, res) => {
 });
 
 // Get all features
-router.get('/features', requireOwner, async (req, res) => {
+router.get('/features', jwtAdminAuth, async (req, res) => {
   try {
     const allFeatures = await db.select().from(features).orderBy(features.category, features.label);
     res.json(allFeatures);
@@ -434,7 +434,7 @@ router.get('/features', requireOwner, async (req, res) => {
 });
 
 // Create plan
-router.post('/plans', requireOwner, async (req, res) => {
+router.post('/plans', jwtAdminAuth, async (req, res) => {
   try {
     const {
       name, planType, price, currency, frequency, businessCardsLimit, 
@@ -502,7 +502,7 @@ router.post('/plans', requireOwner, async (req, res) => {
 });
 
 // Update plan
-router.patch('/plans/:id', requireOwner, async (req, res) => {
+router.patch('/plans/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -522,7 +522,7 @@ router.patch('/plans/:id', requireOwner, async (req, res) => {
 });
 
 // Assign features to plan
-router.post('/plans/:id/features', requireOwner, async (req, res) => {
+router.post('/plans/:id/features', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { featureIds } = req.body;
@@ -550,7 +550,7 @@ router.post('/plans/:id/features', requireOwner, async (req, res) => {
 });
 
 // Assign templates to plan
-router.post('/plans/:id/templates', requireOwner, async (req, res) => {
+router.post('/plans/:id/templates', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { templateIds } = req.body;
@@ -580,7 +580,7 @@ router.post('/plans/:id/templates', requireOwner, async (req, res) => {
 // === COUPONS MANAGEMENT ENDPOINTS ===
 
 // Get all coupons
-router.get('/coupons', requireOwner, async (req, res) => {
+router.get('/coupons', jwtAdminAuth, async (req, res) => {
   try {
     const { search, status, type } = req.query;
     
@@ -617,7 +617,7 @@ router.get('/coupons', requireOwner, async (req, res) => {
 });
 
 // Create coupon
-router.post('/coupons', requireOwner, async (req, res) => {
+router.post('/coupons', jwtAdminAuth, async (req, res) => {
   try {
     const validatedData = insertCouponSchema.parse({
       ...req.body,
@@ -653,7 +653,7 @@ router.post('/coupons', requireOwner, async (req, res) => {
 });
 
 // Update coupon
-router.put('/coupons/:id', requireOwner, async (req, res) => {
+router.put('/coupons/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -701,7 +701,7 @@ router.put('/coupons/:id', requireOwner, async (req, res) => {
 });
 
 // Delete coupon
-router.delete('/coupons/:id', requireOwner, async (req, res) => {
+router.delete('/coupons/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -723,7 +723,7 @@ router.delete('/coupons/:id', requireOwner, async (req, res) => {
 });
 
 // Validate coupon
-router.post('/coupons/validate', requireOwner, async (req, res) => {
+router.post('/coupons/validate', jwtAdminAuth, async (req, res) => {
   try {
     const { code, planId, userId } = req.body;
 
@@ -801,7 +801,7 @@ router.post('/coupons/validate', requireOwner, async (req, res) => {
 });
 
 // Apply coupon and record usage
-router.post('/coupons/apply', requireOwner, async (req, res) => {
+router.post('/coupons/apply', jwtAdminAuth, async (req, res) => {
   try {
     const { couponId, userId, planId, originalAmount } = req.body;
 
@@ -872,7 +872,7 @@ router.post('/coupons/apply', requireOwner, async (req, res) => {
 });
 
 // Get coupon usage statistics
-router.get('/coupons/:id/usage', requireOwner, async (req, res) => {
+router.get('/coupons/:id/usage', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -967,7 +967,7 @@ router.get('/templates/:id', async (req, res) => {
 });
 
 // Update template
-router.patch('/templates/:id', requireOwner, async (req, res) => {
+router.patch('/templates/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, templateData, previewImage, isActive } = req.body;
@@ -998,7 +998,7 @@ router.patch('/templates/:id', requireOwner, async (req, res) => {
 });
 
 // Delete template
-router.delete('/templates/:id', requireOwner, async (req, res) => {
+router.delete('/templates/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -1020,7 +1020,7 @@ router.delete('/templates/:id', requireOwner, async (req, res) => {
 });
 
 // Create template
-router.post('/templates', requireOwner, async (req, res) => {
+router.post('/templates', jwtAdminAuth, async (req, res) => {
   try {
     const templateData = {
       ...req.body,
@@ -1039,7 +1039,7 @@ router.post('/templates', requireOwner, async (req, res) => {
 });
 
 // Toggle template publish status
-router.post('/templates/:id/publish', requireOwner, async (req, res) => {
+router.post('/templates/:id/publish', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -1077,7 +1077,7 @@ router.post('/templates/:id/publish', requireOwner, async (req, res) => {
 });
 
 // Duplicate template
-router.post('/templates/:id/duplicate', requireOwner, async (req, res) => {
+router.post('/templates/:id/duplicate', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -1108,7 +1108,7 @@ router.post('/templates/:id/duplicate', requireOwner, async (req, res) => {
 });
 
 // Import templates from JSON file
-router.post('/templates/import', requireOwner, async (req, res) => {
+router.post('/templates/import', jwtAdminAuth, async (req, res) => {
   try {
     const importData = req.body;
     
@@ -1193,7 +1193,7 @@ router.post('/templates/import', requireOwner, async (req, res) => {
 // === ICON PACKS & TYPES ENDPOINTS ===
 
 // Get all icon packs with icon counts
-router.get('/icon-packs', requireOwner, async (req, res) => {
+router.get('/icon-packs', jwtAdminAuth, async (req, res) => {
   try {
     const packsWithCounts = await db
       .select({
@@ -1225,7 +1225,7 @@ router.get('/icon-packs', requireOwner, async (req, res) => {
 });
 
 // Create new icon pack
-router.post('/icon-packs', requireOwner, async (req, res) => {
+router.post('/icon-packs', jwtAdminAuth, async (req, res) => {
   try {
     const packData = req.body;
     
@@ -1252,7 +1252,7 @@ router.post('/icon-packs', requireOwner, async (req, res) => {
 });
 
 // Update icon pack
-router.patch('/icon-packs/:id', requireOwner, async (req, res) => {
+router.patch('/icon-packs/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const packData = req.body;
@@ -1287,7 +1287,7 @@ router.patch('/icon-packs/:id', requireOwner, async (req, res) => {
 });
 
 // Delete icon pack
-router.delete('/icon-packs/:id', requireOwner, async (req, res) => {
+router.delete('/icon-packs/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -1314,7 +1314,7 @@ router.delete('/icon-packs/:id', requireOwner, async (req, res) => {
 });
 
 // Get icon types for a pack
-router.get('/icon-packs/:packId/icons', requireOwner, async (req, res) => {
+router.get('/icon-packs/:packId/icons', jwtAdminAuth, async (req, res) => {
   try {
     const { packId } = req.params;
     
@@ -1358,7 +1358,7 @@ router.get('/icon-packs/:packId/icons', requireOwner, async (req, res) => {
 });
 
 // Create new icon in pack
-router.post('/icon-packs/:packId/icons', requireOwner, async (req, res) => {
+router.post('/icon-packs/:packId/icons', jwtAdminAuth, async (req, res) => {
   try {
     const { packId } = req.params;
     const iconData = req.body;
@@ -1413,7 +1413,7 @@ router.post('/icon-packs/:packId/icons', requireOwner, async (req, res) => {
 });
 
 // Update icon
-router.patch('/icon-types/:id', requireOwner, async (req, res) => {
+router.patch('/icon-types/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const iconData = req.body;
@@ -1455,7 +1455,7 @@ router.patch('/icon-types/:id', requireOwner, async (req, res) => {
 });
 
 // Delete icon
-router.delete('/icon-types/:id', requireOwner, async (req, res) => {
+router.delete('/icon-types/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -1478,7 +1478,7 @@ router.delete('/icon-types/:id', requireOwner, async (req, res) => {
 });
 
 // Get icon types
-router.get('/icon-types', requireOwner, async (req, res) => {
+router.get('/icon-types', jwtAdminAuth, async (req, res) => {
   try {
     const types = await db.select().from(iconTypes).orderBy(iconTypes.name);
     res.json(types);
@@ -1489,7 +1489,7 @@ router.get('/icon-types', requireOwner, async (req, res) => {
 });
 
 // Create icon type
-router.post('/icon-types', requireOwner, async (req, res) => {
+router.post('/icon-types', jwtAdminAuth, async (req, res) => {
   try {
     const { name, type } = req.body;
     
@@ -1509,7 +1509,7 @@ router.post('/icon-types', requireOwner, async (req, res) => {
 });
 
 // Get icons by category for builder integration
-router.get('/icons/by-category/:category', requireOwner, async (req, res) => {
+router.get('/icons/by-category/:category', jwtAdminAuth, async (req, res) => {
   try {
     const { category } = req.params;
     
@@ -1542,7 +1542,7 @@ router.get('/icons/by-category/:category', requireOwner, async (req, res) => {
 // === SETTINGS ENDPOINTS ===
 
 // Get settings
-router.get('/settings/:category', requireOwner, async (req, res) => {
+router.get('/settings/:category', jwtAdminAuth, async (req, res) => {
   try {
     const { category } = req.params;
     
@@ -1576,7 +1576,7 @@ router.get('/settings/:category', requireOwner, async (req, res) => {
 });
 
 // Update settings
-router.put('/settings/:category', requireOwner, async (req, res) => {
+router.put('/settings/:category', jwtAdminAuth, async (req, res) => {
   try {
     const { category } = req.params;
     const settings = req.body;
@@ -1593,7 +1593,7 @@ router.put('/settings/:category', requireOwner, async (req, res) => {
 // === HEADER TEMPLATE ENDPOINTS ===
 
 // Get all header templates
-router.get('/header-templates', requireOwner, async (req, res) => {
+router.get('/header-templates', jwtAdminAuth, async (req, res) => {
   try {
     const templates = await db.select().from(headerTemplates).orderBy(headerTemplates.createdAt);
     res.json(templates);
@@ -1604,7 +1604,7 @@ router.get('/header-templates', requireOwner, async (req, res) => {
 });
 
 // Get header template by ID
-router.get('/header-templates/:id', requireOwner, async (req, res) => {
+router.get('/header-templates/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const template = await db.select().from(headerTemplates).where(eq(headerTemplates.id, id)).limit(1);
@@ -1621,7 +1621,7 @@ router.get('/header-templates/:id', requireOwner, async (req, res) => {
 });
 
 // Create header template
-router.post('/header-templates', requireOwner, async (req, res) => {
+router.post('/header-templates', jwtAdminAuth, async (req, res) => {
   try {
     const data = insertHeaderTemplateSchema.parse(req.body);
     const newTemplate = await db.insert(headerTemplates).values(data).returning();
@@ -1636,7 +1636,7 @@ router.post('/header-templates', requireOwner, async (req, res) => {
 });
 
 // Update header template
-router.patch('/header-templates/:id', requireOwner, async (req, res) => {
+router.patch('/header-templates/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const data = req.body;
@@ -1660,7 +1660,7 @@ router.patch('/header-templates/:id', requireOwner, async (req, res) => {
 });
 
 // Delete header template
-router.delete('/header-templates/:id', requireOwner, async (req, res) => {
+router.delete('/header-templates/:id', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -1680,7 +1680,7 @@ router.delete('/header-templates/:id', requireOwner, async (req, res) => {
 });
 
 // Duplicate header template
-router.post('/header-templates/:id/duplicate', requireOwner, async (req, res) => {
+router.post('/header-templates/:id/duplicate', jwtAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -1716,7 +1716,7 @@ router.post('/header-templates/:id/duplicate', requireOwner, async (req, res) =>
 // === ADMIN PROFILE ENDPOINTS ===
 
 // Get admin profile
-router.get('/profile', requireOwner, async (req, res) => {
+router.get('/profile', jwtAdminAuth, async (req, res) => {
   try {
     const user = req.user!;
     res.json(user);
@@ -1727,7 +1727,7 @@ router.get('/profile', requireOwner, async (req, res) => {
 });
 
 // Update admin profile
-router.patch('/profile', requireOwner, async (req, res) => {
+router.patch('/profile', jwtAdminAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { firstName, lastName, email } = req.body;
@@ -1764,7 +1764,7 @@ router.patch('/profile', requireOwner, async (req, res) => {
 });
 
 // Change admin password
-router.post('/change-password', requireOwner, async (req, res) => {
+router.post('/change-password', jwtAdminAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { currentPassword, newPassword } = req.body;
@@ -1816,7 +1816,7 @@ router.post('/change-password', requireOwner, async (req, res) => {
 });
 
 // Upload admin avatar
-router.post('/upload-avatar', requireOwner, async (req, res) => {
+router.post('/upload-avatar', jwtAdminAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
     
@@ -1859,7 +1859,7 @@ import('./admin-affiliate-routes').then(module => {
 // === ADMIN PROFILE ENDPOINTS ===
 
 // Get admin profile
-router.get('/profile', requireOwner, async (req, res) => {
+router.get('/profile', jwtAdminAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
     
@@ -1879,7 +1879,7 @@ router.get('/profile', requireOwner, async (req, res) => {
 });
 
 // Update admin profile
-router.patch('/profile', requireOwner, async (req, res) => {
+router.patch('/profile', jwtAdminAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { firstName, lastName, email } = req.body;
@@ -1915,7 +1915,7 @@ router.patch('/profile', requireOwner, async (req, res) => {
 });
 
 // Update admin preferences
-router.patch('/profile/preferences', requireOwner, async (req, res) => {
+router.patch('/profile/preferences', jwtAdminAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { timezone, preferredLanguage } = req.body;
@@ -1949,7 +1949,7 @@ router.patch('/profile/preferences', requireOwner, async (req, res) => {
 });
 
 // Toggle 2FA
-router.post('/profile/2fa', requireOwner, async (req, res) => {
+router.post('/profile/2fa', jwtAdminAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { enabled } = req.body;
@@ -1982,7 +1982,7 @@ router.post('/profile/2fa', requireOwner, async (req, res) => {
 });
 
 // Get admin activities
-router.get('/profile/activities', requireOwner, async (req, res) => {
+router.get('/profile/activities', jwtAdminAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
     
@@ -2007,7 +2007,7 @@ router.get('/profile/activities', requireOwner, async (req, res) => {
 });
 
 // Get admin sessions (mock data for now)
-router.get('/profile/sessions', requireOwner, async (req, res) => {
+router.get('/profile/sessions', jwtAdminAuth, async (req, res) => {
   try {
     // Mock session data since we don't have a sessions tracking system yet
     const mockSessions = [
@@ -2039,7 +2039,7 @@ router.get('/profile/sessions', requireOwner, async (req, res) => {
 });
 
 // Revoke admin session
-router.delete('/profile/sessions/:sessionId', requireOwner, async (req, res) => {
+router.delete('/profile/sessions/:sessionId', jwtAdminAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
     const { sessionId } = req.params;

@@ -98,7 +98,11 @@ export default function UsersPage() {
       if (planFilter !== 'all') params.append('plan', planFilter);
       
       const url = `/api/admin/users${params.toString() ? '?' + params.toString() : ''}`;
-      return fetch(url, { credentials: 'include' }).then(res => res.json());
+      return fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      }).then(res => res.json());
     },
     initialData: []
   });
@@ -106,7 +110,11 @@ export default function UsersPage() {
   // Fetch available plans for assignment
   const { data: availablePlans = [] } = useQuery({
     queryKey: ['/api/admin/plans'],
-    queryFn: () => fetch('/api/admin/plans', { credentials: 'include' }).then(res => res.json()),
+    queryFn: () => fetch('/api/admin/plans', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+      }
+    }).then(res => res.json()),
     initialData: []
   });
 
@@ -124,8 +132,8 @@ export default function UsersPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
         },
-        credentials: 'include',
         body: JSON.stringify({ 
           subscriptionEndsAt: subscriptionEndsAt 
         })
@@ -163,8 +171,8 @@ export default function UsersPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
         },
-        credentials: 'include',
         body: JSON.stringify({
           firstName: editFirstName.trim(),
           lastName: editLastName.trim(),
@@ -231,8 +239,8 @@ export default function UsersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
         },
-        credentials: 'include',
         body: JSON.stringify({
           planId: Number(selectedPlanId),
           endsAt: planEndsAt || null,
@@ -275,8 +283,8 @@ export default function UsersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
         },
-        credentials: 'include',
         body: JSON.stringify(userData)
       });
 

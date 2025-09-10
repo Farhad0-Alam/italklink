@@ -76,6 +76,41 @@ export const jwtAuthOptional: RequestHandler = async (req, res, next) => {
   }
 };
 
+// Admin/Owner JWT middleware
+export const jwtAdminAuth: RequestHandler = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    const token = authHeader.substring(7);
+    const payload = verifyAccess(token);
+    
+    if (!payload) {
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+
+    // Get full user data
+    const user = await authService.getUserById(payload.sub);
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    // Check admin/owner role
+    if (user.role !== 'admin' && user.role !== 'owner') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+
+    // Attach user to request
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('JWT admin auth error:', error);
+    res.status(401).json({ message: 'Authentication failed' });
+  }
+};
+
 // Email/password login
 router.post('/login', async (req, res) => {
   try {
