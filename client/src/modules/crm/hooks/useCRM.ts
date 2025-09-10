@@ -140,7 +140,7 @@ export function useMoveDeal() {
   
   return useMutation({
     mutationFn: ({ dealId, stageId, probability }: { dealId: string; stageId: string; probability: number }) => 
-      apiRequest('PATCH', `/api/crm/deals/${dealId}/move`, { stageId, probability }),
+      apiRequest('PUT', `/api/crm/deals/${dealId}/move`, { stageId, probability }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/crm/deals'] });
       queryClient.invalidateQueries({ queryKey: ['/api/crm/stats'] });

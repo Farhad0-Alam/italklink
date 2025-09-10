@@ -1552,7 +1552,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Deal not found' });
       }
       
-      const { stageId } = moveDealSchema.parse(req.body);
+      const moveDealSchema = z.object({
+        stageId: z.string().min(1),
+        probability: z.number().min(0).max(100).optional()
+      });
+      
+      const { stageId, probability } = moveDealSchema.parse(req.body);
       
       // Verify stage belongs to same pipeline
       const stage = await storage.getStage(stageId);
@@ -1568,10 +1573,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         entityId: deal.id,
         entityType: 'deal',
         data: {
-          deal: movedDeal,
-          previousStageId: deal.stageId,
-          newStageId: stageId,
-          stage: stage
+          dealId: deal.id,
+          dealTitle: deal.title,
+          fromStageId: deal.stageId,
+          toStageId: stageId,
+          stageName: stage.name,
+          probability: movedDeal.probability,
+          dealValue: movedDeal.value,
+          contactId: movedDeal.primaryContactId,
+          pipelineId: movedDeal.pipelineId
         },
         timestamp: new Date()
       });

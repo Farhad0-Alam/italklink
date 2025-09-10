@@ -28,7 +28,9 @@ export interface EventPayload {
 }
 
 class AutomationEngine extends EventEmitter {
+  private eventQueue: Array<{ eventType: string; payload: EventPayload }> = [];
   private isProcessing = false;
+  private processingTimeout: NodeJS.Timeout | null = null;
 
   constructor() {
     super();
@@ -36,35 +38,62 @@ class AutomationEngine extends EventEmitter {
 
   // Main method to trigger automation based on events
   async triggerAutomations(eventType: string, payload: EventPayload): Promise<void> {
-    if (this.isProcessing) {
-      console.log('Automation engine is busy, queuing event...');
+    // Always enqueue the event to prevent data loss
+    this.eventQueue.push({ eventType, payload });
+    
+    // Start processing if not already running
+    if (!this.isProcessing) {
+      this.processQueue();
+    }
+  }
+
+  // Process events from the queue sequentially
+  private async processQueue(): Promise<void> {
+    if (this.isProcessing || this.eventQueue.length === 0) {
       return;
     }
 
     this.isProcessing = true;
     
     try {
-      console.log(`🔄 Processing automation trigger: ${eventType}`, { userId: payload.userId });
-      
-      // Get all enabled automations for the user
-      const automations = await storage.getEnabledAutomations(payload.userId);
-      
-      // Filter automations that match this trigger
-      const matchingAutomations = automations.filter(automation => {
-        const triggers = automation.triggers as AutomationTrigger[];
-        return triggers.some(trigger => trigger.type === eventType);
-      });
+      while (this.eventQueue.length > 0) {
+        const event = this.eventQueue.shift();
+        if (!event) continue;
 
-      console.log(`Found ${matchingAutomations.length} matching automations for ${eventType}`);
+        const { eventType, payload } = event;
+        
+        try {
+          console.log(`🔄 Processing automation trigger: ${eventType}`, { userId: payload.userId });
+          
+          // Get all enabled automations for the user
+          const automations = await storage.getEnabledAutomations(payload.userId);
+          
+          // Filter automations that match this trigger
+          const matchingAutomations = automations.filter(automation => {
+            const triggers = automation.triggers as AutomationTrigger[];
+            return triggers.some(trigger => trigger.type === eventType);
+          });
 
-      // Execute each matching automation
-      for (const automation of matchingAutomations) {
-        await this.executeAutomation(automation, eventType, payload);
+          console.log(`Found ${matchingAutomations.length} matching automations for ${eventType}`);
+
+          // Execute each matching automation
+          for (const automation of matchingAutomations) {
+            await this.executeAutomation(automation, eventType, payload);
+          }
+        } catch (eventError) {
+          console.error(`Error processing event ${eventType}:`, eventError);
+          // Continue processing other events even if one fails
+        }
       }
     } catch (error) {
-      console.error('Error in automation engine:', error);
+      console.error('Error in automation engine queue processing:', error);
     } finally {
       this.isProcessing = false;
+      
+      // Schedule next processing cycle if queue has new items
+      if (this.eventQueue.length > 0) {
+        this.processingTimeout = setTimeout(() => this.processQueue(), 100);
+      }
     }
   }
 
