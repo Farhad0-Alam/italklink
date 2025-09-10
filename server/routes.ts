@@ -55,6 +55,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup notification routes
   const notificationRoutes = (await import('./modules/notifications')).default;
   app.use('/api/notify', notificationRoutes);
+  
+  // Setup AR routes
+  const arRoutes = (await import('./modules/ar')).default;
+  app.use('/api/ar', arRoutes);
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {

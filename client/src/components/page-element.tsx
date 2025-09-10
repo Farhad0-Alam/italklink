@@ -13,6 +13,8 @@ import { DocumentManager, DocumentItem } from "@/components/DocumentManager";
 import { RAGChatBox } from "@/components/RAGChatBox";
 import { MessageCircle } from "lucide-react";
 import { MenuPageElement } from "@/modules/multi-page/components/MenuPageElement";
+import ARPreviewMindAR from "@/elements/ARPreviewMindAR";
+import { compileMind } from "@/builder/api/ar";
 import {
   DndContext,
   closestCenter,
@@ -2953,6 +2955,225 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
             availablePages={availablePages}
             onNavigate={onNavigatePage}
           />
+        );
+
+      case 'arPreviewMindAR':
+        return (
+          <div className="space-y-4">
+            {isEditing ? (
+              <div className="space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <h3 className="text-lg font-semibold text-gray-800">AR Preview Settings</h3>
+                
+                {/* Generate from Card Image Button */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Auto-Generate AR Target
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      
+                      try {
+                        const result = await compileMind(file);
+                        updateData({
+                          mindFileUrl: result.mindFileUrl,
+                          planeTextureUrl: result.textureUrl || element.data.planeTextureUrl
+                        });
+                        alert('AR target generated successfully!');
+                      } catch (error: any) {
+                        alert(`Failed to generate AR target: ${error.message}`);
+                      }
+                    }}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Upload your business card front image to auto-generate AR target
+                  </p>
+                </div>
+
+                {/* Mind File URL */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Mind (.mind) File URL
+                  </label>
+                  <Input
+                    value={element.data.mindFileUrl || ''}
+                    onChange={(e) => updateData({ mindFileUrl: e.target.value })}
+                    placeholder="https://example.com/targets.mind"
+                    className="text-sm"
+                  />
+                  <p className="text-xs text-gray-500">
+                    {element.data.mindFileUrl ? 'AR target configured' : 'Upload image above or paste .mind URL manually'}
+                  </p>
+                </div>
+
+                {/* Poster URL */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Poster URL (Fallback)
+                  </label>
+                  <Input
+                    value={element.data.posterUrl || ''}
+                    onChange={(e) => updateData({ posterUrl: e.target.value })}
+                    placeholder="https://example.com/poster.jpg"
+                    className="text-sm"
+                  />
+                </div>
+
+                {/* Plane Texture URL */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Plane Texture URL
+                  </label>
+                  <Input
+                    value={element.data.planeTextureUrl || ''}
+                    onChange={(e) => updateData({ planeTextureUrl: e.target.value })}
+                    placeholder="https://example.com/texture.jpg"
+                    className="text-sm"
+                  />
+                </div>
+
+                {/* Plane Dimensions */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      Plane Width (m)
+                    </label>
+                    <Input
+                      type="number"
+                      min="0.1"
+                      max="2"
+                      step="0.05"
+                      value={element.data.planeWidth || 0.8}
+                      onChange={(e) => updateData({ planeWidth: parseFloat(e.target.value) })}
+                      className="text-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      Plane Height (m)
+                    </label>
+                    <Input
+                      type="number"
+                      min="0.1"
+                      max="2"
+                      step="0.05"
+                      value={element.data.planeHeight || 0.45}
+                      onChange={(e) => updateData({ planeHeight: parseFloat(e.target.value) })}
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Accent Color */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Accent Color
+                  </label>
+                  <input
+                    type="color"
+                    value={element.data.accent || '#0ea5e9'}
+                    onChange={(e) => updateData({ accent: e.target.value })}
+                    className="w-full h-10 rounded border border-gray-300"
+                  />
+                </div>
+
+                {/* CTAs */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Call-to-Action Buttons
+                  </label>
+                  <div className="space-y-2">
+                    {(element.data.ctas || []).map((cta: any, index: number) => (
+                      <div key={index} className="flex gap-2 items-center p-2 border rounded">
+                        <Input
+                          value={cta.label || ''}
+                          onChange={(e) => {
+                            const newCtas = [...(element.data.ctas || [])];
+                            newCtas[index] = { ...cta, label: e.target.value };
+                            updateData({ ctas: newCtas });
+                          }}
+                          placeholder="Button label"
+                          className="text-sm"
+                        />
+                        <select
+                          value={cta.action || 'link'}
+                          onChange={(e) => {
+                            const newCtas = [...(element.data.ctas || [])];
+                            newCtas[index] = { ...cta, action: e.target.value };
+                            updateData({ ctas: newCtas });
+                          }}
+                          className="text-sm border rounded px-2 py-1"
+                        >
+                          <option value="link">Link</option>
+                          <option value="whatsapp">WhatsApp</option>
+                          <option value="tel">Call</option>
+                          <option value="mailto">Email</option>
+                        </select>
+                        <Input
+                          value={cta.value || ''}
+                          onChange={(e) => {
+                            const newCtas = [...(element.data.ctas || [])];
+                            newCtas[index] = { ...cta, value: e.target.value };
+                            updateData({ ctas: newCtas });
+                          }}
+                          placeholder="URL/phone/email"
+                          className="text-sm"
+                        />
+                        <Button
+                          onClick={() => {
+                            const newCtas = (element.data.ctas || []).filter((_: any, i: number) => i !== index);
+                            updateData({ ctas: newCtas });
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      onClick={() => {
+                        const newCtas = [...(element.data.ctas || []), { label: 'New Action', action: 'link', value: '' }];
+                        updateData({ ctas: newCtas });
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="text-purple-600 hover:text-purple-800"
+                    >
+                      + Add CTA
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Delete Button */}
+                <div className="pt-4 border-t">
+                  <Button
+                    onClick={() => onDelete && onDelete(element.id)}
+                    variant="destructive"
+                    size="sm"
+                    className="w-full"
+                  >
+                    Delete AR Element
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <ARPreviewMindAR
+                mindFileUrl={element.data.mindFileUrl}
+                posterUrl={element.data.posterUrl}
+                planeTextureUrl={element.data.planeTextureUrl}
+                planeWidth={element.data.planeWidth}
+                planeHeight={element.data.planeHeight}
+                accent={element.data.accent}
+                ctas={element.data.ctas}
+              />
+            )}
+          </div>
         );
 
       default:

@@ -68,6 +68,7 @@ function SortableElement({ element, onUpdate, onDelete, cardData, onNavigatePage
       case "testimonials": return element.data.title || "Testimonials";
       case "googleMaps": return element.data.title || "Google Maps";
       case "aiChatbot": return element.data.title || "AI Chatbot";
+      case "arPreviewMindAR": return "AR Preview";
       default: return "Page Element";
     }
   };

@@ -116,6 +116,13 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       icon: "fas fa-bars",
       color: "bg-gradient-to-r from-slate-500 to-slate-700",
       description: "Multi-page navigation menu"
+    },
+    {
+      type: "arPreviewMindAR",
+      title: "AR Preview",
+      icon: "fas fa-cube",
+      color: "bg-gradient-to-r from-purple-500 to-pink-600",
+      description: "AR Digital Business Card Viewer"
     }
   ];
 
@@ -387,6 +394,26 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
               position: 'default',
               fixed: false
             }
+          }
+        };
+        break;
+
+      case "arPreviewMindAR":
+        element = {
+          id,
+          type: "arPreviewMindAR",
+          order: Date.now(),
+          data: {
+            mindFileUrl: "",
+            posterUrl: import.meta.env.VITE_AR_DEFAULT_POSTER || "",
+            planeTextureUrl: "",
+            planeWidth: 0.8,
+            planeHeight: 0.45,
+            accent: "#0ea5e9",
+            ctas: [
+              { label: "View Offer", action: "link", value: "https://yourdomain.com/card/slug/offers" },
+              { label: "WhatsApp", action: "whatsapp", value: "+88017XXXXXXXX" }
+            ]
           }
         };
         break;
