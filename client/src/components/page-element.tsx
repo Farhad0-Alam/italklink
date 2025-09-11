@@ -4064,6 +4064,104 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
           </div>
         );
 
+      case "html":
+        return (
+          <div className="mb-4">
+            {isEditing ? (
+              <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-md font-semibold text-slate-800">Custom HTML Element</h4>
+                  <Button
+                    onClick={() => onDelete && onDelete(element.id)}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    <i className="fas fa-trash text-xs"></i>
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">HTML Content</label>
+                    <Textarea
+                      value={element.data.content || ""}
+                      onChange={(e) => handleDataUpdate({ content: e.target.value })}
+                      placeholder="Enter your HTML code here..."
+                      className="min-h-[200px] font-mono text-sm"
+                      data-testid="html-content-editor"
+                    />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <label className="text-sm font-medium text-slate-700 block mb-1">Height (px)</label>
+                      <Input
+                        type="number"
+                        value={element.data.height || 300}
+                        onChange={(e) => handleDataUpdate({ height: parseInt(e.target.value) || 300 })}
+                        min={100}
+                        max={1000}
+                        className="w-24"
+                        data-testid="html-height-input"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={element.data.sandbox !== false}
+                        onCheckedChange={(checked) => handleDataUpdate({ sandbox: checked })}
+                        data-testid="html-sandbox-checkbox"
+                      />
+                      <label className="text-sm font-medium text-slate-700">Security sandboxing (recommended)</label>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+                    <p className="text-sm text-amber-800">
+                      <i className="fas fa-exclamation-triangle mr-2"></i>
+                      Security Note: JavaScript and external scripts will be disabled for safety.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="html-element-preview" data-testid="html-element-preview">
+                {element.data.content && element.data.content.trim() ? (
+                  <iframe
+                    srcDoc={`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { margin: 0; padding: 16px; font-family: system-ui, -apple-system, sans-serif; }
+    * { box-sizing: border-box; }
+  </style>
+</head>
+<body>
+  ${element.data.content}
+</body>
+</html>`}
+                    style={{ 
+                      width: '100%', 
+                      height: `${element.data.height || 300}px`,
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px'
+                    }}
+                    sandbox="allow-same-origin"
+                    title="Custom HTML Content"
+                    data-testid="html-iframe"
+                  />
+                ) : (
+                  <div 
+                    className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center text-slate-500"
+                    style={{ height: `${element.data.height || 300}px` }}
+                    data-testid="html-placeholder"
+                  >
+                    <i className="fas fa-code text-4xl mb-4"></i>
+                    <p>Add HTML content to see preview</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+
       default:
         return (
           <div className="mb-4 p-4 bg-slate-100 rounded-lg text-center text-slate-600">
