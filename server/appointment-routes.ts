@@ -6,6 +6,7 @@ import { eq, and, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { insertAppointmentSchema, insertAppointmentEventTypeSchema } from '@shared/schema';
 import { appointmentTriggers } from './appointment-triggers';
+import { requireAuth, optionalAuth } from './auth';
 
 // Validation schemas
 const availabilityQuerySchema = z.object({
@@ -20,33 +21,27 @@ const createAppointmentSchema = insertAppointmentSchema.omit({
   updatedAt: true 
 });
 
+const createEventTypeSchema = insertAppointmentEventTypeSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+const updateEventTypeSchema = insertAppointmentEventTypeSchema.omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true
+}).partial();
+
+const queryFiltersSchema = z.object({
+  isActive: z.enum(['true', 'false']).optional().transform(val => val === 'true'),
+  search: z.string().optional(),
+  page: z.string().regex(/^\d+$/).optional().transform(val => val ? parseInt(val) : 1),
+  limit: z.string().regex(/^\d+$/).optional().transform(val => val ? Math.min(parseInt(val), 100) : 10)
+});
+
 export function setupAppointmentRoutes(app: Express) {
-  // Get event type by slug
-  app.get('/api/appointment-event-types/:slug', async (req, res) => {
-    try {
-      const { slug } = req.params;
-      
-      if (!slug) {
-        return res.status(400).json({ message: 'Event type slug is required' });
-      }
-
-      const eventType = await storage.getAppointmentEventTypeBySlug(slug);
-      
-      if (!eventType) {
-        return res.status(404).json({ message: 'Event type not found' });
-      }
-
-      // Only return public event types or if user has access
-      if (!eventType.isPublic && !eventType.isActive) {
-        return res.status(404).json({ message: 'Event type not available' });
-      }
-
-      res.json(eventType);
-    } catch (error) {
-      console.error('Error fetching event type:', error);
-      res.status(500).json({ message: 'Internal server error' });
-    }
-  });
 
   // Get availability for event type and date
   app.get('/api/appointments/availability', async (req, res) => {
@@ -161,7 +156,7 @@ export function setupAppointmentRoutes(app: Express) {
       }
 
       // Calculate end time
-      const endTime = new Date(requestedDate.getTime() + eventType.duration * 60000);
+      const endTime = new Date(requestedStartTime.getTime() + eventType.duration * 60000);
 
       // Create the appointment
       const appointment = await storage.createAppointment({
@@ -233,6 +228,386 @@ export function setupAppointmentRoutes(app: Express) {
     } catch (error) {
       console.error('Error fetching appointment:', error);
       res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // ===== EVENT TYPES MANAGEMENT CRUD ROUTES =====
+
+  // Get all event types for authenticated user
+  app.get('/api/appointment-event-types', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const queryResult = queryFiltersSchema.safeParse(req.query);
+      
+      if (!queryResult.success) {
+        return res.status(400).json({
+          message: 'Invalid query parameters',
+          errors: queryResult.error.format(),
+        });
+      }
+
+      const { isActive, search } = queryResult.data;
+      const eventTypes = await storage.getUserAppointmentEventTypes(user.id, { isActive, search });
+
+      // Add stats for each event type
+      const eventTypesWithStats = await Promise.all(
+        eventTypes.map(async (eventType) => {
+          const [appointmentCount] = await db
+            .select({ count: sql`COUNT(*)` })
+            .from(appointments)
+            .where(eq(appointments.eventTypeId, eventType.id));
+
+          return {
+            ...eventType,
+            appointmentCount: appointmentCount?.count || 0,
+            bookingUrl: `${req.protocol}://${req.get('host')}/booking/${eventType.slug}`,
+          };
+        })
+      );
+
+      res.json({
+        eventTypes: eventTypesWithStats,
+        pagination: {
+          total: eventTypesWithStats.length,
+          page: 1,
+          limit: eventTypesWithStats.length,
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching event types:', error);
+      res.status(500).json({ message: 'Failed to fetch event types' });
+    }
+  });
+
+  // Create new event type
+  app.post('/api/appointment-event-types', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const validationResult = createEventTypeSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({
+          message: 'Invalid event type data',
+          errors: validationResult.error.format(),
+        });
+      }
+
+      const eventTypeData = {
+        ...validationResult.data,
+        userId: user.id,
+      };
+
+      const eventType = await storage.createAppointmentEventType(eventTypeData);
+
+      res.status(201).json({
+        ...eventType,
+        bookingUrl: `${req.protocol}://${req.get('host')}/booking/${eventType.slug}`,
+      });
+    } catch (error) {
+      console.error('Error creating event type:', error);
+      if (error instanceof Error && error.message.includes('already exists')) {
+        return res.status(409).json({ message: error.message });
+      }
+      res.status(500).json({ message: 'Failed to create event type' });
+    }
+  });
+
+  // Get specific event type by ID (authenticated)
+  app.get('/api/appointment-event-types/:id([0-9a-fA-F-]{36})', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { id } = req.params;
+      
+      const eventType = await storage.getAppointmentEventType(id);
+      if (!eventType) {
+        return res.status(404).json({ message: 'Event type not found' });
+      }
+
+      // Check if user owns this event type
+      if (eventType.userId !== user.id) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+
+      // Add additional stats
+      const [appointmentCount] = await db
+        .select({ count: sql`COUNT(*)` })
+        .from(appointments)
+        .where(eq(appointments.eventTypeId, eventType.id));
+
+      res.json({
+        ...eventType,
+        appointmentCount: appointmentCount?.count || 0,
+        bookingUrl: `${req.protocol}://${req.get('host')}/booking/${eventType.slug}`,
+      });
+    } catch (error) {
+      console.error('Error fetching event type:', error);
+      res.status(500).json({ message: 'Failed to fetch event type' });
+    }
+  });
+
+  // Update event type
+  app.put('/api/appointment-event-types/:id([0-9a-fA-F-]{36})', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { id } = req.params;
+      
+      const validationResult = updateEventTypeSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({
+          message: 'Invalid event type data',
+          errors: validationResult.error.format(),
+        });
+      }
+
+      // Check ownership
+      const existingEventType = await storage.getAppointmentEventType(id);
+      if (!existingEventType) {
+        return res.status(404).json({ message: 'Event type not found' });
+      }
+      if (existingEventType.userId !== user.id) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+
+      const eventType = await storage.updateAppointmentEventType(id, validationResult.data);
+
+      res.json({
+        ...eventType,
+        bookingUrl: `${req.protocol}://${req.get('host')}/booking/${eventType.slug}`,
+      });
+    } catch (error) {
+      console.error('Error updating event type:', error);
+      if (error instanceof Error && error.message.includes('Slug already exists')) {
+        return res.status(409).json({ message: error.message });
+      }
+      res.status(500).json({ message: 'Failed to update event type' });
+    }
+  });
+
+  // Delete event type
+  app.delete('/api/appointment-event-types/:id([0-9a-fA-F-]{36})', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { id } = req.params;
+      
+      // Check ownership
+      const existingEventType = await storage.getAppointmentEventType(id);
+      if (!existingEventType) {
+        return res.status(404).json({ message: 'Event type not found' });
+      }
+      if (existingEventType.userId !== user.id) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+
+      await storage.deleteAppointmentEventType(id);
+
+      res.json({ message: 'Event type deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting event type:', error);
+      if (error instanceof Error && error.message.includes('existing appointments')) {
+        return res.status(409).json({ message: error.message });
+      }
+      res.status(500).json({ message: 'Failed to delete event type' });
+    }
+  });
+
+  // Duplicate event type
+  app.post('/api/appointment-event-types/:id([0-9a-fA-F-]{36})/duplicate', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { id } = req.params;
+      const { name } = req.body;
+      
+      // Check ownership
+      const existingEventType = await storage.getAppointmentEventType(id);
+      if (!existingEventType) {
+        return res.status(404).json({ message: 'Event type not found' });
+      }
+      if (existingEventType.userId !== user.id) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+
+      const duplicatedEventType = await storage.duplicateAppointmentEventType(id, name);
+
+      res.status(201).json({
+        ...duplicatedEventType,
+        bookingUrl: `${req.protocol}://${req.get('host')}/booking/${duplicatedEventType.slug}`,
+      });
+    } catch (error) {
+      console.error('Error duplicating event type:', error);
+      res.status(500).json({ message: 'Failed to duplicate event type' });
+    }
+  });
+
+  // Toggle event type status
+  app.patch('/api/appointment-event-types/:id([0-9a-fA-F-]{36})/status', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { id } = req.params;
+      const { isActive } = req.body;
+      
+      if (typeof isActive !== 'boolean') {
+        return res.status(400).json({ message: 'isActive must be a boolean' });
+      }
+
+      // Check ownership
+      const existingEventType = await storage.getAppointmentEventType(id);
+      if (!existingEventType) {
+        return res.status(404).json({ message: 'Event type not found' });
+      }
+      if (existingEventType.userId !== user.id) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+
+      const eventType = await storage.updateAppointmentEventTypeStatus(id, isActive);
+
+      res.json({
+        ...eventType,
+        bookingUrl: `${req.protocol}://${req.get('host')}/booking/${eventType.slug}`,
+      });
+    } catch (error) {
+      console.error('Error updating event type status:', error);
+      res.status(500).json({ message: 'Failed to update event type status' });
+    }
+  });
+
+  // Get event type templates
+  app.get('/api/appointment-event-types/templates', requireAuth, async (req, res) => {
+    try {
+      const templates = await storage.getEventTypeTemplates();
+      res.json({ templates });
+    } catch (error) {
+      console.error('Error fetching event type templates:', error);
+      res.status(500).json({ message: 'Failed to fetch templates' });
+    }
+  });
+
+  // Get event type by slug (MUST be after all specific routes to prevent path conflicts)
+  app.get('/api/appointment-event-types/:slug', optionalAuth, async (req, res) => {
+    try {
+      const { slug } = req.params;
+      
+      if (!slug) {
+        return res.status(400).json({ message: 'Event type slug is required' });
+      }
+
+      const eventType = await storage.getAppointmentEventTypeBySlug(slug);
+      
+      if (!eventType) {
+        return res.status(404).json({ message: 'Event type not found' });
+      }
+
+      // Only allow access if (public AND active) OR (authenticated owner)
+      const isPublicAndActive = eventType.isPublic && eventType.isActive;
+      const isAuthenticatedOwner = req.user && req.user.id === eventType.userId;
+      
+      if (!isPublicAndActive && !isAuthenticatedOwner) {
+        return res.status(404).json({ message: 'Event type not found' });
+      }
+
+      res.json(eventType);
+    } catch (error) {
+      console.error('Error fetching event type:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Get event type preview data
+  app.get('/api/appointment-event-types/:id([0-9a-fA-F-]{36})/preview', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { id } = req.params;
+      
+      const eventType = await storage.getAppointmentEventType(id);
+      if (!eventType) {
+        return res.status(404).json({ message: 'Event type not found' });
+      }
+
+      // Check ownership
+      if (eventType.userId !== user.id) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+
+      // Generate preview data for booking page
+      res.json({
+        eventType,
+        bookingUrl: `${req.protocol}://${req.get('host')}/booking/${eventType.slug}`,
+        previewData: {
+          title: eventType.name,
+          description: eventType.description,
+          duration: eventType.duration,
+          price: eventType.price,
+          currency: eventType.currency,
+          location: eventType.meetingLocation,
+          brandColor: eventType.brandColor,
+          instructionsBeforeEvent: eventType.instructionsBeforeEvent,
+          instructionsAfterEvent: eventType.instructionsAfterEvent,
+        }
+      });
+    } catch (error) {
+      console.error('Error generating event type preview:', error);
+      res.status(500).json({ message: 'Failed to generate preview' });
+    }
+  });
+
+  // Bulk operations for event types
+  app.patch('/api/appointment-event-types/bulk', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { eventTypeIds, operation, data } = req.body;
+      
+      if (!Array.isArray(eventTypeIds) || eventTypeIds.length === 0) {
+        return res.status(400).json({ message: 'eventTypeIds must be a non-empty array' });
+      }
+
+      // Verify ownership of all event types
+      const eventTypes = await Promise.all(
+        eventTypeIds.map(id => storage.getAppointmentEventType(id))
+      );
+      
+      const invalidEventTypes = eventTypes.filter(et => !et || et.userId !== user.id);
+      if (invalidEventTypes.length > 0) {
+        return res.status(403).json({ message: 'Access denied to some event types' });
+      }
+
+      let results = [];
+      
+      switch (operation) {
+        case 'toggle_status':
+          results = await Promise.all(
+            eventTypeIds.map(id => 
+              storage.updateAppointmentEventTypeStatus(id, data.isActive)
+            )
+          );
+          break;
+        case 'update_settings':
+          results = await Promise.all(
+            eventTypeIds.map(id => 
+              storage.updateAppointmentEventType(id, data)
+            )
+          );
+          break;
+        case 'delete':
+          await Promise.all(
+            eventTypeIds.map(id => storage.deleteAppointmentEventType(id))
+          );
+          results = { deleted: eventTypeIds.length };
+          break;
+        default:
+          return res.status(400).json({ message: 'Invalid bulk operation' });
+      }
+
+      res.json({
+        success: true,
+        operation,
+        affectedCount: eventTypeIds.length,
+        results
+      });
+    } catch (error) {
+      console.error('Error performing bulk operation:', error);
+      if (error instanceof Error && error.message.includes('existing appointments')) {
+        return res.status(409).json({ message: 'Some event types have existing appointments and cannot be deleted' });
+      }
+      res.status(500).json({ message: 'Bulk operation failed' });
     }
   });
 }

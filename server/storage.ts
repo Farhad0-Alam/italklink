@@ -200,11 +200,18 @@ export interface IStorage {
   }>;
 
   // Appointment operations
-  getAppointmentEventType(id: string): Promise<any | undefined>;
-  getAppointmentEventTypeBySlug(slug: string): Promise<any | undefined>;
+  getAppointmentEventType(id: string): Promise<AppointmentEventType | undefined>;
+  getAppointmentEventTypeBySlug(slug: string): Promise<AppointmentEventType | undefined>;
+  getUserAppointmentEventTypes(userId: string, filters?: { isActive?: boolean; search?: string }): Promise<AppointmentEventType[]>;
+  createAppointmentEventType(eventTypeData: InsertAppointmentEventType): Promise<AppointmentEventType>;
+  updateAppointmentEventType(id: string, eventTypeData: Partial<InsertAppointmentEventType>): Promise<AppointmentEventType>;
+  deleteAppointmentEventType(id: string): Promise<void>;
+  duplicateAppointmentEventType(id: string, newName?: string): Promise<AppointmentEventType>;
+  updateAppointmentEventTypeStatus(id: string, isActive: boolean): Promise<AppointmentEventType>;
+  getEventTypeTemplates(): Promise<AppointmentEventType[]>;
   getAvailabilityForDate(eventTypeId: string, date: Date, timezone: string): Promise<Array<{time: string, available: boolean, utcTime: string}>>;
-  createAppointment(appointmentData: any): Promise<any>;
-  getAppointment(id: string): Promise<any | undefined>;
+  createAppointment(appointmentData: InsertAppointment): Promise<Appointment>;
+  getAppointment(id: string): Promise<Appointment | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1832,7 +1839,7 @@ export class DatabaseStorage implements IStorage {
     return (utcDate.getTime() - targetDate.getTime()) / 60000;
   }
 
-  async createAppointment(appointmentData: any): Promise<Appointment> {
+  async createAppointment(appointmentData: InsertAppointment): Promise<Appointment> {
     const [appointment] = await db.insert(appointments).values(appointmentData).returning();
     return appointment;
   }
@@ -1840,6 +1847,584 @@ export class DatabaseStorage implements IStorage {
   async getAppointment(id: string): Promise<Appointment | undefined> {
     const [appointment] = await db.select().from(appointments).where(eq(appointments.id, id));
     return appointment;
+  }
+
+  // Event Types CRUD operations
+  async getUserAppointmentEventTypes(userId: string, filters?: { isActive?: boolean; search?: string }): Promise<AppointmentEventType[]> {
+    const conditions = [eq(appointmentEventTypes.userId, userId)];
+    
+    if (filters?.isActive !== undefined) {
+      conditions.push(eq(appointmentEventTypes.isActive, filters.isActive));
+    }
+    
+    if (filters?.search) {
+      conditions.push(
+        or(
+          like(appointmentEventTypes.name, `%${filters.search}%`),
+          like(appointmentEventTypes.description, `%${filters.search}%`)
+        )
+      );
+    }
+    
+    const query = db.select().from(appointmentEventTypes).where(and(...conditions));
+    
+    return query.orderBy(desc(appointmentEventTypes.createdAt));
+  }
+
+  async createAppointmentEventType(eventTypeData: InsertAppointmentEventType): Promise<AppointmentEventType> {
+    // Generate unique slug if not provided
+    if (!eventTypeData.slug) {
+      const baseSlug = eventTypeData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      let slug = baseSlug;
+      let counter = 1;
+      
+      while (true) {
+        const [existing] = await db.select().from(appointmentEventTypes)
+          .where(eq(appointmentEventTypes.slug, slug))
+          .limit(1);
+        
+        if (!existing) break;
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+      
+      eventTypeData.slug = slug;
+    }
+
+    const [eventType] = await db.insert(appointmentEventTypes).values({
+      ...eventTypeData,
+      isActive: eventTypeData.isActive ?? true,
+      isPublic: eventTypeData.isPublic ?? true,
+      duration: eventTypeData.duration || 30,
+      price: eventTypeData.price || 0,
+      currency: eventTypeData.currency || 'USD',
+      brandColor: eventTypeData.brandColor || '#3B82F6',
+      requiresConfirmation: eventTypeData.requiresConfirmation ?? false,
+      bufferTimeBefore: eventTypeData.bufferTimeBefore || 0,
+      bufferTimeAfter: eventTypeData.bufferTimeAfter || 0,
+    }).returning();
+    
+    return eventType;
+  }
+
+  async updateAppointmentEventType(id: string, eventTypeData: Partial<InsertAppointmentEventType>): Promise<AppointmentEventType> {
+    // If updating slug, ensure uniqueness
+    if (eventTypeData.slug) {
+      const [existing] = await db.select().from(appointmentEventTypes)
+        .where(and(
+          eq(appointmentEventTypes.slug, eventTypeData.slug),
+          sql`${appointmentEventTypes.id} != ${id}`
+        ))
+        .limit(1);
+      
+      if (existing) {
+        throw new Error('Slug already exists');
+      }
+    }
+
+    const [eventType] = await db
+      .update(appointmentEventTypes)
+      .set({ 
+        ...eventTypeData,
+        updatedAt: new Date() 
+      })
+      .where(eq(appointmentEventTypes.id, id))
+      .returning();
+    
+    if (!eventType) {
+      throw new Error('Event type not found');
+    }
+    
+    return eventType;
+  }
+
+  async deleteAppointmentEventType(id: string): Promise<void> {
+    // Check for existing appointments
+    const [hasAppointments] = await db
+      .select({ count: count() })
+      .from(appointments)
+      .where(eq(appointments.eventTypeId, id));
+    
+    if (hasAppointments.count > 0) {
+      throw new Error('Cannot delete event type with existing appointments');
+    }
+    
+    await db.delete(appointmentEventTypes).where(eq(appointmentEventTypes.id, id));
+  }
+
+  async duplicateAppointmentEventType(id: string, newName?: string): Promise<AppointmentEventType> {
+    const original = await this.getAppointmentEventType(id);
+    if (!original) {
+      throw new Error('Event type not found');
+    }
+
+    const duplicateData: InsertAppointmentEventType = {
+      ...original,
+      name: newName || `${original.name} (Copy)`,
+      slug: '', // Will be auto-generated
+      id: undefined, // Remove ID so new one is generated
+      createdAt: undefined,
+      updatedAt: undefined,
+    };
+
+    return this.createAppointmentEventType(duplicateData);
+  }
+
+  async updateAppointmentEventTypeStatus(id: string, isActive: boolean): Promise<AppointmentEventType> {
+    return this.updateAppointmentEventType(id, { isActive });
+  }
+
+  async getEventTypeTemplates(): Promise<AppointmentEventType[]> {
+    // Return pre-built event type templates
+    const templates: AppointmentEventType[] = [
+      // Consultation Templates
+      {
+        id: 'template-consultation-30',
+        name: '30-Minute Consultation',
+        slug: '30-minute-consultation',
+        description: 'A focused consultation session to discuss your needs and objectives.',
+        duration: 30,
+        price: 0,
+        currency: 'USD',
+        meetingLocation: 'video',
+        brandColor: '#3B82F6',
+        isActive: true,
+        isPublic: true,
+        requiresConfirmation: false,
+        bufferTimeBefore: 5,
+        bufferTimeAfter: 5,
+        minimumNotice: 60,
+        maximumFutureBooking: 30,
+        dailyBookingLimit: 0,
+        weeklyBookingLimit: 0,
+        monthlyBookingLimit: 0,
+        collectAttendeeEmail: true,
+        collectAttendeePhone: false,
+        collectAttendeeMessage: true,
+        customQuestions: [
+          {
+            id: 'consultation-topic',
+            question: 'What would you like to discuss in this consultation?',
+            required: true,
+            type: 'textarea'
+          }
+        ],
+        instructionsBeforeEvent: 'Please prepare any questions or materials you\'d like to discuss during our consultation.',
+        instructionsAfterEvent: 'Thank you for the consultation! You should receive a follow-up email within 24 hours.',
+        allowCancellation: true,
+        cancellationNotice: 120,
+        allowRescheduling: true,
+        rescheduleNotice: 120,
+        userId: '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 'template-discovery-call',
+        name: 'Discovery Call',
+        slug: 'discovery-call',
+        description: 'An initial call to explore potential collaboration and understand your requirements.',
+        duration: 45,
+        price: 0,
+        currency: 'USD',
+        meetingLocation: 'video',
+        brandColor: '#10B981',
+        isActive: true,
+        isPublic: true,
+        requiresConfirmation: false,
+        bufferTimeBefore: 10,
+        bufferTimeAfter: 10,
+        minimumNotice: 120,
+        maximumFutureBooking: 60,
+        dailyBookingLimit: 3,
+        weeklyBookingLimit: 0,
+        monthlyBookingLimit: 0,
+        collectAttendeeEmail: true,
+        collectAttendeePhone: true,
+        collectAttendeeMessage: true,
+        customQuestions: [
+          {
+            id: 'company-info',
+            question: 'What company do you represent?',
+            required: true,
+            type: 'text'
+          },
+          {
+            id: 'project-type',
+            question: 'What type of project are you looking to discuss?',
+            required: true,
+            type: 'select'
+          },
+          {
+            id: 'budget-range',
+            question: 'What is your expected budget range?',
+            required: false,
+            type: 'select'
+          }
+        ],
+        instructionsBeforeEvent: 'Please prepare a brief overview of your project and any specific questions you have.',
+        instructionsAfterEvent: 'We\'ll send you a proposal within 2-3 business days based on our discussion.',
+        allowCancellation: true,
+        cancellationNotice: 240,
+        allowRescheduling: true,
+        rescheduleNotice: 240,
+        userId: '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+
+      // Sales & Business Templates
+      {
+        id: 'template-sales-call',
+        name: 'Sales Call',
+        slug: 'sales-call',
+        description: 'A dedicated sales conversation to discuss our services and how we can help your business.',
+        duration: 60,
+        price: 0,
+        currency: 'USD',
+        meetingLocation: 'video',
+        brandColor: '#EF4444',
+        isActive: true,
+        isPublic: true,
+        requiresConfirmation: false,
+        bufferTimeBefore: 15,
+        bufferTimeAfter: 15,
+        minimumNotice: 180,
+        maximumFutureBooking: 45,
+        dailyBookingLimit: 4,
+        weeklyBookingLimit: 0,
+        monthlyBookingLimit: 0,
+        collectAttendeeEmail: true,
+        collectAttendeePhone: true,
+        collectAttendeeMessage: true,
+        customQuestions: [
+          {
+            id: 'company-size',
+            question: 'How many employees does your company have?',
+            required: true,
+            type: 'select'
+          },
+          {
+            id: 'decision-maker',
+            question: 'Are you the primary decision maker for this purchase?',
+            required: true,
+            type: 'select'
+          },
+          {
+            id: 'timeline',
+            question: 'What is your expected timeline for implementation?',
+            required: true,
+            type: 'select'
+          }
+        ],
+        instructionsBeforeEvent: 'Please review our services page and prepare any questions about our offerings.',
+        instructionsAfterEvent: 'Thank you for your time! We\'ll send you a customized proposal within 24 hours.',
+        allowCancellation: true,
+        cancellationNotice: 360,
+        allowRescheduling: true,
+        rescheduleNotice: 360,
+        userId: '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 'template-product-demo',
+        name: 'Product Demo',
+        slug: 'product-demo',
+        description: 'A comprehensive demonstration of our product features and capabilities.',
+        duration: 30,
+        price: 0,
+        currency: 'USD',
+        meetingLocation: 'video',
+        brandColor: '#8B5CF6',
+        isActive: true,
+        isPublic: true,
+        requiresConfirmation: false,
+        bufferTimeBefore: 5,
+        bufferTimeAfter: 10,
+        minimumNotice: 120,
+        maximumFutureBooking: 30,
+        dailyBookingLimit: 6,
+        weeklyBookingLimit: 0,
+        monthlyBookingLimit: 0,
+        collectAttendeeEmail: true,
+        collectAttendeePhone: false,
+        collectAttendeeMessage: true,
+        customQuestions: [
+          {
+            id: 'use-case',
+            question: 'What specific use case would you like to see demonstrated?',
+            required: true,
+            type: 'textarea'
+          },
+          {
+            id: 'current-solution',
+            question: 'What solution are you currently using?',
+            required: false,
+            type: 'text'
+          }
+        ],
+        instructionsBeforeEvent: 'Please prepare any specific scenarios you\'d like to see demonstrated.',
+        instructionsAfterEvent: 'You\'ll receive a recording of this demo and next steps via email.',
+        allowCancellation: true,
+        cancellationNotice: 120,
+        allowRescheduling: true,
+        rescheduleNotice: 120,
+        userId: '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+
+      // Support & Service Templates
+      {
+        id: 'template-support-session',
+        name: 'Support Session',
+        slug: 'support-session',
+        description: 'Dedicated support session to resolve technical issues or answer questions.',
+        duration: 45,
+        price: 12500, // $125.00
+        currency: 'USD',
+        meetingLocation: 'video',
+        brandColor: '#F59E0B',
+        isActive: true,
+        isPublic: true,
+        requiresConfirmation: true,
+        bufferTimeBefore: 10,
+        bufferTimeAfter: 5,
+        minimumNotice: 60,
+        maximumFutureBooking: 14,
+        dailyBookingLimit: 8,
+        weeklyBookingLimit: 0,
+        monthlyBookingLimit: 0,
+        collectAttendeeEmail: true,
+        collectAttendeePhone: false,
+        collectAttendeeMessage: true,
+        customQuestions: [
+          {
+            id: 'issue-description',
+            question: 'Please describe the issue you\'re experiencing in detail',
+            required: true,
+            type: 'textarea'
+          },
+          {
+            id: 'urgency-level',
+            question: 'How urgent is this issue?',
+            required: true,
+            type: 'select'
+          },
+          {
+            id: 'error-messages',
+            question: 'Are you seeing any error messages? If so, please share them here.',
+            required: false,
+            type: 'textarea'
+          }
+        ],
+        instructionsBeforeEvent: 'Please prepare screenshots or screen recordings of the issue if possible.',
+        instructionsAfterEvent: 'You\'ll receive a summary of our session and any follow-up resources via email.',
+        allowCancellation: true,
+        cancellationNotice: 180,
+        allowRescheduling: true,
+        rescheduleNotice: 180,
+        userId: '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+
+      // Coaching & Training Templates
+      {
+        id: 'template-coaching-session',
+        name: '1-on-1 Coaching Session',
+        slug: 'coaching-session',
+        description: 'Personalized coaching session focused on your specific goals and challenges.',
+        duration: 60,
+        price: 15000, // $150.00
+        currency: 'USD',
+        meetingLocation: 'video',
+        brandColor: '#06B6D4',
+        isActive: true,
+        isPublic: true,
+        requiresConfirmation: false,
+        bufferTimeBefore: 15,
+        bufferTimeAfter: 15,
+        minimumNotice: 720, // 12 hours
+        maximumFutureBooking: 90,
+        dailyBookingLimit: 4,
+        weeklyBookingLimit: 20,
+        monthlyBookingLimit: 0,
+        collectAttendeeEmail: true,
+        collectAttendeePhone: false,
+        collectAttendeeMessage: true,
+        customQuestions: [
+          {
+            id: 'coaching-goals',
+            question: 'What specific goals would you like to work on in this session?',
+            required: true,
+            type: 'textarea'
+          },
+          {
+            id: 'current-challenges',
+            question: 'What challenges are you currently facing?',
+            required: true,
+            type: 'textarea'
+          },
+          {
+            id: 'previous-coaching',
+            question: 'Have you worked with a coach before?',
+            required: false,
+            type: 'select'
+          }
+        ],
+        instructionsBeforeEvent: 'Please complete our pre-session questionnaire and come prepared with specific goals.',
+        instructionsAfterEvent: 'You\'ll receive session notes and action items within 24 hours.',
+        allowCancellation: true,
+        cancellationNotice: 720,
+        allowRescheduling: true,
+        rescheduleNotice: 720,
+        userId: '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+
+      // Healthcare & Legal Templates
+      {
+        id: 'template-legal-consultation',
+        name: 'Legal Consultation',
+        slug: 'legal-consultation',
+        description: 'Initial legal consultation to discuss your case and explore options.',
+        duration: 60,
+        price: 30000, // $300.00
+        currency: 'USD',
+        meetingLocation: 'video',
+        brandColor: '#374151',
+        isActive: true,
+        isPublic: true,
+        requiresConfirmation: true,
+        bufferTimeBefore: 15,
+        bufferTimeAfter: 15,
+        minimumNotice: 1440, // 24 hours
+        maximumFutureBooking: 60,
+        dailyBookingLimit: 6,
+        weeklyBookingLimit: 0,
+        monthlyBookingLimit: 0,
+        collectAttendeeEmail: true,
+        collectAttendeePhone: true,
+        collectAttendeeMessage: true,
+        customQuestions: [
+          {
+            id: 'legal-matter',
+            question: 'What type of legal matter do you need assistance with?',
+            required: true,
+            type: 'select'
+          },
+          {
+            id: 'case-details',
+            question: 'Please provide a brief overview of your situation',
+            required: true,
+            type: 'textarea'
+          },
+          {
+            id: 'urgency',
+            question: 'How urgent is this matter?',
+            required: true,
+            type: 'select'
+          },
+          {
+            id: 'prior-legal-action',
+            question: 'Have you taken any prior legal action on this matter?',
+            required: false,
+            type: 'select'
+          }
+        ],
+        instructionsBeforeEvent: 'Please gather any relevant documents and prepare a summary of your situation.',
+        instructionsAfterEvent: 'You\'ll receive a consultation summary and next steps recommendations within 48 hours.',
+        allowCancellation: true,
+        cancellationNotice: 1440,
+        allowRescheduling: true,
+        rescheduleNotice: 1440,
+        userId: '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+
+      // Quick Meeting Templates
+      {
+        id: 'template-quick-call',
+        name: '15-Minute Quick Call',
+        slug: '15-minute-call',
+        description: 'A brief call to discuss urgent matters or quick questions.',
+        duration: 15,
+        price: 0,
+        currency: 'USD',
+        meetingLocation: 'phone',
+        brandColor: '#84CC16',
+        isActive: true,
+        isPublic: true,
+        requiresConfirmation: false,
+        bufferTimeBefore: 0,
+        bufferTimeAfter: 5,
+        minimumNotice: 30,
+        maximumFutureBooking: 7,
+        dailyBookingLimit: 10,
+        weeklyBookingLimit: 0,
+        monthlyBookingLimit: 0,
+        collectAttendeeEmail: true,
+        collectAttendeePhone: true,
+        collectAttendeeMessage: true,
+        customQuestions: [
+          {
+            id: 'call-purpose',
+            question: 'What would you like to discuss in this quick call?',
+            required: true,
+            type: 'textarea'
+          }
+        ],
+        instructionsBeforeEvent: 'Please be ready with your questions as this is a brief 15-minute call.',
+        instructionsAfterEvent: 'If you need more time, please book a longer consultation slot.',
+        allowCancellation: true,
+        cancellationNotice: 60,
+        allowRescheduling: true,
+        rescheduleNotice: 60,
+        userId: '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 'template-office-hours',
+        name: 'Office Hours',
+        slug: 'office-hours',
+        description: 'Drop-in style office hours for questions, feedback, or informal discussions.',
+        duration: 30,
+        price: 0,
+        currency: 'USD',
+        meetingLocation: 'video',
+        brandColor: '#F97316',
+        isActive: true,
+        isPublic: true,
+        requiresConfirmation: false,
+        bufferTimeBefore: 0,
+        bufferTimeAfter: 0,
+        minimumNotice: 15,
+        maximumFutureBooking: 7,
+        dailyBookingLimit: 0,
+        weeklyBookingLimit: 0,
+        monthlyBookingLimit: 0,
+        collectAttendeeEmail: true,
+        collectAttendeePhone: false,
+        collectAttendeeMessage: false,
+        customQuestions: [],
+        instructionsBeforeEvent: 'This is an informal session - come with any questions or topics you\'d like to discuss.',
+        instructionsAfterEvent: 'Feel free to book another office hours slot anytime you have questions.',
+        allowCancellation: true,
+        cancellationNotice: 30,
+        allowRescheduling: true,
+        rescheduleNotice: 30,
+        userId: '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    return templates;
   }
 }
 
