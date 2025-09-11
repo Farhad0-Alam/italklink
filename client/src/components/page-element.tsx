@@ -512,7 +512,7 @@ interface PageElementProps {
   onNavigatePage?: (pageId: string) => void;
 }
 
-export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, cardData, onNavigatePage }: PageElementProps) {
+export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, isInteractive = true, cardData, onNavigatePage }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   
