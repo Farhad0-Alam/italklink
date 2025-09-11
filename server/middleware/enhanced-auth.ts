@@ -5,22 +5,31 @@ import { storage } from '../storage';
 
 // List of public endpoints that don't require authentication
 const PUBLIC_ENDPOINTS = [
-  '/api/health',
-  '/api/auth/login',
-  '/api/auth/register',
-  '/api/auth/user', // Allow checking auth status without requiring auth
-  '/api/auth/logout',
-  '/api/auth/google',
-  '/api/auth/google/callback',
-  '/api/public',
+  '/health',
+  '/auth/login',
+  '/auth/register',
+  '/auth/user', // Allow checking auth status without requiring auth
+  '/auth/logout',
+  '/auth/google',
+  '/auth/google/callback',
+  '/admin/login',
+  '/admin/register',
+  '/public',
+  '/plans',
+  '/templates',
+  '/availability',
+  '/appointments/book'
 ];
 
 // Enhanced authentication middleware that includes additional security checks
 export const enhancedAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    // Remove /api prefix if present
+    const cleanPath = req.path.replace(/^\/api/, '');
+    
     // Skip authentication for public endpoints
     const isPublicEndpoint = PUBLIC_ENDPOINTS.some(endpoint => 
-      req.path === endpoint || req.path.startsWith(endpoint + '/')
+      cleanPath === endpoint || cleanPath.startsWith(endpoint + '/')
     );
     
     if (isPublicEndpoint) {

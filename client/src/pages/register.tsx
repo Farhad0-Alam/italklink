@@ -162,7 +162,9 @@ export default function Register() {
                   <Label htmlFor="firstName">First Name</Label>
                   <Input
                     id="firstName"
+                    name="firstName"
                     type="text"
+                    autoComplete="given-name"
                     placeholder="John"
                     value={formData.firstName}
                     onChange={(e) => handleInputChange("firstName", e.target.value)}
@@ -174,7 +176,9 @@ export default function Register() {
                   <Label htmlFor="lastName">Last Name</Label>
                   <Input
                     id="lastName"
+                    name="lastName"
                     type="text"
+                    autoComplete="family-name"
                     placeholder="Smith"
                     value={formData.lastName}
                     onChange={(e) => handleInputChange("lastName", e.target.value)}
@@ -188,7 +192,9 @@ export default function Register() {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
+                  autoComplete="email"
                   placeholder="name@example.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
@@ -201,7 +207,9 @@ export default function Register() {
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
+                  autoComplete="new-password"
                   placeholder="Create a strong password"
                   value={formData.password}
                   onChange={(e) => handleInputChange("password", e.target.value)}
@@ -217,7 +225,9 @@ export default function Register() {
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <Input
                   id="confirmPassword"
+                  name="confirmPassword"
                   type="password"
+                  autoComplete="new-password"
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange("confirmPassword", e.target.value)}

@@ -389,8 +389,18 @@ export const setupAuthenticatedRoutes = (app: Express) => {
   // Premium user rate limit bypass
   app.use('/api', premiumRateLimitBypass);
 
-  // Concurrent request limiting for authenticated users
-  app.use('/api', enhancedAuth, limitConcurrentRequests(10));
+  // NOTE: enhancedAuth middleware now checks for public endpoints internally
+  // so we can apply it globally and it will skip authentication for public routes
+  app.use('/api', enhancedAuth);
+  
+  // Concurrent request limiting for authenticated users (only after auth check)
+  app.use('/api', (req, res, next) => {
+    // Only apply concurrent limiting to authenticated requests
+    if (req.isAuthenticated()) {
+      return limitConcurrentRequests(10)(req, res, next);
+    }
+    next();
+  });
 };
 
 // Setup public route rate limiting with built-in implementation
