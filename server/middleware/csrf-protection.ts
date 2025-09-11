@@ -159,9 +159,18 @@ export const enhancedCORS = (req: Request, res: Response, next: NextFunction) =>
 
   const origin = req.headers.origin;
   
-  // For credentialed requests, be strict about origins
+  // For development on Replit or other platforms, allow same-origin requests
+  const isAllowedOrigin = !origin || // Same-origin requests (no origin header)
+    allowedOrigins.includes(origin) ||
+    origin.includes('.repl.co') || // Allow Replit domains
+    origin.includes('localhost') || // Allow localhost variants
+    origin.startsWith('http://127.0.0.1') || // Allow local IP
+    origin.startsWith('https://127.0.0.1'); // Allow local IP with HTTPS
+  
+  // For credentialed requests, be strict about origins but allow development environments
   if (req.headers.cookie || req.headers.authorization) {
-    if (!origin || !allowedOrigins.includes(origin)) {
+    if (!isAllowedOrigin) {
+      console.log(`CORS blocked: ${origin} not in allowed origins for credentialed request`);
       return res.status(403).json({
         error: 'Forbidden',
         code: 'INVALID_ORIGIN_FOR_CREDENTIALED_REQUEST',
