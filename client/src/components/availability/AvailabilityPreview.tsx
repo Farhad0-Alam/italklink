@@ -66,12 +66,15 @@ const TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
 });
 
 export function AvailabilityPreview({ settings, eventTypes }: AvailabilityPreviewProps) {
+  // Ensure eventTypes is always an array
+  const safeEventTypes = Array.isArray(eventTypes) ? eventTypes : [];
+  
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedEventType, setSelectedEventType] = useState<string>(eventTypes[0]?.id || '');
+  const [selectedEventType, setSelectedEventType] = useState<string>(safeEventTypes[0]?.id || '');
   const [previewMode, setPreviewMode] = useState<'calendar' | 'list'>('calendar');
 
   // Generate mock booking URL for preview
-  const mockBookingUrl = `/booking/${eventTypes.find(et => et.id === selectedEventType)?.name?.toLowerCase().replace(/\s+/g, '-') || 'consultation'}`;
+  const mockBookingUrl = `/booking/${safeEventTypes.find(et => et.id === selectedEventType)?.name?.toLowerCase().replace(/\s+/g, '-') || 'consultation'}`;
 
   // Check if a date is blacked out
   const isDateBlackedOut = (date: Date): { isBlackedOut: boolean; reasons: string[] } => {
@@ -122,7 +125,7 @@ export function AvailabilityPreview({ settings, eventTypes }: AvailabilityPrevie
     }
 
     // Get event type and buffer settings
-    const eventType = eventTypes.find(et => et.id === eventTypeId);
+    const eventType = safeEventTypes.find(et => et.id === eventTypeId);
     const bufferSettings = settings?.bufferTimes?.find(bt => bt.eventTypeId === eventTypeId);
     
     if (!eventType) {
@@ -299,7 +302,7 @@ export function AvailabilityPreview({ settings, eventTypes }: AvailabilityPrevie
       </div>
 
       {/* Event Type Selection */}
-      {eventTypes.length > 1 && (
+      {safeEventTypes.length > 1 && (
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-4">
@@ -309,7 +312,7 @@ export function AvailabilityPreview({ settings, eventTypes }: AvailabilityPrevie
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {eventTypes.map((eventType) => (
+                  {safeEventTypes.map((eventType) => (
                     <SelectItem key={eventType.id} value={eventType.id}>
                       {eventType.name} ({eventType.duration}min)
                     </SelectItem>
@@ -318,7 +321,7 @@ export function AvailabilityPreview({ settings, eventTypes }: AvailabilityPrevie
               </Select>
               {selectedEventType && (
                 <Badge variant="outline">
-                  {eventTypes.find(et => et.id === selectedEventType)?.duration}min duration
+                  {safeEventTypes.find(et => et.id === selectedEventType)?.duration}min duration
                 </Badge>
               )}
             </div>
@@ -369,7 +372,7 @@ export function AvailabilityPreview({ settings, eventTypes }: AvailabilityPrevie
                 Available Times - {format(selectedDate, 'MMM d, yyyy')}
               </CardTitle>
               <CardDescription>
-                Times shown for {eventTypes.find(et => et.id === selectedEventType)?.name || 'selected event type'}
+                Times shown for {safeEventTypes.find(et => et.id === selectedEventType)?.name || 'selected event type'}
               </CardDescription>
             </CardHeader>
             <CardContent>

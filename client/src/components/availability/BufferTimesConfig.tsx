@@ -40,13 +40,16 @@ const BUFFER_TIME_OPTIONS = [
 ];
 
 export function BufferTimesConfig({ eventTypes, bufferTimes, onChange }: BufferTimesConfigProps) {
+  // Ensure eventTypes is always an array
+  const safeEventTypes = Array.isArray(eventTypes) ? eventTypes : [];
+  
   const { toast } = useToast();
   const [localBufferTimes, setLocalBufferTimes] = useState<BufferTime[]>([]);
 
   // Initialize buffer times from event types or provided buffer times
   useEffect(() => {
-    if (eventTypes.length > 0) {
-      const initialBufferTimes = eventTypes.map(eventType => {
+    if (safeEventTypes.length > 0) {
+      const initialBufferTimes = safeEventTypes.map(eventType => {
         const existingBuffer = bufferTimes.find(bt => bt.eventTypeId === eventType.id);
         return existingBuffer || {
           eventTypeId: eventType.id,
@@ -56,7 +59,7 @@ export function BufferTimesConfig({ eventTypes, bufferTimes, onChange }: BufferT
       });
       setLocalBufferTimes(initialBufferTimes);
     }
-  }, [eventTypes, bufferTimes]);
+  }, [safeEventTypes, bufferTimes]);
 
   // Note: onChange is only called in user event handlers to prevent infinite loops
 
@@ -103,7 +106,7 @@ export function BufferTimesConfig({ eventTypes, bufferTimes, onChange }: BufferT
   const applyRecommendedBuffers = () => {
     setLocalBufferTimes(prev => {
       const next = prev.map(bt => {
-        const eventType = eventTypes.find(et => et.id === bt.eventTypeId);
+        const eventType = safeEventTypes.find(et => et.id === bt.eventTypeId);
         if (!eventType) return bt;
 
         // Recommended buffers based on appointment duration
@@ -137,7 +140,7 @@ export function BufferTimesConfig({ eventTypes, bufferTimes, onChange }: BufferT
     return eventType.duration + bufferTime.bufferTimeBefore + bufferTime.bufferTimeAfter;
   };
 
-  if (eventTypes.length === 0) {
+  if (safeEventTypes.length === 0) {
     return (
       <div className="text-center py-8">
         <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg max-w-md mx-auto">
@@ -194,7 +197,7 @@ export function BufferTimesConfig({ eventTypes, bufferTimes, onChange }: BufferT
 
       {/* Buffer Time Configuration for Each Event Type */}
       <div className="space-y-4">
-        {eventTypes.map((eventType) => {
+        {safeEventTypes.map((eventType) => {
           const bufferTime = localBufferTimes.find(bt => bt.eventTypeId === eventType.id) || {
             eventTypeId: eventType.id,
             bufferTimeBefore: 0,
@@ -307,7 +310,7 @@ export function BufferTimesConfig({ eventTypes, bufferTimes, onChange }: BufferT
           <div className="font-medium mb-2">Buffer Configuration Summary:</div>
           <div className="space-y-1 text-gray-600 dark:text-gray-400">
             {localBufferTimes.map((bt) => {
-              const eventType = eventTypes.find(et => et.id === bt.eventTypeId);
+              const eventType = safeEventTypes.find(et => et.id === bt.eventTypeId);
               if (!eventType) return null;
               
               return (
