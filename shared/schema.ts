@@ -67,6 +67,14 @@ export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'paid', 'f
 export const bufferTimeTypeEnum = pgEnum('buffer_time_type', ['before', 'after', 'both']);
 export const weekdayEnum = pgEnum('weekday', ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']);
 
+// Calendar and video meeting integration enums
+export const videoMeetingProviderEnum = pgEnum('video_meeting_provider', ['zoom', 'google_meet', 'microsoft_teams', 'webex', 'gotomeeting', 'custom']);
+export const calendarSyncStatusEnum = pgEnum('calendar_sync_status', ['pending', 'synced', 'failed', 'conflict', 'manual_review']);
+export const meetingStatusEnum = pgEnum('meeting_status', ['created', 'started', 'ended', 'cancelled']);
+export const integrationStatusEnum = pgEnum('integration_status', ['connected', 'disconnected', 'expired', 'error', 'revoked']);
+export const conflictResolutionEnum = pgEnum('conflict_resolution', ['skip', 'overwrite', 'merge', 'manual']);
+export const syncDirectionEnum = pgEnum('sync_direction', ['one_way_to_external', 'one_way_from_external', 'two_way']);
+
 // Database Tables
 
 // Session storage table
@@ -2085,6 +2093,305 @@ export const calendarIntegrations = pgTable("calendar_integrations", {
   index("idx_calendar_integrations_active").on(table.isActive),
 ]);
 
+// Calendar connections for comprehensive OAuth management
+export const calendarConnections = pgTable("calendar_connections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Connection details
+  provider: calendarProviderEnum("provider").notNull(),
+  providerAccountId: varchar("provider_account_id"), // User's account ID at provider
+  providerEmail: varchar("provider_email"), // Email associated with the provider account
+  
+  // OAuth tokens (encrypted)
+  accessToken: text("access_token"), // encrypted access token
+  refreshToken: text("refresh_token"), // encrypted refresh token
+  idToken: text("id_token"), // encrypted ID token (for OpenID Connect)
+  tokenType: varchar("token_type").default('Bearer'),
+  scope: text("scope"), // granted scopes
+  tokenExpiresAt: timestamp("token_expires_at"),
+  
+  // Connection metadata
+  status: integrationStatusEnum("status").default('connected'),
+  lastConnectionTest: timestamp("last_connection_test"),
+  connectionTestResult: text("connection_test_result"), // Last test result/error
+  
+  // Sync settings
+  syncDirection: syncDirectionEnum("sync_direction").default('two_way'),
+  autoSync: boolean("auto_sync").default(true),
+  syncConflictResolution: conflictResolutionEnum("sync_conflict_resolution").default('manual'),
+  
+  // Selected calendars (JSON array of calendar IDs to sync)
+  selectedCalendars: jsonb("selected_calendars").default('[]'),
+  /*
+  Example:
+  [
+    {
+      id: "primary",
+      name: "John Doe",
+      isPrimary: true,
+      isSelected: true
+    },
+    {
+      id: "calendar_id_123",
+      name: "Work Calendar",
+      isPrimary: false,
+      isSelected: true
+    }
+  ]
+  */
+  
+  // Sync status tracking
+  lastSyncAt: timestamp("last_sync_at"),
+  lastSyncStatus: calendarSyncStatusEnum("last_sync_status").default('pending'),
+  lastSyncError: text("last_sync_error"),
+  nextSyncAt: timestamp("next_sync_at"),
+  
+  // Provider-specific settings
+  providerSettings: jsonb("provider_settings").default('{}'),
+  /*
+  Example for Google:
+  {
+    timeZone: "America/New_York",
+    colorId: "3",
+    sendNotifications: true,
+    sendUpdates: "all"
+  }
+  */
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_calendar_connections_user").on(table.userId),
+  index("idx_calendar_connections_provider").on(table.provider),
+  index("idx_calendar_connections_status").on(table.status),
+  index("idx_calendar_connections_sync_at").on(table.lastSyncAt),
+]);
+
+// Video meeting providers for Zoom, Google Meet, Teams integration
+export const videoMeetingProviders = pgTable("video_meeting_providers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Provider details
+  provider: videoMeetingProviderEnum("provider").notNull(),
+  providerAccountId: varchar("provider_account_id"), // User ID at the provider
+  providerEmail: varchar("provider_email"), // Email associated with provider account
+  
+  // OAuth tokens (encrypted)
+  accessToken: text("access_token"), // encrypted access token
+  refreshToken: text("refresh_token"), // encrypted refresh token
+  tokenType: varchar("token_type").default('Bearer'),
+  scope: text("scope"), // granted scopes
+  tokenExpiresAt: timestamp("token_expires_at"),
+  
+  // Provider status
+  status: integrationStatusEnum("status").default('connected'),
+  lastConnectionTest: timestamp("last_connection_test"),
+  connectionTestResult: text("connection_test_result"),
+  
+  // Default settings for this provider
+  isDefaultProvider: boolean("is_default_provider").default(false),
+  
+  // Meeting creation settings
+  defaultSettings: jsonb("default_settings").default('{}'),
+  /*
+  Example for Zoom:
+  {
+    waitingRoom: true,
+    requirePassword: true,
+    allowJoinBeforeHost: false,
+    muteUponEntry: true,
+    autoRecording: "cloud",
+    meetingAuthentication: false
+  }
+  */
+  
+  // Usage limits and quotas
+  monthlyMeetingCount: integer("monthly_meeting_count").default(0),
+  meetingQuotaLimit: integer("meeting_quota_limit"), // null = unlimited
+  lastQuotaReset: timestamp("last_quota_reset"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_video_providers_user").on(table.userId),
+  index("idx_video_providers_provider").on(table.provider),
+  index("idx_video_providers_status").on(table.status),
+  index("idx_video_providers_default").on(table.isDefaultProvider),
+]);
+
+// External calendar events for tracking synced events
+export const externalCalendarEvents = pgTable("external_calendar_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  appointmentId: varchar("appointment_id").references(() => appointments.id, { onDelete: 'cascade' }).notNull(),
+  calendarConnectionId: varchar("calendar_connection_id").references(() => calendarConnections.id, { onDelete: 'cascade' }).notNull(),
+  
+  // External event identification
+  externalEventId: varchar("external_event_id").notNull(), // Event ID in the external calendar
+  externalCalendarId: varchar("external_calendar_id").notNull(), // Calendar ID in the external system
+  
+  // Event metadata
+  title: varchar("title").notNull(),
+  description: text("description"),
+  location: text("location"),
+  
+  // Timing
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  timezone: varchar("timezone"),
+  isAllDay: boolean("is_all_day").default(false),
+  
+  // Sync tracking
+  syncStatus: calendarSyncStatusEnum("sync_status").default('synced'),
+  lastSyncAt: timestamp("last_sync_at").defaultNow(),
+  syncVersion: integer("sync_version").default(1), // Version for conflict resolution
+  
+  // External event metadata
+  externalEventData: jsonb("external_event_data").default('{}'),
+  /*
+  Example:
+  {
+    etag: "\"3456789012345\"",
+    htmlLink: "https://calendar.google.com/event?eid=xyz",
+    hangoutLink: "https://meet.google.com/xyz-abc-def",
+    conferenceData: { ... },
+    attendees: [...],
+    recurrence: ["RRULE:FREQ=WEEKLY;COUNT=10"]
+  }
+  */
+  
+  // Conflict resolution
+  hasConflict: boolean("has_conflict").default(false),
+  conflictDetails: jsonb("conflict_details").default('{}'),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_external_events_appointment").on(table.appointmentId),
+  index("idx_external_events_calendar_connection").on(table.calendarConnectionId),
+  index("idx_external_events_external_id").on(table.externalEventId),
+  index("idx_external_events_sync_status").on(table.syncStatus),
+  index("idx_external_events_start_time").on(table.startTime),
+]);
+
+// Meeting links and video meeting management
+export const meetingLinks = pgTable("meeting_links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  appointmentId: varchar("appointment_id").references(() => appointments.id, { onDelete: 'cascade' }).notNull(),
+  videoMeetingProviderId: varchar("video_meeting_provider_id").references(() => videoMeetingProviders.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Meeting identification
+  externalMeetingId: varchar("external_meeting_id").notNull(), // Meeting ID at the provider
+  meetingNumber: varchar("meeting_number"), // Zoom meeting number, Teams meeting ID
+  
+  // Meeting access details
+  joinUrl: text("join_url").notNull(),
+  hostUrl: text("host_url"), // Host-specific join URL
+  meetingPassword: varchar("meeting_password"), // encrypted password
+  dialInNumbers: jsonb("dial_in_numbers").default('[]'), // Array of phone numbers
+  
+  // Meeting settings
+  meetingSettings: jsonb("meeting_settings").default('{}'),
+  /*
+  Example:
+  {
+    waitingRoom: true,
+    requirePassword: true,
+    allowJoinBeforeHost: false,
+    muteUponEntry: true,
+    autoRecording: "cloud",
+    recordingConsent: true
+  }
+  */
+  
+  // Meeting status and lifecycle
+  meetingStatus: meetingStatusEnum("meeting_status").default('created'),
+  actualStartTime: timestamp("actual_start_time"),
+  actualEndTime: timestamp("actual_end_time"),
+  
+  // Participants tracking
+  participantCount: integer("participant_count").default(0),
+  maxParticipants: integer("max_participants"),
+  participantData: jsonb("participant_data").default('[]'),
+  
+  // Recording information
+  recordingUrls: jsonb("recording_urls").default('[]'),
+  /*
+  Example:
+  [
+    {
+      type: "video",
+      url: "https://zoom.us/rec/share/xyz",
+      downloadUrl: "https://zoom.us/rec/download/xyz",
+      playUrl: "https://zoom.us/rec/play/xyz",
+      fileSize: 1234567,
+      recordingStart: "2023-01-01T10:00:00Z",
+      recordingEnd: "2023-01-01T11:00:00Z"
+    }
+  ]
+  */
+  
+  // Security and access control
+  accessCode: varchar("access_code"), // Custom access code for meetings
+  waitingRoomEnabled: boolean("waiting_room_enabled").default(true),
+  isLocked: boolean("is_locked").default(false),
+  
+  // External provider metadata
+  providerData: jsonb("provider_data").default('{}'), // Raw data from provider API
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_meeting_links_appointment").on(table.appointmentId),
+  index("idx_meeting_links_provider").on(table.videoMeetingProviderId),
+  index("idx_meeting_links_external_id").on(table.externalMeetingId),
+  index("idx_meeting_links_status").on(table.meetingStatus),
+  index("idx_meeting_links_start_time").on(table.actualStartTime),
+]);
+
+// Integration audit logs for tracking sync operations and debugging
+export const integrationLogs = pgTable("integration_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Integration context
+  integrationType: varchar("integration_type").notNull(), // 'calendar', 'video_meeting'
+  provider: varchar("provider").notNull(), // google, zoom, microsoft, etc.
+  connectionId: varchar("connection_id"), // calendarConnectionId or videoMeetingProviderId
+  
+  // Operation details
+  operation: varchar("operation").notNull(), // 'sync', 'create', 'update', 'delete', 'auth'
+  resourceType: varchar("resource_type"), // 'event', 'meeting', 'calendar', 'token'
+  resourceId: varchar("resource_id"), // appointment ID, meeting ID, etc.
+  
+  // Operation status
+  status: varchar("status").notNull(), // 'success', 'failure', 'partial'
+  errorCode: varchar("error_code"),
+  errorMessage: text("error_message"),
+  
+  // Request/Response data
+  requestPayload: jsonb("request_payload"),
+  responsePayload: jsonb("response_payload"),
+  
+  // Performance metrics
+  duration: integer("duration"), // milliseconds
+  retryCount: integer("retry_count").default(0),
+  
+  // Additional metadata
+  userAgent: text("user_agent"),
+  ipAddress: varchar("ip_address"),
+  apiVersion: varchar("api_version"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_integration_logs_user").on(table.userId),
+  index("idx_integration_logs_type_provider").on(table.integrationType, table.provider),
+  index("idx_integration_logs_status").on(table.status),
+  index("idx_integration_logs_created_at").on(table.createdAt),
+  index("idx_integration_logs_operation").on(table.operation),
+]);
+
 // Booking form templates
 export const bookingFormTemplates = pgTable("booking_form_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -3057,3 +3364,49 @@ export const PlanFeaturesSchema = z.object({
 });
 
 export type PlanFeaturesData = z.infer<typeof PlanFeaturesSchema>;
+
+// Calendar and Video Meeting Integration Types
+export type CalendarConnection = typeof calendarConnections.$inferSelect;
+export type InsertCalendarConnection = typeof calendarConnections.$inferInsert;
+
+export type VideoMeetingProvider = typeof videoMeetingProviders.$inferSelect;
+export type InsertVideoMeetingProvider = typeof videoMeetingProviders.$inferInsert;
+
+export type ExternalCalendarEvent = typeof externalCalendarEvents.$inferSelect;
+export type InsertExternalCalendarEvent = typeof externalCalendarEvents.$inferInsert;
+
+export type MeetingLink = typeof meetingLinks.$inferSelect;
+export type InsertMeetingLink = typeof meetingLinks.$inferInsert;
+
+export type IntegrationLog = typeof integrationLogs.$inferSelect;
+export type InsertIntegrationLog = typeof integrationLogs.$inferInsert;
+
+// Zod schemas for calendar and video integration validation
+export const insertCalendarConnectionSchema = createInsertSchema(calendarConnections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertVideoMeetingProviderSchema = createInsertSchema(videoMeetingProviders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertExternalCalendarEventSchema = createInsertSchema(externalCalendarEvents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMeetingLinkSchema = createInsertSchema(meetingLinks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertIntegrationLogSchema = createInsertSchema(integrationLogs).omit({
+  id: true,
+  createdAt: true,
+});

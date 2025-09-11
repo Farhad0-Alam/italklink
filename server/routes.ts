@@ -47,6 +47,11 @@ import { pwaRouter } from './routes/pwa';
 import emailNotificationRoutes from './email-notification-routes';
 import { notificationScheduler } from './notification-scheduler';
 import { setupAnalyticsRoutes } from './analytics-routes';
+import { setupCalendarRoutes } from './calendar-routes';
+import { setupVideoMeetingRoutes } from './video-meeting-routes';
+import { setupWebhookRoutes, calendarSyncWorker } from './webhook-routes';
+import { conflictDetectionService } from './conflict-detection';
+import { calendarHealthChecker } from './calendar-health-check';
 
 
 
@@ -87,9 +92,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup analytics routes
   setupAnalyticsRoutes(app);
 
-  // Payment routes
-  const { setupPaymentRoutes } = await import('./payment-routes');
-  setupPaymentRoutes(app);
+  // Setup calendar integration routes
+  setupCalendarRoutes(app);
+  
+  // Setup video meeting routes
+  setupVideoMeetingRoutes(app);
+
+  // Setup webhook routes for calendar/video integrations
+  setupWebhookRoutes(app);
+  
+  // Start calendar sync worker
+  calendarSyncWorker.start();
+
+  // Setup payment routes (conditional based on Stripe configuration)
+  try {
+    const { setupPaymentRoutes } = await import('./payment-routes');
+    setupPaymentRoutes(app);
+  } catch (error) {
+    console.warn('⚠️  Payment routes not loaded:', error instanceof Error ? error.message : 'Unknown error');
+  }
   
   // Setup availability routes
   const { setupAvailabilityRoutes } = await import('./availability-routes');
@@ -133,6 +154,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       lastCheck: new Date().toISOString(),
       status: notificationScheduler.isActive() ? 'healthy' : 'stopped'
     });
+  });
+
+  // Calendar integration health check endpoint
+  app.get('/api/calendar/health', async (req, res) => {
+    try {
+      const healthStatus = await calendarHealthChecker.performHealthCheck();
+      res.json({
+        status: healthStatus.overall ? 'healthy' : 'degraded',
+        timestamp: new Date().toISOString(),
+        components: healthStatus
+      });
+    } catch (error) {
+      console.error('Calendar health check error:', error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Health check failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   });
 
   // Public plans endpoint for landing page

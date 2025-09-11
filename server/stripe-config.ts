@@ -1,15 +1,51 @@
 import Stripe from 'stripe';
 
-// Initialize Stripe with secret key
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
-  typescript: true,
+// Lazy Stripe instance - only created when needed
+let stripeInstance: Stripe | null = null;
+
+// Check if Stripe is configured
+export function hasStripeConfig(): boolean {
+  return !!(process.env.STRIPE_SECRET_KEY && 
+           process.env.STRIPE_PUBLISHABLE_KEY && 
+           process.env.STRIPE_WEBHOOK_SECRET);
+}
+
+// Get Stripe instance with lazy initialization
+export function getStripe(): Stripe {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error('STRIPE_SECRET_KEY environment variable is required to use payment features');
+  }
+  
+  if (!stripeInstance) {
+    stripeInstance = new Stripe(secretKey, {
+      apiVersion: '2024-06-20',
+      typescript: true,
+    });
+  }
+  
+  return stripeInstance;
+}
+
+// Legacy export for backward compatibility - throws error if not configured
+export const stripe = new Proxy({} as Stripe, {
+  get(target, prop) {
+    return getStripe()[prop as keyof Stripe];
+  }
 });
 
-// Stripe configuration constants
+// Stripe configuration constants with safe access
 export const STRIPE_CONFIG = {
-  publishableKey: process.env.STRIPE_PUBLISHABLE_KEY!,
-  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+  get publishableKey() {
+    const key = process.env.STRIPE_PUBLISHABLE_KEY;
+    if (!key) throw new Error('STRIPE_PUBLISHABLE_KEY environment variable is required');
+    return key;
+  },
+  get webhookSecret() {
+    const secret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!secret) throw new Error('STRIPE_WEBHOOK_SECRET environment variable is required');
+    return secret;
+  },
   currency: 'usd',
   apiVersion: '2024-06-20' as const,
 };

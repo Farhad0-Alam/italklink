@@ -3,6 +3,7 @@ import {
   users, businessCards, teams, teamMembers, bulkGenerationJobs, subscriptionPlans, globalTemplates, walletPasses,
   crmContacts, crmActivities, crmTasks, crmPipelines, crmStages, crmDeals, crmSequences, emailTemplates,
   automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability, appointmentNotifications, appointmentPayments,
+  calendarConnections, videoMeetingProviders, externalCalendarEvents, meetingLinks, integrationLogs,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -14,7 +15,12 @@ import {
   type Automation, type InsertAutomation, type AutomationRun, type InsertAutomationRun,
   type AppointmentEventType, type InsertAppointmentEventType, type Appointment, type InsertAppointment,
   type AppointmentNotification, type InsertAppointmentNotification,
-  type AppointmentPayment, type InsertAppointmentPayment
+  type AppointmentPayment, type InsertAppointmentPayment,
+  type CalendarConnection, type InsertCalendarConnection,
+  type VideoMeetingProvider, type InsertVideoMeetingProvider,
+  type ExternalCalendarEvent, type InsertExternalCalendarEvent,
+  type MeetingLink, type InsertMeetingLink,
+  type IntegrationLog, type InsertIntegrationLog
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -239,6 +245,52 @@ export interface IStorage {
     paymentsByStatus: Record<string, number>;
     recentPayments: Array<AppointmentPayment & { appointmentId: string; customerName: string }>;
   }>;
+
+  // Calendar Integration operations
+  createCalendarConnection(connectionData: InsertCalendarConnection): Promise<CalendarConnection>;
+  getCalendarConnection(id: string): Promise<CalendarConnection | undefined>;
+  getUserCalendarConnections(userId: string, filters?: { provider?: string; isActive?: boolean }): Promise<CalendarConnection[]>;
+  updateCalendarConnection(id: string, connectionData: Partial<InsertCalendarConnection>): Promise<CalendarConnection>;
+  deleteCalendarConnection(id: string): Promise<void>;
+  updateCalendarTokens(id: string, accessToken: string, refreshToken?: string): Promise<CalendarConnection>;
+  getCalendarConnectionByProvider(userId: string, provider: string): Promise<CalendarConnection | undefined>;
+
+  // Video Meeting Provider operations  
+  createVideoMeetingProvider(providerData: InsertVideoMeetingProvider): Promise<VideoMeetingProvider>;
+  getVideoMeetingProvider(id: string): Promise<VideoMeetingProvider | undefined>;
+  getUserVideoMeetingProviders(userId: string, filters?: { provider?: string; isActive?: boolean }): Promise<VideoMeetingProvider[]>;
+  updateVideoMeetingProvider(id: string, providerData: Partial<InsertVideoMeetingProvider>): Promise<VideoMeetingProvider>;
+  deleteVideoMeetingProvider(id: string): Promise<void>;
+  updateVideoProviderTokens(id: string, accessToken: string, refreshToken?: string): Promise<VideoMeetingProvider>;
+  getVideoProviderByProvider(userId: string, provider: string): Promise<VideoMeetingProvider | undefined>;
+
+  // External Calendar Event operations
+  createExternalCalendarEvent(eventData: InsertExternalCalendarEvent): Promise<ExternalCalendarEvent>;
+  getExternalCalendarEvent(id: string): Promise<ExternalCalendarEvent | undefined>;
+  getExternalCalendarEventByExternalId(externalEventId: string, calendarConnectionId: string): Promise<ExternalCalendarEvent | undefined>;
+  getAppointmentExternalEvents(appointmentId: string): Promise<ExternalCalendarEvent[]>;
+  updateExternalCalendarEvent(id: string, eventData: Partial<InsertExternalCalendarEvent>): Promise<ExternalCalendarEvent>;
+  deleteExternalCalendarEvent(id: string): Promise<void>;
+  deleteExternalCalendarEventsByAppointment(appointmentId: string): Promise<void>;
+
+  // Meeting Link operations
+  createMeetingLink(linkData: InsertMeetingLink): Promise<MeetingLink>;
+  getMeetingLink(id: string): Promise<MeetingLink | undefined>;
+  getMeetingLinkByAppointment(appointmentId: string): Promise<MeetingLink | undefined>;
+  updateMeetingLink(id: string, linkData: Partial<InsertMeetingLink>): Promise<MeetingLink>;
+  deleteMeetingLink(id: string): Promise<void>;
+  deleteMeetingLinksByAppointment(appointmentId: string): Promise<void>;
+
+  // Integration Log operations
+  createIntegrationLog(logData: InsertIntegrationLog): Promise<IntegrationLog>;
+  getIntegrationLogs(filters?: { 
+    userId?: string; 
+    integrationType?: string; 
+    provider?: string;
+    operation?: string;
+    status?: string;
+    limit?: number;
+  }): Promise<IntegrationLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2651,6 +2703,264 @@ export class DatabaseStorage implements IStorage {
       paymentsByStatus,
       recentPayments,
     };
+  }
+
+  // Calendar Integration operations implementation
+  async createCalendarConnection(connectionData: InsertCalendarConnection): Promise<CalendarConnection> {
+    const [connection] = await db.insert(calendarConnections).values(connectionData).returning();
+    return connection;
+  }
+
+  async getCalendarConnection(id: string): Promise<CalendarConnection | undefined> {
+    const [connection] = await db.select().from(calendarConnections).where(eq(calendarConnections.id, id));
+    return connection;
+  }
+
+  async getUserCalendarConnections(userId: string, filters?: { provider?: string; isActive?: boolean }): Promise<CalendarConnection[]> {
+    let query = db.select().from(calendarConnections).where(eq(calendarConnections.userId, userId));
+    
+    const conditions = [eq(calendarConnections.userId, userId)];
+    
+    if (filters?.provider) {
+      conditions.push(eq(calendarConnections.provider, filters.provider as any));
+    }
+    
+    if (filters?.isActive !== undefined) {
+      conditions.push(eq(calendarConnections.status, filters.isActive ? 'connected' : 'disconnected'));
+    }
+    
+    if (conditions.length > 1) {
+      query = query.where(and(...conditions));
+    }
+    
+    return await query.orderBy(desc(calendarConnections.createdAt));
+  }
+
+  async updateCalendarConnection(id: string, connectionData: Partial<InsertCalendarConnection>): Promise<CalendarConnection> {
+    const [connection] = await db
+      .update(calendarConnections)
+      .set({ ...connectionData, updatedAt: new Date() })
+      .where(eq(calendarConnections.id, id))
+      .returning();
+    return connection;
+  }
+
+  async deleteCalendarConnection(id: string): Promise<void> {
+    await db.delete(calendarConnections).where(eq(calendarConnections.id, id));
+  }
+
+  async updateCalendarTokens(id: string, accessToken: string, refreshToken?: string): Promise<CalendarConnection> {
+    const updateData: any = { accessToken, updatedAt: new Date() };
+    if (refreshToken) {
+      updateData.refreshToken = refreshToken;
+    }
+    
+    const [connection] = await db
+      .update(calendarConnections)
+      .set(updateData)
+      .where(eq(calendarConnections.id, id))
+      .returning();
+    return connection;
+  }
+
+  async getCalendarConnectionByProvider(userId: string, provider: string): Promise<CalendarConnection | undefined> {
+    const [connection] = await db.select().from(calendarConnections)
+      .where(and(
+        eq(calendarConnections.userId, userId),
+        eq(calendarConnections.provider, provider as any)
+      ));
+    return connection;
+  }
+
+  // Video Meeting Provider operations implementation
+  async createVideoMeetingProvider(providerData: InsertVideoMeetingProvider): Promise<VideoMeetingProvider> {
+    const [provider] = await db.insert(videoMeetingProviders).values(providerData).returning();
+    return provider;
+  }
+
+  async getVideoMeetingProvider(id: string): Promise<VideoMeetingProvider | undefined> {
+    const [provider] = await db.select().from(videoMeetingProviders).where(eq(videoMeetingProviders.id, id));
+    return provider;
+  }
+
+  async getUserVideoMeetingProviders(userId: string, filters?: { provider?: string; isActive?: boolean }): Promise<VideoMeetingProvider[]> {
+    let query = db.select().from(videoMeetingProviders).where(eq(videoMeetingProviders.userId, userId));
+    
+    const conditions = [eq(videoMeetingProviders.userId, userId)];
+    
+    if (filters?.provider) {
+      conditions.push(eq(videoMeetingProviders.provider, filters.provider as any));
+    }
+    
+    if (filters?.isActive !== undefined) {
+      conditions.push(eq(videoMeetingProviders.status, filters.isActive ? 'connected' : 'disconnected'));
+    }
+    
+    if (conditions.length > 1) {
+      query = query.where(and(...conditions));
+    }
+    
+    return await query.orderBy(desc(videoMeetingProviders.createdAt));
+  }
+
+  async updateVideoMeetingProvider(id: string, providerData: Partial<InsertVideoMeetingProvider>): Promise<VideoMeetingProvider> {
+    const [provider] = await db
+      .update(videoMeetingProviders)
+      .set({ ...providerData, updatedAt: new Date() })
+      .where(eq(videoMeetingProviders.id, id))
+      .returning();
+    return provider;
+  }
+
+  async deleteVideoMeetingProvider(id: string): Promise<void> {
+    await db.delete(videoMeetingProviders).where(eq(videoMeetingProviders.id, id));
+  }
+
+  async updateVideoProviderTokens(id: string, accessToken: string, refreshToken?: string): Promise<VideoMeetingProvider> {
+    const updateData: any = { accessToken, updatedAt: new Date() };
+    if (refreshToken) {
+      updateData.refreshToken = refreshToken;
+    }
+    
+    const [provider] = await db
+      .update(videoMeetingProviders)
+      .set(updateData)
+      .where(eq(videoMeetingProviders.id, id))
+      .returning();
+    return provider;
+  }
+
+  async getVideoProviderByProvider(userId: string, provider: string): Promise<VideoMeetingProvider | undefined> {
+    const [videoProvider] = await db.select().from(videoMeetingProviders)
+      .where(and(
+        eq(videoMeetingProviders.userId, userId),
+        eq(videoMeetingProviders.provider, provider as any)
+      ));
+    return videoProvider;
+  }
+
+  // External Calendar Event operations implementation
+  async createExternalCalendarEvent(eventData: InsertExternalCalendarEvent): Promise<ExternalCalendarEvent> {
+    const [event] = await db.insert(externalCalendarEvents).values(eventData).returning();
+    return event;
+  }
+
+  async getExternalCalendarEvent(id: string): Promise<ExternalCalendarEvent | undefined> {
+    const [event] = await db.select().from(externalCalendarEvents).where(eq(externalCalendarEvents.id, id));
+    return event;
+  }
+
+  async getExternalCalendarEventByExternalId(externalEventId: string, calendarConnectionId: string): Promise<ExternalCalendarEvent | undefined> {
+    const [event] = await db.select().from(externalCalendarEvents)
+      .where(and(
+        eq(externalCalendarEvents.externalEventId, externalEventId),
+        eq(externalCalendarEvents.calendarConnectionId, calendarConnectionId)
+      ));
+    return event;
+  }
+
+  async getAppointmentExternalEvents(appointmentId: string): Promise<ExternalCalendarEvent[]> {
+    return await db.select().from(externalCalendarEvents)
+      .where(eq(externalCalendarEvents.appointmentId, appointmentId));
+  }
+
+  async updateExternalCalendarEvent(id: string, eventData: Partial<InsertExternalCalendarEvent>): Promise<ExternalCalendarEvent> {
+    const [event] = await db
+      .update(externalCalendarEvents)
+      .set({ ...eventData, updatedAt: new Date() })
+      .where(eq(externalCalendarEvents.id, id))
+      .returning();
+    return event;
+  }
+
+  async deleteExternalCalendarEvent(id: string): Promise<void> {
+    await db.delete(externalCalendarEvents).where(eq(externalCalendarEvents.id, id));
+  }
+
+  async deleteExternalCalendarEventsByAppointment(appointmentId: string): Promise<void> {
+    await db.delete(externalCalendarEvents).where(eq(externalCalendarEvents.appointmentId, appointmentId));
+  }
+
+  // Meeting Link operations implementation
+  async createMeetingLink(linkData: InsertMeetingLink): Promise<MeetingLink> {
+    const [link] = await db.insert(meetingLinks).values(linkData).returning();
+    return link;
+  }
+
+  async getMeetingLink(id: string): Promise<MeetingLink | undefined> {
+    const [link] = await db.select().from(meetingLinks).where(eq(meetingLinks.id, id));
+    return link;
+  }
+
+  async getMeetingLinkByAppointment(appointmentId: string): Promise<MeetingLink | undefined> {
+    const [link] = await db.select().from(meetingLinks).where(eq(meetingLinks.appointmentId, appointmentId));
+    return link;
+  }
+
+  async updateMeetingLink(id: string, linkData: Partial<InsertMeetingLink>): Promise<MeetingLink> {
+    const [link] = await db
+      .update(meetingLinks)
+      .set({ ...linkData, updatedAt: new Date() })
+      .where(eq(meetingLinks.id, id))
+      .returning();
+    return link;
+  }
+
+  async deleteMeetingLink(id: string): Promise<void> {
+    await db.delete(meetingLinks).where(eq(meetingLinks.id, id));
+  }
+
+  async deleteMeetingLinksByAppointment(appointmentId: string): Promise<void> {
+    await db.delete(meetingLinks).where(eq(meetingLinks.appointmentId, appointmentId));
+  }
+
+  // Integration Log operations implementation
+  async createIntegrationLog(logData: InsertIntegrationLog): Promise<IntegrationLog> {
+    const [log] = await db.insert(integrationLogs).values(logData).returning();
+    return log;
+  }
+
+  async getIntegrationLogs(filters?: { 
+    userId?: string; 
+    integrationType?: string; 
+    provider?: string;
+    operation?: string;
+    status?: string;
+    limit?: number;
+  }): Promise<IntegrationLog[]> {
+    let query = db.select().from(integrationLogs);
+    
+    const conditions = [];
+    
+    if (filters?.userId) {
+      conditions.push(eq(integrationLogs.userId, filters.userId));
+    }
+    
+    if (filters?.integrationType) {
+      conditions.push(eq(integrationLogs.integrationType, filters.integrationType));
+    }
+    
+    if (filters?.provider) {
+      conditions.push(eq(integrationLogs.provider, filters.provider));
+    }
+    
+    if (filters?.operation) {
+      conditions.push(eq(integrationLogs.operation, filters.operation));
+    }
+    
+    if (filters?.status) {
+      conditions.push(eq(integrationLogs.status, filters.status as any));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    const results = await query
+      .orderBy(desc(integrationLogs.createdAt))
+      .limit(filters?.limit || 100);
+    
+    return results;
   }
 }
 

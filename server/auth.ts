@@ -6,6 +6,7 @@ import type { Express, RequestHandler } from 'express';
 import { db } from './db';
 import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
+import { setupOAuthStrategies } from './oauth-strategies';
 
 const pgStore = connectPg(session);
 
@@ -116,6 +117,9 @@ export function setupAuth(app: Express) {
       done(error, null);
     }
   });
+
+  // Setup OAuth strategies for calendar and video integrations
+  setupOAuthStrategies();
 }
 
 // Authentication middleware

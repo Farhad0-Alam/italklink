@@ -7,6 +7,131 @@ import { z } from 'zod';
 import { insertAppointmentSchema, insertAppointmentEventTypeSchema } from '@shared/schema';
 import { appointmentTriggers } from './appointment-triggers';
 import { requireAuth, optionalAuth } from './auth';
+import { conflictDetectionService } from './conflict-detection';
+
+// Meeting link creation helper function
+async function createMeetingLinkForAppointment(appointment: any, eventType: any) {
+  try {
+    // Determine meeting provider based on event type settings
+    let provider = 'google_meet'; // default
+    if (eventType.meetingLocation?.includes('zoom')) {
+      provider = 'zoom';
+    } else if (eventType.meetingLocation?.includes('teams')) {
+      provider = 'microsoft_teams';
+    }
+
+    // Get user's video meeting provider
+    const videoProvider = await storage.getVideoProviderByProvider(eventType.userId, provider);
+    
+    if (!videoProvider || videoProvider.status !== 'connected') {
+      // Fall back to creating a simple meeting room placeholder
+      const meetingLink = await storage.createMeetingLink({
+        appointmentId: appointment.id,
+        meetingUrl: `https://meet.google.com/new`, // Generic meeting URL
+        provider: 'manual',
+        meetingId: `meeting-${appointment.id}`,
+        settings: {
+          requirePassword: false,
+          allowRecording: false,
+          muteOnEntry: true
+        }
+      });
+      
+      return meetingLink;
+    }
+
+    // Create actual meeting based on provider
+    let meetingUrl = '';
+    let meetingId = '';
+    
+    if (provider === 'zoom' && videoProvider.accessToken) {
+      // Create Zoom meeting
+      const zoomResponse = await fetch('https://api.zoom.us/v2/users/me/meetings', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${videoProvider.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          topic: `${eventType.name} - ${appointment.attendeeName}`,
+          type: 2, // Scheduled meeting
+          start_time: appointment.startTime,
+          duration: eventType.duration,
+          timezone: appointment.timezone || 'UTC',
+          settings: {
+            host_video: true,
+            participant_video: true,
+            join_before_host: false,
+            mute_upon_entry: true,
+            waiting_room: true,
+            audio: 'both'
+          }
+        })
+      });
+
+      if (zoomResponse.ok) {
+        const zoomMeeting = await zoomResponse.json();
+        meetingUrl = zoomMeeting.join_url;
+        meetingId = zoomMeeting.id.toString();
+      }
+    } else if (provider === 'google_meet') {
+      // For Google Meet, we'll create a calendar event which automatically generates a Meet link
+      meetingUrl = `https://meet.google.com/new`;
+      meetingId = `meet-${appointment.id}`;
+    } else if (provider === 'microsoft_teams' && videoProvider.accessToken) {
+      // Create Teams meeting
+      const teamsResponse = await fetch('https://graph.microsoft.com/v1.0/me/onlineMeetings', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${videoProvider.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          subject: `${eventType.name} - ${appointment.attendeeName}`,
+          startDateTime: appointment.startTime,
+          endDateTime: appointment.endTime
+        })
+      });
+
+      if (teamsResponse.ok) {
+        const teamsMeeting = await teamsResponse.json();
+        meetingUrl = teamsMeeting.joinWebUrl;
+        meetingId = teamsMeeting.id;
+      }
+    }
+
+    // Store meeting link in database
+    const meetingLink = await storage.createMeetingLink({
+      appointmentId: appointment.id,
+      meetingUrl,
+      provider,
+      meetingId,
+      settings: {
+        requirePassword: false,
+        allowRecording: videoProvider.settings?.allowRecording || false,
+        muteOnEntry: true
+      }
+    });
+
+    await storage.createIntegrationLog({
+      userId: eventType.userId,
+      integrationType: 'video_meeting',
+      provider,
+      operation: 'create_meeting_link',
+      status: 'success',
+      details: { 
+        appointmentId: appointment.id,
+        meetingId,
+        provider
+      }
+    });
+
+    return meetingLink;
+  } catch (error) {
+    console.error('Meeting link creation error:', error);
+    throw error;
+  }
+}
 
 // Validation schemas
 const availabilityQuerySchema = z.object({
@@ -109,28 +234,28 @@ export function setupAppointmentRoutes(app: Express) {
       const conflictCheckStart = new Date(requestedStartTime.getTime() - bufferBefore * 60000);
       const conflictCheckEnd = new Date(requestedEndTime.getTime() + bufferAfter * 60000);
       
-      // Check for existing appointment conflicts with proper overlap logic
-      const conflictingAppointments = await db
-        .select()
-        .from(appointments)
-        .where(and(
-          eq(appointments.eventTypeId, appointmentData.eventTypeId),
-          or(
-            eq(appointments.status, 'scheduled'),
-            eq(appointments.status, 'confirmed'),
-            eq(appointments.status, 'completed')
-          ),
-          // Proper overlap detection: appointments overlap if start < existingEnd && end > existingStart
-          sql`${conflictCheckStart.toISOString()} < ${appointments.endTime} AND ${conflictCheckEnd.toISOString()} > ${appointments.startTime}`
-        ));
+      // Comprehensive conflict checking including external calendars
+      const conflictCheck = await conflictDetectionService.checkAppointmentConflicts(
+        eventType.userId, // Check against the host's calendar
+        conflictCheckStart.toISOString(),
+        conflictCheckEnd.toISOString()
+      );
       
-      if (conflictingAppointments.length > 0) {
+      if (conflictCheck.hasConflicts) {
+        // Suggest alternative time slots
+        const alternatives = await conflictDetectionService.suggestAlternativeSlots(
+          eventType.userId,
+          requestedStartTime.toISOString(),
+          eventType.duration
+        );
+
         return res.status(409).json({ 
-          message: 'Time slot is no longer available due to scheduling conflict',
+          message: 'Time slot is no longer available due to scheduling conflicts',
           conflictDetails: {
             requestedStart: requestedStartTime.toISOString(),
             requestedEnd: requestedEndTime.toISOString(),
-            conflictingAppointments: conflictingAppointments.length
+            conflicts: conflictCheck.conflicts,
+            suggestedAlternatives: alternatives.slice(0, 3) // Provide up to 3 alternatives
           }
         });
       }
@@ -166,6 +291,32 @@ export function setupAppointmentRoutes(app: Express) {
         status: eventType.requiresConfirmation ? 'scheduled' : 'confirmed',
       });
 
+      // Automatically create meeting link if event type supports video calls
+      let meetingLink = null;
+      if (eventType.meetingLocation && (
+        eventType.meetingLocation.includes('zoom') ||
+        eventType.meetingLocation.includes('google_meet') ||
+        eventType.meetingLocation.includes('teams')
+      )) {
+        try {
+          meetingLink = await createMeetingLinkForAppointment(appointment, eventType);
+        } catch (meetingError) {
+          console.error('Failed to create meeting link:', meetingError);
+          // Don't fail the booking if meeting link creation fails
+          await storage.createIntegrationLog({
+            userId: eventType.userId,
+            integrationType: 'video_meeting',
+            provider: 'auto_creation',
+            operation: 'create_meeting_link',
+            status: 'error',
+            details: { 
+              appointmentId: appointment.id,
+              error: meetingError instanceof Error ? meetingError.message : 'Unknown error'
+            }
+          });
+        }
+      }
+
       // Get host user information for notifications
       const hostUser = await storage.getUser(eventType.userId);
       if (!hostUser) {
@@ -194,6 +345,11 @@ export function setupAppointmentRoutes(app: Express) {
         attendeeName: appointment.attendeeName,
         attendeeEmail: appointment.attendeeEmail,
         requiresConfirmation: eventType.requiresConfirmation,
+        meetingLink: meetingLink ? {
+          url: meetingLink.meetingUrl,
+          meetingId: meetingLink.meetingId,
+          provider: meetingLink.provider
+        } : null,
         message: eventType.requiresConfirmation 
           ? 'Your booking request has been submitted and is pending confirmation.'
           : 'Your appointment has been confirmed!',

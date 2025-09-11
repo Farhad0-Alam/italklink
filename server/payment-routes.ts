@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { storage } from './storage';
-import { stripe, formatCurrency, toCents, fromCents, STRIPE_CONFIG } from './stripe-config';
+import { getStripe, hasStripeConfig, formatCurrency, toCents, fromCents, STRIPE_CONFIG } from './stripe-config';
 import { z } from 'zod';
 import { requireAuth, optionalAuth } from './auth';
 import { insertAppointmentPaymentSchema } from '@shared/schema';
@@ -39,6 +39,29 @@ const paymentHistoryFiltersSchema = z.object({
 });
 
 export function setupPaymentRoutes(app: Express) {
+  // Check if Stripe is configured before setting up routes
+  if (!hasStripeConfig()) {
+    console.warn('⚠️  Stripe not configured - payment routes disabled');
+    // Setup placeholder routes that return appropriate errors
+    app.post('/api/payments/create-payment-intent', (req, res) => {
+      res.status(503).json({ message: 'Payment processing is not configured' });
+    });
+    app.post('/api/payments/confirm-payment', (req, res) => {
+      res.status(503).json({ message: 'Payment processing is not configured' });
+    });
+    app.post('/api/payments/refund', (req, res) => {
+      res.status(503).json({ message: 'Payment processing is not configured' });
+    });
+    app.post('/api/payments/webhook', (req, res) => {
+      res.status(503).json({ message: 'Payment processing is not configured' });
+    });
+    app.get('/api/payments/history', (req, res) => {
+      res.status(503).json({ message: 'Payment processing is not configured' });
+    });
+    return;
+  }
+
+  console.log('✅ Setting up Stripe payment routes');
 
   // Create payment intent for appointment booking
   app.post('/api/payments/create-payment-intent', async (req: Request, res: Response) => {
@@ -80,6 +103,7 @@ export function setupPaymentRoutes(app: Express) {
       }
 
       // Create customer in Stripe (or retrieve existing)
+      const stripe = getStripe();
       let customer: Stripe.Customer;
       const existingCustomers = await stripe.customers.list({
         email: customerEmail,
@@ -165,6 +189,7 @@ export function setupPaymentRoutes(app: Express) {
       const { paymentIntentId } = validation.data;
 
       // Verify payment intent with Stripe
+      const stripe = getStripe();
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
       
       if (paymentIntent.status !== 'succeeded') {
@@ -261,6 +286,7 @@ export function setupPaymentRoutes(app: Express) {
       }
 
       // Process refund with Stripe
+      const stripe = getStripe();
       const refund = await stripe.refunds.create({
         payment_intent: payment.stripePaymentIntentId,
         amount: refundAmount,
@@ -328,6 +354,7 @@ export function setupPaymentRoutes(app: Express) {
     
     try {
       // Verify webhook signature
+      const stripe = getStripe();
       event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_CONFIG.webhookSecret);
     } catch (err) {
       console.error('Webhook signature verification failed:', err);
