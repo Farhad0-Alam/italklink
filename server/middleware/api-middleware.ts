@@ -413,11 +413,11 @@ export const setupPublicRoutes = (app: Express) => {
   app.use('/api', simpleRateLimit(100, 15 * 60 * 1000));
 };
 
-// Setup error handling (must be last)
+// Setup error handling (must be last) - scoped to API routes only
 export const setupErrorHandling = (app: Express) => {
-  // 404 handler for unmatched routes
-  app.use(notFoundHandler);
+  // 404 handler for unmatched API routes only
+  app.use('/api', notFoundHandler);
 
-  // Global error handler
-  app.use(errorHandler);
+  // Error handler for API routes only  
+  app.use('/api', errorHandler);
 };
