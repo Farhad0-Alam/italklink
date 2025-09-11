@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -105,13 +105,13 @@ export default function AvailabilityManagement() {
   }, [availabilitySettings, editedSettings]);
 
   // Handle settings changes
-  const handleSettingsChange = (section: keyof AvailabilitySettings, data: any) => {
+  const handleSettingsChange = useCallback((section: keyof AvailabilitySettings, data: any) => {
     setHasUnsavedChanges(true);
     setEditedSettings(prev => ({
       ...prev!,
       [section]: data
     }));
-  };
+  }, []); // Empty dependency array since this doesn't depend on any props or state
 
   // Get current settings (edited if available, otherwise from query)
   const currentSettings = editedSettings || availabilitySettings;

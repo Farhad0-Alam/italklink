@@ -64,17 +64,18 @@ export function BusinessHoursConfig({ businessHours, onChange }: BusinessHoursCo
     setUserTimezone(detected);
   }, []);
 
-  // Update parent when hours change
-  useEffect(() => {
-    onChange(hours);
-  }, [hours, onChange]);
+  // Note: onChange is only called in user event handlers to prevent infinite loops
 
   const updateHour = (weekday: string, field: keyof BusinessHour, value: any) => {
-    setHours(prev => prev.map(hour => 
-      hour.weekday === weekday 
-        ? { ...hour, [field]: value }
-        : hour
-    ));
+    setHours(prev => {
+      const next = prev.map(hour => 
+        hour.weekday === weekday 
+          ? { ...hour, [field]: value }
+          : hour
+      );
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
   };
 
   const addTimeRange = (weekday: string) => {
@@ -98,32 +99,48 @@ export function BusinessHoursConfig({ businessHours, onChange }: BusinessHoursCo
   const copyToAllDays = (weekday: string) => {
     const sourceHour = hours.find(h => h.weekday === weekday);
     if (sourceHour) {
-      setHours(prev => prev.map(hour => ({
-        ...hour,
-        startTime: sourceHour.startTime,
-        endTime: sourceHour.endTime,
-        enabled: sourceHour.enabled,
-        timezone: sourceHour.timezone,
-      })));
+      setHours(prev => {
+        const next = prev.map(hour => ({
+          ...hour,
+          startTime: sourceHour.startTime,
+          endTime: sourceHour.endTime,
+          enabled: sourceHour.enabled,
+          timezone: sourceHour.timezone,
+        }));
+        onChange(next); // Call onChange with computed next state
+        return next;
+      });
     }
   };
 
   const setCommonWorkingHours = () => {
-    setHours(prev => prev.map(hour => ({
-      ...hour,
-      startTime: '09:00',
-      endTime: '17:00',
-      enabled: hour.weekday !== 'saturday' && hour.weekday !== 'sunday',
-      timezone: userTimezone,
-    })));
+    setHours(prev => {
+      const next = prev.map(hour => ({
+        ...hour,
+        startTime: '09:00',
+        endTime: '17:00',
+        enabled: hour.weekday !== 'saturday' && hour.weekday !== 'sunday',
+        timezone: userTimezone,
+      }));
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
   };
 
   const enableAllDays = () => {
-    setHours(prev => prev.map(hour => ({ ...hour, enabled: true })));
+    setHours(prev => {
+      const next = prev.map(hour => ({ ...hour, enabled: true }));
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
   };
 
   const disableAllDays = () => {
-    setHours(prev => prev.map(hour => ({ ...hour, enabled: false })));
+    setHours(prev => {
+      const next = prev.map(hour => ({ ...hour, enabled: false }));
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
   };
 
   return (

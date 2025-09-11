@@ -97,10 +97,7 @@ export function RecurringSchedulesConfig({ recurringSchedules, onChange }: Recur
     description: '',
   });
 
-  // Update parent when recurring schedules change
-  useEffect(() => {
-    onChange(localRecurringSchedules);
-  }, [localRecurringSchedules, onChange]);
+  // Note: onChange is only called in user event handlers to prevent infinite loops
 
   const resetForm = () => {
     setFormData({
@@ -151,11 +148,15 @@ export function RecurringSchedulesConfig({ recurringSchedules, onChange }: Recur
 
     if (editingSchedule) {
       // Update existing schedule
-      setLocalRecurringSchedules(prev => prev.map(schedule => 
-        schedule.id === editingSchedule.id 
-          ? { ...schedule, ...scheduleData }
-          : schedule
-      ));
+      setLocalRecurringSchedules(prev => {
+        const next = prev.map(schedule => 
+          schedule.id === editingSchedule.id 
+            ? { ...schedule, ...scheduleData }
+            : schedule
+        );
+        onChange(next); // Call onChange with computed next state
+        return next;
+      });
       toast({
         title: "Schedule Updated",
         description: "The recurring schedule has been updated successfully.",
@@ -167,7 +168,11 @@ export function RecurringSchedulesConfig({ recurringSchedules, onChange }: Recur
         ...scheduleData,
       };
 
-      setLocalRecurringSchedules(prev => [...prev, newSchedule]);
+      setLocalRecurringSchedules(prev => {
+        const next = [...prev, newSchedule];
+        onChange(next); // Call onChange with computed next state
+        return next;
+      });
       toast({
         title: "Schedule Created",
         description: "The recurring schedule has been created successfully.",
@@ -179,7 +184,11 @@ export function RecurringSchedulesConfig({ recurringSchedules, onChange }: Recur
   };
 
   const handleDelete = (id: string) => {
-    setLocalRecurringSchedules(prev => prev.filter(schedule => schedule.id !== id));
+    setLocalRecurringSchedules(prev => {
+      const next = prev.filter(schedule => schedule.id !== id);
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
     toast({
       title: "Schedule Deleted",
       description: "The recurring schedule has been removed.",
@@ -192,7 +201,11 @@ export function RecurringSchedulesConfig({ recurringSchedules, onChange }: Recur
       id: Date.now().toString(),
       name: `${schedule.name} (Copy)`,
     };
-    setLocalRecurringSchedules(prev => [...prev, duplicatedSchedule]);
+    setLocalRecurringSchedules(prev => {
+      const next = [...prev, duplicatedSchedule];
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
     toast({
       title: "Schedule Duplicated",
       description: "The recurring schedule has been duplicated.",
@@ -208,7 +221,11 @@ export function RecurringSchedulesConfig({ recurringSchedules, onChange }: Recur
       endDate: addDays(new Date(), 365).toISOString(), // Default to 1 year
     };
 
-    setLocalRecurringSchedules(prev => [...prev, newSchedule]);
+    setLocalRecurringSchedules(prev => {
+      const next = [...prev, newSchedule];
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
     toast({
       title: "Template Applied",
       description: `Applied ${template.name} template to recurring schedules.`,

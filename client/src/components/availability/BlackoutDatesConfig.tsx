@@ -70,10 +70,7 @@ export function BlackoutDatesConfig({ blackoutDates, onChange }: BlackoutDatesCo
     endTime: '17:00',
   });
 
-  // Update parent when blackout dates change
-  useEffect(() => {
-    onChange(localBlackoutDates);
-  }, [localBlackoutDates, onChange]);
+  // Note: onChange is only called in user event handlers to prevent infinite loops
 
   const resetForm = () => {
     setFormData({
@@ -121,20 +118,24 @@ export function BlackoutDatesConfig({ blackoutDates, onChange }: BlackoutDatesCo
 
     if (editingBlackout) {
       // Update existing blackout
-      setLocalBlackoutDates(prev => prev.map(blackout => 
-        blackout.id === editingBlackout.id 
-          ? {
-              ...blackout,
-              title: formData.title,
-              description: formData.description,
-              type: formData.type,
-              isAllDay: formData.isAllDay,
-              isRecurring: formData.isRecurring,
-              startDate: selectedDates[0].toISOString(),
-              endDate: selectedDates[selectedDates.length - 1].toISOString(),
-            }
-          : blackout
-      ));
+      setLocalBlackoutDates(prev => {
+        const next = prev.map(blackout => 
+          blackout.id === editingBlackout.id 
+            ? {
+                ...blackout,
+                title: formData.title,
+                description: formData.description,
+                type: formData.type,
+                isAllDay: formData.isAllDay,
+                isRecurring: formData.isRecurring,
+                startDate: selectedDates[0].toISOString(),
+                endDate: selectedDates[selectedDates.length - 1].toISOString(),
+              }
+            : blackout
+        );
+        onChange(next); // Call onChange with computed next state
+        return next;
+      });
       toast({
         title: "Blackout Updated",
         description: "The blackout period has been updated successfully.",
@@ -171,7 +172,11 @@ export function BlackoutDatesConfig({ blackoutDates, onChange }: BlackoutDatesCo
         });
       }
 
-      setLocalBlackoutDates(prev => [...prev, ...newBlackouts]);
+      setLocalBlackoutDates(prev => {
+        const next = [...prev, ...newBlackouts];
+        onChange(next); // Call onChange with computed next state
+        return next;
+      });
       toast({
         title: "Blackout Created",
         description: `Created ${newBlackouts.length} blackout period${newBlackouts.length > 1 ? 's' : ''}.`,
@@ -183,7 +188,11 @@ export function BlackoutDatesConfig({ blackoutDates, onChange }: BlackoutDatesCo
   };
 
   const handleDelete = (id: string) => {
-    setLocalBlackoutDates(prev => prev.filter(blackout => blackout.id !== id));
+    setLocalBlackoutDates(prev => {
+      const next = prev.filter(blackout => blackout.id !== id);
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
     toast({
       title: "Blackout Deleted",
       description: "The blackout period has been removed.",
@@ -202,7 +211,11 @@ export function BlackoutDatesConfig({ blackoutDates, onChange }: BlackoutDatesCo
       endDate: holiday.date.toISOString(),
     }));
 
-    setLocalBlackoutDates(prev => [...prev, ...holidayBlackouts]);
+    setLocalBlackoutDates(prev => {
+      const next = [...prev, ...holidayBlackouts];
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
     toast({
       title: "Holidays Added",
       description: `Added ${holidayBlackouts.length} common US holidays.`,
@@ -210,7 +223,11 @@ export function BlackoutDatesConfig({ blackoutDates, onChange }: BlackoutDatesCo
   };
 
   const clearAllBlackouts = () => {
-    setLocalBlackoutDates([]);
+    setLocalBlackoutDates(() => {
+      const next = [];
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
     toast({
       title: "All Blackouts Cleared",
       description: "All blackout periods have been removed.",

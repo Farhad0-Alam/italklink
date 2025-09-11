@@ -58,21 +58,26 @@ export function BufferTimesConfig({ eventTypes, bufferTimes, onChange }: BufferT
     }
   }, [eventTypes, bufferTimes]);
 
-  // Update parent when buffer times change
-  useEffect(() => {
-    onChange(localBufferTimes);
-  }, [localBufferTimes, onChange]);
+  // Note: onChange is only called in user event handlers to prevent infinite loops
 
   const updateBufferTime = (eventTypeId: string, field: 'bufferTimeBefore' | 'bufferTimeAfter', value: number) => {
-    setLocalBufferTimes(prev => prev.map(bt => 
-      bt.eventTypeId === eventTypeId 
-        ? { ...bt, [field]: value }
-        : bt
-    ));
+    setLocalBufferTimes(prev => {
+      const next = prev.map(bt => 
+        bt.eventTypeId === eventTypeId 
+          ? { ...bt, [field]: value }
+          : bt
+      );
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
   };
 
   const setBufferForAll = (field: 'bufferTimeBefore' | 'bufferTimeAfter', value: number) => {
-    setLocalBufferTimes(prev => prev.map(bt => ({ ...bt, [field]: value })));
+    setLocalBufferTimes(prev => {
+      const next = prev.map(bt => ({ ...bt, [field]: value }));
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
     toast({
       title: "Buffer times updated",
       description: `Set ${field === 'bufferTimeBefore' ? 'before' : 'after'} buffer to ${value} minutes for all event types.`,
@@ -80,11 +85,15 @@ export function BufferTimesConfig({ eventTypes, bufferTimes, onChange }: BufferT
   };
 
   const resetToDefaults = () => {
-    setLocalBufferTimes(prev => prev.map(bt => ({
-      ...bt,
-      bufferTimeBefore: 0,
-      bufferTimeAfter: 0,
-    })));
+    setLocalBufferTimes(prev => {
+      const next = prev.map(bt => ({
+        ...bt,
+        bufferTimeBefore: 0,
+        bufferTimeAfter: 0,
+      }));
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
     toast({
       title: "Reset to defaults",
       description: "All buffer times have been reset to 0 minutes.",
@@ -92,28 +101,32 @@ export function BufferTimesConfig({ eventTypes, bufferTimes, onChange }: BufferT
   };
 
   const applyRecommendedBuffers = () => {
-    setLocalBufferTimes(prev => prev.map(bt => {
-      const eventType = eventTypes.find(et => et.id === bt.eventTypeId);
-      if (!eventType) return bt;
+    setLocalBufferTimes(prev => {
+      const next = prev.map(bt => {
+        const eventType = eventTypes.find(et => et.id === bt.eventTypeId);
+        if (!eventType) return bt;
 
-      // Recommended buffers based on appointment duration
-      let recommendedBefore = 5;
-      let recommendedAfter = 5;
+        // Recommended buffers based on appointment duration
+        let recommendedBefore = 5;
+        let recommendedAfter = 5;
 
-      if (eventType.duration >= 60) {
-        recommendedBefore = 15;
-        recommendedAfter = 10;
-      } else if (eventType.duration >= 30) {
-        recommendedBefore = 10;
-        recommendedAfter = 5;
-      }
+        if (eventType.duration >= 60) {
+          recommendedBefore = 15;
+          recommendedAfter = 10;
+        } else if (eventType.duration >= 30) {
+          recommendedBefore = 10;
+          recommendedAfter = 5;
+        }
 
-      return {
-        ...bt,
-        bufferTimeBefore: recommendedBefore,
-        bufferTimeAfter: recommendedAfter,
-      };
-    }));
+        return {
+          ...bt,
+          bufferTimeBefore: recommendedBefore,
+          bufferTimeAfter: recommendedAfter,
+        };
+      });
+      onChange(next); // Call onChange with computed next state
+      return next;
+    });
     toast({
       title: "Applied recommended buffers",
       description: "Buffer times have been set based on appointment durations.",
