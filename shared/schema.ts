@@ -1758,98 +1758,23 @@ export const appointmentEventTypes = pgTable("appointment_event_types", {
   // Basic event type info
   name: varchar("name").notNull(),
   description: text("description"),
-  slug: varchar("slug").notNull(), // URL-friendly identifier
-  type: appointmentTypeEnum("type").default('consultation'),
+  slug: varchar("slug").notNull(),
   
   // Scheduling settings
-  duration: integer("duration").notNull(), // in minutes
+  duration: integer("duration").notNull().default(30), // in minutes
+  price: integer("price").default(0), // in cents 
+  currency: varchar("currency").default('USD'),
+  meetingLocation: varchar("meeting_location"),
+  brandColor: varchar("brand_color").default('#3B82F6'),
+  instructionsBeforeEvent: text("instructions_before_event"),
+  instructionsAfterEvent: text("instructions_after_event"),
+  requiresConfirmation: boolean("requires_confirmation").default(false),
   bufferTimeBefore: integer("buffer_time_before").default(0), // in minutes
   bufferTimeAfter: integer("buffer_time_after").default(0), // in minutes
-  maxBookingsPerDay: integer("max_bookings_per_day"),
-  minNoticeTime: integer("min_notice_time").default(60), // in minutes
-  maxAdvanceTime: integer("max_advance_time").default(43200), // in minutes (30 days default)
-  
-  // Availability settings
-  availableWeekdays: jsonb("available_weekdays").default('["monday","tuesday","wednesday","thursday","friday"]'), // Array of weekdays
-  timeSlots: jsonb("time_slots").default('[]'), // Array of {start: "09:00", end: "17:00", weekday: "monday"}
-  timezone: varchar("timezone").default('UTC'),
-  
-  // Recurring appointments
-  allowRecurring: boolean("allow_recurring").default(false),
-  recurringPattern: recurringPatternEnum("recurring_pattern").default('none'),
-  recurringLimit: integer("recurring_limit"), // max occurrences
-  
-  // Team assignment
-  assignmentType: teamAssignmentEnum("assignment_type").default('any_available'),
-  assignedTeamMembers: jsonb("assigned_team_members").default('[]'), // Array of user IDs
-  
-  // Booking form settings
-  requireEmail: boolean("require_email").default(true),
-  requirePhone: boolean("require_phone").default(false),
-  requireCompany: boolean("require_company").default(false),
-  customFields: jsonb("custom_fields").default('[]'), // Array of custom form fields
-  /*
-  Example custom field:
-  {
-    id: "field-1",
-    type: "text|textarea|select|checkbox|radio",
-    label: "Company Size",
-    placeholder: "Enter company size",
-    required: true,
-    options: ["1-10", "11-50", "51-200", "200+"] // for select/radio
-  }
-  */
-  
-  // Payment settings
-  isPaid: boolean("is_paid").default(false),
-  price: integer("price"), // in cents
-  currency: varchar("currency").default('usd'),
-  paymentRequired: boolean("payment_required").default(false), // if false, payment optional
-  
-  // Integration settings
-  createCrmContact: boolean("create_crm_contact").default(true),
-  createCrmActivity: boolean("create_crm_activity").default(true),
-  crmPipelineId: varchar("crm_pipeline_id").references(() => crmPipelines.id),
-  crmStageId: varchar("crm_stage_id").references(() => crmStages.id),
-  autoCreateDeal: boolean("auto_create_deal").default(false),
-  dealValue: integer("deal_value"), // in cents
-  
-  // Notification settings
-  sendConfirmationEmail: boolean("send_confirmation_email").default(true),
-  sendReminderEmail: boolean("send_reminder_email").default(true),
-  reminderTimes: jsonb("reminder_times").default('[1440, 60]'), // minutes before appointment
-  confirmationEmailTemplate: text("confirmation_email_template"),
-  reminderEmailTemplate: text("reminder_email_template"),
-  
-  // Advanced settings
-  requireApproval: boolean("require_approval").default(false),
-  allowRescheduling: boolean("allow_rescheduling").default(true),
-  allowCancellation: boolean("allow_cancellation").default(true),
-  cancellationPolicy: text("cancellation_policy"),
-  redirectAfterBooking: varchar("redirect_after_booking"),
-  
-  // External calendar integration
-  calendarIntegrations: jsonb("calendar_integrations").default('[]'),
-  /*
-  Example integration:
-  {
-    provider: "google",
-    calendarId: "primary",
-    createEvent: true,
-    syncConflicts: true
-  }
-  */
-  
-  // Appearance settings
-  brandColor: varchar("brand_color").default('#22c55e'),
-  headerImage: text("header_image"),
-  welcomeMessage: text("welcome_message"),
-  thankYouMessage: text("thank_you_message"),
   
   // Status and metadata
   isActive: boolean("is_active").default(true),
-  isPublic: boolean("is_public").default(true),
-  bookingCount: integer("booking_count").default(0),
+  isPublic: boolean("is_public").default(false),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

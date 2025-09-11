@@ -28,6 +28,7 @@ import Help from "./pages/help";
 import Automation from "./pages/automation";
 import NotFound from "@/pages/not-found";
 import CRM from "./pages/crm";
+import BookingPage from "./pages/booking";
 import i18n from "./lib/i18n";
 
 function Router() {
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/automation" component={Automation} />
       <Route path="/crm" component={CRM} />
       <Route path="/help" component={Help} />
+      <Route path="/booking/:eventTypeSlug" component={BookingPage} />
       <Route path="/admin/templates/import" component={() => <Admin />} />
       <Route path="/admin/templates/builder" component={() => <Admin />} />
       <Route path="/admin/templates/header-builder" component={() => <Admin />} />

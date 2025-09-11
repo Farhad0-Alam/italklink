@@ -74,6 +74,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const affiliateRoutes = (await import('./affiliate-routes')).default;
   app.use('/api/affiliate', affiliateRoutes);
   
+  // Setup appointment routes
+  const { setupAppointmentRoutes } = await import('./appointment-routes');
+  setupAppointmentRoutes(app);
+  
   // Setup template collections routes
   app.use('/api/collections', requireAuth, templateCollectionsRoutes);
   

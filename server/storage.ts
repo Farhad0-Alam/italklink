@@ -2,7 +2,7 @@ import { db } from './db';
 import { 
   users, businessCards, teams, teamMembers, bulkGenerationJobs, subscriptionPlans, globalTemplates, walletPasses,
   crmContacts, crmActivities, crmTasks, crmPipelines, crmStages, crmDeals, crmSequences, emailTemplates,
-  automations, automationRuns,
+  automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -11,7 +11,8 @@ import {
   type CrmTask, type InsertCrmTask, type CrmPipeline, type InsertCrmPipeline,
   type CrmStage, type InsertCrmStage, type CrmDeal, type InsertCrmDeal,
   type CrmSequence, type InsertCrmSequence, type EmailTemplate, type InsertEmailTemplate,
-  type Automation, type InsertAutomation, type AutomationRun, type InsertAutomationRun
+  type Automation, type InsertAutomation, type AutomationRun, type InsertAutomationRun,
+  type AppointmentEventType, type InsertAppointmentEventType, type Appointment, type InsertAppointment
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -175,6 +176,13 @@ export interface IStorage {
     upcomingTasks: number;
     overdueTasks: number;
   }>;
+
+  // Appointment operations
+  getAppointmentEventType(id: string): Promise<any | undefined>;
+  getAppointmentEventTypeBySlug(slug: string): Promise<any | undefined>;
+  getAvailabilityForDate(eventTypeId: string, date: Date, timezone: string): Promise<Array<{time: string, available: boolean, utcTime: string}>>;
+  createAppointment(appointmentData: any): Promise<any>;
+  getAppointment(id: string): Promise<any | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1392,6 +1400,218 @@ export class DatabaseStorage implements IStorage {
       upcomingTasks: upcomingTasksResult.count || 0,
       overdueTasks: overdueTasksResult.count || 0
     };
+  }
+
+  // Appointment operations
+  async getAppointmentEventType(id: string): Promise<AppointmentEventType | undefined> {
+    const [eventType] = await db.select().from(appointmentEventTypes).where(eq(appointmentEventTypes.id, id));
+    return eventType;
+  }
+
+  async getAppointmentEventTypeBySlug(slug: string): Promise<AppointmentEventType | undefined> {
+    const [eventType] = await db.select().from(appointmentEventTypes).where(
+      and(
+        eq(appointmentEventTypes.slug, slug),
+        eq(appointmentEventTypes.isActive, true)
+      )
+    );
+    return eventType;
+  }
+
+  async getAvailabilityForDate(eventTypeId: string, date: Date, timezone: string): Promise<Array<{time: string, available: boolean, utcTime: string}>> {
+    const eventType = await this.getAppointmentEventType(eventTypeId);
+    if (!eventType) {
+      return [];
+    }
+
+    // Get event type owner's availability rules (default business hours if none exist)
+    const [availability] = await db
+      .select()
+      .from(teamMemberAvailability)
+      .where(and(
+        eq(teamMemberAvailability.userId, eventType.userId),
+        or(
+          eq(teamMemberAvailability.eventTypeId, eventTypeId),
+          sql`${teamMemberAvailability.eventTypeId} IS NULL` // Default availability
+        )
+      ))
+      .limit(1);
+
+    // Default business hours if no availability rules set
+    const defaultStartTime = '09:00';
+    const defaultEndTime = '17:00';
+    
+    // Use specific availability or defaults
+    const startTime = availability?.startTime || defaultStartTime;
+    const endTime = availability?.endTime || defaultEndTime;
+    
+    // Parse times
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    
+    // Calculate slot duration and intervals based on event type
+    const slotDuration = eventType.duration; // in minutes
+    const bufferBefore = eventType.bufferTimeBefore || 0;
+    const bufferAfter = eventType.bufferTimeAfter || 0;
+    const totalSlotTime = slotDuration + bufferBefore + bufferAfter;
+
+    // Get existing appointments for the date range with proper overlap checking
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const existingAppointments = await db
+      .select({
+        startTime: appointments.startTime,
+        endTime: appointments.endTime,
+        status: appointments.status
+      })
+      .from(appointments)
+      .where(and(
+        eq(appointments.eventTypeId, eventTypeId),
+        gte(appointments.startTime, startOfDay.toISOString()),
+        lte(appointments.startTime, endOfDay.toISOString()),
+        or(
+          eq(appointments.status, 'scheduled'),
+          eq(appointments.status, 'confirmed'),
+          eq(appointments.status, 'completed')
+        )
+      ));
+
+    // Get blackout dates for this date
+    const blackoutDates = await db
+      .select()
+      .from(blackoutDates)
+      .where(and(
+        eq(blackoutDates.userId, eventType.userId),
+        or(
+          eq(blackoutDates.eventTypeId, eventTypeId),
+          sql`${blackoutDates.eventTypeId} IS NULL`
+        ),
+        lte(blackoutDates.startDate, date.toISOString()),
+        gte(blackoutDates.endDate, date.toISOString())
+      ));
+
+    // Check if the entire day is blocked
+    const fullDayBlackout = blackoutDates.some(bd => bd.isAllDay);
+    if (fullDayBlackout) {
+      return [];
+    }
+
+    // Generate time slots
+    const slots = [];
+    const startTimeMinutes = startHour * 60 + startMinute;
+    const endTimeMinutes = endHour * 60 + endMinute;
+
+    // Create slots every `totalSlotTime` minutes
+    for (let currentMinutes = startTimeMinutes; currentMinutes + slotDuration <= endTimeMinutes; currentMinutes += totalSlotTime) {
+      const slotHour = Math.floor(currentMinutes / 60);
+      const slotMinute = currentMinutes % 60;
+      
+      // Create the slot start time in the user's requested timezone
+      const slotStartDate = new Date(date);
+      slotStartDate.setHours(slotHour, slotMinute, 0, 0);
+      
+      // Convert to UTC for storage and comparison
+      const utcSlotStart = this.convertToUTC(slotStartDate, timezone);
+      const utcSlotEnd = new Date(utcSlotStart.getTime() + slotDuration * 60000);
+      
+      // Check for conflicts with existing appointments (proper overlap logic)
+      const hasConflict = existingAppointments.some(apt => {
+        const aptStart = new Date(apt.startTime);
+        const aptEnd = new Date(apt.endTime);
+        
+        // Add buffers to check for conflicts
+        const slotWithBufferStart = new Date(utcSlotStart.getTime() - bufferBefore * 60000);
+        const slotWithBufferEnd = new Date(utcSlotEnd.getTime() + bufferAfter * 60000);
+        
+        // Proper overlap detection: slots overlap if start < apt.end && end > apt.start
+        return slotWithBufferStart < aptEnd && slotWithBufferEnd > aptStart;
+      });
+      
+      // Check for blackout time conflicts
+      const hasBlackoutConflict = blackoutDates.some(bd => {
+        if (bd.isAllDay) return true;
+        
+        if (bd.startTime && bd.endTime) {
+          const [blackoutStartHour, blackoutStartMin] = bd.startTime.split(':').map(Number);
+          const [blackoutEndHour, blackoutEndMin] = bd.endTime.split(':').map(Number);
+          
+          const blackoutStartMinutes = blackoutStartHour * 60 + blackoutStartMin;
+          const blackoutEndMinutes = blackoutEndHour * 60 + blackoutEndMin;
+          
+          const slotStartMinutes = slotHour * 60 + slotMinute;
+          const slotEndMinutes = slotStartMinutes + slotDuration;
+          
+          // Check overlap
+          return slotStartMinutes < blackoutEndMinutes && slotEndMinutes > blackoutStartMinutes;
+        }
+        
+        return false;
+      });
+      
+      // Format time for display in user's timezone
+      const displayTime = `${slotHour.toString().padStart(2, '0')}:${slotMinute.toString().padStart(2, '0')}`;
+      
+      slots.push({
+        time: displayTime,
+        available: !hasConflict && !hasBlackoutConflict,
+        utcTime: utcSlotStart.toISOString(),
+      });
+    }
+
+    return slots;
+  }
+
+  // Helper method to convert local time to UTC based on timezone
+  private convertToUTC(date: Date, timezone: string): Date {
+    // Create a date formatter for the specific timezone
+    const localTime = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).formatToParts(date);
+    
+    // Reconstruct the date in the specified timezone
+    const year = parseInt(localTime.find(part => part.type === 'year')?.value || '0');
+    const month = parseInt(localTime.find(part => part.type === 'month')?.value || '1') - 1;
+    const day = parseInt(localTime.find(part => part.type === 'day')?.value || '1');
+    const hour = parseInt(localTime.find(part => part.type === 'hour')?.value || '0');
+    const minute = parseInt(localTime.find(part => part.type === 'minute')?.value || '0');
+    const second = parseInt(localTime.find(part => part.type === 'second')?.value || '0');
+    
+    // Create a new date with the timezone-adjusted values
+    const adjustedDate = new Date(year, month, day, hour, minute, second);
+    
+    // Calculate the timezone offset difference and adjust
+    const originalOffset = date.getTimezoneOffset();
+    const targetOffset = this.getTimezoneOffset(timezone, date);
+    const offsetDifference = (originalOffset - targetOffset) * 60000;
+    
+    return new Date(adjustedDate.getTime() + offsetDifference);
+  }
+  
+  // Helper to get timezone offset for a specific timezone
+  private getTimezoneOffset(timezone: string, date: Date): number {
+    const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+    const targetDate = new Date(utcDate.toLocaleString('en-US', { timeZone: timezone }));
+    return (utcDate.getTime() - targetDate.getTime()) / 60000;
+  }
+
+  async createAppointment(appointmentData: any): Promise<Appointment> {
+    const [appointment] = await db.insert(appointments).values(appointmentData).returning();
+    return appointment;
+  }
+
+  async getAppointment(id: string): Promise<Appointment | undefined> {
+    const [appointment] = await db.select().from(appointments).where(eq(appointments.id, id));
+    return appointment;
   }
 }
 
