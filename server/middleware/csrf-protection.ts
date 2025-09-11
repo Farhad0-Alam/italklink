@@ -180,8 +180,8 @@ export const enhancedCORS = (req: Request, res: Response, next: NextFunction) =>
   }
   
   // Set CORS headers
-  if (origin && allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+  if (isAllowedOrigin || !origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
   }
   
   res.setHeader('Access-Control-Allow-Credentials', 'true');

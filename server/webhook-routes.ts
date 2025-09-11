@@ -77,6 +77,9 @@ export class CalendarSyncWorker {
   }
 
   private async performSync() {
+    console.log('Calendar sync temporarily disabled due to schema sync');
+    return; // Temporarily disabled to prevent crashes
+    
     console.log('Performing calendar sync...');
     
     // Get all active calendar connections
