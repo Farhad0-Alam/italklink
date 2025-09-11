@@ -1424,12 +1424,17 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
 
-    // Get event type owner's availability rules (default business hours if none exist)
+    // Get event type owner's availability rules for this specific weekday
+    const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const requestedWeekday = weekdays[date.getDay()];
+    
     const [availability] = await db
       .select()
       .from(teamMemberAvailability)
       .where(and(
         eq(teamMemberAvailability.userId, eventType.userId),
+        eq(teamMemberAvailability.weekday, requestedWeekday as any),
+        eq(teamMemberAvailability.type, 'available'),
         or(
           eq(teamMemberAvailability.eventTypeId, eventTypeId),
           sql`${teamMemberAvailability.eventTypeId} IS NULL` // Default availability
@@ -1480,7 +1485,8 @@ export class DatabaseStorage implements IStorage {
       ));
 
     // Get blackout dates for this date
-    const blackoutDates = await db
+    
+    const blackoutDatesResult = await db
       .select()
       .from(blackoutDates)
       .where(and(
@@ -1489,12 +1495,11 @@ export class DatabaseStorage implements IStorage {
           eq(blackoutDates.eventTypeId, eventTypeId),
           sql`${blackoutDates.eventTypeId} IS NULL`
         ),
-        lte(blackoutDates.startDate, date.toISOString()),
-        gte(blackoutDates.endDate, date.toISOString())
+        sql`${blackoutDates.startDate} <= ${endOfDay.toISOString()} AND ${blackoutDates.endDate} >= ${startOfDay.toISOString()}`
       ));
 
     // Check if the entire day is blocked
-    const fullDayBlackout = blackoutDates.some(bd => bd.isAllDay);
+    const fullDayBlackout = blackoutDatesResult.some(bd => bd.isAllDay);
     if (fullDayBlackout) {
       return [];
     }
@@ -1531,7 +1536,7 @@ export class DatabaseStorage implements IStorage {
       });
       
       // Check for blackout time conflicts
-      const hasBlackoutConflict = blackoutDates.some(bd => {
+      const hasBlackoutConflict = blackoutDatesResult.some(bd => {
         if (bd.isAllDay) return true;
         
         if (bd.startTime && bd.endTime) {

@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap } from "lucide-react";
+import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -243,6 +243,10 @@ export default function Dashboard() {
                 <Link href="/crm" className="text-gray-500 hover:text-gray-700 flex items-center space-x-1" data-testid="link-crm">
                   <Users className="w-4 h-4" />
                   <span>CRM</span>
+                </Link>
+                <Link href="/availability" className="text-gray-500 hover:text-gray-700 flex items-center space-x-1" data-testid="link-availability">
+                  <CalendarDays className="w-4 h-4" />
+                  <span>Availability</span>
                 </Link>
                 <Link href="/affiliate" className="text-gray-500 hover:text-gray-700">
                   Affiliate

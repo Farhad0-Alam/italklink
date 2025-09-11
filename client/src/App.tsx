@@ -26,6 +26,7 @@ import Billing from "./pages/billing";
 import Usage from "./pages/usage";
 import Help from "./pages/help";
 import Automation from "./pages/automation";
+import Availability from "./pages/availability";
 import NotFound from "@/pages/not-found";
 import CRM from "./pages/crm";
 import BookingPage from "./pages/booking";
@@ -56,6 +57,7 @@ function Router() {
       <Route path="/billing" component={Billing} />
       <Route path="/usage" component={Usage} />
       <Route path="/automation" component={Automation} />
+      <Route path="/availability" component={Availability} />
       <Route path="/crm" component={CRM} />
       <Route path="/help" component={Help} />
       <Route path="/booking/:eventTypeSlug" component={BookingPage} />
