@@ -54,6 +54,19 @@ export const taskTypeEnum = pgEnum('task_type', ['call', 'email', 'follow_up', '
 export const taskStatusEnum = pgEnum('task_status', ['open', 'in_progress', 'done', 'cancelled']);
 export const dealStatusEnum = pgEnum('deal_status', ['open', 'won', 'lost', 'abandoned']);
 
+// Appointment booking system enums
+export const appointmentStatusEnum = pgEnum('appointment_status', ['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show', 'rescheduled']);
+export const appointmentTypeEnum = pgEnum('appointment_type', ['consultation', 'demo', 'meeting', 'interview', 'sales_call', 'support', 'onboarding', 'training', 'custom']);
+export const recurringPatternEnum = pgEnum('recurring_pattern', ['none', 'daily', 'weekly', 'monthly', 'yearly']);
+export const notificationMethodEnum = pgEnum('notification_method', ['email', 'sms', 'push', 'webhook']);
+export const notificationTriggerEnum = pgEnum('notification_trigger', ['booking_confirmed', 'reminder_24h', 'reminder_1h', 'appointment_start', 'appointment_cancelled', 'appointment_rescheduled', 'follow_up']);
+export const availabilityTypeEnum = pgEnum('availability_type', ['available', 'busy', 'tentative', 'out_of_office']);
+export const teamAssignmentEnum = pgEnum('team_assignment', ['round_robin', 'specific_member', 'any_available', 'most_available']);
+export const calendarProviderEnum = pgEnum('calendar_provider', ['google', 'outlook', 'apple', 'ical', 'caldav']);
+export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'paid', 'failed', 'refunded', 'partially_refunded']);
+export const bufferTimeTypeEnum = pgEnum('buffer_time_type', ['before', 'after', 'both']);
+export const weekdayEnum = pgEnum('weekday', ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']);
+
 // Database Tables
 
 // Session storage table
@@ -1098,6 +1111,7 @@ export const insertCounterDailySchema = createInsertSchema(countersDaily);
 export const insertCouponSchema = createInsertSchema(coupons);
 export const insertCouponUsageSchema = createInsertSchema(couponUsages);
 
+
 // Team invitation schema
 export const teamInvitationSchema = z.object({
   email: z.string().email('Valid email required'),
@@ -1145,6 +1159,194 @@ export const addTemplateToCollectionSchema = z.object({
 export type CreateTemplateCollection = z.infer<typeof createTemplateCollectionSchema>;
 export type UpdateTemplateCollection = z.infer<typeof updateTemplateCollectionSchema>;
 export type AddTemplateToCollection = z.infer<typeof addTemplateToCollectionSchema>;
+
+// ===== APPOINTMENT BOOKING VALIDATION SCHEMAS =====
+
+// Event Type Creation/Update Schema
+export const createEventTypeSchema = z.object({
+  name: z.string().min(1, 'Event type name is required').max(100, 'Name too long'),
+  description: z.string().max(500, 'Description too long').optional(),
+  slug: z.string().min(1, 'URL slug is required').max(50, 'Slug too long').regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'),
+  type: z.enum(['consultation', 'demo', 'meeting', 'interview', 'sales_call', 'support', 'onboarding', 'training', 'custom']).default('consultation'),
+  duration: z.number().min(15, 'Minimum duration is 15 minutes').max(480, 'Maximum duration is 8 hours'),
+  bufferTimeBefore: z.number().min(0).max(120).default(0),
+  bufferTimeAfter: z.number().min(0).max(120).default(0),
+  maxBookingsPerDay: z.number().min(1).max(50).optional(),
+  minNoticeTime: z.number().min(0).default(60), // minutes
+  maxAdvanceTime: z.number().min(1440).default(43200), // minutes (at least 1 day, max 30 days)
+  availableWeekdays: z.array(z.enum(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])).min(1, 'At least one weekday required'),
+  timeSlots: z.array(z.object({
+    weekday: z.enum(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']),
+    start: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
+    end: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)')
+  })).default([]),
+  timezone: z.string().default('UTC'),
+  requireEmail: z.boolean().default(true),
+  requirePhone: z.boolean().default(false),
+  requireCompany: z.boolean().default(false),
+  isPaid: z.boolean().default(false),
+  price: z.number().min(0).optional(), // in cents
+  currency: z.string().length(3).default('usd'),
+  crmPipelineId: z.string().uuid().optional(),
+  crmStageId: z.string().uuid().optional(),
+  autoCreateDeal: z.boolean().default(false),
+  dealValue: z.number().min(0).optional(), // in cents
+  brandColor: z.string().regex(/^#[0-9A-F]{6}$/i, 'Invalid hex color').default('#22c55e'),
+  welcomeMessage: z.string().max(1000).optional(),
+  thankYouMessage: z.string().max(1000).optional(),
+  isActive: z.boolean().default(true),
+  isPublic: z.boolean().default(true),
+});
+
+export const updateEventTypeSchema = createEventTypeSchema.partial();
+
+// Appointment Booking Schema  
+export const bookAppointmentSchema = z.object({
+  eventTypeId: z.string().uuid('Valid event type required'),
+  startTime: z.string().datetime('Valid start time required'),
+  attendeeName: z.string().min(1, 'Attendee name is required').max(100, 'Name too long'),
+  attendeeEmail: z.string().email('Valid email address required'),
+  attendeePhone: z.string().max(20).optional(),
+  attendeeCompany: z.string().max(100).optional(),
+  attendeeTimezone: z.string().optional(),
+  description: z.string().max(1000).optional(),
+  customFormData: z.record(z.any()).default({}),
+  utmParams: z.object({
+    source: z.string().optional(),
+    medium: z.string().optional(),
+    campaign: z.string().optional(),
+    term: z.string().optional(),
+    content: z.string().optional(),
+  }).optional(),
+  referrer: z.string().optional(),
+  location: z.string().max(500).optional(),
+  meetingUrl: z.string().url().optional(),
+});
+
+// Appointment Reschedule Schema
+export const rescheduleAppointmentSchema = z.object({
+  newStartTime: z.string().datetime('Valid start time required'),
+  reason: z.string().max(500).optional(),
+  notifyAttendee: z.boolean().default(true),
+});
+
+// Appointment Cancellation Schema
+export const cancelAppointmentSchema = z.object({
+  reason: z.string().max(500).optional(),
+  cancelledBy: z.enum(['attendee', 'host', 'system']),
+  notifyAttendee: z.boolean().default(true),
+  refundPayment: z.boolean().default(false),
+});
+
+// Availability Schedule Schema
+export const createAvailabilitySchema = z.object({
+  eventTypeId: z.string().uuid().optional(),
+  weekday: z.enum(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']),
+  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
+  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
+  timezone: z.string().default('UTC'),
+  type: z.enum(['available', 'busy', 'tentative', 'out_of_office']).default('available'),
+  effectiveFrom: z.string().datetime().optional(),
+  effectiveTo: z.string().datetime().optional(),
+  isOverride: z.boolean().default(false),
+  overrideDate: z.string().datetime().optional(),
+});
+
+// Blackout Date Schema
+export const createBlackoutDateSchema = z.object({
+  eventTypeId: z.string().uuid().optional(),
+  startDate: z.string().datetime('Valid start date required'),
+  endDate: z.string().datetime('Valid end date required'),
+  isAllDay: z.boolean().default(true),
+  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
+  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
+  title: z.string().min(1, 'Title is required').max(100),
+  description: z.string().max(500).optional(),
+  type: z.string().default('time_off'),
+  isRecurring: z.boolean().default(false),
+  recurringPattern: z.enum(['none', 'daily', 'weekly', 'monthly', 'yearly']).default('none'),
+  recurringEndDate: z.string().datetime().optional(),
+});
+
+// Calendar Integration Schema
+export const createCalendarIntegrationSchema = z.object({
+  provider: z.enum(['google', 'outlook', 'apple', 'ical', 'caldav']),
+  calendarId: z.string().min(1, 'Calendar ID is required'),
+  calendarName: z.string().max(100).optional(),
+  syncConflicts: z.boolean().default(true),
+  createEvents: z.boolean().default(true),
+  updateEvents: z.boolean().default(true),
+  deleteEvents: z.boolean().default(false),
+  isPrimary: z.boolean().default(false),
+});
+
+// Booking Form Template Schema
+export const createBookingFormSchema = z.object({
+  name: z.string().min(1, 'Form name is required').max(100),
+  description: z.string().max(500).optional(),
+  fields: z.array(z.object({
+    id: z.string(),
+    type: z.enum(['text', 'textarea', 'select', 'checkbox', 'radio', 'email', 'phone', 'url', 'number']),
+    label: z.string().min(1, 'Field label is required'),
+    placeholder: z.string().optional(),
+    required: z.boolean().default(false),
+    options: z.array(z.object({
+      value: z.string(),
+      label: z.string()
+    })).optional(),
+    validation: z.object({
+      minLength: z.number().optional(),
+      maxLength: z.number().optional(),
+      pattern: z.string().optional(),
+      min: z.number().optional(),
+      max: z.number().optional(),
+    }).optional(),
+  })).default([]),
+  theme: z.object({
+    primaryColor: z.string().regex(/^#[0-9A-F]{6}$/i).default('#22c55e'),
+    backgroundColor: z.string().regex(/^#[0-9A-F]{6}$/i).default('#ffffff'),
+    textColor: z.string().regex(/^#[0-9A-F]{6}$/i).default('#374151'),
+    borderRadius: z.number().min(0).max(50).default(8),
+    fontFamily: z.string().default('Inter'),
+  }).default({}),
+});
+
+// Appointment Filter/Search Schema
+export const appointmentFiltersSchema = z.object({
+  status: z.array(z.enum(['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show', 'rescheduled'])).optional(),
+  eventTypeId: z.string().uuid().optional(),
+  attendeeEmail: z.string().email().optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+  assignedUserId: z.string().uuid().optional(),
+  crmContactId: z.string().uuid().optional(),
+  page: z.number().min(1).default(1),
+  limit: z.number().min(1).max(100).default(20),
+  sortBy: z.enum(['startTime', 'createdAt', 'status', 'attendeeName']).default('startTime'),
+  sortOrder: z.enum(['asc', 'desc']).default('asc'),
+});
+
+// Appointment Analytics Query Schema
+export const appointmentAnalyticsSchema = z.object({
+  eventTypeId: z.string().uuid().optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+  granularity: z.enum(['day', 'week', 'month']).default('day'),
+  metrics: z.array(z.enum(['bookings', 'revenue', 'conversion_rate', 'cancellation_rate', 'no_show_rate'])).default(['bookings']),
+});
+
+// Type exports for the custom schemas
+export type CreateEventType = z.infer<typeof createEventTypeSchema>;
+export type UpdateEventType = z.infer<typeof updateEventTypeSchema>;
+export type BookAppointment = z.infer<typeof bookAppointmentSchema>;
+export type RescheduleAppointment = z.infer<typeof rescheduleAppointmentSchema>;
+export type CancelAppointment = z.infer<typeof cancelAppointmentSchema>;
+export type CreateAvailability = z.infer<typeof createAvailabilitySchema>;
+export type CreateBlackoutDate = z.infer<typeof createBlackoutDateSchema>;
+export type CreateCalendarIntegration = z.infer<typeof createCalendarIntegrationSchema>;
+export type CreateBookingForm = z.infer<typeof createBookingFormSchema>;
+export type AppointmentFilters = z.infer<typeof appointmentFiltersSchema>;
+export type AppointmentAnalyticsQuery = z.infer<typeof appointmentAnalyticsSchema>;
 
 // Knowledge base documents table (vector column handled via raw SQL)
 export const kbDocs = pgTable("kb_docs", {
@@ -1546,6 +1748,529 @@ export const emailTemplates = pgTable("email_templates", {
   index("idx_email_templates_category").on(table.category),
 ]);
 
+// ===== APPOINTMENT BOOKING SYSTEM =====
+
+// Event Types table (appointment types configuration)
+export const appointmentEventTypes = pgTable("appointment_event_types", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Basic event type info
+  name: varchar("name").notNull(),
+  description: text("description"),
+  slug: varchar("slug").notNull(), // URL-friendly identifier
+  type: appointmentTypeEnum("type").default('consultation'),
+  
+  // Scheduling settings
+  duration: integer("duration").notNull(), // in minutes
+  bufferTimeBefore: integer("buffer_time_before").default(0), // in minutes
+  bufferTimeAfter: integer("buffer_time_after").default(0), // in minutes
+  maxBookingsPerDay: integer("max_bookings_per_day"),
+  minNoticeTime: integer("min_notice_time").default(60), // in minutes
+  maxAdvanceTime: integer("max_advance_time").default(43200), // in minutes (30 days default)
+  
+  // Availability settings
+  availableWeekdays: jsonb("available_weekdays").default('["monday","tuesday","wednesday","thursday","friday"]'), // Array of weekdays
+  timeSlots: jsonb("time_slots").default('[]'), // Array of {start: "09:00", end: "17:00", weekday: "monday"}
+  timezone: varchar("timezone").default('UTC'),
+  
+  // Recurring appointments
+  allowRecurring: boolean("allow_recurring").default(false),
+  recurringPattern: recurringPatternEnum("recurring_pattern").default('none'),
+  recurringLimit: integer("recurring_limit"), // max occurrences
+  
+  // Team assignment
+  assignmentType: teamAssignmentEnum("assignment_type").default('any_available'),
+  assignedTeamMembers: jsonb("assigned_team_members").default('[]'), // Array of user IDs
+  
+  // Booking form settings
+  requireEmail: boolean("require_email").default(true),
+  requirePhone: boolean("require_phone").default(false),
+  requireCompany: boolean("require_company").default(false),
+  customFields: jsonb("custom_fields").default('[]'), // Array of custom form fields
+  /*
+  Example custom field:
+  {
+    id: "field-1",
+    type: "text|textarea|select|checkbox|radio",
+    label: "Company Size",
+    placeholder: "Enter company size",
+    required: true,
+    options: ["1-10", "11-50", "51-200", "200+"] // for select/radio
+  }
+  */
+  
+  // Payment settings
+  isPaid: boolean("is_paid").default(false),
+  price: integer("price"), // in cents
+  currency: varchar("currency").default('usd'),
+  paymentRequired: boolean("payment_required").default(false), // if false, payment optional
+  
+  // Integration settings
+  createCrmContact: boolean("create_crm_contact").default(true),
+  createCrmActivity: boolean("create_crm_activity").default(true),
+  crmPipelineId: varchar("crm_pipeline_id").references(() => crmPipelines.id),
+  crmStageId: varchar("crm_stage_id").references(() => crmStages.id),
+  autoCreateDeal: boolean("auto_create_deal").default(false),
+  dealValue: integer("deal_value"), // in cents
+  
+  // Notification settings
+  sendConfirmationEmail: boolean("send_confirmation_email").default(true),
+  sendReminderEmail: boolean("send_reminder_email").default(true),
+  reminderTimes: jsonb("reminder_times").default('[1440, 60]'), // minutes before appointment
+  confirmationEmailTemplate: text("confirmation_email_template"),
+  reminderEmailTemplate: text("reminder_email_template"),
+  
+  // Advanced settings
+  requireApproval: boolean("require_approval").default(false),
+  allowRescheduling: boolean("allow_rescheduling").default(true),
+  allowCancellation: boolean("allow_cancellation").default(true),
+  cancellationPolicy: text("cancellation_policy"),
+  redirectAfterBooking: varchar("redirect_after_booking"),
+  
+  // External calendar integration
+  calendarIntegrations: jsonb("calendar_integrations").default('[]'),
+  /*
+  Example integration:
+  {
+    provider: "google",
+    calendarId: "primary",
+    createEvent: true,
+    syncConflicts: true
+  }
+  */
+  
+  // Appearance settings
+  brandColor: varchar("brand_color").default('#22c55e'),
+  headerImage: text("header_image"),
+  welcomeMessage: text("welcome_message"),
+  thankYouMessage: text("thank_you_message"),
+  
+  // Status and metadata
+  isActive: boolean("is_active").default(true),
+  isPublic: boolean("is_public").default(true),
+  bookingCount: integer("booking_count").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_event_types_user").on(table.userId),
+  index("idx_event_types_slug").on(table.slug),
+  index("idx_event_types_active").on(table.isActive),
+  index("idx_event_types_public").on(table.isPublic),
+]);
+
+// Team member availability schedules
+export const teamMemberAvailability = pgTable("team_member_availability", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  eventTypeId: varchar("event_type_id").references(() => appointmentEventTypes.id, { onDelete: 'cascade' }),
+  
+  // Day-specific availability
+  weekday: weekdayEnum("weekday").notNull(),
+  startTime: varchar("start_time").notNull(), // HH:MM format
+  endTime: varchar("end_time").notNull(), // HH:MM format
+  timezone: varchar("timezone").default('UTC'),
+  
+  // Availability type
+  type: availabilityTypeEnum("type").default('available'),
+  
+  // Date range (optional - for temporary overrides)
+  effectiveFrom: timestamp("effective_from"),
+  effectiveTo: timestamp("effective_to"),
+  
+  // Override settings
+  isOverride: boolean("is_override").default(false), // true for temporary changes
+  overrideDate: timestamp("override_date"), // specific date override
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_availability_user").on(table.userId),
+  index("idx_availability_event_type").on(table.eventTypeId),
+  index("idx_availability_weekday").on(table.weekday),
+  index("idx_availability_date").on(table.overrideDate),
+]);
+
+// Blackout dates and time-off
+export const blackoutDates = pgTable("blackout_dates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  eventTypeId: varchar("event_type_id").references(() => appointmentEventTypes.id, { onDelete: 'cascade' }),
+  
+  // Date range
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  isAllDay: boolean("is_all_day").default(true),
+  
+  // Time-specific blackout (if not all day)
+  startTime: varchar("start_time"), // HH:MM format
+  endTime: varchar("end_time"), // HH:MM format
+  
+  // Blackout details
+  title: varchar("title").notNull(),
+  description: text("description"),
+  type: varchar("type").default('time_off'), // 'time_off', 'holiday', 'meeting', 'personal'
+  
+  // Recurring blackouts
+  isRecurring: boolean("is_recurring").default(false),
+  recurringPattern: recurringPatternEnum("recurring_pattern").default('none'),
+  recurringEndDate: timestamp("recurring_end_date"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_blackout_user").on(table.userId),
+  index("idx_blackout_event_type").on(table.eventTypeId),
+  index("idx_blackout_dates").on(table.startDate, table.endDate),
+]);
+
+// Main appointments table
+export const appointments = pgTable("appointments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventTypeId: varchar("event_type_id").references(() => appointmentEventTypes.id, { onDelete: 'cascade' }).notNull(),
+  hostUserId: varchar("host_user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  assignedUserId: varchar("assigned_user_id").references(() => users.id, { onDelete: 'set null' }),
+  
+  // CRM Integration
+  crmContactId: varchar("crm_contact_id").references(() => crmContacts.id, { onDelete: 'set null' }),
+  crmDealId: varchar("crm_deal_id").references(() => crmDeals.id, { onDelete: 'set null' }),
+  
+  // Appointment timing
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  timezone: varchar("timezone").notNull(),
+  duration: integer("duration").notNull(), // in minutes
+  
+  // Attendee information
+  attendeeName: varchar("attendee_name").notNull(),
+  attendeeEmail: varchar("attendee_email").notNull(),
+  attendeePhone: varchar("attendee_phone"),
+  attendeeCompany: varchar("attendee_company"),
+  attendeeTimezone: varchar("attendee_timezone"),
+  
+  // Custom form responses
+  customFormData: jsonb("custom_form_data").default('{}'),
+  /*
+  Example:
+  {
+    "company_size": "11-50",
+    "budget_range": "$10k-$50k",
+    "specific_needs": "Looking for CRM integration"
+  }
+  */
+  
+  // Appointment details
+  title: varchar("title").notNull(),
+  description: text("description"),
+  location: text("location"), // meeting room, video link, address
+  meetingUrl: text("meeting_url"), // Zoom, Google Meet, etc.
+  meetingPassword: varchar("meeting_password"),
+  
+  // Status and tracking
+  status: appointmentStatusEnum("status").default('scheduled'),
+  confirmationToken: varchar("confirmation_token").unique(),
+  rescheduleToken: varchar("reschedule_token").unique(),
+  cancellationToken: varchar("cancellation_token").unique(),
+  
+  // Booking metadata
+  bookingSource: varchar("booking_source").default('direct'), // 'direct', 'embedded', 'api'
+  referrer: text("referrer"),
+  utmParams: jsonb("utm_params").default('{}'),
+  userAgent: text("user_agent"),
+  ipAddress: varchar("ip_address"),
+  
+  // Rescheduling history
+  isRescheduled: boolean("is_rescheduled").default(false),
+  originalAppointmentId: varchar("original_appointment_id").references(() => appointments.id),
+  rescheduleReason: text("reschedule_reason"),
+  rescheduleCount: integer("reschedule_count").default(0),
+  
+  // Cancellation details
+  cancellationReason: text("cancellation_reason"),
+  cancelledBy: varchar("cancelled_by"), // 'attendee', 'host', 'system'
+  cancelledAt: timestamp("cancelled_at"),
+  
+  // No-show tracking
+  noShowReason: text("no_show_reason"),
+  markedNoShowAt: timestamp("marked_no_show_at"),
+  markedNoShowBy: varchar("marked_no_show_by").references(() => users.id),
+  
+  // Follow-up and notes
+  hostNotes: text("host_notes"),
+  attendeeNotes: text("attendee_notes"),
+  internalNotes: text("internal_notes"),
+  followUpRequired: boolean("follow_up_required").default(false),
+  followUpCompleted: boolean("follow_up_completed").default(false),
+  
+  // Recurring appointment details
+  recurringGroupId: varchar("recurring_group_id"), // groups related recurring appointments
+  isRecurring: boolean("is_recurring").default(false),
+  recurringPattern: recurringPatternEnum("recurring_pattern").default('none'),
+  recurringEndDate: timestamp("recurring_end_date"),
+  recurringIndex: integer("recurring_index"), // 1st, 2nd, 3rd occurrence
+  
+  // External calendar integration
+  externalCalendarEventIds: jsonb("external_calendar_event_ids").default('{}'),
+  /*
+  Example:
+  {
+    "google": "event_id_123",
+    "outlook": "event_id_456"
+  }
+  */
+  
+  // Automation and webhooks
+  automationsTriggered: jsonb("automations_triggered").default('[]'), // Array of automation IDs
+  webhooksSent: jsonb("webhooks_sent").default('[]'), // Array of webhook delivery IDs
+  
+  // Analytics and scoring
+  leadScore: integer("lead_score").default(0),
+  leadPriority: leadPriorityEnum("lead_priority").default('medium'),
+  conversionValue: integer("conversion_value"), // estimated value in cents
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_appointments_event_type").on(table.eventTypeId),
+  index("idx_appointments_host").on(table.hostUserId),
+  index("idx_appointments_assigned").on(table.assignedUserId),
+  index("idx_appointments_contact").on(table.crmContactId),
+  index("idx_appointments_deal").on(table.crmDealId),
+  index("idx_appointments_start_time").on(table.startTime),
+  index("idx_appointments_status").on(table.status),
+  index("idx_appointments_attendee_email").on(table.attendeeEmail),
+  index("idx_appointments_recurring_group").on(table.recurringGroupId),
+  index("idx_appointments_created_at").on(table.createdAt),
+]);
+
+// Appointment notifications and reminders
+export const appointmentNotifications = pgTable("appointment_notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  appointmentId: varchar("appointment_id").references(() => appointments.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Notification details
+  type: notificationTriggerEnum("type").notNull(),
+  method: notificationMethodEnum("method").notNull(),
+  recipient: varchar("recipient").notNull(), // email or phone number
+  
+  // Timing
+  scheduledFor: timestamp("scheduled_for").notNull(),
+  sentAt: timestamp("sent_at"),
+  
+  // Content
+  subject: varchar("subject"),
+  message: text("message"),
+  templateId: varchar("template_id").references(() => emailTemplates.id),
+  
+  // Delivery tracking
+  status: eventStatusEnum("status").default('pending'),
+  deliveryAttempts: integer("delivery_attempts").default(0),
+  lastAttemptAt: timestamp("last_attempt_at"),
+  errorMessage: text("error_message"),
+  
+  // External service tracking
+  externalId: varchar("external_id"), // Sendgrid, Twilio, etc.
+  webhookData: jsonb("webhook_data"), // delivery confirmation data
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_notifications_appointment").on(table.appointmentId),
+  index("idx_notifications_scheduled").on(table.scheduledFor),
+  index("idx_notifications_status").on(table.status),
+  index("idx_notifications_type").on(table.type),
+]);
+
+// Appointment payments
+export const appointmentPayments = pgTable("appointment_payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  appointmentId: varchar("appointment_id").references(() => appointments.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Payment details
+  amount: integer("amount").notNull(), // in cents
+  currency: varchar("currency").default('usd'),
+  status: paymentStatusEnum("status").default('pending'),
+  
+  // Payment provider integration
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  stripeChargeId: varchar("stripe_charge_id"),
+  paypalTransactionId: varchar("paypal_transaction_id"),
+  
+  // Payment metadata
+  paymentMethod: varchar("payment_method"), // 'card', 'bank_transfer', 'paypal'
+  lastFourDigits: varchar("last_four_digits"),
+  cardBrand: varchar("card_brand"),
+  
+  // Refund tracking
+  refundAmount: integer("refund_amount").default(0),
+  refundReason: text("refund_reason"),
+  refundedAt: timestamp("refunded_at"),
+  refundedBy: varchar("refunded_by").references(() => users.id),
+  
+  // Billing information
+  billingName: varchar("billing_name"),
+  billingEmail: varchar("billing_email"),
+  billingAddress: jsonb("billing_address"),
+  
+  // Payment processing
+  processingFee: integer("processing_fee"), // in cents
+  netAmount: integer("net_amount"), // amount after fees, in cents
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_payments_appointment").on(table.appointmentId),
+  index("idx_payments_status").on(table.status),
+  index("idx_payments_stripe_intent").on(table.stripePaymentIntentId),
+]);
+
+// Calendar integrations for external sync
+export const calendarIntegrations = pgTable("calendar_integrations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Integration details
+  provider: calendarProviderEnum("provider").notNull(),
+  calendarId: varchar("calendar_id").notNull(), // external calendar ID
+  calendarName: varchar("calendar_name"),
+  
+  // Access credentials (encrypted)
+  accessToken: text("access_token"), // encrypted OAuth token
+  refreshToken: text("refresh_token"), // encrypted refresh token
+  tokenExpiresAt: timestamp("token_expires_at"),
+  
+  // Sync settings
+  syncConflicts: boolean("sync_conflicts").default(true),
+  createEvents: boolean("create_events").default(true),
+  updateEvents: boolean("update_events").default(true),
+  deleteEvents: boolean("delete_events").default(false),
+  
+  // Sync status
+  lastSyncAt: timestamp("last_sync_at"),
+  lastSyncStatus: varchar("last_sync_status").default('pending'), // 'success', 'failed', 'pending'
+  lastSyncError: text("last_sync_error"),
+  
+  // Settings
+  isActive: boolean("is_active").default(true),
+  isPrimary: boolean("is_primary").default(false), // primary calendar for conflict checking
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_calendar_integrations_user").on(table.userId),
+  index("idx_calendar_integrations_provider").on(table.provider),
+  index("idx_calendar_integrations_active").on(table.isActive),
+]);
+
+// Booking form templates
+export const bookingFormTemplates = pgTable("booking_form_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Template details
+  name: varchar("name").notNull(),
+  description: text("description"),
+  
+  // Form configuration
+  fields: jsonb("fields").notNull().default('[]'), // Array of form field definitions
+  /*
+  Example field:
+  {
+    id: "company_size",
+    type: "select",
+    label: "Company Size",
+    placeholder: "Select your company size",
+    required: true,
+    options: [
+      { value: "1-10", label: "1-10 employees" },
+      { value: "11-50", label: "11-50 employees" },
+      { value: "51-200", label: "51-200 employees" },
+      { value: "200+", label: "200+ employees" }
+    ],
+    validation: {
+      minLength: null,
+      maxLength: null,
+      pattern: null
+    }
+  }
+  */
+  
+  // Form styling
+  theme: jsonb("theme").default('{}'), // Form styling configuration
+  /*
+  Example theme:
+  {
+    primaryColor: "#22c55e",
+    backgroundColor: "#ffffff",
+    textColor: "#374151",
+    borderRadius: 8,
+    fontFamily: "Inter"
+  }
+  */
+  
+  // Usage tracking
+  usageCount: integer("usage_count").default(0),
+  isActive: boolean("is_active").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_booking_forms_user").on(table.userId),
+  index("idx_booking_forms_active").on(table.isActive),
+]);
+
+// Appointment analytics and metrics
+export const appointmentAnalytics = pgTable("appointment_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventTypeId: varchar("event_type_id").references(() => appointmentEventTypes.id, { onDelete: 'cascade' }),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Date for aggregation
+  date: timestamp("date").notNull(), // date for daily metrics
+  
+  // Booking metrics
+  totalBookings: integer("total_bookings").default(0),
+  confirmedBookings: integer("confirmed_bookings").default(0),
+  completedBookings: integer("completed_bookings").default(0),
+  cancelledBookings: integer("cancelled_bookings").default(0),
+  noShowBookings: integer("no_show_bookings").default(0),
+  rescheduledBookings: integer("rescheduled_bookings").default(0),
+  
+  // Revenue metrics
+  totalRevenue: integer("total_revenue").default(0), // in cents
+  paidBookings: integer("paid_bookings").default(0),
+  refundedAmount: integer("refunded_amount").default(0), // in cents
+  
+  // Conversion metrics
+  pageViews: integer("page_views").default(0),
+  conversionRate: integer("conversion_rate").default(0), // percentage * 100
+  
+  // Lead quality metrics
+  avgLeadScore: integer("avg_lead_score").default(0),
+  highPriorityLeads: integer("high_priority_leads").default(0),
+  
+  // Time metrics
+  avgBookingNotice: integer("avg_booking_notice").default(0), // in hours
+  avgReschedulingTime: integer("avg_rescheduling_time").default(0), // in hours
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_analytics_event_type").on(table.eventTypeId),
+  index("idx_analytics_user").on(table.userId),
+  index("idx_analytics_date").on(table.date),
+]);
+
+// ===== APPOINTMENT BOOKING VALIDATION SCHEMAS =====
+
+// Appointment booking validation schemas
+export const insertAppointmentEventTypeSchema = createInsertSchema(appointmentEventTypes);
+export const insertTeamMemberAvailabilitySchema = createInsertSchema(teamMemberAvailability);
+export const insertBlackoutDateSchema = createInsertSchema(blackoutDates);
+export const insertAppointmentSchema = createInsertSchema(appointments);
+export const insertAppointmentNotificationSchema = createInsertSchema(appointmentNotifications);
+export const insertAppointmentPaymentSchema = createInsertSchema(appointmentPayments);
+export const insertCalendarIntegrationSchema = createInsertSchema(calendarIntegrations);
+export const insertBookingFormTemplateSchema = createInsertSchema(bookingFormTemplates);
+export const insertAppointmentAnalyticsSchema = createInsertSchema(appointmentAnalytics);
+
 // ===== AUTOMATION WORKFLOW SYSTEM =====
 
 // Main Automations table (workflow definitions)
@@ -1646,6 +2371,34 @@ export type InsertCrmSequence = typeof crmSequences.$inferInsert;
 
 export type EmailTemplate = typeof emailTemplates.$inferSelect;
 export type InsertEmailTemplate = typeof emailTemplates.$inferInsert;
+
+// Appointment Booking System Types
+export type AppointmentEventType = typeof appointmentEventTypes.$inferSelect;
+export type InsertAppointmentEventType = typeof appointmentEventTypes.$inferInsert;
+
+export type TeamMemberAvailability = typeof teamMemberAvailability.$inferSelect;
+export type InsertTeamMemberAvailability = typeof teamMemberAvailability.$inferInsert;
+
+export type BlackoutDate = typeof blackoutDates.$inferSelect;
+export type InsertBlackoutDate = typeof blackoutDates.$inferInsert;
+
+export type Appointment = typeof appointments.$inferSelect;
+export type InsertAppointment = typeof appointments.$inferInsert;
+
+export type AppointmentNotification = typeof appointmentNotifications.$inferSelect;
+export type InsertAppointmentNotification = typeof appointmentNotifications.$inferInsert;
+
+export type AppointmentPayment = typeof appointmentPayments.$inferSelect;
+export type InsertAppointmentPayment = typeof appointmentPayments.$inferInsert;
+
+export type CalendarIntegration = typeof calendarIntegrations.$inferSelect;
+export type InsertCalendarIntegration = typeof calendarIntegrations.$inferInsert;
+
+export type BookingFormTemplate = typeof bookingFormTemplates.$inferSelect;
+export type InsertBookingFormTemplate = typeof bookingFormTemplates.$inferInsert;
+
+export type AppointmentAnalytics = typeof appointmentAnalytics.$inferSelect;
+export type InsertAppointmentAnalytics = typeof appointmentAnalytics.$inferInsert;
 
 export type Automation = typeof automations.$inferSelect;
 export type InsertAutomation = typeof automations.$inferInsert;
