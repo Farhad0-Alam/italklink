@@ -2,7 +2,7 @@ import { db } from './db';
 import { 
   users, businessCards, teams, teamMembers, bulkGenerationJobs, subscriptionPlans, globalTemplates, walletPasses,
   crmContacts, crmActivities, crmTasks, crmPipelines, crmStages, crmDeals, crmSequences, emailTemplates,
-  automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability, appointmentNotifications,
+  automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability, appointmentNotifications, appointmentPayments,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -13,7 +13,8 @@ import {
   type CrmSequence, type InsertCrmSequence, type EmailTemplate, type InsertEmailTemplate,
   type Automation, type InsertAutomation, type AutomationRun, type InsertAutomationRun,
   type AppointmentEventType, type InsertAppointmentEventType, type Appointment, type InsertAppointment,
-  type AppointmentNotification, type InsertAppointmentNotification
+  type AppointmentNotification, type InsertAppointmentNotification,
+  type AppointmentPayment, type InsertAppointmentPayment
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -212,6 +213,32 @@ export interface IStorage {
   getAvailabilityForDate(eventTypeId: string, date: Date, timezone: string): Promise<Array<{time: string, available: boolean, utcTime: string}>>;
   createAppointment(appointmentData: InsertAppointment): Promise<Appointment>;
   getAppointment(id: string): Promise<Appointment | undefined>;
+  updateAppointment(id: string, appointmentData: Partial<InsertAppointment>): Promise<Appointment>;
+
+  // Payment operations
+  createAppointmentPayment(paymentData: InsertAppointmentPayment): Promise<AppointmentPayment>;
+  getAppointmentPayment(id: string): Promise<AppointmentPayment | undefined>;
+  updateAppointmentPayment(id: string, paymentData: Partial<InsertAppointmentPayment>): Promise<AppointmentPayment>;
+  updateAppointmentPaymentByStripeId(stripePaymentIntentId: string, paymentData: Partial<InsertAppointmentPayment>): Promise<AppointmentPayment>;
+  getUserAppointmentPayments(userId: string, filters?: {
+    status?: string;
+    appointmentId?: string;
+    customerId?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<AppointmentPayment[]>;
+  getPaymentAnalytics(userId: string): Promise<{
+    totalRevenue: number;
+    totalTransactions: number;
+    successfulPayments: number;
+    refundedPayments: number;
+    averageTransactionValue: number;
+    monthlyRevenue: Array<{ month: string; revenue: number; count: number }>;
+    paymentsByStatus: Record<string, number>;
+    recentPayments: Array<AppointmentPayment & { appointmentId: string; customerName: string }>;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2425,6 +2452,205 @@ export class DatabaseStorage implements IStorage {
     ];
 
     return templates;
+  }
+
+  // Update appointment method (was missing from interface)
+  async updateAppointment(id: string, appointmentData: Partial<InsertAppointment>): Promise<Appointment> {
+    const [appointment] = await db
+      .update(appointments)
+      .set({ ...appointmentData, updatedAt: new Date() })
+      .where(eq(appointments.id, id))
+      .returning();
+    return appointment;
+  }
+
+  // Payment operations implementation
+  async createAppointmentPayment(paymentData: InsertAppointmentPayment): Promise<AppointmentPayment> {
+    const [payment] = await db.insert(appointmentPayments).values(paymentData).returning();
+    return payment;
+  }
+
+  async getAppointmentPayment(id: string): Promise<AppointmentPayment | undefined> {
+    const [payment] = await db.select().from(appointmentPayments).where(eq(appointmentPayments.id, id));
+    return payment;
+  }
+
+  async updateAppointmentPayment(id: string, paymentData: Partial<InsertAppointmentPayment>): Promise<AppointmentPayment> {
+    const [payment] = await db
+      .update(appointmentPayments)
+      .set({ ...paymentData, updatedAt: new Date() })
+      .where(eq(appointmentPayments.id, id))
+      .returning();
+    return payment;
+  }
+
+  async updateAppointmentPaymentByStripeId(stripePaymentIntentId: string, paymentData: Partial<InsertAppointmentPayment>): Promise<AppointmentPayment> {
+    const [payment] = await db
+      .update(appointmentPayments)
+      .set({ ...paymentData, updatedAt: new Date() })
+      .where(eq(appointmentPayments.stripePaymentIntentId, stripePaymentIntentId))
+      .returning();
+    return payment;
+  }
+
+  async getUserAppointmentPayments(
+    userId: string, 
+    filters?: {
+      status?: string;
+      appointmentId?: string;
+      customerId?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      page?: number;
+      limit?: number;
+    }
+  ): Promise<AppointmentPayment[]> {
+    // Get user's event types to filter payments
+    const userEventTypes = await db.select().from(appointmentEventTypes)
+      .where(eq(appointmentEventTypes.userId, userId));
+    
+    const eventTypeIds = userEventTypes.map(et => et.id);
+    
+    if (eventTypeIds.length === 0) {
+      return [];
+    }
+
+    // Build the query with joins to filter by user's appointments
+    let query = db.select({
+      payment: appointmentPayments,
+    }).from(appointmentPayments)
+      .innerJoin(appointments, eq(appointmentPayments.appointmentId, appointments.id))
+      .where(inArray(appointments.eventTypeId, eventTypeIds));
+
+    // Apply filters
+    const conditions = [];
+
+    if (filters?.status) {
+      conditions.push(eq(appointmentPayments.status, filters.status as any));
+    }
+
+    if (filters?.appointmentId) {
+      conditions.push(eq(appointmentPayments.appointmentId, filters.appointmentId));
+    }
+
+    if (filters?.customerId) {
+      conditions.push(eq(appointmentPayments.stripeCustomerId, filters.customerId));
+    }
+
+    if (filters?.dateFrom) {
+      conditions.push(gte(appointmentPayments.createdAt, new Date(filters.dateFrom)));
+    }
+
+    if (filters?.dateTo) {
+      conditions.push(lte(appointmentPayments.createdAt, new Date(filters.dateTo)));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    // Apply pagination
+    const page = filters?.page || 1;
+    const limit = filters?.limit || 20;
+    const offset = (page - 1) * limit;
+
+    const results = await query
+      .orderBy(desc(appointmentPayments.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return results.map(r => r.payment);
+  }
+
+  async getPaymentAnalytics(userId: string): Promise<{
+    totalRevenue: number;
+    totalTransactions: number;
+    successfulPayments: number;
+    refundedPayments: number;
+    averageTransactionValue: number;
+    monthlyRevenue: Array<{ month: string; revenue: number; count: number }>;
+    paymentsByStatus: Record<string, number>;
+    recentPayments: Array<AppointmentPayment & { appointmentId: string; customerName: string }>;
+  }> {
+    // Get user's event types
+    const userEventTypes = await db.select().from(appointmentEventTypes)
+      .where(eq(appointmentEventTypes.userId, userId));
+    
+    const eventTypeIds = userEventTypes.map(et => et.id);
+    
+    if (eventTypeIds.length === 0) {
+      return {
+        totalRevenue: 0,
+        totalTransactions: 0,
+        successfulPayments: 0,
+        refundedPayments: 0,
+        averageTransactionValue: 0,
+        monthlyRevenue: [],
+        paymentsByStatus: {},
+        recentPayments: [],
+      };
+    }
+
+    // Get all payments for user's appointments
+    const payments = await db.select({
+      payment: appointmentPayments,
+      appointment: appointments,
+    }).from(appointmentPayments)
+      .innerJoin(appointments, eq(appointmentPayments.appointmentId, appointments.id))
+      .where(inArray(appointments.eventTypeId, eventTypeIds))
+      .orderBy(desc(appointmentPayments.createdAt));
+
+    const paymentData = payments.map(p => p.payment);
+    const appointmentData = payments.map(p => p.appointment);
+
+    // Calculate basic metrics
+    const totalRevenue = paymentData
+      .filter(p => p.status === 'paid')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const totalTransactions = paymentData.length;
+    const successfulPayments = paymentData.filter(p => p.status === 'paid').length;
+    const refundedPayments = paymentData.filter(p => p.status === 'refunded' || p.status === 'partially_refunded').length;
+    const averageTransactionValue = successfulPayments > 0 ? Math.round(totalRevenue / successfulPayments) : 0;
+
+    // Calculate monthly revenue
+    const monthlyData = new Map<string, { revenue: number; count: number }>();
+    paymentData.filter(p => p.status === 'paid').forEach(payment => {
+      const month = payment.createdAt.toISOString().substring(0, 7); // YYYY-MM
+      const existing = monthlyData.get(month) || { revenue: 0, count: 0 };
+      monthlyData.set(month, {
+        revenue: existing.revenue + payment.amount,
+        count: existing.count + 1,
+      });
+    });
+
+    const monthlyRevenue = Array.from(monthlyData.entries())
+      .map(([month, data]) => ({ month, ...data }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+
+    // Calculate payments by status
+    const paymentsByStatus = paymentData.reduce((acc, payment) => {
+      acc[payment.status] = (acc[payment.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Get recent payments with appointment details
+    const recentPayments = payments.slice(0, 10).map(({ payment, appointment }) => ({
+      ...payment,
+      appointmentId: appointment.id,
+      customerName: appointment.attendeeName,
+    }));
+
+    return {
+      totalRevenue,
+      totalTransactions,
+      successfulPayments,
+      refundedPayments,
+      averageTransactionValue,
+      monthlyRevenue,
+      paymentsByStatus,
+      recentPayments,
+    };
   }
 }
 

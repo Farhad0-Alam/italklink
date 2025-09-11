@@ -1,7 +1,7 @@
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { CalendarDays, Clock, MapPin, User, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarDays, Clock, MapPin, User, Check, ChevronLeft, ChevronRight, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { format, startOfToday, addDays, parseISO } from "date-fns";
+import { BookingPaymentStep } from "@/components/booking-payment-step";
+import { formatCurrency } from "@/lib/utils";
 
 // Common timezone options for the selector
 const TIMEZONE_OPTIONS = [
@@ -51,28 +53,42 @@ interface BookingStep {
   description: string;
 }
 
-const BOOKING_STEPS: BookingStep[] = [
-  {
-    id: "info",
-    title: "Event Details",
-    description: "Review event information",
-  },
-  {
-    id: "time",
-    title: "Select Time",
-    description: "Choose date and time",
-  },
-  {
-    id: "details",
-    title: "Your Details",
-    description: "Provide your information",
-  },
-  {
+// Dynamic booking steps based on whether event requires payment
+const getBookingSteps = (isPaidEvent: boolean): BookingStep[] => {
+  const baseSteps = [
+    {
+      id: "info",
+      title: "Event Details",
+      description: "Review event information",
+    },
+    {
+      id: "time",
+      title: "Select Time",
+      description: "Choose date and time",
+    },
+    {
+      id: "details",
+      title: "Your Details",
+      description: "Provide your information",
+    },
+  ];
+
+  if (isPaidEvent) {
+    baseSteps.push({
+      id: "payment",
+      title: "Payment",
+      description: "Complete payment",
+    });
+  }
+
+  baseSteps.push({
     id: "confirm",
     title: "Confirmation",
     description: "Review and confirm",
-  },
-];
+  });
+
+  return baseSteps;
+};
 
 interface TimeSlot {
   time: string;
@@ -110,6 +126,7 @@ export default function BookingPage() {
   const [isBooking, setIsBooking] = useState(false);
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [confirmedBooking, setConfirmedBooking] = useState<any>();
+  const [paymentData, setPaymentData] = useState<any>(null);
 
   // Detect user timezone
   useEffect(() => {
@@ -179,9 +196,13 @@ export default function BookingPage() {
     },
   });
 
+  // Determine if this is a paid event
+  const isPaidEvent = eventType && eventType.price > 0;
+  const bookingSteps = eventType ? getBookingSteps(isPaidEvent) : [];
+
   // Navigation functions
   const nextStep = () => {
-    if (currentStep < BOOKING_STEPS.length - 1) {
+    if (currentStep < bookingSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -192,7 +213,7 @@ export default function BookingPage() {
     }
   };
 
-  // Booking submission
+  // For free events, handle booking submission directly
   const onSubmit = async (data: AttendeeFormData) => {
     if (!eventType || !selectedDate || !selectedTimeSlot || !userTimezone) {
       toast({
@@ -203,6 +224,19 @@ export default function BookingPage() {
       return;
     }
 
+    // For paid events, go to payment step
+    if (isPaidEvent) {
+      // Store form data and go to payment step
+      form.setValue('name', data.name);
+      form.setValue('email', data.email);
+      form.setValue('phone', data.phone);
+      form.setValue('company', data.company);
+      form.setValue('notes', data.notes);
+      nextStep();
+      return;
+    }
+
+    // For free events, create booking directly
     setIsBooking(true);
     
     try {
@@ -251,6 +285,23 @@ export default function BookingPage() {
     }
   };
 
+  // Payment success handler
+  const handlePaymentSuccess = (paymentData: any) => {
+    setPaymentData(paymentData);
+    setBookingConfirmed(true);
+    nextStep();
+    
+    toast({
+      title: "Payment Successful!",
+      description: "Your appointment has been booked and confirmed.",
+    });
+  };
+
+  // Booking completion handler
+  const handleBookingComplete = (booking: any) => {
+    setConfirmedBooking(booking);
+  };
+
   // Loading state
   if (eventTypeLoading) {
     return (
@@ -297,7 +348,7 @@ export default function BookingPage() {
     );
   }
 
-  const currentStepData = BOOKING_STEPS[currentStep];
+  const currentStepData = bookingSteps[currentStep];
 
   return (
     <div 
@@ -354,7 +405,7 @@ export default function BookingPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between">
-              {BOOKING_STEPS.map((step, index) => (
+              {bookingSteps.map((step, index) => (
                 <div key={step.id} className="flex items-center">
                   <div className="flex items-center">
                     <div
@@ -383,7 +434,7 @@ export default function BookingPage() {
                       </div>
                     </div>
                   </div>
-                  {index < BOOKING_STEPS.length - 1 && (
+                  {index < bookingSteps.length - 1 && (
                     <div className="ml-4 mr-4 hidden sm:block">
                       <ChevronRight className="w-4 h-4 text-gray-400" />
                     </div>

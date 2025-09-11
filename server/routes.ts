@@ -82,6 +82,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup appointment routes
   const { setupAppointmentRoutes } = await import('./appointment-routes');
   setupAppointmentRoutes(app);
+
+  // Payment routes
+  const { setupPaymentRoutes } = await import('./payment-routes');
+  setupPaymentRoutes(app);
   
   // Setup availability routes
   const { setupAvailabilityRoutes } = await import('./availability-routes');
