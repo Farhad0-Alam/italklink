@@ -2358,7 +2358,7 @@ export const integrationLogs = pgTable("integration_logs", {
   // Integration context
   integrationType: varchar("integration_type").notNull(), // 'calendar', 'video_meeting'
   provider: varchar("provider").notNull(), // google, zoom, microsoft, etc.
-  connectionId: varchar("connection_id"), // calendarConnectionId or videoMeetingProviderId
+  connectionId: varchar("connection_id").references(() => calendarConnections.id), // calendarConnectionId or videoMeetingProviderId
   
   // Operation details
   operation: varchar("operation").notNull(), // 'sync', 'create', 'update', 'delete', 'auth'
