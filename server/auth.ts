@@ -164,6 +164,93 @@ export const requireOwner: RequestHandler = (req, res, next) => {
   next();
 };
 
+// Team membership verification middleware - CRITICAL for multi-tenant security
+export const requireTeamRole = (...allowedRoles: string[]): RequestHandler => {
+  return async (req, res, next) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    const teamId = req.params.teamId;
+    if (!teamId) {
+      return res.status(400).json({ message: 'Team ID required' });
+    }
+
+    try {
+      const { storage } = await import('./storage');
+      const userId = (req.user as any).id;
+      
+      // Get user's membership in the team
+      const teamMembership = await storage.getTeamMemberByUserAndTeam(userId, teamId);
+      
+      if (!teamMembership) {
+        return res.status(403).json({ message: 'Access denied: Not a team member' });
+      }
+
+      // Check if user's role is allowed
+      if (!allowedRoles.includes(teamMembership.role)) {
+        return res.status(403).json({ 
+          message: `Access denied: Insufficient permissions. Required: ${allowedRoles.join(', ')}, Current: ${teamMembership.role}` 
+        });
+      }
+
+      // Add team membership info to request for use in handlers
+      (req as any).teamMembership = teamMembership;
+      next();
+    } catch (error) {
+      console.error('Error verifying team membership:', error);
+      res.status(500).json({ message: 'Internal server error verifying team access' });
+    }
+  };
+};
+
+// Helper to check if user has access to a specific team member resource
+export const requireMemberAccess: RequestHandler = async (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Authentication required' });
+  }
+
+  const memberId = req.params.memberId;
+  if (!memberId) {
+    return res.status(400).json({ message: 'Member ID required' });
+  }
+
+  try {
+    const { storage } = await import('./storage');
+    const userId = (req.user as any).id;
+    
+    // Get the team member and verify access
+    const teamMember = await storage.getTeamMember(memberId);
+    if (!teamMember) {
+      return res.status(404).json({ message: 'Team member not found' });
+    }
+
+    // Check if user is accessing their own member record OR has team permissions
+    if (teamMember.userId === userId) {
+      // User accessing their own member record
+      (req as any).teamMember = teamMember;
+      return next();
+    }
+
+    // Check team-level permissions
+    const userMembership = await storage.getTeamMemberByUserAndTeam(userId, teamMember.teamId);
+    if (!userMembership) {
+      return res.status(403).json({ message: 'Access denied: Not a team member' });
+    }
+
+    if (!['owner', 'admin'].includes(userMembership.role)) {
+      return res.status(403).json({ message: 'Access denied: Insufficient permissions to access other members' });
+    }
+
+    (req as any).teamMember = teamMember;
+    (req as any).teamMembership = userMembership;
+    next();
+  } catch (error) {
+    console.error('Error verifying member access:', error);
+    res.status(500).json({ message: 'Internal server error verifying member access' });
+  }
+};
+
 // Extend Express Request interface
 declare global {
   namespace Express {

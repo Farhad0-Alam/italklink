@@ -33,6 +33,7 @@ import CRM from "./pages/crm";
 import BookingPage from "./pages/booking";
 import EmailTemplatesPage from "./pages/EmailTemplatesPage";
 import Analytics from "./pages/analytics";
+import TeamDashboard from "./pages/TeamDashboard";
 import i18n from "./lib/i18n";
 
 function Router() {
@@ -65,6 +66,7 @@ function Router() {
       <Route path="/email-templates" component={EmailTemplatesPage} />
       <Route path="/crm" component={CRM} />
       <Route path="/analytics" component={Analytics} />
+      <Route path="/teams" component={TeamDashboard} />
       <Route path="/help" component={Help} />
       <Route path="/booking/:eventTypeSlug" component={BookingPage} />
       <Route path="/admin/templates/import" component={() => <Admin />} />

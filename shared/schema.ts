@@ -3410,3 +3410,391 @@ export const insertIntegrationLogSchema = createInsertSchema(integrationLogs).om
   id: true,
   createdAt: true,
 });
+
+// ===== TEAM SCHEDULING SYSTEM =====
+
+// Team assignment tracking for round-robin and manual assignments
+export const teamAssignments = pgTable("team_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamId: varchar("team_id").references(() => teams.id, { onDelete: 'cascade' }).notNull(),
+  appointmentId: varchar("appointment_id").references(() => appointments.id, { onDelete: 'cascade' }).notNull(),
+  assignedMemberId: varchar("assigned_member_id").references(() => users.id, { onDelete: 'set null' }),
+  
+  // Assignment details
+  assignmentType: varchar("assignment_type").notNull(), // 'round_robin', 'manual', 'skill_based', 'geographic'
+  assignmentReason: text("assignment_reason"), // Why this member was chosen
+  priorityScore: integer("priority_score").default(0), // Score used for assignment decision
+  
+  // Assignment status
+  status: varchar("status").default('assigned'), // 'assigned', 'accepted', 'rejected', 'reassigned'
+  assignedAt: timestamp("assigned_at").defaultNow(),
+  assignedBy: varchar("assigned_by").references(() => users.id), // Who made the assignment
+  
+  // Routing metadata
+  routingRuleId: varchar("routing_rule_id"), // Which rule was used for assignment
+  alternativeMembers: jsonb("alternative_members").default('[]'), // Other members who could have been assigned
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_team_assignments_team").on(table.teamId),
+  index("idx_team_assignments_appointment").on(table.appointmentId),
+  index("idx_team_assignments_member").on(table.assignedMemberId),
+  index("idx_team_assignments_type").on(table.assignmentType),
+  index("idx_team_assignments_status").on(table.status),
+  index("idx_team_assignments_created_at").on(table.createdAt),
+]);
+
+// Round-robin state tracking for fair distribution
+export const roundRobinState = pgTable("round_robin_state", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamId: varchar("team_id").references(() => teams.id, { onDelete: 'cascade' }).notNull(),
+  eventTypeId: varchar("event_type_id").references(() => appointmentEventTypes.id, { onDelete: 'cascade' }),
+  
+  // Current state
+  lastAssignedMemberId: varchar("last_assigned_member_id").references(() => users.id, { onDelete: 'set null' }),
+  currentIndex: integer("current_index").default(0), // Current position in round-robin rotation
+  totalAssignments: integer("total_assignments").default(0), // Total assignments made
+  
+  // Member assignment counts for balancing
+  memberAssignmentCounts: jsonb("member_assignment_counts").default('{}'), // {memberId: count}
+  rotationOrder: jsonb("rotation_order").default('[]'), // Ordered list of member IDs
+  
+  // Settings
+  resetPeriod: varchar("reset_period").default('weekly'), // 'daily', 'weekly', 'monthly', 'never'
+  lastResetAt: timestamp("last_reset_at").defaultNow(),
+  isActive: boolean("is_active").default(true),
+  
+  // Balancing settings
+  allowSkip: boolean("allow_skip").default(true), // Skip unavailable members
+  rebalanceThreshold: integer("rebalance_threshold").default(5), // Trigger rebalancing when difference exceeds this
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_round_robin_team").on(table.teamId),
+  index("idx_round_robin_event_type").on(table.eventTypeId),
+  index("idx_round_robin_active").on(table.isActive),
+  { unique: { columns: [table.teamId, table.eventTypeId] } }
+]);
+
+// Lead routing rules for intelligent assignment
+export const leadRoutingRules = pgTable("lead_routing_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamId: varchar("team_id").references(() => teams.id, { onDelete: 'cascade' }).notNull(),
+  createdBy: varchar("created_by").references(() => users.id, { onDelete: 'set null' }).notNull(),
+  
+  // Rule identification
+  name: varchar("name").notNull(),
+  description: text("description"),
+  priority: integer("priority").default(0), // Higher priority rules evaluated first
+  
+  // Rule conditions
+  conditions: jsonb("conditions").notNull(), // Complex condition matching rules
+  /*
+  Example conditions:
+  {
+    appointmentType: ["consultation", "demo"],
+    clientLocation: {country: "US", states: ["CA", "NY"]},
+    appointmentValue: {min: 1000, max: 10000},
+    clientSize: ["enterprise", "mid-market"],
+    timeRange: {start: "09:00", end: "17:00"},
+    dayOfWeek: ["monday", "tuesday", "wednesday"]
+  }
+  */
+  
+  // Assignment targets
+  assignmentStrategy: varchar("assignment_strategy").notNull(), // 'specific_members', 'skill_based', 'round_robin', 'least_busy', 'best_match'
+  targetMembers: jsonb("target_members").default('[]'), // Array of member IDs for specific assignment
+  requiredSkills: jsonb("required_skills").default('[]'), // Skills required for assignment
+  preferredSkills: jsonb("preferred_skills").default('[]'), // Nice-to-have skills
+  
+  // Scoring weights
+  skillWeight: integer("skill_weight").default(40),
+  availabilityWeight: integer("availability_weight").default(30),
+  locationWeight: integer("location_weight").default(20),
+  performanceWeight: integer("performance_weight").default(10),
+  
+  // Rule settings
+  isActive: boolean("is_active").default(true),
+  fallbackRule: varchar("fallback_rule").default('round_robin'), // What to do if rule can't be applied
+  
+  // Usage tracking
+  usageCount: integer("usage_count").default(0),
+  successRate: integer("success_rate").default(100), // Percentage of successful assignments
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_routing_rules_team").on(table.teamId),
+  index("idx_routing_rules_priority").on(table.priority),
+  index("idx_routing_rules_active").on(table.isActive),
+  index("idx_routing_rules_strategy").on(table.assignmentStrategy),
+]);
+
+// Team member skills and capabilities
+export const teamMemberSkills = pgTable("team_member_skills", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamMemberId: varchar("team_member_id").references(() => teamMembers.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Skill details
+  skillName: varchar("skill_name").notNull(),
+  skillCategory: varchar("skill_category").notNull(), // 'technical', 'language', 'industry', 'soft_skill'
+  proficiencyLevel: integer("proficiency_level").notNull(), // 1-5 scale
+  
+  // Verification and validation
+  isVerified: boolean("is_verified").default(false),
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  verificationDate: timestamp("verification_date"),
+  
+  // Metadata
+  acquisitionDate: timestamp("acquisition_date"),
+  lastUsed: timestamp("last_used"),
+  usageCount: integer("usage_count").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_member_skills_member").on(table.teamMemberId),
+  index("idx_member_skills_skill").on(table.skillName),
+  index("idx_member_skills_category").on(table.skillCategory),
+  index("idx_member_skills_level").on(table.proficiencyLevel),
+  { unique: { columns: [table.teamMemberId, table.skillName] } }
+]);
+
+// Team member capacity and workload management
+export const teamMemberCapacity = pgTable("team_member_capacity", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamMemberId: varchar("team_member_id").references(() => teamMembers.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Capacity settings
+  maxDailyAppointments: integer("max_daily_appointments").default(8),
+  maxWeeklyAppointments: integer("max_weekly_appointments").default(40),
+  maxConcurrentAppointments: integer("max_concurrent_appointments").default(1),
+  
+  // Buffer times
+  bufferBetweenAppointments: integer("buffer_between_appointments").default(15), // minutes
+  preparationTime: integer("preparation_time").default(10), // minutes before each appointment
+  wrapupTime: integer("wrap_up_time").default(10), // minutes after each appointment
+  
+  // Workload preferences
+  preferredAppointmentTypes: jsonb("preferred_appointment_types").default('[]'),
+  maxAppointmentDuration: integer("max_appointment_duration").default(120), // minutes
+  minAppointmentDuration: integer("min_appointment_duration").default(15), // minutes
+  
+  // Current load tracking
+  currentDailyLoad: integer("current_daily_load").default(0),
+  currentWeeklyLoad: integer("current_weekly_load").default(0),
+  lastLoadUpdate: timestamp("last_load_update").defaultNow(),
+  
+  // Performance metrics
+  averageAppointmentDuration: integer("average_appointment_duration").default(60),
+  completionRate: integer("completion_rate").default(100),
+  satisfactionScore: integer("satisfaction_score").default(100),
+  
+  // Effective dates
+  effectiveFrom: timestamp("effective_from").defaultNow(),
+  effectiveTo: timestamp("effective_to"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_member_capacity_member").on(table.teamMemberId),
+  index("idx_member_capacity_effective").on(table.effectiveFrom, table.effectiveTo),
+]);
+
+// Collective team availability patterns
+export const teamAvailabilityPatterns = pgTable("team_availability_patterns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamId: varchar("team_id").references(() => teams.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Pattern details
+  patternName: varchar("pattern_name").notNull(),
+  patternType: varchar("pattern_type").notNull(), // 'collective', 'minimum_coverage', 'specific_members'
+  
+  // Availability requirements
+  minimumMembers: integer("minimum_members").default(1), // Minimum team members required to be available
+  requiredMembers: jsonb("required_members").default('[]'), // Specific members that must be available
+  preferredMembers: jsonb("preferred_members").default('[]'), // Preferred members when available
+  
+  // Time patterns
+  weekdayPatterns: jsonb("weekday_patterns").notNull(), // Per-day availability requirements
+  /*
+  Example:
+  {
+    "monday": {minMembers: 2, preferredMembers: ["user1", "user2"], timeSlots: ["09:00-17:00"]},
+    "tuesday": {minMembers: 3, timeSlots: ["08:00-20:00"]},
+    ...
+  }
+  */
+  
+  // Override periods
+  holidayPattern: jsonb("holiday_pattern"), // Special availability during holidays
+  peakSeasonPattern: jsonb("peak_season_pattern"), // Enhanced coverage during peak periods
+  
+  // Settings
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(0),
+  
+  // Date range
+  effectiveFrom: timestamp("effective_from").defaultNow(),
+  effectiveTo: timestamp("effective_to"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_team_patterns_team").on(table.teamId),
+  index("idx_team_patterns_type").on(table.patternType),
+  index("idx_team_patterns_active").on(table.isActive),
+  index("idx_team_patterns_effective").on(table.effectiveFrom, table.effectiveTo),
+]);
+
+// Assignment performance tracking and analytics
+export const assignmentAnalytics = pgTable("assignment_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamId: varchar("team_id").references(() => teams.id, { onDelete: 'cascade' }).notNull(),
+  teamMemberId: varchar("team_member_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Time period
+  periodType: varchar("period_type").notNull(), // 'daily', 'weekly', 'monthly'
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  
+  // Assignment metrics
+  totalAssignments: integer("total_assignments").default(0),
+  completedAssignments: integer("completed_assignments").default(0),
+  cancelledAssignments: integer("cancelled_assignments").default(0),
+  noShowAssignments: integer("no_show_assignments").default(0),
+  
+  // Performance metrics
+  averageResponseTime: integer("average_response_time").default(0), // minutes
+  clientSatisfactionScore: integer("client_satisfaction_score").default(0),
+  conversionRate: integer("conversion_rate").default(0), // percentage
+  
+  // Revenue impact
+  totalRevenue: integer("total_revenue").default(0), // in cents
+  averageAppointmentValue: integer("average_appointment_value").default(0),
+  
+  // Utilization metrics
+  utilizationRate: integer("utilization_rate").default(0), // percentage of capacity used
+  peakHours: jsonb("peak_hours").default('[]'), // Hours with highest booking rate
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_assignment_analytics_team").on(table.teamId),
+  index("idx_assignment_analytics_member").on(table.teamMemberId),
+  index("idx_assignment_analytics_period").on(table.periodType, table.periodStart),
+  { unique: { columns: [table.teamId, table.teamMemberId, table.periodType, table.periodStart] } }
+]);
+
+// Lead routing performance tracking
+export const routingAnalytics = pgTable("routing_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamId: varchar("team_id").references(() => teams.id, { onDelete: 'cascade' }).notNull(),
+  routingRuleId: varchar("routing_rule_id").references(() => leadRoutingRules.id, { onDelete: 'set null' }),
+  
+  // Assignment tracking
+  appointmentId: varchar("appointment_id").references(() => appointments.id, { onDelete: 'cascade' }).notNull(),
+  assignedMemberId: varchar("assigned_member_id").references(() => users.id, { onDelete: 'set null' }),
+  
+  // Routing process details
+  totalEvaluatedMembers: integer("total_evaluated_members").default(0),
+  evaluationScores: jsonb("evaluation_scores").default('{}'), // {memberId: score}
+  selectionReason: text("selection_reason"), // Why this member was chosen
+  
+  // Outcome tracking
+  appointmentStatus: varchar("appointment_status"), // Final appointment status
+  clientSatisfaction: integer("client_satisfaction"), // 1-5 rating
+  appointmentValue: integer("appointment_value").default(0), // in cents
+  
+  // Performance metrics
+  routingTime: integer("routing_time").default(0), // milliseconds to complete routing
+  ruleMatchAccuracy: integer("rule_match_accuracy").default(100), // How well the rule matched
+  
+  // Metadata
+  routingContext: jsonb("routing_context").default('{}'), // Additional context used in routing
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_routing_analytics_team").on(table.teamId),
+  index("idx_routing_analytics_rule").on(table.routingRuleId),
+  index("idx_routing_analytics_appointment").on(table.appointmentId),
+  index("idx_routing_analytics_member").on(table.assignedMemberId),
+  index("idx_routing_analytics_created_at").on(table.createdAt),
+]);
+
+// ===== TEAM SCHEDULING TYPE DEFINITIONS =====
+
+// TypeScript types for team scheduling tables
+export type TeamAssignment = typeof teamAssignments.$inferSelect;
+export type InsertTeamAssignment = typeof teamAssignments.$inferInsert;
+
+export type RoundRobinState = typeof roundRobinState.$inferSelect;
+export type InsertRoundRobinState = typeof roundRobinState.$inferInsert;
+
+export type LeadRoutingRule = typeof leadRoutingRules.$inferSelect;
+export type InsertLeadRoutingRule = typeof leadRoutingRules.$inferInsert;
+
+export type TeamMemberSkill = typeof teamMemberSkills.$inferSelect;
+export type InsertTeamMemberSkill = typeof teamMemberSkills.$inferInsert;
+
+export type TeamMemberCapacity = typeof teamMemberCapacity.$inferSelect;
+export type InsertTeamMemberCapacity = typeof teamMemberCapacity.$inferInsert;
+
+export type TeamAvailabilityPattern = typeof teamAvailabilityPatterns.$inferSelect;
+export type InsertTeamAvailabilityPattern = typeof teamAvailabilityPatterns.$inferInsert;
+
+export type AssignmentAnalytics = typeof assignmentAnalytics.$inferSelect;
+export type InsertAssignmentAnalytics = typeof assignmentAnalytics.$inferInsert;
+
+export type RoutingAnalytics = typeof routingAnalytics.$inferSelect;
+export type InsertRoutingAnalytics = typeof routingAnalytics.$inferInsert;
+
+// ===== VALIDATION SCHEMAS FOR TEAM SCHEDULING =====
+
+// Zod schemas for input validation
+export const insertTeamAssignmentSchema = createInsertSchema(teamAssignments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRoundRobinStateSchema = createInsertSchema(roundRobinState).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertLeadRoutingRuleSchema = createInsertSchema(leadRoutingRules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTeamMemberSkillSchema = createInsertSchema(teamMemberSkills).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTeamMemberCapacitySchema = createInsertSchema(teamMemberCapacity).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTeamAvailabilityPatternSchema = createInsertSchema(teamAvailabilityPatterns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAssignmentAnalyticsSchema = createInsertSchema(assignmentAnalytics).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertRoutingAnalyticsSchema = createInsertSchema(routingAnalytics).omit({
+  id: true,
+  createdAt: true,
+});

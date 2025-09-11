@@ -116,6 +116,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { setupAvailabilityRoutes } = await import('./availability-routes');
   setupAvailabilityRoutes(app);
   
+  // Setup comprehensive team scheduling routes
+  const { setupTeamSchedulingRoutes } = await import('./team-scheduling-routes');
+  setupTeamSchedulingRoutes(app);
+  
   // Setup template collections routes
   app.use('/api/collections', requireAuth, templateCollectionsRoutes);
   

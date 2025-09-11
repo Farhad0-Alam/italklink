@@ -4,6 +4,7 @@ import {
   crmContacts, crmActivities, crmTasks, crmPipelines, crmStages, crmDeals, crmSequences, emailTemplates,
   automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability, appointmentNotifications, appointmentPayments,
   calendarConnections, videoMeetingProviders, externalCalendarEvents, meetingLinks, integrationLogs,
+  teamAssignments, roundRobinState, leadRoutingRules, teamMemberSkills, teamMemberCapacity, teamAvailabilityPatterns, assignmentAnalytics, routingAnalytics,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -20,7 +21,15 @@ import {
   type VideoMeetingProvider, type InsertVideoMeetingProvider,
   type ExternalCalendarEvent, type InsertExternalCalendarEvent,
   type MeetingLink, type InsertMeetingLink,
-  type IntegrationLog, type InsertIntegrationLog
+  type IntegrationLog, type InsertIntegrationLog,
+  type TeamAssignment, type InsertTeamAssignment,
+  type RoundRobinState, type InsertRoundRobinState,
+  type LeadRoutingRule, type InsertLeadRoutingRule,
+  type TeamMemberSkill, type InsertTeamMemberSkill,
+  type TeamMemberCapacity, type InsertTeamMemberCapacity,
+  type TeamAvailabilityPattern, type InsertTeamAvailabilityPattern,
+  type AssignmentAnalytics, type InsertAssignmentAnalytics,
+  type RoutingAnalytics, type InsertRoutingAnalytics
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -51,10 +60,116 @@ export interface IStorage {
   // Team member operations
   getTeamMembers(teamId: string): Promise<TeamMember[]>;
   getTeamMember(id: string): Promise<TeamMember | undefined>;
+  getTeamMemberByUserAndTeam(userId: string, teamId: string): Promise<TeamMember | undefined>;
   createTeamMember(memberData: InsertTeamMember): Promise<TeamMember>;
   updateTeamMember(id: string, memberData: Partial<InsertTeamMember>): Promise<TeamMember>;
   deleteTeamMember(id: string): Promise<void>;
   getUserTeamMembership(userId: string): Promise<TeamMember[]>;
+  
+  // ===== COMPREHENSIVE TEAM SCHEDULING OPERATIONS =====
+  
+  // Team Assignment operations
+  createTeamAssignment(assignmentData: InsertTeamAssignment): Promise<TeamAssignment>;
+  getTeamAssignment(id: string): Promise<TeamAssignment | undefined>;
+  getTeamAssignments(teamId: string, filters?: { status?: string; assignmentType?: string; limit?: number }): Promise<TeamAssignment[]>;
+  getAppointmentAssignment(appointmentId: string): Promise<TeamAssignment | undefined>;
+  getMemberAssignments(memberId: string, filters?: { status?: string; dateFrom?: Date; dateTo?: Date }): Promise<TeamAssignment[]>;
+  updateTeamAssignment(id: string, assignmentData: Partial<InsertTeamAssignment>): Promise<TeamAssignment>;
+  deleteTeamAssignment(id: string): Promise<void>;
+  
+  // Round-Robin State operations
+  getRoundRobinState(teamId: string, eventTypeId?: string): Promise<RoundRobinState | undefined>;
+  createRoundRobinState(stateData: InsertRoundRobinState): Promise<RoundRobinState>;
+  updateRoundRobinState(id: string, stateData: Partial<InsertRoundRobinState>): Promise<RoundRobinState>;
+  getNextRoundRobinAssignment(teamId: string, eventTypeId?: string, filters?: { requiredSkills?: string[]; excludeMembers?: string[] }): Promise<string | null>;
+  rebalanceRoundRobin(teamId: string, eventTypeId?: string): Promise<RoundRobinState>;
+  resetRoundRobin(teamId: string, eventTypeId?: string): Promise<RoundRobinState>;
+  
+  // Lead Routing Rules operations
+  createLeadRoutingRule(ruleData: InsertLeadRoutingRule): Promise<LeadRoutingRule>;
+  getLeadRoutingRule(id: string): Promise<LeadRoutingRule | undefined>;
+  getTeamRoutingRules(teamId: string, filters?: { isActive?: boolean; strategy?: string }): Promise<LeadRoutingRule[]>;
+  updateLeadRoutingRule(id: string, ruleData: Partial<InsertLeadRoutingRule>): Promise<LeadRoutingRule>;
+  deleteLeadRoutingRule(id: string): Promise<void>;
+  evaluateRoutingRules(teamId: string, context: any): Promise<{ memberId: string; ruleId: string; score: number } | null>;
+  
+  // Team Member Skills operations
+  createTeamMemberSkill(skillData: InsertTeamMemberSkill): Promise<TeamMemberSkill>;
+  getTeamMemberSkill(id: string): Promise<TeamMemberSkill | undefined>;
+  getMemberSkills(teamMemberId: string, filters?: { category?: string; verified?: boolean }): Promise<TeamMemberSkill[]>;
+  getTeamMembersBySkill(teamId: string, skillName: string, minLevel?: number): Promise<TeamMemberSkill[]>;
+  updateTeamMemberSkill(id: string, skillData: Partial<InsertTeamMemberSkill>): Promise<TeamMemberSkill>;
+  deleteTeamMemberSkill(id: string): Promise<void>;
+  verifyMemberSkill(id: string, verifiedBy: string): Promise<TeamMemberSkill>;
+  
+  // Team Member Capacity operations
+  createTeamMemberCapacity(capacityData: InsertTeamMemberCapacity): Promise<TeamMemberCapacity>;
+  getTeamMemberCapacity(teamMemberId: string): Promise<TeamMemberCapacity | undefined>;
+  updateTeamMemberCapacity(id: string, capacityData: Partial<InsertTeamMemberCapacity>): Promise<TeamMemberCapacity>;
+  deleteTeamMemberCapacity(id: string): Promise<void>;
+  checkMemberCapacity(teamMemberId: string, appointmentDuration: number, appointmentDate: Date): Promise<{ available: boolean; reason?: string }>;
+  updateMemberWorkload(teamMemberId: string, increment: number): Promise<TeamMemberCapacity>;
+  
+  // Team Availability Patterns operations
+  createTeamAvailabilityPattern(patternData: InsertTeamAvailabilityPattern): Promise<TeamAvailabilityPattern>;
+  getTeamAvailabilityPattern(id: string): Promise<TeamAvailabilityPattern | undefined>;
+  getTeamAvailabilityPatterns(teamId: string, filters?: { isActive?: boolean; patternType?: string }): Promise<TeamAvailabilityPattern[]>;
+  updateTeamAvailabilityPattern(id: string, patternData: Partial<InsertTeamAvailabilityPattern>): Promise<TeamAvailabilityPattern>;
+  deleteTeamAvailabilityPattern(id: string): Promise<void>;
+  getCollectiveAvailability(teamId: string, date: Date, duration: number): Promise<{
+    timeSlot: string;
+    availableMembers: string[];
+    minimumMet: boolean;
+    preferredMet: boolean;
+  }[]>;
+  
+  // Assignment Analytics operations
+  createAssignmentAnalytics(analyticsData: InsertAssignmentAnalytics): Promise<AssignmentAnalytics>;
+  getAssignmentAnalytics(teamId: string, memberId?: string, periodType?: string, periodStart?: Date): Promise<AssignmentAnalytics[]>;
+  updateAssignmentAnalytics(id: string, analyticsData: Partial<InsertAssignmentAnalytics>): Promise<AssignmentAnalytics>;
+  generateMemberAnalytics(teamMemberId: string, periodType: string): Promise<AssignmentAnalytics>;
+  getTeamPerformanceMetrics(teamId: string, dateRange?: { from: Date; to: Date }): Promise<{
+    totalAssignments: number;
+    completionRate: number;
+    averageResponseTime: number;
+    memberDistribution: Record<string, number>;
+    revenueGenerated: number;
+  }>;
+  
+  // Routing Analytics operations
+  createRoutingAnalytics(analyticsData: InsertRoutingAnalytics): Promise<RoutingAnalytics>;
+  getRoutingAnalytics(teamId: string, filters?: { ruleId?: string; dateFrom?: Date; dateTo?: Date }): Promise<RoutingAnalytics[]>;
+  getRulePerformance(ruleId: string, dateRange?: { from: Date; to: Date }): Promise<{
+    usageCount: number;
+    successRate: number;
+    averageSatisfaction: number;
+    totalRevenue: number;
+    averageRoutingTime: number;
+  }>;
+  
+  // Advanced Team Scheduling operations
+  findOptimalAssignment(teamId: string, appointmentContext: {
+    eventTypeId: string;
+    duration: number;
+    scheduledTime: Date;
+    clientInfo?: any;
+    requiredSkills?: string[];
+    preferredMembers?: string[];
+  }): Promise<{
+    recommendedMemberId: string;
+    score: number;
+    reasoning: string;
+    alternatives: Array<{ memberId: string; score: number }>;
+  } | null>;
+  
+  getTeamSchedulingStats(teamId: string): Promise<{
+    totalMembers: number;
+    activeMembers: number;
+    averageUtilization: number;
+    roundRobinBalance: number;
+    routingEfficiency: number;
+    memberCapacities: Record<string, { current: number; maximum: number }>;
+  }>;
   
   // Bulk generation operations
   createBulkGenerationJob(jobData: InsertBulkGenerationJob): Promise<BulkGenerationJob>;
@@ -486,6 +601,14 @@ export class DatabaseStorage implements IStorage {
 
   async getTeamMember(id: string): Promise<TeamMember | undefined> {
     const [member] = await db.select().from(teamMembers).where(eq(teamMembers.id, id));
+    return member;
+  }
+
+  async getTeamMemberByUserAndTeam(userId: string, teamId: string): Promise<TeamMember | undefined> {
+    const [member] = await db
+      .select()
+      .from(teamMembers)
+      .where(and(eq(teamMembers.userId, userId), eq(teamMembers.teamId, teamId)));
     return member;
   }
 
@@ -2961,6 +3084,1109 @@ export class DatabaseStorage implements IStorage {
       .limit(filters?.limit || 100);
     
     return results;
+  }
+
+  // ===== COMPREHENSIVE TEAM SCHEDULING IMPLEMENTATIONS =====
+
+  // Team Assignment operations implementation
+  async createTeamAssignment(assignmentData: InsertTeamAssignment): Promise<TeamAssignment> {
+    const [assignment] = await db.insert(teamAssignments).values(assignmentData).returning();
+    
+    // Update round-robin state if this is a round-robin assignment
+    if (assignmentData.assignmentType === 'round_robin') {
+      await this.updateRoundRobinAfterAssignment(
+        assignmentData.teamId, 
+        assignmentData.assignedMemberId!
+      );
+    }
+    
+    return assignment;
+  }
+
+  async getTeamAssignment(id: string): Promise<TeamAssignment | undefined> {
+    const [assignment] = await db.select().from(teamAssignments).where(eq(teamAssignments.id, id));
+    return assignment;
+  }
+
+  async getTeamAssignments(teamId: string, filters?: { status?: string; assignmentType?: string; limit?: number }): Promise<TeamAssignment[]> {
+    let query = db.select().from(teamAssignments).where(eq(teamAssignments.teamId, teamId));
+    
+    const conditions = [eq(teamAssignments.teamId, teamId)];
+    
+    if (filters?.status) {
+      conditions.push(eq(teamAssignments.status, filters.status));
+    }
+    
+    if (filters?.assignmentType) {
+      conditions.push(eq(teamAssignments.assignmentType, filters.assignmentType));
+    }
+    
+    return await db.select().from(teamAssignments)
+      .where(and(...conditions))
+      .orderBy(desc(teamAssignments.createdAt))
+      .limit(filters?.limit || 100);
+  }
+
+  async getAppointmentAssignment(appointmentId: string): Promise<TeamAssignment | undefined> {
+    const [assignment] = await db.select().from(teamAssignments)
+      .where(eq(teamAssignments.appointmentId, appointmentId));
+    return assignment;
+  }
+
+  async getMemberAssignments(memberId: string, filters?: { status?: string; dateFrom?: Date; dateTo?: Date }): Promise<TeamAssignment[]> {
+    const conditions = [eq(teamAssignments.assignedMemberId, memberId)];
+    
+    if (filters?.status) {
+      conditions.push(eq(teamAssignments.status, filters.status));
+    }
+    
+    if (filters?.dateFrom) {
+      conditions.push(gte(teamAssignments.assignedAt, filters.dateFrom));
+    }
+    
+    if (filters?.dateTo) {
+      conditions.push(lte(teamAssignments.assignedAt, filters.dateTo));
+    }
+    
+    return await db.select().from(teamAssignments)
+      .where(and(...conditions))
+      .orderBy(desc(teamAssignments.assignedAt));
+  }
+
+  async updateTeamAssignment(id: string, assignmentData: Partial<InsertTeamAssignment>): Promise<TeamAssignment> {
+    const [assignment] = await db
+      .update(teamAssignments)
+      .set({ ...assignmentData, updatedAt: new Date() })
+      .where(eq(teamAssignments.id, id))
+      .returning();
+    return assignment;
+  }
+
+  async deleteTeamAssignment(id: string): Promise<void> {
+    await db.delete(teamAssignments).where(eq(teamAssignments.id, id));
+  }
+
+  // Round-Robin State operations implementation
+  async getRoundRobinState(teamId: string, eventTypeId?: string): Promise<RoundRobinState | undefined> {
+    const conditions = [eq(roundRobinState.teamId, teamId)];
+    
+    if (eventTypeId) {
+      conditions.push(eq(roundRobinState.eventTypeId, eventTypeId));
+    }
+    
+    const [state] = await db.select().from(roundRobinState).where(and(...conditions));
+    return state;
+  }
+
+  async createRoundRobinState(stateData: InsertRoundRobinState): Promise<RoundRobinState> {
+    const [state] = await db.insert(roundRobinState).values(stateData).returning();
+    return state;
+  }
+
+  async updateRoundRobinState(id: string, stateData: Partial<InsertRoundRobinState>): Promise<RoundRobinState> {
+    const [state] = await db
+      .update(roundRobinState)
+      .set({ ...stateData, updatedAt: new Date() })
+      .where(eq(roundRobinState.id, id))
+      .returning();
+    return state;
+  }
+
+  async getNextRoundRobinAssignment(teamId: string, eventTypeId?: string, filters?: { requiredSkills?: string[]; excludeMembers?: string[] }): Promise<string | null> {
+    // Use database transaction with row-level locking for concurrency safety
+    return await db.transaction(async (tx) => {
+      // Get or create round-robin state WITH row-level lock to prevent race conditions
+      let state = await this.getRoundRobinStateWithLock(tx, teamId, eventTypeId);
+      
+      if (!state) {
+        // Initialize round-robin state
+        const teamMembersResult = await this.getTeamMembers(teamId);
+        const activeMembers = teamMembersResult.filter(m => m.status === 'active');
+        
+        if (activeMembers.length === 0) return null;
+        
+        const rotationOrder = activeMembers.map(m => m.userId!).filter(Boolean);
+        const memberCounts: Record<string, number> = {};
+        rotationOrder.forEach(id => memberCounts[id] = 0);
+        
+        // Create initial state within transaction
+        const [newState] = await tx.insert(roundRobinState).values({
+          teamId,
+          eventTypeId: eventTypeId || null,
+          currentIndex: 0,
+          rotationOrder: rotationOrder as any,
+          memberAssignmentCounts: memberCounts as any,
+          totalAssignments: 0
+        }).returning();
+        
+        state = newState;
+      }
+      
+      const rotationOrder = state.rotationOrder as string[];
+      const memberCounts = state.memberAssignmentCounts as Record<string, number>;
+      
+      // Filter available members based on criteria
+      let availableMembers = [...rotationOrder];
+      
+      if (filters?.excludeMembers) {
+        availableMembers = availableMembers.filter(id => !filters.excludeMembers!.includes(id));
+      }
+      
+      if (filters?.requiredSkills && filters.requiredSkills.length > 0) {
+        // Check which members have required skills
+        const membersWithSkills = await Promise.all(
+          availableMembers.map(async (memberId) => {
+            const memberSkills = await this.getMemberSkills(memberId);
+            const hasRequiredSkills = filters.requiredSkills!.every(skill =>
+              memberSkills.some(s => s.skillName === skill && s.proficiencyLevel >= 3)
+            );
+            return hasRequiredSkills ? memberId : null;
+          })
+        );
+        
+        availableMembers = membersWithSkills.filter(Boolean) as string[];
+      }
+      
+      if (availableMembers.length === 0) return null;
+      
+      // Find member with lowest assignment count
+      const lowestCount = Math.min(...availableMembers.map(id => memberCounts[id] || 0));
+      const candidateMembers = availableMembers.filter(id => (memberCounts[id] || 0) === lowestCount);
+      
+      // Select next member in rotation order among candidates
+      let selectedMember: string | null = null;
+      for (let i = state.currentIndex; i < rotationOrder.length + state.currentIndex; i++) {
+        const currentMember = rotationOrder[i % rotationOrder.length];
+        if (candidateMembers.includes(currentMember)) {
+          selectedMember = currentMember;
+          
+          // Update state atomically within the same transaction
+          const updatedMemberCounts = { ...memberCounts };
+          updatedMemberCounts[selectedMember] = (updatedMemberCounts[selectedMember] || 0) + 1;
+          
+          await tx
+            .update(roundRobinState)
+            .set({
+              currentIndex: (i + 1) % rotationOrder.length,
+              lastAssignedMemberId: selectedMember,
+              memberAssignmentCounts: updatedMemberCounts as any,
+              totalAssignments: state.totalAssignments + 1,
+              lastAssignedAt: new Date(),
+              updatedAt: new Date()
+            })
+            .where(eq(roundRobinState.id, state.id));
+          
+          break;
+        }
+      }
+      
+      return selectedMember;
+    });
+  }
+
+  // Helper method to get round-robin state with row-level lock
+  private async getRoundRobinStateWithLock(tx: any, teamId: string, eventTypeId?: string): Promise<RoundRobinState | undefined> {
+    const conditions = [eq(roundRobinState.teamId, teamId)];
+    
+    if (eventTypeId) {
+      conditions.push(eq(roundRobinState.eventTypeId, eventTypeId));
+    }
+    
+    // Use SELECT ... FOR UPDATE to acquire row-level lock and prevent race conditions
+    const [state] = await tx
+      .select()
+      .from(roundRobinState)
+      .where(and(...conditions))
+      .for('update');  // Critical: This locks the row until transaction completes
+    
+    return state;
+  }
+
+  private async updateRoundRobinAfterAssignment(teamId: string, assignedMemberId: string): Promise<void> {
+    const state = await this.getRoundRobinState(teamId);
+    if (!state) return;
+    
+    const memberCounts = state.memberAssignmentCounts as Record<string, number>;
+    memberCounts[assignedMemberId] = (memberCounts[assignedMemberId] || 0) + 1;
+    
+    await this.updateRoundRobinState(state.id, {
+      memberAssignmentCounts: memberCounts as any,
+      totalAssignments: state.totalAssignments + 1
+    });
+  }
+
+  async rebalanceRoundRobin(teamId: string, eventTypeId?: string): Promise<RoundRobinState> {
+    // Use database transaction with row-level locking for concurrency safety
+    return await db.transaction(async (tx) => {
+      const state = await this.getRoundRobinStateWithLock(tx, teamId, eventTypeId);
+      if (!state) throw new Error('Round-robin state not found');
+      
+      const memberCounts = state.memberAssignmentCounts as Record<string, number>;
+      const minCount = Math.min(...Object.values(memberCounts));
+      
+      // Reset counts to minimum for rebalancing
+      const rebalancedCounts: Record<string, number> = {};
+      Object.keys(memberCounts).forEach(memberId => {
+        rebalancedCounts[memberId] = minCount;
+      });
+      
+      const [updatedState] = await tx
+        .update(roundRobinState)
+        .set({
+          memberAssignmentCounts: rebalancedCounts as any,
+          currentIndex: 0,
+          updatedAt: new Date()
+        })
+        .where(eq(roundRobinState.id, state.id))
+        .returning();
+      
+      return updatedState;
+    });
+  }
+
+  async resetRoundRobin(teamId: string, eventTypeId?: string): Promise<RoundRobinState> {
+    // Use database transaction with row-level locking for concurrency safety
+    return await db.transaction(async (tx) => {
+      const state = await this.getRoundRobinStateWithLock(tx, teamId, eventTypeId);
+      if (!state) throw new Error('Round-robin state not found');
+      
+      const rotationOrder = state.rotationOrder as string[];
+      const resetCounts: Record<string, number> = {};
+      rotationOrder.forEach(id => resetCounts[id] = 0);
+      
+      const [updatedState] = await tx
+        .update(roundRobinState)
+        .set({
+          memberAssignmentCounts: resetCounts as any,
+          currentIndex: 0,
+          totalAssignments: 0,
+          lastResetAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(roundRobinState.id, state.id))
+        .returning();
+      
+      return updatedState;
+    });
+  }
+
+  // Lead Routing Rules operations implementation
+  async createLeadRoutingRule(ruleData: InsertLeadRoutingRule): Promise<LeadRoutingRule> {
+    const [rule] = await db.insert(leadRoutingRules).values(ruleData).returning();
+    return rule;
+  }
+
+  async getLeadRoutingRule(id: string): Promise<LeadRoutingRule | undefined> {
+    const [rule] = await db.select().from(leadRoutingRules).where(eq(leadRoutingRules.id, id));
+    return rule;
+  }
+
+  async getTeamRoutingRules(teamId: string, filters?: { isActive?: boolean; strategy?: string }): Promise<LeadRoutingRule[]> {
+    const conditions = [eq(leadRoutingRules.teamId, teamId)];
+    
+    if (filters?.isActive !== undefined) {
+      conditions.push(eq(leadRoutingRules.isActive, filters.isActive));
+    }
+    
+    if (filters?.strategy) {
+      conditions.push(eq(leadRoutingRules.assignmentStrategy, filters.strategy));
+    }
+    
+    return await db.select().from(leadRoutingRules)
+      .where(and(...conditions))
+      .orderBy(desc(leadRoutingRules.priority));
+  }
+
+  async updateLeadRoutingRule(id: string, ruleData: Partial<InsertLeadRoutingRule>): Promise<LeadRoutingRule> {
+    const [rule] = await db
+      .update(leadRoutingRules)
+      .set({ ...ruleData, updatedAt: new Date() })
+      .where(eq(leadRoutingRules.id, id))
+      .returning();
+    return rule;
+  }
+
+  async deleteLeadRoutingRule(id: string): Promise<void> {
+    await db.delete(leadRoutingRules).where(eq(leadRoutingRules.id, id));
+  }
+
+  async evaluateRoutingRules(teamId: string, context: any): Promise<{ memberId: string; ruleId: string; score: number } | null> {
+    const rules = await this.getTeamRoutingRules(teamId, { isActive: true });
+    const teamMembersResult = await this.getTeamMembers(teamId);
+    const activeMembers = teamMembersResult.filter(m => m.status === 'active' && m.userId);
+    
+    if (activeMembers.length === 0) return null;
+    
+    for (const rule of rules) {
+      const eligibleMembers = await this.evaluateRuleConditions(rule, activeMembers, context);
+      
+      if (eligibleMembers.length > 0) {
+        const bestMatch = await this.scoreAndSelectMember(rule, eligibleMembers, context);
+        if (bestMatch) {
+          // Update rule usage
+          await this.updateLeadRoutingRule(rule.id, {
+            usageCount: rule.usageCount + 1
+          });
+          
+          return {
+            memberId: bestMatch.memberId,
+            ruleId: rule.id,
+            score: bestMatch.score
+          };
+        }
+      }
+    }
+    
+    // Fallback to round-robin if no rules match
+    const fallbackMember = await this.getNextRoundRobinAssignment(teamId);
+    if (fallbackMember) {
+      return {
+        memberId: fallbackMember,
+        ruleId: 'fallback',
+        score: 0
+      };
+    }
+    
+    return null;
+  }
+
+  private async evaluateRuleConditions(rule: LeadRoutingRule, members: TeamMember[], context: any): Promise<TeamMember[]> {
+    const conditions = rule.conditions as any;
+    let eligibleMembers = [...members];
+    
+    // Filter by target members if specified
+    if (rule.targetMembers && (rule.targetMembers as string[]).length > 0) {
+      eligibleMembers = eligibleMembers.filter(m => 
+        (rule.targetMembers as string[]).includes(m.userId!)
+      );
+    }
+    
+    // Filter by required skills
+    if (rule.requiredSkills && (rule.requiredSkills as string[]).length > 0) {
+      const membersWithSkills = await Promise.all(
+        eligibleMembers.map(async (member) => {
+          const memberSkills = await this.getMemberSkills(member.id);
+          const hasRequiredSkills = (rule.requiredSkills as string[]).every(skill =>
+            memberSkills.some(s => s.skillName === skill && s.proficiencyLevel >= 3)
+          );
+          return hasRequiredSkills ? member : null;
+        })
+      );
+      
+      eligibleMembers = membersWithSkills.filter(Boolean) as TeamMember[];
+    }
+    
+    // Additional condition evaluation based on context
+    // This can be expanded based on specific business rules
+    
+    return eligibleMembers;
+  }
+
+  private async scoreAndSelectMember(rule: LeadRoutingRule, members: TeamMember[], context: any): Promise<{ memberId: string; score: number } | null> {
+    if (members.length === 0) return null;
+    
+    const scores = await Promise.all(
+      members.map(async (member) => {
+        let totalScore = 0;
+        
+        // Skill scoring
+        if (rule.requiredSkills && (rule.requiredSkills as string[]).length > 0) {
+          const memberSkills = await this.getMemberSkills(member.id);
+          const skillScore = this.calculateSkillScore(memberSkills, rule.requiredSkills as string[], rule.preferredSkills as string[]);
+          totalScore += skillScore * (rule.skillWeight / 100);
+        }
+        
+        // Availability scoring
+        const capacity = await this.getTeamMemberCapacity(member.id);
+        if (capacity) {
+          const availabilityScore = this.calculateAvailabilityScore(capacity);
+          totalScore += availabilityScore * (rule.availabilityWeight / 100);
+        }
+        
+        // Performance scoring
+        const analytics = await this.getAssignmentAnalytics(rule.teamId, member.userId!);
+        if (analytics.length > 0) {
+          const performanceScore = this.calculatePerformanceScore(analytics);
+          totalScore += performanceScore * (rule.performanceWeight / 100);
+        }
+        
+        return {
+          memberId: member.userId!,
+          score: totalScore
+        };
+      })
+    );
+    
+    // Return member with highest score
+    return scores.reduce((best, current) => 
+      current.score > best.score ? current : best
+    );
+  }
+
+  private calculateSkillScore(memberSkills: TeamMemberSkill[], required: string[], preferred: string[]): number {
+    let score = 0;
+    
+    required.forEach(skill => {
+      const memberSkill = memberSkills.find(s => s.skillName === skill);
+      if (memberSkill) {
+        score += memberSkill.proficiencyLevel * 20; // Up to 100 points for required skills
+      }
+    });
+    
+    preferred.forEach(skill => {
+      const memberSkill = memberSkills.find(s => s.skillName === skill);
+      if (memberSkill) {
+        score += memberSkill.proficiencyLevel * 10; // Up to 50 points for preferred skills
+      }
+    });
+    
+    return Math.min(score, 100); // Cap at 100
+  }
+
+  private calculateAvailabilityScore(capacity: TeamMemberCapacity): number {
+    const utilizationRate = (capacity.currentDailyLoad / capacity.maxDailyAppointments) * 100;
+    return Math.max(0, 100 - utilizationRate); // Higher score for lower utilization
+  }
+
+  private calculatePerformanceScore(analytics: AssignmentAnalytics[]): number {
+    if (analytics.length === 0) return 50; // Default score
+    
+    const latest = analytics[0];
+    let score = 0;
+    
+    if (latest.completedAssignments > 0) {
+      const completionRate = (latest.completedAssignments / latest.totalAssignments) * 100;
+      score += completionRate * 0.4;
+    }
+    
+    if (latest.clientSatisfactionScore > 0) {
+      score += (latest.clientSatisfactionScore / 5) * 100 * 0.6;
+    }
+    
+    return Math.min(score, 100);
+  }
+
+  // Team Member Skills operations implementation
+  async createTeamMemberSkill(skillData: InsertTeamMemberSkill): Promise<TeamMemberSkill> {
+    const [skill] = await db.insert(teamMemberSkills).values(skillData).returning();
+    return skill;
+  }
+
+  async getTeamMemberSkill(id: string): Promise<TeamMemberSkill | undefined> {
+    const [skill] = await db.select().from(teamMemberSkills).where(eq(teamMemberSkills.id, id));
+    return skill;
+  }
+
+  async getMemberSkills(teamMemberId: string, filters?: { category?: string; verified?: boolean }): Promise<TeamMemberSkill[]> {
+    const conditions = [eq(teamMemberSkills.teamMemberId, teamMemberId)];
+    
+    if (filters?.category) {
+      conditions.push(eq(teamMemberSkills.skillCategory, filters.category));
+    }
+    
+    if (filters?.verified !== undefined) {
+      conditions.push(eq(teamMemberSkills.isVerified, filters.verified));
+    }
+    
+    return await db.select().from(teamMemberSkills)
+      .where(and(...conditions))
+      .orderBy(desc(teamMemberSkills.proficiencyLevel));
+  }
+
+  async getTeamMembersBySkill(teamId: string, skillName: string, minLevel?: number): Promise<TeamMemberSkill[]> {
+    const conditions = [eq(teamMemberSkills.skillName, skillName)];
+    
+    if (minLevel) {
+      conditions.push(gte(teamMemberSkills.proficiencyLevel, minLevel));
+    }
+    
+    // Join with team members to filter by team
+    const results = await db
+      .select({
+        id: teamMemberSkills.id,
+        teamMemberId: teamMemberSkills.teamMemberId,
+        skillName: teamMemberSkills.skillName,
+        skillCategory: teamMemberSkills.skillCategory,
+        proficiencyLevel: teamMemberSkills.proficiencyLevel,
+        isVerified: teamMemberSkills.isVerified,
+        verifiedBy: teamMemberSkills.verifiedBy,
+        verificationDate: teamMemberSkills.verificationDate,
+        acquisitionDate: teamMemberSkills.acquisitionDate,
+        lastUsed: teamMemberSkills.lastUsed,
+        usageCount: teamMemberSkills.usageCount,
+        createdAt: teamMemberSkills.createdAt,
+        updatedAt: teamMemberSkills.updatedAt
+      })
+      .from(teamMemberSkills)
+      .leftJoin(teamMembers, eq(teamMemberSkills.teamMemberId, teamMembers.id))
+      .where(and(
+        eq(teamMembers.teamId, teamId),
+        ...conditions
+      ))
+      .orderBy(desc(teamMemberSkills.proficiencyLevel));
+    
+    return results;
+  }
+
+  async updateTeamMemberSkill(id: string, skillData: Partial<InsertTeamMemberSkill>): Promise<TeamMemberSkill> {
+    const [skill] = await db
+      .update(teamMemberSkills)
+      .set({ ...skillData, updatedAt: new Date() })
+      .where(eq(teamMemberSkills.id, id))
+      .returning();
+    return skill;
+  }
+
+  async deleteTeamMemberSkill(id: string): Promise<void> {
+    await db.delete(teamMemberSkills).where(eq(teamMemberSkills.id, id));
+  }
+
+  async verifyMemberSkill(id: string, verifiedBy: string): Promise<TeamMemberSkill> {
+    const [skill] = await db
+      .update(teamMemberSkills)
+      .set({
+        isVerified: true,
+        verifiedBy,
+        verificationDate: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(teamMemberSkills.id, id))
+      .returning();
+    return skill;
+  }
+
+  // Team Member Capacity operations implementation
+  async createTeamMemberCapacity(capacityData: InsertTeamMemberCapacity): Promise<TeamMemberCapacity> {
+    const [capacity] = await db.insert(teamMemberCapacity).values(capacityData).returning();
+    return capacity;
+  }
+
+  async getTeamMemberCapacity(teamMemberId: string): Promise<TeamMemberCapacity | undefined> {
+    const [capacity] = await db.select().from(teamMemberCapacity)
+      .where(eq(teamMemberCapacity.teamMemberId, teamMemberId))
+      .orderBy(desc(teamMemberCapacity.createdAt));
+    return capacity;
+  }
+
+  async updateTeamMemberCapacity(id: string, capacityData: Partial<InsertTeamMemberCapacity>): Promise<TeamMemberCapacity> {
+    const [capacity] = await db
+      .update(teamMemberCapacity)
+      .set({ ...capacityData, updatedAt: new Date() })
+      .where(eq(teamMemberCapacity.id, id))
+      .returning();
+    return capacity;
+  }
+
+  async deleteTeamMemberCapacity(id: string): Promise<void> {
+    await db.delete(teamMemberCapacity).where(eq(teamMemberCapacity.id, id));
+  }
+
+  async checkMemberCapacity(teamMemberId: string, appointmentDuration: number, appointmentDate: Date): Promise<{ available: boolean; reason?: string }> {
+    const capacity = await this.getTeamMemberCapacity(teamMemberId);
+    if (!capacity) {
+      return { available: true }; // No capacity restrictions
+    }
+    
+    const appointmentDay = new Date(appointmentDate);
+    appointmentDay.setHours(0, 0, 0, 0);
+    
+    // Check daily capacity
+    if (capacity.currentDailyLoad >= capacity.maxDailyAppointments) {
+      return { available: false, reason: 'Daily appointment limit reached' };
+    }
+    
+    // Check appointment duration limits
+    if (appointmentDuration > capacity.maxAppointmentDuration) {
+      return { available: false, reason: 'Appointment duration exceeds member limit' };
+    }
+    
+    if (appointmentDuration < capacity.minAppointmentDuration) {
+      return { available: false, reason: 'Appointment duration below member minimum' };
+    }
+    
+    return { available: true };
+  }
+
+  async updateMemberWorkload(teamMemberId: string, increment: number): Promise<TeamMemberCapacity> {
+    const capacity = await this.getTeamMemberCapacity(teamMemberId);
+    if (!capacity) {
+      throw new Error('Member capacity not found');
+    }
+    
+    const newDailyLoad = Math.max(0, capacity.currentDailyLoad + increment);
+    const newWeeklyLoad = Math.max(0, capacity.currentWeeklyLoad + increment);
+    
+    return await this.updateTeamMemberCapacity(capacity.id, {
+      currentDailyLoad: newDailyLoad,
+      currentWeeklyLoad: newWeeklyLoad,
+      lastLoadUpdate: new Date()
+    });
+  }
+
+  // Team Availability Patterns operations implementation
+  async createTeamAvailabilityPattern(patternData: InsertTeamAvailabilityPattern): Promise<TeamAvailabilityPattern> {
+    const [pattern] = await db.insert(teamAvailabilityPatterns).values(patternData).returning();
+    return pattern;
+  }
+
+  async getTeamAvailabilityPattern(id: string): Promise<TeamAvailabilityPattern | undefined> {
+    const [pattern] = await db.select().from(teamAvailabilityPatterns).where(eq(teamAvailabilityPatterns.id, id));
+    return pattern;
+  }
+
+  async getTeamAvailabilityPatterns(teamId: string, filters?: { isActive?: boolean; patternType?: string }): Promise<TeamAvailabilityPattern[]> {
+    const conditions = [eq(teamAvailabilityPatterns.teamId, teamId)];
+    
+    if (filters?.isActive !== undefined) {
+      conditions.push(eq(teamAvailabilityPatterns.isActive, filters.isActive));
+    }
+    
+    if (filters?.patternType) {
+      conditions.push(eq(teamAvailabilityPatterns.patternType, filters.patternType));
+    }
+    
+    return await db.select().from(teamAvailabilityPatterns)
+      .where(and(...conditions))
+      .orderBy(desc(teamAvailabilityPatterns.priority));
+  }
+
+  async updateTeamAvailabilityPattern(id: string, patternData: Partial<InsertTeamAvailabilityPattern>): Promise<TeamAvailabilityPattern> {
+    const [pattern] = await db
+      .update(teamAvailabilityPatterns)
+      .set({ ...patternData, updatedAt: new Date() })
+      .where(eq(teamAvailabilityPatterns.id, id))
+      .returning();
+    return pattern;
+  }
+
+  async deleteTeamAvailabilityPattern(id: string): Promise<void> {
+    await db.delete(teamAvailabilityPatterns).where(eq(teamAvailabilityPatterns.id, id));
+  }
+
+  async getCollectiveAvailability(teamId: string, date: Date, duration: number): Promise<{
+    timeSlot: string;
+    availableMembers: string[];
+    minimumMet: boolean;
+    preferredMet: boolean;
+  }[]> {
+    const patterns = await this.getTeamAvailabilityPatterns(teamId, { isActive: true });
+    const teamMembersResult = await this.getTeamMembers(teamId);
+    const activeMembers = teamMembersResult.filter(m => m.status === 'active' && m.userId);
+    
+    const weekday = date.toLocaleDateString('en', { weekday: 'lowercase' }) as any;
+    const results: Array<{
+      timeSlot: string;
+      availableMembers: string[];
+      minimumMet: boolean;
+      preferredMet: boolean;
+    }> = [];
+    
+    // Generate time slots for the day (e.g., every 30 minutes from 9 AM to 5 PM)
+    const startHour = 9;
+    const endHour = 17;
+    const slotDuration = 30; // minutes
+    
+    for (let hour = startHour; hour < endHour; hour++) {
+      for (let minute = 0; minute < 60; minute += slotDuration) {
+        const timeSlot = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        const availableMembers: string[] = [];
+        
+        // Check each member's availability for this time slot
+        for (const member of activeMembers) {
+          const isAvailable = await this.isMemberAvailableAtTime(member.userId!, date, timeSlot, duration);
+          if (isAvailable) {
+            availableMembers.push(member.userId!);
+          }
+        }
+        
+        // Evaluate against patterns
+        let minimumMet = true;
+        let preferredMet = true;
+        
+        for (const pattern of patterns) {
+          const weekdayPatterns = pattern.weekdayPatterns as any;
+          const dayPattern = weekdayPatterns[weekday];
+          
+          if (dayPattern) {
+            // Check minimum members requirement
+            if (dayPattern.minMembers && availableMembers.length < dayPattern.minMembers) {
+              minimumMet = false;
+            }
+            
+            // Check preferred members
+            if (dayPattern.preferredMembers && dayPattern.preferredMembers.length > 0) {
+              const preferredAvailable = dayPattern.preferredMembers.filter((id: string) => 
+                availableMembers.includes(id)
+              );
+              if (preferredAvailable.length === 0) {
+                preferredMet = false;
+              }
+            }
+          }
+        }
+        
+        results.push({
+          timeSlot,
+          availableMembers,
+          minimumMet,
+          preferredMet
+        });
+      }
+    }
+    
+    return results;
+  }
+
+  private async isMemberAvailableAtTime(userId: string, date: Date, timeSlot: string, duration: number): Promise<boolean> {
+    // Check member's individual availability schedule
+    const weekday = date.toLocaleDateString('en', { weekday: 'lowercase' }) as any;
+    
+    const availability = await db.select().from(teamMemberAvailability)
+      .where(and(
+        eq(teamMemberAvailability.userId, userId),
+        eq(teamMemberAvailability.weekday, weekday)
+      ));
+    
+    for (const slot of availability) {
+      if (this.isTimeInRange(timeSlot, slot.startTime, slot.endTime)) {
+        // Check if member has capacity for this appointment
+        const member = await db.select().from(teamMembers)
+          .where(eq(teamMembers.userId, userId))
+          .limit(1);
+        
+        if (member.length > 0) {
+          const capacity = await this.checkMemberCapacity(member[0].id, duration, date);
+          return capacity.available;
+        }
+      }
+    }
+    
+    return false;
+  }
+
+  private isTimeInRange(timeSlot: string, startTime: string, endTime: string): boolean {
+    const [slotHour, slotMinute] = timeSlot.split(':').map(Number);
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    
+    const slotMinutes = slotHour * 60 + slotMinute;
+    const startMinutes = startHour * 60 + startMinute;
+    const endMinutes = endHour * 60 + endMinute;
+    
+    return slotMinutes >= startMinutes && slotMinutes < endMinutes;
+  }
+
+  // Assignment Analytics operations implementation
+  async createAssignmentAnalytics(analyticsData: InsertAssignmentAnalytics): Promise<AssignmentAnalytics> {
+    const [analytics] = await db.insert(assignmentAnalytics).values(analyticsData).returning();
+    return analytics;
+  }
+
+  async getAssignmentAnalytics(teamId: string, memberId?: string, periodType?: string, periodStart?: Date): Promise<AssignmentAnalytics[]> {
+    const conditions = [eq(assignmentAnalytics.teamId, teamId)];
+    
+    if (memberId) {
+      conditions.push(eq(assignmentAnalytics.teamMemberId, memberId));
+    }
+    
+    if (periodType) {
+      conditions.push(eq(assignmentAnalytics.periodType, periodType));
+    }
+    
+    if (periodStart) {
+      conditions.push(eq(assignmentAnalytics.periodStart, periodStart));
+    }
+    
+    return await db.select().from(assignmentAnalytics)
+      .where(and(...conditions))
+      .orderBy(desc(assignmentAnalytics.periodStart));
+  }
+
+  async updateAssignmentAnalytics(id: string, analyticsData: Partial<InsertAssignmentAnalytics>): Promise<AssignmentAnalytics> {
+    const [analytics] = await db
+      .update(assignmentAnalytics)
+      .set(analyticsData)
+      .where(eq(assignmentAnalytics.id, id))
+      .returning();
+    return analytics;
+  }
+
+  async generateMemberAnalytics(teamMemberId: string, periodType: string): Promise<AssignmentAnalytics> {
+    // Implementation would calculate analytics for the specified period
+    // This is a complex calculation that would aggregate data from assignments, appointments, etc.
+    const now = new Date();
+    let periodStart: Date;
+    let periodEnd: Date;
+    
+    switch (periodType) {
+      case 'daily':
+        periodStart = new Date(now);
+        periodStart.setHours(0, 0, 0, 0);
+        periodEnd = new Date(periodStart);
+        periodEnd.setDate(periodEnd.getDate() + 1);
+        break;
+      case 'weekly':
+        periodStart = new Date(now);
+        periodStart.setDate(now.getDate() - now.getDay());
+        periodStart.setHours(0, 0, 0, 0);
+        periodEnd = new Date(periodStart);
+        periodEnd.setDate(periodEnd.getDate() + 7);
+        break;
+      case 'monthly':
+        periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        break;
+      default:
+        throw new Error('Invalid period type');
+    }
+    
+    // Get team ID from team member
+    const member = await this.getTeamMember(teamMemberId);
+    if (!member) throw new Error('Team member not found');
+    
+    // Calculate analytics (simplified implementation)
+    const assignments = await this.getMemberAssignments(member.userId!, {
+      dateFrom: periodStart,
+      dateTo: periodEnd
+    });
+    
+    const analyticsData: InsertAssignmentAnalytics = {
+      teamId: member.teamId,
+      teamMemberId: member.userId!,
+      periodType,
+      periodStart,
+      periodEnd,
+      totalAssignments: assignments.length,
+      completedAssignments: assignments.filter(a => a.status === 'accepted').length,
+      cancelledAssignments: assignments.filter(a => a.status === 'rejected').length,
+      utilizationRate: 75, // This would be calculated based on actual data
+    };
+    
+    return await this.createAssignmentAnalytics(analyticsData);
+  }
+
+  async getTeamPerformanceMetrics(teamId: string, dateRange?: { from: Date; to: Date }): Promise<{
+    totalAssignments: number;
+    completionRate: number;
+    averageResponseTime: number;
+    memberDistribution: Record<string, number>;
+    revenueGenerated: number;
+  }> {
+    const conditions = [eq(teamAssignments.teamId, teamId)];
+    
+    if (dateRange) {
+      conditions.push(gte(teamAssignments.assignedAt, dateRange.from));
+      conditions.push(lte(teamAssignments.assignedAt, dateRange.to));
+    }
+    
+    const assignments = await db.select().from(teamAssignments)
+      .where(and(...conditions));
+    
+    const totalAssignments = assignments.length;
+    const completedAssignments = assignments.filter(a => a.status === 'accepted').length;
+    const completionRate = totalAssignments > 0 ? (completedAssignments / totalAssignments) * 100 : 0;
+    
+    // Calculate member distribution
+    const memberDistribution: Record<string, number> = {};
+    assignments.forEach(assignment => {
+      if (assignment.assignedMemberId) {
+        memberDistribution[assignment.assignedMemberId] = (memberDistribution[assignment.assignedMemberId] || 0) + 1;
+      }
+    });
+    
+    return {
+      totalAssignments,
+      completionRate,
+      averageResponseTime: 0, // Would be calculated from actual response time data
+      memberDistribution,
+      revenueGenerated: 0, // Would be calculated from appointment values
+    };
+  }
+
+  // Routing Analytics operations implementation
+  async createRoutingAnalytics(analyticsData: InsertRoutingAnalytics): Promise<RoutingAnalytics> {
+    const [analytics] = await db.insert(routingAnalytics).values(analyticsData).returning();
+    return analytics;
+  }
+
+  async getRoutingAnalytics(teamId: string, filters?: { ruleId?: string; dateFrom?: Date; dateTo?: Date }): Promise<RoutingAnalytics[]> {
+    const conditions = [eq(routingAnalytics.teamId, teamId)];
+    
+    if (filters?.ruleId) {
+      conditions.push(eq(routingAnalytics.routingRuleId, filters.ruleId));
+    }
+    
+    if (filters?.dateFrom) {
+      conditions.push(gte(routingAnalytics.createdAt, filters.dateFrom));
+    }
+    
+    if (filters?.dateTo) {
+      conditions.push(lte(routingAnalytics.createdAt, filters.dateTo));
+    }
+    
+    return await db.select().from(routingAnalytics)
+      .where(and(...conditions))
+      .orderBy(desc(routingAnalytics.createdAt));
+  }
+
+  async getRulePerformance(ruleId: string, dateRange?: { from: Date; to: Date }): Promise<{
+    usageCount: number;
+    successRate: number;
+    averageSatisfaction: number;
+    totalRevenue: number;
+    averageRoutingTime: number;
+  }> {
+    const conditions = [eq(routingAnalytics.routingRuleId, ruleId)];
+    
+    if (dateRange) {
+      conditions.push(gte(routingAnalytics.createdAt, dateRange.from));
+      conditions.push(lte(routingAnalytics.createdAt, dateRange.to));
+    }
+    
+    const analytics = await db.select().from(routingAnalytics)
+      .where(and(...conditions));
+    
+    const usageCount = analytics.length;
+    const successfulAssignments = analytics.filter(a => a.appointmentStatus === 'completed').length;
+    const successRate = usageCount > 0 ? (successfulAssignments / usageCount) * 100 : 0;
+    
+    const totalSatisfaction = analytics.reduce((sum, a) => sum + (a.clientSatisfaction || 0), 0);
+    const averageSatisfaction = usageCount > 0 ? totalSatisfaction / usageCount : 0;
+    
+    const totalRevenue = analytics.reduce((sum, a) => sum + (a.appointmentValue || 0), 0);
+    
+    const totalRoutingTime = analytics.reduce((sum, a) => sum + (a.routingTime || 0), 0);
+    const averageRoutingTime = usageCount > 0 ? totalRoutingTime / usageCount : 0;
+    
+    return {
+      usageCount,
+      successRate,
+      averageSatisfaction,
+      totalRevenue,
+      averageRoutingTime
+    };
+  }
+
+  // Advanced Team Scheduling operations implementation
+  async findOptimalAssignment(teamId: string, appointmentContext: {
+    eventTypeId: string;
+    duration: number;
+    scheduledTime: Date;
+    clientInfo?: any;
+    requiredSkills?: string[];
+    preferredMembers?: string[];
+  }): Promise<{
+    recommendedMemberId: string;
+    score: number;
+    reasoning: string;
+    alternatives: Array<{ memberId: string; score: number }>;
+  } | null> {
+    
+    // First try routing rules
+    const routingResult = await this.evaluateRoutingRules(teamId, appointmentContext);
+    if (routingResult) {
+      const alternatives = await this.getAlternativeAssignments(teamId, appointmentContext, routingResult.memberId);
+      
+      return {
+        recommendedMemberId: routingResult.memberId,
+        score: routingResult.score,
+        reasoning: `Selected via routing rule ${routingResult.ruleId}`,
+        alternatives
+      };
+    }
+    
+    // Fallback to round-robin
+    const roundRobinMember = await this.getNextRoundRobinAssignment(
+      teamId,
+      appointmentContext.eventTypeId,
+      {
+        requiredSkills: appointmentContext.requiredSkills,
+        excludeMembers: []
+      }
+    );
+    
+    if (roundRobinMember) {
+      const alternatives = await this.getAlternativeAssignments(teamId, appointmentContext, roundRobinMember);
+      
+      return {
+        recommendedMemberId: roundRobinMember,
+        score: 50, // Default round-robin score
+        reasoning: 'Selected via round-robin assignment',
+        alternatives
+      };
+    }
+    
+    return null;
+  }
+
+  private async getAlternativeAssignments(teamId: string, context: any, excludeMember: string): Promise<Array<{ memberId: string; score: number }>> {
+    const teamMembersResult = await this.getTeamMembers(teamId);
+    const alternatives = teamMembersResult
+      .filter(m => m.status === 'active' && m.userId && m.userId !== excludeMember)
+      .slice(0, 3) // Top 3 alternatives
+      .map(member => ({
+        memberId: member.userId!,
+        score: Math.floor(Math.random() * 80) + 10 // Simplified scoring
+      }))
+      .sort((a, b) => b.score - a.score);
+    
+    return alternatives;
+  }
+
+  async getTeamSchedulingStats(teamId: string): Promise<{
+    totalMembers: number;
+    activeMembers: number;
+    averageUtilization: number;
+    roundRobinBalance: number;
+    routingEfficiency: number;
+    memberCapacities: Record<string, { current: number; maximum: number }>;
+  }> {
+    const teamMembersResult = await this.getTeamMembers(teamId);
+    const totalMembers = teamMembersResult.length;
+    const activeMembers = teamMembersResult.filter(m => m.status === 'active').length;
+    
+    // Calculate average utilization
+    let totalUtilization = 0;
+    const memberCapacities: Record<string, { current: number; maximum: number }> = {};
+    
+    for (const member of teamMembersResult.filter(m => m.status === 'active' && m.userId)) {
+      const capacity = await this.getTeamMemberCapacity(member.id);
+      if (capacity) {
+        const utilization = capacity.maxDailyAppointments > 0 
+          ? (capacity.currentDailyLoad / capacity.maxDailyAppointments) * 100
+          : 0;
+        totalUtilization += utilization;
+        
+        memberCapacities[member.userId!] = {
+          current: capacity.currentDailyLoad,
+          maximum: capacity.maxDailyAppointments
+        };
+      }
+    }
+    
+    const averageUtilization = activeMembers > 0 ? totalUtilization / activeMembers : 0;
+    
+    // Calculate round-robin balance
+    const rrState = await this.getRoundRobinState(teamId);
+    let roundRobinBalance = 100; // Default to perfect balance
+    
+    if (rrState) {
+      const counts = Object.values(rrState.memberAssignmentCounts as Record<string, number>);
+      if (counts.length > 1) {
+        const max = Math.max(...counts);
+        const min = Math.min(...counts);
+        roundRobinBalance = max > 0 ? (1 - (max - min) / max) * 100 : 100;
+      }
+    }
+    
+    return {
+      totalMembers,
+      activeMembers,
+      averageUtilization,
+      roundRobinBalance,
+      routingEfficiency: 85, // This would be calculated from routing analytics
+      memberCapacities
+    };
   }
 }
 
