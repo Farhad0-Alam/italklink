@@ -225,7 +225,7 @@ export default function AvailabilityManagement() {
                 </DialogHeader>
                 <AvailabilityPreview
                   settings={currentSettings}
-                  eventTypes={eventTypes}
+                  eventTypes={eventTypes || []}
                 />
               </DialogContent>
             </Dialog>
@@ -413,7 +413,7 @@ export default function AvailabilityManagement() {
               <CardContent>
                 <AvailabilityPreview
                   settings={currentSettings}
-                  eventTypes={eventTypes}
+                  eventTypes={eventTypes || []}
                 />
               </CardContent>
             </Card>
