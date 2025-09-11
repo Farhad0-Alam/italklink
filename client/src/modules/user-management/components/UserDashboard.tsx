@@ -236,7 +236,7 @@ export default function Dashboard() {
                   Templates
                 </Link>
                 <Link href="/collections" className="text-gray-500 hover:text-gray-700">
-                  Collections
+                  Appointments
                 </Link>
                 <Link href="/affiliate" className="text-gray-500 hover:text-gray-700">
                   Affiliate
