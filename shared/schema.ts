@@ -10,6 +10,7 @@ import {
   pgTable,
   serial,
   text,
+  time,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -1793,36 +1794,18 @@ export const appointmentEventTypes = pgTable("appointment_event_types", {
   index("idx_event_types_public").on(table.isPublic),
 ]);
 
-// Team member availability schedules
+// Team member availability schedules (matches existing DB structure)
 export const teamMemberAvailability = pgTable("team_member_availability", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
-  eventTypeId: varchar("event_type_id").references(() => appointmentEventTypes.id, { onDelete: 'cascade' }),
-  
-  // Day-specific availability
-  weekday: weekdayEnum("weekday").notNull(),
-  startTime: varchar("start_time").notNull(), // HH:MM format
-  endTime: varchar("end_time").notNull(), // HH:MM format
+  id: varchar("id").primaryKey(),
+  teamMemberId: varchar("team_member_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  dayOfWeek: integer("day_of_week").notNull(), // 0-6 (Sunday-Saturday)
+  startTime: time("start_time").notNull(), // time without time zone
+  endTime: time("end_time").notNull(), // time without time zone
+  isAvailable: boolean("is_available").default(true),
   timezone: varchar("timezone").default('UTC'),
-  
-  // Availability type
-  type: availabilityTypeEnum("type").default('available'),
-  
-  // Date range (optional - for temporary overrides)
-  effectiveFrom: timestamp("effective_from"),
-  effectiveTo: timestamp("effective_to"),
-  
-  // Override settings
-  isOverride: boolean("is_override").default(false), // true for temporary changes
-  overrideDate: timestamp("override_date"), // specific date override
-  
   createdAt: timestamp("created_at").defaultNow(),
-}, (table) => [
-  index("idx_availability_user").on(table.userId),
-  index("idx_availability_event_type").on(table.eventTypeId),
-  index("idx_availability_weekday").on(table.weekday),
-  index("idx_availability_date").on(table.overrideDate),
-]);
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 // Blackout dates and time-off
 export const blackoutDates = pgTable("blackout_dates", {
