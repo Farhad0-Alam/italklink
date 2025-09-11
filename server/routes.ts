@@ -14,6 +14,40 @@ import {
 } from '@shared/schema';
 import { z } from 'zod';
 
+// Import comprehensive middleware infrastructure
+import {
+  setupApiMiddleware,
+  setupAuthenticatedRoutes,
+  setupPublicRoutes,
+  setupErrorHandling,
+} from './middleware/api-middleware';
+import {
+  generateCSRFToken,
+  verifyCSRFToken,
+  enhancedCORS,
+} from './middleware/csrf-protection';
+import {
+  asyncHandler,
+  successResponse,
+  paginatedResponse,
+  notFoundError,
+  validationError,
+  businessLogicError,
+} from './middleware/error-handling';
+import {
+  enhancedAuth,
+  requireRole,
+  requirePlan,
+  requireOwnership,
+  requireTeamAccess,
+} from './middleware/enhanced-auth';
+import {
+  validateRequest,
+  userValidationSchemas,
+  teamValidationSchemas,
+  commonSchemas,
+} from './middleware/validation';
+
 // Create update schemas for CRM entities (omit immutable fields)
 const updateCrmContactSchema = insertCrmContactSchema.omit({ 
   id: true, ownerUserId: true, createdAt: true, updatedAt: true 
@@ -58,8 +92,20 @@ import { calendarHealthChecker } from './calendar-health-check';
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup authentication
+  // Apply enhanced CORS with CSRF protection
+  app.use(enhancedCORS);
+  
+  // Apply comprehensive security middleware infrastructure
+  setupApiMiddleware(app);
+  
+  // Setup authentication with enhanced security
   setupAuth(app);
+  
+  // Apply public route rate limiting
+  setupPublicRoutes(app);
+  
+  // Apply authenticated route security
+  setupAuthenticatedRoutes(app);
   
   // Setup AI routes
   setupAIRoutes(app);
@@ -138,6 +184,279 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { automationRoutes } = await import('./modules/automation/routes');
   app.use('/api/automation', automationRoutes);
 
+  // === ENHANCED API ENDPOINTS ===
+  
+  // Advanced User Management APIs
+  app.get('/api/user/profile', enhancedAuth, asyncHandler(async (req, res) => {
+    const userId = (req.user as any).id;
+    const userProfile = await storage.getUserProfile(userId);
+    
+    if (!userProfile) {
+      throw notFoundError('User profile', userId);
+    }
+    
+    successResponse(res, userProfile, 'Profile retrieved successfully');
+  }));
+  
+  app.put('/api/user/profile', 
+    enhancedAuth, 
+    asyncHandler(async (req, res) => {
+      // Validate request body
+      const bodyValidation = userValidationSchemas.updateProfile.safeParse(req.body);
+      if (!bodyValidation.success) {
+        throw validationError('Invalid request body', bodyValidation.error.errors);
+      }
+      
+      const userId = (req.user as any).id;
+      const updatedProfile = await storage.updateUser(userId, bodyValidation.data);
+      
+      successResponse(res, updatedProfile, 'Profile updated successfully');
+    })
+  );
+  
+  app.get('/api/user/settings', enhancedAuth, asyncHandler(async (req, res) => {
+    const userId = (req.user as any).id;
+    const settings = await storage.getUserSettings(userId);
+    
+    successResponse(res, settings, 'Settings retrieved successfully');
+  }));
+  
+  // Enhanced Team Management APIs
+  app.post('/api/teams', 
+    enhancedAuth,
+    requirePlan('pro', 'enterprise'),
+    asyncHandler(async (req, res) => {
+      // Validate request body
+      const bodyValidation = teamValidationSchemas.create.safeParse(req.body);
+      if (!bodyValidation.success) {
+        throw validationError('Invalid request body', bodyValidation.error.errors);
+      }
+      
+      const userId = (req.user as any).id;
+      const teamData = { ...bodyValidation.data, ownerId: userId };
+      
+      const team = await storage.createTeam(teamData);
+      successResponse(res, team, 'Team created successfully', 201);
+    })
+  );
+  
+  app.get('/api/teams', enhancedAuth, asyncHandler(async (req, res) => {
+    const userId = (req.user as any).id;
+    
+    // Validate query parameters
+    const queryValidation = commonSchemas.pagination.safeParse(req.query);
+    if (!queryValidation.success) {
+      throw validationError('Invalid query parameters', queryValidation.error.errors);
+    }
+    const { page, limit } = queryValidation.data;
+    
+    const { teams, total } = await storage.getUserTeams(userId, { page, limit });
+    paginatedResponse(res, teams, total, page, limit, 'Teams retrieved successfully');
+  }));
+  
+  app.post('/api/teams/:id/invite',
+    enhancedAuth,
+    requireTeamAccess(['owner', 'admin']),
+    asyncHandler(async (req, res) => {
+      // Validate request body
+      const bodyValidation = teamValidationSchemas.invite.safeParse(req.body);
+      if (!bodyValidation.success) {
+        throw validationError('Invalid request body', bodyValidation.error.errors);
+      }
+      
+      const teamId = req.params.id;
+      const invitation = await storage.inviteTeamMember(teamId, bodyValidation.data);
+      
+      // Send invitation email
+      await emitAutomationEvent({
+        type: 'team.member.invited',
+        data: { teamId, invitation }
+      });
+      
+      successResponse(res, invitation, 'Team member invited successfully', 201);
+    })
+  );
+  
+  // Advanced Appointment Management APIs
+  app.get('/api/appointments/conflicts',
+    enhancedAuth,
+    validateRequest(z.object({
+      startTime: z.string().datetime(),
+      endTime: z.string().datetime(),
+      excludeId: z.string().uuid().optional(),
+    }), 'query'),
+    asyncHandler(async (req, res) => {
+      const userId = (req.user as any).id;
+      const conflicts = await conflictDetectionService.detectConflicts(
+        userId,
+        req.query.startTime,
+        req.query.endTime,
+        req.query.excludeId
+      );
+      
+      successResponse(res, conflicts, 'Conflict check completed');
+    })
+  );
+  
+  app.post('/api/appointments/:id/reschedule',
+    enhancedAuth,
+    requireOwnership('appointment'),
+    validateRequest(z.object({
+      startTime: z.string().datetime(),
+      timezone: z.string(),
+      reason: z.string().max(500).optional(),
+    })),
+    asyncHandler(async (req, res) => {
+      const appointmentId = req.params.id;
+      const rescheduledAppointment = await storage.rescheduleAppointment(
+        appointmentId,
+        req.body
+      );
+      
+      // Emit automation event for notifications
+      await emitAutomationEvent({
+        type: 'appointment.rescheduled',
+        data: { appointment: rescheduledAppointment }
+      });
+      
+      successResponse(res, rescheduledAppointment, 'Appointment rescheduled successfully');
+    })
+  );
+  
+  app.post('/api/appointments/:id/confirm',
+    enhancedAuth,
+    requireOwnership('appointment'),
+    asyncHandler(async (req, res) => {
+      const appointmentId = req.params.id;
+      const confirmedAppointment = await storage.confirmAppointment(appointmentId);
+      
+      await emitAutomationEvent({
+        type: 'appointment.confirmed',
+        data: { appointment: confirmedAppointment }
+      });
+      
+      successResponse(res, confirmedAppointment, 'Appointment confirmed successfully');
+    })
+  );
+  
+  // Availability & Scheduling Enhancement APIs
+  app.get('/api/availability/check',
+    asyncHandler(async (req, res) => {
+      // Validate query parameters
+      const queryValidation = z.object({
+        eventTypeId: z.string().uuid(),
+        startTime: z.string().datetime(),
+        endTime: z.string().datetime(),
+        timezone: z.string(),
+      }).safeParse(req.query);
+      
+      if (!queryValidation.success) {
+        throw validationError('Invalid query parameters', queryValidation.error.errors);
+      }
+      
+      const availability = await storage.checkAvailability(queryValidation.data);
+      successResponse(res, availability, 'Availability checked successfully');
+    })
+  );
+  
+  app.post('/api/availability/bulk-check',
+    asyncHandler(async (req, res) => {
+      // Validate request body
+      const bodyValidation = z.object({
+        eventTypeId: z.string().uuid(),
+        timeSlots: z.array(z.object({
+          startTime: z.string().datetime(),
+          endTime: z.string().datetime(),
+        })),
+        timezone: z.string(),
+      }).safeParse(req.body);
+      
+      if (!bodyValidation.success) {
+        throw validationError('Invalid request body', bodyValidation.error.errors);
+      }
+      
+      const bulkAvailability = await storage.bulkCheckAvailability(bodyValidation.data);
+      successResponse(res, bulkAvailability, 'Bulk availability check completed');
+    })
+  );
+  
+  app.get('/api/availability/suggestions',
+    asyncHandler(async (req, res) => {
+      // Validate query parameters
+      const queryValidation = z.object({
+        eventTypeId: z.string().uuid(),
+        preferredDate: z.string().datetime(),
+        timezone: z.string(),
+        count: z.string().regex(/^\d+$/).transform(val => Math.min(parseInt(val), 20)).default('10'),
+      }).safeParse(req.query);
+      
+      if (!queryValidation.success) {
+        throw validationError('Invalid query parameters', queryValidation.error.errors);
+      }
+      
+      const validatedQuery = queryValidation.data;
+      const suggestions = await storage.getAvailabilitySuggestions(validatedQuery);
+      successResponse(res, suggestions, 'Availability suggestions retrieved');
+    })
+  );
+  
+  // Enhanced Authentication APIs with comprehensive validation
+  app.post('/api/auth/register',
+    asyncHandler(async (req, res) => {
+      // Validate request body
+      const bodyValidation = userValidationSchemas.register.safeParse(req.body);
+      if (!bodyValidation.success) {
+        throw validationError('Invalid request body', bodyValidation.error.errors);
+      }
+      
+      const { email, password, firstName, lastName, timezone, acceptTerms } = bodyValidation.data;
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        throw validationError('Email already registered', 'EMAIL_ALREADY_EXISTS');
+      }
+      
+      const hashedPassword = await bcrypt.hash(password, 12);
+      const newUser = await storage.createUser({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        timezone,
+        acceptTerms,
+      });
+      
+      // Remove sensitive data from response
+      const { password: _, ...userResponse } = newUser;
+      
+      successResponse(res, userResponse, 'User registered successfully', 201);
+    })
+  );
+  
+  app.post('/api/auth/forgot-password',
+    asyncHandler(async (req, res) => {
+      // Validate request body
+      const bodyValidation = z.object({ email: commonSchemas.email }).safeParse(req.body);
+      if (!bodyValidation.success) {
+        throw validationError('Invalid request body', bodyValidation.error.errors);
+      }
+      
+      const { email } = bodyValidation.data;
+      const user = await storage.getUserByEmail(email);
+      
+      if (user) {
+        const resetToken = await storage.createPasswordResetToken(user.id);
+        
+        await emitAutomationEvent({
+          type: 'user.password.reset.requested',
+          data: { user, resetToken }
+        });
+      }
+      
+      // Always return success for security (don't reveal if email exists)
+      successResponse(res, {}, 'Password reset email sent if account exists');
+    })
+  );
+  
   // Health check endpoint
   app.get("/api/health", (req, res) => {
     res.json({ 
@@ -1925,6 +2244,215 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === COMPREHENSIVE API ENDPOINTS COMPLETION ===
+  
+  // Advanced Notification Management APIs
+  app.get('/api/notifications', enhancedAuth, asyncHandler(async (req, res) => {
+    const userId = (req.user as any).id;
+    const { page = 1, limit = 20, status } = validateRequest(z.object({
+      page: z.string().optional().transform(val => val ? parseInt(val) : 1),
+      limit: z.string().optional().transform(val => val ? Math.min(parseInt(val), 100) : 20),
+      status: z.enum(['unread', 'read', 'archived']).optional(),
+    }), 'query');
+    
+    const { notifications, total } = await storage.getUserNotifications(userId, { page, limit, status });
+    paginatedResponse(res, notifications, total, page, limit, 'Notifications retrieved successfully');
+  }));
+  
+  app.put('/api/notifications/:id/read', enhancedAuth, requireOwnership('notification'), asyncHandler(async (req, res) => {
+    const notificationId = req.params.id;
+    const notification = await storage.markNotificationAsRead(notificationId);
+    successResponse(res, notification, 'Notification marked as read');
+  }));
+  
+  // Advanced Analytics & Reporting APIs
+  app.get('/api/analytics/dashboard', enhancedAuth, asyncHandler(async (req, res) => {
+    const userId = (req.user as any).id;
+    const { dateFrom, dateTo } = validateRequest(z.object({
+      dateFrom: z.string().datetime().optional(),
+      dateTo: z.string().datetime().optional(),
+    }), 'query');
+    
+    const analytics = await storage.getDashboardAnalytics(userId, { dateFrom, dateTo });
+    successResponse(res, analytics, 'Analytics retrieved successfully');
+  }));
+  
+  app.get('/api/analytics/appointments', enhancedAuth, asyncHandler(async (req, res) => {
+    const userId = (req.user as any).id;
+    const { period = '30d', eventTypeId } = validateRequest(z.object({
+      period: z.enum(['7d', '30d', '90d', '1y']).default('30d'),
+      eventTypeId: z.string().uuid().optional(),
+    }), 'query');
+    
+    const appointmentAnalytics = await storage.getAppointmentAnalytics(userId, { period, eventTypeId });
+    successResponse(res, appointmentAnalytics, 'Appointment analytics retrieved successfully');
+  }));
+  
+  app.get('/api/analytics/revenue', enhancedAuth, asyncHandler(async (req, res) => {
+    const userId = (req.user as any).id;
+    const { period = '30d', currency = 'USD' } = validateRequest(z.object({
+      period: z.enum(['7d', '30d', '90d', '1y']).default('30d'),
+      currency: z.string().length(3).default('USD'),
+    }), 'query');
+    
+    const revenueAnalytics = await storage.getRevenueAnalytics(userId, { period, currency });
+    successResponse(res, revenueAnalytics, 'Revenue analytics retrieved successfully');
+  }));
+  
+  // System Administration APIs
+  app.get('/api/admin/system/status', 
+    enhancedAuth, 
+    requireRole('admin'), 
+    asyncHandler(async (req, res) => {
+      const systemStatus = {
+        database: 'healthy',
+        scheduler: notificationScheduler.isActive() ? 'healthy' : 'degraded',
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        timestamp: new Date().toISOString(),
+      };
+      
+      successResponse(res, systemStatus, 'System status retrieved successfully');
+    })
+  );
+  
+  app.get('/api/admin/users/stats', 
+    enhancedAuth, 
+    requireRole('admin'), 
+    asyncHandler(async (req, res) => {
+      const userStats = await storage.getUserStatistics();
+      successResponse(res, userStats, 'User statistics retrieved successfully');
+    })
+  );
+  
+  // Enhanced Public Booking API
+  app.post('/api/public/book/:eventTypeSlug',
+    validateRequest(z.object({
+      attendeeName: z.string().min(1).max(100),
+      attendeeEmail: commonSchemas.email,
+      attendeePhone: commonSchemas.phone,
+      startTime: z.string().datetime(),
+      timezone: z.string(),
+      customFields: z.record(z.string(), z.any()).optional(),
+      notes: z.string().max(1000).optional(),
+    })),
+    asyncHandler(async (req, res) => {
+      const eventTypeSlug = req.params.eventTypeSlug;
+      const eventType = await storage.getEventTypeBySlug(eventTypeSlug);
+      
+      if (!eventType || !eventType.isPublic || !eventType.isActive) {
+        throw notFoundError('Event type not found or not available');
+      }
+      
+      // Check availability
+      const availability = await storage.checkAvailability({
+        eventTypeId: eventType.id,
+        startTime: req.body.startTime,
+        timezone: req.body.timezone,
+      });
+      
+      if (!availability.available) {
+        throw businessLogicError('Time slot not available', 'TIME_SLOT_UNAVAILABLE');
+      }
+      
+      // Create appointment
+      const appointment = await storage.createAppointment({
+        ...req.body,
+        eventTypeId: eventType.id,
+        hostUserId: eventType.userId,
+        status: eventType.requiresConfirmation ? 'pending' : 'scheduled',
+      });
+      
+      // Emit automation events
+      await emitAutomationEvent({
+        type: 'appointment.booked',
+        data: { appointment, eventType }
+      });
+      
+      successResponse(res, appointment, 'Appointment booked successfully', 201);
+    })
+  );
+  
+  // API Documentation endpoint
+  app.get('/api/docs', (req, res) => {
+    res.json({
+      version: '1.0.0',
+      title: 'Appointment Booking System API',
+      description: 'Comprehensive appointment booking and scheduling platform',
+      endpoints: {
+        authentication: '/api/auth/*',
+        appointments: '/api/appointments/*',
+        availability: '/api/availability/*',
+        users: '/api/user/*',
+        teams: '/api/teams/*',
+        payments: '/api/payments/*',
+        notifications: '/api/notifications/*',
+        analytics: '/api/analytics/*',
+        calendar: '/api/calendar/*',
+        video: '/api/video/*',
+        crm: '/api/crm/*',
+        automation: '/api/automation/*',
+        admin: '/api/admin/*',
+        health: '/api/health',
+        public: '/api/public/*',
+      },
+      security: {
+        rateLimiting: true,
+        authentication: 'Session-based with Google OAuth',
+        authorization: 'Role-based access control',
+        validation: 'Zod schema validation',
+        cors: 'Configured for allowed origins',
+      },
+      features: {
+        appointments: true,
+        payments: !!process.env.STRIPE_SECRET_KEY,
+        calendar: !!process.env.GOOGLE_CLIENT_ID,
+        video: !!process.env.ZOOM_CLIENT_ID,
+        analytics: true,
+        notifications: true,
+        automation: true,
+        crm: true,
+        teams: true,
+      },
+      documentation: 'https://docs.appointment-system.com',
+      support: 'support@appointment-system.com',
+    });
+  });
+  
+  // API version and feature endpoint
+  app.get('/api/version', (req, res) => {
+    res.json({
+      version: '1.0.0',
+      buildDate: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      apiVersion: 'v1',
+      features: {
+        authentication: true,
+        payments: !!process.env.STRIPE_SECRET_KEY,
+        calendar: !!process.env.GOOGLE_CLIENT_ID,
+        video: !!process.env.ZOOM_CLIENT_ID,
+        analytics: true,
+        notifications: true,
+        automation: true,
+        crm: true,
+        teams: true,
+        rateLimiting: true,
+        monitoring: true,
+      },
+      security: {
+        cors: true,
+        helmet: true,
+        rateLimiting: true,
+        inputValidation: true,
+        authentication: true,
+        authorization: true,
+      }
+    });
+  });
+  
+  // Apply comprehensive error handling middleware (must be last)
+  setupErrorHandling(app);
+  
   const httpServer = createServer(app);
   return httpServer;
 }

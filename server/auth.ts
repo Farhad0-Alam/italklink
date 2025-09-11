@@ -7,6 +7,12 @@ import { db } from './db';
 import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { setupOAuthStrategies } from './oauth-strategies';
+import { 
+  generateCSRFToken, 
+  verifyCSRFToken, 
+  enhancedCORS, 
+  getSecureSessionConfig 
+} from './middleware/csrf-protection';
 
 const pgStore = connectPg(session);
 
@@ -29,14 +35,16 @@ export function getSessionMiddleware() {
     tableName: "sessions",
   });
 
+  const secureConfig = getSecureSessionConfig();
+  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    name: secureConfig.name,
     cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      ...secureConfig.cookie,
       maxAge: sessionTtl,
     },
   });
