@@ -163,6 +163,8 @@ export const enhancedCORS = (req: Request, res: Response, next: NextFunction) =>
   const isAllowedOrigin = !origin || // Same-origin requests (no origin header)
     allowedOrigins.includes(origin) ||
     origin.includes('.repl.co') || // Allow Replit domains
+    origin.includes('.replit.dev') || // Allow new Replit dev domains
+    origin.includes('.pike.replit.dev') || // Allow Replit pike domains
     origin.includes('localhost') || // Allow localhost variants
     origin.startsWith('http://127.0.0.1') || // Allow local IP
     origin.startsWith('https://127.0.0.1'); // Allow local IP with HTTPS

@@ -3,9 +3,30 @@ import { z } from 'zod';
 import { AuthenticationError, AuthorizationError, businessLogicError } from './error-handling';
 import { storage } from '../storage';
 
+// List of public endpoints that don't require authentication
+const PUBLIC_ENDPOINTS = [
+  '/api/health',
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/user', // Allow checking auth status without requiring auth
+  '/api/auth/logout',
+  '/api/auth/google',
+  '/api/auth/google/callback',
+  '/api/public',
+];
+
 // Enhanced authentication middleware that includes additional security checks
 export const enhancedAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    // Skip authentication for public endpoints
+    const isPublicEndpoint = PUBLIC_ENDPOINTS.some(endpoint => 
+      req.path === endpoint || req.path.startsWith(endpoint + '/')
+    );
+    
+    if (isPublicEndpoint) {
+      return next();
+    }
+    
     // Check if user is authenticated via session
     if (!req.isAuthenticated() || !req.user) {
       throw new AuthenticationError('Authentication required');
