@@ -2,7 +2,7 @@ import { db } from './db';
 import { 
   users, businessCards, teams, teamMembers, bulkGenerationJobs, subscriptionPlans, globalTemplates, walletPasses,
   crmContacts, crmActivities, crmTasks, crmPipelines, crmStages, crmDeals, crmSequences, emailTemplates,
-  automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability,
+  automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability, appointmentNotifications,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -12,7 +12,8 @@ import {
   type CrmStage, type InsertCrmStage, type CrmDeal, type InsertCrmDeal,
   type CrmSequence, type InsertCrmSequence, type EmailTemplate, type InsertEmailTemplate,
   type Automation, type InsertAutomation, type AutomationRun, type InsertAutomationRun,
-  type AppointmentEventType, type InsertAppointmentEventType, type Appointment, type InsertAppointment
+  type AppointmentEventType, type InsertAppointmentEventType, type Appointment, type InsertAppointment,
+  type AppointmentNotification, type InsertAppointmentNotification
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -69,6 +70,14 @@ export interface IStorage {
     activeMembers: number;
     totalCards: number;
     recentJobs: number;
+  }>;
+
+  // Email notification stats
+  getNotificationStats(userId: string): Promise<{
+    totalSent: number;
+    deliveryRate: number;
+    recentNotifications: number;
+    failedNotifications: number;
   }>;
   
   // Plans operations
@@ -146,9 +155,22 @@ export interface IStorage {
   // Email Template operations
   createEmailTemplate(templateData: InsertEmailTemplate): Promise<EmailTemplate>;
   getEmailTemplate(id: string): Promise<EmailTemplate | undefined>;
+  getEmailTemplateByType(type: string, userId: string): Promise<EmailTemplate | undefined>;
   getUserEmailTemplates(userId: string, filters?: { category?: string }): Promise<EmailTemplate[]>;
-  updateEmailTemplate(id: string, templateData: Partial<InsertEmailTemplate>): Promise<EmailTemplate>;
-  deleteEmailTemplate(id: string): Promise<void>;
+  updateEmailTemplate(id: string, templateData: Partial<InsertEmailTemplate>, userId?: string): Promise<EmailTemplate>;
+  deleteEmailTemplate(id: string, userId?: string): Promise<void>;
+  getDefaultEmailTemplates(): Promise<EmailTemplate[]>;
+  ensureDefaultTemplatesExist(userId: string): Promise<void>;
+
+  // Appointment Notification operations
+  createNotification(notificationData: InsertAppointmentNotification): Promise<AppointmentNotification>;
+  getNotification(id: string): Promise<AppointmentNotification | undefined>;
+  getAppointmentNotifications(appointmentId: string): Promise<AppointmentNotification[]>;
+  getUserNotifications(userId: string, filters?: { type?: string; status?: string; limit?: number }): Promise<AppointmentNotification[]>;
+  updateNotification(id: string, notificationData: Partial<InsertAppointmentNotification>): Promise<AppointmentNotification>;
+  deleteNotification(id: string): Promise<void>;
+  getPendingNotifications(): Promise<AppointmentNotification[]>;
+  getNotificationHistory(userId: string, limit?: number): Promise<AppointmentNotification[]>;
 
   // CRM Stats and Analytics
   getContactStats(userId: string): Promise<{
@@ -1209,17 +1231,218 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(emailTemplates.createdAt));
   }
 
-  async updateEmailTemplate(id: string, templateData: Partial<InsertEmailTemplate>): Promise<EmailTemplate> {
+  async updateEmailTemplate(id: string, templateData: Partial<InsertEmailTemplate>, userId?: string): Promise<EmailTemplate> {
+    const conditions = [eq(emailTemplates.id, id)];
+    
+    // Add user scoping for security - only allow updates to user's own templates
+    if (userId) {
+      conditions.push(eq(emailTemplates.ownerUserId, userId));
+    }
+    
     const [template] = await db
       .update(emailTemplates)
       .set({ ...templateData, updatedAt: new Date() })
-      .where(eq(emailTemplates.id, id))
+      .where(and(...conditions))
       .returning();
+    
+    if (!template) {
+      throw new Error('Email template not found or access denied');
+    }
+    
     return template;
   }
 
-  async deleteEmailTemplate(id: string): Promise<void> {
-    await db.delete(emailTemplates).where(eq(emailTemplates.id, id));
+  async deleteEmailTemplate(id: string, userId?: string): Promise<void> {
+    const conditions = [eq(emailTemplates.id, id)];
+    
+    // Add user scoping for security - only allow deletion of user's own templates
+    if (userId) {
+      conditions.push(eq(emailTemplates.ownerUserId, userId));
+    }
+    
+    const result = await db.delete(emailTemplates).where(and(...conditions)).returning();
+    
+    if (result.length === 0) {
+      throw new Error('Email template not found or access denied');
+    }
+  }
+
+  async getEmailTemplateByType(type: string, userId: string): Promise<EmailTemplate | undefined> {
+    // First try to get user's custom template
+    const userTemplate = await db.select().from(emailTemplates)
+      .where(and(
+        eq(emailTemplates.type, type),
+        eq(emailTemplates.ownerUserId, userId)
+      ))
+      .limit(1);
+    
+    if (userTemplate[0]) {
+      return userTemplate[0];
+    }
+    
+    // Fallback to default template for the type (system templates)
+    const defaultTemplate = await db.select().from(emailTemplates)
+      .where(and(
+        eq(emailTemplates.type, type),
+        eq(emailTemplates.isDefault, true)
+      ))
+      .limit(1);
+    
+    return defaultTemplate[0];
+  }
+
+  async getDefaultEmailTemplates(): Promise<EmailTemplate[]> {
+    return await db.select().from(emailTemplates)
+      .where(eq(emailTemplates.isDefault, true))
+      .orderBy(emailTemplates.type);
+  }
+
+  async ensureDefaultTemplatesExist(userId: string): Promise<void> {
+    // This method will be implemented to ensure default email templates exist for a user
+    // It will create default templates if they don't exist
+  }
+
+  // ===== APPOINTMENT NOTIFICATION OPERATIONS =====
+  async createNotification(notificationData: InsertAppointmentNotification): Promise<AppointmentNotification> {
+    const result = await db.insert(appointmentNotifications)
+      .values(notificationData)
+      .returning();
+    return result[0];
+  }
+
+  async getNotification(id: string): Promise<AppointmentNotification | undefined> {
+    const result = await db.select().from(appointmentNotifications)
+      .where(eq(appointmentNotifications.id, id))
+      .limit(1);
+    return result[0];
+  }
+
+  async getAppointmentNotifications(appointmentId: string): Promise<AppointmentNotification[]> {
+    return await db.select().from(appointmentNotifications)
+      .where(eq(appointmentNotifications.appointmentId, appointmentId))
+      .orderBy(desc(appointmentNotifications.createdAt));
+  }
+
+  async getUserNotifications(
+    userId: string, 
+    filters?: { type?: string; status?: string; limit?: number }
+  ): Promise<AppointmentNotification[]> {
+    let query = db.select().from(appointmentNotifications)
+      .innerJoin(appointments, eq(appointmentNotifications.appointmentId, appointments.id))
+      .where(or(
+        eq(appointments.hostUserId, userId),
+        eq(appointments.assignedUserId, userId)
+      ));
+
+    if (filters?.type) {
+      query = query.where(eq(appointmentNotifications.type, filters.type as any));
+    }
+    if (filters?.status) {
+      query = query.where(eq(appointmentNotifications.status, filters.status as any));
+    }
+
+    const result = await query
+      .orderBy(desc(appointmentNotifications.createdAt))
+      .limit(filters?.limit || 50);
+
+    return result.map(row => row.appointment_notifications);
+  }
+
+  async updateNotification(
+    id: string, 
+    notificationData: Partial<InsertAppointmentNotification>
+  ): Promise<AppointmentNotification> {
+    const result = await db.update(appointmentNotifications)
+      .set(notificationData)
+      .where(eq(appointmentNotifications.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteNotification(id: string): Promise<void> {
+    await db.delete(appointmentNotifications)
+      .where(eq(appointmentNotifications.id, id));
+  }
+
+  async getPendingNotifications(): Promise<AppointmentNotification[]> {
+    return await db.select().from(appointmentNotifications)
+      .where(and(
+        eq(appointmentNotifications.status, 'pending'),
+        lte(appointmentNotifications.scheduledFor, new Date())
+      ))
+      .orderBy(appointmentNotifications.scheduledFor)
+      .limit(100); // Process max 100 at a time
+  }
+
+  async getNotificationHistory(userId: string, limit: number = 50): Promise<AppointmentNotification[]> {
+    const result = await db.select().from(appointmentNotifications)
+      .innerJoin(appointments, eq(appointmentNotifications.appointmentId, appointments.id))
+      .where(or(
+        eq(appointments.hostUserId, userId),
+        eq(appointments.assignedUserId, userId)
+      ))
+      .orderBy(desc(appointmentNotifications.createdAt))
+      .limit(limit);
+
+    return result.map(row => row.appointment_notifications);
+  }
+
+  async getNotificationStats(userId: string): Promise<{
+    totalSent: number;
+    deliveryRate: number;
+    recentNotifications: number;
+    failedNotifications: number;
+  }> {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    // Get total sent notifications for user
+    const totalSentResult = await db.select({ count: count() })
+      .from(appointmentNotifications)
+      .innerJoin(appointments, eq(appointmentNotifications.appointmentId, appointments.id))
+      .where(and(
+        or(
+          eq(appointments.hostUserId, userId),
+          eq(appointments.assignedUserId, userId)
+        ),
+        eq(appointmentNotifications.status, 'sent')
+      ));
+
+    // Get failed notifications
+    const failedResult = await db.select({ count: count() })
+      .from(appointmentNotifications)
+      .innerJoin(appointments, eq(appointmentNotifications.appointmentId, appointments.id))
+      .where(and(
+        or(
+          eq(appointments.hostUserId, userId),
+          eq(appointments.assignedUserId, userId)
+        ),
+        eq(appointmentNotifications.status, 'failed')
+      ));
+
+    // Get recent notifications (last 30 days)
+    const recentResult = await db.select({ count: count() })
+      .from(appointmentNotifications)
+      .innerJoin(appointments, eq(appointmentNotifications.appointmentId, appointments.id))
+      .where(and(
+        or(
+          eq(appointments.hostUserId, userId),
+          eq(appointments.assignedUserId, userId)
+        ),
+        gte(appointmentNotifications.createdAt, thirtyDaysAgo)
+      ));
+
+    const totalSent = totalSentResult[0]?.count || 0;
+    const failed = failedResult[0]?.count || 0;
+    const recent = recentResult[0]?.count || 0;
+    const totalAttempts = totalSent + failed;
+    const deliveryRate = totalAttempts > 0 ? (totalSent / totalAttempts) * 100 : 100;
+
+    return {
+      totalSent,
+      deliveryRate: Math.round(deliveryRate * 100) / 100,
+      recentNotifications: recent,
+      failedNotifications: failed
+    };
   }
 
   // ===== CRM STATS AND ANALYTICS =====

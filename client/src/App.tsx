@@ -30,6 +30,7 @@ import Availability from "./pages/availability";
 import NotFound from "@/pages/not-found";
 import CRM from "./pages/crm";
 import BookingPage from "./pages/booking";
+import EmailTemplatesPage from "./pages/EmailTemplatesPage";
 import i18n from "./lib/i18n";
 
 function Router() {
@@ -58,6 +59,7 @@ function Router() {
       <Route path="/usage" component={Usage} />
       <Route path="/automation" component={Automation} />
       <Route path="/availability" component={Availability} />
+      <Route path="/email-templates" component={EmailTemplatesPage} />
       <Route path="/crm" component={CRM} />
       <Route path="/help" component={Help} />
       <Route path="/booking/:eventTypeSlug" component={BookingPage} />

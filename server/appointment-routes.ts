@@ -5,6 +5,7 @@ import { appointments } from '@shared/schema';
 import { eq, and, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { insertAppointmentSchema, insertAppointmentEventTypeSchema } from '@shared/schema';
+import { appointmentTriggers } from './appointment-triggers';
 
 // Validation schemas
 const availabilityQuerySchema = z.object({
@@ -170,8 +171,20 @@ export function setupAppointmentRoutes(app: Express) {
         status: eventType.requiresConfirmation ? 'scheduled' : 'confirmed',
       });
 
-      // Send confirmation email (if email service is configured)
-      // TODO: Implement email notifications
+      // Get host user information for notifications
+      const hostUser = await storage.getUser(eventType.userId);
+      if (!hostUser) {
+        console.error('Host user not found for appointment notifications:', eventType.userId);
+      } else {
+        // Trigger booking confirmation and schedule reminders
+        try {
+          await appointmentTriggers.onAppointmentBooked(appointment, eventType, hostUser);
+          console.log('Appointment notifications triggered successfully:', appointment.id);
+        } catch (triggerError) {
+          console.error('Failed to trigger appointment notifications:', triggerError);
+          // Don't fail the booking if notifications fail
+        }
+      }
 
       res.status(201).json({
         id: appointment.id,

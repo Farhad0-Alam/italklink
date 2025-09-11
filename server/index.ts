@@ -1,6 +1,11 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { notificationScheduler } from "./notification-scheduler";
+
+// Start the notification scheduler for background processing
+notificationScheduler.start();
+log("Notification scheduler started");
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -67,5 +72,6 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    log(`notification scheduler active: ${notificationScheduler.isActive()}`);
   });
 })();

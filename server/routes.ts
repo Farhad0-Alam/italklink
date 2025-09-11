@@ -44,6 +44,8 @@ import { templateCollectionsRoutes } from './template-collections-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 import ragRoutes from './rag-routes';
 import { pwaRouter } from './routes/pwa';
+import emailNotificationRoutes from './email-notification-routes';
+import { notificationScheduler } from './notification-scheduler';
 
 
 
@@ -74,6 +76,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const affiliateRoutes = (await import('./affiliate-routes')).default;
   app.use('/api/affiliate', affiliateRoutes);
   
+  // Setup email notification routes
+  app.use('/api/notifications', emailNotificationRoutes);
+  
   // Setup appointment routes
   const { setupAppointmentRoutes } = await import('./appointment-routes');
   setupAppointmentRoutes(app);
@@ -102,7 +107,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {
-    res.json({ ok: true, timestamp: new Date().toISOString() });
+    res.json({ 
+      ok: true, 
+      timestamp: new Date().toISOString(),
+      scheduler: {
+        active: notificationScheduler.isActive(),
+        uptime: process.uptime()
+      }
+    });
+  });
+  
+  // Scheduler-specific status endpoint
+  app.get('/api/notifications/scheduler/status', (req, res) => {
+    res.json({
+      active: notificationScheduler.isActive(),
+      uptime: process.uptime(),
+      lastCheck: new Date().toISOString(),
+      status: notificationScheduler.isActive() ? 'healthy' : 'stopped'
+    });
   });
 
   // Public plans endpoint for landing page
