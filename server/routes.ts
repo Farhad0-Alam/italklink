@@ -46,6 +46,7 @@ import ragRoutes from './rag-routes';
 import { pwaRouter } from './routes/pwa';
 import emailNotificationRoutes from './email-notification-routes';
 import { notificationScheduler } from './notification-scheduler';
+import { setupAnalyticsRoutes } from './analytics-routes';
 
 
 
@@ -82,6 +83,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup appointment routes
   const { setupAppointmentRoutes } = await import('./appointment-routes');
   setupAppointmentRoutes(app);
+  
+  // Setup analytics routes
+  setupAnalyticsRoutes(app);
 
   // Payment routes
   const { setupPaymentRoutes } = await import('./payment-routes');
