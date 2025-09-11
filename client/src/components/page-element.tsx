@@ -4066,7 +4066,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
 
       case "html":
         return (
-          <div className="mb-4">
+          <div className="w-full max-w-[430px] mx-auto">
             {isEditing ? (
               <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
                 <div className="flex justify-between items-center">
@@ -4121,7 +4121,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 </div>
               </div>
             ) : (
-              <div className="html-element-preview" data-testid="html-element-preview">
+              <div className="html-element-preview w-full" data-testid="html-element-preview">
                 {element.data.content && element.data.content.trim() ? (
                   <iframe
                     srcDoc={`<!DOCTYPE html>
@@ -4129,7 +4129,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
 <head>
   <meta charset="utf-8">
   <style>
-    body { margin: 0; padding: 16px; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
     * { box-sizing: border-box; }
   </style>
 </head>
@@ -4138,10 +4138,11 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
 </body>
 </html>`}
                     style={{ 
-                      width: '100%', 
+                      width: '430px',
+                      maxWidth: '100%',
                       height: `${element.data.height || 300}px`,
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px'
+                      border: 'none',
+                      borderRadius: '0'
                     }}
                     sandbox="allow-same-origin"
                     title="Custom HTML Content"
@@ -4149,8 +4150,8 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   />
                 ) : (
                   <div 
-                    className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center text-slate-500"
-                    style={{ height: `${element.data.height || 300}px` }}
+                    className="border-2 border-dashed border-slate-300 p-8 text-center text-slate-500"
+                    style={{ width: '430px', maxWidth: '100%', height: `${element.data.height || 300}px` }}
                     data-testid="html-placeholder"
                   >
                     <i className="fas fa-code text-4xl mb-4"></i>
