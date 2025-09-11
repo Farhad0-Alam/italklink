@@ -360,7 +360,7 @@ export default function AvailabilityManagement() {
               </CardHeader>
               <CardContent>
                 <BufferTimesConfig
-                  eventTypes={eventTypes}
+                  eventTypes={eventTypes || []}
                   bufferTimes={currentSettings?.bufferTimes || []}
                   onChange={(data) => handleSettingsChange('bufferTimes', data)}
                 />
