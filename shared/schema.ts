@@ -3024,6 +3024,17 @@ export const availabilityDisplayElementSchema = baseElementSchema.extend({
   }),
 });
 
+// Custom HTML element
+export const htmlElementSchema = baseElementSchema.extend({
+  type: z.literal("html"),
+  data: z.object({
+    content: z.string().default(""),
+    height: z.number().default(300),
+    sandbox: z.boolean().default(true),
+    showPreview: z.boolean().default(true),
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   headingElementSchema,
@@ -3048,6 +3059,7 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   scheduleCallElementSchema,
   meetingRequestElementSchema,
   availabilityDisplayElementSchema,
+  htmlElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;
