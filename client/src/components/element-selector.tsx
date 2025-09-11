@@ -124,6 +124,13 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       color: "bg-gradient-to-r from-purple-500 to-pink-600",
       description: "AR Digital Business Card Viewer"
     },
+    {
+      type: "html",
+      title: "Custom HTML",
+      icon: "fas fa-code",
+      color: "bg-gradient-to-r from-gray-600 to-gray-800",
+      description: "Add custom HTML design"
+    },
     // Appointment booking elements
     {
       type: "bookAppointment",
@@ -546,6 +553,20 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             bookingLinkText: "Book a slot",
             eventTypeSlug: "",
           }
+        };
+        break;
+
+      case "html":
+        element = {
+          id,
+          type: "html",
+          order: Date.now(),
+          data: {
+            content: "",
+            height: 300,
+            sandbox: true,
+            showPreview: true,
+          },
         };
         break;
       
