@@ -123,6 +123,35 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       icon: "fas fa-cube",
       color: "bg-gradient-to-r from-purple-500 to-pink-600",
       description: "AR Digital Business Card Viewer"
+    },
+    // Appointment booking elements
+    {
+      type: "bookAppointment",
+      title: "Book Appointment",
+      icon: "fas fa-calendar-alt",
+      color: "bg-gradient-to-r from-blue-500 to-teal-600",
+      description: "Appointment booking button"
+    },
+    {
+      type: "scheduleCall",
+      title: "Schedule Call",
+      icon: "fas fa-phone",
+      color: "bg-gradient-to-r from-green-500 to-blue-600",
+      description: "Schedule a phone/video call"
+    },
+    {
+      type: "meetingRequest",
+      title: "Meeting Request",
+      icon: "fas fa-handshake",
+      color: "bg-gradient-to-r from-purple-500 to-indigo-600",
+      description: "Request a meeting button"
+    },
+    {
+      type: "availabilityDisplay",
+      title: "Availability Display",
+      icon: "fas fa-clock",
+      color: "bg-gradient-to-r from-amber-500 to-orange-600",
+      description: "Show your availability schedule"
     }
   ];
 
@@ -414,6 +443,108 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
               { label: "View Offer", action: "link", value: "https://yourdomain.com/card/slug/offers" },
               { label: "WhatsApp", action: "whatsapp", value: "+88017XXXXXXXX" }
             ]
+          }
+        };
+        break;
+      
+      case "bookAppointment":
+        element = {
+          id,
+          type: "bookAppointment",
+          order: Date.now(),
+          data: {
+            title: "Book Appointment",
+            subtitle: "Schedule a meeting with me",
+            buttonText: "Book Now",
+            buttonStyle: "primary" as const,
+            buttonSize: "medium" as const,
+            buttonColor: "#22c55e",
+            textColor: "#ffffff",
+            showIcon: true,
+            iconType: "calendar" as const,
+            eventTypeSlug: "",
+            duration: 30,
+            description: "",
+            showDuration: true,
+            openInNewTab: true,
+          }
+        };
+        break;
+      
+      case "scheduleCall":
+        element = {
+          id,
+          type: "scheduleCall",
+          order: Date.now(),
+          data: {
+            title: "Schedule a Call",
+            subtitle: "Let's discuss your project",
+            buttonText: "Schedule Call",
+            buttonStyle: "primary" as const,
+            buttonSize: "medium" as const,
+            buttonColor: "#2563eb",
+            textColor: "#ffffff",
+            showIcon: true,
+            iconType: "phone" as const,
+            callType: "video" as const,
+            eventTypeSlug: "",
+            duration: 30,
+            description: "",
+            showDuration: true,
+            openInNewTab: true,
+          }
+        };
+        break;
+      
+      case "meetingRequest":
+        element = {
+          id,
+          type: "meetingRequest",
+          order: Date.now(),
+          data: {
+            title: "Request a Meeting",
+            subtitle: "Let's meet to discuss opportunities",
+            buttonText: "Request Meeting",
+            buttonStyle: "outlined" as const,
+            buttonSize: "medium" as const,
+            buttonColor: "#7c3aed",
+            textColor: "#7c3aed",
+            showIcon: true,
+            iconType: "handshake" as const,
+            meetingType: "consultation" as const,
+            eventTypeSlug: "",
+            duration: 60,
+            description: "",
+            showDuration: true,
+            openInNewTab: true,
+          }
+        };
+        break;
+      
+      case "availabilityDisplay":
+        element = {
+          id,
+          type: "availabilityDisplay",
+          order: Date.now(),
+          data: {
+            title: "My Availability",
+            subtitle: "Choose a convenient time",
+            displayStyle: "compact" as const,
+            showTimezone: true,
+            timezone: "UTC",
+            availableSlots: [
+              { day: "Monday", startTime: "09:00", endTime: "17:00", available: true },
+              { day: "Tuesday", startTime: "09:00", endTime: "17:00", available: true },
+              { day: "Wednesday", startTime: "09:00", endTime: "17:00", available: true },
+              { day: "Thursday", startTime: "09:00", endTime: "17:00", available: true },
+              { day: "Friday", startTime: "09:00", endTime: "17:00", available: true },
+            ],
+            primaryColor: "#22c55e",
+            backgroundColor: "#f8fafc",
+            textColor: "#475569",
+            showBookingLink: true,
+            bookingLinkText: "Book a slot",
+            eventTypeSlug: "",
           }
         };
         break;

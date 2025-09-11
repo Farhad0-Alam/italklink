@@ -2717,6 +2717,98 @@ export const digitalWalletElementSchema = baseElementSchema.extend({
   }),
 });
 
+// Appointment booking elements
+export const bookAppointmentElementSchema = baseElementSchema.extend({
+  type: z.literal("bookAppointment"),
+  data: z.object({
+    title: z.string().default("Book Appointment"),
+    subtitle: z.string().default("Schedule a meeting with me"),
+    buttonText: z.string().default("Book Now"),
+    buttonStyle: z.enum(["primary", "secondary", "outlined", "filled"]).default("primary"),
+    buttonSize: z.enum(["small", "medium", "large"]).default("medium"),
+    buttonColor: z.string().default("#22c55e"),
+    textColor: z.string().default("#ffffff"),
+    showIcon: z.boolean().default(true),
+    iconType: z.enum(["calendar", "clock", "video", "phone"]).default("calendar"),
+    eventTypeSlug: z.string().default(""), // Links to user's event type
+    duration: z.number().default(30), // in minutes
+    description: z.string().default(""),
+    showDuration: z.boolean().default(true),
+    openInNewTab: z.boolean().default(true),
+  }),
+});
+
+export const scheduleCallElementSchema = baseElementSchema.extend({
+  type: z.literal("scheduleCall"),
+  data: z.object({
+    title: z.string().default("Schedule a Call"),
+    subtitle: z.string().default("Let's discuss your project"),
+    buttonText: z.string().default("Schedule Call"),
+    buttonStyle: z.enum(["primary", "secondary", "outlined", "filled"]).default("primary"),
+    buttonSize: z.enum(["small", "medium", "large"]).default("medium"),
+    buttonColor: z.string().default("#2563eb"),
+    textColor: z.string().default("#ffffff"),
+    showIcon: z.boolean().default(true),
+    iconType: z.enum(["phone", "video", "calendar", "chat"]).default("phone"),
+    callType: z.enum(["phone", "video", "audio"]).default("video"),
+    eventTypeSlug: z.string().default(""),
+    duration: z.number().default(30),
+    description: z.string().default(""),
+    showDuration: z.boolean().default(true),
+    openInNewTab: z.boolean().default(true),
+  }),
+});
+
+export const meetingRequestElementSchema = baseElementSchema.extend({
+  type: z.literal("meetingRequest"),
+  data: z.object({
+    title: z.string().default("Request a Meeting"),
+    subtitle: z.string().default("Let's meet to discuss opportunities"),
+    buttonText: z.string().default("Request Meeting"),
+    buttonStyle: z.enum(["primary", "secondary", "outlined", "filled"]).default("outlined"),
+    buttonSize: z.enum(["small", "medium", "large"]).default("medium"),
+    buttonColor: z.string().default("#7c3aed"),
+    textColor: z.string().default("#7c3aed"),
+    showIcon: z.boolean().default(true),
+    iconType: z.enum(["calendar", "handshake", "briefcase", "users"]).default("handshake"),
+    meetingType: z.enum(["consultation", "demo", "sales_call", "general"]).default("consultation"),
+    eventTypeSlug: z.string().default(""),
+    duration: z.number().default(60),
+    description: z.string().default(""),
+    showDuration: z.boolean().default(true),
+    openInNewTab: z.boolean().default(true),
+  }),
+});
+
+export const availabilityDisplayElementSchema = baseElementSchema.extend({
+  type: z.literal("availabilityDisplay"),
+  data: z.object({
+    title: z.string().default("My Availability"),
+    subtitle: z.string().default("Choose a convenient time"),
+    displayStyle: z.enum(["compact", "detailed", "calendar"]).default("compact"),
+    showTimezone: z.boolean().default(true),
+    timezone: z.string().default("UTC"),
+    availableSlots: z.array(z.object({
+      day: z.string(),
+      startTime: z.string(),
+      endTime: z.string(),
+      available: z.boolean().default(true),
+    })).default([
+      { day: "Monday", startTime: "09:00", endTime: "17:00", available: true },
+      { day: "Tuesday", startTime: "09:00", endTime: "17:00", available: true },
+      { day: "Wednesday", startTime: "09:00", endTime: "17:00", available: true },
+      { day: "Thursday", startTime: "09:00", endTime: "17:00", available: true },
+      { day: "Friday", startTime: "09:00", endTime: "17:00", available: true },
+    ]),
+    primaryColor: z.string().default("#22c55e"),
+    backgroundColor: z.string().default("#f8fafc"),
+    textColor: z.string().default("#475569"),
+    showBookingLink: z.boolean().default(true),
+    bookingLinkText: z.string().default("Book a slot"),
+    eventTypeSlug: z.string().default(""),
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   headingElementSchema,
@@ -2737,6 +2829,10 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   appleWalletElementSchema,
   googleWalletElementSchema,
   digitalWalletElementSchema,
+  bookAppointmentElementSchema,
+  scheduleCallElementSchema,
+  meetingRequestElementSchema,
+  availabilityDisplayElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;
@@ -2861,6 +2957,10 @@ export const businessCardSchema = z.object({
   template: z.enum(["minimal", "bold", "photo", "dark"]).default("minimal"),
   headerDesign: z.enum(["cover-logo", "profile-center", "split-design", "shape-divider"]).default("cover-logo"),
   
+  // Advanced Header Design
+  advancedHeaderEnabled: z.boolean().default(false),
+  headerTemplate: z.record(z.any()).optional(), // Complete header configuration with SVG shapes, layouts, etc.
+  
   // Header Preset Configuration (New System)
   headerPreset: headerPresetSchema.optional(),
   
@@ -2962,6 +3062,9 @@ export const businessCardSchema = z.object({
   ogDescription: z.string().optional(),
   ogImage: z.string().optional(),
   keywords: z.array(z.string()).default([]),
+  noIndex: z.boolean().default(false),
+  noFollow: z.boolean().default(false),
+  author: z.string().optional(),
   
   // Media (base64 encoded)
   profilePhoto: z.string().optional(),

@@ -139,6 +139,208 @@ function SortableImageItem({ image, index, onDelete, onUpdateAlt }: SortableImag
   );
 }
 
+// Availability Widget Component
+interface AvailabilityWidgetProps {
+  eventTypeSlug?: string;
+  timezone?: string;
+  displayStyle?: string;
+  daysToShow?: number;
+  primaryColor?: string;
+  showBookingButton?: boolean;
+  bookingButtonText?: string;
+  openInNewTab?: boolean;
+  isInteractive?: boolean;
+}
+
+function AvailabilityWidget({
+  eventTypeSlug = '30min-meeting',
+  timezone = 'auto',
+  displayStyle = 'compact',
+  daysToShow = 7,
+  primaryColor = '#22c55e',
+  showBookingButton = true,
+  bookingButtonText = 'Book a slot',
+  openInNewTab = false,
+  isInteractive = true
+}: AvailabilityWidgetProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+
+  // Generate mock availability data
+  useEffect(() => {
+    setIsLoading(true);
+    
+    // Simulate API call
+    const timer = setTimeout(() => {
+      const mockSlots = [];
+      const today = new Date();
+      
+      for (let i = 0; i < daysToShow; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        
+        // Mock availability - some days available, some busy, some with multiple slots
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+        const isAvailable = !isWeekend && Math.random() > 0.3;
+        
+        if (isAvailable) {
+          // Add multiple time slots for available days
+          const timeSlots = ['9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'];
+          timeSlots.forEach((time, timeIndex) => {
+            if (Math.random() > 0.4) { // 60% chance each slot is available
+              mockSlots.push({
+                id: `${i}-${timeIndex}`,
+                day: `${dayName}, ${dateStr}`,
+                time,
+                available: true,
+                date: date.toISOString().split('T')[0]
+              });
+            }
+          });
+        } else {
+          // Add one busy slot for non-available days
+          mockSlots.push({
+            id: `${i}-busy`,
+            day: `${dayName}, ${dateStr}`,
+            time: isWeekend ? 'Weekend' : 'No slots',
+            available: false,
+            date: date.toISOString().split('T')[0]
+          });
+        }
+      }
+      
+      setAvailableSlots(mockSlots);
+      setIsLoading(false);
+    }, 800); // Simulate loading delay
+    
+    return () => clearTimeout(timer);
+  }, [daysToShow, eventTypeSlug]);
+
+  const handleSlotClick = (slot: any) => {
+    if (!isInteractive || !slot.available) return;
+    
+    const bookingUrl = `/booking/${eventTypeSlug}?date=${slot.date}&time=${encodeURIComponent(slot.time)}&source=availability`;
+    
+    if (openInNewTab) {
+      window.open(bookingUrl, '_blank');
+    } else {
+      window.location.href = bookingUrl;
+    }
+  };
+
+  const handleBookingClick = () => {
+    if (!isInteractive) return;
+    
+    const bookingUrl = `/booking/${eventTypeSlug}?source=availability`;
+    
+    if (openInNewTab) {
+      window.open(bookingUrl, '_blank');
+    } else {
+      window.location.href = bookingUrl;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3" data-testid="availability-loading">
+        {Array.from({ length: Math.min(daysToShow, 5) }).map((_, index) => (
+          <div key={index} className="flex items-center justify-between p-3 bg-white rounded border animate-pulse">
+            <div className="h-4 bg-slate-200 rounded w-20"></div>
+            <div className="h-4 bg-slate-200 rounded w-16"></div>
+            <div className="h-4 bg-slate-200 rounded w-12"></div>
+          </div>
+        ))}
+        {showBookingButton && (
+          <div className="mt-4 text-center">
+            <div className="h-10 bg-slate-200 rounded w-32 mx-auto animate-pulse"></div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (displayStyle === 'minimal') {
+    return (
+      <div className="space-y-2">
+        <div className="text-center text-sm text-slate-600 mb-3">
+          <i className="fas fa-clock mr-1"></i>
+          {availableSlots.filter(slot => slot.available).length} slots available
+        </div>
+        {showBookingButton && (
+          <div className="text-center">
+            <Button
+              onClick={handleBookingClick}
+              style={{
+                backgroundColor: primaryColor,
+                color: "#ffffff",
+              }}
+              className="px-4 py-2 rounded font-medium hover:shadow-lg transition-all"
+              data-testid="button-book-availability"
+            >
+              <i className="fas fa-calendar-alt mr-2"></i>
+              {bookingButtonText}
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {availableSlots.map((slot, index) => (
+        <div 
+          key={slot.id} 
+          className={`flex items-center justify-between p-3 bg-white rounded border transition-all ${
+            slot.available && isInteractive ? 'hover:shadow-md hover:border-slate-300 cursor-pointer' : ''
+          }`}
+          onClick={() => handleSlotClick(slot)}
+          data-testid={`availability-slot-${index}`}
+        >
+          <span className="text-sm font-medium text-slate-700" data-testid={`availability-day-${index}`}>
+            {displayStyle === 'detailed' ? slot.day : slot.day.split(',')[0]}
+          </span>
+          <span className="text-sm text-slate-600" data-testid={`availability-time-${index}`}>
+            {slot.time}
+          </span>
+          <div className="flex items-center">
+            <div 
+              className={`w-2 h-2 rounded-full mr-2 ${
+                slot.available ? "bg-green-500" : "bg-red-500"
+              }`}
+            ></div>
+            <span className={`text-xs ${
+              slot.available ? "text-green-600" : "text-red-600"
+            }`}>
+              {slot.available ? "Available" : "Busy"}
+            </span>
+          </div>
+        </div>
+      ))}
+      
+      {showBookingButton && (
+        <div className="mt-4 text-center">
+          <Button
+            onClick={handleBookingClick}
+            style={{
+              backgroundColor: primaryColor,
+              color: "#ffffff",
+            }}
+            className="px-4 py-2 rounded font-medium hover:shadow-lg transition-all"
+            data-testid="button-book-availability"
+          >
+            <i className="fas fa-calendar-alt mr-2"></i>
+            {bookingButtonText}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Enhanced Image Slider Component with Modern Design
 interface ImageSliderComponentProps {
   images: { id: string; src: string; alt?: string; }[];
@@ -3179,6 +3381,683 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 accent={element.data.accent}
                 ctas={element.data.ctas}
               />
+            )}
+          </div>
+        );
+
+      // Appointment booking elements
+      case "bookAppointment":
+        return (
+          <div className="mb-4">
+            {isEditing ? (
+              <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-md font-semibold text-slate-800">Book Appointment Element</h4>
+                  <Button
+                    onClick={() => onDelete && onDelete(element.id)}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    <i className="fas fa-trash text-xs"></i>
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Title</label>
+                    <Input
+                      value={element.data.title || ""}
+                      onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                      placeholder="Book Appointment"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Button Text</label>
+                    <Input
+                      value={element.data.buttonText || ""}
+                      onChange={(e) => handleDataUpdate({ buttonText: e.target.value })}
+                      placeholder="Book Now"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 block mb-1">Subtitle</label>
+                  <Input
+                    value={element.data.subtitle || ""}
+                    onChange={(e) => handleDataUpdate({ subtitle: e.target.value })}
+                    placeholder="Schedule a meeting with me"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Event Type Slug</label>
+                    <Input
+                      value={element.data.eventTypeSlug || ""}
+                      onChange={(e) => handleDataUpdate({ eventTypeSlug: e.target.value })}
+                      placeholder="consultation"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Duration (min)</label>
+                    <Input
+                      type="number"
+                      value={element.data.duration || 30}
+                      onChange={(e) => handleDataUpdate({ duration: parseInt(e.target.value) })}
+                      min="15"
+                      max="180"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Button Color</label>
+                    <Input
+                      type="color"
+                      value={element.data.buttonColor || "#22c55e"}
+                      onChange={(e) => handleDataUpdate({ buttonColor: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Text Color</label>
+                    <Input
+                      type="color"
+                      value={element.data.textColor || "#ffffff"}
+                      onChange={(e) => handleDataUpdate({ textColor: e.target.value })}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={element.data.openInNewTab || false}
+                      onCheckedChange={(checked) => handleDataUpdate({ openInNewTab: checked })}
+                    />
+                    <label className="text-sm font-medium text-slate-700">Open in new tab</label>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Icon</label>
+                    <Select value={element.data.icon || "calendar"} onValueChange={(value) => handleDataUpdate({ icon: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="calendar"><i className="fas fa-calendar-alt mr-2"></i> Calendar</SelectItem>
+                        <SelectItem value="clock"><i className="fas fa-clock mr-2"></i> Clock</SelectItem>
+                        <SelectItem value="user"><i className="fas fa-user mr-2"></i> User</SelectItem>
+                        <SelectItem value="none">No Icon</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Button Size</label>
+                    <Select value={element.data.size || "medium"} onValueChange={(value) => handleDataUpdate({ size: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="small">Small</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="large">Large</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center space-y-3 p-4 rounded-lg border border-slate-200 bg-white">
+                <h3 className="text-lg font-bold text-slate-800">{element.data.title || "Book Appointment"}</h3>
+                {element.data.subtitle && (
+                  <p className="text-sm text-slate-600">{element.data.subtitle}</p>
+                )}
+                <Button
+                  onClick={() => {
+                    if (!isInteractive) return;
+                    const eventSlug = element.data.eventTypeSlug || 'consultation';
+                    const duration = element.data.duration || 30;
+                    const bookingUrl = `/booking/${eventSlug}?duration=${duration}&source=card`;
+                    
+                    if (element.data.openInNewTab) {
+                      window.open(bookingUrl, '_blank');
+                    } else {
+                      window.location.href = bookingUrl;
+                    }
+                  }}
+                  style={{
+                    backgroundColor: element.data.buttonColor || "#22c55e",
+                    color: element.data.textColor || "#ffffff",
+                  }}
+                  className={`rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${
+                    element.data.size === 'small' ? 'px-4 py-1 text-sm' :
+                    element.data.size === 'large' ? 'px-8 py-3 text-lg' :
+                    'px-6 py-2'
+                  }`}
+                  data-testid="button-book-appointment"
+                >
+                  {element.data.icon && element.data.icon !== 'none' && (
+                    <i className={`fas fa-${
+                      element.data.icon === 'calendar' ? 'calendar-alt' :
+                      element.data.icon === 'clock' ? 'clock' :
+                      element.data.icon === 'user' ? 'user' : 'calendar-alt'
+                    } mr-2`}></i>
+                  )}
+                  {element.data.buttonText || "Book Now"}
+                  {element.data.duration && (
+                    <span className="ml-2 text-xs opacity-80">({element.data.duration}min)</span>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+        );
+
+      case "scheduleCall":
+        return (
+          <div className="mb-4">
+            {isEditing ? (
+              <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-md font-semibold text-slate-800">Schedule Call Element</h4>
+                  <Button
+                    onClick={() => onDelete && onDelete(element.id)}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    <i className="fas fa-trash text-xs"></i>
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Title</label>
+                    <Input
+                      value={element.data.title || ""}
+                      onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                      placeholder="Schedule a Call"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Button Text</label>
+                    <Input
+                      value={element.data.buttonText || ""}
+                      onChange={(e) => handleDataUpdate({ buttonText: e.target.value })}
+                      placeholder="Schedule Call"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 block mb-1">Subtitle</label>
+                  <Input
+                    value={element.data.subtitle || ""}
+                    onChange={(e) => handleDataUpdate({ subtitle: e.target.value })}
+                    placeholder="Let's discuss your project"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Event Type Slug</label>
+                    <Input
+                      value={element.data.eventTypeSlug || ""}
+                      onChange={(e) => handleDataUpdate({ eventTypeSlug: e.target.value })}
+                      placeholder="phone-call"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Call Type</label>
+                    <Select value={element.data.callType || "phone"} onValueChange={(value) => handleDataUpdate({ callType: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="phone"><i className="fas fa-phone mr-2"></i> Phone Call</SelectItem>
+                        <SelectItem value="video"><i className="fas fa-video mr-2"></i> Video Call</SelectItem>
+                        <SelectItem value="both"><i className="fas fa-phone mr-1"></i><i className="fas fa-video ml-1"></i> Both</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Button Color</label>
+                    <Input
+                      type="color"
+                      value={element.data.buttonColor || "#2563eb"}
+                      onChange={(e) => handleDataUpdate({ buttonColor: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Text Color</label>
+                    <Input
+                      type="color"
+                      value={element.data.textColor || "#ffffff"}
+                      onChange={(e) => handleDataUpdate({ textColor: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Duration (min)</label>
+                    <Input
+                      type="number"
+                      value={element.data.duration || 30}
+                      onChange={(e) => handleDataUpdate({ duration: parseInt(e.target.value) })}
+                      min="15"
+                      max="180"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Button Size</label>
+                    <Select value={element.data.size || "medium"} onValueChange={(value) => handleDataUpdate({ size: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="small">Small</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="large">Large</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={element.data.openInNewTab || false}
+                      onCheckedChange={(checked) => handleDataUpdate({ openInNewTab: checked })}
+                    />
+                    <label className="text-sm font-medium text-slate-700">Open in new tab</label>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center space-y-3 p-4 rounded-lg border border-slate-200 bg-white">
+                <h3 className="text-lg font-bold text-slate-800">{element.data.title || "Schedule a Call"}</h3>
+                {element.data.subtitle && (
+                  <p className="text-sm text-slate-600">{element.data.subtitle}</p>
+                )}
+                <Button
+                  onClick={() => {
+                    if (!isInteractive) return;
+                    const eventSlug = element.data.eventTypeSlug || 'phone-call';
+                    const duration = element.data.duration || 30;
+                    const callType = element.data.callType || 'phone';
+                    const bookingUrl = `/booking/${eventSlug}?duration=${duration}&type=${callType}&source=card`;
+                    
+                    if (element.data.openInNewTab) {
+                      window.open(bookingUrl, '_blank');
+                    } else {
+                      window.location.href = bookingUrl;
+                    }
+                  }}
+                  style={{
+                    backgroundColor: element.data.buttonColor || "#2563eb",
+                    color: element.data.textColor || "#ffffff",
+                  }}
+                  className={`rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${
+                    element.data.size === 'small' ? 'px-4 py-1 text-sm' :
+                    element.data.size === 'large' ? 'px-8 py-3 text-lg' :
+                    'px-6 py-2'
+                  }`}
+                  data-testid="button-schedule-call"
+                >
+                  {element.data.callType === 'phone' && (
+                    <i className="fas fa-phone mr-2"></i>
+                  )}
+                  {element.data.callType === 'video' && (
+                    <i className="fas fa-video mr-2"></i>
+                  )}
+                  {element.data.callType === 'both' && (
+                    <>
+                      <i className="fas fa-phone mr-1"></i>
+                      <i className="fas fa-video mr-2"></i>
+                    </>
+                  )}
+                  {element.data.buttonText || "Schedule Call"}
+                  {element.data.duration && (
+                    <span className="ml-2 text-xs opacity-80">({element.data.duration}min)</span>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+        );
+
+      case "meetingRequest":
+        return (
+          <div className="mb-4">
+            {isEditing ? (
+              <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-md font-semibold text-slate-800">Meeting Request Element</h4>
+                  <Button
+                    onClick={() => onDelete && onDelete(element.id)}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    <i className="fas fa-trash text-xs"></i>
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Title</label>
+                    <Input
+                      value={element.data.title || ""}
+                      onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                      placeholder="Request a Meeting"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Button Text</label>
+                    <Input
+                      value={element.data.buttonText || ""}
+                      onChange={(e) => handleDataUpdate({ buttonText: e.target.value })}
+                      placeholder="Request Meeting"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 block mb-1">Subtitle</label>
+                  <Input
+                    value={element.data.subtitle || ""}
+                    onChange={(e) => handleDataUpdate({ subtitle: e.target.value })}
+                    placeholder="Let's meet to discuss opportunities"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Event Type Slug</label>
+                    <Input
+                      value={element.data.eventTypeSlug || ""}
+                      onChange={(e) => handleDataUpdate({ eventTypeSlug: e.target.value })}
+                      placeholder="discovery-meeting"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Meeting Type</label>
+                    <Select value={element.data.meetingType || "business"} onValueChange={(value) => handleDataUpdate({ meetingType: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="business"><i className="fas fa-handshake mr-2"></i> Business Meeting</SelectItem>
+                        <SelectItem value="consultation"><i className="fas fa-user-tie mr-2"></i> Consultation</SelectItem>
+                        <SelectItem value="discovery"><i className="fas fa-search mr-2"></i> Discovery Call</SelectItem>
+                        <SelectItem value="demo"><i className="fas fa-desktop mr-2"></i> Product Demo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Border Color</label>
+                    <Input
+                      type="color"
+                      value={element.data.borderColor || "#7c3aed"}
+                      onChange={(e) => handleDataUpdate({ borderColor: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Text Color</label>
+                    <Input
+                      type="color"
+                      value={element.data.textColor || "#7c3aed"}
+                      onChange={(e) => handleDataUpdate({ textColor: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Duration (min)</label>
+                    <Input
+                      type="number"
+                      value={element.data.duration || 60}
+                      onChange={(e) => handleDataUpdate({ duration: parseInt(e.target.value) })}
+                      min="15"
+                      max="180"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Button Style</label>
+                    <Select value={element.data.style || "outlined"} onValueChange={(value) => handleDataUpdate({ style: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="outlined">Outlined</SelectItem>
+                        <SelectItem value="filled">Filled</SelectItem>
+                        <SelectItem value="minimal">Minimal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Button Size</label>
+                    <Select value={element.data.size || "medium"} onValueChange={(value) => handleDataUpdate({ size: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="small">Small</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="large">Large</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    checked={element.data.openInNewTab || false}
+                    onCheckedChange={(checked) => handleDataUpdate({ openInNewTab: checked })}
+                  />
+                  <label className="text-sm font-medium text-slate-700">Open in new tab</label>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center space-y-3 p-4 rounded-lg border border-slate-200 bg-white">
+                <h3 className="text-lg font-bold text-slate-800">{element.data.title || "Request a Meeting"}</h3>
+                {element.data.subtitle && (
+                  <p className="text-sm text-slate-600">{element.data.subtitle}</p>
+                )}
+                <Button
+                  onClick={() => {
+                    if (!isInteractive) return;
+                    const eventSlug = element.data.eventTypeSlug || 'discovery-meeting';
+                    const duration = element.data.duration || 60;
+                    const meetingType = element.data.meetingType || 'business';
+                    const bookingUrl = `/booking/${eventSlug}?duration=${duration}&type=${meetingType}&source=card&style=meeting`;
+                    
+                    if (element.data.openInNewTab) {
+                      window.open(bookingUrl, '_blank');
+                    } else {
+                      window.location.href = bookingUrl;
+                    }
+                  }}
+                  style={{
+                    backgroundColor: element.data.style === 'filled' ? (element.data.borderColor || "#7c3aed") : "transparent",
+                    color: element.data.style === 'filled' ? "#ffffff" : (element.data.textColor || "#7c3aed"),
+                    borderColor: element.data.style !== 'minimal' ? (element.data.borderColor || "#7c3aed") : "transparent",
+                    borderWidth: element.data.style === 'minimal' ? '0' : '2px',
+                  }}
+                  className={`rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 ${
+                    element.data.style === 'outlined' ? 'border-2 hover:shadow-lg' :
+                    element.data.style === 'filled' ? 'shadow-lg hover:shadow-xl' :
+                    'hover:bg-slate-50'
+                  } ${
+                    element.data.size === 'small' ? 'px-4 py-1 text-sm' :
+                    element.data.size === 'large' ? 'px-8 py-3 text-lg' :
+                    'px-6 py-2'
+                  }`}
+                  variant={element.data.style === 'filled' ? 'default' : 'outline'}
+                  data-testid="button-meeting-request"
+                >
+                  {element.data.meetingType === 'business' && (
+                    <i className="fas fa-handshake mr-2"></i>
+                  )}
+                  {element.data.meetingType === 'consultation' && (
+                    <i className="fas fa-user-tie mr-2"></i>
+                  )}
+                  {element.data.meetingType === 'discovery' && (
+                    <i className="fas fa-search mr-2"></i>
+                  )}
+                  {element.data.meetingType === 'demo' && (
+                    <i className="fas fa-desktop mr-2"></i>
+                  )}
+                  {element.data.buttonText || "Request Meeting"}
+                  {element.data.duration && (
+                    <span className="ml-2 text-xs opacity-80">({element.data.duration}min)</span>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+        );
+
+      case "availabilityDisplay":
+        return (
+          <div className="mb-4">
+            {isEditing ? (
+              <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-md font-semibold text-slate-800">Availability Display Element</h4>
+                  <Button
+                    onClick={() => onDelete && onDelete(element.id)}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    <i className="fas fa-trash text-xs"></i>
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Title</label>
+                    <Input
+                      value={element.data.title || ""}
+                      onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                      placeholder="My Availability"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Subtitle</label>
+                    <Input
+                      value={element.data.subtitle || ""}
+                      onChange={(e) => handleDataUpdate({ subtitle: e.target.value })}
+                      placeholder="Choose a convenient time"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Event Type Slug</label>
+                    <Input
+                      value={element.data.eventTypeSlug || ""}
+                      onChange={(e) => handleDataUpdate({ eventTypeSlug: e.target.value })}
+                      placeholder="30min-meeting"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Timezone</label>
+                    <Select value={element.data.timezone || "auto"} onValueChange={(value) => handleDataUpdate({ timezone: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="auto">Auto-detect</SelectItem>
+                        <SelectItem value="UTC">UTC</SelectItem>
+                        <SelectItem value="America/New_York">Eastern Time</SelectItem>
+                        <SelectItem value="America/Chicago">Central Time</SelectItem>
+                        <SelectItem value="America/Denver">Mountain Time</SelectItem>
+                        <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                        <SelectItem value="Europe/London">London Time</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Primary Color</label>
+                    <Input
+                      type="color"
+                      value={element.data.primaryColor || "#22c55e"}
+                      onChange={(e) => handleDataUpdate({ primaryColor: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Background Color</label>
+                    <Input
+                      type="color"
+                      value={element.data.backgroundColor || "#f8fafc"}
+                      onChange={(e) => handleDataUpdate({ backgroundColor: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Display Style</label>
+                    <Select value={element.data.displayStyle || "compact"} onValueChange={(value) => handleDataUpdate({ displayStyle: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="compact">Compact</SelectItem>
+                        <SelectItem value="detailed">Detailed</SelectItem>
+                        <SelectItem value="minimal">Minimal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Days to Show</label>
+                    <Input
+                      type="number"
+                      value={element.data.daysToShow || 7}
+                      onChange={(e) => handleDataUpdate({ daysToShow: parseInt(e.target.value) })}
+                      min="3"
+                      max="14"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={element.data.showBookingButton || true}
+                      onCheckedChange={(checked) => handleDataUpdate({ showBookingButton: checked })}
+                    />
+                    <label className="text-sm font-medium text-slate-700">Show booking button</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={element.data.openInNewTab || false}
+                      onCheckedChange={(checked) => handleDataUpdate({ openInNewTab: checked })}
+                    />
+                    <label className="text-sm font-medium text-slate-700">Open in new tab</label>
+                  </div>
+                </div>
+                {element.data.showBookingButton && (
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Booking Button Text</label>
+                    <Input
+                      value={element.data.bookingButtonText || ""}
+                      onChange={(e) => handleDataUpdate({ bookingButtonText: e.target.value })}
+                      placeholder="Book a slot"
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div 
+                className="p-4 rounded-lg border border-slate-200"
+                style={{ backgroundColor: element.data.backgroundColor || "#f8fafc" }}
+                data-testid="availability-display"
+              >
+                <h3 className="text-lg font-bold text-slate-800 mb-2 text-center">{element.data.title || "My Availability"}</h3>
+                {element.data.subtitle && (
+                  <p className="text-sm text-slate-600 mb-4 text-center">{element.data.subtitle}</p>
+                )}
+                <AvailabilityWidget
+                  eventTypeSlug={element.data.eventTypeSlug}
+                  timezone={element.data.timezone}
+                  displayStyle={element.data.displayStyle}
+                  daysToShow={element.data.daysToShow}
+                  primaryColor={element.data.primaryColor}
+                  showBookingButton={element.data.showBookingButton}
+                  bookingButtonText={element.data.bookingButtonText}
+                  openInNewTab={element.data.openInNewTab}
+                  isInteractive={isInteractive}
+                />
+              </div>
             )}
           </div>
         );

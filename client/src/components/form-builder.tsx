@@ -872,7 +872,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       variant="outline"
                       onClick={() => {
                         const currentTemplate = form.getValues("template"); // Preserve current template
-                        const newContact = { id: generateFieldId(), label: "", value: "", type: "custom", icon: "fas fa-link" };
+                        const newContact = { id: generateFieldId(), label: "", value: "", type: "other" as const, icon: "fas fa-link" };
                         form.setValue("customContacts", [...(form.watch("customContacts") || []), newContact]);
                         // Explicitly preserve template type to prevent reverting to schema default
                         form.setValue("template", currentTemplate);
