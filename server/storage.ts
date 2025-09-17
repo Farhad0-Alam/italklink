@@ -334,6 +334,7 @@ export interface IStorage {
   getAvailabilityForDate(eventTypeId: string, date: Date, timezone: string): Promise<Array<{time: string, available: boolean, utcTime: string}>>;
   createAppointment(appointmentData: InsertAppointment): Promise<Appointment>;
   getAppointment(id: string): Promise<Appointment | undefined>;
+  getUserAppointments(userId: string, filters?: { search?: string; page?: number; limit?: number }): Promise<Appointment[]>;
   updateAppointment(id: string, appointmentData: Partial<InsertAppointment>): Promise<Appointment>;
 
   // Payment operations
