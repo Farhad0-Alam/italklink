@@ -187,10 +187,12 @@ export default function AppointmentDashboard() {
   });
 
   // Fetch event types
-  const { data: eventTypes, isLoading: eventTypesLoading } = useQuery<AppointmentEventType[]>({
+  const { data: eventTypesResponse, isLoading: eventTypesLoading } = useQuery({
     queryKey: ['/api/appointment-event-types'],
-    queryFn: () => apiRequest('GET', '/api/appointment-event-types') as Promise<AppointmentEventType[]>,
+    queryFn: () => apiRequest('GET', '/api/appointment-event-types'),
   });
+
+  const eventTypes = eventTypesResponse?.eventTypes || [];
 
   const appointmentsDataTyped = appointmentsData as AppointmentsResponse | undefined;
   const appointments: AppointmentWithDetails[] = appointmentsDataTyped?.appointments || [];
