@@ -157,32 +157,78 @@ export default function Pricing() {
 
   const getTeamPlanPrice = (plan: Plan, additionalUserCount: number = 0) => {
     const basePrice = getDisplayPrice(plan);
-    // Assuming $12 per additional user as shown in example
-    const additionalUserPrice = additionalUserCount * 12;
+    // Apply yearly discount to additional users too
+    const perUserMonthly = isYearly ? 12 * 0.8 : 12; // $9.60/month for yearly, $12/month for monthly
+    const additionalUserPrice = additionalUserCount * perUserMonthly;
     return basePrice + additionalUserPrice;
   };
+
+  const getPerUserMonthly = () => isYearly ? 12 * 0.8 : 12;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       <Navigation />
       
-      {/* Fixed Plan Selector Header */}
+      {/* Plan Selection Toggle - Fixed Header */}
       <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 sticky top-16 z-40">
-        <div className="container mx-auto px-4 py-6">
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Choose Your Perfect Plan
             </h1>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
               Create stunning digital business cards with unlimited customization
             </p>
+            
+            {/* Plan Selection Header */}
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+                Plan selection
+              </h2>
+              <div className="flex items-center justify-center">
+                <div className="bg-gray-100 dark:bg-slate-700 rounded-full p-1 flex items-center">
+                  <button
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                      !isYearly 
+                        ? 'bg-orange-500 text-white shadow-sm' 
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }`}
+                    onClick={() => setIsYearly(false)}
+                    data-testid="toggle-monthly"
+                  >
+                    Pay monthly
+                  </button>
+                  <button
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                      isYearly 
+                        ? 'bg-orange-500 text-white shadow-sm' 
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }`}
+                    onClick={() => setIsYearly(true)}
+                    data-testid="toggle-yearly"
+                  >
+                    Yearly and save 20%
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          
-          {/* Plan Selection Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
+        </div>
+      </div>
+      
+      {/* Plan Cards - Scrollable Section */}
+      <div className="py-16 px-4" id="plans-section">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <AnimatePresence>
               {plans?.map((plan) => {
-                const displayPrice = getDisplayPrice(plan);
+                const isTeamPlan = plan.planType.toLowerCase().includes('team');
+                const userCount = isTeamPlan ? (additionalUsers[plan.id] || 0) + 3 : 1;
+                const totalPrice = isTeamPlan ? getTeamPlanPrice(plan, additionalUsers[plan.id] || 0) : getDisplayPrice(plan);
+                const perUserMonthly = getPerUserMonthly();
+                const actualBillingPrice = isTeamPlan && additionalUsers[plan.id] > 0 
+                  ? (getActualBillingPrice(plan) + (additionalUsers[plan.id] * perUserMonthly * 12))
+                  : getActualBillingPrice(plan);
                 const popular = isPopular(plan.planType);
                 const isSelected = selectedPlan === plan.id;
                 
@@ -193,285 +239,183 @@ export default function Pricing() {
                     animate={{ opacity: 1, y: 0 }}
                     className="relative"
                   >
-                    <div
-                      className={`bg-white dark:bg-slate-900 border-2 rounded-lg p-6 cursor-pointer transition-all ${
-                        isSelected
-                          ? 'border-orange-500 shadow-lg'
-                          : popular
-                          ? 'border-orange-200 dark:border-orange-800'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                      }`}
-                      onClick={() => setSelectedPlan(plan.id)}
-                      data-testid={`plan-selector-${plan.planType}`}
+                    <Card className={`border-2 hover:shadow-lg transition-all duration-200 cursor-pointer ${
+                      isSelected 
+                        ? 'border-orange-500 shadow-lg ring-2 ring-orange-200' 
+                        : 'border-gray-200 dark:border-gray-700'
+                    } bg-white dark:bg-slate-800`}
+                    onClick={() => setSelectedPlan(plan.id)}
+                    data-testid={`plan-card-${plan.planType}`}
                     >
-                      {popular && (
-                        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                          <Badge className="bg-orange-500 text-white px-3 py-1 text-xs font-medium">
-                            Most Popular
-                          </Badge>
-                        </div>
-                      )}
-                      
-                      <div className="text-center">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                          {plan.name}
-                        </h3>
-                        <div className="mb-4">
-                          <span className="text-3xl font-bold text-gray-900 dark:text-white">
-                            ${displayPrice === 0 ? '0' : displayPrice}
-                          </span>
-                          <span className="text-gray-500 ml-1">/month</span>
-                        </div>
-                        
-                        {/* User limit display */}
-                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                          {plan.businessCardsLimit === -1 ? 'Unlimited' : plan.businessCardsLimit} Cards
-                        </div>
-                        
-                        {/* Add Users Section for Team Plans */}
-                        {plan.planType.toLowerCase().includes('team') && (
-                          <div className="border-t border-gray-200 dark:border-gray-600 pt-4 mt-4">
-                            <div className="flex items-center justify-center space-x-3 mb-3">
-                              <Users className="w-4 h-4 text-gray-500" />
-                              <span className="text-sm text-gray-600 dark:text-gray-400">Add users</span>
+                      <CardHeader className="pb-4">
+                        <div className="text-center">
+                          <CardTitle className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                            {plan.name}
+                          </CardTitle>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            {plan.planType === 'free' ? 'For Individuals' : 
+                             isTeamPlan ? `${userCount} users included!` : 
+                             'For Individuals'}
+                          </p>
+                          
+                          {/* Pricing Display */}
+                          <div className="mb-6">
+                            <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                              ${totalPrice === 0 ? '0' : totalPrice.toFixed(2)}/month
                             </div>
-                            <div className="flex items-center justify-center space-x-3">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleUserCountChange(plan.id, (additionalUsers[plan.id] || 0) - 1);
-                                }}
-                                data-testid={`decrease-users-${plan.id}`}
-                              >
-                                <Minus className="h-4 w-4" />
-                              </Button>
-                              <div className="bg-orange-500 text-white px-4 py-1 rounded-md font-medium min-w-[50px] text-center">
-                                {(additionalUsers[plan.id] || 0) + 3}
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleUserCountChange(plan.id, (additionalUsers[plan.id] || 0) + 1);
-                                }}
-                                data-testid={`increase-users-${plan.id}`}
-                              >
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            {additionalUsers[plan.id] > 0 && (
-                              <div className="text-xs text-gray-500 mt-2">
-                                +${additionalUsers[plan.id] * 12}/month for additional users
+                            {plan.price > 0 && isYearly && (
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                Billed at ${actualBillingPrice.toFixed(2)}/year
+                                {isTeamPlan && additionalUsers[plan.id] > 0 && (
+                                  <span> (includes additional users)</span>
+                                )}
                               </div>
                             )}
                           </div>
-                        )}
-                        
-                        <Button
-                          className={`w-full mt-4 ${
-                            popular
-                              ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                              : plan.price === 0
-                              ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                              : 'bg-gray-900 hover:bg-gray-800 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-gray-900'
-                          }`}
-                          data-testid={`select-plan-${plan.planType}`}
-                        >
-                          {plan.price === 0 ? 'Get Started' : 
-                           plan.planType.toLowerCase().includes('enterprise') ? 'Talk to sales' : 'Select plan'}
-                        </Button>
-                      </div>
-                    </div>
+                          
+                          {/* Add Users Section for Team Plans */}
+                          {isTeamPlan && (
+                            <div className="mb-6">
+                              <div className="flex items-center justify-between mb-3">
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Add users</span>
+                                <div className="flex items-center space-x-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 rounded-md"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleUserCountChange(plan.id, (additionalUsers[plan.id] || 0) - 1);
+                                    }}
+                                    data-testid={`decrease-users-${plan.id}`}
+                                  >
+                                    <Minus className="h-4 w-4" />
+                                  </Button>
+                                  <div className="bg-black text-white px-4 py-1 rounded-md font-bold min-w-[50px] text-center">
+                                    {userCount}
+                                  </div>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 rounded-md"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleUserCountChange(plan.id, (additionalUsers[plan.id] || 0) + 1);
+                                    }}
+                                    data-testid={`increase-users-${plan.id}`}
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                              {additionalUsers[plan.id] > 0 && (
+                                <div className="text-xs text-gray-500 mb-3">
+                                  +${(additionalUsers[plan.id] * perUserMonthly).toFixed(2)}/month for {additionalUsers[plan.id]} additional user{additionalUsers[plan.id] > 1 ? 's' : ''}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Select Plan Button */}
+                          <Button
+                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedPlan(plan.id);
+                              const detailsSection = document.getElementById('plan-details');
+                              if (detailsSection) {
+                                detailsSection.scrollIntoView({ behavior: 'smooth' });
+                              }
+                            }}
+                            data-testid={`select-plan-${plan.planType}`}
+                          >
+                            Select plan
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      
+                      <CardContent className="pt-0">
+                        <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+                          <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Includes:</h4>
+                          <div className="space-y-2">
+                            {getPlanFeatures(plan).slice(0, 6).map((feature) => (
+                              <div key={feature.id} className="flex items-center space-x-2">
+                                <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                <span className="text-sm text-gray-600 dark:text-gray-300">{feature.name}</span>
+                              </div>
+                            ))}
+                            {getPlanFeatures(plan).length > 6 && (
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                +{getPlanFeatures(plan).length - 6} more features
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </motion.div>
                 );
               })}
             </AnimatePresence>
           </div>
-          
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center mt-6">
-            <div className="bg-gray-100 dark:bg-slate-700 rounded-lg p-1 flex items-center space-x-1">
-              <button
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                  !isYearly ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-300'
-                }`}
-                onClick={() => setIsYearly(false)}
-                data-testid="monthly-toggle"
-              >
-                Monthly
-              </button>
-              <button
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                  isYearly ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-300'
-                }`}
-                onClick={() => setIsYearly(true)}
-                data-testid="yearly-toggle"
-              >
-                Yearly
-                {isYearly && (
-                  <Badge className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5">
-                    Save 20%
-                  </Badge>
-                )}
-              </button>
-            </div>
-          </div>
         </div>
       </div>
-
+      
       {/* Plan Details Section */}
-      <div className="bg-gray-50 dark:bg-slate-900 py-16">
-        <div className="container mx-auto px-4 max-w-6xl">
-          {selectedPlan && plans && (
-            <div>
-              {(() => {
-                const plan = plans.find(p => p.id === selectedPlan);
-                if (!plan) return null;
-                
-                const features = getPlanFeatures(plan);
-                const displayPrice = getDisplayPrice(plan);
-                const totalPrice = plan.planType.toLowerCase().includes('team') 
-                  ? getTeamPlanPrice(plan, additionalUsers[plan.id] || 0) 
-                  : displayPrice;
-                
-                return (
-                  <div className="grid lg:grid-cols-2 gap-12">
-                    {/* Plan Summary */}
-                    <div>
-                      <div className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm">
-                        <div className="flex items-center justify-between mb-6">
-                          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                            {plan.name}
-                          </h2>
-                          {isPopular(plan.planType) && (
-                            <Badge className="bg-orange-500 text-white px-3 py-1">
-                              Most Popular
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        <div className="mb-6">
-                          <div className="flex items-baseline mb-2">
-                            <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                              ${totalPrice === 0 ? '0' : totalPrice}
-                            </span>
-                            <span className="text-gray-500 ml-2">/month</span>
-                          </div>
-                          
-                          {plan.businessCardsLimit && (
-                            <p className="text-gray-600 dark:text-gray-300 mb-4">
-                              {plan.businessCardsLimit === -1 ? 'Unlimited' : plan.businessCardsLimit} Business Cards
-                            </p>
-                          )}
-                          
-                          {isYearly && plan.price > 0 && (
-                            <p className="text-sm text-gray-500">
-                              Billed annually at ${Math.round(getActualBillingPrice(plan))} 
-                              {plan.planType.toLowerCase().includes('team') && additionalUsers[plan.id] > 0 && (
-                                <span> (+${(additionalUsers[plan.id] || 0) * 12 * 12} for additional users)</span>
-                              )}
-                            </p>
-                          )}
-                        </div>
-                        
-                        <Button 
-                          className={`w-full py-3 text-lg font-semibold ${
-                            isPopular(plan.planType)
-                              ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                              : plan.price === 0
-                              ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                              : 'bg-gray-900 hover:bg-gray-800 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-gray-900'
-                          }`}
-                          data-testid={`cta-${plan.planType}`}
-                        >
-                          {plan.price === 0 ? 'Get Started Free' : 
-                           plan.planType.toLowerCase().includes('enterprise') ? 'Contact Sales' : 'Get Started'}
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    {/* Features List */}
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                        Includes:
-                      </h3>
-                      
-                      <ul className="space-y-4">
-                        {features.map((feature) => (
-                          <li key={feature.id} className="flex items-start">
-                            <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                              <Check className="w-3 h-3 text-white" />
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-900 dark:text-white">
-                                {feature.name}
-                              </span>
-                              <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
-                                {feature.description}
-                              </p>
-                            </div>
-                          </li>
-                        ))}
-                        
-                        {/* Always show unlimited custom features */}
-                        <li className="flex items-start border-t border-gray-200 dark:border-gray-600 pt-4">
-                          <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                            <Infinity className="w-3 h-3 text-white" />
-                          </div>
-                          <div>
-                            <span className="font-medium text-gray-900 dark:text-white">
-                              Unlimited Custom Features
-                            </span>
-                            <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
-                              Add unlimited custom contact buttons, links, and interactive elements
-                            </p>
-                          </div>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-          
-          {!selectedPlan && (
-            <div className="text-center py-12">
-              <h3 className="text-xl font-medium text-gray-600 dark:text-gray-300 mb-2">
-                Select a plan above to see details
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                Compare features and find the perfect plan for your needs
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Simple FAQ Section */}
-      <div className="bg-white dark:bg-slate-800 py-16">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300">
-              Get answers to common questions about our pricing and features
-            </p>
+      {selectedPlan && plans && (
+        <div id="plan-details" className="bg-gray-100 dark:bg-slate-800 py-16 px-4">
+          <div className="container mx-auto max-w-4xl">
+            {(() => {
+              const plan = plans.find(p => p.id === selectedPlan);
+              if (!plan) return null;
+              
+              const isTeamPlan = plan.planType.toLowerCase().includes('team');
+              const userCount = isTeamPlan ? (additionalUsers[plan.id] || 0) + 3 : 1;
+              const totalPrice = isTeamPlan ? getTeamPlanPrice(plan, additionalUsers[plan.id] || 0) : getDisplayPrice(plan);
+              
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center"
+                >
+                  <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                    You selected: {plan.name}
+                  </h3>
+                  <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+                    ${totalPrice === 0 ? '0' : totalPrice.toFixed(2)}/month
+                    {isTeamPlan && userCount > 1 && (
+                      <span className="text-sm block mt-2">for {userCount} user{userCount > 1 ? 's' : ''}</span>
+                    )}
+                  </p>
+                  <Button 
+                    size="lg"
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-12 py-4 text-lg"
+                    data-testid="proceed-to-checkout"
+                  >
+                    {plan.price === 0 ? 'Get Started Free' : 'Proceed to Checkout'}
+                  </Button>
+                </motion.div>
+              );
+            })()}
           </div>
-          
+        </div>
+      )}
+      
+      {/* FAQ Section */}
+      <div className="py-16 px-4">
+        <div className="container mx-auto max-w-4xl">
+          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
+            Frequently Asked Questions
+          </h2>
           <div className="space-y-8">
             <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
-                Can I change my plan later?
+                Can I change my plan anytime?
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.
+                Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately for upgrades, 
+                and at your next billing cycle for downgrades.
               </p>
             </div>
             
