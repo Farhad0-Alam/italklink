@@ -2051,6 +2051,32 @@ export class DatabaseStorage implements IStorage {
     return appointment;
   }
 
+  async getUserAppointments(userId: string, filters?: { search?: string; page?: number; limit?: number }): Promise<Appointment[]> {
+    const conditions = [eq(appointments.hostUserId, userId)];
+    
+    if (filters?.search) {
+      conditions.push(
+        or(
+          like(appointments.attendeeName, `%${filters.search}%`),
+          like(appointments.attendeeEmail, `%${filters.search}%`),
+          like(appointments.attendeeCompany, `%${filters.search}%`)
+        )
+      );
+    }
+    
+    const query = db.select().from(appointments).where(and(...conditions));
+    
+    if (filters?.limit) {
+      query.limit(filters.limit);
+    }
+    
+    if (filters?.page && filters?.limit) {
+      query.offset((filters.page - 1) * filters.limit);
+    }
+    
+    return query.orderBy(desc(appointments.startTime));
+  }
+
   // Event Types CRUD operations
   async getUserAppointmentEventTypes(userId: string, filters?: { isActive?: boolean; search?: string }): Promise<AppointmentEventType[]> {
     const conditions = [eq(appointmentEventTypes.userId, userId)];
