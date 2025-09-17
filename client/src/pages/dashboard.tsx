@@ -237,8 +237,8 @@ export default function Dashboard() {
                 <Link href="/templates" className="text-gray-500 hover:text-gray-700">
                   Templates
                 </Link>
-                <Link href="/collections" className="text-gray-500 hover:text-gray-700">
-                  Collections
+                <Link href="/appointments" className="text-gray-500 hover:text-gray-700">
+                  Appointments
                 </Link>
                 <Link href="/crm" className="text-gray-500 hover:text-gray-700 flex items-center space-x-1" data-testid="link-crm">
                   <Users className="w-4 h-4" />

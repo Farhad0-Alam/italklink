@@ -836,6 +836,14 @@ export default function AppointmentDashboard() {
       <div className="flex flex-col space-y-6 mb-8">
         <div className="flex items-center justify-between">
           <div>
+            <div className="flex items-center space-x-4 mb-2">
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" data-testid="back-to-dashboard">
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Back to Dashboard
+                </Button>
+              </Link>
+            </div>
             <h1 className="text-3xl font-bold text-foreground" data-testid="page-title">Appointment Dashboard</h1>
             <p className="text-muted-foreground mt-1">
               Manage your appointments, event types, and booking calendar

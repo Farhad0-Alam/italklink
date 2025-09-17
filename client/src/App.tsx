@@ -12,7 +12,7 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
 import Templates from "./pages/templates";
-import Collections from "./pages/collections";
+import Appointments from "./pages/appointments";
 import { Builder } from "./pages/builder";
 import { Share } from "./pages/share";
 import TemplatePreview from "./pages/template-preview";
@@ -46,8 +46,8 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/templates" component={Templates} />
-      <Route path="/collections/:rest*" component={Collections} />
-      <Route path="/collections" component={Collections} />
+      <Route path="/appointments/:rest*" component={Appointments} />
+      <Route path="/appointments" component={Appointments} />
       <Route path="/builder" component={Builder} />
       <Route path="/cards/create" component={CardEditor} />
       <Route path="/cards/:id/edit" component={CardEditor} />
