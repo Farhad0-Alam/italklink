@@ -387,6 +387,36 @@ export function setupAppointmentRoutes(app: Express) {
     }
   });
 
+  // Get all appointments for authenticated user
+  app.get('/api/appointments', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const queryResult = queryFiltersSchema.safeParse(req.query);
+      
+      if (!queryResult.success) {
+        return res.status(400).json({
+          message: 'Invalid query parameters',
+          errors: queryResult.error.format(),
+        });
+      }
+
+      const { search, page = 1, limit = 10 } = queryResult.data;
+      const appointments = await storage.getUserAppointments(user.id, { search, page, limit });
+
+      res.json({
+        appointments: appointments || [],
+        pagination: {
+          total: appointments?.length || 0,
+          page: page,
+          limit: limit,
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      res.status(500).json({ message: 'Failed to fetch appointments' });
+    }
+  });
+
   // ===== EVENT TYPES MANAGEMENT CRUD ROUTES =====
 
   // Get all event types for authenticated user

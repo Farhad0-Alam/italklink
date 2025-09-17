@@ -854,7 +854,7 @@ export default function AppointmentDashboard() {
               <Settings className="h-4 w-4 mr-2" />
               Event Types
             </Button>
-            <Button data-testid="create-appointment">
+            <Button onClick={() => setShowAppointmentModal(true)} data-testid="create-appointment">
               <Plus className="h-4 w-4 mr-2" />
               New Appointment
             </Button>
@@ -963,7 +963,7 @@ export default function AppointmentDashboard() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button className="w-full justify-start" data-testid="quick-new-appointment">
+                <Button onClick={() => setShowAppointmentModal(true)} className="w-full justify-start" data-testid="quick-new-appointment">
                   <Plus className="h-4 w-4 mr-2" />
                   Schedule New Appointment
                 </Button>
