@@ -410,8 +410,8 @@ export const setupPublicRoutes = (app: Express) => {
   app.use('/api/templates', simpleRateLimit(200, 15 * 60 * 1000));
   app.use('/api/availability', simpleRateLimit(200, 15 * 60 * 1000));
   
-  // Booking endpoints with stricter rate limiting (5 requests per 5 minutes)
-  app.use('/api/appointments', simpleRateLimit(5, 5 * 60 * 1000));
+  // Booking endpoints with moderate rate limiting (50 requests per 15 minutes)
+  app.use('/api/appointments', simpleRateLimit(50, 15 * 60 * 1000));
   
   // Authentication endpoints - separate limits for different types
   // Login/logout endpoints with strictest rate limiting (5 requests per 15 minutes)
