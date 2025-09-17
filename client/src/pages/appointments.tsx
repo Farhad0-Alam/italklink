@@ -122,6 +122,7 @@ export default function AppointmentDashboard() {
   const [page, setPage] = useState(1);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithDetails | null>(null);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false);
   const [showEventTypeModal, setShowEventTypeModal] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showRescheduleDialog, setShowRescheduleDialog] = useState(false);
@@ -854,7 +855,7 @@ export default function AppointmentDashboard() {
               <Settings className="h-4 w-4 mr-2" />
               Event Types
             </Button>
-            <Button onClick={() => setShowAppointmentModal(true)} data-testid="create-appointment">
+            <Button onClick={() => setShowNewAppointmentModal(true)} data-testid="create-appointment">
               <Plus className="h-4 w-4 mr-2" />
               New Appointment
             </Button>
@@ -963,19 +964,19 @@ export default function AppointmentDashboard() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button onClick={() => setShowAppointmentModal(true)} className="w-full justify-start" data-testid="quick-new-appointment">
+                <Button onClick={() => setShowNewAppointmentModal(true)} className="w-full justify-start" data-testid="quick-new-appointment">
                   <Plus className="h-4 w-4 mr-2" />
                   Schedule New Appointment
                 </Button>
-                <Button variant="outline" className="w-full justify-start" data-testid="quick-view-calendar">
+                <Button variant="outline" className="w-full justify-start" data-testid="quick-view-calendar" onClick={() => setActiveTab('calendar')}>
                   <CalendarIcon className="h-4 w-4 mr-2" />
                   View Full Calendar
                 </Button>
-                <Button variant="outline" className="w-full justify-start" data-testid="quick-manage-types">
+                <Button variant="outline" className="w-full justify-start" data-testid="quick-manage-types" onClick={() => setActiveTab('event-types')}>
                   <Settings className="h-4 w-4 mr-2" />
                   Manage Event Types
                 </Button>
-                <Button variant="outline" className="w-full justify-start" data-testid="quick-export-data">
+                <Button variant="outline" className="w-full justify-start" data-testid="quick-export-data" onClick={() => setActiveTab('appointments')}>
                   <TrendingUp className="h-4 w-4 mr-2" />
                   View Analytics
                 </Button>
@@ -1298,6 +1299,93 @@ export default function AppointmentDashboard() {
 
       {/* Appointment Details Modal */}
       <AppointmentDetailsModal />
+
+      {/* New Appointment Modal */}
+      <Dialog open={showNewAppointmentModal} onOpenChange={setShowNewAppointmentModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" data-testid="new-appointment-modal">
+          <DialogHeader>
+            <DialogTitle>Schedule New Appointment</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="event-type">Event Type</Label>
+                <Select>
+                  <SelectTrigger id="event-type" data-testid="new-appointment-event-type">
+                    <SelectValue placeholder="Select event type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {eventTypesResponse?.eventTypes?.map((eventType) => (
+                      <SelectItem key={eventType.id} value={eventType.id}>
+                        {eventType.name} ({eventType.duration} min)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="attendee-name">Name *</Label>
+                  <Input id="attendee-name" placeholder="John Doe" data-testid="new-appointment-name" />
+                </div>
+                <div>
+                  <Label htmlFor="attendee-email">Email *</Label>
+                  <Input id="attendee-email" type="email" placeholder="john@example.com" data-testid="new-appointment-email" />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="attendee-phone">Phone</Label>
+                  <Input id="attendee-phone" type="tel" placeholder="+1 (555) 000-0000" data-testid="new-appointment-phone" />
+                </div>
+                <div>
+                  <Label htmlFor="attendee-company">Company</Label>
+                  <Input id="attendee-company" placeholder="Company name" data-testid="new-appointment-company" />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="appointment-date">Date *</Label>
+                  <Input id="appointment-date" type="date" data-testid="new-appointment-date" />
+                </div>
+                <div>
+                  <Label htmlFor="appointment-time">Time *</Label>
+                  <Input id="appointment-time" type="time" data-testid="new-appointment-time" />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="appointment-notes">Notes</Label>
+                <Textarea 
+                  id="appointment-notes" 
+                  placeholder="Additional notes or special requirements..."
+                  className="min-h-[100px]"
+                  data-testid="new-appointment-notes"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setShowNewAppointmentModal(false)}
+              data-testid="cancel-new-appointment"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button"
+              data-testid="confirm-new-appointment"
+            >
+              Schedule Appointment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Event Type Modal */}
       <Dialog open={showEventTypeModal} onOpenChange={setShowEventTypeModal}>
