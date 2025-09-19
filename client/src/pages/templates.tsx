@@ -273,9 +273,6 @@ export default function Templates() {
                 <Link href="/templates" className="text-gray-900 font-medium hover:text-blue-600">
                   Templates
                 </Link>
-                <Link href="/collections" className="text-gray-500 hover:text-gray-700">
-                  Collections
-                </Link>
                 <Link href="/pricing" className="text-gray-500 hover:text-gray-700">
                   Pricing
                 </Link>
