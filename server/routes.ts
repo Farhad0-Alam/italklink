@@ -2524,11 +2524,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
     
     // Serve the actual file from disk
-    const fs = require('fs');
-    const filePath = require('path').join(process.cwd(), 'uploads', upload.storagePath);
+    const fs = await import('fs');
+    const path = await import('path');
+    const filePath = path.default.join(process.cwd(), 'uploads', upload.storagePath);
     
     // Check if file exists on disk
-    if (!fs.existsSync(filePath)) {
+    if (!fs.default.existsSync(filePath)) {
       return res.status(404).send(`
         <!DOCTYPE html>
         <html>
@@ -2554,7 +2555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     // Read and serve the actual file
     try {
-      const fileBuffer = fs.readFileSync(filePath);
+      const fileBuffer = fs.default.readFileSync(filePath);
       res.send(fileBuffer);
     } catch (error) {
       console.error('Error reading file:', error);
