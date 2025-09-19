@@ -17,6 +17,7 @@ import { MessageCircle } from "lucide-react";
 import { MenuPageElement } from "@/modules/multi-page/components/MenuPageElement";
 import ARPreviewMindAR from "@/elements/ARPreviewMindAR";
 import { compileMind } from "@/builder/api/ar";
+import { PdfViewerButton } from "@/components/PdfViewerButton";
 import {
   DndContext,
   closestCenter,
@@ -4156,6 +4157,89 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   >
                     <i className="fas fa-code text-4xl mb-4"></i>
                     <p>Add HTML content to see preview</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+
+      case "pdfViewer":
+        return (
+          <div className="w-full max-w-[430px] mx-auto">
+            {isEditing ? (
+              <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-md font-semibold text-slate-800">PDF Viewer</h4>
+                  <Button
+                    onClick={() => onDelete && onDelete(element.id)}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    <i className="fas fa-trash text-xs"></i>
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">PDF URL *</label>
+                    <Input
+                      type="url"
+                      value={element.data.pdf_url || ""}
+                      onChange={(e) => handleDataUpdate({ pdf_url: e.target.value })}
+                      placeholder="https://example.com/document.pdf"
+                      className="w-full"
+                      data-testid="pdf-url-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Button Text</label>
+                    <Input
+                      value={element.data.button_text || "View PDF"}
+                      onChange={(e) => handleDataUpdate({ button_text: e.target.value })}
+                      placeholder="View PDF"
+                      className="w-full"
+                      data-testid="pdf-button-text-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">
+                      Scale ({Math.round((element.data.scale || 1.0) * 100)}%)
+                    </label>
+                    <Input
+                      type="range"
+                      min="0.5"
+                      max="3"
+                      step="0.1"
+                      value={element.data.scale || 1.0}
+                      onChange={(e) => handleDataUpdate({ scale: parseFloat(e.target.value) })}
+                      className="w-full"
+                      data-testid="pdf-scale-input"
+                    />
+                    <div className="text-xs text-slate-500 mt-1">
+                      Adjust PDF zoom level (50% - 300%)
+                    </div>
+                  </div>
+                  <div className="p-3 bg-purple-50 border border-purple-200 rounded-md">
+                    <p className="text-sm text-purple-800">
+                      <i className="fas fa-info-circle mr-2"></i>
+                      PDF will open in a modal with clickable links, zoom controls, and download options.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="pdf-viewer-element w-full flex justify-center" data-testid="pdf-viewer-element">
+                {element.data.pdf_url ? (
+                  <PdfViewerButton
+                    pdf_url={element.data.pdf_url}
+                    button_text={element.data.button_text || "View PDF"}
+                    scale={element.data.scale || 1.0}
+                    className="w-full max-w-xs"
+                  />
+                ) : (
+                  <div className="border-2 border-dashed border-purple-300 p-8 text-center text-purple-500 rounded-2xl">
+                    <i className="fas fa-file-pdf text-4xl mb-4"></i>
+                    <p>Add PDF URL to see preview</p>
                   </div>
                 )}
               </div>
