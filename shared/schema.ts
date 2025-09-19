@@ -3035,6 +3035,16 @@ export const htmlElementSchema = baseElementSchema.extend({
   }),
 });
 
+// PDF Viewer element
+export const pdfViewerElementSchema = baseElementSchema.extend({
+  type: z.literal("pdfViewer"),
+  data: z.object({
+    pdf_url: z.string().url().min(1, "PDF URL is required"),
+    button_text: z.string().default("View PDF"),
+    scale: z.number().min(0.5).max(3).default(1.0),
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   headingElementSchema,
@@ -3060,6 +3070,7 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   meetingRequestElementSchema,
   availabilityDisplayElementSchema,
   htmlElementSchema,
+  pdfViewerElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;
