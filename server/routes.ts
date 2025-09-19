@@ -2691,14 +2691,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Generate static QR code (PNG or SVG)
+  // QR code cache for performance optimization
+  const qrCache = new Map<string, { data: string | Buffer, contentType: string, timestamp: number }>();
+  const QR_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+  
+  // Generate static QR code (PNG or SVG) with caching
   app.post('/api/qr/generate', requireAuth, async (req, res) => {
     try {
       const params = staticQrSchema.parse(req.body);
+      
+      // Create cache key from parameters
+      const cacheKey = JSON.stringify(params);
+      
+      // Check cache first
+      const cached = qrCache.get(cacheKey);
+      if (cached && (Date.now() - cached.timestamp) < QR_CACHE_TTL) {
+        res.setHeader('Content-Type', cached.contentType);
+        res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours
+        return res.send(cached.data);
+      }
+      
       const QRCode = await import('qrcode');
+      let data: string | Buffer;
+      let contentType: string;
       
       if (params.format === 'svg') {
-        const svg = await QRCode.toString(params.data, {
+        data = await QRCode.toString(params.data, {
           type: 'svg',
           width: parseInt(params.size),
           margin: params.margin,
@@ -2707,11 +2725,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             light: params.light
           }
         });
-        
-        res.setHeader('Content-Type', 'image/svg+xml');
-        res.send(svg);
+        contentType = 'image/svg+xml';
       } else {
-        const buffer = await QRCode.toBuffer(params.data, {
+        data = await QRCode.toBuffer(params.data, {
           type: 'png',
           width: parseInt(params.size),
           margin: params.margin,
@@ -2720,10 +2736,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
             light: params.light
           }
         });
-        
-        res.setHeader('Content-Type', 'image/png');
-        res.send(buffer);
+        contentType = 'image/png';
       }
+      
+      // Cache the result
+      qrCache.set(cacheKey, { data, contentType, timestamp: Date.now() });
+      
+      // Clean old cache entries periodically
+      if (qrCache.size > 1000) {
+        const now = Date.now();
+        for (const [key, entry] of qrCache.entries()) {
+          if (now - entry.timestamp > QR_CACHE_TTL) {
+            qrCache.delete(key);
+          }
+        }
+      }
+      
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours
+      res.send(data);
     } catch (error) {
       if (error instanceof ZodError) {
         return res.status(400).json({ message: 'Invalid parameters', errors: error.errors });
