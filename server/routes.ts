@@ -10,9 +10,11 @@ import {
   insertUserSchema, teamInvitationSchema, teamSettingsSchema,
   insertTeamMemberSchema, insertCrmContactSchema, insertCrmActivitySchema, 
   insertCrmTaskSchema, insertCrmPipelineSchema, insertCrmStageSchema, 
-  insertCrmDealSchema, insertCrmSequenceSchema
+  insertCrmDealSchema, insertCrmSequenceSchema,
+  insertQrLinkSchema, staticQrSchema
 } from '@shared/schema';
-import { z } from 'zod';
+import { z, ZodError } from 'zod';
+import { nanoid } from 'nanoid';
 
 // Import comprehensive middleware infrastructure
 import {
@@ -2582,6 +2584,220 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `);
     }
   }));
+  
+  // ===== QR CODE API ROUTES =====
+  
+  // Get user's QR links
+  app.get('/api/qr/links', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const { limit = '20', offset = '0' } = req.query;
+      
+      const [links, total] = await Promise.all([
+        storage.getUserQrLinks(user.id, parseInt(limit as string), parseInt(offset as string)),
+        storage.countUserQrLinks(user.id)
+      ]);
+      
+      res.json({ links, total });
+    } catch (error) {
+      console.error('Error fetching QR links:', error);
+      res.status(500).json({ message: 'Failed to fetch QR links' });
+    }
+  });
+  
+  // Create new QR link
+  app.post('/api/qr/links', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const linkData = insertQrLinkSchema.parse({
+        ...req.body,
+        userId: user.id,
+        shortId: nanoid(8) // Generate unique short ID
+      });
+      
+      const qrLink = await storage.createQrLink(linkData);
+      res.json(qrLink);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      console.error('Error creating QR link:', error);
+      res.status(500).json({ message: 'Failed to create QR link' });
+    }
+  });
+  
+  // Get single QR link with analytics
+  app.get('/api/qr/links/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const qrLink = await storage.getQrLink(req.params.id);
+      
+      if (!qrLink || qrLink.userId !== user.id) {
+        return res.status(404).json({ message: 'QR link not found' });
+      }
+      
+      // Get analytics for the past 30 days
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+      
+      const analytics = await storage.getQrAnalytics(qrLink.id, startDate, endDate);
+      
+      res.json({ ...qrLink, analytics });
+    } catch (error) {
+      console.error('Error fetching QR link:', error);
+      res.status(500).json({ message: 'Failed to fetch QR link' });
+    }
+  });
+  
+  // Update QR link
+  app.put('/api/qr/links/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const qrLink = await storage.getQrLink(req.params.id);
+      
+      if (!qrLink || qrLink.userId !== user.id) {
+        return res.status(404).json({ message: 'QR link not found' });
+      }
+      
+      const updateData = insertQrLinkSchema.partial().parse(req.body);
+      const updatedLink = await storage.updateQrLink(req.params.id, updateData);
+      
+      res.json(updatedLink);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
+      }
+      console.error('Error updating QR link:', error);
+      res.status(500).json({ message: 'Failed to update QR link' });
+    }
+  });
+  
+  // Delete QR link
+  app.delete('/api/qr/links/:id', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const qrLink = await storage.getQrLink(req.params.id);
+      
+      if (!qrLink || qrLink.userId !== user.id) {
+        return res.status(404).json({ message: 'QR link not found' });
+      }
+      
+      await storage.deleteQrLink(req.params.id);
+      res.json({ message: 'QR link deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting QR link:', error);
+      res.status(500).json({ message: 'Failed to delete QR link' });
+    }
+  });
+  
+  // Generate static QR code (PNG or SVG)
+  app.post('/api/qr/generate', requireAuth, async (req, res) => {
+    try {
+      const params = staticQrSchema.parse(req.body);
+      const QRCode = await import('qrcode');
+      
+      if (params.format === 'svg') {
+        const svg = await QRCode.toString(params.data, {
+          type: 'svg',
+          width: parseInt(params.size),
+          margin: params.margin,
+          color: {
+            dark: params.dark,
+            light: params.light
+          }
+        });
+        
+        res.setHeader('Content-Type', 'image/svg+xml');
+        res.send(svg);
+      } else {
+        const buffer = await QRCode.toBuffer(params.data, {
+          type: 'png',
+          width: parseInt(params.size),
+          margin: params.margin,
+          color: {
+            dark: params.dark,
+            light: params.light
+          }
+        });
+        
+        res.setHeader('Content-Type', 'image/png');
+        res.send(buffer);
+      }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({ message: 'Invalid parameters', errors: error.errors });
+      }
+      console.error('Error generating QR code:', error);
+      res.status(500).json({ message: 'Failed to generate QR code' });
+    }
+  });
+  
+  // QR redirect handler (public endpoint)
+  app.get('/q/:shortId', async (req, res) => {
+    try {
+      const { shortId } = req.params;
+      const qrLink = await storage.getQrLinkByShortId(shortId);
+      
+      if (!qrLink) {
+        return res.status(404).send(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Link Not Found</title>
+              <meta charset="utf-8">
+              <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; text-align: center; }
+                .error-container { max-width: 400px; margin: 0 auto; }
+                h1 { color: #e74c3c; margin-bottom: 20px; }
+                p { color: #666; line-height: 1.6; }
+              </style>
+            </head>
+            <body>
+              <div class="error-container">
+                <h1>404 - Link Not Found</h1>
+                <p>This QR code link has expired or does not exist.</p>
+              </div>
+            </body>
+          </html>
+        `);
+      }
+      
+      // Track the scan event
+      const userAgent = req.headers['user-agent'] || '';
+      const ipAddress = req.ip || req.connection.remoteAddress || '';
+      const country = req.headers['cf-ipcountry'] || req.headers['x-country'] || null;
+      const referrer = req.headers.referer || null;
+      const landingHost = req.headers.host || '';
+      
+      // Simple device detection
+      let device = 'desktop';
+      if (/mobile|android|iphone|ipad/i.test(userAgent)) {
+        device = /ipad/i.test(userAgent) ? 'tablet' : 'mobile';
+      }
+      
+      // Hash IP for privacy (using crypto)
+      const crypto = await import('crypto');
+      const ipHash = crypto.createHash('sha256').update(ipAddress + 'QR_SALT').digest('hex');
+      
+      // Record the event
+      await storage.createQrEvent({
+        qrId: qrLink.id,
+        ipHash,
+        ua: userAgent.substring(0, 500), // Truncate long user agents
+        device: device as any,
+        country: country as string,
+        referrer: referrer as string,
+        landingHost
+      });
+      
+      // Redirect to target URL
+      res.redirect(302, qrLink.targetUrl);
+    } catch (error) {
+      console.error('Error processing QR redirect:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
   
   // Apply comprehensive error handling middleware (must be last)
   setupErrorHandling(app);
