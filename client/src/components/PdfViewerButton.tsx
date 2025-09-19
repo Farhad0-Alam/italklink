@@ -1,13 +1,16 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { X, ExternalLink, Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ExternalLink, Download, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
-// Set up PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+// Set up PDF.js worker with better configuration for faster loading
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url,
+).toString();
 
 interface PdfViewerButtonProps {
   pdf_file: string;
@@ -30,43 +33,74 @@ export function PdfViewerButton({
   const [currentScale, setCurrentScale] = useState(scale);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+
+  // Memoize and cache the PDF blob for better performance
+  const pdfBlob = useMemo(() => {
+    if (!pdf_file) return null;
+    try {
+      const base64Data = pdf_file.includes(',') ? pdf_file.split(',')[1] : pdf_file;
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      return new Blob([byteArray], { type: 'application/pdf' });
+    } catch (error) {
+      console.error('Error creating PDF blob:', error);
+      return null;
+    }
+  }, [pdf_file]);
+
+  // Create blob URL when modal opens
+  useEffect(() => {
+    if (isOpen && pdfBlob && !blobUrl) {
+      const url = window.URL.createObjectURL(pdfBlob);
+      setBlobUrl(url);
+      setLoading(true);
+    }
+    return () => {
+      if (blobUrl) {
+        window.URL.revokeObjectURL(blobUrl);
+      }
+    };
+  }, [isOpen, pdfBlob]);
+
+  // Cleanup blob URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (blobUrl) {
+        window.URL.revokeObjectURL(blobUrl);
+      }
+    };
+  }, [blobUrl]);
 
   const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setLoading(false);
     setError(null);
+    setPageNumber(1); // Reset to first page
   }, []);
 
   const onDocumentLoadError = useCallback((error: Error) => {
     console.error('PDF loading error:', error);
     setLoading(false);
-    setError('Failed to load PDF. This might be due to CORS restrictions.');
+    setError('Failed to load PDF file. The file may be corrupted or invalid.');
   }, []);
 
   const openInNewTab = useCallback(() => {
-    if (pdf_file) {
-      const byteCharacters = atob(pdf_file.split(',')[1] || pdf_file);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
+    if (pdfBlob) {
+      const url = window.URL.createObjectURL(pdfBlob);
       window.open(url, '_blank', 'noopener,noreferrer');
+      // Clean up the URL after a delay
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
     }
-  }, [pdf_file]);
+  }, [pdfBlob]);
 
   const downloadPdf = useCallback(() => {
-    if (pdf_file) {
-      const byteCharacters = atob(pdf_file.split(',')[1] || pdf_file);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
+    if (pdfBlob) {
+      const url = window.URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
       link.href = url;
       link.download = file_name || 'document.pdf';
@@ -94,12 +128,13 @@ export function PdfViewerButton({
   }, [numPages]);
 
   const handleOpen = useCallback(() => {
+    if (!pdf_file || !pdfBlob) return;
     setIsOpen(true);
     setLoading(true);
     setError(null);
     setPageNumber(1);
     setCurrentScale(scale);
-  }, [scale]);
+  }, [scale, pdf_file, pdfBlob]);
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
@@ -299,12 +334,18 @@ export function PdfViewerButton({
             {!loading && !error && (
               <div className="flex flex-col items-center">
                 <Document
-                  file={pdf_file ? { data: pdf_file.includes(',') ? pdf_file.split(',')[1] : pdf_file } : null}
+                  file={blobUrl}
+                  onLoadStart={() => setLoading(true)}
                   onLoadSuccess={onDocumentLoadSuccess}
                   onLoadError={onDocumentLoadError}
                   loading={null}
                   error={null}
                   className="max-w-full"
+                  options={{
+                    cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                    cMapPacked: true,
+                    standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+                  }}
                 >
                   <Page
                     pageNumber={pageNumber}
