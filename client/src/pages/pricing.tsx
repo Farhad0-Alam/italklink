@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Navigation } from "@/components/navigation";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
-import { Check, Star, Sparkles, Zap, Crown, Infinity, Plus, Minus, Users } from "lucide-react";
+import { Check, Star, Sparkles, Zap, Crown, Infinity, Plus, Minus, Users, ArrowLeft } from "lucide-react";
 
 interface Plan {
   id: number;
@@ -76,6 +77,7 @@ const cardHover = {
 };
 
 export default function Pricing() {
+  const [, setLocation] = useLocation();
   const [isYearly, setIsYearly] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
   const [additionalUsers, setAdditionalUsers] = useState<{[key: number]: number}>({});
@@ -168,6 +170,20 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       <Navigation />
+      
+      {/* Back to Dashboard */}
+      <div className="container mx-auto px-4 pt-6">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => setLocation('/dashboard')}
+          className="flex items-center space-x-2 hover:bg-gray-100"
+          data-testid="button-back-dashboard"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Dashboard</span>
+        </Button>
+      </div>
       
       {/* Plan Selection Toggle - Fixed Header */}
       <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 sticky top-16 z-40">

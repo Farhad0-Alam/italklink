@@ -46,10 +46,12 @@ import {
   Clock,
   UserPlus,
   Link as LinkIcon,
-  Calendar
+  Calendar,
+  ArrowLeft
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 
 interface AffiliateProfile {
   id: string;
@@ -377,9 +379,24 @@ export default function Affiliate() {
   }
 
   // Affiliate dashboard for existing affiliates
+  const [, setLocation] = useLocation();
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
+        <div className="flex items-center space-x-4 mb-6">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setLocation('/dashboard')}
+            className="flex items-center space-x-2 hover:bg-gray-100"
+            data-testid="button-back-dashboard"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Dashboard</span>
+          </Button>
+          <div className="h-6 w-px bg-gray-300" />
+        </div>
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold">Affiliate Dashboard</h1>
           <Badge className={getStatusColor(affiliate.status)}>

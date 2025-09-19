@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { MoreHorizontal, FileText, Users, TrendingUp, User as UserIcon, CreditCard, Settings, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays, Upload } from "lucide-react";
+import { MoreHorizontal, FileText, Users, TrendingUp, User as UserIcon, CreditCard, Settings, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays, Upload, ArrowLeft } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -264,6 +264,18 @@ export default function UploadsPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setLocation('/dashboard')}
+            className="flex items-center space-x-2 hover:bg-gray-100"
+            data-testid="button-back-dashboard"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Dashboard</span>
+          </Button>
+        </div>
         <UploadsManager />
       </main>
 
