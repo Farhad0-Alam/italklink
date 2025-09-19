@@ -4,10 +4,8 @@ import { I18nextProvider } from "react-i18next";
 import { Suspense, lazy } from "react";
 import { queryClient } from "./lib/queryClient";
 import { ThemeProvider } from "./components/theme-provider";
-import { Navigation } from "./components/navigation";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { CardRoutes } from "@/modules/multi-page";
 import i18n from "./lib/i18n";
 
 // Eager load only critical pages (Landing, Login, Dashboard)
@@ -42,6 +40,9 @@ const Analytics = lazy(() => import("./pages/analytics"));
 const TeamDashboard = lazy(() => import("./pages/TeamDashboard"));
 const Uploads = lazy(() => import("./pages/uploads"));
 
+// Lazy load CardRoutes to prevent loading multi-page module eagerly
+const LazyCardRoutes = lazy(() => import("@/modules/multi-page").then(module => ({ default: module.CardRoutes })));
+
 // Loading component for lazy-loaded routes
 const PageSuspense = ({ children }: { children: React.ReactNode }) => (
   <Suspense fallback={
@@ -66,53 +67,57 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/dashboard" component={Dashboard} />
       
-      {/* Lazy-loaded pages */}
-      <Route path="/pricing" component={() => <PageSuspense><Pricing /></PageSuspense>} />
-      <Route path="/templates" component={() => <PageSuspense><Templates /></PageSuspense>} />
-      <Route path="/appointments/:rest*" component={() => <PageSuspense><Appointments /></PageSuspense>} />
-      <Route path="/appointments" component={() => <PageSuspense><Appointments /></PageSuspense>} />
-      <Route path="/builder" component={() => <PageSuspense><Builder /></PageSuspense>} />
-      <Route path="/cards/create" component={() => <PageSuspense><CardEditor /></PageSuspense>} />
-      <Route path="/cards/:id/edit" component={() => <PageSuspense><CardEditor /></PageSuspense>} />
-      <Route path="/card-editor/:id?" component={() => <PageSuspense><CardEditor /></PageSuspense>} />
-      <Route path="/card-editor" component={() => <PageSuspense><CardEditor /></PageSuspense>} />
-      <Route path="/share" component={() => <PageSuspense><Share /></PageSuspense>} />
-      <Route path="/template-preview/:templateId" component={() => <PageSuspense><TemplatePreview /></PageSuspense>} />
-      <Route path="/affiliate" component={() => <PageSuspense><Affiliate /></PageSuspense>} />
-      <Route path="/profile" component={() => <PageSuspense><Profile /></PageSuspense>} />
-      <Route path="/account-settings" component={() => <PageSuspense><AccountSettings /></PageSuspense>} />
-      <Route path="/billing" component={() => <PageSuspense><Billing /></PageSuspense>} />
-      <Route path="/usage" component={() => <PageSuspense><Usage /></PageSuspense>} />
-      <Route path="/automation" component={() => <PageSuspense><Automation /></PageSuspense>} />
-      <Route path="/availability" component={() => <PageSuspense><Availability /></PageSuspense>} />
-      <Route path="/event-types" component={() => <PageSuspense><EventTypes /></PageSuspense>} />
-      <Route path="/email-templates" component={() => <PageSuspense><EmailTemplatesPage /></PageSuspense>} />
-      <Route path="/uploads" component={() => <PageSuspense><Uploads /></PageSuspense>} />
-      <Route path="/crm" component={() => <PageSuspense><CRM /></PageSuspense>} />
-      <Route path="/analytics" component={() => <PageSuspense><Analytics /></PageSuspense>} />
-      <Route path="/teams" component={() => <PageSuspense><TeamDashboard /></PageSuspense>} />
-      <Route path="/help" component={() => <PageSuspense><Help /></PageSuspense>} />
-      <Route path="/booking/:eventTypeSlug" component={() => <PageSuspense><BookingPage /></PageSuspense>} />
-      <Route path="/admin/templates/import" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin/templates/builder" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin/templates/header-builder" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin/header-builder" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin/header-templates" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin/templates" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin/users" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin/plans" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin/coupons" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin/affiliates" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin/conversions" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin/icon-packs" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin/profile" component={() => <PageSuspense><Admin /></PageSuspense>} />
-      <Route path="/admin" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      {/* Lazy-loaded pages - Fixed to preserve route params */}
+      <Route path="/pricing">{() => <PageSuspense><Pricing /></PageSuspense>}</Route>
+      <Route path="/templates">{() => <PageSuspense><Templates /></PageSuspense>}</Route>
+      <Route path="/appointments/:rest*">{(params) => <PageSuspense><Appointments {...params} /></PageSuspense>}</Route>
+      <Route path="/appointments">{() => <PageSuspense><Appointments /></PageSuspense>}</Route>
+      <Route path="/builder">{() => <PageSuspense><Builder /></PageSuspense>}</Route>
+      <Route path="/cards/create">{() => <PageSuspense><CardEditor /></PageSuspense>}</Route>
+      <Route path="/cards/:id/edit">{(params) => <PageSuspense><CardEditor {...params} /></PageSuspense>}</Route>
+      <Route path="/card-editor/:id?">{(params) => <PageSuspense><CardEditor {...params} /></PageSuspense>}</Route>
+      <Route path="/card-editor">{() => <PageSuspense><CardEditor /></PageSuspense>}</Route>
+      <Route path="/share">{() => <PageSuspense><Share /></PageSuspense>}</Route>
+      <Route path="/template-preview/:templateId">{(params) => <PageSuspense><TemplatePreview {...params} /></PageSuspense>}</Route>
+      <Route path="/affiliate">{() => <PageSuspense><Affiliate /></PageSuspense>}</Route>
+      <Route path="/profile">{() => <PageSuspense><Profile /></PageSuspense>}</Route>
+      <Route path="/account-settings">{() => <PageSuspense><AccountSettings /></PageSuspense>}</Route>
+      <Route path="/billing">{() => <PageSuspense><Billing /></PageSuspense>}</Route>
+      <Route path="/usage">{() => <PageSuspense><Usage /></PageSuspense>}</Route>
+      <Route path="/automation">{() => <PageSuspense><Automation /></PageSuspense>}</Route>
+      <Route path="/availability">{() => <PageSuspense><Availability /></PageSuspense>}</Route>
+      <Route path="/event-types">{() => <PageSuspense><EventTypes /></PageSuspense>}</Route>
+      <Route path="/email-templates">{() => <PageSuspense><EmailTemplatesPage /></PageSuspense>}</Route>
+      <Route path="/uploads">{() => <PageSuspense><Uploads /></PageSuspense>}</Route>
+      <Route path="/crm">{() => <PageSuspense><CRM /></PageSuspense>}</Route>
+      <Route path="/analytics">{() => <PageSuspense><Analytics /></PageSuspense>}</Route>
+      <Route path="/teams">{() => <PageSuspense><TeamDashboard /></PageSuspense>}</Route>
+      <Route path="/help">{() => <PageSuspense><Help /></PageSuspense>}</Route>
+      <Route path="/booking/:eventTypeSlug">{(params) => <PageSuspense><BookingPage {...params} /></PageSuspense>}</Route>
+      <Route path="/admin/templates/import">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/templates/builder">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/templates/header-builder">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/header-builder">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/header-templates">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/templates">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/users">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/plans">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/coupons">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/affiliates">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/conversions">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/icon-packs">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/profile">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       
-      {/* Multi-page card routes */}
-      <CardRoutes />
+      {/* Multi-page card routes - Lazy loaded */}
+      <Route path="/card/:cardId" nest>
+        <PageSuspense>
+          <LazyCardRoutes />
+        </PageSuspense>
+      </Route>
       
-      <Route path="/:shareSlug" component={() => <PageSuspense><Share /></PageSuspense>} />
-      <Route component={() => <PageSuspense><NotFound /></PageSuspense>} />
+      <Route path="/:shareSlug">{(params) => <PageSuspense><Share {...params} /></PageSuspense>}</Route>
+      <Route>{() => <PageSuspense><NotFound /></PageSuspense>}</Route>
     </Switch>
   );
 }
