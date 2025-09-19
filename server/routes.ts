@@ -2523,58 +2523,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'Content-Disposition': `inline; filename="${upload.originalFileName}"`,
     });
     
-    // For now, since we're storing metadata only, serve a placeholder
-    // In a real implementation, you would fetch the file from storage and stream it
-    if (mimeType === 'text/html') {
-      res.send(`
+    // Serve the actual file from disk
+    const fs = require('fs');
+    const filePath = require('path').join(process.cwd(), 'uploads', upload.storagePath);
+    
+    // Check if file exists on disk
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).send(`
         <!DOCTYPE html>
         <html>
           <head>
-            <title>${upload.title || upload.originalFileName}</title>
-            <meta charset="utf-8">
-          </head>
-          <body>
-            <h1>File: ${upload.title || upload.originalFileName}</h1>
-            <p>This is a placeholder for the uploaded HTML file.</p>
-            <p>File Size: ${(upload.fileSize / 1024).toFixed(2)} KB</p>
-            <p>Uploaded: ${new Date(upload.createdAt).toLocaleDateString()}</p>
-            <p>Views: ${upload.viewCount + 1}</p>
-          </body>
-        </html>
-      `);
-    } else {
-      // For non-HTML files, serve a info page or redirect to actual file
-      res.send(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>${upload.title || upload.originalFileName}</title>
+            <title>File Not Found</title>
             <meta charset="utf-8">
             <style>
               body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; text-align: center; }
-              .file-info { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
-              .file-icon { font-size: 48px; margin-bottom: 20px; }
-              h1 { color: #333; margin-bottom: 10px; }
-              .file-details { text-align: left; margin: 20px 0; }
-              .file-details dt { font-weight: bold; }
-              .file-details dd { margin: 5px 0 15px 0; color: #666; }
+              .error-container { max-width: 400px; margin: 0 auto; }
+              h1 { color: #e74c3c; margin-bottom: 20px; }
+              p { color: #666; line-height: 1.6; }
             </style>
           </head>
           <body>
-            <div class="file-info">
-              <div class="file-icon">${fileExtension === '.pdf' ? '📄' : fileExtension.includes('image') ? '🖼️' : '📁'}</div>
-              <h1>${upload.title || upload.originalFileName}</h1>
-              <dl class="file-details">
-                <dt>File Type:</dt>
-                <dd>${mimeType}</dd>
-                <dt>File Size:</dt>
-                <dd>${(upload.fileSize / 1024).toFixed(2)} KB</dd>
-                <dt>Uploaded:</dt>
-                <dd>${new Date(upload.createdAt).toLocaleDateString()}</dd>
-                <dt>Views:</dt>
-                <dd>${upload.viewCount + 1}</dd>
-              </dl>
-              <p><em>Note: This is a preview page. In a full implementation, the actual file would be served directly.</em></p>
+            <div class="error-container">
+              <h1>404 - File Not Found</h1>
+              <p>The file has been removed from storage or is temporarily unavailable.</p>
+            </div>
+          </body>
+        </html>
+      `);
+    }
+
+    // Read and serve the actual file
+    try {
+      const fileBuffer = fs.readFileSync(filePath);
+      res.send(fileBuffer);
+    } catch (error) {
+      console.error('Error reading file:', error);
+      res.status(500).send(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Error Loading File</title>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; text-align: center; }
+              .error-container { max-width: 400px; margin: 0 auto; }
+              h1 { color: #e74c3c; margin-bottom: 20px; }
+              p { color: #666; line-height: 1.6; }
+            </style>
+          </head>
+          <body>
+            <div class="error-container">
+              <h1>500 - Error Loading File</h1>
+              <p>There was an error loading the requested file. Please try again later.</p>
             </div>
           </body>
         </html>

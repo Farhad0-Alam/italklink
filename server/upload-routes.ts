@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 import { z } from 'zod';
 import { requireAuth } from './auth';
 import { storage } from './storage';
@@ -84,6 +85,30 @@ function slugify(text: string): string {
     .substring(0, 80);
 }
 
+// Helper function to ensure directory exists
+function ensureDirectoryExists(dirPath: string): void {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+}
+
+// Helper function to save file to disk
+async function saveFileToDisk(buffer: Buffer, storagePath: string): Promise<void> {
+  const fullPath = path.join(process.cwd(), 'uploads', storagePath);
+  const directory = path.dirname(fullPath);
+  
+  // Ensure the directory exists
+  ensureDirectoryExists(directory);
+  
+  // Write the file to disk
+  return new Promise((resolve, reject) => {
+    fs.writeFile(fullPath, buffer, (err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+}
+
 // Upload new file
 router.post('/', requireAuth, upload.single('file'), asyncHandler(async (req, res) => {
   if (!req.file) {
@@ -140,12 +165,11 @@ router.post('/', requireAuth, upload.single('file'), asyncHandler(async (req, re
     throw validationError('Invalid upload data', validation.error.errors);
   }
 
-  // Store file (for now, we'll store in memory/filesystem, later can integrate with cloud storage)
-  // In a real implementation, this would upload to S3, Google Cloud Storage, etc.
-  const upload = await storage.createPublicUpload({
-    ...uploadData,
-    fileContent: req.file.buffer, // Store file content temporarily
-  });
+  // Save file to disk
+  await saveFileToDisk(req.file.buffer, storagePath);
+
+  // Store metadata in database
+  const upload = await storage.createPublicUpload(uploadData);
 
   successResponse(res, {
     id: upload.id,
