@@ -459,6 +459,9 @@ export function UploadsManager() {
                 >
                   {/* Action Buttons */}
                   <div className="flex items-center justify-between mb-3">
+                    <Badge variant={upload.isPublic ? "default" : "secondary"}>
+                      {upload.isPublic ? "Public" : "Private"}
+                    </Badge>
                     <div className="flex items-center space-x-2">
                       <Button 
                         variant="outline" 
@@ -498,9 +501,6 @@ export function UploadsManager() {
                         Delete
                       </Button>
                     </div>
-                    <Badge variant={upload.isPublic ? "default" : "secondary"}>
-                      {upload.isPublic ? "Public" : "Private"}
-                    </Badge>
                   </div>
 
                   {/* File Info */}
