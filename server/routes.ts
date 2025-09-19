@@ -184,6 +184,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { automationRoutes } = await import('./modules/automation/routes');
   app.use('/api/automation', automationRoutes);
 
+  // Setup upload routes
+  const uploadRoutes = (await import('./upload-routes')).default;
+  app.use('/api/uploads', uploadRoutes);
+
   // === ENHANCED API ENDPOINTS ===
   
   // Advanced User Management APIs
@@ -2449,6 +2453,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
   });
+
+  // Public file serving route - serves uploaded files at /:slug
+  // This must be BEFORE any catch-all routes but AFTER API routes
+  app.get('/:slug', asyncHandler(async (req, res) => {
+    const slug = req.params.slug;
+    
+    // Reserved slugs that should skip file serving
+    const RESERVED_SLUGS = [
+      "", "api", "auth", "admin", "builder", "dashboard", "login", "register",
+      "logout", "static", "assets", "public", "favicon.ico", "robots.txt", "sitemap.xml",
+      "_next", "card", "cards", "user", "users", "settings", "docs", "pricing",
+      "health", "status", "webhook", "hooks", "oauth", "pay", "stripe", "paypal"
+    ];
+    
+    // Skip reserved slugs - let them fall through to other handlers
+    if (RESERVED_SLUGS.includes(slug)) {
+      return; // This will fall through to the next route handler
+    }
+    
+    // Check if this slug exists in public uploads
+    const upload = await storage.getPublicUploadBySlug(slug);
+    
+    if (!upload) {
+      // If no upload found, return 404 or let it fall through to SPA
+      return res.status(404).send(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>File Not Found</title>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; text-align: center; }
+              .error-container { max-width: 400px; margin: 0 auto; }
+              h1 { color: #e74c3c; margin-bottom: 20px; }
+              p { color: #666; line-height: 1.6; }
+            </style>
+          </head>
+          <body>
+            <div class="error-container">
+              <h1>404 - File Not Found</h1>
+              <p>The file you're looking for doesn't exist or has been removed.</p>
+            </div>
+          </body>
+        </html>
+      `);
+    }
+    
+    // Increment view count
+    await storage.incrementUploadViews(upload.id);
+    
+    // Set appropriate headers based on file type
+    const mimeType = upload.mimeType;
+    const fileExtension = upload.fileExtension;
+    
+    res.set({
+      'Content-Type': mimeType,
+      'X-Content-Type-Options': 'nosniff',
+      'Cache-Control': 'public, max-age=300', // 5 minutes cache
+      'Content-Disposition': `inline; filename="${upload.originalFileName}"`,
+    });
+    
+    // For now, since we're storing metadata only, serve a placeholder
+    // In a real implementation, you would fetch the file from storage and stream it
+    if (mimeType === 'text/html') {
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${upload.title || upload.originalFileName}</title>
+            <meta charset="utf-8">
+          </head>
+          <body>
+            <h1>File: ${upload.title || upload.originalFileName}</h1>
+            <p>This is a placeholder for the uploaded HTML file.</p>
+            <p>File Size: ${(upload.fileSize / 1024).toFixed(2)} KB</p>
+            <p>Uploaded: ${new Date(upload.createdAt).toLocaleDateString()}</p>
+            <p>Views: ${upload.viewCount + 1}</p>
+          </body>
+        </html>
+      `);
+    } else {
+      // For non-HTML files, serve a info page or redirect to actual file
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${upload.title || upload.originalFileName}</title>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; text-align: center; }
+              .file-info { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+              .file-icon { font-size: 48px; margin-bottom: 20px; }
+              h1 { color: #333; margin-bottom: 10px; }
+              .file-details { text-align: left; margin: 20px 0; }
+              .file-details dt { font-weight: bold; }
+              .file-details dd { margin: 5px 0 15px 0; color: #666; }
+            </style>
+          </head>
+          <body>
+            <div class="file-info">
+              <div class="file-icon">${fileExtension === '.pdf' ? '📄' : fileExtension.includes('image') ? '🖼️' : '📁'}</div>
+              <h1>${upload.title || upload.originalFileName}</h1>
+              <dl class="file-details">
+                <dt>File Type:</dt>
+                <dd>${mimeType}</dd>
+                <dt>File Size:</dt>
+                <dd>${(upload.fileSize / 1024).toFixed(2)} KB</dd>
+                <dt>Uploaded:</dt>
+                <dd>${new Date(upload.createdAt).toLocaleDateString()}</dd>
+                <dt>Views:</dt>
+                <dd>${upload.viewCount + 1}</dd>
+              </dl>
+              <p><em>Note: This is a preview page. In a full implementation, the actual file would be served directly.</em></p>
+            </div>
+          </body>
+        </html>
+      `);
+    }
+  }));
   
   // Apply comprehensive error handling middleware (must be last)
   setupErrorHandling(app);

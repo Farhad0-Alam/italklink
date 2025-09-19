@@ -5,6 +5,7 @@ import {
   automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability, appointmentNotifications, appointmentPayments,
   calendarConnections, videoMeetingProviders, externalCalendarEvents, meetingLinks, integrationLogs,
   teamAssignments, roundRobinState, leadRoutingRules, teamMemberSkills, teamMemberCapacity, teamAvailabilityPatterns, assignmentAnalytics, routingAnalytics,
+  publicUploads,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -29,7 +30,8 @@ import {
   type TeamMemberCapacity, type InsertTeamMemberCapacity,
   type TeamAvailabilityPattern, type InsertTeamAvailabilityPattern,
   type AssignmentAnalytics, type InsertAssignmentAnalytics,
-  type RoutingAnalytics, type InsertRoutingAnalytics
+  type RoutingAnalytics, type InsertRoutingAnalytics,
+  type PublicUpload, type InsertPublicUpload
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -407,6 +409,16 @@ export interface IStorage {
     status?: string;
     limit?: number;
   }): Promise<IntegrationLog[]>;
+
+  // Public Upload operations
+  createPublicUpload(uploadData: InsertPublicUpload & { fileContent?: Buffer }): Promise<PublicUpload>;
+  getPublicUploadById(id: string): Promise<PublicUpload | undefined>;
+  getPublicUploadBySlug(slug: string): Promise<PublicUpload | undefined>;
+  getUserPublicUploads(userId: string, limit?: number, offset?: number): Promise<PublicUpload[]>;
+  countUserPublicUploads(userId: string): Promise<number>;
+  updatePublicUpload(id: string, uploadData: Partial<InsertPublicUpload> & { fileContent?: Buffer }): Promise<PublicUpload>;
+  deletePublicUpload(id: string): Promise<void>;
+  incrementUploadViews(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -4214,6 +4226,79 @@ export class DatabaseStorage implements IStorage {
       routingEfficiency: 85, // This would be calculated from routing analytics
       memberCapacities
     };
+  }
+
+  // Public Upload operations
+  async createPublicUpload(uploadData: InsertPublicUpload & { fileContent?: Buffer }): Promise<PublicUpload> {
+    const [upload] = await db.insert(publicUploads).values({
+      userId: uploadData.userId,
+      slug: uploadData.slug,
+      originalFileName: uploadData.originalFileName,
+      storagePath: uploadData.storagePath,
+      title: uploadData.title,
+      mimeType: uploadData.mimeType,
+      fileExtension: uploadData.fileExtension,
+      fileSize: uploadData.fileSize,
+      isPublic: uploadData.isPublic ?? true,
+    }).returning();
+    
+    // Note: In a real implementation, you would store the fileContent to a file system or cloud storage
+    // For now, we're just storing the metadata in the database
+    return upload;
+  }
+
+  async getPublicUploadById(id: string): Promise<PublicUpload | undefined> {
+    const [upload] = await db.select().from(publicUploads).where(eq(publicUploads.id, id));
+    return upload;
+  }
+
+  async getPublicUploadBySlug(slug: string): Promise<PublicUpload | undefined> {
+    const [upload] = await db.select().from(publicUploads).where(
+      and(eq(publicUploads.slug, slug), eq(publicUploads.isPublic, true))
+    );
+    return upload;
+  }
+
+  async getUserPublicUploads(userId: string, limit: number = 20, offset: number = 0): Promise<PublicUpload[]> {
+    return await db.select()
+      .from(publicUploads)
+      .where(eq(publicUploads.userId, userId))
+      .orderBy(desc(publicUploads.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async countUserPublicUploads(userId: string): Promise<number> {
+    const [result] = await db.select({ count: count() })
+      .from(publicUploads)
+      .where(eq(publicUploads.userId, userId));
+    return result.count;
+  }
+
+  async updatePublicUpload(id: string, uploadData: Partial<InsertPublicUpload> & { fileContent?: Buffer }): Promise<PublicUpload> {
+    const [upload] = await db
+      .update(publicUploads)
+      .set({ 
+        ...uploadData, 
+        updatedAt: new Date() 
+      })
+      .where(eq(publicUploads.id, id))
+      .returning();
+    
+    // Note: In a real implementation, you would also update the stored file if fileContent is provided
+    return upload;
+  }
+
+  async deletePublicUpload(id: string): Promise<void> {
+    await db.delete(publicUploads).where(eq(publicUploads.id, id));
+    // Note: In a real implementation, you would also delete the stored file from storage
+  }
+
+  async incrementUploadViews(id: string): Promise<void> {
+    await db
+      .update(publicUploads)
+      .set({ viewCount: sql`${publicUploads.viewCount} + 1` })
+      .where(eq(publicUploads.id, id));
   }
 }
 
