@@ -1,96 +1,118 @@
 import { Switch, Route } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { I18nextProvider } from "react-i18next";
+import { Suspense, lazy } from "react";
 import { queryClient } from "./lib/queryClient";
 import { ThemeProvider } from "./components/theme-provider";
 import { Navigation } from "./components/navigation";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CardRoutes } from "@/modules/multi-page";
+import i18n from "./lib/i18n";
+
+// Eager load only critical pages (Landing, Login, Dashboard)
 import Landing from "./pages/landing";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
-import Templates from "./pages/templates";
-import Appointments from "./pages/appointments";
-import { Builder } from "./pages/builder";
-import { Share } from "./pages/share";
-import TemplatePreview from "./pages/template-preview";
-import CardEditor from "./pages/card-editor";
-import Admin from "./pages/admin";
-import Pricing from "./pages/pricing";
-import Affiliate from "./pages/affiliate";
-import Profile from "./pages/profile";
-import AccountSettings from "./pages/account-settings";
-import Billing from "./pages/billing";
-import Usage from "./pages/usage";
-import Help from "./pages/help";
-import Automation from "./pages/automation";
-import Availability from "./pages/availability";
-import EventTypes from "./pages/event-types";
-import NotFound from "@/pages/not-found";
-import CRM from "./pages/crm";
-import BookingPage from "./pages/booking";
-import EmailTemplatesPage from "./pages/EmailTemplatesPage";
-import Analytics from "./pages/analytics";
-import TeamDashboard from "./pages/TeamDashboard";
-import Uploads from "./pages/uploads";
-import i18n from "./lib/i18n";
+
+// Lazy load all other pages to improve initial load performance
+const Templates = lazy(() => import("./pages/templates"));
+const Appointments = lazy(() => import("./pages/appointments"));
+const Builder = lazy(() => import("./pages/builder").then(module => ({ default: module.Builder })));
+const Share = lazy(() => import("./pages/share").then(module => ({ default: module.Share })));
+const TemplatePreview = lazy(() => import("./pages/template-preview"));
+const CardEditor = lazy(() => import("./pages/card-editor"));
+const Admin = lazy(() => import("./pages/admin"));
+const Pricing = lazy(() => import("./pages/pricing"));
+const Affiliate = lazy(() => import("./pages/affiliate"));
+const Profile = lazy(() => import("./pages/profile"));
+const AccountSettings = lazy(() => import("./pages/account-settings"));
+const Billing = lazy(() => import("./pages/billing"));
+const Usage = lazy(() => import("./pages/usage"));
+const Help = lazy(() => import("./pages/help"));
+const Automation = lazy(() => import("./pages/automation"));
+const Availability = lazy(() => import("./pages/availability"));
+const EventTypes = lazy(() => import("./pages/event-types"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+const CRM = lazy(() => import("./pages/crm"));
+const BookingPage = lazy(() => import("./pages/booking"));
+const EmailTemplatesPage = lazy(() => import("./pages/EmailTemplatesPage"));
+const Analytics = lazy(() => import("./pages/analytics"));
+const TeamDashboard = lazy(() => import("./pages/TeamDashboard"));
+const Uploads = lazy(() => import("./pages/uploads"));
+
+// Loading component for lazy-loaded routes
+const PageSuspense = ({ children }: { children: React.ReactNode }) => (
+  <Suspense fallback={
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    </div>
+  }>
+    {children}
+  </Suspense>
+);
 
 function Router() {
   return (
     <Switch>
+      {/* Critical pages loaded immediately */}
       <Route path="/" component={Landing} />
       <Route path="/landing" component={Landing} />
-      <Route path="/pricing" component={Pricing} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/dashboard" component={Dashboard} />
-      <Route path="/templates" component={Templates} />
-      <Route path="/appointments/:rest*" component={Appointments} />
-      <Route path="/appointments" component={Appointments} />
-      <Route path="/builder" component={Builder} />
-      <Route path="/cards/create" component={CardEditor} />
-      <Route path="/cards/:id/edit" component={CardEditor} />
-      <Route path="/card-editor/:id?" component={CardEditor} />
-      <Route path="/card-editor" component={CardEditor} />
-      <Route path="/share" component={Share} />
-      <Route path="/template-preview/:templateId" component={TemplatePreview} />
-      <Route path="/affiliate" component={Affiliate} />
-      <Route path="/profile" component={Profile} />
-      <Route path="/account-settings" component={AccountSettings} />
-      <Route path="/billing" component={Billing} />
-      <Route path="/usage" component={Usage} />
-      <Route path="/automation" component={Automation} />
-      <Route path="/availability" component={Availability} />
-      <Route path="/event-types" component={EventTypes} />
-      <Route path="/email-templates" component={EmailTemplatesPage} />
-      <Route path="/uploads" component={Uploads} />
-      <Route path="/crm" component={CRM} />
-      <Route path="/analytics" component={Analytics} />
-      <Route path="/teams" component={TeamDashboard} />
-      <Route path="/help" component={Help} />
-      <Route path="/booking/:eventTypeSlug" component={BookingPage} />
-      <Route path="/admin/templates/import" component={() => <Admin />} />
-      <Route path="/admin/templates/builder" component={() => <Admin />} />
-      <Route path="/admin/templates/header-builder" component={() => <Admin />} />
-      <Route path="/admin/header-builder" component={() => <Admin />} />
-      <Route path="/admin/header-templates" component={() => <Admin />} />
-      <Route path="/admin/templates" component={() => <Admin />} />
-      <Route path="/admin/users" component={() => <Admin />} />
-      <Route path="/admin/plans" component={() => <Admin />} />
-      <Route path="/admin/coupons" component={() => <Admin />} />
-      <Route path="/admin/affiliates" component={() => <Admin />} />
-      <Route path="/admin/conversions" component={() => <Admin />} />
-      <Route path="/admin/icon-packs" component={() => <Admin />} />
-      <Route path="/admin/profile" component={() => <Admin />} />
-      <Route path="/admin" component={() => <Admin />} />
+      
+      {/* Lazy-loaded pages */}
+      <Route path="/pricing" component={() => <PageSuspense><Pricing /></PageSuspense>} />
+      <Route path="/templates" component={() => <PageSuspense><Templates /></PageSuspense>} />
+      <Route path="/appointments/:rest*" component={() => <PageSuspense><Appointments /></PageSuspense>} />
+      <Route path="/appointments" component={() => <PageSuspense><Appointments /></PageSuspense>} />
+      <Route path="/builder" component={() => <PageSuspense><Builder /></PageSuspense>} />
+      <Route path="/cards/create" component={() => <PageSuspense><CardEditor /></PageSuspense>} />
+      <Route path="/cards/:id/edit" component={() => <PageSuspense><CardEditor /></PageSuspense>} />
+      <Route path="/card-editor/:id?" component={() => <PageSuspense><CardEditor /></PageSuspense>} />
+      <Route path="/card-editor" component={() => <PageSuspense><CardEditor /></PageSuspense>} />
+      <Route path="/share" component={() => <PageSuspense><Share /></PageSuspense>} />
+      <Route path="/template-preview/:templateId" component={() => <PageSuspense><TemplatePreview /></PageSuspense>} />
+      <Route path="/affiliate" component={() => <PageSuspense><Affiliate /></PageSuspense>} />
+      <Route path="/profile" component={() => <PageSuspense><Profile /></PageSuspense>} />
+      <Route path="/account-settings" component={() => <PageSuspense><AccountSettings /></PageSuspense>} />
+      <Route path="/billing" component={() => <PageSuspense><Billing /></PageSuspense>} />
+      <Route path="/usage" component={() => <PageSuspense><Usage /></PageSuspense>} />
+      <Route path="/automation" component={() => <PageSuspense><Automation /></PageSuspense>} />
+      <Route path="/availability" component={() => <PageSuspense><Availability /></PageSuspense>} />
+      <Route path="/event-types" component={() => <PageSuspense><EventTypes /></PageSuspense>} />
+      <Route path="/email-templates" component={() => <PageSuspense><EmailTemplatesPage /></PageSuspense>} />
+      <Route path="/uploads" component={() => <PageSuspense><Uploads /></PageSuspense>} />
+      <Route path="/crm" component={() => <PageSuspense><CRM /></PageSuspense>} />
+      <Route path="/analytics" component={() => <PageSuspense><Analytics /></PageSuspense>} />
+      <Route path="/teams" component={() => <PageSuspense><TeamDashboard /></PageSuspense>} />
+      <Route path="/help" component={() => <PageSuspense><Help /></PageSuspense>} />
+      <Route path="/booking/:eventTypeSlug" component={() => <PageSuspense><BookingPage /></PageSuspense>} />
+      <Route path="/admin/templates/import" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin/templates/builder" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin/templates/header-builder" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin/header-builder" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin/header-templates" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin/templates" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin/users" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin/plans" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin/coupons" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin/affiliates" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin/conversions" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin/icon-packs" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin/profile" component={() => <PageSuspense><Admin /></PageSuspense>} />
+      <Route path="/admin" component={() => <PageSuspense><Admin /></PageSuspense>} />
       
       {/* Multi-page card routes */}
       <CardRoutes />
       
-      <Route path="/:shareSlug" component={Share} />
-      <Route component={NotFound} />
+      <Route path="/:shareSlug" component={() => <PageSuspense><Share /></PageSuspense>} />
+      <Route component={() => <PageSuspense><NotFound /></PageSuspense>} />
     </Switch>
   );
 }
