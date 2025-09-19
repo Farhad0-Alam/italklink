@@ -18,6 +18,8 @@ interface PdfViewerButtonProps {
   scale?: number;
   className?: string;
   file_name?: string;
+  buttonColor?: string;
+  textColor?: string;
 }
 
 export function PdfViewerButton({ 
@@ -25,7 +27,9 @@ export function PdfViewerButton({
   button_text = "View PDF", 
   scale = 1.0,
   className = "",
-  file_name = "" 
+  file_name = "",
+  buttonColor = "#6b21a8",
+  textColor = "#ffffff"
 }: PdfViewerButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [numPages, setNumPages] = useState<number | null>(null);
@@ -181,25 +185,44 @@ export function PdfViewerButton({
       <Button
         onClick={handleOpen}
         variant="default"
+        style={{
+          background: `linear-gradient(to right, ${buttonColor}, ${buttonColor}dd)`,
+          color: textColor,
+          borderColor: `${buttonColor}33`,
+          '--ring-color': `${buttonColor}1a`,
+          '--hover-ring-color': `${buttonColor}4d`,
+        } as React.CSSProperties & { '--ring-color': string; '--hover-ring-color': string }}
         className={`
           h-12 px-6 text-base font-semibold
-          bg-gradient-to-r from-purple-600 to-purple-700 
-          hover:from-purple-700 hover:to-purple-800
-          text-white border-0 shadow-lg hover:shadow-xl
-          dark:from-purple-700 dark:to-purple-800 
-          dark:hover:from-purple-800 dark:hover:to-purple-900
+          border-0 shadow-lg hover:shadow-xl
           transition-all duration-300 ease-in-out
           transform hover:scale-105 active:scale-95
-          rounded-xl border-2 border-purple-500/20
-          ring-2 ring-purple-500/10 hover:ring-purple-500/30
+          rounded-xl border-2
+          ring-2 hover:ring-opacity-30
           disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
           ${className}
         `}
         disabled={!pdf_file}
         data-testid="button-pdf-viewer"
+        onMouseEnter={(e) => {
+          if (!pdf_file) return;
+          e.currentTarget.style.background = `linear-gradient(to right, ${buttonColor}cc, ${buttonColor}bb)`;
+        }}
+        onMouseLeave={(e) => {
+          if (!pdf_file) return;
+          e.currentTarget.style.background = `linear-gradient(to right, ${buttonColor}, ${buttonColor}dd)`;
+        }}
       >
-        <i className="fas fa-file-pdf mr-3 text-purple-100" style={{fontSize: '18px'}}></i>
-        <span className="text-white font-medium tracking-wide">{button_text}</span>
+        <i 
+          className="fas fa-file-pdf mr-3" 
+          style={{fontSize: '18px', color: textColor, opacity: 0.9}}
+        ></i>
+        <span 
+          className="font-medium tracking-wide"
+          style={{color: textColor}}
+        >
+          {button_text}
+        </span>
       </Button>
 
       {/* PDF Modal */}

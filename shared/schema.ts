@@ -3043,6 +3043,8 @@ export const pdfViewerElementSchema = baseElementSchema.extend({
     button_text: z.string().default("View PDF"),
     scale: z.number().min(0.5).max(3).default(1.0),
     file_name: z.string().default(""), // Original filename for display
+    buttonColor: z.string().default("#6b21a8"), // Button color (purple default)
+    textColor: z.string().default("#ffffff"), // Button text color
   }),
 });
 

@@ -4219,6 +4219,29 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       data-testid="pdf-button-text-input"
                     />
                   </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium text-slate-700 block mb-1">Button Color</label>
+                      <Input
+                        type="color"
+                        value={element.data.buttonColor || "#6b21a8"}
+                        onChange={(e) => handleDataUpdate({ buttonColor: e.target.value })}
+                        className="w-full h-10"
+                        data-testid="pdf-button-color-input"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-slate-700 block mb-1">Text Color</label>
+                      <Input
+                        type="color"
+                        value={element.data.textColor || "#ffffff"}
+                        onChange={(e) => handleDataUpdate({ textColor: e.target.value })}
+                        className="w-full h-10"
+                        data-testid="pdf-text-color-input"
+                      />
+                    </div>
+                  </div>
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">
                       Scale ({Math.round((element.data.scale || 1.0) * 100)}%)
@@ -4253,6 +4276,8 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     button_text={element.data.button_text || "View PDF"}
                     scale={element.data.scale || 1.0}
                     file_name={element.data.file_name || ""}
+                    buttonColor={element.data.buttonColor || "#6b21a8"}
+                    textColor={element.data.textColor || "#ffffff"}
                     className="w-full max-w-xs"
                   />
                 ) : (
