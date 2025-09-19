@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays } from "lucide-react";
+import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays, QrCode } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -255,6 +255,10 @@ export default function Dashboard() {
                 <Link href="/uploads" className="text-gray-500 hover:text-gray-700 flex items-center space-x-1" data-testid="link-uploads">
                   <FileText className="w-4 h-4" />
                   <span>Uploads</span>
+                </Link>
+                <Link href="/qr-codes" className="text-gray-500 hover:text-gray-700 flex items-center space-x-1" data-testid="link-qr-codes">
+                  <QrCode className="w-4 h-4" />
+                  <span>QR Codes</span>
                 </Link>
                 <Link href="/affiliate" className="text-gray-500 hover:text-gray-700">
                   Affiliate
