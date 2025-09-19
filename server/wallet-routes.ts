@@ -120,7 +120,7 @@ router.post('/google/:ecardId/create', optionalAuth, async (req, res) => {
 });
 
 // Generate QR code for ecard (helper endpoint)
-router.get('/qr/:ecardId', async (req, res) => {
+router.get('/api/qr/:ecardId', async (req, res) => {
   try {
     const { ecardId } = req.params;
     
