@@ -133,10 +133,12 @@ export function PdfViewerButton({
   }, [isOpen, handleClose, goToPrevPage, goToNextPage, handleZoomIn, handleZoomOut]);
 
   // Add keyboard event listener
-  useState(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  });
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, handleKeyDown]);
 
   return (
     <>
@@ -237,6 +239,7 @@ export function PdfViewerButton({
                 onClick={openInNewTab}
                 className="h-8"
                 data-testid="button-open-new-tab"
+                disabled={!pdf_file}
               >
                 <ExternalLink className="h-4 w-4 mr-1" />
                 Open
@@ -248,6 +251,7 @@ export function PdfViewerButton({
                 onClick={downloadPdf}
                 className="h-8"
                 data-testid="button-download-pdf"
+                disabled={!pdf_file}
               >
                 <Download className="h-4 w-4 mr-1" />
                 Download
@@ -295,7 +299,7 @@ export function PdfViewerButton({
             {!loading && !error && (
               <div className="flex flex-col items-center">
                 <Document
-                  file={pdf_file ? `data:application/pdf;base64,${pdf_file.split(',')[1] || pdf_file}` : null}
+                  file={pdf_file ? { data: pdf_file.includes(',') ? pdf_file.split(',')[1] : pdf_file } : null}
                   onLoadSuccess={onDocumentLoadSuccess}
                   onLoadError={onDocumentLoadError}
                   loading={null}
