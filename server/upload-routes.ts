@@ -85,7 +85,7 @@ function slugify(text: string): string {
 }
 
 // Upload new file
-router.post('/upload', requireAuth, upload.single('file'), asyncHandler(async (req, res) => {
+router.post('/', requireAuth, upload.single('file'), asyncHandler(async (req, res) => {
   if (!req.file) {
     throw validationError('No file uploaded');
   }
@@ -159,7 +159,7 @@ router.post('/upload', requireAuth, upload.single('file'), asyncHandler(async (r
 }));
 
 // Get user's uploads
-router.get('/uploads', requireAuth, asyncHandler(async (req, res) => {
+router.get('/', requireAuth, asyncHandler(async (req, res) => {
   const userId = (req.user as any).id;
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 20;
@@ -182,7 +182,7 @@ router.get('/uploads', requireAuth, asyncHandler(async (req, res) => {
 }));
 
 // Update upload
-router.patch('/uploads/:id', requireAuth, asyncHandler(async (req, res) => {
+router.patch('/:id', requireAuth, asyncHandler(async (req, res) => {
   const uploadId = req.params.id;
   const userId = (req.user as any).id;
   const { title, isPublic } = req.body;
@@ -211,7 +211,7 @@ router.patch('/uploads/:id', requireAuth, asyncHandler(async (req, res) => {
 }));
 
 // Delete upload
-router.delete('/uploads/:id', requireAuth, asyncHandler(async (req, res) => {
+router.delete('/:id', requireAuth, asyncHandler(async (req, res) => {
   const uploadId = req.params.id;
   const userId = (req.user as any).id;
 
@@ -233,7 +233,7 @@ router.delete('/uploads/:id', requireAuth, asyncHandler(async (req, res) => {
 }));
 
 // Replace file for existing upload
-router.post('/uploads/:id/replace', requireAuth, upload.single('file'), asyncHandler(async (req, res) => {
+router.post('/:id/replace', requireAuth, upload.single('file'), asyncHandler(async (req, res) => {
   if (!req.file) {
     throw validationError('No file uploaded');
   }
