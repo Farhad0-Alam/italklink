@@ -241,7 +241,8 @@ export function UploadsManager() {
   };
 
   const handleOpenFile = (slug: string) => {
-    window.open(`/${slug}`, '_blank');
+    const w = window.open(`/${slug}`, '_blank');
+    if (w) w.opener = null; // Security: prevent tabnabbing
   };
 
   const getFileIcon = (mimeType: string) => {
@@ -450,75 +451,88 @@ export function UploadsManager() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {uploads.map((upload) => (
                 <div
                   key={upload.id}
-                  className="p-4 border rounded-lg hover:bg-muted/50"
+                  className="group relative rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200"
                   data-testid={`upload-item-${upload.id}`}
                 >
-                  {/* Action Buttons */}
-                  <div className="flex items-center justify-between mb-3">
-                    <Badge variant={upload.isPublic ? "default" : "secondary"}>
-                      {upload.isPublic ? "Public" : "Private"}
-                    </Badge>
+                  <div className="p-6">
+                    {/* Header with title and badge */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 mb-2">
+                          {getFileIcon(upload.mimeType)}
+                          <h3 className="font-semibold text-lg leading-tight truncate" data-testid={`text-title-${upload.id}`}>
+                            {upload.title || upload.originalFileName}
+                          </h3>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={upload.isPublic ? "default" : "secondary"} className="text-xs">
+                            {upload.isPublic ? "Public" : "Private"}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground font-mono bg-muted px-2 py-1 rounded">
+                            /{upload.slug}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* File details */}
+                    <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-6">
+                      <div className="flex items-center space-x-1">
+                        <span className="font-medium">{formatFileSize(upload.fileSize)}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Eye className="h-3 w-3" />
+                        <span>{upload.viewCount}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <span>{format(new Date(upload.createdAt), 'MMM d')}</span>
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
                     <div className="flex items-center space-x-2">
                       <Button 
-                        variant="outline" 
+                        variant="ghost" 
                         size="sm" 
                         onClick={() => handleOpenFile(upload.slug)}
+                        className="flex-1 hover:bg-primary/10"
                         data-testid={`button-open-${upload.id}`}
                       >
-                        <ExternalLink className="h-4 w-4 mr-1" />
-                        Open File
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Open
                       </Button>
                       <Button 
-                        variant="outline" 
+                        variant="ghost" 
                         size="sm" 
                         onClick={() => handleCopyUrl(upload.slug)}
+                        className="flex-1 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20"
                         data-testid={`button-copy-url-${upload.id}`}
                       >
-                        <Copy className="h-4 w-4 mr-1" />
-                        Copy URL
+                        <Copy className="h-4 w-4 mr-2" />
+                        Copy
                       </Button>
                       <Button 
-                        variant="outline" 
+                        variant="ghost" 
                         size="sm" 
                         onClick={() => handleEdit(upload)}
+                        className="hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-900/20"
                         data-testid={`button-edit-${upload.id}`}
                       >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
+                        <Edit className="h-4 w-4" />
                       </Button>
                       <Button 
-                        variant="outline" 
+                        variant="ghost" 
                         size="sm" 
                         onClick={() => deleteMutation.mutate(upload.id)}
-                        className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                        className="hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
                         data-testid={`button-delete-${upload.id}`}
                       >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
+                        <Trash2 className="h-4 w-4" />
                       </Button>
-                    </div>
-                  </div>
-
-                  {/* File Info */}
-                  <div className="flex items-center space-x-3">
-                    {getFileIcon(upload.mimeType)}
-                    <div>
-                      <p className="font-medium" data-testid={`text-title-${upload.id}`}>
-                        {upload.title || upload.originalFileName}
-                      </p>
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <span>/{upload.slug}</span>
-                        <span>•</span>
-                        <span>{formatFileSize(upload.fileSize)}</span>
-                        <span>•</span>
-                        <span>{upload.viewCount} views</span>
-                        <span>•</span>
-                        <span>{format(new Date(upload.createdAt), 'MMM d, yyyy')}</span>
-                      </div>
                     </div>
                   </div>
                 </div>
