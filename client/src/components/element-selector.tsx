@@ -125,6 +125,13 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       description: "AR Digital Business Card Viewer"
     },
     {
+      type: "pdfViewer",
+      title: "PDF Viewer",
+      icon: "fas fa-file-pdf",
+      color: "bg-purple-100",
+      description: "Display PDF with modal viewer and clickable links"
+    },
+    {
       type: "html",
       title: "Custom HTML",
       icon: "fas fa-code",
@@ -566,6 +573,19 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             height: 300,
             sandbox: true,
             showPreview: true,
+          },
+        };
+        break;
+      
+      case "pdfViewer":
+        element = {
+          id,
+          type: "pdfViewer",
+          order: Date.now(),
+          data: {
+            pdf_url: "",
+            button_text: "View PDF",
+            scale: 1.0,
           },
         };
         break;
