@@ -2464,7 +2464,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       "", "api", "auth", "admin", "builder", "dashboard", "login", "register",
       "logout", "static", "assets", "public", "favicon.ico", "robots.txt", "sitemap.xml",
       "_next", "card", "cards", "user", "users", "settings", "docs", "pricing",
-      "health", "status", "webhook", "hooks", "oauth", "pay", "stripe", "paypal"
+      "health", "status", "webhook", "hooks", "oauth", "pay", "stripe", "paypal",
+      "uploads", "templates", "appointments", "crm", "availability", "affiliate",
+      "profile", "account-settings", "billing", "usage", "automation", "event-types",
+      "email-templates", "analytics", "teams", "help", "booking"
     ];
     
     // Skip reserved slugs - let them fall through to other handlers
