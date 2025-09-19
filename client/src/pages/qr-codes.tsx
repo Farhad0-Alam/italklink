@@ -88,7 +88,7 @@ export default function QrCodes() {
 
   // Create QR link mutation
   const createQrLinkMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/qr/links', { method: 'POST', body: data }),
+    mutationFn: (data: any) => apiRequest('POST', '/api/qr/links', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/qr/links'] });
       setShowCreateDialog(false);
@@ -108,7 +108,7 @@ export default function QrCodes() {
 
   // Delete QR link mutation
   const deleteQrLinkMutation = useMutation({
-    mutationFn: (id: string) => apiRequest(`/api/qr/links/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: string) => apiRequest('DELETE', `/api/qr/links/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/qr/links'] });
       toast({
