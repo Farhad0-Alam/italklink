@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, Filter, X } from "lucide-react";
+import { Search, Filter, X, ArrowLeft } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -245,6 +245,17 @@ export default function Templates() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-8">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setLocation('/dashboard')}
+                className="flex items-center space-x-2 hover:bg-gray-100"
+                data-testid="button-back-dashboard"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back to Dashboard</span>
+              </Button>
+              <div className="h-6 w-px bg-gray-300" />
               <Link href="/" className="flex items-center space-x-2">
                 <div className="text-2xl font-bold">
                   <span className="text-blue-600">2talk</span>

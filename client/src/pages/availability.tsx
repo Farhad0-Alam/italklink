@@ -192,13 +192,26 @@ export default function AvailabilityManagement() {
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="space-y-2">
+          <div className="flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setLocation('/dashboard')}
+              className="flex items-center space-x-2 hover:bg-gray-100"
+              data-testid="button-back-dashboard"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Dashboard</span>
+            </Button>
+            <div className="h-6 w-px bg-gray-300" />
+            <div className="space-y-2">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="title-availability">
               Availability Management
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Configure your business hours, buffer times, and blackout dates to control when appointments can be booked.
-            </p>
+              <p className="text-gray-600 dark:text-gray-400">
+                Configure your business hours, buffer times, and blackout dates to control when appointments can be booked.
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">

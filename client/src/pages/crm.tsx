@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Target, CheckSquare, Activity, BarChart3, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
+import { Users, Target, CheckSquare, Activity, BarChart3, Zap, ArrowLeft } from "lucide-react";
 import { 
   CRMStats,
   ContactsManager,
@@ -12,6 +14,7 @@ import {
 import AutomationManager from "@/modules/crm/components/AutomationManager";
 
 export default function CRM() {
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
 
   return (
@@ -20,12 +23,25 @@ export default function CRM() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center" data-testid="text-crm-header">
-                <BarChart3 className="h-6 w-6 mr-3 text-blue-600" />
-                CRM Dashboard
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">Manage your contacts, deals, and sales pipeline</p>
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setLocation('/dashboard')}
+                className="flex items-center space-x-2 hover:bg-gray-100"
+                data-testid="button-back-dashboard"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back to Dashboard</span>
+              </Button>
+              <div className="h-6 w-px bg-gray-300" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 flex items-center" data-testid="text-crm-header">
+                  <BarChart3 className="h-6 w-6 mr-3 text-blue-600" />
+                  CRM Dashboard
+                </h1>
+                <p className="text-sm text-gray-600 mt-1">Manage your contacts, deals, and sales pipeline</p>
+              </div>
             </div>
           </div>
         </div>
