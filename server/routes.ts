@@ -2478,7 +2478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Skip reserved slugs - let them fall through to other handlers
     if (RESERVED_SLUGS.includes(slug)) {
-      return; // This will fall through to the next route handler
+      return next(); // Pass control to next middleware (Vite/SPA)
     }
     
     // Check if this slug exists in public uploads
