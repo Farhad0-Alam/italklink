@@ -2587,6 +2587,176 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // ===== QR CODE API ROUTES =====
   
+  // URL allowlist for production security
+  const ALLOWED_URL_PATTERNS = [
+    // HTTP/HTTPS with domains only - IP validation handled separately
+    /^https?:\/\/([\w-]+\.)+[a-zA-Z0-9-]{2,}(:\d+)?([\/?#].*)?$/,  // Domains with TLD, supports query/fragment
+    /^tel:[+]?[\d\s\-\(\)]+$/,  // Telephone links
+    /^mailto:[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,  // Email links
+    /^sms:[+]?[\d\s\-\(\)]+$/,  // SMS links
+    /^geo:[\d\.-]+,[\d\.-]+/,  // Geo coordinates
+    /^whatsapp:\/\/send\?/,  // WhatsApp links
+    /^linkedin:\/\/in\//,  // LinkedIn profiles
+    /^twitter:\/\/user\?/,  // Twitter profiles
+  ];
+  
+  // Comprehensive private network CIDR blocks
+  const PRIVATE_IPV4_RANGES = [
+    { start: [127, 0, 0, 0], end: [127, 255, 255, 255] },      // 127.0.0.0/8 loopback
+    { start: [10, 0, 0, 0], end: [10, 255, 255, 255] },       // 10.0.0.0/8 private
+    { start: [192, 168, 0, 0], end: [192, 168, 255, 255] },   // 192.168.0.0/16 private
+    { start: [172, 16, 0, 0], end: [172, 31, 255, 255] },     // 172.16.0.0/12 private
+    { start: [169, 254, 0, 0], end: [169, 254, 255, 255] },   // 169.254.0.0/16 link-local
+    { start: [100, 64, 0, 0], end: [100, 127, 255, 255] },    // 100.64.0.0/10 CGNAT
+    { start: [198, 18, 0, 0], end: [198, 19, 255, 255] },     // 198.18.0.0/15 benchmarking
+  ];
+  
+  function isPrivateIPv4(ip: string): boolean {
+    // Only allow dotted decimal format
+    if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip)) {
+      return false; // Reject numeric/octal/hex formats
+    }
+    
+    const parts = ip.split('.').map(Number);
+    if (parts.some(p => p < 0 || p > 255)) return false;
+    
+    return PRIVATE_IPV4_RANGES.some(range => {
+      return parts.every((part, i) => part >= range.start[i] && part <= range.end[i]);
+    });
+  }
+  
+  function isPrivateIPv6(ip: string): boolean {
+    const normalized = ip.toLowerCase().replace(/^\[|\]$/g, '');
+    
+    return (
+      normalized === '::1' ||                                    // ::1/128 loopback
+      /^fc[0-9a-f]/i.test(normalized) ||                        // fc00::/7 ULA
+      /^fd[0-9a-f]/i.test(normalized) ||                        // fd00::/8 ULA subset
+      /^fe[89ab][0-9a-f]/i.test(normalized) ||                  // fe80::/10 link-local
+      normalized.startsWith('::ffff:127.') ||                   // IPv4-mapped loopback
+      normalized.startsWith('::ffff:10.') ||                    // IPv4-mapped private
+      normalized.startsWith('::ffff:192.168.') ||               // IPv4-mapped private
+      /^::ffff:172\.(1[6-9]|2[0-9]|3[0-1])\./.test(normalized) // IPv4-mapped private
+    );
+  }
+  
+  // Blocked domains and suffixes (known malicious or suspicious)
+  const BLOCKED_DOMAINS = [
+    'bit.ly', 'tinyurl.com', 'short.link', 'suspicious.com',
+    '0.0.0.0', '127.0.0.1', 'localhost'
+  ];
+  
+  const BLOCKED_SUFFIXES = [
+    '.localhost', '.local', '.internal', '.home', '.corp', '.test', '.invalid', '.example'
+  ];
+  
+  // Rate limiting for QR generation
+  const qrRateLimit = new Map<string, { count: number; resetTime: number }>();
+  const QR_RATE_LIMIT = { requests: 100, windowMs: 60 * 60 * 1000 }; // 100 requests per hour
+  
+  function validateUrl(url: string): { valid: boolean; reason?: string } {
+    try {
+      // First check if URL matches allowed patterns
+      const isAllowed = ALLOWED_URL_PATTERNS.some(pattern => pattern.test(url));
+      if (!isAllowed) {
+        return { valid: false, reason: 'URL format not supported' };
+      }
+      
+      // For non-HTTP schemes, just allow the pattern match
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        return { valid: true };
+      }
+      
+      // For HTTP/HTTPS, do additional security validation
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname.toLowerCase();
+      
+      // Always block localhost
+      if (hostname === 'localhost') {
+        return { valid: false, reason: 'Local URLs not allowed' };
+      }
+      
+      // Check for blocked domains (exact or subdomain match)
+      if (BLOCKED_DOMAINS.some(domain => 
+        hostname === domain || hostname.endsWith('.' + domain)
+      )) {
+        return { valid: false, reason: 'Domain not allowed' };
+      }
+      
+      // Check for blocked suffixes
+      if (BLOCKED_SUFFIXES.some(suffix => hostname.endsWith(suffix))) {
+        return { valid: false, reason: 'Domain suffix not allowed' };
+      }
+      
+      // Block all IP literals (IPv4 and IPv6) to prevent bypasses
+      const isIPv4 = /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
+      const isIPv6 = hostname.startsWith('[') && hostname.endsWith(']') || 
+                     /^[0-9a-f:]+$/i.test(hostname);
+      
+      if (isIPv4) {
+        // Block all IP literals - both private and public for security
+        return { valid: false, reason: 'IP addresses not allowed - use domain names only' };
+      }
+      
+      if (isIPv6) {
+        // Block all IPv6 literals  
+        return { valid: false, reason: 'IP addresses not allowed - use domain names only' };
+      }
+      
+      // Block numeric hostname formats that could be IP addresses
+      if (/^\d+$/.test(hostname)) {
+        return { valid: false, reason: 'Numeric hostnames not allowed' };
+      }
+      
+      // Require at least one dot and valid TLD for domains
+      const domainParts = hostname.split('.');
+      if (domainParts.length < 2) {
+        return { valid: false, reason: 'Invalid domain format - TLD required' };
+      }
+      
+      // Block obvious non-public TLDs
+      const tld = domainParts[domainParts.length - 1].toLowerCase();
+      const privateTlds = ['local', 'lan', 'internal', 'corp', 'home'];
+      if (privateTlds.includes(tld)) {
+        return { valid: false, reason: 'Private TLD not allowed' };
+      }
+      
+      return { valid: true };
+    } catch (error) {
+      return { valid: false, reason: 'Invalid URL format' };
+    }
+  }
+  
+  function checkRateLimit(userId: string, ipAddress?: string): { allowed: boolean; resetTime?: number } {
+    const now = Date.now();
+    
+    // Use userId for authenticated users, IP address for public endpoints
+    const rateLimitKey = userId || ipAddress || 'anonymous';
+    const userLimit = qrRateLimit.get(rateLimitKey);
+    
+    // Clean expired entries periodically to prevent memory leaks
+    const shouldCleanup = Math.random() < 0.1; // 10% chance per request
+    if (shouldCleanup || qrRateLimit.size > 1000) {
+      for (const [key, entry] of qrRateLimit.entries()) {
+        if (now > entry.resetTime) {
+          qrRateLimit.delete(key);
+        }
+      }
+    }
+    
+    if (!userLimit || now > userLimit.resetTime) {
+      qrRateLimit.set(rateLimitKey, { count: 1, resetTime: now + QR_RATE_LIMIT.windowMs });
+      return { allowed: true };
+    }
+    
+    if (userLimit.count >= QR_RATE_LIMIT.requests) {
+      return { allowed: false, resetTime: userLimit.resetTime };
+    }
+    
+    userLimit.count++;
+    return { allowed: true };
+  }
+  
   // Get user's QR links
   app.get('/api/qr/links', requireAuth, async (req, res) => {
     try {
@@ -2605,12 +2775,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Create new QR link
+  // Create new QR link with URL validation
   app.post('/api/qr/links', requireAuth, async (req, res) => {
     try {
       const user = req.user as User;
+      
+      // Rate limiting check
+      const rateLimitCheck = checkRateLimit(user.id);
+      if (!rateLimitCheck.allowed) {
+        const resetDate = new Date(rateLimitCheck.resetTime!);
+        return res.status(429).json({
+          message: 'Rate limit exceeded. Try again later.',
+          resetTime: resetDate.toISOString(),
+          maxRequests: QR_RATE_LIMIT.requests
+        });
+      }
+      
+      // Validate and sanitize target URL
+      const { targetUrl, name, rules, utm } = req.body;
+      
+      if (!targetUrl) {
+        return res.status(400).json({ message: 'Target URL is required' });
+      }
+      
+      const urlValidation = validateUrl(targetUrl);
+      if (!urlValidation.valid) {
+        return res.status(400).json({
+          message: `Invalid URL: ${urlValidation.reason}`,
+          code: 'INVALID_URL'
+        });
+      }
+      
+      // Sanitize name to prevent XSS
+      const sanitizedName = name ? name.replace(/<[^>]*>/g, '').substring(0, 200) : undefined;
+      
       const linkData = insertQrLinkSchema.parse({
-        ...req.body,
+        name: sanitizedName,
+        targetUrl,
+        rules: rules || {},
+        utm: utm || {},
         userId: user.id,
         shortId: nanoid(8) // Generate unique short ID
       });
@@ -2650,7 +2853,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Update QR link
+  // Update QR link with validation
   app.put('/api/qr/links/:id', requireAuth, async (req, res) => {
     try {
       const user = req.user as User;
@@ -2660,7 +2863,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'QR link not found' });
       }
       
-      const updateData = insertQrLinkSchema.partial().parse(req.body);
+      const { targetUrl, name, ...otherData } = req.body;
+      
+      // Validate target URL if it's being updated
+      if (targetUrl) {
+        const urlValidation = validateUrl(targetUrl);
+        if (!urlValidation.valid) {
+          return res.status(400).json({
+            message: `Invalid URL: ${urlValidation.reason}`,
+            code: 'INVALID_URL'
+          });
+        }
+      }
+      
+      // Sanitize name to prevent XSS
+      const sanitizedName = name ? name.replace(/<[^>]*>/g, '').substring(0, 200) : undefined;
+      
+      const updateData = insertQrLinkSchema.partial().parse({
+        ...otherData,
+        targetUrl,
+        name: sanitizedName
+      });
+      
       const updatedLink = await storage.updateQrLink(req.params.id, updateData);
       
       res.json(updatedLink);
@@ -2695,13 +2919,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const qrCache = new Map<string, { data: string | Buffer, contentType: string, timestamp: number }>();
   const QR_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
   
-  // Generate static QR code (PNG or SVG) with caching
+  // Generate static QR code (PNG or SVG) with caching and rate limiting
   app.post('/api/qr/generate', requireAuth, async (req, res) => {
     try {
+      const user = req.user as User;
+      
+      // Rate limiting check
+      const rateLimitCheck = checkRateLimit(user.id);
+      if (!rateLimitCheck.allowed) {
+        const resetDate = new Date(rateLimitCheck.resetTime!);
+        return res.status(429).json({
+          message: 'Rate limit exceeded. Try again later.',
+          resetTime: resetDate.toISOString(),
+          maxRequests: QR_RATE_LIMIT.requests
+        });
+      }
+      
       const params = staticQrSchema.parse(req.body);
       
+      // Validate URL if it's provided
+      if (params.data && (params.data.startsWith('http') || params.data.includes('.'))) {
+        const urlValidation = validateUrl(params.data);
+        if (!urlValidation.valid) {
+          return res.status(400).json({
+            message: `Invalid URL: ${urlValidation.reason}`,
+            code: 'INVALID_URL'
+          });
+        }
+      }
+      
+      // Sanitize data to prevent injection
+      const sanitizedData = params.data.replace(/<[^>]*>/g, '').substring(0, 2048);
+      const sanitizedParams = { ...params, data: sanitizedData };
+      
       // Create cache key from parameters
-      const cacheKey = JSON.stringify(params);
+      const cacheKey = JSON.stringify(sanitizedParams);
       
       // Check cache first
       const cached = qrCache.get(cacheKey);
@@ -2715,25 +2967,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let data: string | Buffer;
       let contentType: string;
       
-      if (params.format === 'svg') {
-        data = await QRCode.toString(params.data, {
+      if (sanitizedParams.format === 'svg') {
+        data = await QRCode.toString(sanitizedParams.data, {
           type: 'svg',
-          width: parseInt(params.size),
-          margin: params.margin,
+          width: parseInt(sanitizedParams.size),
+          margin: sanitizedParams.margin,
           color: {
-            dark: params.dark,
-            light: params.light
+            dark: sanitizedParams.dark,
+            light: sanitizedParams.light
           }
         });
         contentType = 'image/svg+xml';
       } else {
-        data = await QRCode.toBuffer(params.data, {
+        data = await QRCode.toBuffer(sanitizedParams.data, {
           type: 'png',
-          width: parseInt(params.size),
-          margin: params.margin,
+          width: parseInt(sanitizedParams.size),
+          margin: sanitizedParams.margin,
           color: {
-            dark: params.dark,
-            light: params.light
+            dark: sanitizedParams.dark,
+            light: sanitizedParams.light
           }
         });
         contentType = 'image/png';
@@ -2788,6 +3040,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
               <div class="error-container">
                 <h1>404 - Link Not Found</h1>
                 <p>This QR code link has expired or does not exist.</p>
+              </div>
+            </body>
+          </html>
+        `);
+      }
+      
+      // Validate target URL for security (defense-in-depth for legacy links)
+      if (!qrLink.enabled) {
+        return res.status(403).send(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Link Disabled</title>
+              <meta charset="utf-8">
+              <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; text-align: center; }
+                .error-container { max-width: 400px; margin: 0 auto; }
+                h1 { color: #e74c3c; margin-bottom: 20px; }
+                p { color: #666; line-height: 1.6; }
+              </style>
+            </head>
+            <body>
+              <div class="error-container">
+                <h1>403 - Link Disabled</h1>
+                <p>This QR code link has been disabled by the owner.</p>
+              </div>
+            </body>
+          </html>
+        `);
+      }
+      
+      // Validate URL at redirect time for defense-in-depth
+      const urlValidation = validateUrl(qrLink.targetUrl);
+      if (!urlValidation.valid) {
+        console.warn(`Blocked redirect to invalid URL: ${qrLink.targetUrl} - ${urlValidation.reason}`);
+        return res.status(403).send(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Blocked</title>
+              <meta charset="utf-8">
+              <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; text-align: center; }
+                .error-container { max-width: 400px; margin: 0 auto; }
+                h1 { color: #e74c3c; margin-bottom: 20px; }
+                p { color: #666; line-height: 1.6; }
+              </style>
+            </head>
+            <body>
+              <div class="error-container">
+                <h1>403 - Blocked</h1>
+                <p>This link has been blocked for security reasons.</p>
               </div>
             </body>
           </html>
