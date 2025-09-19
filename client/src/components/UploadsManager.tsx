@@ -450,13 +450,60 @@ export function UploadsManager() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {uploads.map((upload) => (
                 <div
                   key={upload.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                  className="p-4 border rounded-lg hover:bg-muted/50"
                   data-testid={`upload-item-${upload.id}`}
                 >
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleOpenFile(upload.slug)}
+                        data-testid={`button-open-${upload.id}`}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-1" />
+                        Open File
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleCopyUrl(upload.slug)}
+                        data-testid={`button-copy-url-${upload.id}`}
+                      >
+                        <Copy className="h-4 w-4 mr-1" />
+                        Copy URL
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleEdit(upload)}
+                        data-testid={`button-edit-${upload.id}`}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => deleteMutation.mutate(upload.id)}
+                        className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                        data-testid={`button-delete-${upload.id}`}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                    <Badge variant={upload.isPublic ? "default" : "secondary"}>
+                      {upload.isPublic ? "Public" : "Private"}
+                    </Badge>
+                  </div>
+
+                  {/* File Info */}
                   <div className="flex items-center space-x-3">
                     {getFileIcon(upload.mimeType)}
                     <div>
@@ -473,42 +520,6 @@ export function UploadsManager() {
                         <span>{format(new Date(upload.createdAt), 'MMM d, yyyy')}</span>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Badge variant={upload.isPublic ? "default" : "secondary"}>
-                      {upload.isPublic ? "Public" : "Private"}
-                    </Badge>
-                    
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" data-testid={`button-menu-${upload.id}`}>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleOpenFile(upload.slug)}>
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          Open File
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleCopyUrl(upload.slug)}>
-                          <Copy className="h-4 w-4 mr-2" />
-                          Copy URL
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(upload)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          onClick={() => deleteMutation.mutate(upload.id)}
-                          className="text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
                   </div>
                 </div>
               ))}
