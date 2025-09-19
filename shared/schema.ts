@@ -3732,6 +3732,39 @@ export const routingAnalytics = pgTable("routing_analytics", {
   index("idx_routing_analytics_created_at").on(table.createdAt),
 ]);
 
+// ===== PUBLIC UPLOADS SYSTEM =====
+
+// Public uploads table for user-uploaded files with custom URLs
+export const publicUploads = pgTable("public_uploads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // File information
+  slug: varchar("slug").unique().notNull(), // Custom URL slug like "my-document"
+  originalFileName: varchar("original_file_name").notNull(),
+  storagePath: text("storage_path").notNull(), // Path in storage system
+  title: text("title"), // Optional display title
+  
+  // File metadata
+  mimeType: varchar("mime_type").notNull(), // e.g., "text/html", "image/jpeg", "application/pdf"
+  fileExtension: varchar("file_extension").notNull(), // e.g., ".html", ".jpg", ".pdf"
+  fileSize: integer("file_size").notNull(), // File size in bytes
+  
+  // Settings
+  isPublic: boolean("is_public").default(true),
+  viewCount: integer("view_count").default(0),
+  
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_public_uploads_user").on(table.userId),
+  index("idx_public_uploads_slug").on(table.slug),
+  index("idx_public_uploads_mime_type").on(table.mimeType),
+  index("idx_public_uploads_public").on(table.isPublic),
+  index("idx_public_uploads_created_at").on(table.createdAt),
+]);
+
 // ===== TEAM SCHEDULING TYPE DEFINITIONS =====
 
 // TypeScript types for team scheduling tables
@@ -3758,6 +3791,10 @@ export type InsertAssignmentAnalytics = typeof assignmentAnalytics.$inferInsert;
 
 export type RoutingAnalytics = typeof routingAnalytics.$inferSelect;
 export type InsertRoutingAnalytics = typeof routingAnalytics.$inferInsert;
+
+// Public uploads types
+export type PublicUpload = typeof publicUploads.$inferSelect;
+export type InsertPublicUpload = typeof publicUploads.$inferInsert;
 
 // ===== VALIDATION SCHEMAS FOR TEAM SCHEDULING =====
 
@@ -3807,3 +3844,43 @@ export const insertRoutingAnalyticsSchema = createInsertSchema(routingAnalytics)
   id: true,
   createdAt: true,
 });
+
+// Public uploads validation schema
+export const insertPublicUploadSchema = createInsertSchema(publicUploads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  viewCount: true,
+});
+
+// Public upload validation with additional client-side validation
+export const publicUploadFormSchema = z.object({
+  slug: z.string()
+    .min(3, 'Slug must be at least 3 characters')
+    .max(80, 'Slug must be at most 80 characters')
+    .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'),
+  title: z.string().max(200, 'Title too long').optional(),
+  file: z.instanceof(File).refine(
+    (file) => file.size <= 2 * 1024 * 1024, // 2MB
+    'File size must be less than 2MB'
+  ).refine(
+    (file) => {
+      const allowedTypes = [
+        'text/html',
+        'image/jpeg',
+        'image/jpg', 
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/avif',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      return allowedTypes.includes(file.type);
+    },
+    'File type not supported. Allowed: HTML, images (JPG, PNG, GIF, WEBP, AVIF), PDF, DOC, DOCX'
+  ),
+});
+
+export type PublicUploadForm = z.infer<typeof publicUploadFormSchema>;
