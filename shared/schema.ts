@@ -3039,9 +3039,10 @@ export const htmlElementSchema = baseElementSchema.extend({
 export const pdfViewerElementSchema = baseElementSchema.extend({
   type: z.literal("pdfViewer"),
   data: z.object({
-    pdf_url: z.string().url().min(1, "PDF URL is required"),
+    pdf_file: z.string().default(""), // Base64 encoded PDF file
     button_text: z.string().default("View PDF"),
     scale: z.number().min(0.5).max(3).default(1.0),
+    file_name: z.string().default(""), // Original filename for display
   }),
 });
 

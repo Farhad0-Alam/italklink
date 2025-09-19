@@ -4181,15 +4181,33 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-slate-700 block mb-1">PDF URL *</label>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Upload PDF File *</label>
                     <Input
-                      type="url"
-                      value={element.data.pdf_url || ""}
-                      onChange={(e) => handleDataUpdate({ pdf_url: e.target.value })}
-                      placeholder="https://example.com/document.pdf"
+                      type="file"
+                      accept=".pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file && file.type === 'application/pdf') {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            const base64 = event.target?.result as string;
+                            handleDataUpdate({ 
+                              pdf_file: base64,
+                              file_name: file.name
+                            });
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
                       className="w-full"
-                      data-testid="pdf-url-input"
+                      data-testid="pdf-file-input"
                     />
+                    {element.data.file_name && (
+                      <p className="text-xs text-green-600 mt-1">
+                        <i className="fas fa-check mr-1"></i>
+                        Uploaded: {element.data.file_name}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Button Text</label>
@@ -4229,17 +4247,18 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
               </div>
             ) : (
               <div className="pdf-viewer-element w-full flex justify-center" data-testid="pdf-viewer-element">
-                {element.data.pdf_url ? (
+                {element.data.pdf_file ? (
                   <PdfViewerButton
-                    pdf_url={element.data.pdf_url}
+                    pdf_file={element.data.pdf_file}
                     button_text={element.data.button_text || "View PDF"}
                     scale={element.data.scale || 1.0}
+                    file_name={element.data.file_name || ""}
                     className="w-full max-w-xs"
                   />
                 ) : (
                   <div className="border-2 border-dashed border-purple-300 p-8 text-center text-purple-500 rounded-2xl">
                     <i className="fas fa-file-pdf text-4xl mb-4"></i>
-                    <p>Add PDF URL to see preview</p>
+                    <p>Upload PDF file to see preview</p>
                   </div>
                 )}
               </div>

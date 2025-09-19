@@ -583,9 +583,10 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           type: "pdfViewer",
           order: Date.now(),
           data: {
-            pdf_url: "",
+            pdf_file: "",
             button_text: "View PDF",
             scale: 1.0,
+            file_name: "",
           },
         };
         break;

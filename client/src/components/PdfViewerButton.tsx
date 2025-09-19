@@ -10,17 +10,19 @@ import 'react-pdf/dist/Page/TextLayer.css';
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 interface PdfViewerButtonProps {
-  pdf_url: string;
+  pdf_file: string;
   button_text?: string;
   scale?: number;
   className?: string;
+  file_name?: string;
 }
 
 export function PdfViewerButton({ 
-  pdf_url, 
+  pdf_file, 
   button_text = "View PDF", 
   scale = 1.0,
-  className = "" 
+  className = "",
+  file_name = "" 
 }: PdfViewerButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [numPages, setNumPages] = useState<number | null>(null);
@@ -42,17 +44,38 @@ export function PdfViewerButton({
   }, []);
 
   const openInNewTab = useCallback(() => {
-    window.open(pdf_url, '_blank', 'noopener,noreferrer');
-  }, [pdf_url]);
+    if (pdf_file) {
+      const byteCharacters = atob(pdf_file.split(',')[1] || pdf_file);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  }, [pdf_file]);
 
   const downloadPdf = useCallback(() => {
-    const link = document.createElement('a');
-    link.href = pdf_url;
-    link.download = pdf_url.split('/').pop() || 'document.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, [pdf_url]);
+    if (pdf_file) {
+      const byteCharacters = atob(pdf_file.split(',')[1] || pdf_file);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file_name || 'document.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }
+  }, [pdf_file, file_name]);
 
   const handleZoomIn = useCallback(() => {
     setCurrentScale(prev => Math.min(prev + 0.25, 3));
@@ -117,18 +140,20 @@ export function PdfViewerButton({
 
   return (
     <>
-      {/* PDF Viewer Button */}
+      {/* PDF Viewer Button - Wallet Style */}
       <Button
         onClick={handleOpen}
+        variant="outline"
         className={`
-          bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800
-          text-white border-0 rounded-2xl px-6 py-3 font-medium transition-all duration-300
-          hover:scale-105 hover:shadow-lg active:scale-95
+          h-10 px-4 text-sm
+          bg-purple-600 hover:bg-purple-700 text-white border-purple-600
+          dark:bg-purple-700 dark:hover:bg-purple-800 dark:border-purple-600
+          transition-all duration-200
           ${className}
         `}
         data-testid="button-pdf-viewer"
       >
-        <i className="fas fa-file-pdf mr-2"></i>
+        <i className="fas fa-file-pdf mr-2" style={{fontSize: '16px'}}></i>
         {button_text}
       </Button>
 
@@ -270,7 +295,7 @@ export function PdfViewerButton({
             {!loading && !error && (
               <div className="flex flex-col items-center">
                 <Document
-                  file={pdf_url}
+                  file={pdf_file ? `data:application/pdf;base64,${pdf_file.split(',')[1] || pdf_file}` : null}
                   onLoadSuccess={onDocumentLoadSuccess}
                   onLoadError={onDocumentLoadError}
                   loading={null}
