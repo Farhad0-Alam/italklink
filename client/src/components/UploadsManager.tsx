@@ -81,10 +81,13 @@ export function UploadsManager() {
   });
 
   // Fetch uploads
-  const { data: uploads = [], isLoading, refetch } = useQuery<PublicUpload[]>({
+  const { data: uploadsResponse, isLoading, refetch } = useQuery({
     queryKey: ['/api/uploads'],
     retry: false,
   });
+
+  // Extract uploads array from API response
+  const uploads: PublicUpload[] = uploadsResponse?.data || [];
 
   // Upload mutation
   const uploadMutation = useMutation({
