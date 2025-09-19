@@ -2456,8 +2456,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Public file serving route - serves uploaded files at /:slug
   // This must be BEFORE any catch-all routes but AFTER API routes
-  app.get('/:slug', asyncHandler(async (req, res) => {
+  app.get('/:slug', asyncHandler(async (req, res, next) => {
     const slug = req.params.slug;
+    
+    // Skip Vite-specific paths in development (these start with @ or are special paths)
+    if (process.env.NODE_ENV === 'development' && 
+        (slug.startsWith('@') || slug === 'src' || slug === 'node_modules' || slug.startsWith('__vite'))) {
+      return next(); // Pass to next middleware (Vite)
+    }
     
     // Reserved slugs that should skip file serving
     const RESERVED_SLUGS = [
