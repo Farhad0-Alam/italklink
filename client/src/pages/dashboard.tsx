@@ -74,29 +74,30 @@ export default function Dashboard() {
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
     queryKey: ['/api/auth/user'],
     retry: false,
-    staleTime: 1000 * 60 * 10, // 10 minutes cache for user data
-    gcTime: 1000 * 60 * 15, // 15 minutes garbage collection
+    staleTime: 1000 * 60 * 15, // 15 minutes cache for user data
+    gcTime: 1000 * 60 * 30, // 30 minutes garbage collection
+    refetchOnWindowFocus: false, // Don't refetch user on window focus
   });
 
   const { data: businessCards = [], isLoading: cardsLoading, refetch: refetchCards } = useQuery<BusinessCard[]>({
     queryKey: ['/api/business-cards'],
     enabled: !!user,
-    staleTime: 1000 * 60 * 2, // 2 minutes cache
-    gcTime: 1000 * 60 * 5, // 5 minutes garbage collection time
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
+    gcTime: 1000 * 60 * 10, // 10 minutes garbage collection time
+    refetchOnWindowFocus: false, // Don't refetch on window focus for better performance
   });
 
-  // Debug log for business cards
-  useEffect(() => {
-    console.log('Dashboard - Business cards data:', businessCards);
-    console.log('Dashboard - Cards loading:', cardsLoading);
-  }, [businessCards, cardsLoading]);
+  // Remove debug logs for production performance
 
-  // Fetch affiliate data
+  // Fetch affiliate data - with better cache settings
   const { data: affiliate } = useQuery<AffiliateProfile>({
     queryKey: ['/api/affiliate/me'],
     enabled: !!user,
     retry: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 15, // 15 minutes cache to reduce 404s
+    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnMount: false, // Only fetch once per session
   });
 
   const logoutMutation = useMutation({
