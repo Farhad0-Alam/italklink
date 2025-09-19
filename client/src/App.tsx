@@ -34,6 +34,7 @@ import BookingPage from "./pages/booking";
 import EmailTemplatesPage from "./pages/EmailTemplatesPage";
 import Analytics from "./pages/analytics";
 import TeamDashboard from "./pages/TeamDashboard";
+import Uploads from "./pages/uploads";
 import i18n from "./lib/i18n";
 
 function Router() {
@@ -64,6 +65,7 @@ function Router() {
       <Route path="/availability" component={Availability} />
       <Route path="/event-types" component={EventTypes} />
       <Route path="/email-templates" component={EmailTemplatesPage} />
+      <Route path="/uploads" component={Uploads} />
       <Route path="/crm" component={CRM} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/teams" component={TeamDashboard} />
