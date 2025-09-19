@@ -74,12 +74,15 @@ export default function Dashboard() {
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
     queryKey: ['/api/auth/user'],
     retry: false,
+    staleTime: 1000 * 60 * 10, // 10 minutes cache for user data
+    gcTime: 1000 * 60 * 15, // 15 minutes garbage collection
   });
 
   const { data: businessCards = [], isLoading: cardsLoading, refetch: refetchCards } = useQuery<BusinessCard[]>({
     queryKey: ['/api/business-cards'],
     enabled: !!user,
-    refetchInterval: 5000, // Refresh every 5 seconds to catch new cards
+    staleTime: 1000 * 60 * 2, // 2 minutes cache
+    gcTime: 1000 * 60 * 5, // 5 minutes garbage collection time
   });
 
   // Debug log for business cards

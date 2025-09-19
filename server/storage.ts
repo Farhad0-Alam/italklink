@@ -2060,7 +2060,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAppointment(id: string): Promise<Appointment | undefined> {
-    const [appointment] = await db.select().from(appointments).where(eq(appointments.id, id));
+    const [appointment] = await db.select({
+      id: appointments.id,
+      eventTypeId: appointments.eventTypeId,
+      hostUserId: appointments.hostUserId,
+      assignedUserId: appointments.assignedUserId,
+      startTime: appointments.startTime,
+      endTime: appointments.endTime,
+      timezone: appointments.timezone,
+      duration: appointments.duration,
+      attendeeName: appointments.attendeeName,
+      attendeeEmail: appointments.attendeeEmail,
+      attendeePhone: appointments.attendeePhone,
+      attendeeCompany: appointments.attendeeCompany,
+      title: appointments.title,
+      description: appointments.description,
+      location: appointments.location,
+      status: appointments.status,
+      createdAt: appointments.createdAt,
+      updatedAt: appointments.updatedAt,
+    }).from(appointments).where(eq(appointments.id, id));
     return appointment;
   }
 
@@ -2077,7 +2096,26 @@ export class DatabaseStorage implements IStorage {
       );
     }
     
-    const query = db.select().from(appointments).where(and(...conditions));
+    const query = db.select({
+      id: appointments.id,
+      eventTypeId: appointments.eventTypeId,
+      hostUserId: appointments.hostUserId,
+      assignedUserId: appointments.assignedUserId,
+      startTime: appointments.startTime,
+      endTime: appointments.endTime,
+      timezone: appointments.timezone,
+      duration: appointments.duration,
+      attendeeName: appointments.attendeeName,
+      attendeeEmail: appointments.attendeeEmail,
+      attendeePhone: appointments.attendeePhone,
+      attendeeCompany: appointments.attendeeCompany,
+      title: appointments.title,
+      description: appointments.description,
+      location: appointments.location,
+      status: appointments.status,
+      createdAt: appointments.createdAt,
+      updatedAt: appointments.updatedAt,
+    }).from(appointments).where(and(...conditions));
     
     if (filters?.limit) {
       query.limit(filters.limit);
