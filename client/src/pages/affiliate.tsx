@@ -97,6 +97,7 @@ interface MarketingAsset {
 }
 
 export default function Affiliate() {
+  const [, setLocation] = useLocation();
   const [applicationForm, setApplicationForm] = useState({
     country: '',
     website: '',
@@ -248,6 +249,22 @@ export default function Affiliate() {
   if (!affiliate) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="mb-8">
+          <div className="flex items-center space-x-4 mb-6">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setLocation('/dashboard')}
+              className="flex items-center space-x-2 hover:bg-gray-100"
+              data-testid="button-back-dashboard"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Dashboard</span>
+            </Button>
+            <div className="h-6 w-px bg-gray-300" />
+          </div>
+        </div>
+        
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">Join Our Affiliate Program</h1>
           <p className="text-xl text-muted-foreground mb-8">
@@ -379,8 +396,6 @@ export default function Affiliate() {
   }
 
   // Affiliate dashboard for existing affiliates
-  const [, setLocation] = useLocation();
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
