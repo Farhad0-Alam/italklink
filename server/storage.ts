@@ -5,7 +5,7 @@ import {
   automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability, appointmentNotifications, appointmentPayments,
   calendarConnections, videoMeetingProviders, externalCalendarEvents, meetingLinks, integrationLogs,
   teamAssignments, roundRobinState, leadRoutingRules, teamMemberSkills, teamMemberCapacity, teamAvailabilityPatterns, assignmentAnalytics, routingAnalytics,
-  publicUploads,
+  publicUploads, qrLinks, qrEvents,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -31,7 +31,8 @@ import {
   type TeamAvailabilityPattern, type InsertTeamAvailabilityPattern,
   type AssignmentAnalytics, type InsertAssignmentAnalytics,
   type RoutingAnalytics, type InsertRoutingAnalytics,
-  type PublicUpload, type InsertPublicUpload
+  type PublicUpload, type InsertPublicUpload,
+  type QrLink, type InsertQrLink, type QrEvent, type InsertQrEvent
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -419,6 +420,29 @@ export interface IStorage {
   updatePublicUpload(id: string, uploadData: Partial<InsertPublicUpload> & { fileContent?: Buffer }): Promise<PublicUpload>;
   deletePublicUpload(id: string): Promise<void>;
   incrementUploadViews(id: string): Promise<void>;
+  
+  // ===== QR CODE OPERATIONS =====
+  
+  // QR Link operations
+  createQrLink(linkData: InsertQrLink): Promise<QrLink>;
+  getQrLink(id: string): Promise<QrLink | undefined>;
+  getQrLinkByShortId(shortId: string): Promise<QrLink | undefined>;
+  getUserQrLinks(userId: string, limit?: number, offset?: number): Promise<QrLink[]>;
+  countUserQrLinks(userId: string): Promise<number>;
+  updateQrLink(id: string, linkData: Partial<InsertQrLink>): Promise<QrLink>;
+  deleteQrLink(id: string): Promise<void>;
+  
+  // QR Event operations
+  createQrEvent(eventData: InsertQrEvent): Promise<QrEvent>;
+  getQrEventsByQrId(qrId: string, limit?: number, offset?: number): Promise<QrEvent[]>;
+  countQrEvents(qrId: string): Promise<number>;
+  getQrAnalytics(qrId: string, startDate?: Date, endDate?: Date): Promise<{
+    totalScans: number;
+    uniqueScans: number;
+    deviceBreakdown: { device: string; count: number }[];
+    countryBreakdown: { country: string; count: number }[];
+    dailyScans: { date: string; scans: number }[];
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -4337,6 +4361,143 @@ export class DatabaseStorage implements IStorage {
       .update(publicUploads)
       .set({ viewCount: sql`${publicUploads.viewCount} + 1` })
       .where(eq(publicUploads.id, id));
+  }
+  
+  // ===== QR CODE OPERATIONS =====
+  
+  // QR Link operations
+  async createQrLink(linkData: InsertQrLink): Promise<QrLink> {
+    const [qrLink] = await db.insert(qrLinks).values(linkData).returning();
+    return qrLink;
+  }
+  
+  async getQrLink(id: string): Promise<QrLink | undefined> {
+    const [qrLink] = await db.select().from(qrLinks).where(eq(qrLinks.id, id));
+    return qrLink;
+  }
+  
+  async getQrLinkByShortId(shortId: string): Promise<QrLink | undefined> {
+    const [qrLink] = await db.select().from(qrLinks)
+      .where(and(eq(qrLinks.shortId, shortId), eq(qrLinks.enabled, true)));
+    return qrLink;
+  }
+  
+  async getUserQrLinks(userId: string, limit: number = 20, offset: number = 0): Promise<QrLink[]> {
+    return await db.select()
+      .from(qrLinks)
+      .where(eq(qrLinks.userId, userId))
+      .orderBy(desc(qrLinks.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+  
+  async countUserQrLinks(userId: string): Promise<number> {
+    const [result] = await db.select({ count: count() })
+      .from(qrLinks)
+      .where(eq(qrLinks.userId, userId));
+    return result.count;
+  }
+  
+  async updateQrLink(id: string, linkData: Partial<InsertQrLink>): Promise<QrLink> {
+    const [qrLink] = await db
+      .update(qrLinks)
+      .set({ ...linkData, updatedAt: new Date() })
+      .where(eq(qrLinks.id, id))
+      .returning();
+    return qrLink;
+  }
+  
+  async deleteQrLink(id: string): Promise<void> {
+    await db.delete(qrLinks).where(eq(qrLinks.id, id));
+  }
+  
+  // QR Event operations
+  async createQrEvent(eventData: InsertQrEvent): Promise<QrEvent> {
+    const [qrEvent] = await db.insert(qrEvents).values(eventData).returning();
+    return qrEvent;
+  }
+  
+  async getQrEventsByQrId(qrId: string, limit: number = 100, offset: number = 0): Promise<QrEvent[]> {
+    return await db.select()
+      .from(qrEvents)
+      .where(eq(qrEvents.qrId, qrId))
+      .orderBy(desc(qrEvents.ts))
+      .limit(limit)
+      .offset(offset);
+  }
+  
+  async countQrEvents(qrId: string): Promise<number> {
+    const [result] = await db.select({ count: count() })
+      .from(qrEvents)
+      .where(eq(qrEvents.qrId, qrId));
+    return result.count;
+  }
+  
+  async getQrAnalytics(qrId: string, startDate?: Date, endDate?: Date): Promise<{
+    totalScans: number;
+    uniqueScans: number;
+    deviceBreakdown: { device: string; count: number }[];
+    countryBreakdown: { country: string; count: number }[];
+    dailyScans: { date: string; scans: number }[];
+  }> {
+    let whereCondition = eq(qrEvents.qrId, qrId);
+    
+    if (startDate && endDate) {
+      whereCondition = and(
+        eq(qrEvents.qrId, qrId),
+        gte(qrEvents.ts, startDate),
+        lte(qrEvents.ts, endDate)
+      ) as any;
+    }
+    
+    // Get total scans
+    const [totalScansResult] = await db.select({ count: count() })
+      .from(qrEvents)
+      .where(whereCondition);
+    
+    // Get unique scans (by IP hash)
+    const [uniqueScansResult] = await db.select({ count: count(sql`DISTINCT ${qrEvents.ipHash}`) })
+      .from(qrEvents)
+      .where(whereCondition);
+    
+    // Get device breakdown
+    const deviceBreakdown = await db
+      .select({
+        device: qrEvents.device,
+        count: count()
+      })
+      .from(qrEvents)
+      .where(whereCondition)
+      .groupBy(qrEvents.device);
+    
+    // Get country breakdown
+    const countryBreakdown = await db
+      .select({
+        country: qrEvents.country,
+        count: count()
+      })
+      .from(qrEvents)
+      .where(whereCondition)
+      .groupBy(qrEvents.country);
+    
+    // Get daily scans
+    const dailyScans = await db
+      .select({
+        date: sql<string>`DATE(${qrEvents.ts})`,
+        scans: count()
+      })
+      .from(qrEvents)
+      .where(whereCondition)
+      .groupBy(sql`DATE(${qrEvents.ts})`)
+      .orderBy(sql`DATE(${qrEvents.ts})`);
+    
+    return {
+      totalScans: totalScansResult.count,
+      uniqueScans: uniqueScansResult.count,
+      deviceBreakdown: deviceBreakdown.map(d => ({ device: d.device || 'Unknown', count: d.count })),
+      countryBreakdown: countryBreakdown.map(c => ({ country: c.country || 'Unknown', count: c.count })),
+      dailyScans: dailyScans.map(d => ({ date: d.date, scans: d.scans }))
+    };
   }
 }
 

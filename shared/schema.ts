@@ -76,6 +76,9 @@ export const integrationStatusEnum = pgEnum('integration_status', ['connected', 
 export const conflictResolutionEnum = pgEnum('conflict_resolution', ['skip', 'overwrite', 'merge', 'manual']);
 export const syncDirectionEnum = pgEnum('sync_direction', ['one_way_to_external', 'one_way_from_external', 'two_way']);
 
+// QR Code system enums
+export const deviceTypeEnum = pgEnum('device_type', ['mobile', 'desktop', 'tablet', 'bot']);
+
 // Database Tables
 
 // Session storage table
@@ -3765,6 +3768,44 @@ export const publicUploads = pgTable("public_uploads", {
   index("idx_public_uploads_created_at").on(table.createdAt),
 ]);
 
+// ===== QR CODE SYSTEM =====
+
+// QR Links table for Dynamic QR codes
+export const qrLinks = pgTable("qr_links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  shortId: varchar("short_id").unique().notNull(), // 7-10 URL-safe chars
+  name: text("name"), // Optional label for UI
+  targetUrl: text("target_url").notNull(), // Absolute http/https URL
+  utm: jsonb("utm"), // UTM parameters as JSON object
+  rules: jsonb("rules"), // Smart routing rules as JSON object
+  enabled: boolean("enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_qr_links_short_id").on(table.shortId),
+  index("idx_qr_links_user_created").on(table.userId, table.createdAt),
+  index("idx_qr_links_enabled").on(table.enabled),
+]);
+
+// QR Events table for scan tracking
+export const qrEvents = pgTable("qr_events", {
+  id: serial("id").primaryKey(),
+  qrId: varchar("qr_id").references(() => qrLinks.id, { onDelete: 'cascade' }).notNull(),
+  ts: timestamp("ts").defaultNow().notNull(),
+  ipHash: text("ip_hash"), // SHA256 of IP + salt for privacy
+  ua: text("ua"), // User agent string
+  device: deviceTypeEnum("device"), // Parsed device type
+  country: text("country"), // From headers (CF-IPCountry)
+  referrer: text("referrer"), // Referrer URL
+  landingHost: text("landing_host"), // Hostname used for access
+}, (table) => [
+  index("idx_qr_events_qr_ts").on(table.qrId, table.ts),
+  index("idx_qr_events_device").on(table.device),
+  index("idx_qr_events_country").on(table.country),
+  index("idx_qr_events_ts").on(table.ts),
+]);
+
 // ===== TEAM SCHEDULING TYPE DEFINITIONS =====
 
 // TypeScript types for team scheduling tables
@@ -3795,6 +3836,13 @@ export type InsertRoutingAnalytics = typeof routingAnalytics.$inferInsert;
 // Public uploads types
 export type PublicUpload = typeof publicUploads.$inferSelect;
 export type InsertPublicUpload = typeof publicUploads.$inferInsert;
+
+// QR Code types
+export type QrLink = typeof qrLinks.$inferSelect;
+export type InsertQrLink = typeof qrLinks.$inferInsert;
+
+export type QrEvent = typeof qrEvents.$inferSelect;
+export type InsertQrEvent = typeof qrEvents.$inferInsert;
 
 // ===== VALIDATION SCHEMAS FOR TEAM SCHEDULING =====
 
@@ -3884,3 +3932,51 @@ export const publicUploadFormSchema = z.object({
 });
 
 export type PublicUploadForm = z.infer<typeof publicUploadFormSchema>;
+
+// ===== QR CODE VALIDATION SCHEMAS =====
+
+// QR Link validation schema
+export const insertQrLinkSchema = createInsertSchema(qrLinks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  targetUrl: z.string().url('Target URL must be a valid HTTP/HTTPS URL'),
+  utm: z.object({
+    utm_source: z.string().optional(),
+    utm_medium: z.string().optional(),
+    utm_campaign: z.string().optional(),
+    utm_term: z.string().optional(),
+    utm_content: z.string().optional(),
+  }).optional(),
+  rules: z.object({
+    platform: z.record(z.string().url()).optional(),
+    device: z.record(z.string().url()).optional(),
+    geo: z.record(z.string().url()).optional(),
+    ab: z.array(z.object({
+      weight: z.number().min(1).max(100),
+      url: z.string().url(),
+    })).optional(),
+    fallback: z.string().url().optional(),
+  }).optional(),
+});
+
+export type QrLinkForm = z.infer<typeof insertQrLinkSchema>;
+
+// QR Event validation schema
+export const insertQrEventSchema = createInsertSchema(qrEvents).omit({
+  id: true,
+});
+
+// Static QR validation schema (for on-demand generation)
+export const staticQrSchema = z.object({
+  data: z.string().min(1, 'Data is required'),
+  format: z.enum(['png', 'svg']).default('svg'),
+  size: z.enum(['256', '512', '1024']).default('512'),
+  margin: z.number().min(0).max(10).default(2),
+  dark: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Dark color must be valid hex').default('#000000'),
+  light: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Light color must be valid hex').default('#ffffff'),
+  logoUrl: z.string().url().optional(),
+});
+
+export type StaticQrForm = z.infer<typeof staticQrSchema>;
