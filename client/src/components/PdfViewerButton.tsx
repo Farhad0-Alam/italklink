@@ -180,18 +180,26 @@ export function PdfViewerButton({
       {/* PDF Viewer Button - Wallet Style */}
       <Button
         onClick={handleOpen}
-        variant="outline"
+        variant="default"
         className={`
-          h-10 px-4 text-sm
-          bg-purple-600 hover:bg-purple-700 text-white border-purple-600
-          dark:bg-purple-700 dark:hover:bg-purple-800 dark:border-purple-600
-          transition-all duration-200
+          h-12 px-6 text-base font-semibold
+          bg-gradient-to-r from-purple-600 to-purple-700 
+          hover:from-purple-700 hover:to-purple-800
+          text-white border-0 shadow-lg hover:shadow-xl
+          dark:from-purple-700 dark:to-purple-800 
+          dark:hover:from-purple-800 dark:hover:to-purple-900
+          transition-all duration-300 ease-in-out
+          transform hover:scale-105 active:scale-95
+          rounded-xl border-2 border-purple-500/20
+          ring-2 ring-purple-500/10 hover:ring-purple-500/30
+          disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
           ${className}
         `}
+        disabled={!pdf_file}
         data-testid="button-pdf-viewer"
       >
-        <i className="fas fa-file-pdf mr-2" style={{fontSize: '16px'}}></i>
-        {button_text}
+        <i className="fas fa-file-pdf mr-3 text-purple-100" style={{fontSize: '18px'}}></i>
+        <span className="text-white font-medium tracking-wide">{button_text}</span>
       </Button>
 
       {/* PDF Modal */}
