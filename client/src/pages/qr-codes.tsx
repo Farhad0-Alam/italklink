@@ -61,6 +61,7 @@ const staticQrSchema = z.object({
   margin: z.number().min(0).max(10).default(2),
   dark: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').default('#000000'),
   light: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').default('#ffffff'),
+  logo: z.any().optional(),
 });
 
 export default function QrCodes() {
@@ -150,20 +151,104 @@ export default function QrCodes() {
       margin: 2,
       dark: '#000000',
       light: '#ffffff',
+      logo: null,
     },
   });
+
+  const [qrPreview, setQrPreview] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
 
   // Handlers
   const handleCreateQrLink = (data: any) => {
     createQrLinkMutation.mutate(data);
   };
 
-  const generateStaticQr = async (data: any) => {
+  // Watch form data for preview (including logo changes)
+  const watchedData = staticQrForm.watch();
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      generateQrPreview(watchedData);
+    }, 500);
+    return () => clearTimeout(timeoutId);
+  }, [watchedData.data, watchedData.dark, watchedData.light, watchedData.size, watchedData.margin, logoFile]);
+
+  const [previewAbortController, setPreviewAbortController] = useState<AbortController | null>(null);
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
+
+  const generateQrPreview = async (data: any) => {
+    if (!data.data.trim()) {
+      setQrPreview(null);
+      return;
+    }
+
+    // Cancel any in-flight request
+    if (previewAbortController) {
+      previewAbortController.abort();
+    }
+
+    const controller = new AbortController();
+    setPreviewAbortController(controller);
+    setIsGeneratingPreview(true);
+
     try {
+      const formData = new FormData();
+      formData.append('data', data.data);
+      formData.append('format', 'svg'); // Always use SVG for preview
+      formData.append('size', data.size || '512');
+      formData.append('margin', data.margin?.toString() || '2');
+      formData.append('dark', data.dark || '#000000');
+      formData.append('light', data.light || '#ffffff');
+      
+      // Add logo if selected
+      if (logoFile) {
+        formData.append('logo', logoFile);
+      }
+
       const response = await fetch('/api/qr/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: formData,
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate QR code preview');
+      }
+
+      const svgText = await response.text();
+      // Create safe data URL for SVG
+      const svgDataUrl = `data:image/svg+xml;base64,${btoa(svgText)}`;
+      setQrPreview(svgDataUrl);
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        // Request was cancelled, ignore
+        return;
+      }
+      console.error('Preview generation error:', error);
+      setQrPreview(null);
+    } finally {
+      setIsGeneratingPreview(false);
+      setPreviewAbortController(null);
+    }
+  };
+
+  const downloadQrCode = async (data: any) => {
+    try {
+      const formData = new FormData();
+      formData.append('data', data.data);
+      formData.append('format', data.format || 'svg');
+      formData.append('size', data.size || '512');
+      formData.append('margin', data.margin?.toString() || '2');
+      formData.append('dark', data.dark || '#000000');
+      formData.append('light', data.light || '#ffffff');
+      
+      // Add logo if selected
+      if (logoFile) {
+        formData.append('logo', logoFile);
+      }
+
+      const response = await fetch('/api/qr/generate', {
+        method: 'POST',
+        body: formData,
       });
 
       if (!response.ok) {
@@ -183,15 +268,31 @@ export default function QrCodes() {
       URL.revokeObjectURL(url);
 
       toast({
-        title: 'QR Code Generated',
-        description: 'Your static QR code has been generated and downloaded.',
+        title: 'QR Code Downloaded',
+        description: 'Your static QR code has been downloaded successfully.',
       });
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to generate QR code',
+        description: error.message || 'Failed to download QR code',
         variant: 'destructive',
       });
+    }
+  };
+
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type.startsWith('image/')) {
+        setLogoFile(file);
+        staticQrForm.setValue('logo', file);
+      } else {
+        toast({
+          title: 'Invalid File',
+          description: 'Please select an image file for the logo.',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
@@ -428,7 +529,7 @@ export default function QrCodes() {
               </CardHeader>
               <CardContent>
                 <Form {...staticQrForm}>
-                  <form onSubmit={staticQrForm.handleSubmit(generateStaticQr)} className="space-y-6">
+                  <form className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <FormField
@@ -498,6 +599,28 @@ export default function QrCodes() {
                           />
                         </div>
 
+                        <FormField
+                          control={staticQrForm.control}
+                          name="logo"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Logo (Optional)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="file" 
+                                  accept="image/*"
+                                  onChange={handleLogoUpload}
+                                  data-testid="input-logo-upload"
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Upload a logo to display in the center of the QR code
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
                             control={staticQrForm.control}
@@ -530,18 +653,53 @@ export default function QrCodes() {
                       <div className="space-y-4">
                         <Label>Preview</Label>
                         <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 flex items-center justify-center min-h-[200px]">
-                          <div ref={qrPreviewRef} className="flex flex-col items-center text-slate-400">
-                            <QrCode className="w-16 h-16 mb-2" />
-                            <p className="text-sm">Preview will appear here</p>
-                          </div>
+                          {isGeneratingPreview ? (
+                            <div className="flex flex-col items-center text-slate-400">
+                              <QrCode className="w-8 h-8 mb-2 animate-pulse" />
+                              <p className="text-sm">Generating preview...</p>
+                            </div>
+                          ) : qrPreview ? (
+                            <img 
+                              ref={qrPreviewRef} 
+                              src={qrPreview}
+                              alt="QR Code Preview"
+                              className="max-w-[200px] max-h-[200px] rounded"
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center text-slate-400">
+                              <QrCode className="w-16 h-16 mb-2" />
+                              <p className="text-sm">Preview will appear here</p>
+                            </div>
+                          )}
                         </div>
+                        {logoFile && (
+                          <div className="text-center">
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                              Logo: {logoFile.name}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex justify-end">
-                      <Button type="submit" data-testid="button-generate-static">
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        type="button" 
+                        variant="outline"
+                        onClick={() => generateQrPreview(staticQrForm.getValues())}
+                        data-testid="button-refresh-preview"
+                      >
+                        <QrCode className="w-4 h-4 mr-2" />
+                        Refresh Preview
+                      </Button>
+                      <Button 
+                        type="button" 
+                        onClick={() => downloadQrCode(staticQrForm.getValues())}
+                        disabled={!qrPreview}
+                        data-testid="button-download-qr"
+                      >
                         <Download className="w-4 h-4 mr-2" />
-                        Generate & Download
+                        Download
                       </Button>
                     </div>
                   </form>
