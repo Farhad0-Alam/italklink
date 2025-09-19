@@ -2,13 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, Clock, Settings, Ban, RefreshCw, Eye, Plus, Save } from "lucide-react";
+import { Calendar, Clock, Settings, Ban, RefreshCw, Eye, Plus, Save, ArrowLeft } from "lucide-react";
 import { BusinessHoursConfig } from "@/components/availability/BusinessHoursConfig";
 import { BufferTimesConfig } from "@/components/availability/BufferTimesConfig";
 import { BlackoutDatesConfig } from "@/components/availability/BlackoutDatesConfig";
@@ -56,6 +57,7 @@ interface EventType {
 }
 
 export default function AvailabilityManagement() {
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("business-hours");
