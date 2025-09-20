@@ -534,10 +534,10 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         onClick={() => handleContactAction(contact.type, contact.value)}
                         className={`${data.template === 'dark' ? 'w-full py-2 px-2 rounded-lg' : 'rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center ${data.template === 'dark' ? 'mb-0' : 'mb-1'} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'contact-icon-hover' : ''}`}
                         style={{
-                          // Base colors - always applied
-                          backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || (data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a')),
-                          color: getSectionStyle('contactInfo', 'iconColor') || (data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')),
-                          borderColor: getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
+                          // Base CSS variables - always applied
+                          '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || (data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a')),
+                          '--tl-icon-color': getSectionStyle('contactInfo', 'iconColor') || (data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')),
+                          '--tl-border': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
                           // Hover CSS variables - only when toggle enabled
                           ...(getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? {
                             '--tl-icon-bg-hover': getSectionStyle('contactInfo', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconBackgroundColor') || (data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a')), 20),
@@ -698,10 +698,10 @@ END:VCARD`;
                         onClick={() => handleContactAction(social.platform, social.value)}
                         className={`rounded-full flex items-center justify-center mb-1 ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'social-icon-hover' : ''}`}
                         style={{
-                          // Base colors - always applied
-                          backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#fbbf24'),
-                          color: getSectionStyle('socialMedia', 'iconColor') || '#000000',
-                          borderColor: getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
+                          // Base CSS variables - always applied
+                          '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#fbbf24'),
+                          '--tl-icon-color': getSectionStyle('socialMedia', 'iconColor') || '#000000',
+                          '--tl-border': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
                           // Hover CSS variables - only when toggle enabled
                           ...(getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? {
                             '--tl-icon-bg-hover': getSectionStyle('socialMedia', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#fbbf24'), 20),
@@ -747,10 +747,10 @@ END:VCARD`;
                         onClick={() => handleContactAction(social.platform, social.value)}
                         className={`w-full py-3 px-4 rounded-xl flex items-center justify-center text-sm ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'social-icon-hover' : ''}`}
                         style={{
-                          // Base colors - always applied
-                          backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#22c55e'),
-                          color: getSectionStyle('socialMedia', 'iconTextColor') || (data.tertiaryColor || '#ffffff'),
-                          borderColor: getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
+                          // Base CSS variables - always applied
+                          '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#22c55e'),
+                          '--tl-icon-color': getSectionStyle('socialMedia', 'iconTextColor') || (data.tertiaryColor || '#ffffff'),
+                          '--tl-border': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
                           // Hover CSS variables - only when toggle enabled
                           ...(getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? {
                             '--tl-icon-bg-hover': getSectionStyle('socialMedia', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#22c55e'), 20),
