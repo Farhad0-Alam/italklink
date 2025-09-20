@@ -721,8 +721,7 @@ END:VCARD`;
                         <i 
                           className={`${social.icon}`}
                           style={{
-                            fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 14)}px`,
-                            color: getSectionStyle('socialMedia', 'iconColor') || 'inherit'
+                            fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 14)}px`
                           }}
                         ></i>
                       </button>
@@ -773,8 +772,7 @@ END:VCARD`;
                         <i 
                           className={`${social.icon} mr-3`}
                           style={{
-                            fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 18)}px`,
-                            color: getSectionStyle('socialMedia', 'iconColor') || 'inherit'
+                            fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 18)}px`
                           }}
                         ></i>
                         {social.label || 'Social'}
