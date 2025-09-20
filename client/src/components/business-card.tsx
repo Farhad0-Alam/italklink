@@ -532,7 +532,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     >
                       <button 
                         onClick={() => handleContactAction(contact.type, contact.value)}
-                        className={`${data.template === 'dark' ? 'w-full py-2 px-2 rounded-lg' : 'rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center ${data.template === 'dark' ? 'mb-0' : 'mb-1'} contact-icon-hover`}
+                        className={`${data.template === 'dark' ? 'w-full py-2 px-2 rounded-lg' : 'rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center ${data.template === 'dark' ? 'mb-0' : 'mb-1'} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'contact-icon-hover' : ''}`}
                         style={{
                           '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || (data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a')),
                           '--tl-icon-color': getSectionStyle('contactInfo', 'iconColor') || (data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')),
@@ -692,7 +692,7 @@ END:VCARD`;
                     <div key={social.id} className="flex flex-col items-center">
                       <button 
                         onClick={() => handleContactAction(social.platform, social.value)}
-                        className="rounded-full flex items-center justify-center mb-1 social-icon-hover"
+                        className={`rounded-full flex items-center justify-center mb-1 ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'social-icon-hover' : ''}`}
                         style={{
                           '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#fbbf24'),
                           '--tl-icon-color': getSectionStyle('socialMedia', 'iconColor') || '#000000',
@@ -737,7 +737,7 @@ END:VCARD`;
                     <button 
                       key={social.id} 
                         onClick={() => handleContactAction(social.platform, social.value)}
-                        className="w-full py-3 px-4 rounded-xl flex items-center justify-center text-sm social-icon-hover"
+                        className={`w-full py-3 px-4 rounded-xl flex items-center justify-center text-sm ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'social-icon-hover' : ''}`}
                         style={{
                           '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#22c55e'),
                           '--tl-icon-color': getSectionStyle('socialMedia', 'iconTextColor') || (data.tertiaryColor || '#ffffff'),
