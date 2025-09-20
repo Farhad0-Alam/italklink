@@ -126,6 +126,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     contactIconStyling: true,
     contactFontStyling: true,
     contactDropShadow: true,
+    contactContainerStyling: true,
   });
 
   const form = useForm<BusinessCard>({
