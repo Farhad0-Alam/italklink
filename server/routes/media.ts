@@ -3,7 +3,7 @@ import multer from 'multer';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
 import { requireAuth } from '../auth.js';
-import { getSupabaseClient, STORAGE_CONFIG, WEBP_VARIANTS } from '../lib/supabase.js';
+import { getSupabaseClient, STORAGE_CONFIG, WEBP_VARIANTS, saveFileLocally } from '../lib/supabase.js';
 import { db } from '../db.js';
 import { publicUploads, mediaVariants } from '../../shared/schema.js';
 import { eq, desc, and } from 'drizzle-orm';
@@ -196,7 +196,7 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
     // Initialize Supabase client dynamically
     const supabase = await getSupabaseClient();
     
-    if (!supabase) {
+    if (!supabase && !STORAGE_CONFIG.useLocalStorage) {
       return res.status(500).json({
         ok: false,
         error: 'Supabase not configured'
@@ -243,20 +243,29 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
     if (isPdf) {
       // For PDFs, just upload as-is
       const pdfPath = `${storagePath}/original${ext}`;
+      let publicUrl: string;
       
-      const { error: uploadError } = await supabase.storage
-        .from(STORAGE_CONFIG.bucket)
-        .upload(pdfPath, file.buffer, {
-          contentType: mime,
-          cacheControl: '3600',
-        });
+      if (STORAGE_CONFIG.useLocalStorage) {
+        const localResult = await saveFileLocally(pdfPath, file.buffer);
+        if (!localResult.success) {
+          throw new Error(localResult.error || 'Failed to save PDF locally');
+        }
+        publicUrl = localResult.publicUrl!;
+      } else {
+        const { error: uploadError } = await supabase!.storage
+          .from(STORAGE_CONFIG.bucket)
+          .upload(pdfPath, file.buffer, {
+            contentType: mime,
+            cacheControl: '3600',
+          });
 
-      if (uploadError) {
-        console.error('Supabase upload error:', uploadError);
-        throw new Error('Failed to upload to storage');
+        if (uploadError) {
+          console.error('Supabase upload error:', uploadError);
+          throw new Error('Failed to upload to storage');
+        }
+        publicUrl = `${STORAGE_CONFIG.assetBaseUrl}/${pdfPath}`;
       }
-
-      const publicUrl = `${STORAGE_CONFIG.assetBaseUrl}/${pdfPath}`;
+      
       variants.original = publicUrl;
 
       // Store variant record
@@ -286,19 +295,29 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
     
     // Upload original image
     const originalPath = `${storagePath}/original${ext}`;
-    const { error: originalUploadError } = await supabase.storage
-      .from(STORAGE_CONFIG.bucket)
-      .upload(originalPath, file.buffer, {
-        contentType: mime,
-        cacheControl: '3600',
-      });
+    let originalUrl: string;
+    
+    if (STORAGE_CONFIG.useLocalStorage) {
+      const localResult = await saveFileLocally(originalPath, file.buffer);
+      if (!localResult.success) {
+        throw new Error(localResult.error || 'Failed to save original image locally');
+      }
+      originalUrl = localResult.publicUrl!;
+    } else {
+      const { error: originalUploadError } = await supabase!.storage
+        .from(STORAGE_CONFIG.bucket)
+        .upload(originalPath, file.buffer, {
+          contentType: mime,
+          cacheControl: '3600',
+        });
 
-    if (originalUploadError) {
-      console.error('Supabase upload error:', originalUploadError);
-      throw new Error('Failed to upload original to storage');
+      if (originalUploadError) {
+        console.error('Supabase upload error:', originalUploadError);
+        throw new Error('Failed to upload original to storage');
+      }
+      originalUrl = `${STORAGE_CONFIG.assetBaseUrl}/${originalPath}`;
     }
-
-    const originalUrl = `${STORAGE_CONFIG.assetBaseUrl}/${originalPath}`;
+    
     variants.original = originalUrl;
 
     // Store original variant record
@@ -317,21 +336,30 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
     if (variantMetadata.variantRecords && variantMetadata.variantRecords.length > 0) {
       for (const variantRecord of variantMetadata.variantRecords) {
         try {
-          // Upload WebP variant to Supabase
-          const { error: variantUploadError } = await supabase.storage
-            .from(STORAGE_CONFIG.bucket)
-            .upload(variantRecord.storagePath, variantRecord.buffer, {
-              contentType: 'image/webp',
-              cacheControl: '3600',
-            });
+          // Upload WebP variant (to local storage or Supabase)
+          let realPublicUrl: string;
+          
+          if (STORAGE_CONFIG.useLocalStorage) {
+            const localResult = await saveFileLocally(variantRecord.storagePath, variantRecord.buffer);
+            if (!localResult.success) {
+              console.error(`Error saving ${variantRecord.variantType} variant locally:`, localResult.error);
+              continue;
+            }
+            realPublicUrl = localResult.publicUrl!;
+          } else {
+            const { error: variantUploadError } = await supabase!.storage
+              .from(STORAGE_CONFIG.bucket)
+              .upload(variantRecord.storagePath, variantRecord.buffer, {
+                contentType: 'image/webp',
+                cacheControl: '3600',
+              });
 
-          if (variantUploadError) {
-            console.error(`Error uploading ${variantRecord.variantType} variant:`, variantUploadError);
-            continue; // Skip this variant but continue with others
+            if (variantUploadError) {
+              console.error(`Error uploading ${variantRecord.variantType} variant:`, variantUploadError);
+              continue; // Skip this variant but continue with others
+            }
+            realPublicUrl = `${STORAGE_CONFIG.assetBaseUrl}/${variantRecord.storagePath}`;
           }
-
-          // Update public URL to actual Supabase URL
-          const realPublicUrl = `${STORAGE_CONFIG.assetBaseUrl}/${variantRecord.storagePath}`;
           variants[`${variantRecord.variantType}_webp`] = realPublicUrl;
 
           // Create database record with real URL
