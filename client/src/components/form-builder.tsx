@@ -127,6 +127,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     contactFontStyling: true,
     contactDropShadow: true,
     contactContainerStyling: true,
+    // subsections inside Social Media
+    socialIconStyling: true,
+    socialFontStyling: true,
+    socialDropShadow: true,
+    socialContainerStyling: true,
   });
 
   const form = useForm<BusinessCard>({
@@ -1476,6 +1481,503 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       <i className="fas fa-plus mr-2" /> Add Social Platform
                     </Button>
                   </div>
+
+                {/* Icon Styling */}
+                <div className="bg-slate-800/50 rounded-lg p-3 space-y-3 mt-4">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("socialIconStyling")} data-testid="toggle-social-icon-styling">
+                    <h5 className="text-xs font-medium text-purple-300">Icon Styling</h5>
+                    <i className={`fas fa-chevron-${collapsedSections.socialIconStyling ? "down" : "up"} text-purple-300 text-xs`} />
+                  </div>
+
+                  {!collapsedSections.socialIconStyling && (
+                    <>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Icon Color</Label>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconColor || "#3b82f6"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconColor", e.target.value)}
+                              className="w-8 h-8 rounded border border-slate-600"
+                            />
+                            <input
+                              type="text"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconColor || "#3b82f6"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconColor", e.target.value)}
+                              className="flex-1 bg-slate-700 border-slate-600 text-white text-xs h-8"
+                              placeholder="#000000"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Background Color</Label>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundColor || "#16a34a"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBackgroundColor", e.target.value)}
+                              className="w-8 h-8 rounded border border-slate-600"
+                            />
+                            <input
+                              type="text"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundColor || "#16a34a"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBackgroundColor", e.target.value)}
+                              className="flex-1 bg-slate-700 border-slate-600 text-white text-xs h-8"
+                              placeholder="#000000"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Border Color</Label>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconBorderColor || "#000000"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBorderColor", e.target.value)}
+                              className="w-8 h-8 rounded border border-slate-600"
+                            />
+                            <input
+                              type="text"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconBorderColor || "#000000"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBorderColor", e.target.value)}
+                              className="flex-1 bg-slate-700 border-slate-600 text-white text-xs h-8"
+                              placeholder="#000000"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Icon Size: {watchedValues.sectionStyles?.socialMedia?.iconSize || 18}px</Label>
+                          <input
+                            type="range"
+                            value={watchedValues.sectionStyles?.socialMedia?.iconSize || 18}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.iconSize", parseInt(e.target.value))}
+                            className="custom-range w-full"
+                            min={12}
+                            max={32}
+                            data-testid="slider-social-icon-size"
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Icon Background Size: {watchedValues.sectionStyles?.socialMedia?.iconBackgroundSize || 40}px</Label>
+                          <input
+                            type="range"
+                            value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundSize || 40}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBackgroundSize", parseInt(e.target.value))}
+                            className="custom-range w-full"
+                            min={24}
+                            max={80}
+                            data-testid="slider-social-icon-background-size"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Font Styling */}
+                <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("socialFontStyling")} data-testid="toggle-social-font-styling">
+                    <h5 className="text-xs font-medium text-purple-300">Font Styling</h5>
+                    <i className={`fas fa-chevron-${collapsedSections.socialFontStyling ? "down" : "up"} text-purple-300 text-xs`} />
+                  </div>
+
+                  {!collapsedSections.socialFontStyling && (
+                    <>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Text Color</Label>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconTextColor || "#000000"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconTextColor", e.target.value)}
+                              className="w-8 h-8 rounded border border-slate-600"
+                            />
+                            <input
+                              type="text"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconTextColor || "#000000"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconTextColor", e.target.value)}
+                              className="flex-1 bg-slate-700 border-slate-600 text-white text-xs h-8"
+                              placeholder="#000000"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Font Family</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.socialMedia?.iconTextFont || "inherit"}
+                            onValueChange={(v) => form.setValue("sectionStyles.socialMedia.iconTextFont", v)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="inherit">Default</SelectItem>
+                              <SelectItem value="Arial, sans-serif">Arial</SelectItem>
+                              <SelectItem value="Helvetica, sans-serif">Helvetica</SelectItem>
+                              <SelectItem value="Georgia, serif">Georgia</SelectItem>
+                              <SelectItem value="Times New Roman, serif">Times</SelectItem>
+                              <SelectItem value="Verdana, sans-serif">Verdana</SelectItem>
+                              <SelectItem value="Courier New, monospace">Courier</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Font Size: {watchedValues.sectionStyles?.socialMedia?.iconTextSize || 14}px</Label>
+                          <input
+                            type="range"
+                            value={watchedValues.sectionStyles?.socialMedia?.iconTextSize || 14}
+                            onChange={(e) => form.setValue("sectionStyles.socialMedia.iconTextSize", parseInt(e.target.value))}
+                            className="custom-range w-full"
+                            min={10}
+                            max={24}
+                            data-testid="slider-social-font-size"
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Font Weight</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.socialMedia?.iconTextWeight || "400"}
+                            onValueChange={(v) => form.setValue("sectionStyles.socialMedia.iconTextWeight", v as any)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="300">Light</SelectItem>
+                              <SelectItem value="400">Normal</SelectItem>
+                              <SelectItem value="500">Medium</SelectItem>
+                              <SelectItem value="600">Semi-bold</SelectItem>
+                              <SelectItem value="700">Bold</SelectItem>
+                              <SelectItem value="800">Extra-bold</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Font Style</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.socialMedia?.iconTextStyle || "normal"}
+                            onValueChange={(v) => form.setValue("sectionStyles.socialMedia.iconTextStyle", v as any)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="normal">Normal</SelectItem>
+                              <SelectItem value="italic">Italic</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Drop Shadow Options */}
+                <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("socialDropShadow")} data-testid="toggle-social-drop-shadow">
+                    <h5 className="text-xs font-medium text-purple-300">Drop Shadow</h5>
+                    <i className={`fas fa-chevron-${collapsedSections.socialDropShadow ? "down" : "up"} text-purple-300 text-xs`} />
+                  </div>
+
+                  {!collapsedSections.socialDropShadow && (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="socialDropShadowEnable"
+                          checked={watchedValues.sectionStyles?.socialMedia?.dropShadowEnabled || false}
+                          onCheckedChange={(checked) => form.setValue("sectionStyles.socialMedia.dropShadowEnabled", checked)}
+                          data-testid="checkbox-social-drop-shadow-enable"
+                        />
+                        <Label htmlFor="socialDropShadowEnable" className="text-white text-xs">Enable Drop Shadow</Label>
+                      </div>
+
+                      {watchedValues.sectionStyles?.socialMedia?.dropShadowEnabled && (
+                        <>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-white text-xs">Shadow Color</Label>
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="color"
+                                  value={watchedValues.sectionStyles?.socialMedia?.dropShadowColor || "#000000"}
+                                  onChange={(e) => form.setValue("sectionStyles.socialMedia.dropShadowColor", e.target.value)}
+                                  className="w-8 h-8 rounded border border-slate-600"
+                                />
+                                <input
+                                  type="text"
+                                  value={watchedValues.sectionStyles?.socialMedia?.dropShadowColor || "#000000"}
+                                  onChange={(e) => form.setValue("sectionStyles.socialMedia.dropShadowColor", e.target.value)}
+                                  className="flex-1 bg-slate-700 border-slate-600 text-white text-xs h-8"
+                                  placeholder="#000000"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <Label className="text-white text-xs">Opacity: {Math.round((watchedValues.sectionStyles?.socialMedia?.dropShadowOpacity || 0.25) * 100)}%</Label>
+                              <input
+                                type="range"
+                                value={watchedValues.sectionStyles?.socialMedia?.dropShadowOpacity || 0.25}
+                                onChange={(e) => form.setValue("sectionStyles.socialMedia.dropShadowOpacity", parseFloat(e.target.value))}
+                                className="custom-range w-full"
+                                min={0}
+                                max={1}
+                                step={0.05}
+                                data-testid="slider-social-drop-shadow-opacity"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-white text-xs">Blur: {watchedValues.sectionStyles?.socialMedia?.dropShadowBlur || 4}px</Label>
+                              <input
+                                type="range"
+                                value={watchedValues.sectionStyles?.socialMedia?.dropShadowBlur || 4}
+                                onChange={(e) => form.setValue("sectionStyles.socialMedia.dropShadowBlur", parseInt(e.target.value))}
+                                className="custom-range w-full"
+                                min={0}
+                                max={20}
+                                data-testid="slider-social-drop-shadow-blur"
+                              />
+                            </div>
+
+                            <div>
+                              <Label className="text-white text-xs">Offset: {watchedValues.sectionStyles?.socialMedia?.dropShadowOffset || 2}px</Label>
+                              <input
+                                type="range"
+                                value={watchedValues.sectionStyles?.socialMedia?.dropShadowOffset || 2}
+                                onChange={(e) => form.setValue("sectionStyles.socialMedia.dropShadowOffset", parseInt(e.target.value))}
+                                className="custom-range w-full"
+                                min={0}
+                                max={10}
+                                data-testid="slider-social-drop-shadow-offset"
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Social Container Styling Section */}
+                <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("socialContainerStyling")} data-testid="toggle-social-container-styling">
+                    <h5 className="text-xs font-medium text-purple-300">Social Container Styling</h5>
+                    <i className={`fas fa-chevron-${collapsedSections.socialContainerStyling ? "down" : "up"} text-purple-300 text-xs`} />
+                  </div>
+
+                  {!collapsedSections.socialContainerStyling && (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="socialContainerStylingEnable"
+                          checked={watchedValues.sectionStyles?.socialMedia?.containerStylingEnabled || false}
+                          onCheckedChange={(checked) => form.setValue("sectionStyles.socialMedia.containerStylingEnabled", checked)}
+                          data-testid="checkbox-enable-social-container-styling"
+                        />
+                        <Label htmlFor="socialContainerStylingEnable" className="text-white text-xs">Enable Social Container Styling</Label>
+                      </div>
+
+                      {watchedValues.sectionStyles?.socialMedia?.containerStylingEnabled && (
+                        <>
+                          {/* Container Background & Border */}
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-white text-xs">Container Background</Label>
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="color"
+                                  value={watchedValues.sectionStyles?.socialMedia?.containerBackgroundColor || "#ffffff"}
+                                  onChange={(e) => form.setValue("sectionStyles.socialMedia.containerBackgroundColor", e.target.value)}
+                                  className="w-8 h-8 rounded border border-slate-600"
+                                />
+                                <input
+                                  type="text"
+                                  value={watchedValues.sectionStyles?.socialMedia?.containerBackgroundColor || "#ffffff"}
+                                  onChange={(e) => form.setValue("sectionStyles.socialMedia.containerBackgroundColor", e.target.value)}
+                                  className="flex-1 bg-slate-700 border-slate-600 text-white text-xs h-8"
+                                  placeholder="#ffffff"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <Label className="text-white text-xs">Container Border</Label>
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="color"
+                                  value={watchedValues.sectionStyles?.socialMedia?.containerBorderColor || "#e5e7eb"}
+                                  onChange={(e) => form.setValue("sectionStyles.socialMedia.containerBorderColor", e.target.value)}
+                                  className="w-8 h-8 rounded border border-slate-600"
+                                />
+                                <input
+                                  type="text"
+                                  value={watchedValues.sectionStyles?.socialMedia?.containerBorderColor || "#e5e7eb"}
+                                  onChange={(e) => form.setValue("sectionStyles.socialMedia.containerBorderColor", e.target.value)}
+                                  className="flex-1 bg-slate-700 border-slate-600 text-white text-xs h-8"
+                                  placeholder="#e5e7eb"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Container Dimensions */}
+                          <div className="grid grid-cols-3 gap-2">
+                            <div>
+                              <Label className="text-white text-xs">Border Radius: {watchedValues.sectionStyles?.socialMedia?.containerBorderRadius || 8}px</Label>
+                              <input
+                                type="range"
+                                value={watchedValues.sectionStyles?.socialMedia?.containerBorderRadius || 8}
+                                onChange={(e) => form.setValue("sectionStyles.socialMedia.containerBorderRadius", parseInt(e.target.value))}
+                                className="custom-range w-full"
+                                min={0}
+                                max={24}
+                                data-testid="slider-social-container-border-radius"
+                              />
+                            </div>
+
+                            <div>
+                              <Label className="text-white text-xs">Container Width: {watchedValues.sectionStyles?.socialMedia?.containerWidth || 100}%</Label>
+                              <input
+                                type="range"
+                                value={watchedValues.sectionStyles?.socialMedia?.containerWidth || 100}
+                                onChange={(e) => form.setValue("sectionStyles.socialMedia.containerWidth", parseInt(e.target.value))}
+                                className="custom-range w-full"
+                                min={50}
+                                max={100}
+                                data-testid="slider-social-container-width"
+                              />
+                            </div>
+
+                            <div>
+                              <Label className="text-white text-xs">Container Height: {watchedValues.sectionStyles?.socialMedia?.containerHeight || 60}px</Label>
+                              <input
+                                type="range"
+                                value={watchedValues.sectionStyles?.socialMedia?.containerHeight || 60}
+                                onChange={(e) => form.setValue("sectionStyles.socialMedia.containerHeight", parseInt(e.target.value))}
+                                className="custom-range w-full"
+                                min={40}
+                                max={120}
+                                data-testid="slider-social-container-height"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label className="text-white text-xs">Container Gap: {watchedValues.sectionStyles?.socialMedia?.containerGap || 12}px</Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.socialMedia?.containerGap || 12}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.containerGap", parseInt(e.target.value))}
+                              className="custom-range w-full"
+                              min={0}
+                              max={32}
+                              data-testid="slider-social-container-gap"
+                            />
+                          </div>
+
+                          {/* Container Drop Shadow */}
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id="socialContainerDropShadowEnable"
+                                checked={watchedValues.sectionStyles?.socialMedia?.containerDropShadowEnabled || false}
+                                onCheckedChange={(checked) => form.setValue("sectionStyles.socialMedia.containerDropShadowEnabled", checked)}
+                                data-testid="checkbox-social-container-drop-shadow-enable"
+                              />
+                              <Label htmlFor="socialContainerDropShadowEnable" className="text-white text-xs">Enable Container Drop Shadow</Label>
+                            </div>
+
+                            {watchedValues.sectionStyles?.socialMedia?.containerDropShadowEnabled && (
+                              <>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <Label className="text-white text-xs">Shadow Color</Label>
+                                    <div className="flex items-center space-x-2">
+                                      <input
+                                        type="color"
+                                        value={watchedValues.sectionStyles?.socialMedia?.containerDropShadowColor || "#000000"}
+                                        onChange={(e) => form.setValue("sectionStyles.socialMedia.containerDropShadowColor", e.target.value)}
+                                        className="w-8 h-8 rounded border border-slate-600"
+                                      />
+                                      <input
+                                        type="text"
+                                        value={watchedValues.sectionStyles?.socialMedia?.containerDropShadowColor || "#000000"}
+                                        onChange={(e) => form.setValue("sectionStyles.socialMedia.containerDropShadowColor", e.target.value)}
+                                        className="flex-1 bg-slate-700 border-slate-600 text-white text-xs h-8"
+                                        placeholder="#000000"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <Label className="text-white text-xs">Opacity: {Math.round((watchedValues.sectionStyles?.socialMedia?.containerDropShadowOpacity || 0.1) * 100)}%</Label>
+                                    <input
+                                      type="range"
+                                      value={watchedValues.sectionStyles?.socialMedia?.containerDropShadowOpacity || 0.1}
+                                      onChange={(e) => form.setValue("sectionStyles.socialMedia.containerDropShadowOpacity", parseFloat(e.target.value))}
+                                      className="custom-range w-full"
+                                      min={0}
+                                      max={1}
+                                      step={0.05}
+                                      data-testid="slider-social-container-drop-shadow-opacity"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <Label className="text-white text-xs">Blur: {watchedValues.sectionStyles?.socialMedia?.containerDropShadowBlur || 8}px</Label>
+                                    <input
+                                      type="range"
+                                      value={watchedValues.sectionStyles?.socialMedia?.containerDropShadowBlur || 8}
+                                      onChange={(e) => form.setValue("sectionStyles.socialMedia.containerDropShadowBlur", parseInt(e.target.value))}
+                                      className="custom-range w-full"
+                                      min={0}
+                                      max={24}
+                                      data-testid="slider-social-container-drop-shadow-blur"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <Label className="text-white text-xs">Offset: {watchedValues.sectionStyles?.socialMedia?.containerDropShadowOffset || 2}px</Label>
+                                    <input
+                                      type="range"
+                                      value={watchedValues.sectionStyles?.socialMedia?.containerDropShadowOffset || 2}
+                                      onChange={(e) => form.setValue("sectionStyles.socialMedia.containerDropShadowOffset", parseInt(e.target.value))}
+                                      className="custom-range w-full"
+                                      min={0}
+                                      max={12}
+                                      data-testid="slider-social-container-drop-shadow-offset"
+                                    />
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
 
               </>
             )}
