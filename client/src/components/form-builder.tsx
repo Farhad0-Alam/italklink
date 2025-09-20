@@ -963,6 +963,19 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             data-testid="slider-contact-icon-size"
                           />
                         </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Icon Background Size: {watchedValues.sectionStyles?.contactInfo?.iconBackgroundSize || 40}px</Label>
+                          <input
+                            type="range"
+                            value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundSize || 40}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBackgroundSize", parseInt(e.target.value))}
+                            className="custom-range w-full"
+                            min={24}
+                            max={80}
+                            data-testid="slider-contact-icon-background-size"
+                          />
+                        </div>
                       </div>
                     </>
                   )}

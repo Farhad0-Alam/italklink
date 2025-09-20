@@ -3265,6 +3265,7 @@ export const businessCardSchema = z.object({
       iconColor: z.string().optional(),
       iconSize: z.number().optional(),
       iconBackgroundColor: z.string().optional(),
+      iconBackgroundSize: z.number().optional(),
       iconBorderColor: z.string().optional(),
       iconTextColor: z.string().optional(),
       iconTextFont: z.string().optional(),

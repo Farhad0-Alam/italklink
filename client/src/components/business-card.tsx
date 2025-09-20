@@ -532,13 +532,15 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     >
                       <button 
                         onClick={() => handleContactAction(contact.type, contact.value)}
-                        className={`${data.template === 'dark' ? 'w-full py-2 px-2 rounded-lg' : 'w-10 h-10 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
+                        className={`${data.template === 'dark' ? 'w-full py-2 px-2 rounded-lg' : 'rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
                         style={{ 
                           backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || (data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a')),
                           color: getSectionStyle('contactInfo', 'iconColor') || (data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')),
                           borderWidth: getSectionStyle('contactInfo', 'iconBorderColor') ? '1px' : '0',
                           borderStyle: getSectionStyle('contactInfo', 'iconBorderColor') ? 'solid' : 'none',
                           borderColor: getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
+                          width: data.template === 'dark' ? 'auto' : `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 40)}px`,
+                          height: data.template === 'dark' ? 'auto' : `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 40)}px`,
                           boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
                             ? `${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'dropShadowOpacity') || '0.25'))}`
                             : 'none'
