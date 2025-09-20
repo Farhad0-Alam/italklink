@@ -367,3 +367,22 @@
   background: #d1d5db;
   border: none;
 }
+
+/* Business Card Icon Hover Effects */
+.contact-icon-hover {
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.contact-icon-hover:hover {
+  color: var(--contact-icon-hover-color) !important;
+  background-color: var(--contact-icon-bg-hover-color) !important;
+}
+
+.social-icon-hover {
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.social-icon-hover:hover {
+  color: var(--social-icon-hover-color) !important;
+  background-color: var(--social-icon-bg-hover-color) !important;
+}

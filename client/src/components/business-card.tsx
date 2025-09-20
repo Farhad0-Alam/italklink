@@ -532,7 +532,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     >
                       <button 
                         onClick={() => handleContactAction(contact.type, contact.value)}
-                        className={`${data.template === 'dark' ? 'w-full py-2 px-2 rounded-lg' : 'rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
+                        className={`${data.template === 'dark' ? 'w-full py-2 px-2 rounded-lg' : 'rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center ${data.template === 'dark' ? 'mb-0' : 'mb-1'} contact-icon-hover`}
                         style={{ 
                           backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || (data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a')),
                           color: getSectionStyle('contactInfo', 'iconColor') || (data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')),
@@ -543,8 +543,10 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                           height: data.template === 'dark' ? 'auto' : `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 40)}px`,
                           boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
                             ? `${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'dropShadowOpacity') || '0.25'))}`
-                            : 'none'
-                        }}
+                            : 'none',
+                          '--contact-icon-hover-color': getSectionStyle('contactInfo', 'iconHoverColor') || getSectionStyle('contactInfo', 'iconColor') || (data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')),
+                          '--contact-icon-bg-hover-color': getSectionStyle('contactInfo', 'iconBackgroundHoverColor') || getSectionStyle('contactInfo', 'iconBackgroundColor') || (data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'))
+                        } as React.CSSProperties}
                         data-testid={`button-custom-contact-${contact.id}`}
                       >
                         <i 
@@ -689,7 +691,7 @@ END:VCARD`;
                     <div key={social.id} className="flex flex-col items-center">
                       <button 
                         onClick={() => handleContactAction(social.platform, social.value)}
-                        className="rounded-full flex items-center justify-center transition-colors mb-1"
+                        className="rounded-full flex items-center justify-center mb-1 social-icon-hover"
                         style={{ 
                           backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#fbbf24'),
                           color: getSectionStyle('socialMedia', 'iconColor') || '#000000',
@@ -700,8 +702,10 @@ END:VCARD`;
                           height: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48)}px`,
                           boxShadow: getSectionStyle('socialMedia', 'dropShadowEnabled') === 'true' 
                             ? `${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('socialMedia', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('socialMedia', 'dropShadowOpacity') || '0.25'))}`
-                            : 'none'
-                        }}
+                            : 'none',
+                          '--social-icon-hover-color': getSectionStyle('socialMedia', 'iconHoverColor') || getSectionStyle('socialMedia', 'iconColor') || '#000000',
+                          '--social-icon-bg-hover-color': getSectionStyle('socialMedia', 'iconBackgroundHoverColor') || getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#fbbf24')
+                        } as React.CSSProperties}
                         data-testid={`button-custom-social-${social.id}`}
                       >
                         <i 
@@ -731,7 +735,7 @@ END:VCARD`;
                     <button 
                       key={social.id} 
                         onClick={() => handleContactAction(social.platform, social.value)}
-                        className="w-full py-3 px-4 rounded-xl flex items-center justify-center text-sm transition-colors"
+                        className="w-full py-3 px-4 rounded-xl flex items-center justify-center text-sm social-icon-hover"
                         style={{ 
                           backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#22c55e'),
                           color: getSectionStyle('socialMedia', 'iconTextColor') || (data.tertiaryColor || '#ffffff'),
@@ -742,6 +746,8 @@ END:VCARD`;
                           fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'inherit',
                           fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconTextSize'), 14)}px`,
                           fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || '600',
+                          '--social-icon-hover-color': getSectionStyle('socialMedia', 'iconHoverColor') || getSectionStyle('socialMedia', 'iconTextColor') || (data.tertiaryColor || '#ffffff'),
+                          '--social-icon-bg-hover-color': getSectionStyle('socialMedia', 'iconBackgroundHoverColor') || getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#22c55e'),
                           fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal',
                           boxShadow: getSectionStyle('socialMedia', 'dropShadowEnabled') === 'true' 
                             ? `${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('socialMedia', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('socialMedia', 'dropShadowOpacity') || '0.25'))}`

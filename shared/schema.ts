@@ -3263,8 +3263,10 @@ export const businessCardSchema = z.object({
     }).default({}),
     contactInfo: z.object({
       iconColor: z.string().optional(),
+      iconHoverColor: z.string().optional(),
       iconSize: z.number().optional(),
       iconBackgroundColor: z.string().optional(),
+      iconBackgroundHoverColor: z.string().optional(),
       iconBackgroundSize: z.number().optional(),
       iconBorderColor: z.string().optional(),
       iconTextColor: z.string().optional(),
@@ -3295,8 +3297,10 @@ export const businessCardSchema = z.object({
     }).default({}),
     socialMedia: z.object({
       iconColor: z.string().optional(),
+      iconHoverColor: z.string().optional(),
       iconSize: z.number().optional(),
       iconBackgroundColor: z.string().optional(),
+      iconBackgroundHoverColor: z.string().optional(),
       iconBackgroundSize: z.number().optional(),
       iconBorderColor: z.string().optional(),
       iconTextColor: z.string().optional(),

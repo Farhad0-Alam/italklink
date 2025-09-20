@@ -957,6 +957,46 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         </div>
 
                         <div>
+                          <Label className="text-white text-xs">Icon Hover Color</Label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.contactInfo?.iconHoverColor || "#a855f7"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconHoverColor", e.target.value)}
+                              className="w-6 h-6 rounded cursor-pointer"
+                              data-testid="color-picker-contact-icon-hover"
+                            />
+                            <Input
+                              value={watchedValues.sectionStyles?.contactInfo?.iconHoverColor || "#a855f7"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconHoverColor", e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="#a855f7"
+                              data-testid="input-contact-icon-hover-color"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Background Hover Color</Label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundHoverColor || "#374151"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBackgroundHoverColor", e.target.value)}
+                              className="w-6 h-6 rounded cursor-pointer"
+                              data-testid="color-picker-contact-icon-bg-hover"
+                            />
+                            <Input
+                              value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundHoverColor || "#374151"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBackgroundHoverColor", e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="#374151"
+                              data-testid="input-contact-icon-bg-hover-color"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
                           <Label className="text-white text-xs">Icon Size: {watchedValues.sectionStyles?.contactInfo?.iconSize || 18}px</Label>
                           <input
                             type="range"
@@ -1547,6 +1587,50 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBorderColor", e.target.value)}
                               className="flex-1 bg-slate-700 border-slate-600 text-white text-xs h-8"
                               placeholder="#000000"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Icon Hover Color</Label>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconHoverColor || "#60a5fa"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconHoverColor", e.target.value)}
+                              className="w-8 h-8 rounded border border-slate-600"
+                              data-testid="color-picker-social-icon-hover"
+                            />
+                            <input
+                              type="text"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconHoverColor || "#60a5fa"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconHoverColor", e.target.value)}
+                              className="flex-1 bg-slate-700 border-slate-600 text-white text-xs h-8"
+                              placeholder="#60a5fa"
+                              data-testid="input-social-icon-hover-color"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Background Hover Color</Label>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundHoverColor || "#22c55e"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBackgroundHoverColor", e.target.value)}
+                              className="w-8 h-8 rounded border border-slate-600"
+                              data-testid="color-picker-social-icon-bg-hover"
+                            />
+                            <input
+                              type="text"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundHoverColor || "#22c55e"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBackgroundHoverColor", e.target.value)}
+                              className="flex-1 bg-slate-700 border-slate-600 text-white text-xs h-8"
+                              placeholder="#22c55e"
+                              data-testid="input-social-icon-bg-hover-color"
                             />
                           </div>
                         </div>
