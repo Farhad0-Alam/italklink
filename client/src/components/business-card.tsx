@@ -448,21 +448,45 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         onClick={() => handleContactAction(contact.type, contact.value)}
                         className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
                         style={{ 
-                          backgroundColor: data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a'),
-                          color: data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')
+                          backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || (data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a')),
+                          color: getSectionStyle('contactInfo', 'iconColor') || (data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')),
+                          borderWidth: getSectionStyle('contactInfo', 'iconBorderColor') ? '1px' : '0',
+                          borderStyle: getSectionStyle('contactInfo', 'iconBorderColor') ? 'solid' : 'none',
+                          borderColor: getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
+                          boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
+                            ? `${getSectionStyle('contactInfo', 'dropShadowOffset') || 2}px ${getSectionStyle('contactInfo', 'dropShadowOffset') || 2}px ${getSectionStyle('contactInfo', 'dropShadowBlur') || 4}px rgba(${parseInt((getSectionStyle('contactInfo', 'dropShadowColor') || '#000000').slice(1, 3), 16)}, ${parseInt((getSectionStyle('contactInfo', 'dropShadowColor') || '#000000').slice(3, 5), 16)}, ${parseInt((getSectionStyle('contactInfo', 'dropShadowColor') || '#000000').slice(5, 7), 16)}, ${getSectionStyle('contactInfo', 'dropShadowOpacity') || 0.25})`
+                            : 'none'
                         }}
                         data-testid={`button-custom-contact-${contact.id}`}
                       >
-                        <i className={`${contact.icon} ${data.template === 'dark' ? 'text-lg mb-1' : 'text-sm'}`}></i>
+                        <i 
+                          className={`${contact.icon} ${data.template === 'dark' ? 'mb-1' : ''}`}
+                          style={{
+                            fontSize: `${getSectionStyle('contactInfo', 'iconSize') || (data.template === 'dark' ? 18 : 14)}px`
+                          }}
+                        ></i>
                         {data.template === 'dark' && (
-                          <span className="text-xs font-medium">{contact.label}</span>
+                          <span 
+                            className="font-medium"
+                            style={{
+                              fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
+                              fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
+                              fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || '500',
+                              color: getSectionStyle('contactInfo', 'iconTextColor') || 'inherit'
+                            }}
+                          >
+                            {contact.label}
+                          </span>
                         )}
                       </button>
                       {data.template !== 'dark' && (
                         <span 
-                          className="text-xs font-medium"
+                          className="font-medium"
                           style={{ 
-                            color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151'
+                            color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151',
+                            fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
+                            fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
+                            fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || '500'
                           }}
                         >
                           {contact.label}
