@@ -895,18 +895,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
                   {!collapsedSections.contactIconStyling && (
                     <>
-                      {/* Enable Hover Color Toggle */}
-                      <div className="flex items-center justify-between">
-                        <Label className="text-white text-xs">Enable Hover Color</Label>
-                        <input
-                          type="checkbox"
-                          checked={watchedValues.sectionStyles?.contactInfo?.enableHoverColor || false}
-                          onChange={(e) => form.setValue("sectionStyles.contactInfo.enableHoverColor", e.target.checked)}
-                          className="w-4 h-4 rounded bg-slate-700 border-slate-600"
-                          data-testid="checkbox-contact-enable-hover"
-                        />
-                      </div>
-
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <Label className="text-white text-xs">Icon Color</Label>
@@ -929,26 +917,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         </div>
 
                         <div>
-                          <Label className="text-white text-xs">Icon Hover Color</Label>
-                          <div className="flex items-center gap-1">
-                            <input
-                              type="color"
-                              value={watchedValues.sectionStyles?.contactInfo?.iconHoverColor || "#a855f7"}
-                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconHoverColor", e.target.value)}
-                              className="w-6 h-6 rounded cursor-pointer"
-                              data-testid="color-picker-contact-icon-hover"
-                            />
-                            <Input
-                              value={watchedValues.sectionStyles?.contactInfo?.iconHoverColor || "#a855f7"}
-                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconHoverColor", e.target.value)}
-                              className="bg-slate-700 border-slate-600 text-white text-xs"
-                              placeholder="#a855f7"
-                              data-testid="input-contact-icon-hover-color"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
                           <Label className="text-white text-xs">Background Color</Label>
                           <div className="flex items-center gap-1">
                             <input
@@ -964,26 +932,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               className="bg-slate-700 border-slate-600 text-white text-xs"
                               placeholder="#1e293b"
                               data-testid="input-contact-icon-bg-color"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-white text-xs">Background Hover Color</Label>
-                          <div className="flex items-center gap-1">
-                            <input
-                              type="color"
-                              value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundHoverColor || "#374151"}
-                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBackgroundHoverColor", e.target.value)}
-                              className="w-6 h-6 rounded cursor-pointer"
-                              data-testid="color-picker-contact-icon-bg-hover"
-                            />
-                            <Input
-                              value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundHoverColor || "#374151"}
-                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBackgroundHoverColor", e.target.value)}
-                              className="bg-slate-700 border-slate-600 text-white text-xs"
-                              placeholder="#374151"
-                              data-testid="input-contact-icon-bg-hover-color"
                             />
                           </div>
                         </div>
@@ -1045,6 +993,72 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             max={80}
                             data-testid="slider-contact-icon-background-size"
                           />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Hover Color */}
+                <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("contactHoverColor")} data-testid="toggle-contact-hover-color">
+                    <h5 className="text-xs font-medium text-purple-300">Hover Color</h5>
+                    <i className={`fas fa-chevron-${collapsedSections.contactHoverColor ? "down" : "up"} text-purple-300 text-xs`} />
+                  </div>
+
+                  {!collapsedSections.contactHoverColor && (
+                    <>
+                      {/* Enable Hover Color Toggle */}
+                      <div className="flex items-center justify-between">
+                        <Label className="text-white text-xs">Enable Hover Color</Label>
+                        <input
+                          type="checkbox"
+                          checked={watchedValues.sectionStyles?.contactInfo?.enableHoverColor || false}
+                          onChange={(e) => form.setValue("sectionStyles.contactInfo.enableHoverColor", e.target.checked)}
+                          className="w-4 h-4 rounded bg-slate-700 border-slate-600"
+                          data-testid="checkbox-contact-enable-hover"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Icon Hover Color</Label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.contactInfo?.iconHoverColor || "#a855f7"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconHoverColor", e.target.value)}
+                              className="w-6 h-6 rounded cursor-pointer"
+                              data-testid="color-picker-contact-icon-hover"
+                            />
+                            <Input
+                              value={watchedValues.sectionStyles?.contactInfo?.iconHoverColor || "#a855f7"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconHoverColor", e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="#a855f7"
+                              data-testid="input-contact-icon-hover-color"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Background Hover Color</Label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundHoverColor || "#374151"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBackgroundHoverColor", e.target.value)}
+                              className="w-6 h-6 rounded cursor-pointer"
+                              data-testid="color-picker-contact-icon-bg-hover"
+                            />
+                            <Input
+                              value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundHoverColor || "#374151"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBackgroundHoverColor", e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="#374151"
+                              data-testid="input-contact-icon-bg-hover-color"
+                            />
+                          </div>
                         </div>
                       </div>
                     </>
@@ -1556,18 +1570,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
                   {!collapsedSections.socialIconStyling && (
                     <>
-                      {/* Enable Hover Color Toggle */}
-                      <div className="flex items-center justify-between">
-                        <Label className="text-white text-xs">Enable Hover Color</Label>
-                        <input
-                          type="checkbox"
-                          checked={watchedValues.sectionStyles?.socialMedia?.enableHoverColor || false}
-                          onChange={(e) => form.setValue("sectionStyles.socialMedia.enableHoverColor", e.target.checked)}
-                          className="w-4 h-4 rounded bg-slate-700 border-slate-600"
-                          data-testid="checkbox-social-enable-hover"
-                        />
-                      </div>
-
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <Label className="text-white text-xs">Icon Color</Label>
@@ -1590,26 +1592,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         </div>
 
                         <div>
-                          <Label className="text-white text-xs">Icon Hover Color</Label>
-                          <div className="flex items-center gap-1">
-                            <input
-                              type="color"
-                              value={watchedValues.sectionStyles?.socialMedia?.iconHoverColor || "#60a5fa"}
-                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconHoverColor", e.target.value)}
-                              className="w-6 h-6 rounded cursor-pointer"
-                              data-testid="color-picker-social-icon-hover"
-                            />
-                            <Input
-                              value={watchedValues.sectionStyles?.socialMedia?.iconHoverColor || "#60a5fa"}
-                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconHoverColor", e.target.value)}
-                              className="bg-slate-700 border-slate-600 text-white text-xs"
-                              placeholder="#60a5fa"
-                              data-testid="input-social-icon-hover-color"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
                           <Label className="text-white text-xs">Background Color</Label>
                           <div className="flex items-center gap-1">
                             <input
@@ -1625,26 +1607,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               className="bg-slate-700 border-slate-600 text-white text-xs"
                               placeholder="#16a34a"
                               data-testid="input-social-icon-bg-color"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-white text-xs">Background Hover Color</Label>
-                          <div className="flex items-center gap-1">
-                            <input
-                              type="color"
-                              value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundHoverColor || "#22c55e"}
-                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBackgroundHoverColor", e.target.value)}
-                              className="w-6 h-6 rounded cursor-pointer"
-                              data-testid="color-picker-social-icon-bg-hover"
-                            />
-                            <Input
-                              value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundHoverColor || "#22c55e"}
-                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBackgroundHoverColor", e.target.value)}
-                              className="bg-slate-700 border-slate-600 text-white text-xs"
-                              placeholder="#22c55e"
-                              data-testid="input-social-icon-bg-hover-color"
                             />
                           </div>
                         </div>
@@ -1706,6 +1668,72 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             max={80}
                             data-testid="slider-social-icon-background-size"
                           />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Hover Color */}
+                <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("socialHoverColor")} data-testid="toggle-social-hover-color">
+                    <h5 className="text-xs font-medium text-purple-300">Hover Color</h5>
+                    <i className={`fas fa-chevron-${collapsedSections.socialHoverColor ? "down" : "up"} text-purple-300 text-xs`} />
+                  </div>
+
+                  {!collapsedSections.socialHoverColor && (
+                    <>
+                      {/* Enable Hover Color Toggle */}
+                      <div className="flex items-center justify-between">
+                        <Label className="text-white text-xs">Enable Hover Color</Label>
+                        <input
+                          type="checkbox"
+                          checked={watchedValues.sectionStyles?.socialMedia?.enableHoverColor || false}
+                          onChange={(e) => form.setValue("sectionStyles.socialMedia.enableHoverColor", e.target.checked)}
+                          className="w-4 h-4 rounded bg-slate-700 border-slate-600"
+                          data-testid="checkbox-social-enable-hover"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Icon Hover Color</Label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconHoverColor || "#60a5fa"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconHoverColor", e.target.value)}
+                              className="w-6 h-6 rounded cursor-pointer"
+                              data-testid="color-picker-social-icon-hover"
+                            />
+                            <Input
+                              value={watchedValues.sectionStyles?.socialMedia?.iconHoverColor || "#60a5fa"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconHoverColor", e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="#60a5fa"
+                              data-testid="input-social-icon-hover-color"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Background Hover Color</Label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundHoverColor || "#22c55e"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBackgroundHoverColor", e.target.value)}
+                              className="w-6 h-6 rounded cursor-pointer"
+                              data-testid="color-picker-social-icon-bg-hover"
+                            />
+                            <Input
+                              value={watchedValues.sectionStyles?.socialMedia?.iconBackgroundHoverColor || "#22c55e"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.iconBackgroundHoverColor", e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="#22c55e"
+                              data-testid="input-social-icon-bg-hover-color"
+                            />
+                          </div>
                         </div>
                       </div>
                     </>
