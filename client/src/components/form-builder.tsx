@@ -1135,201 +1135,210 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           </div>
                         </>
                       )}
+                    </>
+                  )}
+                </div>
 
-                      {/* Container Styling Section */}
-                      <div className="mt-4 pt-4 border-t border-slate-600/50">
-                        <div className="flex items-center space-x-2 mb-3">
-                          <Checkbox
-                            id="contactContainerStylingEnable"
-                            checked={watchedValues.sectionStyles?.contactInfo?.containerStylingEnabled || false}
-                            onCheckedChange={(c) => form.setValue("sectionStyles.contactInfo.containerStylingEnabled", !!c)}
-                            data-testid="checkbox-enable-container-styling"
-                          />
-                          <Label htmlFor="contactContainerStylingEnable" className="text-white text-xs">Enable Contact Container Styling</Label>
-                        </div>
+                {/* Contact Container Styling Section */}
+                <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("contactContainerStyling")} data-testid="toggle-contact-container-styling">
+                    <h5 className="text-xs font-medium text-purple-300">Contact Container Styling</h5>
+                    <i className={`fas fa-chevron-${collapsedSections.contactContainerStyling ? "down" : "up"} text-purple-300 text-xs`} />
+                  </div>
 
-                        {watchedValues.sectionStyles?.contactInfo?.containerStylingEnabled && (
-                          <>
-                            {/* Container Background & Border */}
-                            <div className="grid grid-cols-2 gap-2 mb-3">
-                              <div>
-                                <Label className="text-white text-xs">Container Background</Label>
-                                <div className="flex items-center gap-1">
-                                  <input
-                                    type="color"
-                                    value={watchedValues.sectionStyles?.contactInfo?.containerBackgroundColor || "#1e293b"}
-                                    onChange={(e) => form.setValue("sectionStyles.contactInfo.containerBackgroundColor", e.target.value)}
-                                    className="w-6 h-6 rounded cursor-pointer"
-                                    data-testid="color-picker-container-bg"
-                                  />
-                                  <Input
-                                    value={watchedValues.sectionStyles?.contactInfo?.containerBackgroundColor || "#1e293b"}
-                                    onChange={(e) => form.setValue("sectionStyles.contactInfo.containerBackgroundColor", e.target.value)}
-                                    className="bg-slate-700 border-slate-600 text-white text-xs"
-                                    placeholder="#1e293b"
-                                    data-testid="input-container-bg-color"
-                                  />
-                                </div>
-                              </div>
+                  {!collapsedSections.contactContainerStyling && (
+                    <>
+                      <div className="flex items-center space-x-2 mb-3">
+                        <Checkbox
+                          id="contactContainerStylingEnable"
+                          checked={watchedValues.sectionStyles?.contactInfo?.containerStylingEnabled || false}
+                          onCheckedChange={(c) => form.setValue("sectionStyles.contactInfo.containerStylingEnabled", !!c)}
+                          data-testid="checkbox-enable-container-styling"
+                        />
+                        <Label htmlFor="contactContainerStylingEnable" className="text-white text-xs">Enable Contact Container Styling</Label>
+                      </div>
 
-                              <div>
-                                <Label className="text-white text-xs">Container Border</Label>
-                                <div className="flex items-center gap-1">
-                                  <input
-                                    type="color"
-                                    value={watchedValues.sectionStyles?.contactInfo?.containerBorderColor || "#475569"}
-                                    onChange={(e) => form.setValue("sectionStyles.contactInfo.containerBorderColor", e.target.value)}
-                                    className="w-6 h-6 rounded cursor-pointer"
-                                    data-testid="color-picker-container-border"
-                                  />
-                                  <Input
-                                    value={watchedValues.sectionStyles?.contactInfo?.containerBorderColor || "#475569"}
-                                    onChange={(e) => form.setValue("sectionStyles.contactInfo.containerBorderColor", e.target.value)}
-                                    className="bg-slate-700 border-slate-600 text-white text-xs"
-                                    placeholder="#475569"
-                                    data-testid="input-container-border-color"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Container Dimensions & Styling */}
-                            <div className="grid grid-cols-2 gap-2 mb-3">
-                              <div>
-                                <Label className="text-white text-xs">Border Radius: {watchedValues.sectionStyles?.contactInfo?.containerBorderRadius || 8}px</Label>
+                      {watchedValues.sectionStyles?.contactInfo?.containerStylingEnabled && (
+                        <>
+                          {/* Container Background & Border */}
+                          <div className="grid grid-cols-2 gap-2 mb-3">
+                            <div>
+                              <Label className="text-white text-xs">Container Background</Label>
+                              <div className="flex items-center gap-1">
                                 <input
-                                  type="range"
-                                  value={watchedValues.sectionStyles?.contactInfo?.containerBorderRadius || 8}
-                                  onChange={(e) => form.setValue("sectionStyles.contactInfo.containerBorderRadius", parseInt(e.target.value))}
-                                  className="custom-range w-full"
-                                  min={0}
-                                  max={50}
-                                  data-testid="slider-container-border-radius"
+                                  type="color"
+                                  value={watchedValues.sectionStyles?.contactInfo?.containerBackgroundColor || "#1e293b"}
+                                  onChange={(e) => form.setValue("sectionStyles.contactInfo.containerBackgroundColor", e.target.value)}
+                                  className="w-6 h-6 rounded cursor-pointer"
+                                  data-testid="color-picker-container-bg"
                                 />
-                              </div>
-
-                              <div>
-                                <Label className="text-white text-xs">Container Gap: {watchedValues.sectionStyles?.contactInfo?.containerGap || 8}px</Label>
-                                <input
-                                  type="range"
-                                  value={watchedValues.sectionStyles?.contactInfo?.containerGap || 8}
-                                  onChange={(e) => form.setValue("sectionStyles.contactInfo.containerGap", parseInt(e.target.value))}
-                                  className="custom-range w-full"
-                                  min={0}
-                                  max={20}
-                                  data-testid="slider-container-gap"
+                                <Input
+                                  value={watchedValues.sectionStyles?.contactInfo?.containerBackgroundColor || "#1e293b"}
+                                  onChange={(e) => form.setValue("sectionStyles.contactInfo.containerBackgroundColor", e.target.value)}
+                                  className="bg-slate-700 border-slate-600 text-white text-xs"
+                                  placeholder="#1e293b"
+                                  data-testid="input-container-bg-color"
                                 />
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2 mb-3">
-                              <div>
-                                <Label className="text-white text-xs">Container Width: {watchedValues.sectionStyles?.contactInfo?.containerWidth || 80}px</Label>
+                            <div>
+                              <Label className="text-white text-xs">Container Border</Label>
+                              <div className="flex items-center gap-1">
                                 <input
-                                  type="range"
-                                  value={watchedValues.sectionStyles?.contactInfo?.containerWidth || 80}
-                                  onChange={(e) => form.setValue("sectionStyles.contactInfo.containerWidth", parseInt(e.target.value))}
-                                  className="custom-range w-full"
-                                  min={60}
-                                  max={120}
-                                  data-testid="slider-container-width"
+                                  type="color"
+                                  value={watchedValues.sectionStyles?.contactInfo?.containerBorderColor || "#475569"}
+                                  onChange={(e) => form.setValue("sectionStyles.contactInfo.containerBorderColor", e.target.value)}
+                                  className="w-6 h-6 rounded cursor-pointer"
+                                  data-testid="color-picker-container-border"
                                 />
-                              </div>
-
-                              <div>
-                                <Label className="text-white text-xs">Container Height: {watchedValues.sectionStyles?.contactInfo?.containerHeight || 80}px</Label>
-                                <input
-                                  type="range"
-                                  value={watchedValues.sectionStyles?.contactInfo?.containerHeight || 80}
-                                  onChange={(e) => form.setValue("sectionStyles.contactInfo.containerHeight", parseInt(e.target.value))}
-                                  className="custom-range w-full"
-                                  min={60}
-                                  max={120}
-                                  data-testid="slider-container-height"
+                                <Input
+                                  value={watchedValues.sectionStyles?.contactInfo?.containerBorderColor || "#475569"}
+                                  onChange={(e) => form.setValue("sectionStyles.contactInfo.containerBorderColor", e.target.value)}
+                                  className="bg-slate-700 border-slate-600 text-white text-xs"
+                                  placeholder="#475569"
+                                  data-testid="input-container-border-color"
                                 />
                               </div>
                             </div>
+                          </div>
 
-                            {/* Container Drop Shadow */}
-                            <div className="space-y-2">
-                              <div className="flex items-center space-x-2">
-                                <Checkbox
-                                  id="containerDropShadowEnable"
-                                  checked={watchedValues.sectionStyles?.contactInfo?.containerDropShadowEnabled || false}
-                                  onCheckedChange={(c) => form.setValue("sectionStyles.contactInfo.containerDropShadowEnabled", !!c)}
-                                  data-testid="checkbox-container-drop-shadow-enable"
-                                />
-                                <Label htmlFor="containerDropShadowEnable" className="text-white text-xs">Enable Container Drop Shadow</Label>
-                              </div>
+                          {/* Container Dimensions & Styling */}
+                          <div className="grid grid-cols-2 gap-2 mb-3">
+                            <div>
+                              <Label className="text-white text-xs">Border Radius: {watchedValues.sectionStyles?.contactInfo?.containerBorderRadius || 8}px</Label>
+                              <input
+                                type="range"
+                                value={watchedValues.sectionStyles?.contactInfo?.containerBorderRadius || 8}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.containerBorderRadius", parseInt(e.target.value))}
+                                className="custom-range w-full"
+                                min={0}
+                                max={50}
+                                data-testid="slider-container-border-radius"
+                              />
+                            </div>
 
-                              {watchedValues.sectionStyles?.contactInfo?.containerDropShadowEnabled && (
-                                <>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    <div>
-                                      <Label className="text-white text-xs">Shadow Color</Label>
-                                      <div className="flex items-center gap-1">
-                                        <input
-                                          type="color"
-                                          value={watchedValues.sectionStyles?.contactInfo?.containerDropShadowColor || "#000000"}
-                                          onChange={(e) => form.setValue("sectionStyles.contactInfo.containerDropShadowColor", e.target.value)}
-                                          className="w-6 h-6 rounded cursor-pointer"
-                                          data-testid="color-picker-container-shadow"
-                                        />
-                                        <Input
-                                          value={watchedValues.sectionStyles?.contactInfo?.containerDropShadowColor || "#000000"}
-                                          onChange={(e) => form.setValue("sectionStyles.contactInfo.containerDropShadowColor", e.target.value)}
-                                          className="bg-slate-700 border-slate-600 text-white text-xs"
-                                          placeholder="#000000"
-                                          data-testid="input-container-shadow-color"
-                                        />
-                                      </div>
-                                    </div>
+                            <div>
+                              <Label className="text-white text-xs">Container Gap: {watchedValues.sectionStyles?.contactInfo?.containerGap || 8}px</Label>
+                              <input
+                                type="range"
+                                value={watchedValues.sectionStyles?.contactInfo?.containerGap || 8}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.containerGap", parseInt(e.target.value))}
+                                className="custom-range w-full"
+                                min={0}
+                                max={20}
+                                data-testid="slider-container-gap"
+                              />
+                            </div>
+                          </div>
 
-                                    <div>
-                                      <Label className="text-white text-xs">Shadow Opacity: {Math.round((watchedValues.sectionStyles?.contactInfo?.containerDropShadowOpacity || 0.25) * 100)}%</Label>
+                          <div className="grid grid-cols-2 gap-2 mb-3">
+                            <div>
+                              <Label className="text-white text-xs">Container Width: {watchedValues.sectionStyles?.contactInfo?.containerWidth || 80}px</Label>
+                              <input
+                                type="range"
+                                value={watchedValues.sectionStyles?.contactInfo?.containerWidth || 80}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.containerWidth", parseInt(e.target.value))}
+                                className="custom-range w-full"
+                                min={60}
+                                max={120}
+                                data-testid="slider-container-width"
+                              />
+                            </div>
+
+                            <div>
+                              <Label className="text-white text-xs">Container Height: {watchedValues.sectionStyles?.contactInfo?.containerHeight || 80}px</Label>
+                              <input
+                                type="range"
+                                value={watchedValues.sectionStyles?.contactInfo?.containerHeight || 80}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.containerHeight", parseInt(e.target.value))}
+                                className="custom-range w-full"
+                                min={60}
+                                max={120}
+                                data-testid="slider-container-height"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Container Drop Shadow */}
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id="containerDropShadowEnable"
+                                checked={watchedValues.sectionStyles?.contactInfo?.containerDropShadowEnabled || false}
+                                onCheckedChange={(c) => form.setValue("sectionStyles.contactInfo.containerDropShadowEnabled", !!c)}
+                                data-testid="checkbox-container-drop-shadow-enable"
+                              />
+                              <Label htmlFor="containerDropShadowEnable" className="text-white text-xs">Enable Container Drop Shadow</Label>
+                            </div>
+
+                            {watchedValues.sectionStyles?.contactInfo?.containerDropShadowEnabled && (
+                              <>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <Label className="text-white text-xs">Shadow Color</Label>
+                                    <div className="flex items-center gap-1">
                                       <input
-                                        type="range"
-                                        value={(watchedValues.sectionStyles?.contactInfo?.containerDropShadowOpacity || 0.25) * 100}
-                                        onChange={(e) => form.setValue("sectionStyles.contactInfo.containerDropShadowOpacity", parseInt(e.target.value) / 100)}
-                                        className="custom-range w-full"
-                                        min={0}
-                                        max={100}
-                                        data-testid="slider-container-shadow-opacity"
+                                        type="color"
+                                        value={watchedValues.sectionStyles?.contactInfo?.containerDropShadowColor || "#000000"}
+                                        onChange={(e) => form.setValue("sectionStyles.contactInfo.containerDropShadowColor", e.target.value)}
+                                        className="w-6 h-6 rounded cursor-pointer"
+                                        data-testid="color-picker-container-shadow"
                                       />
-                                    </div>
-
-                                    <div>
-                                      <Label className="text-white text-xs">Blur Radius: {watchedValues.sectionStyles?.contactInfo?.containerDropShadowBlur || 4}px</Label>
-                                      <input
-                                        type="range"
-                                        value={watchedValues.sectionStyles?.contactInfo?.containerDropShadowBlur || 4}
-                                        onChange={(e) => form.setValue("sectionStyles.contactInfo.containerDropShadowBlur", parseInt(e.target.value))}
-                                        className="custom-range w-full"
-                                        min={0}
-                                        max={20}
-                                        data-testid="slider-container-shadow-blur"
-                                      />
-                                    </div>
-
-                                    <div>
-                                      <Label className="text-white text-xs">Shadow Offset: {watchedValues.sectionStyles?.contactInfo?.containerDropShadowOffset || 2}px</Label>
-                                      <input
-                                        type="range"
-                                        value={watchedValues.sectionStyles?.contactInfo?.containerDropShadowOffset || 2}
-                                        onChange={(e) => form.setValue("sectionStyles.contactInfo.containerDropShadowOffset", parseInt(e.target.value))}
-                                        className="custom-range w-full"
-                                        min={0}
-                                        max={10}
-                                        data-testid="slider-container-shadow-offset"
+                                      <Input
+                                        value={watchedValues.sectionStyles?.contactInfo?.containerDropShadowColor || "#000000"}
+                                        onChange={(e) => form.setValue("sectionStyles.contactInfo.containerDropShadowColor", e.target.value)}
+                                        className="bg-slate-700 border-slate-600 text-white text-xs"
+                                        placeholder="#000000"
+                                        data-testid="input-container-shadow-color"
                                       />
                                     </div>
                                   </div>
-                                </>
-                              )}
-                            </div>
-                          </>
-                        )}
-                      </div>
+
+                                  <div>
+                                    <Label className="text-white text-xs">Shadow Opacity: {Math.round((watchedValues.sectionStyles?.contactInfo?.containerDropShadowOpacity || 0.25) * 100)}%</Label>
+                                    <input
+                                      type="range"
+                                      value={(watchedValues.sectionStyles?.contactInfo?.containerDropShadowOpacity || 0.25) * 100}
+                                      onChange={(e) => form.setValue("sectionStyles.contactInfo.containerDropShadowOpacity", parseInt(e.target.value) / 100)}
+                                      className="custom-range w-full"
+                                      min={0}
+                                      max={100}
+                                      data-testid="slider-container-shadow-opacity"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <Label className="text-white text-xs">Blur Radius: {watchedValues.sectionStyles?.contactInfo?.containerDropShadowBlur || 4}px</Label>
+                                    <input
+                                      type="range"
+                                      value={watchedValues.sectionStyles?.contactInfo?.containerDropShadowBlur || 4}
+                                      onChange={(e) => form.setValue("sectionStyles.contactInfo.containerDropShadowBlur", parseInt(e.target.value))}
+                                      className="custom-range w-full"
+                                      min={0}
+                                      max={20}
+                                      data-testid="slider-container-shadow-blur"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <Label className="text-white text-xs">Shadow Offset: {watchedValues.sectionStyles?.contactInfo?.containerDropShadowOffset || 2}px</Label>
+                                    <input
+                                      type="range"
+                                      value={watchedValues.sectionStyles?.contactInfo?.containerDropShadowOffset || 2}
+                                      onChange={(e) => form.setValue("sectionStyles.contactInfo.containerDropShadowOffset", parseInt(e.target.value))}
+                                      className="custom-range w-full"
+                                      min={0}
+                                      max={10}
+                                      data-testid="slider-container-shadow-offset"
+                                    />
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
