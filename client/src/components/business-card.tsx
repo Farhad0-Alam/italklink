@@ -661,7 +661,26 @@ END:VCARD`;
 
 
             {/* Custom Social Media Platforms */}
-            <div className={`${data.template === 'dark' ? 'grid grid-cols-4 gap-3' : 'space-y-2'} px-4`}>
+            <div 
+              className={`${data.template === 'dark' ? 'grid grid-cols-4' : 'flex flex-col'} px-4`}
+              style={{
+                ...(getSectionStyle('socialMedia', 'containerStylingEnabled') === 'true' ? {
+                  backgroundColor: getSectionStyle('socialMedia', 'containerBackgroundColor') || 'transparent',
+                  borderColor: getSectionStyle('socialMedia', 'containerBorderColor') || 'transparent',
+                  borderWidth: getSectionStyle('socialMedia', 'containerBorderColor') ? '1px' : '0',
+                  borderStyle: getSectionStyle('socialMedia', 'containerBorderColor') ? 'solid' : 'none',
+                  borderRadius: `${parseNumeric(getSectionStyle('socialMedia', 'containerBorderRadius'), 8)}px`,
+                  padding: getSectionStyle('socialMedia', 'containerStylingEnabled') === 'true' ? '12px' : '1rem',
+                  width: getSectionStyle('socialMedia', 'containerWidth') ? `${parseNumeric(getSectionStyle('socialMedia', 'containerWidth'), 100)}%` : '100%',
+                  minHeight: getSectionStyle('socialMedia', 'containerHeight') ? `${parseNumeric(getSectionStyle('socialMedia', 'containerHeight'), 'auto')}px` : 'auto',
+                  boxShadow: getSectionStyle('socialMedia', 'containerDropShadowEnabled') === 'true' 
+                    ? `${parseNumeric(getSectionStyle('socialMedia', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'containerDropShadowBlur'), 8)}px ${hexToRgba(getSectionStyle('socialMedia', 'containerDropShadowColor') || '#000000', parseFloat(getSectionStyle('socialMedia', 'containerDropShadowOpacity') || '0.1'))}`
+                    : 'none'
+                } : {}),
+                gap: `${parseNumeric(getSectionStyle('socialMedia', 'containerGap'), data.template === 'dark' ? 12 : 8)}px`
+              }}
+              data-testid="container-social-media"
+            >
               {/* Custom Social Media Platforms */}
               {data.customSocials?.map((social) => (
                 social.value && (
@@ -670,20 +689,39 @@ END:VCARD`;
                     <div key={social.id} className="flex flex-col items-center">
                       <button 
                         onClick={() => handleContactAction(social.platform, social.value)}
-                        className="w-12 h-12 rounded-full flex items-center justify-center transition-colors mb-1"
+                        className="rounded-full flex items-center justify-center transition-colors mb-1"
                         style={{ 
-                          backgroundColor: data.brandColor || '#fbbf24',
-                          color: '#000000'
+                          backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#fbbf24'),
+                          color: getSectionStyle('socialMedia', 'iconColor') || '#000000',
+                          borderWidth: getSectionStyle('socialMedia', 'iconBorderColor') ? '1px' : '0',
+                          borderStyle: getSectionStyle('socialMedia', 'iconBorderColor') ? 'solid' : 'none',
+                          borderColor: getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
+                          width: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48)}px`,
+                          height: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48)}px`,
+                          boxShadow: getSectionStyle('socialMedia', 'dropShadowEnabled') === 'true' 
+                            ? `${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('socialMedia', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('socialMedia', 'dropShadowOpacity') || '0.25'))}`
+                            : 'none'
                         }}
                         data-testid={`button-custom-social-${social.id}`}
                       >
-                        <i className={`${social.icon} text-sm`}></i>
+                        <i 
+                          className={`${social.icon}`}
+                          style={{
+                            fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 14)}px`,
+                            color: getSectionStyle('socialMedia', 'iconColor') || 'inherit'
+                          }}
+                        ></i>
                       </button>
                       <span 
-                        className="text-xs font-medium text-center"
+                        className="text-center"
                         style={{ 
-                          color: data.brandColor || '#fbbf24'
+                          color: getSectionStyle('socialMedia', 'iconTextColor') || (data.brandColor || '#fbbf24'),
+                          fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'inherit',
+                          fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconTextSize'), 12)}px`,
+                          fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || '500',
+                          fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal'
                         }}
+                        data-testid={`label-custom-social-${social.id}`}
                       >
                         {social.label || 'Social'}
                       </span>
@@ -691,19 +729,35 @@ END:VCARD`;
                   ) : (
                     // Other templates: Rectangular social buttons
                     <button 
-                      key={social.id}
-                      onClick={() => handleContactAction(social.platform, social.value)}
-                      className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
-                      style={{ 
-                        backgroundColor: data.brandColor || '#22c55e',
-                        color: data.tertiaryColor || '#ffffff',
-                        borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
-                      }}
-                      data-testid={`button-custom-social-${social.id}`}
-                    >
-                      <i className={`${social.icon} text-lg mr-3`}></i>
-                      {social.label || 'Social'}
-                    </button>
+                      key={social.id} 
+                        onClick={() => handleContactAction(social.platform, social.value)}
+                        className="w-full py-3 px-4 rounded-xl flex items-center justify-center text-sm transition-colors"
+                        style={{ 
+                          backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || (data.brandColor || '#22c55e'),
+                          color: getSectionStyle('socialMedia', 'iconTextColor') || (data.tertiaryColor || '#ffffff'),
+                          borderWidth: getSectionStyle('socialMedia', 'iconBorderColor') ? '1px' : '0',
+                          borderStyle: getSectionStyle('socialMedia', 'iconBorderColor') ? 'solid' : 'none',
+                          borderColor: getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
+                          borderBottom: getSectionStyle('socialMedia', 'iconBorderColor') ? 'none' : `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
+                          fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'inherit',
+                          fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconTextSize'), 14)}px`,
+                          fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || '600',
+                          fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal',
+                          boxShadow: getSectionStyle('socialMedia', 'dropShadowEnabled') === 'true' 
+                            ? `${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('socialMedia', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('socialMedia', 'dropShadowOpacity') || '0.25'))}`
+                            : 'none'
+                        }}
+                        data-testid={`button-custom-social-${social.id}`}
+                      >
+                        <i 
+                          className={`${social.icon} mr-3`}
+                          style={{
+                            fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 18)}px`,
+                            color: getSectionStyle('socialMedia', 'iconColor') || 'inherit'
+                          }}
+                        ></i>
+                        {social.label || 'Social'}
+                      </button>
                   )
                 )
               ))}
