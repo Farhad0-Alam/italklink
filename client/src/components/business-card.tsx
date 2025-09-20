@@ -11,6 +11,37 @@ import { Share2, Copy, Facebook, Twitter, Linkedin, MessageCircle } from "lucide
 import { useToast } from "@/hooks/use-toast";
 import { useButtonTracking } from "@/modules/automation/useButtonTracking";
 
+// Helper function to get optimized image source
+const getOptimizedImageSrc = (originalSrc: string | null | undefined, variant: 'thumb' | 'card' | 'large' = 'card'): string => {
+  if (!originalSrc) return "";
+  
+  // If it's already a base64 image, return as-is (backward compatibility)
+  if (originalSrc.startsWith('data:')) {
+    return originalSrc;
+  }
+  
+  // If it's a Supabase storage URL, try to get WebP variant
+  if (originalSrc.includes('supabase') && originalSrc.includes('storage')) {
+    // Extract the path and try to construct WebP variant URL
+    const pathMatch = originalSrc.match(/\/storage\/v1\/object\/public\/[^\/]+\/(.+)$/);
+    if (pathMatch) {
+      const storagePath = pathMatch[1];
+      // Remove file extension and add WebP variant suffix
+      const basePath = storagePath.replace(/\.[^.]+$/, '');
+      const webpVariant = variant === 'thumb' ? 'thumb_200.webp' : 
+                         variant === 'card' ? 'card_430.webp' : 
+                         'large_1200.webp';
+      
+      // Construct optimized URL
+      const optimizedUrl = originalSrc.replace(storagePath, `${basePath}_${webpVariant}`);
+      return optimizedUrl;
+    }
+  }
+  
+  // Fallback to original URL
+  return originalSrc;
+};
+
 // Helper function to adjust color brightness
 const adjustColor = (color: string, amount: number): string => {
   // Remove # if present
@@ -178,8 +209,9 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
       }
     };
 
-    // Use sample image for preview when no profile photo
-    const profileImageSrc = data.profilePhoto || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300";
+    // Use optimized profile image with fallback
+    const fallbackImage = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300";
+    const profileImageSrc = getOptimizedImageSrc(data.profilePhoto, 'card') || fallbackImage;
     
     // Helper function to get section-specific styling with global fallback
     const getSectionStyle = (section: 'basicInfo' | 'contactInfo' | 'socialMedia', styleType: string): string | undefined => {
@@ -227,7 +259,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 <div 
                   className="h-40 relative"
                   style={{ 
-                    backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
+                    backgroundImage: data.backgroundImage ? `url(${getOptimizedImageSrc(data.backgroundImage, 'large')})` : undefined,
                     backgroundColor: !data.backgroundImage ? data.brandColor || '#22c55e' : undefined,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
@@ -264,7 +296,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 <div 
                   className="h-32 relative"
                   style={{ 
-                    backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
+                    backgroundImage: data.backgroundImage ? `url(${getOptimizedImageSrc(data.backgroundImage, 'large')})` : undefined,
                     backgroundColor: !data.backgroundImage ? data.brandColor || '#22c55e' : undefined,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
@@ -303,7 +335,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   <div 
                     className="flex-1 relative"
                     style={{ 
-                      backgroundImage: data.backgroundImage ? `url(${data.backgroundImage})` : undefined,
+                      backgroundImage: data.backgroundImage ? `url(${getOptimizedImageSrc(data.backgroundImage, 'large')})` : undefined,
                       backgroundColor: !data.backgroundImage ? data.brandColor || '#22c55e' : undefined,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center'

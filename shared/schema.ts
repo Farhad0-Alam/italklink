@@ -3768,6 +3768,30 @@ export const publicUploads = pgTable("public_uploads", {
   index("idx_public_uploads_created_at").on(table.createdAt),
 ]);
 
+// Media variants table for optimized images
+export const mediaVariants = pgTable("media_variants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  publicUploadId: varchar("public_upload_id").references(() => publicUploads.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Variant details
+  variantType: varchar("variant_type").notNull(), // 'thumb_200', 'card_430', 'large_1200', 'original'
+  storagePath: text("storage_path").notNull(), // Path in Supabase storage
+  publicUrl: text("public_url").notNull(), // Full public URL
+  
+  // Image metadata
+  width: integer("width"),
+  height: integer("height"),
+  fileSize: integer("file_size").notNull(), // in bytes
+  format: varchar("format").notNull(), // 'webp', 'jpeg', 'png', etc.
+  quality: integer("quality"), // WebP quality setting used
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_media_variants_upload").on(table.publicUploadId),
+  index("idx_media_variants_type").on(table.variantType),
+  index("idx_media_variants_format").on(table.format),
+]);
+
 // ===== QR CODE SYSTEM =====
 
 // QR Links table for Dynamic QR codes
@@ -3843,6 +3867,10 @@ export type InsertQrLink = typeof qrLinks.$inferInsert;
 
 export type QrEvent = typeof qrEvents.$inferSelect;
 export type InsertQrEvent = typeof qrEvents.$inferInsert;
+
+// Media variants types
+export type MediaVariant = typeof mediaVariants.$inferSelect;
+export type InsertMediaVariant = typeof mediaVariants.$inferInsert;
 
 // ===== VALIDATION SCHEMAS FOR TEAM SCHEDULING =====
 
@@ -3932,6 +3960,29 @@ export const publicUploadFormSchema = z.object({
 });
 
 export type PublicUploadForm = z.infer<typeof publicUploadFormSchema>;
+
+// Media variants validation schema
+export const insertMediaVariantSchema = createInsertSchema(mediaVariants).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Media upload response schema for client
+export const mediaUploadResponseSchema = z.object({
+  ok: z.boolean(),
+  type: z.enum(['image', 'pdf']),
+  storagePath: z.string(),
+  variants: z.object({
+    thumb_200_webp: z.string().url().optional(),
+    card_430_webp: z.string().url().optional(),
+    large_1200_webp: z.string().url().optional(),
+    original: z.string().url().optional(),
+  }),
+  width: z.number().optional(),
+  height: z.number().optional(),
+});
+
+export type MediaUploadResponse = z.infer<typeof mediaUploadResponseSchema>;
 
 // ===== QR CODE VALIDATION SCHEMAS =====
 

@@ -190,6 +190,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const uploadRoutes = (await import('./upload-routes')).default;
   app.use('/api/uploads', uploadRoutes);
 
+  // Setup media routes with image optimization
+  const mediaRoutes = (await import('./routes/media')).default;
+  app.use('/api/media', mediaRoutes);
+
   // === ENHANCED API ENDPOINTS ===
   
   // Advanced User Management APIs
