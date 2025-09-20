@@ -122,6 +122,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     nameStyling: true,
     titleStyling: true,
     companyStyling: true,
+    // subsections inside Contact Info
+    contactIconStyling: true,
+    contactFontStyling: true,
+    contactDropShadow: true,
   });
 
   const form = useForm<BusinessCard>({
@@ -768,15 +772,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </div>
 
           {/* Contact Information */}
-          <div
-            className="rounded-lg p-4 space-y-4"
-            style={{
-              backgroundColor: watchedValues.sectionStyles?.contactInfo?.sectionBackgroundColor || "rgba(147, 51, 234, 0.3)",
-              borderColor: watchedValues.sectionStyles?.contactInfo?.sectionBorderColor || "rgba(147, 51, 234, 0.6)",
-              borderWidth: "1px",
-              borderStyle: "solid",
-            }}
-          >
+          <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("contactInfo")}>
               <h3 className="text-lg font-semibold text-purple-300">{t("form.contactInfo")}</h3>
               <i className={`fas ${collapsedSections.contactInfo ? "fa-chevron-down" : "fa-chevron-up"} text-purple-300`} />
@@ -883,6 +879,265 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       Add Custom Contact
                     </Button>
                   </div>
+
+                {/* Icon Styling */}
+                <div className="bg-slate-800/50 rounded-lg p-3 space-y-3 mt-4">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("contactIconStyling")} data-testid="toggle-contact-icon-styling">
+                    <h5 className="text-xs font-medium text-purple-300">Icon Styling</h5>
+                    <i className={`fas fa-chevron-${collapsedSections.contactIconStyling ? "down" : "up"} text-purple-300 text-xs`} />
+                  </div>
+
+                  {!collapsedSections.contactIconStyling && (
+                    <>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Icon Color</Label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.contactInfo?.iconColor || "#8b5cf6"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconColor", e.target.value)}
+                              className="w-6 h-6 rounded cursor-pointer"
+                              data-testid="color-picker-contact-icon"
+                            />
+                            <Input
+                              value={watchedValues.sectionStyles?.contactInfo?.iconColor || "#8b5cf6"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconColor", e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="#8b5cf6"
+                              data-testid="input-contact-icon-color"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Background Color</Label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundColor || "#1e293b"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBackgroundColor", e.target.value)}
+                              className="w-6 h-6 rounded cursor-pointer"
+                              data-testid="color-picker-contact-icon-bg"
+                            />
+                            <Input
+                              value={watchedValues.sectionStyles?.contactInfo?.iconBackgroundColor || "#1e293b"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBackgroundColor", e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="#1e293b"
+                              data-testid="input-contact-icon-bg-color"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Border Color</Label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.contactInfo?.iconBorderColor || "#475569"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBorderColor", e.target.value)}
+                              className="w-6 h-6 rounded cursor-pointer"
+                              data-testid="color-picker-contact-icon-border"
+                            />
+                            <Input
+                              value={watchedValues.sectionStyles?.contactInfo?.iconBorderColor || "#475569"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconBorderColor", e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="#475569"
+                              data-testid="input-contact-icon-border-color"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Icon Size: {watchedValues.sectionStyles?.contactInfo?.iconSize || 18}px</Label>
+                          <input
+                            type="range"
+                            value={watchedValues.sectionStyles?.contactInfo?.iconSize || 18}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.iconSize", parseInt(e.target.value))}
+                            className="custom-range w-full"
+                            min={12}
+                            max={32}
+                            data-testid="slider-contact-icon-size"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Font Styling */}
+                <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("contactFontStyling")} data-testid="toggle-contact-font-styling">
+                    <h5 className="text-xs font-medium text-purple-300">Font Styling</h5>
+                    <i className={`fas fa-chevron-${collapsedSections.contactFontStyling ? "down" : "up"} text-purple-300 text-xs`} />
+                  </div>
+
+                  {!collapsedSections.contactFontStyling && (
+                    <>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Text Color</Label>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={watchedValues.sectionStyles?.contactInfo?.iconTextColor || "#ffffff"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconTextColor", e.target.value)}
+                              className="w-6 h-6 rounded cursor-pointer"
+                              data-testid="color-picker-contact-font"
+                            />
+                            <Input
+                              value={watchedValues.sectionStyles?.contactInfo?.iconTextColor || "#ffffff"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.iconTextColor", e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="#ffffff"
+                              data-testid="input-contact-font-color"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Font</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.contactInfo?.iconTextFont || ""}
+                            onValueChange={(v) => form.setValue("sectionStyles.contactInfo.iconTextFont", v)}
+                            data-testid="select-contact-font-family"
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Choose font" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[
+                                "Inter","Roboto","Open Sans","Lato","Montserrat","Poppins","Source Sans Pro","Nunito","Raleway","Ubuntu","PT Sans",
+                                "Merriweather","Playfair Display","Oswald","Libre Baskerville","Crimson Text","Work Sans","Fira Sans","DM Sans","Space Grotesk"
+                              ].map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Font Size: {watchedValues.sectionStyles?.contactInfo?.iconTextSize || 14}px</Label>
+                          <input
+                            type="range"
+                            value={watchedValues.sectionStyles?.contactInfo?.iconTextSize || 14}
+                            onChange={(e) => form.setValue("sectionStyles.contactInfo.iconTextSize", parseInt(e.target.value))}
+                            className="custom-range w-full"
+                            min={10}
+                            max={24}
+                            data-testid="slider-contact-font-size"
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Font Weight</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.contactInfo?.iconTextWeight || ""}
+                            onValueChange={(v) => form.setValue("sectionStyles.contactInfo.iconTextWeight", v as any)}
+                            data-testid="select-contact-font-weight"
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Weight" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[
+                                ["300","Light"],["400","Regular"],["500","Medium"],
+                                ["600","Semi Bold"],["700","Bold"],["800","Extra Bold"],
+                              ].map(([v,l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Drop Shadow Options */}
+                <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("contactDropShadow")} data-testid="toggle-contact-drop-shadow">
+                    <h5 className="text-xs font-medium text-purple-300">Drop Shadow</h5>
+                    <i className={`fas fa-chevron-${collapsedSections.contactDropShadow ? "down" : "up"} text-purple-300 text-xs`} />
+                  </div>
+
+                  {!collapsedSections.contactDropShadow && (
+                    <>
+                      <div className="flex items-center space-x-2 mb-3">
+                        <Checkbox
+                          id="contactDropShadowEnable"
+                          checked={watchedValues.sectionStyles?.contactInfo?.dropShadowEnabled || false}
+                          onCheckedChange={(c) => form.setValue("sectionStyles.contactInfo.dropShadowEnabled", !!c)}
+                          data-testid="checkbox-contact-drop-shadow-enable"
+                        />
+                        <Label htmlFor="contactDropShadowEnable" className="text-white text-xs">Enable Drop Shadow</Label>
+                      </div>
+
+                      {watchedValues.sectionStyles?.contactInfo?.dropShadowEnabled && (
+                        <>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-white text-xs">Shadow Color</Label>
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="color"
+                                  value={watchedValues.sectionStyles?.contactInfo?.dropShadowColor || "#000000"}
+                                  onChange={(e) => form.setValue("sectionStyles.contactInfo.dropShadowColor", e.target.value)}
+                                  className="w-6 h-6 rounded cursor-pointer"
+                                  data-testid="color-picker-contact-shadow"
+                                />
+                                <Input
+                                  value={watchedValues.sectionStyles?.contactInfo?.dropShadowColor || "#000000"}
+                                  onChange={(e) => form.setValue("sectionStyles.contactInfo.dropShadowColor", e.target.value)}
+                                  className="bg-slate-700 border-slate-600 text-white text-xs"
+                                  placeholder="#000000"
+                                  data-testid="input-contact-shadow-color"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <Label className="text-white text-xs">Shadow Opacity: {Math.round((watchedValues.sectionStyles?.contactInfo?.dropShadowOpacity || 0.25) * 100)}%</Label>
+                              <input
+                                type="range"
+                                value={(watchedValues.sectionStyles?.contactInfo?.dropShadowOpacity || 0.25) * 100}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.dropShadowOpacity", parseInt(e.target.value) / 100)}
+                                className="custom-range w-full"
+                                min={0}
+                                max={100}
+                                data-testid="slider-contact-shadow-opacity"
+                              />
+                            </div>
+
+                            <div>
+                              <Label className="text-white text-xs">Blur Radius: {watchedValues.sectionStyles?.contactInfo?.dropShadowBlur || 4}px</Label>
+                              <input
+                                type="range"
+                                value={watchedValues.sectionStyles?.contactInfo?.dropShadowBlur || 4}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.dropShadowBlur", parseInt(e.target.value))}
+                                className="custom-range w-full"
+                                min={0}
+                                max={20}
+                                data-testid="slider-contact-shadow-blur"
+                              />
+                            </div>
+
+                            <div>
+                              <Label className="text-white text-xs">Shadow Offset: {watchedValues.sectionStyles?.contactInfo?.dropShadowOffset || 2}px</Label>
+                              <input
+                                type="range"
+                                value={watchedValues.sectionStyles?.contactInfo?.dropShadowOffset || 2}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.dropShadowOffset", parseInt(e.target.value))}
+                                className="custom-range w-full"
+                                min={0}
+                                max={10}
+                                data-testid="slider-contact-shadow-offset"
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
 
               </>
             )}
