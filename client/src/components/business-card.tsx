@@ -514,7 +514,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                   {data.customContacts.filter(contact => contact?.value && contact?.label).map((contact) => (
                     <div 
                       key={contact.id} 
-                      className="flex flex-col items-center"
+                      className={`flex flex-col items-center ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''}`}
                       style={getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? {
                         backgroundColor: getSectionStyle('contactInfo', 'containerBackgroundColor') || 'transparent',
                         borderWidth: getSectionStyle('contactInfo', 'containerBorderColor') ? '1px' : '0',
