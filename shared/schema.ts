@@ -3277,6 +3277,7 @@ export const businessCardSchema = z.object({
       dropShadowBlur: z.number().optional(),
       dropShadowOffset: z.number().optional(),
       // Individual container styling
+      containerStylingEnabled: z.boolean().optional(),
       containerBackgroundColor: z.string().optional(),
       containerBorderColor: z.string().optional(),
       containerBorderRadius: z.number().optional(),
