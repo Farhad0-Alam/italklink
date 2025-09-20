@@ -232,7 +232,73 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
       
       return undefined;
     };
-    
+
+    // Helper functions for type safety
+    const parseNumeric = (value: string | undefined, defaultValue: number): number => {
+      if (!value) return defaultValue;
+      const parsed = parseFloat(value);
+      return isNaN(parsed) ? defaultValue : parsed;
+    };
+
+    const parseHexColor = (color: string | undefined, fallback: string): string => {
+      if (!color || !/^#[0-9a-fA-F]{6}$/.test(color)) return fallback;
+      return color;
+    };
+
+    const hexToRgba = (hex: string, opacity: number): string => {
+      const validHex = parseHexColor(hex, '#000000');
+      const r = parseInt(validHex.slice(1, 3), 16);
+      const g = parseInt(validHex.slice(3, 5), 16);
+      const b = parseInt(validHex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    };
+
+    // Generate primary contact buttons
+    const getPrimaryContacts = () => {
+      const contacts = [];
+      
+      if (data.phone) {
+        contacts.push({
+          id: 'primary-phone',
+          type: 'phone',
+          value: data.phone,
+          label: 'Phone',
+          icon: 'fas fa-phone'
+        });
+      }
+      
+      if (data.email) {
+        contacts.push({
+          id: 'primary-email', 
+          type: 'email',
+          value: data.email,
+          label: 'Email',
+          icon: 'fas fa-envelope'
+        });
+      }
+      
+      if (data.website) {
+        contacts.push({
+          id: 'primary-website',
+          type: 'website', 
+          value: data.website,
+          label: 'Website',
+          icon: 'fas fa-globe'
+        });
+      }
+      
+      if (data.linkedin) {
+        contacts.push({
+          id: 'primary-linkedin',
+          type: 'linkedin',
+          value: data.linkedin, 
+          label: 'LinkedIn',
+          icon: 'fab fa-linkedin'
+        });
+      }
+      
+      return contacts;
+    };
 
     // Simple gradient style for basic background support
     const gradientStyle = {};
@@ -434,19 +500,36 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           <div className="mb-6 space-y-2">
             {/* Grid of Contact Buttons ONLY - Responsive 2 rows of 4 */}
             <div className="space-y-2">
-              {/* Row 1 - Top 4 buttons */}
-              <div className={`grid ${data.template === 'dark' ? 'grid-cols-3' : 'grid-cols-4'} gap-3 px-4`}>
-
-              </div>
-
-              {/* Row 2 - Unlimited Custom Contact Methods */}
-              {data.customContacts && data.customContacts.length > 0 && (
-                <div className={`grid ${data.template === 'dark' ? 'grid-cols-3' : 'grid-cols-4'} gap-3 px-4`}>
-                  {data.customContacts.filter(contact => contact?.value && contact?.label).map((contact) => (
-                    <div key={contact.id} className="flex flex-col items-center">
+              {/* Row 1 - Primary contact buttons */}
+              {getPrimaryContacts().length > 0 && (
+                <div 
+                  className={`grid ${data.template === 'dark' ? 'grid-cols-3' : 'grid-cols-4'} px-4`}
+                  style={{
+                    gap: `${parseNumeric(getSectionStyle('contactInfo', 'containerGap'), 8)}px`
+                  }}
+                >
+                  {getPrimaryContacts().map((contact) => (
+                    <div 
+                      key={contact.id} 
+                      className="flex flex-col items-center"
+                      style={{
+                        backgroundColor: getSectionStyle('contactInfo', 'containerBackgroundColor') || 'transparent',
+                        borderWidth: getSectionStyle('contactInfo', 'containerBorderColor') ? '1px' : '0',
+                        borderStyle: getSectionStyle('contactInfo', 'containerBorderColor') ? 'solid' : 'none',
+                        borderColor: getSectionStyle('contactInfo', 'containerBorderColor') || 'transparent',
+                        borderRadius: `${parseNumeric(getSectionStyle('contactInfo', 'containerBorderRadius'), 8)}px`,
+                        width: `${parseNumeric(getSectionStyle('contactInfo', 'containerWidth'), 80)}px`,
+                        height: `${parseNumeric(getSectionStyle('contactInfo', 'containerHeight'), 80)}px`,
+                        padding: '8px',
+                        boxShadow: getSectionStyle('contactInfo', 'containerDropShadowEnabled') === 'true' 
+                          ? `${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'containerDropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'containerDropShadowOpacity') || '0.25'))}`
+                          : 'none'
+                      }}
+                      data-testid={`container-primary-contact-${contact.id}`}
+                    >
                       <button 
                         onClick={() => handleContactAction(contact.type, contact.value)}
-                        className={`${data.template === 'dark' ? 'w-full py-3 px-2 rounded-lg' : 'w-12 h-12 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
+                        className={`${data.template === 'dark' ? 'w-full py-2 px-2 rounded-lg' : 'w-10 h-10 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
                         style={{ 
                           backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || (data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a')),
                           color: getSectionStyle('contactInfo', 'iconColor') || (data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')),
@@ -454,22 +537,22 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                           borderStyle: getSectionStyle('contactInfo', 'iconBorderColor') ? 'solid' : 'none',
                           borderColor: getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
                           boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
-                            ? `${getSectionStyle('contactInfo', 'dropShadowOffset') || 2}px ${getSectionStyle('contactInfo', 'dropShadowOffset') || 2}px ${getSectionStyle('contactInfo', 'dropShadowBlur') || 4}px rgba(${parseInt((getSectionStyle('contactInfo', 'dropShadowColor') || '#000000').slice(1, 3), 16)}, ${parseInt((getSectionStyle('contactInfo', 'dropShadowColor') || '#000000').slice(3, 5), 16)}, ${parseInt((getSectionStyle('contactInfo', 'dropShadowColor') || '#000000').slice(5, 7), 16)}, ${getSectionStyle('contactInfo', 'dropShadowOpacity') || 0.25})`
+                            ? `${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'dropShadowOpacity') || '0.25'))}`
                             : 'none'
                         }}
-                        data-testid={`button-custom-contact-${contact.id}`}
+                        data-testid={`button-primary-contact-${contact.id}`}
                       >
                         <i 
                           className={`${contact.icon} ${data.template === 'dark' ? 'mb-1' : ''}`}
                           style={{
-                            fontSize: `${getSectionStyle('contactInfo', 'iconSize') || (data.template === 'dark' ? 18 : 14)}px`
+                            fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconSize'), data.template === 'dark' ? 18 : 14)}px`
                           }}
                         ></i>
                         {data.template === 'dark' && (
                           <span 
                             className="font-medium"
                             style={{
-                              fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
+                              fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 12)}px`,
                               fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
                               fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || '500',
                               color: getSectionStyle('contactInfo', 'iconTextColor') || 'inherit'
@@ -484,7 +567,87 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                           className="font-medium"
                           style={{ 
                             color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151',
-                            fontSize: `${getSectionStyle('contactInfo', 'iconTextSize') || 12}px`,
+                            fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 12)}px`,
+                            fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
+                            fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || '500'
+                          }}
+                        >
+                          {contact.label}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Row 2 - Unlimited Custom Contact Methods */}
+              {data.customContacts && data.customContacts.length > 0 && (
+                <div 
+                  className={`grid ${data.template === 'dark' ? 'grid-cols-3' : 'grid-cols-4'} px-4`}
+                  style={{
+                    gap: `${parseNumeric(getSectionStyle('contactInfo', 'containerGap'), 8)}px`
+                  }}
+                >
+                  {data.customContacts.filter(contact => contact?.value && contact?.label).map((contact) => (
+                    <div 
+                      key={contact.id} 
+                      className="flex flex-col items-center"
+                      style={{
+                        backgroundColor: getSectionStyle('contactInfo', 'containerBackgroundColor') || 'transparent',
+                        borderWidth: getSectionStyle('contactInfo', 'containerBorderColor') ? '1px' : '0',
+                        borderStyle: getSectionStyle('contactInfo', 'containerBorderColor') ? 'solid' : 'none',
+                        borderColor: getSectionStyle('contactInfo', 'containerBorderColor') || 'transparent',
+                        borderRadius: `${parseNumeric(getSectionStyle('contactInfo', 'containerBorderRadius'), 8)}px`,
+                        width: `${parseNumeric(getSectionStyle('contactInfo', 'containerWidth'), 80)}px`,
+                        height: `${parseNumeric(getSectionStyle('contactInfo', 'containerHeight'), 80)}px`,
+                        padding: '8px',
+                        boxShadow: getSectionStyle('contactInfo', 'containerDropShadowEnabled') === 'true' 
+                          ? `${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'containerDropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'containerDropShadowOpacity') || '0.25'))}`
+                          : 'none'
+                      }}
+                      data-testid={`container-custom-contact-${contact.id}`}
+                    >
+                      <button 
+                        onClick={() => handleContactAction(contact.type, contact.value)}
+                        className={`${data.template === 'dark' ? 'w-full py-2 px-2 rounded-lg' : 'w-10 h-10 rounded-full'} flex ${data.template === 'dark' ? 'flex-col' : ''} items-center justify-center transition-colors ${data.template === 'dark' ? 'mb-0' : 'mb-1'}`}
+                        style={{ 
+                          backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || (data.template === 'dark' ? '#2a2a2a' : (data.secondaryColor || data.accentColor || '#16a34a')),
+                          color: getSectionStyle('contactInfo', 'iconColor') || (data.template === 'dark' ? (data.brandColor || '#fbbf24') : (data.tertiaryColor || '#ffffff')),
+                          borderWidth: getSectionStyle('contactInfo', 'iconBorderColor') ? '1px' : '0',
+                          borderStyle: getSectionStyle('contactInfo', 'iconBorderColor') ? 'solid' : 'none',
+                          borderColor: getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
+                          boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
+                            ? `${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'dropShadowOpacity') || '0.25'))}`
+                            : 'none'
+                        }}
+                        data-testid={`button-custom-contact-${contact.id}`}
+                      >
+                        <i 
+                          className={`${contact.icon} ${data.template === 'dark' ? 'mb-1' : ''}`}
+                          style={{
+                            fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconSize'), data.template === 'dark' ? 18 : 14)}px`
+                          }}
+                        ></i>
+                        {data.template === 'dark' && (
+                          <span 
+                            className="font-medium"
+                            style={{
+                              fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 12)}px`,
+                              fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
+                              fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || '500',
+                              color: getSectionStyle('contactInfo', 'iconTextColor') || 'inherit'
+                            }}
+                          >
+                            {contact.label}
+                          </span>
+                        )}
+                      </button>
+                      {data.template !== 'dark' && (
+                        <span 
+                          className="font-medium"
+                          style={{ 
+                            color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151',
+                            fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 12)}px`,
                             fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
                             fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || '500'
                           }}
