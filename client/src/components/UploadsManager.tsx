@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
+import { Progress } from "@/components/ui/progress";
 
 interface PublicUpload {
   id: string;
@@ -79,6 +80,13 @@ export function UploadsManager() {
     title: "",
     isPublic: true,
   });
+  const [optimizationResult, setOptimizationResult] = useState<any>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Helper function to check if file is an image
+  const isImageFile = (file: File): boolean => {
+    return file.type.startsWith('image/');
+  };
 
   // Fetch uploads
   const { data: uploadsResponse, isLoading, refetch } = useQuery({
@@ -89,37 +97,132 @@ export function UploadsManager() {
   // Extract uploads array from API response
   const uploads: PublicUpload[] = uploadsResponse?.data || [];
 
-  // Upload mutation
+  // Upload mutation with WebP optimization for images
   const uploadMutation = useMutation({
     mutationFn: async (data: { file: File; slug: string; title: string; isPublic: boolean }) => {
+      setUploadProgress(0);
+      setOptimizationResult(null);
+
       const formData = new FormData();
       formData.append('file', data.file);
-      formData.append('slug', data.slug);
-      formData.append('title', data.title);
-      formData.append('isPublic', String(data.isPublic));
+      
+      // Check if it's an image file
+      if (isImageFile(data.file)) {
+        // Try media optimization endpoint for images first
+        const progressInterval = setInterval(() => {
+          setUploadProgress(prev => Math.min(prev + 10, 90));
+        }, 100);
 
-      const response = await fetch('/api/uploads', {
-        method: 'POST',
-        body: formData,
-      });
+        try {
+          const response = await fetch('/api/media/upload', {
+            method: 'POST',
+            body: formData,
+          });
 
-      if (!response.ok) {
-        throw new Error('Upload failed');
+          clearInterval(progressInterval);
+          setUploadProgress(100);
+
+          if (!response.ok) {
+            // If media optimization fails, fallback to regular upload
+            const errorData = await response.json();
+            console.warn('Media optimization failed, falling back to regular upload:', errorData.error);
+            
+            // Reset progress and try regular upload
+            setUploadProgress(0);
+            setOptimizationResult(null);
+            
+            // Add slug, title, and isPublic for regular upload
+            formData.append('slug', data.slug);
+            formData.append('title', data.title);
+            formData.append('isPublic', String(data.isPublic));
+
+            const fallbackResponse = await fetch('/api/uploads', {
+              method: 'POST',
+              body: formData,
+            });
+
+            if (!fallbackResponse.ok) {
+              throw new Error('Both image optimization and regular upload failed');
+            }
+
+            return fallbackResponse.json();
+          }
+
+          const result = await response.json();
+          setOptimizationResult(result);
+          
+          // After successful optimization, create an Upload record for the optimized image
+          const uploadRecord = {
+            file: new File([new Blob()], data.file.name, { type: data.file.type }),
+            slug: data.slug,
+            title: data.title,
+            isPublic: data.isPublic
+          };
+
+          // Create the regular upload record so the image appears in the uploads list
+          const uploadFormData = new FormData();
+          // Use the optimized image URL or original file
+          uploadFormData.append('file', data.file);
+          uploadFormData.append('slug', data.slug);
+          uploadFormData.append('title', data.title);
+          uploadFormData.append('isPublic', String(data.isPublic));
+
+          try {
+            await fetch('/api/uploads', {
+              method: 'POST',
+              body: uploadFormData,
+            });
+          } catch (uploadError) {
+            console.warn('Failed to create upload record after optimization:', uploadError);
+          }
+
+          return result;
+        } catch (error) {
+          clearInterval(progressInterval);
+          setUploadProgress(0);
+          throw error;
+        }
+      } else {
+        // Use regular upload endpoint for non-images
+        formData.append('slug', data.slug);
+        formData.append('title', data.title);
+        formData.append('isPublic', String(data.isPublic));
+
+        const response = await fetch('/api/uploads', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Upload failed');
+        }
+
+        return response.json();
       }
-
-      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (result, variables) => {
+      const isImage = isImageFile(variables.file);
+      
       toast({
         title: "Upload successful",
-        description: "Your file has been uploaded successfully.",
+        description: isImage 
+          ? `Image uploaded and optimized! Generated ${result.variants ? Object.keys(result.variants).length : 0} WebP variants.`
+          : "Your file has been uploaded successfully.",
       });
+      
       queryClient.invalidateQueries({ queryKey: ['/api/uploads'] });
-      setShowUploadDialog(false);
-      setUploadFile(null);
-      setUploadData({ slug: "", title: "", isPublic: true });
+      
+      // Don't close dialog immediately for images to show optimization results
+      if (!isImage) {
+        setShowUploadDialog(false);
+        setUploadFile(null);
+        setUploadData({ slug: "", title: "", isPublic: true });
+      }
     },
     onError: (error: any) => {
+      setUploadProgress(0);
+      setOptimizationResult(null);
+      
       toast({
         title: "Upload failed",
         description: error.message || "Failed to upload file.",
@@ -354,6 +457,77 @@ export function UploadsManager() {
                       <Label htmlFor="public">Make public</Label>
                     </div>
                   </>
+                )}
+
+                {/* Progress Display for Images */}
+                {uploadFile && isImageFile(uploadFile) && uploadMutation.isPending && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Uploading and optimizing image...</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <Progress value={uploadProgress} className="w-full" data-testid="progress-image-upload" />
+                  </div>
+                )}
+
+                {/* Optimization Results Display */}
+                {optimizationResult && (
+                  <Card className="p-4 border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+                    <div className="flex items-start gap-3">
+                      <FileImage className="h-5 w-5 text-green-600 mt-0.5" />
+                      <div className="space-y-3 flex-1">
+                        <div>
+                          <p className="font-medium text-green-800 dark:text-green-200">
+                            Image Optimized Successfully!
+                          </p>
+                          <p className="text-sm text-green-700 dark:text-green-300">
+                            {optimizationResult.width && optimizationResult.height && (
+                              `Original: ${optimizationResult.width}×${optimizationResult.height}px • `
+                            )}
+                            Generated {Object.keys(optimizationResult.variants || {}).length} WebP variants
+                          </p>
+                        </div>
+
+                        {/* Variant Grid */}
+                        {optimizationResult.variants && (
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            {Object.entries(optimizationResult.variants).map(([key, url]) => {
+                              const variantName = key.replace('_webp', '').replace('_', ' ');
+                              const dimensions = key === 'thumb_200_webp' ? '200px' :
+                                               key === 'card_430_webp' ? '430px' :
+                                               key === 'large_1200_webp' ? '1200px' : 'Original';
+                              
+                              return (
+                                <div key={key} className="flex items-center justify-between">
+                                  <Badge variant="secondary" className="text-xs">
+                                    {variantName}
+                                  </Badge>
+                                  <span className="text-muted-foreground">{dimensions}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setShowUploadDialog(false);
+                              setUploadFile(null);
+                              setUploadData({ slug: "", title: "", isPublic: true });
+                              setOptimizationResult(null);
+                              setUploadProgress(0);
+                            }}
+                            data-testid="button-close-optimization"
+                          >
+                            Close
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
                 )}
               </div>
               <DialogFooter>

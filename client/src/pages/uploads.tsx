@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ContactSupportModal } from "@/components/contact-support-modal";
 import { UploadsManager } from "@/components/UploadsManager";
-import { MediaUpload } from "@/components/MediaUpload";
 
 interface User {
   id: string;
@@ -277,18 +276,7 @@ export default function UploadsPage() {
             <span>Back to Dashboard</span>
           </Button>
         </div>
-        <div className="space-y-6">
-          {/* New Media Upload Component */}
-          <MediaUpload 
-            onUploadComplete={(response) => {
-              console.log('Upload complete:', response);
-            }}
-            maxSizeMB={2}
-          />
-          
-          {/* Existing Uploads Manager */}
-          <UploadsManager />
-        </div>
+        <UploadsManager />
       </main>
 
       {/* Contact Support Modal */}
