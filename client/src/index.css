@@ -369,20 +369,19 @@
 }
 
 /* Business Card Icon Hover Effects */
+.social-icon-hover,
 .contact-icon-hover {
-  transition: color 0.2s ease, background-color 0.2s ease;
+  background-color: var(--tl-icon-bg);
+  color: var(--tl-icon-color);
+  border-color: var(--tl-border);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.contact-icon-hover:hover {
-  color: var(--contact-icon-hover-color) !important;
-  background-color: var(--contact-icon-bg-hover-color) !important;
-}
-
-.social-icon-hover {
-  transition: color 0.2s ease, background-color 0.2s ease;
-}
-
-.social-icon-hover:hover {
-  color: var(--social-icon-hover-color) !important;
-  background-color: var(--social-icon-bg-hover-color) !important;
+.social-icon-hover:hover,
+.social-icon-hover:focus-visible,
+.contact-icon-hover:hover,
+.contact-icon-hover:focus-visible {
+  background-color: var(--tl-icon-bg-hover, var(--tl-icon-bg));
+  color: var(--tl-icon-color-hover, var(--tl-icon-color));
+  border-color: var(--tl-border-hover, var(--tl-border));
 }
