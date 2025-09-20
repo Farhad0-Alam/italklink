@@ -124,11 +124,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     companyStyling: true,
     // subsections inside Contact Info
     contactIconStyling: true,
+    contactHoverColor: true,  // Hover Color section collapsed by default
     contactFontStyling: true,
     contactDropShadow: true,
     contactContainerStyling: true,
     // subsections inside Social Media
     socialIconStyling: true,
+    socialHoverColor: true,   // Hover Color section collapsed by default
     socialFontStyling: true,
     socialDropShadow: true,
     socialContainerStyling: true,
