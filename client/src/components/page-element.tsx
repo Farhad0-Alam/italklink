@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Label } from "@/components/ui/label";
 import { QRCodeSVG } from "qrcode.react";
 import { useState, useEffect } from "react";
 import { generateFieldId } from "@/lib/card-data";
@@ -620,7 +621,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
         return (
           <div className="mb-4">
             {isEditing ? (
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <Input
                   value={element.data?.text || ''}
                   onChange={(e) => handleDataUpdate({ text: e.target.value })}
@@ -641,15 +642,228 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   <option value="button">Button</option>
                   <option value="text">Text Link</option>
                 </select>
+
+                {/* Button Variant Controls - Only show for button style */}
+                {element.data?.style === 'button' && (
+                  <Collapsible>
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-2 bg-slate-600 text-white rounded">
+                      <span className="text-sm font-medium">Button Styling Override</span>
+                      <i className="fas fa-chevron-down text-xs"></i>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-3 mt-2 p-3 bg-slate-600 rounded">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Button Shape</Label>
+                          <Select
+                            value={element.data?.buttonVariant || "rounded-solid"}
+                            onValueChange={(v) => handleDataUpdate({ buttonVariant: v })}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Choose shape" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pill-solid">Pill Solid</SelectItem>
+                              <SelectItem value="pill-outline">Pill Outline</SelectItem>
+                              <SelectItem value="pill-gradient">Pill Gradient</SelectItem>
+                              <SelectItem value="square-solid">Square Solid</SelectItem>
+                              <SelectItem value="square-outline">Square Outline</SelectItem>
+                              <SelectItem value="rounded-solid">Rounded Solid</SelectItem>
+                              <SelectItem value="rounded-outline">Rounded Outline</SelectItem>
+                              <SelectItem value="accent-left">Accent Left</SelectItem>
+                              <SelectItem value="accent-right">Accent Right</SelectItem>
+                              <SelectItem value="accent-top">Accent Top</SelectItem>
+                              <SelectItem value="accent-bottom">Accent Bottom</SelectItem>
+                              <SelectItem value="circle-icon">Circle Icon</SelectItem>
+                              <SelectItem value="attached-action">Attached Action</SelectItem>
+                              <SelectItem value="shadow-lifted">Shadow Lifted</SelectItem>
+                              <SelectItem value="glass-morphism">Glass Morphism</SelectItem>
+                              <SelectItem value="neo-brutalism">Neo Brutalism</SelectItem>
+                              <SelectItem value="soft-shadow">Soft Shadow</SelectItem>
+                              <SelectItem value="gradient-border">Gradient Border</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Button Size</Label>
+                          <Select
+                            value={element.data?.buttonSize || "md"}
+                            onValueChange={(v) => handleDataUpdate({ buttonSize: v })}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Choose size" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="xs">Extra Small</SelectItem>
+                              <SelectItem value="sm">Small</SelectItem>
+                              <SelectItem value="md">Medium</SelectItem>
+                              <SelectItem value="lg">Large</SelectItem>
+                              <SelectItem value="xl">Extra Large</SelectItem>
+                              <SelectItem value="full">Full Width</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Button Padding</Label>
+                          <Select
+                            value={element.data?.buttonPadding || "normal"}
+                            onValueChange={(v) => handleDataUpdate({ buttonPadding: v })}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Choose padding" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="tight">Tight</SelectItem>
+                              <SelectItem value="normal">Normal</SelectItem>
+                              <SelectItem value="loose">Loose</SelectItem>
+                              <SelectItem value="extra-loose">Extra Loose</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="linkButtonFullWidth"
+                              checked={element.data?.buttonFullWidth || false}
+                              onCheckedChange={(c) => handleDataUpdate({ buttonFullWidth: c })}
+                            />
+                            <Label htmlFor="linkButtonFullWidth" className="text-white text-xs">Full Width</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="linkButtonIconOnly"
+                              checked={element.data?.buttonIconOnly || false}
+                              onCheckedChange={(c) => handleDataUpdate({ buttonIconOnly: c })}
+                            />
+                            <Label htmlFor="linkButtonIconOnly" className="text-white text-xs">Icon Only</Label>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Gradient colors for gradient variants */}
+                      {(element.data?.buttonVariant === 'pill-gradient' || 
+                        element.data?.buttonVariant === 'gradient-border') && (
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-500">
+                          <div>
+                            <Label className="text-white text-xs">Gradient From</Label>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={element.data?.buttonGradientFrom || "#22c55e"}
+                                onChange={(e) => handleDataUpdate({ buttonGradientFrom: e.target.value })}
+                                className="w-6 h-6 rounded cursor-pointer"
+                              />
+                              <Input
+                                value={element.data?.buttonGradientFrom || "#22c55e"}
+                                onChange={(e) => handleDataUpdate({ buttonGradientFrom: e.target.value })}
+                                className="bg-slate-700 border-slate-600 text-white text-xs"
+                                placeholder="#22c55e"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-white text-xs">Gradient To</Label>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={element.data?.buttonGradientTo || "#16a34a"}
+                                onChange={(e) => handleDataUpdate({ buttonGradientTo: e.target.value })}
+                                className="w-6 h-6 rounded cursor-pointer"
+                              />
+                              <Input
+                                value={element.data?.buttonGradientTo || "#16a34a"}
+                                onChange={(e) => handleDataUpdate({ buttonGradientTo: e.target.value })}
+                                className="bg-slate-700 border-slate-600 text-white text-xs"
+                                placeholder="#16a34a"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action text for attached-action variant */}
+                      {element.data?.buttonVariant === 'attached-action' && (
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-500">
+                          <div>
+                            <Label className="text-white text-xs">Action Text</Label>
+                            <Input
+                              value={element.data?.buttonActionText || "▼"}
+                              onChange={(e) => handleDataUpdate({ buttonActionText: e.target.value })}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="▼"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-white text-xs">Action Color</Label>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={element.data?.buttonActionColor || "#16a34a"}
+                                onChange={(e) => handleDataUpdate({ buttonActionColor: e.target.value })}
+                                className="w-6 h-6 rounded cursor-pointer"
+                              />
+                              <Input
+                                value={element.data?.buttonActionColor || "#16a34a"}
+                                onChange={(e) => handleDataUpdate({ buttonActionColor: e.target.value })}
+                                className="bg-slate-700 border-slate-600 text-white text-xs"
+                                placeholder="#16a34a"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
               </div>
             ) : (
               element.data.style === "button" ? (
-                <Button
-                  onClick={() => window.open(element.data.url, '_blank')}
-                  className="w-full bg-talklink-500 hover:bg-talklink-600 text-white"
-                >
-                  {element.data.text}
-                </Button>
+                (() => {
+                  // Get button variant data with fallbacks to section styles or defaults
+                  const buttonVariant = element.data.buttonVariant || cardData?.sectionStyles?.contactInfo?.buttonVariant || "rounded-solid";
+                  const buttonSize = element.data.buttonSize || cardData?.sectionStyles?.contactInfo?.buttonSize || "md";
+                  const buttonPadding = element.data.buttonPadding || cardData?.sectionStyles?.contactInfo?.buttonPadding || "normal";
+                  const buttonFullWidth = element.data.buttonFullWidth ?? cardData?.sectionStyles?.contactInfo?.buttonFullWidth ?? false;
+                  const buttonIconOnly = element.data.buttonIconOnly || cardData?.sectionStyles?.contactInfo?.buttonIconOnly || false;
+                  
+                  // Build CSS classes
+                  let buttonClasses = `btn-variant-${buttonVariant} btn-size-${buttonSize} btn-padding-${buttonPadding}`;
+                  
+                  if (buttonFullWidth) {
+                    buttonClasses += " w-full";
+                  }
+                  
+                  // Add gradient styles if needed
+                  const gradientStyles: any = {};
+                  if (buttonVariant === 'pill-gradient' || buttonVariant === 'gradient-border') {
+                    const gradientFrom = element.data.buttonGradientFrom || cardData?.sectionStyles?.contactInfo?.buttonGradientFrom || "#22c55e";
+                    const gradientTo = element.data.buttonGradientTo || cardData?.sectionStyles?.contactInfo?.buttonGradientTo || "#16a34a";
+                    const gradientAngle = element.data.buttonGradientAngle || cardData?.sectionStyles?.contactInfo?.buttonGradientAngle || 90;
+                    gradientStyles.background = `linear-gradient(${gradientAngle}deg, ${gradientFrom}, ${gradientTo})`;
+                  }
+                  
+                  return (
+                    <button
+                      onClick={() => window.open(element.data.url, '_blank')}
+                      className={buttonClasses}
+                      style={gradientStyles}
+                      data-action-text={element.data.buttonActionText || cardData?.sectionStyles?.contactInfo?.buttonActionText}
+                      data-action-color={element.data.buttonActionColor || cardData?.sectionStyles?.contactInfo?.buttonActionColor}
+                    >
+                      {buttonIconOnly ? <i className="fas fa-external-link-alt"></i> : element.data.text}
+                      {buttonVariant === 'attached-action' && (
+                        <span 
+                          className="action-indicator" 
+                          style={{ color: element.data.buttonActionColor || cardData?.sectionStyles?.contactInfo?.buttonActionColor || "#16a34a" }}
+                        >
+                          {element.data.buttonActionText || cardData?.sectionStyles?.contactInfo?.buttonActionText || "▼"}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })()
               ) : (
                 <a
                   href={element.data.url}
@@ -3504,6 +3718,66 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     </Select>
                   </div>
                 </div>
+
+                {/* Button Variant Controls */}
+                <Collapsible>
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-2 bg-slate-100 text-slate-800 rounded">
+                    <span className="text-sm font-medium">Button Styling Override</span>
+                    <i className="fas fa-chevron-down text-xs"></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-3 mt-2 p-3 bg-slate-50 rounded">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-slate-700 text-xs">Button Shape</Label>
+                        <Select
+                          value={element.data?.buttonVariant || "rounded-solid"}
+                          onValueChange={(v) => handleDataUpdate({ buttonVariant: v })}
+                        >
+                          <SelectTrigger className="text-xs">
+                            <SelectValue placeholder="Choose shape" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pill-solid">Pill Solid</SelectItem>
+                            <SelectItem value="pill-outline">Pill Outline</SelectItem>
+                            <SelectItem value="pill-gradient">Pill Gradient</SelectItem>
+                            <SelectItem value="square-solid">Square Solid</SelectItem>
+                            <SelectItem value="square-outline">Square Outline</SelectItem>
+                            <SelectItem value="rounded-solid">Rounded Solid</SelectItem>
+                            <SelectItem value="rounded-outline">Rounded Outline</SelectItem>
+                            <SelectItem value="accent-left">Accent Left</SelectItem>
+                            <SelectItem value="accent-right">Accent Right</SelectItem>
+                            <SelectItem value="accent-top">Accent Top</SelectItem>
+                            <SelectItem value="accent-bottom">Accent Bottom</SelectItem>
+                            <SelectItem value="circle-icon">Circle Icon</SelectItem>
+                            <SelectItem value="attached-action">Attached Action</SelectItem>
+                            <SelectItem value="shadow-lifted">Shadow Lifted</SelectItem>
+                            <SelectItem value="glass-morphism">Glass Morphism</SelectItem>
+                            <SelectItem value="neo-brutalism">Neo Brutalism</SelectItem>
+                            <SelectItem value="soft-shadow">Soft Shadow</SelectItem>
+                            <SelectItem value="gradient-border">Gradient Border</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-slate-700 text-xs">Button Padding</Label>
+                        <Select
+                          value={element.data?.buttonPadding || "normal"}
+                          onValueChange={(v) => handleDataUpdate({ buttonPadding: v })}
+                        >
+                          <SelectTrigger className="text-xs">
+                            <SelectValue placeholder="Choose padding" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="tight">Tight</SelectItem>
+                            <SelectItem value="normal">Normal</SelectItem>
+                            <SelectItem value="loose">Loose</SelectItem>
+                            <SelectItem value="extra-loose">Extra Loose</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
             ) : (
               <div className="text-center space-y-3 p-4 rounded-lg border border-slate-200 bg-white">
@@ -3511,30 +3785,48 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 {element.data.subtitle && (
                   <p className="text-sm text-slate-600">{element.data.subtitle}</p>
                 )}
-                <Button
-                  onClick={() => {
-                    if (!isInteractive) return;
-                    const eventSlug = element.data.eventTypeSlug || 'consultation';
-                    const duration = element.data.duration || 30;
-                    const bookingUrl = `/booking/${eventSlug}?duration=${duration}&source=card`;
-                    
-                    if (element.data.openInNewTab) {
-                      window.open(bookingUrl, '_blank');
-                    } else {
-                      window.location.href = bookingUrl;
-                    }
-                  }}
-                  style={{
-                    backgroundColor: element.data.buttonColor || "#22c55e",
-                    color: element.data.textColor || "#ffffff",
-                  }}
-                  className={`rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${
-                    element.data.size === 'small' ? 'px-4 py-1 text-sm' :
-                    element.data.size === 'large' ? 'px-8 py-3 text-lg' :
-                    'px-6 py-2'
-                  }`}
-                  data-testid="button-book-appointment"
-                >
+                {(() => {
+                  // Get button variant data with fallbacks to section styles or defaults
+                  const buttonVariant = element.data.buttonVariant || cardData?.sectionStyles?.contactInfo?.buttonVariant || "rounded-solid";
+                  const buttonSize = element.data.buttonSize || cardData?.sectionStyles?.contactInfo?.buttonSize || "md";
+                  const buttonPadding = element.data.buttonPadding || cardData?.sectionStyles?.contactInfo?.buttonPadding || "normal";
+                  
+                  // Build CSS classes
+                  let buttonClasses = `btn-variant-${buttonVariant} btn-size-${buttonSize} btn-padding-${buttonPadding}`;
+                  
+                  // Add gradient styles if needed
+                  const gradientStyles: any = {};
+                  if (buttonVariant === 'pill-gradient' || buttonVariant === 'gradient-border') {
+                    const gradientFrom = element.data.buttonGradientFrom || cardData?.sectionStyles?.contactInfo?.buttonGradientFrom || "#22c55e";
+                    const gradientTo = element.data.buttonGradientTo || cardData?.sectionStyles?.contactInfo?.buttonGradientTo || "#16a34a";
+                    const gradientAngle = element.data.buttonGradientAngle || cardData?.sectionStyles?.contactInfo?.buttonGradientAngle || 90;
+                    gradientStyles.background = `linear-gradient(${gradientAngle}deg, ${gradientFrom}, ${gradientTo})`;
+                  }
+                  
+                  // Legacy color fallback for custom colors if no variant styling
+                  if (!element.data.buttonVariant && !cardData?.sectionStyles?.contactInfo?.buttonVariant) {
+                    gradientStyles.backgroundColor = element.data.buttonColor || "#22c55e";
+                    gradientStyles.color = element.data.textColor || "#ffffff";
+                  }
+                  
+                  return (
+                    <button
+                      onClick={() => {
+                        if (!isInteractive) return;
+                        const eventSlug = element.data.eventTypeSlug || 'consultation';
+                        const duration = element.data.duration || 30;
+                        const bookingUrl = `/booking/${eventSlug}?duration=${duration}&source=card`;
+                        
+                        if (element.data.openInNewTab) {
+                          window.open(bookingUrl, '_blank');
+                        } else {
+                          window.location.href = bookingUrl;
+                        }
+                      }}
+                      className={buttonClasses}
+                      style={gradientStyles}
+                      data-testid="button-book-appointment"
+                    >
                   {element.data.icon && element.data.icon !== 'none' && (
                     <i className={`fas fa-${
                       element.data.icon === 'calendar' ? 'calendar-alt' :
@@ -3542,11 +3834,13 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       element.data.icon === 'user' ? 'user' : 'calendar-alt'
                     } mr-2`}></i>
                   )}
-                  {element.data.buttonText || "Book Now"}
-                  {element.data.duration && (
-                    <span className="ml-2 text-xs opacity-80">({element.data.duration}min)</span>
-                  )}
-                </Button>
+                      {element.data.buttonText || "Book Now"}
+                      {element.data.duration && (
+                        <span className="ml-2 text-xs opacity-80">({element.data.duration}min)</span>
+                      )}
+                    </button>
+                  );
+                })()}
               </div>
             )}
           </div>

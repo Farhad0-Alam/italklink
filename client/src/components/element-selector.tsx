@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { PageElement } from "@shared/schema";
+import { PageElement, BusinessCard } from "@shared/schema";
 import { generateFieldId } from "@/lib/card-data";
 
 interface ElementSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddElement: (element: PageElement) => void;
+  cardData?: BusinessCard;
 }
 
-export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSelectorProps) {
+export function ElementSelector({ open, onOpenChange, onAddElement, cardData }: ElementSelectorProps) {
   const elementTypes = [
     {
       type: "heading",
@@ -207,7 +208,18 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           data: {
             text: "Click Here",
             url: "https://example.com",
-            style: "button" as const
+            style: "button" as const,
+            // Inherit button variants from contact section by default
+            buttonVariant: cardData?.sectionStyles?.contactInfo?.buttonVariant || "rounded-solid",
+            buttonSize: cardData?.sectionStyles?.contactInfo?.buttonSize || "md",
+            buttonPadding: cardData?.sectionStyles?.contactInfo?.buttonPadding || "normal",
+            buttonFullWidth: cardData?.sectionStyles?.contactInfo?.buttonFullWidth || false,
+            buttonIconOnly: cardData?.sectionStyles?.contactInfo?.buttonIconOnly || false,
+            buttonGradientFrom: cardData?.sectionStyles?.contactInfo?.buttonGradientFrom,
+            buttonGradientTo: cardData?.sectionStyles?.contactInfo?.buttonGradientTo,
+            buttonGradientAngle: cardData?.sectionStyles?.contactInfo?.buttonGradientAngle,
+            buttonActionText: cardData?.sectionStyles?.contactInfo?.buttonActionText,
+            buttonActionColor: cardData?.sectionStyles?.contactInfo?.buttonActionColor
           }
         };
         break;
@@ -481,6 +493,16 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             description: "",
             showDuration: true,
             openInNewTab: true,
+            // Inherit button variants from contact section
+            buttonVariant: cardData?.sectionStyles?.contactInfo?.buttonVariant || "rounded-solid",
+            buttonPadding: cardData?.sectionStyles?.contactInfo?.buttonPadding || "normal",
+            buttonFullWidth: cardData?.sectionStyles?.contactInfo?.buttonFullWidth || false,
+            buttonIconOnly: cardData?.sectionStyles?.contactInfo?.buttonIconOnly || false,
+            buttonGradientFrom: cardData?.sectionStyles?.contactInfo?.buttonGradientFrom,
+            buttonGradientTo: cardData?.sectionStyles?.contactInfo?.buttonGradientTo,
+            buttonGradientAngle: cardData?.sectionStyles?.contactInfo?.buttonGradientAngle,
+            buttonActionText: cardData?.sectionStyles?.contactInfo?.buttonActionText,
+            buttonActionColor: cardData?.sectionStyles?.contactInfo?.buttonActionColor
           }
         };
         break;
@@ -506,6 +528,16 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             description: "",
             showDuration: true,
             openInNewTab: true,
+            // Inherit button variants from contact section
+            buttonVariant: cardData?.sectionStyles?.contactInfo?.buttonVariant || "rounded-solid",
+            buttonPadding: cardData?.sectionStyles?.contactInfo?.buttonPadding || "normal",
+            buttonFullWidth: cardData?.sectionStyles?.contactInfo?.buttonFullWidth || false,
+            buttonIconOnly: cardData?.sectionStyles?.contactInfo?.buttonIconOnly || false,
+            buttonGradientFrom: cardData?.sectionStyles?.contactInfo?.buttonGradientFrom,
+            buttonGradientTo: cardData?.sectionStyles?.contactInfo?.buttonGradientTo,
+            buttonGradientAngle: cardData?.sectionStyles?.contactInfo?.buttonGradientAngle,
+            buttonActionText: cardData?.sectionStyles?.contactInfo?.buttonActionText,
+            buttonActionColor: cardData?.sectionStyles?.contactInfo?.buttonActionColor
           }
         };
         break;
@@ -522,6 +554,16 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             buttonStyle: "outlined" as const,
             buttonSize: "medium" as const,
             buttonColor: "#7c3aed",
+            // Inherit button variants from contact section
+            buttonVariant: cardData?.sectionStyles?.contactInfo?.buttonVariant || "rounded-solid",
+            buttonPadding: cardData?.sectionStyles?.contactInfo?.buttonPadding || "normal",
+            buttonFullWidth: cardData?.sectionStyles?.contactInfo?.buttonFullWidth || false,
+            buttonIconOnly: cardData?.sectionStyles?.contactInfo?.buttonIconOnly || false,
+            buttonGradientFrom: cardData?.sectionStyles?.contactInfo?.buttonGradientFrom,
+            buttonGradientTo: cardData?.sectionStyles?.contactInfo?.buttonGradientTo,
+            buttonGradientAngle: cardData?.sectionStyles?.contactInfo?.buttonGradientAngle,
+            buttonActionText: cardData?.sectionStyles?.contactInfo?.buttonActionText,
+            buttonActionColor: cardData?.sectionStyles?.contactInfo?.buttonActionColor,
             textColor: "#7c3aed",
             showIcon: true,
             iconType: "handshake" as const,

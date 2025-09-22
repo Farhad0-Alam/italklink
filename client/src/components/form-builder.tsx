@@ -128,12 +128,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     contactFontStyling: true,
     contactDropShadow: true,
     contactContainerStyling: true,
+    contactButtonStyling: true,  // Button styling section collapsed by default
     // subsections inside Social Media
     socialIconStyling: true,
     socialHoverColor: true,   // Hover Color section collapsed by default
     socialFontStyling: true,
     socialDropShadow: true,
     socialContainerStyling: true,
+    socialButtonStyling: true,  // Button styling section collapsed by default
   });
 
   const form = useForm<BusinessCard>({
@@ -1443,6 +1445,193 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   )}
                 </div>
 
+                {/* Button Styling */}
+                <div className="bg-slate-800/50 rounded-lg p-3 space-y-3 mt-4">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("contactButtonStyling")} data-testid="toggle-contact-button-styling">
+                    <h5 className="text-xs font-medium text-purple-300">Button Styling</h5>
+                    <i className={`fas fa-chevron-${collapsedSections.contactButtonStyling ? "down" : "up"} text-purple-300 text-xs`} />
+                  </div>
+
+                  {!collapsedSections.contactButtonStyling && (
+                    <>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Button Shape</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.contactInfo?.buttonVariant || "rounded-solid"}
+                            onValueChange={(v) => form.setValue("sectionStyles.contactInfo.buttonVariant", v as any)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Choose shape" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pill-solid">Pill Solid</SelectItem>
+                              <SelectItem value="pill-outline">Pill Outline</SelectItem>
+                              <SelectItem value="pill-gradient">Pill Gradient</SelectItem>
+                              <SelectItem value="square-solid">Square Solid</SelectItem>
+                              <SelectItem value="square-outline">Square Outline</SelectItem>
+                              <SelectItem value="rounded-solid">Rounded Solid</SelectItem>
+                              <SelectItem value="rounded-outline">Rounded Outline</SelectItem>
+                              <SelectItem value="accent-left">Accent Left</SelectItem>
+                              <SelectItem value="accent-right">Accent Right</SelectItem>
+                              <SelectItem value="accent-top">Accent Top</SelectItem>
+                              <SelectItem value="accent-bottom">Accent Bottom</SelectItem>
+                              <SelectItem value="circle-icon">Circle Icon</SelectItem>
+                              <SelectItem value="attached-action">Attached Action</SelectItem>
+                              <SelectItem value="shadow-lifted">Shadow Lifted</SelectItem>
+                              <SelectItem value="glass-morphism">Glass Morphism</SelectItem>
+                              <SelectItem value="neo-brutalism">Neo Brutalism</SelectItem>
+                              <SelectItem value="soft-shadow">Soft Shadow</SelectItem>
+                              <SelectItem value="gradient-border">Gradient Border</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Button Size</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.contactInfo?.buttonSize || "md"}
+                            onValueChange={(v) => form.setValue("sectionStyles.contactInfo.buttonSize", v as any)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Choose size" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="xs">Extra Small</SelectItem>
+                              <SelectItem value="sm">Small</SelectItem>
+                              <SelectItem value="md">Medium</SelectItem>
+                              <SelectItem value="lg">Large</SelectItem>
+                              <SelectItem value="xl">Extra Large</SelectItem>
+                              <SelectItem value="full">Full Width</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Button Padding</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.contactInfo?.buttonPadding || "normal"}
+                            onValueChange={(v) => form.setValue("sectionStyles.contactInfo.buttonPadding", v as any)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Choose padding" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="tight">Tight</SelectItem>
+                              <SelectItem value="normal">Normal</SelectItem>
+                              <SelectItem value="loose">Loose</SelectItem>
+                              <SelectItem value="extra-loose">Extra Loose</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="contactButtonFullWidth"
+                              checked={watchedValues.sectionStyles?.contactInfo?.buttonFullWidth || false}
+                              onCheckedChange={(c) => form.setValue("sectionStyles.contactInfo.buttonFullWidth", c)}
+                            />
+                            <Label htmlFor="contactButtonFullWidth" className="text-white text-xs">Full Width</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="contactButtonIconOnly"
+                              checked={watchedValues.sectionStyles?.contactInfo?.buttonIconOnly || false}
+                              onCheckedChange={(c) => form.setValue("sectionStyles.contactInfo.buttonIconOnly", c)}
+                            />
+                            <Label htmlFor="contactButtonIconOnly" className="text-white text-xs">Icon Only</Label>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Gradient colors for gradient variants */}
+                      {(watchedValues.sectionStyles?.contactInfo?.buttonVariant === 'pill-gradient' || 
+                        watchedValues.sectionStyles?.contactInfo?.buttonVariant === 'gradient-border') && (
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-600">
+                          <div>
+                            <Label className="text-white text-xs">Gradient From</Label>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={watchedValues.sectionStyles?.contactInfo?.buttonGradientFrom || "#22c55e"}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.buttonGradientFrom", e.target.value)}
+                                className="w-6 h-6 rounded cursor-pointer"
+                              />
+                              <Input
+                                value={watchedValues.sectionStyles?.contactInfo?.buttonGradientFrom || "#22c55e"}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.buttonGradientFrom", e.target.value)}
+                                className="bg-slate-700 border-slate-600 text-white text-xs"
+                                placeholder="#22c55e"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-white text-xs">Gradient To</Label>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={watchedValues.sectionStyles?.contactInfo?.buttonGradientTo || "#16a34a"}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.buttonGradientTo", e.target.value)}
+                                className="w-6 h-6 rounded cursor-pointer"
+                              />
+                              <Input
+                                value={watchedValues.sectionStyles?.contactInfo?.buttonGradientTo || "#16a34a"}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.buttonGradientTo", e.target.value)}
+                                className="bg-slate-700 border-slate-600 text-white text-xs"
+                                placeholder="#16a34a"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-white text-xs">Gradient Angle: {watchedValues.sectionStyles?.contactInfo?.buttonGradientAngle || 90}°</Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.contactInfo?.buttonGradientAngle || 90}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.buttonGradientAngle", parseInt(e.target.value))}
+                              className="custom-range w-full"
+                              min={0}
+                              max={360}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action text for attached-action variant */}
+                      {watchedValues.sectionStyles?.contactInfo?.buttonVariant === 'attached-action' && (
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-600">
+                          <div>
+                            <Label className="text-white text-xs">Action Text</Label>
+                            <Input
+                              value={watchedValues.sectionStyles?.contactInfo?.buttonActionText || "▼"}
+                              onChange={(e) => form.setValue("sectionStyles.contactInfo.buttonActionText", e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="▼"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-white text-xs">Action Color</Label>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={watchedValues.sectionStyles?.contactInfo?.buttonActionColor || "#16a34a"}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.buttonActionColor", e.target.value)}
+                                className="w-6 h-6 rounded cursor-pointer"
+                              />
+                              <Input
+                                value={watchedValues.sectionStyles?.contactInfo?.buttonActionColor || "#16a34a"}
+                                onChange={(e) => form.setValue("sectionStyles.contactInfo.buttonActionColor", e.target.value)}
+                                className="bg-slate-700 border-slate-600 text-white text-xs"
+                                placeholder="#16a34a"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
               </>
             )}
           </div>
@@ -2133,6 +2322,193 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             )}
                           </div>
                         </>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Button Styling */}
+                <div className="bg-slate-800/50 rounded-lg p-3 space-y-3 mt-4">
+                  <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection("socialButtonStyling")} data-testid="toggle-social-button-styling">
+                    <h5 className="text-xs font-medium text-pink-300">Button Styling</h5>
+                    <i className={`fas fa-chevron-${collapsedSections.socialButtonStyling ? "down" : "up"} text-pink-300 text-xs`} />
+                  </div>
+
+                  {!collapsedSections.socialButtonStyling && (
+                    <>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-white text-xs">Button Shape</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.socialMedia?.buttonVariant || "rounded-solid"}
+                            onValueChange={(v) => form.setValue("sectionStyles.socialMedia.buttonVariant", v as any)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Choose shape" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pill-solid">Pill Solid</SelectItem>
+                              <SelectItem value="pill-outline">Pill Outline</SelectItem>
+                              <SelectItem value="pill-gradient">Pill Gradient</SelectItem>
+                              <SelectItem value="square-solid">Square Solid</SelectItem>
+                              <SelectItem value="square-outline">Square Outline</SelectItem>
+                              <SelectItem value="rounded-solid">Rounded Solid</SelectItem>
+                              <SelectItem value="rounded-outline">Rounded Outline</SelectItem>
+                              <SelectItem value="accent-left">Accent Left</SelectItem>
+                              <SelectItem value="accent-right">Accent Right</SelectItem>
+                              <SelectItem value="accent-top">Accent Top</SelectItem>
+                              <SelectItem value="accent-bottom">Accent Bottom</SelectItem>
+                              <SelectItem value="circle-icon">Circle Icon</SelectItem>
+                              <SelectItem value="attached-action">Attached Action</SelectItem>
+                              <SelectItem value="shadow-lifted">Shadow Lifted</SelectItem>
+                              <SelectItem value="glass-morphism">Glass Morphism</SelectItem>
+                              <SelectItem value="neo-brutalism">Neo Brutalism</SelectItem>
+                              <SelectItem value="soft-shadow">Soft Shadow</SelectItem>
+                              <SelectItem value="gradient-border">Gradient Border</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Button Size</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.socialMedia?.buttonSize || "md"}
+                            onValueChange={(v) => form.setValue("sectionStyles.socialMedia.buttonSize", v as any)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Choose size" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="xs">Extra Small</SelectItem>
+                              <SelectItem value="sm">Small</SelectItem>
+                              <SelectItem value="md">Medium</SelectItem>
+                              <SelectItem value="lg">Large</SelectItem>
+                              <SelectItem value="xl">Extra Large</SelectItem>
+                              <SelectItem value="full">Full Width</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label className="text-white text-xs">Button Padding</Label>
+                          <Select
+                            value={watchedValues.sectionStyles?.socialMedia?.buttonPadding || "normal"}
+                            onValueChange={(v) => form.setValue("sectionStyles.socialMedia.buttonPadding", v as any)}
+                          >
+                            <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                              <SelectValue placeholder="Choose padding" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="tight">Tight</SelectItem>
+                              <SelectItem value="normal">Normal</SelectItem>
+                              <SelectItem value="loose">Loose</SelectItem>
+                              <SelectItem value="extra-loose">Extra Loose</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="socialButtonFullWidth"
+                              checked={watchedValues.sectionStyles?.socialMedia?.buttonFullWidth || false}
+                              onCheckedChange={(c) => form.setValue("sectionStyles.socialMedia.buttonFullWidth", c)}
+                            />
+                            <Label htmlFor="socialButtonFullWidth" className="text-white text-xs">Full Width</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="socialButtonIconOnly"
+                              checked={watchedValues.sectionStyles?.socialMedia?.buttonIconOnly || false}
+                              onCheckedChange={(c) => form.setValue("sectionStyles.socialMedia.buttonIconOnly", c)}
+                            />
+                            <Label htmlFor="socialButtonIconOnly" className="text-white text-xs">Icon Only</Label>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Gradient colors for gradient variants */}
+                      {(watchedValues.sectionStyles?.socialMedia?.buttonVariant === 'pill-gradient' || 
+                        watchedValues.sectionStyles?.socialMedia?.buttonVariant === 'gradient-border') && (
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-600">
+                          <div>
+                            <Label className="text-white text-xs">Gradient From</Label>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={watchedValues.sectionStyles?.socialMedia?.buttonGradientFrom || "#e91e63"}
+                                onChange={(e) => form.setValue("sectionStyles.socialMedia.buttonGradientFrom", e.target.value)}
+                                className="w-6 h-6 rounded cursor-pointer"
+                              />
+                              <Input
+                                value={watchedValues.sectionStyles?.socialMedia?.buttonGradientFrom || "#e91e63"}
+                                onChange={(e) => form.setValue("sectionStyles.socialMedia.buttonGradientFrom", e.target.value)}
+                                className="bg-slate-700 border-slate-600 text-white text-xs"
+                                placeholder="#e91e63"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-white text-xs">Gradient To</Label>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={watchedValues.sectionStyles?.socialMedia?.buttonGradientTo || "#f97316"}
+                                onChange={(e) => form.setValue("sectionStyles.socialMedia.buttonGradientTo", e.target.value)}
+                                className="w-6 h-6 rounded cursor-pointer"
+                              />
+                              <Input
+                                value={watchedValues.sectionStyles?.socialMedia?.buttonGradientTo || "#f97316"}
+                                onChange={(e) => form.setValue("sectionStyles.socialMedia.buttonGradientTo", e.target.value)}
+                                className="bg-slate-700 border-slate-600 text-white text-xs"
+                                placeholder="#f97316"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-white text-xs">Gradient Angle: {watchedValues.sectionStyles?.socialMedia?.buttonGradientAngle || 90}°</Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.socialMedia?.buttonGradientAngle || 90}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.buttonGradientAngle", parseInt(e.target.value))}
+                              className="custom-range w-full"
+                              min={0}
+                              max={360}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action text for attached-action variant */}
+                      {watchedValues.sectionStyles?.socialMedia?.buttonVariant === 'attached-action' && (
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-600">
+                          <div>
+                            <Label className="text-white text-xs">Action Text</Label>
+                            <Input
+                              value={watchedValues.sectionStyles?.socialMedia?.buttonActionText || "▼"}
+                              onChange={(e) => form.setValue("sectionStyles.socialMedia.buttonActionText", e.target.value)}
+                              className="bg-slate-700 border-slate-600 text-white text-xs"
+                              placeholder="▼"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-white text-xs">Action Color</Label>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={watchedValues.sectionStyles?.socialMedia?.buttonActionColor || "#f97316"}
+                                onChange={(e) => form.setValue("sectionStyles.socialMedia.buttonActionColor", e.target.value)}
+                                className="w-6 h-6 rounded cursor-pointer"
+                              />
+                              <Input
+                                value={watchedValues.sectionStyles?.socialMedia?.buttonActionColor || "#f97316"}
+                                onChange={(e) => form.setValue("sectionStyles.socialMedia.buttonActionColor", e.target.value)}
+                                className="bg-slate-700 border-slate-600 text-white text-xs"
+                                placeholder="#f97316"
+                              />
+                            </div>
+                          </div>
+                        </div>
                       )}
                     </>
                   )}

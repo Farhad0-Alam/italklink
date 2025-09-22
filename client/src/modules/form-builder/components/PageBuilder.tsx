@@ -220,6 +220,7 @@ export function PageBuilder({ elements, onElementsChange, cardData, onNavigatePa
         open={showElementSelector}
         onOpenChange={setShowElementSelector}
         onAddElement={handleAddElement}
+        cardData={cardData}
       />
     </div>
   );
