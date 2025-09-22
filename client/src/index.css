@@ -733,3 +733,82 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Text Position Classes for Icon-Text Layout */
+.tl-text-left {
+  display: flex !important;
+  flex-direction: row-reverse !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.tl-text-right {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.tl-text-top {
+  display: flex !important;
+  flex-direction: column-reverse !important;
+  align-items: center !important;
+  gap: 4px !important;
+  text-align: center !important;
+}
+
+.tl-text-bottom {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  text-align: center !important;
+}
+
+/* Icon Container Sizing - Dynamic Utility Classes */
+.tl-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Text Content Styling for Different Positions */
+.tl-text-content {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Vertical text positioning adjustments */
+.tl-text-top .tl-text-content,
+.tl-text-bottom .tl-text-content {
+  flex: none;
+  text-align: center;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+/* Enhanced button styling with text position support */
+.tl-social-button.tl-text-left,
+.tl-social-button.tl-text-right {
+  justify-content: flex-start;
+}
+
+.tl-social-button.tl-text-top,
+.tl-social-button.tl-text-bottom {
+  justify-content: center;
+  min-height: auto;
+}
+
+/* Icon and text balance for optimal spacing */
+.tl-text-left .tl-icon-container,
+.tl-text-right .tl-icon-container {
+  margin: 0;
+}
+
+.tl-text-top .tl-icon-container,
+.tl-text-bottom .tl-icon-container {
+  margin: 0 auto;
+}
