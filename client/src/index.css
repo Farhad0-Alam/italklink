@@ -519,6 +519,42 @@
   display: inline;
 }
 
+/* Alignment Classes */
+.tl-align-left {
+  text-align: left;
+  justify-content: flex-start;
+  justify-items: start;
+}
+
+.tl-align-center {
+  text-align: center;
+  justify-content: center;
+  justify-items: center;
+}
+
+.tl-align-right {
+  text-align: right;
+  justify-content: flex-end;
+  justify-items: end;
+}
+
+.tl-align-justify {
+  text-align: justify;
+  justify-items: start;
+}
+
+/* Apply space-between only for auto columns with justify alignment */
+.tl-cols-auto.tl-align-justify {
+  justify-content: space-between;
+}
+
+/* Make grid items responsive to alignment for better visual results */
+.tl-align-center > *,
+.tl-align-right > * {
+  width: max-content;
+  justify-self: inherit;
+}
+
 /* Responsive Grid Adjustments */
 @media (max-width: 768px) {
   .tl-cols-auto {

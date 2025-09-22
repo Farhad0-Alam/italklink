@@ -1077,6 +1077,44 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               </SelectContent>
                             </Select>
                           </div>
+
+                          <div>
+                            <Label className="text-white text-xs">Alignment</Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.contactInfo?.alignment || "left"}
+                              onValueChange={(value) => form.setValue("sectionStyles.contactInfo.alignment", value as "left" | "center" | "right" | "justify")}
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-contact-alignment">
+                                <SelectValue placeholder="Select alignment" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="left">
+                                  <div className="flex items-center gap-2">
+                                    <i className="fas fa-align-left"></i>
+                                    Left
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="center">
+                                  <div className="flex items-center gap-2">
+                                    <i className="fas fa-align-center"></i>
+                                    Center
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="right">
+                                  <div className="flex items-center gap-2">
+                                    <i className="fas fa-align-right"></i>
+                                    Right
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="justify">
+                                  <div className="flex items-center gap-2">
+                                    <i className="fas fa-align-justify"></i>
+                                    Justify
+                                  </div>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
 
                         {/* Label Toggle - Only show when View is Icon & Text */}
@@ -1850,6 +1888,44 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <SelectItem value="4">4</SelectItem>
                                 <SelectItem value="5">5</SelectItem>
                                 <SelectItem value="6">6</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label className="text-white text-xs">Alignment</Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.socialMedia?.alignment || "left"}
+                              onValueChange={(value) => form.setValue("sectionStyles.socialMedia.alignment", value as "left" | "center" | "right" | "justify")}
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-social-alignment">
+                                <SelectValue placeholder="Select alignment" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="left">
+                                  <div className="flex items-center gap-2">
+                                    <i className="fas fa-align-left"></i>
+                                    Left
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="center">
+                                  <div className="flex items-center gap-2">
+                                    <i className="fas fa-align-center"></i>
+                                    Center
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="right">
+                                  <div className="flex items-center gap-2">
+                                    <i className="fas fa-align-right"></i>
+                                    Right
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="justify">
+                                  <div className="flex items-center gap-2">
+                                    <i className="fas fa-align-justify"></i>
+                                    Justify
+                                  </div>
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                           </div>

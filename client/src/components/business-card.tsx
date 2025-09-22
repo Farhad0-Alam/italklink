@@ -249,6 +249,11 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
       return `tl-cols-${columns}`;
     };
 
+    const getAlignmentClass = (section: 'contactInfo' | 'socialMedia'): string => {
+      const alignment = getSectionStyle(section, 'alignment') || 'left';
+      return `tl-align-${alignment}`;
+    };
+
     const getViewType = (section: 'contactInfo' | 'socialMedia'): 'icon-text' | 'icon' | 'text' => {
       const view = getSectionStyle(section, 'view') || 'icon-text';
       return view as 'icon-text' | 'icon' | 'text';
@@ -533,7 +538,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               {/* Contact Information with Enhanced Icon Styling */}
               {data.customContacts && data.customContacts.length > 0 && (
                 <div 
-                  className={`px-4 ${getColumnClass('contactInfo')}`}
+                  className={`px-4 ${getColumnClass('contactInfo')} ${getAlignmentClass('contactInfo')}`}
                   style={getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? {
                     gap: `${parseNumeric(getSectionStyle('contactInfo', 'containerGap'), 8)}px`
                   } : {
@@ -699,7 +704,7 @@ END:VCARD`;
             {/* Social Media with Enhanced Icon Styling */}
             {data.customSocials && data.customSocials.length > 0 && (
               <div 
-                className={`px-4 ${getColumnClass('socialMedia')}`}
+                className={`px-4 ${getColumnClass('socialMedia')} ${getAlignmentClass('socialMedia')}`}
                 style={{
                   ...(getSectionStyle('socialMedia', 'containerStylingEnabled') === 'true' ? {
                     backgroundColor: getSectionStyle('socialMedia', 'containerBackgroundColor') || 'transparent',

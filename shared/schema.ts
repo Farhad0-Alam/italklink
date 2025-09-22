@@ -3301,6 +3301,7 @@ export const businessCardSchema = z.object({
       skin: z.enum(['gradient', 'minimal', 'framed', 'boxed', 'flat']).optional(),
       shape: z.enum(['square', 'rounded', 'circle']).optional(),
       columns: z.union([z.enum(['auto']), z.number().min(1).max(6)]).optional(),
+      alignment: z.enum(['left', 'center', 'right', 'justify']).optional(),
       showLabel: z.boolean().optional(),
     }).default({}),
     socialMedia: z.object({
@@ -3343,6 +3344,7 @@ export const businessCardSchema = z.object({
       skin: z.enum(['gradient', 'minimal', 'framed', 'boxed', 'flat']).optional(),
       shape: z.enum(['square', 'rounded', 'circle']).optional(),
       columns: z.union([z.enum(['auto']), z.number().min(1).max(6)]).optional(),
+      alignment: z.enum(['left', 'center', 'right', 'justify']).optional(),
       showLabel: z.boolean().optional(),
     }).default({}),
     about: z.object({
