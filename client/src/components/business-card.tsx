@@ -270,6 +270,11 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
       return true; // Default to true if not set
     };
 
+    const getTextPositionClass = (section: 'contactInfo' | 'socialMedia'): string => {
+      const textPosition = getSectionStyle(section, 'textPosition') || 'right';
+      return `tl-text-${textPosition}`;
+    };
+
     // Helper functions for type safety
     const parseNumeric = (value: string | undefined, defaultValue: number): number => {
       if (!value) return defaultValue;
@@ -579,7 +584,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     return (
                       <div 
                         key={contact.id} 
-                        className={`flex ${viewType === 'icon-text' ? 'flex-col' : ''} items-center ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''}`}
+                        className={`tl-icon-container ${viewType === 'icon-text' ? `flex w-full ${getTextPositionClass('contactInfo')}` : 'flex items-center'} ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''}`}
                         style={getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? {
                           backgroundColor: getSectionStyle('contactInfo', 'containerBackgroundColor') || 'transparent',
                           borderWidth: getSectionStyle('contactInfo', 'containerBorderColor') ? '1px' : '0',
@@ -612,8 +617,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                               } : {}),
                               borderWidth: getSectionStyle('contactInfo', 'iconBorderColor') ? `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px` : '0',
                               borderStyle: getSectionStyle('contactInfo', 'iconBorderColor') ? 'solid' : 'none',
-                              width: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 40)}px`,
-                              height: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 40)}px`,
+                              width: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundWidth'), parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48))}px`,
+                              height: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundHeight'), parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48))}px`,
                               boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
                                 ? `${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'dropShadowOpacity') || '0.25'))}`
                                 : 'none'
@@ -757,7 +762,7 @@ END:VCARD`;
                     <button 
                       key={social.id} 
                       onClick={() => handleContactAction(social.platform, social.value)}
-                      className={`tl-social-button ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${viewType === 'icon-text' ? 'w-full' : 'w-auto'}`}
+                      className={`tl-social-button ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${viewType === 'icon-text' ? `w-full ${getTextPositionClass('socialMedia')}` : 'w-auto'}`}
                       data-platform={social.platform}
                       style={{
                         // Base CSS variables - always applied
@@ -779,7 +784,12 @@ END:VCARD`;
                         fontStyle: getSectionStyle('socialMedia', 'iconTextStyle') || 'normal',
                         boxShadow: getSectionStyle('socialMedia', 'dropShadowEnabled') === 'true' 
                           ? `${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('socialMedia', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('socialMedia', 'dropShadowOpacity') || '0.25'))}`
-                          : 'none'
+                          : 'none',
+                        // Icon container dimensions - for icon and icon-text views
+                        ...(shouldShowIcons && {
+                          width: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundWidth'), parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48))}px`,
+                          height: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundHeight'), parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48))}px`
+                        })
                       }}
                       data-testid={`button-custom-social-${social.id}`}
                     >
