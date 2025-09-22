@@ -264,7 +264,10 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
       if (viewType !== 'icon-text') return false;
       
       const showLabel = getSectionStyle(section, 'showLabel');
-      return showLabel !== 'false'; // Default to true if not set
+      // Handle both string and boolean values for backward compatibility
+      if (typeof showLabel === 'boolean') return showLabel;
+      if (typeof showLabel === 'string') return showLabel !== 'false';
+      return true; // Default to true if not set
     };
 
     // Helper functions for type safety
@@ -754,7 +757,8 @@ END:VCARD`;
                     <button 
                       key={social.id} 
                       onClick={() => handleContactAction(social.platform, social.value)}
-                      className={`flex items-center justify-center gap-3 p-3 tl-icon-base ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${viewType === 'icon-text' ? 'w-full' : 'w-auto'}`}
+                      className={`tl-social-button ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${viewType === 'icon-text' ? 'w-full' : 'w-auto'}`}
+                      data-platform={social.platform}
                       style={{
                         // Base CSS variables - always applied
                         '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e',
@@ -781,14 +785,14 @@ END:VCARD`;
                     >
                       {shouldShowIcons && (
                         <i 
-                          className={social.icon}
+                          className={`${social.icon} tl-icon-symbol`}
                           style={{
                             fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 18)}px`
                           }}
                         ></i>
                       )}
                       {shouldShowText && showLabel && (
-                        <span>{social.label || 'Social'}</span>
+                        <span className="tl-icon-text">{social.label || 'Social'}</span>
                       )}
                     </button>
                   );

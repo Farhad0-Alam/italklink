@@ -395,6 +395,17 @@
   color: white;
   border: none;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  font-weight: 500;
+  padding: 12px 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.tl-skin-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
 .tl-skin-minimal {
@@ -403,12 +414,28 @@
   border: none;
   text-decoration: underline;
   text-underline-offset: 4px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 400;
 }
 
 .tl-skin-framed {
   background: transparent;
   color: var(--tl-icon-color, #374151);
   border: 2px solid var(--tl-border, #d1d5db);
+  padding: 10px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tl-skin-framed:hover {
+  background: var(--tl-icon-bg, #f3f4f6);
+  border-color: var(--tl-icon-color, #374151);
 }
 
 .tl-skin-boxed {
@@ -416,14 +443,20 @@
   background: var(--tl-icon-bg, #f3f4f6);
   color: var(--tl-icon-color, #374151);
   border: 1px solid var(--tl-border, #e5e7eb);
+  padding: 12px 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .tl-skin-boxed .tl-icon-container {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   background: white;
   border-radius: inherit;
   margin-right: 8px;
@@ -434,6 +467,121 @@
   background: var(--tl-icon-bg, #6b7280);
   color: white;
   border: none;
+  padding: 12px 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tl-skin-flat:hover {
+  background: var(--tl-icon-bg-hover, var(--tl-icon-bg, #6b7280));
+  transform: translateY(-1px);
+}
+
+/* Enhanced Social Media Button Styles */
+.tl-social-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Icon and Text Spacing */
+.tl-social-button .tl-icon-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.tl-social-button .tl-icon-text {
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  text-transform: capitalize;
+}
+
+/* Platform-specific colors for flat and gradient styles */
+.tl-social-button[data-platform="facebook"] {
+  --platform-color: #1877f2;
+  --platform-hover: #166fe5;
+}
+
+.tl-social-button[data-platform="twitter"] {
+  --platform-color: #1da1f2;
+  --platform-hover: #0d8bd9;
+}
+
+.tl-social-button[data-platform="instagram"] {
+  --platform-color: #e4405f;
+  --platform-hover: #d62d4a;
+}
+
+.tl-social-button[data-platform="linkedin"] {
+  --platform-color: #0077b5;
+  --platform-hover: #005885;
+}
+
+.tl-social-button[data-platform="youtube"] {
+  --platform-color: #ff0000;
+  --platform-hover: #cc0000;
+}
+
+.tl-social-button[data-platform="tiktok"] {
+  --platform-color: #000000;
+  --platform-hover: #333333;
+}
+
+.tl-social-button[data-platform="pinterest"] {
+  --platform-color: #bd081c;
+  --platform-hover: #9a0715;
+}
+
+.tl-social-button[data-platform="snapchat"] {
+  --platform-color: #fffc00;
+  --platform-hover: #e6e300;
+  color: #000000 !important;
+}
+
+.tl-social-button[data-platform="whatsapp"] {
+  --platform-color: #25d366;
+  --platform-hover: #128c7e;
+}
+
+.tl-social-button[data-platform="telegram"] {
+  --platform-color: #0088cc;
+  --platform-hover: #006699;
+}
+
+/* Apply platform colors to flat and gradient styles */
+.tl-skin-flat.tl-social-button,
+.tl-skin-gradient.tl-social-button {
+  background: var(--platform-color, var(--tl-icon-bg, #6b7280));
+  color: white;
+}
+
+.tl-skin-flat.tl-social-button:hover,
+.tl-skin-gradient.tl-social-button:hover {
+  background: var(--platform-hover, var(--tl-icon-bg-hover, var(--tl-icon-bg, #6b7280)));
+}
+
+/* Outlined style with platform colors */
+.tl-skin-framed.tl-social-button {
+  border-color: var(--platform-color, var(--tl-border, #d1d5db));
+  color: var(--platform-color, var(--tl-icon-color, #374151));
+}
+
+.tl-skin-framed.tl-social-button:hover {
+  background: var(--platform-color, var(--tl-icon-bg, #f3f4f6));
+  color: white;
 }
 
 /* Shape Styles */
