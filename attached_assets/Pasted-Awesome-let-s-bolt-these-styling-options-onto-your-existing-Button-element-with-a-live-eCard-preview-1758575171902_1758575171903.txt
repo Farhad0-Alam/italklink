@@ -1,0 +1,380 @@
+Awesome—let’s bolt these styling options onto your existing Button element with a live eCard preview. Below is a drop-in React (TypeScript) module using Tailwind + shadcn/ui that adds:
+
+View: Icon & Text / Icon / Text (with Label show/hide only when Icon & Text)
+
+Skin: Gradient / Minimal / Framed / Boxed Icon / Flat
+
+Shape: Square / Rounded / Circle
+
+Columns: Auto / 1–6
+…and renders a dynamic preview grid exactly like Elementor’s feel, but in your 2TalkLink builder.
+
+If you already have a different UI kit, you can swap the shadcn <Select> / <Switch> quickly—the logic and class mapping stay the same.
+
+1) Button style controls + live preview (single file)
+// components/builder/ButtonStylePanel.tsx
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Share2, Phone, Mail, Link as LinkIcon, Globe } from "lucide-react";
+
+/** --- Types --- */
+type ViewType = "icon-text" | "icon" | "text";
+type SkinType = "gradient" | "minimal" | "framed" | "boxed" | "flat";
+type ShapeType = "square" | "rounded" | "circle";
+type ColumnsType = "auto" | 1 | 2 | 3 | 4 | 5 | 6;
+
+export interface ButtonStyle {
+  view: ViewType;
+  skin: SkinType;
+  shape: ShapeType;
+  columns: ColumnsType;
+  showLabel: boolean; // Only used when view = "icon-text"
+  // Optional brand color (for flat/boxed/etc.)
+  colorHex?: string; // e.g. "#2563eb"
+}
+
+export interface ActionButton {
+  id: string;
+  label: string;
+  icon?: "share" | "phone" | "mail" | "link" | "web";
+  href?: string;
+  // Any other fields you already use (actionType, payload, etc.)
+}
+
+interface Props {
+  value: ButtonStyle;
+  onChange: (next: ButtonStyle) => void;
+  // Preview items (your live eCard’s current button list)
+  items: ActionButton[];
+  onItemsChange?: (next: ActionButton[]) => void; // optional if you edit labels here
+}
+
+/** --- Helpers --- */
+const shapeClass = (shape: ShapeType) => {
+  switch (shape) {
+    case "square": return "rounded-none";
+    case "rounded": return "rounded-xl";
+    case "circle": return "rounded-full";
+  }
+};
+
+const columnsClass = (cols: ColumnsType) => {
+  if (cols === "auto") return "grid-cols-[repeat(auto-fit,minmax(120px,1fr))]";
+  return `grid-cols-${cols}`;
+};
+
+const skinClass = (skin: SkinType, colorHex?: string) => {
+  // Tailwind-safe fallbacks + inline CSS color var for dynamic hex
+  const base = "border transition";
+  switch (skin) {
+    case "gradient":
+      return cn(base, "text-white border-transparent bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-90");
+    case "minimal":
+      return cn(base, "bg-transparent border-transparent text-primary hover:underline underline-offset-4");
+    case "framed":
+      return cn(base, "bg-white border-current text-primary hover:bg-gray-50");
+    case "boxed":
+      // Boxed is handled in renderer (icon box). Button uses light bg.
+      return cn(base, "bg-gray-50 text-gray-900 border-gray-200 hover:bg-gray-100");
+    case "flat":
+      // Use custom color, fallback to slate
+      return cn(base, "text-white border-transparent", colorHex ? "" : "bg-slate-700 hover:opacity-90");
+    default:
+      return base;
+  }
+};
+
+const iconMap = {
+  share: Share2,
+  phone: Phone,
+  mail: Mail,
+  link: LinkIcon,
+  web: Globe,
+};
+
+/** --- The Panel --- */
+export default function ButtonStylePanel({ value, onChange, items, onItemsChange }: Props) {
+  const { view, skin, shape, columns, showLabel, colorHex } = value;
+
+  // Local update helper
+  const update = <K extends keyof ButtonStyle>(key: K, v: ButtonStyle[K]) =>
+    onChange({ ...value, [key]: v });
+
+  return (
+    <div className="space-y-6">
+      {/* Controls */}
+      <section className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label>View</Label>
+            <Select value={view} onValueChange={(v: ViewType) => update("view", v)}>
+              <SelectTrigger className="mt-2">
+                <SelectValue placeholder="Select view" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="icon-text">Icon & Text</SelectItem>
+                <SelectItem value="icon">Icon</SelectItem>
+                <SelectItem value="text">Text</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Skin</Label>
+            <Select value={skin} onValueChange={(v: SkinType) => update("skin", v)}>
+              <SelectTrigger className="mt-2">
+                <SelectValue placeholder="Select skin" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="gradient">Gradient</SelectItem>
+                <SelectItem value="minimal">Minimal</SelectItem>
+                <SelectItem value="framed">Framed</SelectItem>
+                <SelectItem value="boxed">Boxed Icon</SelectItem>
+                <SelectItem value="flat">Flat</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Shape</Label>
+            <Select value={shape} onValueChange={(v: ShapeType) => update("shape", v)}>
+              <SelectTrigger className="mt-2">
+                <SelectValue placeholder="Select shape" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="square">Square</SelectItem>
+                <SelectItem value="rounded">Rounded</SelectItem>
+                <SelectItem value="circle">Circle</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Columns</Label>
+            <Select
+              value={String(columns)}
+              onValueChange={(v) => update("columns", (v === "auto" ? "auto" : (parseInt(v) as ColumnsType)))}
+            >
+              <SelectTrigger className="mt-2">
+                <SelectValue placeholder="Select columns" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">Auto</SelectItem>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="4">4</SelectItem>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="6">6</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {view === "icon-text" && (
+            <div className="col-span-2 flex items-center justify-between rounded-lg border p-3">
+              <div className="space-y-0.5">
+                <Label>Label</Label>
+                <p className="text-xs text-muted-foreground">Show or hide text label for buttons</p>
+              </div>
+              <Switch checked={showLabel} onCheckedChange={(v) => update("showLabel", v)} />
+            </div>
+          )}
+
+          {(skin === "flat") && (
+            <div className="col-span-2">
+              <Label>Color (Flat)</Label>
+              <Input
+                type="text"
+                className="mt-2"
+                placeholder="#2563eb"
+                value={colorHex ?? ""}
+                onChange={(e) => update("colorHex", e.target.value)}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">Hex color for Flat skin background</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Live Preview */}
+      <section>
+        <Label className="mb-2 block">Preview</Label>
+        <ButtonPreviewGrid
+          items={items}
+          style={value}
+          onItemsChange={onItemsChange}
+        />
+      </section>
+    </div>
+  );
+}
+
+/** --- Preview Renderer --- */
+function ButtonPreviewGrid({
+  items,
+  style,
+  onItemsChange,
+}: {
+  items: ActionButton[];
+  style: ButtonStyle;
+  onItemsChange?: (next: ActionButton[]) => void;
+}) {
+  const { view, skin, shape, columns, showLabel, colorHex } = style;
+
+  const handleLabelEdit = (id: string, label: string) => {
+    if (!onItemsChange) return;
+    onItemsChange(items.map(it => it.id === id ? { ...it, label } : it));
+  };
+
+  return (
+    <div
+      className={cn(
+        "grid gap-3",
+        columnsClass(columns)
+      )}
+    >
+      {items.map((item) => {
+        const Icon = item.icon ? iconMap[item.icon] : Share2;
+
+        // Flat dynamic color style
+        const flatStyle = skin === "flat" && colorHex
+          ? { backgroundColor: colorHex }
+          : undefined;
+
+        // Boxed icon rendering: icon sits in its own box
+        const boxedIcon =
+          skin === "boxed" ? (
+            <span
+              className={cn(
+                "inline-flex size-9 items-center justify-center",
+                "bg-white/70 text-gray-900",
+                shapeClass(shape),
+                "shadow-sm"
+              )}
+            >
+              <Icon className="h-4 w-4" />
+            </span>
+          ) : (
+            <Icon className={cn("h-4 w-4", view === "text" && "hidden")} />
+          );
+
+        return (
+          <a
+            key={item.id}
+            href={item.href || "#"}
+            className={cn(
+              "no-underline"
+            )}
+            onClick={(e) => e.preventDefault()} // preview only
+          >
+            <div
+              className={cn(
+                "w-full",
+                "inline-flex items-center justify-center gap-2 px-4 py-2",
+                shapeClass(shape),
+                skinClass(skin, colorHex),
+                // Minimal skin hover affordance when only icon:
+                view === "icon" && skin === "minimal" ? "hover:opacity-80" : ""
+              )}
+              style={flatStyle}
+            >
+              {view !== "text" && boxedIcon}
+
+              {(view === "icon-text" && showLabel) || view === "text" ? (
+                <span className="truncate">{item.label}</span>
+              ) : null}
+            </div>
+
+            {/* (Optional) inline label edit in preview (good UX for quick tweaks) */}
+            {((view === "icon-text" && showLabel) || view === "text") && onItemsChange && (
+              <input
+                className="mt-1 w-full rounded-md border bg-background px-2 py-1 text-sm"
+                value={item.label}
+                onChange={(e) => handleLabelEdit(item.id, e.target.value)}
+              />
+            )}
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+
+2) Minimal utility (if you don’t already have cn)
+// lib/utils.ts
+export function cn(...classes: (string | false | null | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
+}
+
+3) Example integration in your builder
+// pages/builder/BlocksPanel.tsx
+import React from "react";
+import ButtonStylePanel, { ButtonStyle, ActionButton } from "@/components/builder/ButtonStylePanel";
+
+export default function BlocksPanel() {
+  const [buttonStyle, setButtonStyle] = React.useState<ButtonStyle>({
+    view: "icon-text",
+    skin: "gradient",
+    shape: "rounded",
+    columns: "auto",
+    showLabel: true,
+    colorHex: "#2563eb",
+  });
+
+  const [buttons, setButtons] = React.useState<ActionButton[]>([
+    { id: "1", label: "Call", icon: "phone", href: "tel:+8801..." },
+    { id: "2", label: "Email", icon: "mail", href: "mailto:hello@..." },
+    { id: "3", label: "Website", icon: "web", href: "https://..." },
+    { id: "4", label: "Share", icon: "share" },
+    { id: "5", label: "Link", icon: "link", href: "https://..." },
+  ]);
+
+  // Persist this style into your eCard schema as needed
+  return (
+    <div className="space-y-6">
+      <ButtonStylePanel
+        value={buttonStyle}
+        onChange={setButtonStyle}
+        items={buttons}
+        onItemsChange={setButtons}
+      />
+    </div>
+  );
+}
+
+4) Save to your eCard JSON (schema suggestion)
+{
+  "block": "buttons",
+  "style": {
+    "view": "icon-text",
+    "skin": "gradient",
+    "shape": "rounded",
+    "columns": "auto",
+    "showLabel": true,
+    "colorHex": "#2563eb"
+  },
+  "items": [
+    { "id": "1", "label": "Call", "icon": "phone", "href": "tel:+8801..." },
+    { "id": "2", "label": "Email", "icon": "mail", "href": "mailto:hello@..." }
+  ]
+}
+
+
+Your eCard renderer should read this block and apply the same mapping (skinClass, shapeClass, columnsClass) so the live card matches the builder preview 1:1.
+
+Notes & tips
+
+Label toggle only appears when Icon & Text is selected—exactly per your request.
+
+Boxed Icon skin puts the icon in a separate box; looks great with circle shape.
+
+Flat skin supports a custom hex color so clients can match brand exactly.
+
+Columns = Auto uses CSS grid auto-fit for responsive flow; 1–6 uses fixed grid-cols-*.
+
+If you later add per-button colors (e.g., brand colors for WhatsApp/Facebook), keep the same structure and override flatStyle per item

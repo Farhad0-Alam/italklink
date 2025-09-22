@@ -3296,6 +3296,12 @@ export const businessCardSchema = z.object({
       containerDropShadowOffset: z.number().optional(),
       sectionBackgroundColor: z.string().optional(),
       sectionBorderColor: z.string().optional(),
+      // Enhanced Icon Styling Options
+      view: z.enum(['icon-text', 'icon', 'text']).optional(),
+      skin: z.enum(['gradient', 'minimal', 'framed', 'boxed', 'flat']).optional(),
+      shape: z.enum(['square', 'rounded', 'circle']).optional(),
+      columns: z.union([z.enum(['auto']), z.number().min(1).max(6)]).optional(),
+      showLabel: z.boolean().optional(),
     }).default({}),
     socialMedia: z.object({
       iconColor: z.string().optional(),
@@ -3332,6 +3338,12 @@ export const businessCardSchema = z.object({
       containerDropShadowOffset: z.number().optional(),
       sectionBackgroundColor: z.string().optional(),
       sectionBorderColor: z.string().optional(),
+      // Enhanced Icon Styling Options
+      view: z.enum(['icon-text', 'icon', 'text']).optional(),
+      skin: z.enum(['gradient', 'minimal', 'framed', 'boxed', 'flat']).optional(),
+      shape: z.enum(['square', 'rounded', 'circle']).optional(),
+      columns: z.union([z.enum(['auto']), z.number().min(1).max(6)]).optional(),
+      showLabel: z.boolean().optional(),
     }).default({}),
     about: z.object({
       primaryColor: z.string().optional(),
