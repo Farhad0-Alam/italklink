@@ -3296,6 +3296,36 @@ export const businessCardSchema = z.object({
       containerDropShadowOffset: z.number().optional(),
       sectionBackgroundColor: z.string().optional(),
       sectionBorderColor: z.string().optional(),
+      // Button variant system for diverse shapes
+      buttonVariant: z.enum([
+        'pill-solid',           // Rounded pill shape with solid fill
+        'pill-outline',         // Rounded pill with outline
+        'pill-gradient',        // Pill with gradient background
+        'square-solid',         // Sharp corners solid
+        'square-outline',       // Sharp corners outline
+        'rounded-solid',        // Slightly rounded corners
+        'rounded-outline',      // Slightly rounded outline
+        'accent-left',          // Rectangle with left border accent
+        'accent-right',         // Rectangle with right border accent
+        'accent-top',           // Rectangle with top border accent
+        'accent-bottom',        // Rectangle with bottom border accent
+        'circle-icon',          // Circular icon button
+        'attached-action',      // Button with attached action button
+        'shadow-lifted',        // Lifted with shadow effect
+        'glass-morphism',       // Glass morphism effect
+        'neo-brutalism',        // Neo-brutalist style
+        'soft-shadow',          // Soft neumorphic shadow
+        'gradient-border'       // Gradient border effect
+      ]).optional(),
+      buttonSize: z.enum(['xs', 'sm', 'md', 'lg', 'xl', 'full']).optional(),
+      buttonPadding: z.enum(['tight', 'normal', 'loose', 'extra-loose']).optional(),
+      buttonFullWidth: z.boolean().optional(),
+      buttonIconOnly: z.boolean().optional(),
+      buttonGradientFrom: z.string().optional(),
+      buttonGradientTo: z.string().optional(),
+      buttonGradientAngle: z.number().optional(),
+      buttonActionText: z.string().optional(), // For attached-action variant
+      buttonActionColor: z.string().optional(),
     }).default({}),
     socialMedia: z.object({
       iconColor: z.string().optional(),
@@ -3332,6 +3362,36 @@ export const businessCardSchema = z.object({
       containerDropShadowOffset: z.number().optional(),
       sectionBackgroundColor: z.string().optional(),
       sectionBorderColor: z.string().optional(),
+      // Button variant system for diverse shapes
+      buttonVariant: z.enum([
+        'pill-solid',           // Rounded pill shape with solid fill
+        'pill-outline',         // Rounded pill with outline
+        'pill-gradient',        // Pill with gradient background
+        'square-solid',         // Sharp corners solid
+        'square-outline',       // Sharp corners outline
+        'rounded-solid',        // Slightly rounded corners
+        'rounded-outline',      // Slightly rounded outline
+        'accent-left',          // Rectangle with left border accent
+        'accent-right',         // Rectangle with right border accent
+        'accent-top',           // Rectangle with top border accent
+        'accent-bottom',        // Rectangle with bottom border accent
+        'circle-icon',          // Circular icon button
+        'attached-action',      // Button with attached action button
+        'shadow-lifted',        // Lifted with shadow effect
+        'glass-morphism',       // Glass morphism effect
+        'neo-brutalism',        // Neo-brutalist style
+        'soft-shadow',          // Soft neumorphic shadow
+        'gradient-border'       // Gradient border effect
+      ]).optional(),
+      buttonSize: z.enum(['xs', 'sm', 'md', 'lg', 'xl', 'full']).optional(),
+      buttonPadding: z.enum(['tight', 'normal', 'loose', 'extra-loose']).optional(),
+      buttonFullWidth: z.boolean().optional(),
+      buttonIconOnly: z.boolean().optional(),
+      buttonGradientFrom: z.string().optional(),
+      buttonGradientTo: z.string().optional(),
+      buttonGradientAngle: z.number().optional(),
+      buttonActionText: z.string().optional(), // For attached-action variant
+      buttonActionColor: z.string().optional(),
     }).default({}),
     about: z.object({
       primaryColor: z.string().optional(),
