@@ -637,7 +637,14 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                             alignItems: 'center',
                             justifyContent: 'center',
                             transition: 'all 0.2s ease-in-out',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            // CSS variables for hover effects
+                            '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
+                            '--tl-icon-color': getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff',
+                            '--tl-border': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
+                            '--tl-icon-bg-hover': getSectionStyle('contactInfo', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a', 20),
+                            '--tl-icon-color-hover': getSectionStyle('contactInfo', 'iconHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff', -20),
+                            '--tl-border-hover': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent'
                           } : {}),
                           // New button variant system styling
                           ...(getSectionStyle('contactInfo', 'buttonVariant') ? {
@@ -799,7 +806,14 @@ END:VCARD`;
                         display: 'flex',
                         alignItems: 'center',
                         transition: 'all 0.2s ease-in-out',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        // CSS variables for hover effects
+                        '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e',
+                        '--tl-icon-color': getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff',
+                        '--tl-border': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
+                        '--tl-icon-bg-hover': getSectionStyle('socialMedia', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e', 20),
+                        '--tl-icon-color-hover': getSectionStyle('socialMedia', 'iconHoverColor') || adjustColor(getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff', -20),
+                        '--tl-border-hover': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent'
                       } : {}),
                       // New button variant system styling
                       ...(getSectionStyle('socialMedia', 'buttonVariant') ? {
