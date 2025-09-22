@@ -1860,7 +1860,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         <Checkbox
                           id="socialDropShadowEnable"
                           checked={watchedValues.sectionStyles?.socialMedia?.dropShadowEnabled || false}
-                          onCheckedChange={(checked) => form.setValue("sectionStyles.socialMedia.dropShadowEnabled", checked)}
+                          onCheckedChange={(checked) => form.setValue("sectionStyles.socialMedia.dropShadowEnabled", !!checked)}
                           data-testid="checkbox-social-drop-shadow-enable"
                         />
                         <Label htmlFor="socialDropShadowEnable" className="text-white text-xs">Enable Drop Shadow</Label>
@@ -1949,7 +1949,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         <Checkbox
                           id="socialContainerStylingEnable"
                           checked={watchedValues.sectionStyles?.socialMedia?.containerStylingEnabled || false}
-                          onCheckedChange={(checked) => form.setValue("sectionStyles.socialMedia.containerStylingEnabled", checked)}
+                          onCheckedChange={(checked) => form.setValue("sectionStyles.socialMedia.containerStylingEnabled", !!checked)}
                           data-testid="checkbox-enable-social-container-styling"
                         />
                         <Label htmlFor="socialContainerStylingEnable" className="text-white text-xs">Enable Social Container Styling</Label>
@@ -2059,7 +2059,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               <Checkbox
                                 id="socialContainerDropShadowEnable"
                                 checked={watchedValues.sectionStyles?.socialMedia?.containerDropShadowEnabled || false}
-                                onCheckedChange={(checked) => form.setValue("sectionStyles.socialMedia.containerDropShadowEnabled", checked)}
+                                onCheckedChange={(checked) => form.setValue("sectionStyles.socialMedia.containerDropShadowEnabled", !!checked)}
                                 data-testid="checkbox-social-container-drop-shadow-enable"
                               />
                               <Label htmlFor="socialContainerDropShadowEnable" className="text-white text-xs">Enable Container Drop Shadow</Label>
@@ -2152,27 +2152,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             {!collapsedSections.appearance && (
               <>
                 <div className="space-y-6">
-                  {/* Template Selection */}
-                  <div>
-                    <h4 className="text-md font-medium text-purple-200 mb-3">Template Style</h4>
-                    <div>
-                      <Label className="text-white text-sm">Template</Label>
-                      <Select 
-                        value={watchedValues.template || "minimal"} 
-                        onValueChange={(v) => form.setValue("template", v as any)}
-                      >
-                        <SelectTrigger className="bg-slate-700 border-slate-600 text-white h-8 text-sm">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="minimal">Minimal</SelectItem>
-                          <SelectItem value="bold">Bold</SelectItem>
-                          <SelectItem value="photo">Photo</SelectItem>
-                          <SelectItem value="dark">Dark</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                  {/* Template Selection Removed - Using Single Dynamic Template */}
                   {/* Default Colors Section */}
                   <div>
                     <h4 className="text-md font-medium text-purple-200 mb-3">Default Colors</h4>
