@@ -385,3 +385,248 @@
   color: var(--tl-icon-color-hover, var(--tl-icon-color));
   border-color: var(--tl-border-hover, var(--tl-border));
 }
+
+/* Button Variant System - Different Shapes and Styles */
+
+/* Base button styles */
+.btn-variant-base {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Size variants */
+.btn-size-xs { @apply px-2 py-1 text-xs gap-1; min-height: 28px; }
+.btn-size-sm { @apply px-3 py-1.5 text-sm gap-1.5; min-height: 32px; }
+.btn-size-md { @apply px-4 py-2 text-base gap-2; min-height: 40px; }
+.btn-size-lg { @apply px-6 py-3 text-lg gap-2.5; min-height: 48px; }
+.btn-size-xl { @apply px-8 py-4 text-xl gap-3; min-height: 56px; }
+.btn-size-full { @apply w-full px-6 py-3 text-base gap-2; min-height: 44px; }
+
+/* Padding variants */
+.btn-padding-tight { padding: 0.25rem 0.5rem !important; }
+.btn-padding-normal { /* Use size default */ }
+.btn-padding-loose { padding: 0.75rem 1.5rem !important; }
+.btn-padding-extra-loose { padding: 1rem 2rem !important; }
+
+/* Shape: Pill buttons (fully rounded ends) */
+.btn-pill-solid {
+  border-radius: 9999px;
+  background: var(--btn-bg, currentColor);
+  color: var(--btn-text, white);
+  border: 2px solid transparent;
+}
+.btn-pill-outline {
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--btn-bg, currentColor);
+  border: 2px solid var(--btn-bg, currentColor);
+}
+.btn-pill-gradient {
+  border-radius: 9999px;
+  background: linear-gradient(var(--btn-gradient-angle, 90deg), var(--btn-gradient-from), var(--btn-gradient-to));
+  color: var(--btn-text, white);
+  border: 2px solid transparent;
+}
+
+/* Shape: Square buttons (sharp corners) */
+.btn-square-solid {
+  border-radius: 0;
+  background: var(--btn-bg, currentColor);
+  color: var(--btn-text, white);
+  border: 2px solid transparent;
+}
+.btn-square-outline {
+  border-radius: 0;
+  background: transparent;
+  color: var(--btn-bg, currentColor);
+  border: 2px solid var(--btn-bg, currentColor);
+}
+
+/* Shape: Rounded buttons (slightly rounded) */
+.btn-rounded-solid {
+  border-radius: 8px;
+  background: var(--btn-bg, currentColor);
+  color: var(--btn-text, white);
+  border: 2px solid transparent;
+}
+.btn-rounded-outline {
+  border-radius: 8px;
+  background: transparent;
+  color: var(--btn-bg, currentColor);
+  border: 2px solid var(--btn-bg, currentColor);
+}
+
+/* Shape: Accent border buttons */
+.btn-accent-left {
+  border-radius: 4px;
+  background: var(--btn-bg, #f3f4f6);
+  color: var(--btn-text, currentColor);
+  border-left: 4px solid var(--btn-accent, currentColor);
+  padding-left: 1rem;
+}
+.btn-accent-right {
+  border-radius: 4px;
+  background: var(--btn-bg, #f3f4f6);
+  color: var(--btn-text, currentColor);
+  border-right: 4px solid var(--btn-accent, currentColor);
+  padding-right: 1rem;
+}
+.btn-accent-top {
+  border-radius: 4px;
+  background: var(--btn-bg, #f3f4f6);
+  color: var(--btn-text, currentColor);
+  border-top: 4px solid var(--btn-accent, currentColor);
+  padding-top: 0.75rem;
+}
+.btn-accent-bottom {
+  border-radius: 4px;
+  background: var(--btn-bg, #f3f4f6);
+  color: var(--btn-text, currentColor);
+  border-bottom: 4px solid var(--btn-accent, currentColor);
+  padding-bottom: 0.75rem;
+}
+
+/* Shape: Circle icon button */
+.btn-circle-icon {
+  border-radius: 50%;
+  width: var(--btn-size, 48px);
+  height: var(--btn-size, 48px);
+  padding: 0;
+  background: var(--btn-bg, currentColor);
+  color: var(--btn-text, white);
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-circle-icon.btn-size-xs { width: 32px; height: 32px; }
+.btn-circle-icon.btn-size-sm { width: 40px; height: 40px; }
+.btn-circle-icon.btn-size-md { width: 48px; height: 48px; }
+.btn-circle-icon.btn-size-lg { width: 56px; height: 56px; }
+.btn-circle-icon.btn-size-xl { width: 64px; height: 64px; }
+
+/* Shape: Attached action button */
+.btn-attached-action {
+  border-radius: 8px;
+  background: var(--btn-bg, currentColor);
+  color: var(--btn-text, white);
+  display: inline-flex;
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+}
+.btn-attached-action .btn-main {
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-attached-action .btn-action {
+  padding: 0.5rem 0.75rem;
+  background: var(--btn-action-bg, rgba(0,0,0,0.1));
+  border-left: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-attached-action .btn-action:hover {
+  background: var(--btn-action-bg-hover, rgba(0,0,0,0.2));
+}
+
+/* Special Effects */
+.btn-shadow-lifted {
+  border-radius: 12px;
+  background: var(--btn-bg, currentColor);
+  color: var(--btn-text, white);
+  box-shadow: 0 4px 14px 0 rgba(0,0,0,0.15);
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
+.btn-shadow-lifted:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px 0 rgba(0,0,0,0.2);
+}
+
+.btn-glass-morphism {
+  border-radius: 16px;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--btn-text, currentColor);
+  box-shadow: 0 8px 32px 0 rgba(31,38,135,0.15);
+}
+
+.btn-neo-brutalism {
+  border-radius: 0;
+  background: var(--btn-bg, currentColor);
+  color: var(--btn-text, white);
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 0 #000;
+  transform: translate(0);
+  transition: all 0.15s ease;
+}
+.btn-neo-brutalism:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 0 #000;
+}
+
+.btn-soft-shadow {
+  border-radius: 12px;
+  background: var(--btn-bg, #e5e7eb);
+  color: var(--btn-text, currentColor);
+  box-shadow: 
+    6px 6px 12px rgba(0,0,0,0.1),
+    -6px -6px 12px rgba(255,255,255,0.5);
+}
+.btn-soft-shadow:hover {
+  box-shadow: 
+    3px 3px 8px rgba(0,0,0,0.15),
+    -3px -3px 8px rgba(255,255,255,0.6);
+}
+
+.btn-gradient-border {
+  border-radius: 12px;
+  position: relative;
+  background: white;
+  color: var(--btn-text, currentColor);
+}
+.btn-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 12px;
+  padding: 2px;
+  background: linear-gradient(var(--btn-gradient-angle, 45deg), var(--btn-gradient-from), var(--btn-gradient-to));
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: exclude;
+  mask-composite: exclude;
+  z-index: -1;
+}
+
+/* Hover effects */
+.btn-variant-base:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+.btn-variant-base:active {
+  transform: scale(0.98);
+}
+
+/* Icon only adjustments */
+.btn-icon-only {
+  padding: 0.5rem !important;
+}
+.btn-icon-only.btn-size-xs { padding: 0.25rem !important; }
+.btn-icon-only.btn-size-sm { padding: 0.375rem !important; }
+.btn-icon-only.btn-size-lg { padding: 0.75rem !important; }
+.btn-icon-only.btn-size-xl { padding: 1rem !important; }
