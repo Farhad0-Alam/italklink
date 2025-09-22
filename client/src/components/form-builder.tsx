@@ -1135,6 +1135,83 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             </div>
                           </div>
                         )}
+
+                        {/* Icon Container Dimensions */}
+                        <div className="mt-3 space-y-3">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-white text-xs">Icon Width</Label>
+                              <div className="flex items-center gap-2">
+                                <Slider
+                                  value={[watchedValues.sectionStyles?.contactInfo?.iconBackgroundWidth || 48]}
+                                  onValueChange={(value) => form.setValue("sectionStyles.contactInfo.iconBackgroundWidth", value[0])}
+                                  min={24}
+                                  max={120}
+                                  step={2}
+                                  className="flex-1"
+                                  data-testid="slider-contact-icon-width"
+                                />
+                                <span className="text-white text-xs w-8">{watchedValues.sectionStyles?.contactInfo?.iconBackgroundWidth || 48}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-white text-xs">Icon Height</Label>
+                              <div className="flex items-center gap-2">
+                                <Slider
+                                  value={[watchedValues.sectionStyles?.contactInfo?.iconBackgroundHeight || 48]}
+                                  onValueChange={(value) => form.setValue("sectionStyles.contactInfo.iconBackgroundHeight", value[0])}
+                                  min={24}
+                                  max={120}
+                                  step={2}
+                                  className="flex-1"
+                                  data-testid="slider-contact-icon-height"
+                                />
+                                <span className="text-white text-xs w-8">{watchedValues.sectionStyles?.contactInfo?.iconBackgroundHeight || 48}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Text Position - Only show when View includes text */}
+                          {(watchedValues.sectionStyles?.contactInfo?.view === "icon-text" || watchedValues.sectionStyles?.contactInfo?.view === "text") && (
+                            <div>
+                              <Label className="text-white text-xs">Text Position</Label>
+                              <Select
+                                value={watchedValues.sectionStyles?.contactInfo?.textPosition || "right"}
+                                onValueChange={(value) => form.setValue("sectionStyles.contactInfo.textPosition", value as "left" | "right" | "top" | "bottom")}
+                              >
+                                <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-contact-text-position">
+                                  <SelectValue placeholder="Select position" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-700 border-slate-600">
+                                  <SelectItem value="left">
+                                    <div className="flex items-center gap-2">
+                                      <i className="fas fa-arrow-left"></i>
+                                      Text Left
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="right">
+                                    <div className="flex items-center gap-2">
+                                      <i className="fas fa-arrow-right"></i>
+                                      Text Right
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="top">
+                                    <div className="flex items-center gap-2">
+                                      <i className="fas fa-arrow-up"></i>
+                                      Text Top
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="bottom">
+                                    <div className="flex items-center gap-2">
+                                      <i className="fas fa-arrow-down"></i>
+                                      Text Bottom
+                                    </div>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </>
                   )}
@@ -1949,6 +2026,83 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             </div>
                           </div>
                         )}
+
+                        {/* Icon Container Dimensions */}
+                        <div className="mt-3 space-y-3">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-white text-xs">Icon Width</Label>
+                              <div className="flex items-center gap-2">
+                                <Slider
+                                  value={[watchedValues.sectionStyles?.socialMedia?.iconBackgroundWidth || 48]}
+                                  onValueChange={(value) => form.setValue("sectionStyles.socialMedia.iconBackgroundWidth", value[0])}
+                                  min={24}
+                                  max={120}
+                                  step={2}
+                                  className="flex-1"
+                                  data-testid="slider-social-icon-width"
+                                />
+                                <span className="text-white text-xs w-8">{watchedValues.sectionStyles?.socialMedia?.iconBackgroundWidth || 48}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-white text-xs">Icon Height</Label>
+                              <div className="flex items-center gap-2">
+                                <Slider
+                                  value={[watchedValues.sectionStyles?.socialMedia?.iconBackgroundHeight || 48]}
+                                  onValueChange={(value) => form.setValue("sectionStyles.socialMedia.iconBackgroundHeight", value[0])}
+                                  min={24}
+                                  max={120}
+                                  step={2}
+                                  className="flex-1"
+                                  data-testid="slider-social-icon-height"
+                                />
+                                <span className="text-white text-xs w-8">{watchedValues.sectionStyles?.socialMedia?.iconBackgroundHeight || 48}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Text Position - Only show when View includes text */}
+                          {(watchedValues.sectionStyles?.socialMedia?.view === "icon-text" || watchedValues.sectionStyles?.socialMedia?.view === "text") && (
+                            <div>
+                              <Label className="text-white text-xs">Text Position</Label>
+                              <Select
+                                value={watchedValues.sectionStyles?.socialMedia?.textPosition || "right"}
+                                onValueChange={(value) => form.setValue("sectionStyles.socialMedia.textPosition", value as "left" | "right" | "top" | "bottom")}
+                              >
+                                <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-social-text-position">
+                                  <SelectValue placeholder="Select position" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-700 border-slate-600">
+                                  <SelectItem value="left">
+                                    <div className="flex items-center gap-2">
+                                      <i className="fas fa-arrow-left"></i>
+                                      Text Left
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="right">
+                                    <div className="flex items-center gap-2">
+                                      <i className="fas fa-arrow-right"></i>
+                                      Text Right
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="top">
+                                    <div className="flex items-center gap-2">
+                                      <i className="fas fa-arrow-up"></i>
+                                      Text Top
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="bottom">
+                                    <div className="flex items-center gap-2">
+                                      <i className="fas fa-arrow-down"></i>
+                                      Text Bottom
+                                    </div>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </>
                   )}
