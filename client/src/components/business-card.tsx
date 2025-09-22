@@ -62,83 +62,6 @@ const adjustColor = (color: string, amount: number): string => {
   return `#${newHex}`;
 };
 
-// Helper function to get button variant classes based on configuration
-const getButtonVariantClasses = (
-  variant: string | undefined,
-  size: string | undefined,
-  padding: string | undefined,
-  fullWidth: boolean | undefined,
-  iconOnly: boolean | undefined
-): string => {
-  const classes = ['btn-variant-base'];
-  
-  // Add variant class
-  if (variant) {
-    classes.push(`btn-${variant}`);
-  } else {
-    classes.push('btn-rounded-solid'); // Default variant
-  }
-  
-  // Add size class
-  if (fullWidth) {
-    classes.push('btn-size-full');
-  } else if (size) {
-    classes.push(`btn-size-${size}`);
-  } else {
-    classes.push('btn-size-md'); // Default size
-  }
-  
-  // Add padding class if specified
-  if (padding && padding !== 'normal') {
-    classes.push(`btn-padding-${padding}`);
-  }
-  
-  // Add icon-only class if specified
-  if (iconOnly) {
-    classes.push('btn-icon-only');
-  }
-  
-  return classes.join(' ');
-};
-
-// Helper function to get button style variables based on configuration
-const getButtonStyleVariables = (
-  section: 'contactInfo' | 'socialMedia',
-  data: BusinessCard,
-  getSectionStyle: (section: string, key: string) => string | undefined
-): React.CSSProperties => {
-  const styles: React.CSSProperties = {};
-  
-  // Set color variables
-  const bgColor = getSectionStyle(section, 'iconBackgroundColor') || 
-                  (section === 'contactInfo' ? (data.secondaryColor || data.accentColor) : data.brandColor) || 
-                  '#22c55e';
-  const textColor = getSectionStyle(section, 'iconTextColor') || data.tertiaryColor || '#ffffff';
-  const accentColor = data.accentColor || '#16a34a';
-  
-  styles['--btn-bg'] = bgColor;
-  styles['--btn-text'] = textColor;
-  styles['--btn-accent'] = accentColor;
-  
-  // Gradient variables if specified
-  const gradientFrom = getSectionStyle(section, 'buttonGradientFrom');
-  const gradientTo = getSectionStyle(section, 'buttonGradientTo');
-  const gradientAngle = getSectionStyle(section, 'buttonGradientAngle');
-  
-  if (gradientFrom) styles['--btn-gradient-from'] = gradientFrom;
-  if (gradientTo) styles['--btn-gradient-to'] = gradientTo || bgColor;
-  if (gradientAngle) styles['--btn-gradient-angle'] = `${gradientAngle}deg`;
-  
-  // Action button color for attached-action variant
-  const actionColor = getSectionStyle(section, 'buttonActionColor');
-  if (actionColor) {
-    styles['--btn-action-bg'] = actionColor;
-    styles['--btn-action-bg-hover'] = adjustColor(actionColor, 20);
-  }
-  
-  return styles;
-};
-
 interface BusinessCardProps {
   data: BusinessCard;
   showQR?: boolean;
@@ -609,61 +532,22 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     >
                       <button 
                         onClick={() => handleContactAction(contact.type, contact.value)}
-                        className={`${
-                          getSectionStyle('contactInfo', 'buttonVariant')
-                            ? (getSectionStyle('contactInfo', 'buttonVariant') !== 'circle-icon'
-                                ? getButtonVariantClasses(
-                                    getSectionStyle('contactInfo', 'buttonVariant'),
-                                    getSectionStyle('contactInfo', 'buttonSize'),
-                                    getSectionStyle('contactInfo', 'buttonPadding'),
-                                    getSectionStyle('contactInfo', 'buttonFullWidth') === 'true',
-                                    getSectionStyle('contactInfo', 'buttonIconOnly') === 'true'
-                                  )
-                                : `btn-circle-icon btn-size-${getSectionStyle('contactInfo', 'buttonSize') || 'md'}`)
-                            : '' // No classes for original Template -1 styling
-                        } ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'contact-icon-hover' : ''} mb-1`}
+                        className={`rounded-full flex items-center justify-center mb-1 ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'contact-icon-hover' : ''}`}
                         style={{
-                          // Original Template -1 styling when no buttonVariant is defined
-                          ...(!getSectionStyle('contactInfo', 'buttonVariant') ? {
-                            backgroundColor: getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
-                            color: getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff',
-                            borderRadius: '50%', // Always circular for original Template -1
-                            borderWidth: getSectionStyle('contactInfo', 'iconBorderColor') ? `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px` : '0',
-                            borderStyle: getSectionStyle('contactInfo', 'iconBorderColor') ? 'solid' : 'none',
-                            borderColor: getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
-                            width: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48)}px`,
-                            height: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48)}px`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'all 0.2s ease-in-out',
-                            cursor: 'pointer',
-                            // CSS variables for hover effects
-                            '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
-                            '--tl-icon-color': getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff',
-                            '--tl-border': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
-                            '--tl-icon-bg-hover': getSectionStyle('contactInfo', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a', 20),
-                            '--tl-icon-color-hover': getSectionStyle('contactInfo', 'iconHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff', -20),
-                            '--tl-border-hover': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent'
-                          } : {}),
-                          // New button variant system styling
-                          ...(getSectionStyle('contactInfo', 'buttonVariant') ? {
-                            ...getButtonStyleVariables('contactInfo', data, getSectionStyle),
-                            // Legacy icon size for backwards compatibility
-                            ...(getSectionStyle('contactInfo', 'buttonVariant') === 'circle-icon' ? {
-                              width: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48)}px`,
-                              height: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48)}px`
-                            } : {})
-                          } : {}),
-                          // Legacy hover colors if enabled
+                          // Base CSS variables - always applied
+                          '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
+                          '--tl-icon-color': getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff',
+                          '--tl-border': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
+                          // Hover CSS variables - only when toggle enabled
                           ...(getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? {
-                            '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
-                            '--tl-icon-color': getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff',
-                            '--tl-border': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
                             '--tl-icon-bg-hover': getSectionStyle('contactInfo', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a', 20),
                             '--tl-icon-color-hover': getSectionStyle('contactInfo', 'iconHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff', -20),
                             '--tl-border-hover': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
                           } : {}),
+                          borderWidth: getSectionStyle('contactInfo', 'iconBorderColor') ? `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px` : '0',
+                          borderStyle: getSectionStyle('contactInfo', 'iconBorderColor') ? 'solid' : 'none',
+                          width: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 40)}px`,
+                          height: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 40)}px`,
                           boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
                             ? `${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'dropShadowOpacity') || '0.25'))}`
                             : 'none'
@@ -777,57 +661,21 @@ END:VCARD`;
                   <button 
                     key={social.id} 
                     onClick={() => handleContactAction(social.platform, social.value)}
-                    className={`${
-                      getSectionStyle('socialMedia', 'buttonVariant')
-                        ? (getSectionStyle('socialMedia', 'buttonVariant') === 'attached-action'
-                            ? 'btn-attached-action'
-                            : getButtonVariantClasses(
-                                getSectionStyle('socialMedia', 'buttonVariant'),
-                                getSectionStyle('socialMedia', 'buttonSize'),
-                                getSectionStyle('socialMedia', 'buttonPadding'),
-                                getSectionStyle('socialMedia', 'buttonFullWidth') !== 'false',
-                                getSectionStyle('socialMedia', 'buttonIconOnly') === 'true'
-                              ))
-                        : '' // No classes for original Template -1 styling
-                    } ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'social-icon-hover' : ''} ${getSectionStyle('socialMedia', 'buttonFullWidth') === 'false' ? '' : 'w-full'} text-sm`}
+                    className={`w-full py-3 px-4 rounded-xl flex items-center justify-center text-sm ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'social-icon-hover' : ''}`}
                     style={{
-                      // Original Template -1 styling when no buttonVariant is defined
-                      ...(!getSectionStyle('socialMedia', 'buttonVariant') ? {
-                        backgroundColor: getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e',
-                        color: getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff',
-                        borderRadius: '0.75rem',
-                        borderWidth: getSectionStyle('socialMedia', 'iconBorderColor') ? `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px` : '0',
-                        borderStyle: getSectionStyle('socialMedia', 'iconBorderColor') ? 'solid' : 'none',
-                        borderColor: getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
-                        borderBottom: getSectionStyle('socialMedia', 'iconBorderColor') ? 'none' : `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
-                        padding: '0.75rem 1rem',
-                        width: '100%',
-                        textAlign: 'left',
-                        display: 'flex',
-                        alignItems: 'center',
-                        transition: 'all 0.2s ease-in-out',
-                        cursor: 'pointer',
-                        // CSS variables for hover effects
-                        '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e',
-                        '--tl-icon-color': getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff',
-                        '--tl-border': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
-                        '--tl-icon-bg-hover': getSectionStyle('socialMedia', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e', 20),
-                        '--tl-icon-color-hover': getSectionStyle('socialMedia', 'iconHoverColor') || adjustColor(getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff', -20),
-                        '--tl-border-hover': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent'
-                      } : {}),
-                      // New button variant system styling
-                      ...(getSectionStyle('socialMedia', 'buttonVariant') ? {
-                        ...getButtonStyleVariables('socialMedia', data, getSectionStyle)
-                      } : {}),
-                      // Legacy hover colors if enabled
+                      // Base CSS variables - always applied
+                      '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e',
+                      '--tl-icon-color': getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff',
+                      '--tl-border': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
+                      // Hover CSS variables - only when toggle enabled
                       ...(getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? {
-                        '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e',
-                        '--tl-icon-color': getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff',
-                        '--tl-border': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
                         '--tl-icon-bg-hover': getSectionStyle('socialMedia', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e', 20),
                         '--tl-icon-color-hover': getSectionStyle('socialMedia', 'iconHoverColor') || adjustColor(getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff', -20),
                         '--tl-border-hover': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
                       } : {}),
+                      borderWidth: getSectionStyle('socialMedia', 'iconBorderColor') ? `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px` : '0',
+                      borderStyle: getSectionStyle('socialMedia', 'iconBorderColor') ? 'solid' : 'none',
+                      borderBottom: getSectionStyle('socialMedia', 'iconBorderColor') ? 'none' : `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
                       fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'inherit',
                       fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconTextSize'), 14)}px`,
                       fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || '600',
@@ -838,34 +686,13 @@ END:VCARD`;
                     }}
                     data-testid={`button-custom-social-${social.id}`}
                   >
-                    {getSectionStyle('socialMedia', 'buttonVariant') === 'attached-action' ? (
-                      <>
-                        <div className="btn-main">
-                          <i 
-                            className={social.icon}
-                            style={{
-                              fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 18)}px`
-                            }}
-                          ></i>
-                          <span>{social.label || 'Social'}</span>
-                        </div>
-                        {getSectionStyle('socialMedia', 'buttonActionText') && (
-                          <div className="btn-action">
-                            {getSectionStyle('socialMedia', 'buttonActionText')}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <i 
-                          className={`${social.icon} ${getSectionStyle('socialMedia', 'buttonIconOnly') === 'true' ? '' : 'mr-3'}`}
-                          style={{
-                            fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 18)}px`
-                          }}
-                        ></i>
-                        {getSectionStyle('socialMedia', 'buttonIconOnly') !== 'true' && (social.label || 'Social')}
-                      </>
-                    )}
+                    <i 
+                      className={`${social.icon} mr-3`}
+                      style={{
+                        fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 18)}px`
+                      }}
+                    ></i>
+                    {social.label || 'Social'}
                   </button>
                 )
               ))}
