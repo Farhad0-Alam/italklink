@@ -39,12 +39,14 @@ import {
   Palette
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { BusinessCardComponent } from '@/components/business-card';
+import { BusinessCard } from '@shared/schema';
 
 interface Template {
   id: string;
   name: string;
   description?: string;
-  category: string;
+  templateData: BusinessCard;
   isActive: boolean;
   previewImage?: string;
   createdAt: string;
@@ -133,10 +135,17 @@ export default function TemplatesPage() {
     'education', 'retail', 'finance', 'real-estate', 'consulting'
   ];
 
-  const filteredTemplates = templates.filter(template => {
+  // Sort templates to put "Template -1" first (upper left corner)
+  const sortedTemplates = [...templates].sort((a, b) => {
+    if (a.name === 'Template -1') return -1;
+    if (b.name === 'Template -1') return 1;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  const filteredTemplates = sortedTemplates.filter(template => {
     const matchesSearch = template.name.toLowerCase().includes(search.toLowerCase()) ||
                          template.description?.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || template.category === categoryFilter;
+    const matchesCategory = categoryFilter === 'all' || true; // Remove category filter for now
     const matchesStatus = statusFilter === 'all' || 
                          (statusFilter === 'published' && template.isActive) ||
                          (statusFilter === 'draft' && !template.isActive);
@@ -244,14 +253,19 @@ export default function TemplatesPage() {
         ) : (
           filteredTemplates.map((template) => (
             <Card key={template.id} className="group overflow-hidden hover:shadow-lg transition-all duration-200">
-              {/* Template Preview */}
-              <div className="aspect-[5/6] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 relative overflow-hidden">
-                {template.previewImage ? (
-                  <img 
-                    src={template.previewImage} 
-                    alt={template.name}
-                    className="w-full h-full object-cover"
-                  />
+              {/* Template Preview - Actual Business Card */}
+              <div className="aspect-[5/6] bg-white relative overflow-hidden">
+                {template.templateData ? (
+                  <div className="w-full h-full transform scale-[0.35] origin-top-left">
+                    <div className="w-[430px] h-[600px]">
+                      <BusinessCardComponent 
+                        data={template.templateData}
+                        showQR={false}
+                        isInteractive={false}
+                        isMobilePreview={false}
+                      />
+                    </div>
+                  </div>
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-4xl text-gray-400">
@@ -336,8 +350,8 @@ export default function TemplatesPage() {
                     <h3 className="font-medium text-gray-900 dark:text-white truncate">
                       {template.name}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
-                      {template.category?.replace('-', ' ')}
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {template.description || 'Modern design template'}
                     </p>
                     {template.usageCount !== undefined && (
                       <p className="text-xs text-gray-500 mt-1">
@@ -361,18 +375,22 @@ export default function TemplatesPage() {
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>{selectedTemplate.name}</DialogTitle>
-              <DialogDescription className="capitalize">
-                {selectedTemplate.category?.replace('-', ' ')} template
-                {selectedTemplate.description && ` • ${selectedTemplate.description}`}
+              <DialogDescription>
+                {selectedTemplate.description || 'Modern design template'}
               </DialogDescription>
             </DialogHeader>
-            <div className="aspect-[3/4] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-lg flex items-center justify-center">
-              {selectedTemplate.previewImage ? (
-                <img 
-                  src={selectedTemplate.previewImage} 
-                  alt={selectedTemplate.name}
-                  className="w-full h-full object-cover rounded-lg"
-                />
+            <div className="aspect-[3/4] bg-white rounded-lg overflow-hidden flex items-center justify-center">
+              {selectedTemplate.templateData ? (
+                <div className="w-full h-full transform scale-[0.6] origin-center">
+                  <div className="w-[430px] h-[600px]">
+                    <BusinessCardComponent 
+                      data={selectedTemplate.templateData}
+                      showQR={false}
+                      isInteractive={false}
+                      isMobilePreview={false}
+                    />
+                  </div>
+                </div>
               ) : (
                 <div className="text-6xl text-gray-400">
                   <Palette />
