@@ -532,7 +532,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     >
                       <button 
                         onClick={() => handleContactAction(contact.type, contact.value)}
-                        className={`rounded-full flex items-center justify-center mb-1 ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'contact-icon-hover' : ''}`}
+                        className={`rounded-full flex items-center justify-center mb-1 tl-icon-base ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
                         style={{
                           // Base CSS variables - always applied
                           '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
@@ -661,7 +661,7 @@ END:VCARD`;
                   <button 
                     key={social.id} 
                     onClick={() => handleContactAction(social.platform, social.value)}
-                    className={`w-full py-3 px-4 rounded-xl flex items-center justify-center text-sm ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'social-icon-hover' : ''}`}
+                    className={`w-full py-3 px-4 rounded-xl flex items-center justify-center text-sm tl-icon-base ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
                     style={{
                       // Base CSS variables - always applied
                       '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e',
