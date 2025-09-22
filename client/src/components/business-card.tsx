@@ -254,6 +254,12 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
       return `tl-align-${alignment}`;
     };
 
+    // Helper function to determine if buttons should be full width
+    const shouldUseFullWidth = (section: 'contactInfo' | 'socialMedia'): boolean => {
+      const columns = getSectionStyle(section, 'columns') || 'auto';
+      return columns === '1' || columns === 1;
+    };
+
     const getViewType = (section: 'contactInfo' | 'socialMedia'): 'icon-text' | 'icon' | 'text' => {
       const view = getSectionStyle(section, 'view') || 'icon-text';
       return view as 'icon-text' | 'icon' | 'text';
@@ -566,7 +572,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         <button
                           key={contact.id}
                           onClick={() => handleContactAction(contact.type, contact.value)}
-                          className={`text-left p-2 rounded transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')}`}
+                          className={`text-left p-2 rounded transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${shouldUseFullWidth('contactInfo') ? 'w-full' : 'w-auto'}`}
                           style={{
                             color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151',
                             fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 14)}px`,
@@ -584,7 +590,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     return (
                       <div 
                         key={contact.id} 
-                        className={`tl-icon-container ${viewType === 'icon-text' ? `flex w-full ${getTextPositionClass('contactInfo')}` : 'flex items-center'} ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''}`}
+                        className={`tl-icon-container ${viewType === 'icon-text' ? `flex ${shouldUseFullWidth('contactInfo') ? 'w-full' : 'w-auto'} ${getTextPositionClass('contactInfo')}` : 'flex items-center'} ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''} ${shouldUseFullWidth('contactInfo') ? 'w-full' : ''}`}
                         style={getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? {
                           backgroundColor: getSectionStyle('contactInfo', 'containerBackgroundColor') || 'transparent',
                           borderWidth: getSectionStyle('contactInfo', 'containerBorderColor') ? '1px' : '0',
@@ -603,7 +609,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         {shouldShowIcons && (
                           <button 
                             onClick={() => handleContactAction(contact.type, contact.value)}
-                            className={`flex items-center justify-center ${viewType === 'icon-text' ? 'mb-1' : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
+                            className={`flex items-center justify-center ${viewType === 'icon-text' ? 'mb-1' : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${shouldUseFullWidth('contactInfo') ? 'w-full' : ''}`}
                             style={{
                               // Base CSS variables - always applied
                               '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
@@ -743,7 +749,7 @@ END:VCARD`;
                       <button
                         key={social.id}
                         onClick={() => handleContactAction(social.platform, social.value)}
-                        className={`text-left p-2 rounded transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')}`}
+                        className={`text-left p-2 rounded transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${shouldUseFullWidth('socialMedia') ? 'w-full' : 'w-auto'}`}
                         style={{
                           color: getSectionStyle('socialMedia', 'iconTextColor') || '#374151',
                           fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconTextSize'), 14)}px`,
@@ -762,7 +768,7 @@ END:VCARD`;
                     <button 
                       key={social.id} 
                       onClick={() => handleContactAction(social.platform, social.value)}
-                      className={`tl-social-button ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${viewType === 'icon-text' ? `w-full ${getTextPositionClass('socialMedia')}` : 'w-auto'}`}
+                      className={`tl-social-button ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${shouldUseFullWidth('socialMedia') ? 'w-full' : (viewType === 'icon-text' ? `w-full ${getTextPositionClass('socialMedia')}` : 'w-auto')}`}
                       data-platform={social.platform}
                       style={{
                         // Base CSS variables - always applied

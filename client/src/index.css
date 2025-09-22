@@ -641,6 +641,22 @@
   gap: 12px;
 }
 
+/* Force full width for buttons in single column mode */
+.tl-cols-1 .tl-skin-gradient,
+.tl-cols-1 .tl-skin-framed,
+.tl-cols-1 .tl-skin-boxed,
+.tl-cols-1 .tl-skin-flat,
+.tl-cols-1 .tl-skin-minimal,
+.tl-cols-1 button {
+  width: 100% !important;
+  justify-self: stretch;
+}
+
+/* Ensure container divs also stretch in single column */
+.tl-cols-1 .tl-icon-container {
+  width: 100% !important;
+}
+
 /* View Type Classes */
 .tl-view-icon .tl-icon-text {
   display: none;
