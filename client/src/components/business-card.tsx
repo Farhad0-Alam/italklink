@@ -684,12 +684,11 @@ END:VCARD`;
                   document.body.removeChild(link);
                   URL.revokeObjectURL(url);
                 }}
-                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors w-[70%]"
                 style={{
                   backgroundColor: data.secondaryColor || data.accentColor || '#16a34a',
                   color: data.tertiaryColor || '#ffffff',
-                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`,
-                  width: '70%'
+                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`
                 }}
                 data-testid="button-save-contact"
               >
@@ -700,12 +699,11 @@ END:VCARD`;
               {/* Share Button */}
               <button 
                 onClick={() => handleShare()}
-                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors w-[30%]"
                 style={{ 
                   backgroundColor: data.brandColor || '#22c55e',
                   color: data.tertiaryColor || '#ffffff',
-                  borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
-                  width: '30%'
+                  borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
                 }}
                 data-testid="button-share-main"
               >
