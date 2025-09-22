@@ -997,6 +997,107 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           />
                         </div>
                       </div>
+
+                      {/* Enhanced Icon Styling Options */}
+                      <div className="border-t border-slate-600 pt-3 mt-3">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-white text-xs">View</Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.contactInfo?.view || "icon-text"}
+                              onValueChange={(value) => form.setValue("sectionStyles.contactInfo.view", value as "icon-text" | "icon" | "text")}
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-contact-view">
+                                <SelectValue placeholder="Select view" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="icon-text">Icon & Text</SelectItem>
+                                <SelectItem value="icon">Icon</SelectItem>
+                                <SelectItem value="text">Text</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label className="text-white text-xs">Skin</Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.contactInfo?.skin || "flat"}
+                              onValueChange={(value) => form.setValue("sectionStyles.contactInfo.skin", value as "gradient" | "minimal" | "framed" | "boxed" | "flat")}
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-contact-skin">
+                                <SelectValue placeholder="Select skin" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="gradient">Gradient</SelectItem>
+                                <SelectItem value="minimal">Minimal</SelectItem>
+                                <SelectItem value="framed">Framed</SelectItem>
+                                <SelectItem value="boxed">Boxed Icon</SelectItem>
+                                <SelectItem value="flat">Flat</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label className="text-white text-xs">Shape</Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.contactInfo?.shape || "rounded"}
+                              onValueChange={(value) => form.setValue("sectionStyles.contactInfo.shape", value as "square" | "rounded" | "circle")}
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-contact-shape">
+                                <SelectValue placeholder="Select shape" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="square">Square</SelectItem>
+                                <SelectItem value="rounded">Rounded</SelectItem>
+                                <SelectItem value="circle">Circle</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label className="text-white text-xs">Columns</Label>
+                            <Select
+                              value={String(watchedValues.sectionStyles?.contactInfo?.columns || "auto")}
+                              onValueChange={(value) => {
+                                const numValue = value === "auto" ? "auto" : parseInt(value);
+                                form.setValue("sectionStyles.contactInfo.columns", numValue);
+                              }}
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-contact-columns">
+                                <SelectValue placeholder="Select columns" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="auto">Auto</SelectItem>
+                                <SelectItem value="1">1</SelectItem>
+                                <SelectItem value="2">2</SelectItem>
+                                <SelectItem value="3">3</SelectItem>
+                                <SelectItem value="4">4</SelectItem>
+                                <SelectItem value="5">5</SelectItem>
+                                <SelectItem value="6">6</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        {/* Label Toggle - Only show when View is Icon & Text */}
+                        {watchedValues.sectionStyles?.contactInfo?.view === "icon-text" && (
+                          <div className="flex items-center justify-between mt-3 p-2 bg-slate-700/50 rounded">
+                            <div>
+                              <Label className="text-white text-xs">Show Label</Label>
+                              <p className="text-xs text-slate-400">Display text labels next to icons</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id="contactShowLabel"
+                                checked={watchedValues.sectionStyles?.contactInfo?.showLabel !== false}
+                                onCheckedChange={(checked) => form.setValue("sectionStyles.contactInfo.showLabel", !!checked)}
+                                data-testid="checkbox-contact-show-label"
+                              />
+                              <Label htmlFor="contactShowLabel" className="text-white text-xs">Show</Label>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </>
                   )}
                 </div>
@@ -1671,6 +1772,107 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             data-testid="slider-social-icon-background-size"
                           />
                         </div>
+                      </div>
+
+                      {/* Enhanced Icon Styling Options */}
+                      <div className="border-t border-slate-600 pt-3 mt-3">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-white text-xs">View</Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.socialMedia?.view || "icon-text"}
+                              onValueChange={(value) => form.setValue("sectionStyles.socialMedia.view", value as "icon-text" | "icon" | "text")}
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-social-view">
+                                <SelectValue placeholder="Select view" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="icon-text">Icon & Text</SelectItem>
+                                <SelectItem value="icon">Icon</SelectItem>
+                                <SelectItem value="text">Text</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label className="text-white text-xs">Skin</Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.socialMedia?.skin || "flat"}
+                              onValueChange={(value) => form.setValue("sectionStyles.socialMedia.skin", value as "gradient" | "minimal" | "framed" | "boxed" | "flat")}
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-social-skin">
+                                <SelectValue placeholder="Select skin" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="gradient">Gradient</SelectItem>
+                                <SelectItem value="minimal">Minimal</SelectItem>
+                                <SelectItem value="framed">Framed</SelectItem>
+                                <SelectItem value="boxed">Boxed Icon</SelectItem>
+                                <SelectItem value="flat">Flat</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label className="text-white text-xs">Shape</Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.socialMedia?.shape || "rounded"}
+                              onValueChange={(value) => form.setValue("sectionStyles.socialMedia.shape", value as "square" | "rounded" | "circle")}
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-social-shape">
+                                <SelectValue placeholder="Select shape" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="square">Square</SelectItem>
+                                <SelectItem value="rounded">Rounded</SelectItem>
+                                <SelectItem value="circle">Circle</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label className="text-white text-xs">Columns</Label>
+                            <Select
+                              value={String(watchedValues.sectionStyles?.socialMedia?.columns || "auto")}
+                              onValueChange={(value) => {
+                                const numValue = value === "auto" ? "auto" : parseInt(value);
+                                form.setValue("sectionStyles.socialMedia.columns", numValue);
+                              }}
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-social-columns">
+                                <SelectValue placeholder="Select columns" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="auto">Auto</SelectItem>
+                                <SelectItem value="1">1</SelectItem>
+                                <SelectItem value="2">2</SelectItem>
+                                <SelectItem value="3">3</SelectItem>
+                                <SelectItem value="4">4</SelectItem>
+                                <SelectItem value="5">5</SelectItem>
+                                <SelectItem value="6">6</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        {/* Label Toggle - Only show when View is Icon & Text */}
+                        {watchedValues.sectionStyles?.socialMedia?.view === "icon-text" && (
+                          <div className="flex items-center justify-between mt-3 p-2 bg-slate-700/50 rounded">
+                            <div>
+                              <Label className="text-white text-xs">Show Label</Label>
+                              <p className="text-xs text-slate-400">Display text labels next to icons</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                id="socialShowLabel"
+                                checked={watchedValues.sectionStyles?.socialMedia?.showLabel !== false}
+                                onCheckedChange={(checked) => form.setValue("sectionStyles.socialMedia.showLabel", !!checked)}
+                                data-testid="checkbox-social-show-label"
+                              />
+                              <Label htmlFor="socialShowLabel" className="text-white text-xs">Show</Label>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
