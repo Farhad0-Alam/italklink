@@ -594,7 +594,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     return (
                       <div 
                         key={contact.id} 
-                        className={`tl-icon-container ${viewType === 'icon-text' ? `flex ${shouldUseFullWidth('contactInfo') ? 'w-full' : 'w-auto'} ${getTextPositionClass('contactInfo')}` : 'flex items-center'} ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''} ${shouldUseFullWidth('contactInfo') ? 'w-full' : ''}`}
+                        className={`tl-icon-container ${viewType === 'icon-text' ? (isOutsideRight ? 'flex items-center gap-2' : `flex ${getTextPositionClass('contactInfo')}`) : 'flex items-center'} ${shouldUseFullWidth('contactInfo') ? 'w-full' : 'w-auto'} ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''}`}
                         style={getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? {
                           backgroundColor: getSectionStyle('contactInfo', 'containerBackgroundColor') || 'transparent',
                           borderWidth: getSectionStyle('contactInfo', 'containerBorderColor') ? '1px' : '0',
@@ -613,7 +613,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         {shouldShowIcons && (
                           <button 
                             onClick={() => handleContactAction(contact.type, contact.value)}
-                            className={`flex items-center justify-center ${viewType === 'icon-text' && !isOutsideRight ? `mb-1 ${getTextPositionClass('contactInfo')}` : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${shouldUseFullWidth('contactInfo') && !isOutsideRight ? 'w-full' : ''}`}
+                            className={`flex items-center justify-center ${viewType === 'icon-text' && !isOutsideRight ? `mb-1 ${getTextPositionClass('contactInfo')}` : ''} ${isOutsideRight ? 'w-auto shrink-0' : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${shouldUseFullWidth('contactInfo') && !isOutsideRight ? 'w-full' : ''}`}
                             style={{
                               // Base CSS variables - always applied
                               '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
@@ -658,7 +658,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         )}
                         {shouldShowText && showLabel && isOutsideRight && (
                           <span 
-                            className="tl-text-content font-medium"
+                            className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-medium"
                             style={{ 
                               color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151',
                               fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 14)}px`,
@@ -788,11 +788,11 @@ END:VCARD`;
                     return (
                       <div 
                         key={social.id} 
-                        className={`tl-social-button ${getTextPositionClass('socialMedia')} ${shouldUseFullWidth('socialMedia') ? 'w-full' : 'w-auto'}`}
+                        className={`${viewType === 'icon-text' ? (isSocialOutsideRight ? 'flex items-center gap-2' : `tl-social-button ${getTextPositionClass('socialMedia')}`) : 'flex items-center'} ${shouldUseFullWidth('socialMedia') ? 'w-full' : 'w-auto'}`}
                       >
                         <button 
                           onClick={() => handleContactAction(social.platform, social.value)}
-                          className={`tl-icon-base ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
+                          className={`w-auto shrink-0 tl-icon-base ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
                           data-platform={social.platform}
                           style={{
                             // Base CSS variables - always applied
@@ -816,17 +816,19 @@ END:VCARD`;
                             fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 14)}px`
                           }}></i>
                         </button>
-                        <span 
-                          className="tl-text-content font-medium"
-                          style={{ 
-                            color: getSectionStyle('socialMedia', 'iconTextColor') || '#374151',
-                            fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconTextSize'), 14)}px`,
-                            fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                            fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || '500'
-                          }}
-                        >
-                          {social.label || social.platform}
-                        </span>
+                        {shouldShowText && showLabel && (
+                          <span 
+                            className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-medium"
+                            style={{ 
+                              color: getSectionStyle('socialMedia', 'iconTextColor') || '#374151',
+                              fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconTextSize'), 14)}px`,
+                              fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                              fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || '500'
+                            }}
+                          >
+                            {social.label || social.platform}
+                          </span>
+                        )}
                       </div>
                     );
                   }
@@ -836,7 +838,7 @@ END:VCARD`;
                     <button 
                       key={social.id} 
                       onClick={() => handleContactAction(social.platform, social.value)}
-                      className={`tl-social-button ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${shouldUseFullWidth('socialMedia') ? 'w-full' : (viewType === 'icon-text' ? `w-full ${getTextPositionClass('socialMedia')}` : 'w-auto')}`}
+                      className={`tl-social-button ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${shouldUseFullWidth('socialMedia') ? 'w-full' : (viewType === 'icon-text' && !isSocialOutsideRight ? `w-full ${getTextPositionClass('socialMedia')}` : 'w-auto')}`}
                       data-platform={social.platform}
                       style={{
                         // Base CSS variables - always applied
