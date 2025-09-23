@@ -1101,6 +1101,51 @@
   text-align: center !important;
 }
 
+.tl-text-outside-right,
+.tl-icon-container.tl-text-outside-right,
+.tl-social-button.tl-text-outside-right,
+.tl-text-outside-right.tl-skin-gradient-dark,
+.tl-text-outside-right.tl-skin-gradient-vibrant,
+.tl-text-outside-right.tl-skin-outlined,
+.tl-text-outside-right.tl-skin-soft-solid,
+.tl-text-outside-right.tl-skin-icon-circle {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+  justify-content: flex-start !important;
+}
+
+/* For outside-right layout, ensure button stays its natural size */
+.tl-text-outside-right .tl-icon-base,
+.tl-text-outside-right button {
+  flex-shrink: 0 !important;
+  width: auto !important;
+}
+
+/* Text takes remaining space in outside-right layout */
+.tl-text-outside-right .tl-text-content,
+.tl-text-outside-right span {
+  flex: 1 !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Override column 1 width behavior for outside-right layout */
+.tl-cols-1 .tl-text-outside-right {
+  width: 100% !important;
+}
+
+.tl-cols-1 .tl-text-outside-right .tl-icon-base,
+.tl-cols-1 .tl-text-outside-right button {
+  width: auto !important;
+  min-width: 48px !important;
+  max-width: 60px !important;
+  flex-shrink: 0 !important;
+}
+
 /* Icon Container Sizing - Dynamic Utility Classes */
 .tl-icon-container {
   display: flex;

@@ -1183,7 +1183,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               <Label className="text-white text-xs">Text Position</Label>
                               <Select
                                 value={watchedValues.sectionStyles?.contactInfo?.textPosition || "right"}
-                                onValueChange={(value) => form.setValue("sectionStyles.contactInfo.textPosition", value as "left" | "right" | "top" | "bottom")}
+                                onValueChange={(value) => form.setValue("sectionStyles.contactInfo.textPosition", value as "left" | "right" | "top" | "bottom" | "outside-right")}
                               >
                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-contact-text-position">
                                   <SelectValue placeholder="Select position" />
@@ -1211,6 +1211,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <div className="flex items-center gap-2">
                                       <i className="fas fa-arrow-down"></i>
                                       Text Bottom
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="outside-right">
+                                    <div className="flex items-center gap-2">
+                                      <i className="fas fa-external-link-alt"></i>
+                                      Text Outside (Separate)
                                     </div>
                                   </SelectItem>
                                 </SelectContent>
@@ -2079,7 +2085,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               <Label className="text-white text-xs">Text Position</Label>
                               <Select
                                 value={watchedValues.sectionStyles?.socialMedia?.textPosition || "right"}
-                                onValueChange={(value) => form.setValue("sectionStyles.socialMedia.textPosition", value as "left" | "right" | "top" | "bottom")}
+                                onValueChange={(value) => form.setValue("sectionStyles.socialMedia.textPosition", value as "left" | "right" | "top" | "bottom" | "outside-right")}
                               >
                                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-social-text-position">
                                   <SelectValue placeholder="Select position" />
@@ -2107,6 +2113,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <div className="flex items-center gap-2">
                                       <i className="fas fa-arrow-down"></i>
                                       Text Bottom
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="outside-right">
+                                    <div className="flex items-center gap-2">
+                                      <i className="fas fa-external-link-alt"></i>
+                                      Text Outside (Separate)
                                     </div>
                                   </SelectItem>
                                 </SelectContent>

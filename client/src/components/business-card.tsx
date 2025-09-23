@@ -586,6 +586,10 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                       );
                     }
                     
+                    // Check if using outside-right layout
+                    const textPosition = getSectionStyle('contactInfo', 'textPosition') || 'right';
+                    const isOutsideRight = textPosition === 'outside-right';
+                    
                     // For icon and icon-text views
                     return (
                       <div 
@@ -609,7 +613,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         {shouldShowIcons && (
                           <button 
                             onClick={() => handleContactAction(contact.type, contact.value)}
-                            className={`flex items-center justify-center ${viewType === 'icon-text' ? `mb-1 ${getTextPositionClass('contactInfo')}` : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${shouldUseFullWidth('contactInfo') ? 'w-full' : ''}`}
+                            className={`flex items-center justify-center ${viewType === 'icon-text' && !isOutsideRight ? `mb-1 ${getTextPositionClass('contactInfo')}` : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${shouldUseFullWidth('contactInfo') && !isOutsideRight ? 'w-full' : ''}`}
                             style={{
                               // Base CSS variables - always applied
                               '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
@@ -639,12 +643,25 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                             ></i>
                           </button>
                         )}
-                        {shouldShowText && showLabel && (
+                        {shouldShowText && showLabel && !isOutsideRight && (
                           <span 
                             className="font-medium text-center"
                             style={{ 
                               color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151',
                               fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 12)}px`,
+                              fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
+                              fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || '500'
+                            }}
+                          >
+                            {contact.label}
+                          </span>
+                        )}
+                        {shouldShowText && showLabel && isOutsideRight && (
+                          <span 
+                            className="tl-text-content font-medium"
+                            style={{ 
+                              color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151',
+                              fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 14)}px`,
                               fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
                               fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || '500'
                             }}
@@ -761,7 +778,60 @@ END:VCARD`;
                     );
                   }
                   
+                  // Check if using outside-right layout for social media
+                  const socialTextPosition = getSectionStyle('socialMedia', 'textPosition') || 'right';
+                  const isSocialOutsideRight = socialTextPosition === 'outside-right';
+                  
                   // For icon and icon-text views
+                  if (isSocialOutsideRight && viewType === 'icon-text') {
+                    // Render as separate button and text elements for outside-right layout
+                    return (
+                      <div 
+                        key={social.id} 
+                        className={`tl-social-button ${getTextPositionClass('socialMedia')} ${shouldUseFullWidth('socialMedia') ? 'w-full' : 'w-auto'}`}
+                      >
+                        <button 
+                          onClick={() => handleContactAction(social.platform, social.value)}
+                          className={`tl-icon-base ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
+                          data-platform={social.platform}
+                          style={{
+                            // Base CSS variables - always applied
+                            '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e',
+                            '--tl-icon-color': getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff',
+                            '--tl-border': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
+                            // Hover CSS variables - only when toggle enabled
+                            ...(getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? {
+                              '--tl-icon-bg-hover': getSectionStyle('socialMedia', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e', 20),
+                              '--tl-icon-color-hover': getSectionStyle('socialMedia', 'iconHoverColor') || adjustColor(getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff', -20),
+                              '--tl-border-hover': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
+                            } : {}),
+                            borderWidth: getSectionStyle('socialMedia', 'iconBorderColor') ? `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px` : '0',
+                            borderStyle: getSectionStyle('socialMedia', 'iconBorderColor') ? 'solid' : 'none',
+                            width: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundWidth'), parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48))}px`,
+                            height: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundHeight'), parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48))}px`,
+                          } as React.CSSProperties}
+                          data-testid={`button-social-${social.platform}`}
+                        >
+                          <i className={`${getSocialIcon(social.platform)} flex items-center justify-center`} style={{
+                            fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 14)}px`
+                          }}></i>
+                        </button>
+                        <span 
+                          className="tl-text-content font-medium"
+                          style={{ 
+                            color: getSectionStyle('socialMedia', 'iconTextColor') || '#374151',
+                            fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconTextSize'), 14)}px`,
+                            fontFamily: getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
+                            fontWeight: getSectionStyle('socialMedia', 'iconTextWeight') || '500'
+                          }}
+                        >
+                          {social.label || social.platform}
+                        </span>
+                      </div>
+                    );
+                  }
+                  
+                  // Regular layout for non-outside-right positioning
                   return (
                     <button 
                       key={social.id} 
