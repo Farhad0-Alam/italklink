@@ -609,7 +609,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         {shouldShowIcons && (
                           <button 
                             onClick={() => handleContactAction(contact.type, contact.value)}
-                            className={`flex items-center justify-center ${viewType === 'icon-text' ? 'mb-1' : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${shouldUseFullWidth('contactInfo') ? 'w-full' : ''}`}
+                            className={`flex items-center justify-center ${viewType === 'icon-text' ? `mb-1 ${getTextPositionClass('contactInfo')}` : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${shouldUseFullWidth('contactInfo') ? 'w-full' : ''}`}
                             style={{
                               // Base CSS variables - always applied
                               '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
