@@ -581,111 +581,42 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     }
                     
                     // For icon and icon-text views
-                    const textLayout = getSectionStyle('contactInfo', 'textLayout') || 'advanced';
-                    const textPosition = getSectionStyle('contactInfo', 'textPosition') || 'right';
-                    
-                    // Advanced layout - text integrated in button
-                    if (viewType === 'icon-text' && textLayout === 'advanced') {
-                      return (
-                        <button
-                          key={contact.id}
-                          onClick={() => handleContactAction(contact.type, contact.value)}
-                          className={`tl-social-button tl-layout-advanced tl-text-${textPosition} ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
-                          style={{
-                            // Base button styling
-                            '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.brandColor || '#22c55e',
-                            '--tl-icon-color': getSectionStyle('contactInfo', 'iconTextColor') || data.tertiaryColor || '#ffffff',
-                            '--tl-border': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
-                            // Advanced text styling variables
-                            '--tl-text-bg': getSectionStyle('contactInfo', 'textBackground') || 'transparent',
-                            '--tl-text-bg-gradient': getSectionStyle('contactInfo', 'textBackgroundGradient') || 'none',
-                            '--tl-text-color': getSectionStyle('contactInfo', 'iconTextColor') || '#ffffff',
-                            '--tl-text-border': getSectionStyle('contactInfo', 'textBorder') || 'none',
-                            '--tl-text-shadow': getSectionStyle('contactInfo', 'textShadow') || 'none',
-                            '--tl-text-outline': getSectionStyle('contactInfo', 'textOutline') || 'none',
-                            // Hover CSS variables - only when toggle enabled
-                            ...(getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? {
-                              '--tl-icon-bg-hover': getSectionStyle('contactInfo', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconBackgroundColor') || data.brandColor || '#22c55e', 20),
-                              '--tl-icon-color-hover': getSectionStyle('contactInfo', 'iconHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconTextColor') || data.tertiaryColor || '#ffffff', -20),
-                              '--tl-border-hover': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
-                            } : {}),
-                            // Standard styling properties - using directional border properties to avoid conflicts
-                            ...(getSectionStyle('contactInfo', 'iconBorderColor') ? {
-                              borderTopWidth: `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px`,
-                              borderRightWidth: `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px`,
-                              borderBottomWidth: `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px`,
-                              borderLeftWidth: `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px`,
-                              borderStyle: 'solid',
-                              borderColor: getSectionStyle('contactInfo', 'iconBorderColor')
-                            } : {
-                              borderTopWidth: '0',
-                              borderRightWidth: '0',
-                              borderBottomWidth: '4px',
-                              borderLeftWidth: '0',
-                              borderBottomStyle: 'solid',
-                              borderBottomColor: data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')
-                            }),
-                            boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
-                              ? `${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'dropShadowOpacity') || '0.25'))}`
-                              : 'none'
-                          } as React.CSSProperties}
-                          data-testid={`button-custom-contact-${contact.id}`}
-                        >
-                          {shouldShowIcons && (
-                            <i 
-                              className={`${contact.icon} tl-icon-symbol`}
-                              style={{
-                                fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconSize'), 18)}px`
-                              }}
-                            ></i>
-                          )}
-                          {shouldShowText && showLabel && (
-                            <span className="tl-text-advanced">
-                              {contact.label || 'Contact'}
-                            </span>
-                          )}
-                        </button>
-                      );
-                    }
-                    
-                    // Simple layout - text separate from button (original style)
-                    if (viewType === 'icon-text' && textLayout === 'simple') {
-                      return (
-                        <div 
-                          key={contact.id}
-                          className={`tl-layout-simple tl-text-${textPosition}`}
-                          data-testid={`container-custom-contact-${contact.id}`}
-                        >
+                    return (
+                      <div 
+                        key={contact.id} 
+                        className={`tl-icon-container ${viewType === 'icon-text' ? `flex w-full ${getTextPositionClass('contactInfo')}` : 'flex items-center'} ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''}`}
+                        style={getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? {
+                          backgroundColor: getSectionStyle('contactInfo', 'containerBackgroundColor') || 'transparent',
+                          borderWidth: getSectionStyle('contactInfo', 'containerBorderColor') ? '1px' : '0',
+                          borderStyle: getSectionStyle('contactInfo', 'containerBorderColor') ? 'solid' : 'none',
+                          borderColor: getSectionStyle('contactInfo', 'containerBorderColor') || 'transparent',
+                          borderRadius: `${parseNumeric(getSectionStyle('contactInfo', 'containerBorderRadius'), 8)}px`,
+                          width: `${parseNumeric(getSectionStyle('contactInfo', 'containerWidth'), 80)}px`,
+                          height: `${parseNumeric(getSectionStyle('contactInfo', 'containerHeight'), 80)}px`,
+                          padding: '8px',
+                          boxShadow: getSectionStyle('contactInfo', 'containerDropShadowEnabled') === 'true' 
+                            ? `${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'containerDropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'containerDropShadowOpacity') || '0.25'))}`
+                            : 'none'
+                        } : {}}
+                        data-testid={`container-custom-contact-${contact.id}`}
+                      >
+                        {shouldShowIcons && (
                           <button 
                             onClick={() => handleContactAction(contact.type, contact.value)}
-                            className={`tl-social-button ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
+                            className={`flex items-center justify-center ${viewType === 'icon-text' ? 'mb-1' : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
                             style={{
                               // Base CSS variables - always applied
-                              '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.brandColor || '#22c55e',
-                              '--tl-icon-color': getSectionStyle('contactInfo', 'iconTextColor') || data.tertiaryColor || '#ffffff',
+                              '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
+                              '--tl-icon-color': getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff',
                               '--tl-border': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
                               // Hover CSS variables - only when toggle enabled
                               ...(getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? {
-                                '--tl-icon-bg-hover': getSectionStyle('contactInfo', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconBackgroundColor') || data.brandColor || '#22c55e', 20),
-                                '--tl-icon-color-hover': getSectionStyle('contactInfo', 'iconHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconTextColor') || data.tertiaryColor || '#ffffff', -20),
+                                '--tl-icon-bg-hover': getSectionStyle('contactInfo', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a', 20),
+                                '--tl-icon-color-hover': getSectionStyle('contactInfo', 'iconHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff', -20),
                                 '--tl-border-hover': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
                               } : {}),
-                              // Standard styling properties - using directional border properties to avoid conflicts
-                              ...(getSectionStyle('contactInfo', 'iconBorderColor') ? {
-                                borderTopWidth: `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px`,
-                                borderRightWidth: `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px`,
-                                borderBottomWidth: `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px`,
-                                borderLeftWidth: `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px`,
-                                borderStyle: 'solid',
-                                borderColor: getSectionStyle('contactInfo', 'iconBorderColor')
-                              } : {
-                                borderTopWidth: '0',
-                                borderRightWidth: '0',
-                                borderBottomWidth: '4px',
-                                borderLeftWidth: '0',
-                                borderBottomStyle: 'solid',
-                                borderBottomColor: data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')
-                              }),
+                              borderWidth: getSectionStyle('contactInfo', 'iconBorderColor') ? `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px` : '0',
+                              borderStyle: getSectionStyle('contactInfo', 'iconBorderColor') ? 'solid' : 'none',
                               width: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundWidth'), parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48))}px`,
                               height: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundHeight'), parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48))}px`,
                               boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
@@ -694,79 +625,28 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                             } as React.CSSProperties}
                             data-testid={`button-custom-contact-${contact.id}`}
                           >
-                            {shouldShowIcons && (
-                              <i 
-                                className={`${contact.icon} tl-icon-symbol`}
-                                style={{
-                                  fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconSize'), 18)}px`
-                                }}
-                              ></i>
-                            )}
-                          </button>
-                          {shouldShowText && showLabel && (
-                            <span 
-                              className="tl-simple-text"
+                            <i 
+                              className={contact.icon}
                               style={{
-                                '--tl-simple-text-color': getSectionStyle('contactInfo', 'iconTextColor') || '#374151',
-                                '--tl-simple-text-size': `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 12)}px`,
-                                '--tl-simple-text-font': getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
-                                '--tl-simple-text-weight': getSectionStyle('contactInfo', 'iconTextWeight') || '500'
-                              } as React.CSSProperties}
-                            >
-                              {contact.label || 'Contact'}
-                            </span>
-                          )}
-                        </div>
-                      );
-                    }
-                    
-                    // Text inside button layout (new style)
-                    return (
-                      <button 
-                        key={contact.id}
-                        onClick={() => handleContactAction(contact.type, contact.value)}
-                        className={`tl-social-button ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${viewType === 'icon-text' ? `w-full ${getTextPositionClass('contactInfo')}` : 'w-auto'}`}
-                        style={{
-                          // Base CSS variables - always applied
-                          '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.brandColor || '#22c55e',
-                          '--tl-icon-color': getSectionStyle('contactInfo', 'iconTextColor') || data.tertiaryColor || '#ffffff',
-                          '--tl-border': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
-                          // Hover CSS variables - only when toggle enabled
-                          ...(getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? {
-                            '--tl-icon-bg-hover': getSectionStyle('contactInfo', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconBackgroundColor') || data.brandColor || '#22c55e', 20),
-                            '--tl-icon-color-hover': getSectionStyle('contactInfo', 'iconHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconTextColor') || data.tertiaryColor || '#ffffff', -20),
-                            '--tl-border-hover': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
-                          } : {}),
-                          borderWidth: getSectionStyle('contactInfo', 'iconBorderColor') ? `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px` : '0',
-                          borderStyle: getSectionStyle('contactInfo', 'iconBorderColor') ? 'solid' : 'none',
-                          borderBottom: getSectionStyle('contactInfo', 'iconBorderColor') ? 'none' : `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
-                          fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'inherit',
-                          fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 14)}px`,
-                          fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || '600',
-                          fontStyle: getSectionStyle('contactInfo', 'iconTextStyle') || 'normal',
-                          boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
-                            ? `${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'dropShadowOpacity') || '0.25'))}`
-                            : 'none',
-                          // Icon container dimensions - for icon and icon-text views
-                          ...(shouldShowIcons && viewType === 'icon' && {
-                            width: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundWidth'), parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48))}px`,
-                            height: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundHeight'), parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48))}px`
-                          })
-                        } as React.CSSProperties}
-                        data-testid={`button-custom-contact-${contact.id}`}
-                      >
-                        {shouldShowIcons && (
-                          <i 
-                            className={`${contact.icon} tl-icon-symbol`}
-                            style={{
-                              fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconSize'), 18)}px`
-                            }}
-                          ></i>
+                                fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconSize'), 14)}px`
+                              }}
+                            ></i>
+                          </button>
                         )}
                         {shouldShowText && showLabel && (
-                          <span className="tl-icon-text">{contact.label || 'Contact'}</span>
+                          <span 
+                            className="font-medium text-center"
+                            style={{ 
+                              color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151',
+                              fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 12)}px`,
+                              fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
+                              fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || '500'
+                            }}
+                          >
+                            {contact.label}
+                          </span>
                         )}
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -878,138 +758,6 @@ END:VCARD`;
                   }
                   
                   // For icon and icon-text views
-                  const textLayout = getSectionStyle('socialMedia', 'textLayout') || 'advanced';
-                  const textPosition = getSectionStyle('socialMedia', 'textPosition') || 'right';
-                  // Advanced layout - text integrated in button
-                  if (viewType === 'icon-text' && textLayout === 'advanced') {
-                    return (
-                      <button
-                        key={social.id}
-                        onClick={() => handleSocialAction(social.platform, social.value)}
-                        className={`tl-social-button tl-layout-advanced tl-text-${textPosition} ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
-                        data-platform={social.platform}
-                        style={{
-                          // Base button styling
-                          '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e',
-                          '--tl-icon-color': getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff',
-                          '--tl-border': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
-                          // Advanced text styling variables
-                          '--tl-text-bg': getSectionStyle('socialMedia', 'textBackground') || 'transparent',
-                          '--tl-text-bg-gradient': getSectionStyle('socialMedia', 'textBackgroundGradient') || 'none',
-                          '--tl-text-color': getSectionStyle('socialMedia', 'iconTextColor') || '#ffffff',
-                          '--tl-text-border': getSectionStyle('socialMedia', 'textBorder') || 'none',
-                          '--tl-text-shadow': getSectionStyle('socialMedia', 'textShadow') || 'none',
-                          '--tl-text-outline': getSectionStyle('socialMedia', 'textOutline') || 'none',
-                          // Hover CSS variables - only when toggle enabled
-                          ...(getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? {
-                            '--tl-icon-bg-hover': getSectionStyle('socialMedia', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e', 20),
-                            '--tl-icon-color-hover': getSectionStyle('socialMedia', 'iconHoverColor') || adjustColor(getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff', -20),
-                            '--tl-border-hover': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
-                          } : {}),
-                          // Standard styling properties - using directional border properties to avoid conflicts
-                          ...(getSectionStyle('socialMedia', 'iconBorderColor') ? {
-                            borderTopWidth: `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px`,
-                            borderRightWidth: `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px`,
-                            borderBottomWidth: `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px`,
-                            borderLeftWidth: `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px`,
-                            borderStyle: 'solid',
-                            borderColor: getSectionStyle('socialMedia', 'iconBorderColor')
-                          } : {
-                            borderTopWidth: '0',
-                            borderRightWidth: '0',
-                            borderBottomWidth: '4px',
-                            borderLeftWidth: '0',
-                            borderBottomStyle: 'solid',
-                            borderBottomColor: data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')
-                          }),
-                          boxShadow: getSectionStyle('socialMedia', 'dropShadowEnabled') === 'true' 
-                            ? `${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('socialMedia', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('socialMedia', 'dropShadowOpacity') || '0.25'))}`
-                            : 'none'
-                        } as React.CSSProperties}
-                        data-testid={`button-custom-social-${social.id}`}
-                      >
-                        {shouldShowIcons && (
-                          <i 
-                            className={`${social.icon} tl-icon-symbol`}
-                            style={{
-                              fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 18)}px`
-                            }}
-                          ></i>
-                        )}
-                        {shouldShowText && showLabel && (
-                          <span className="tl-text-advanced">
-                            {social.label || social.platform}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  }
-
-                  // Simple layout - text separate from button
-                  if (viewType === 'icon-text' && textLayout === 'simple') {
-                    return (
-                      <div 
-                        key={social.id}
-                        className={`tl-layout-simple tl-text-${textPosition}`}
-                        data-testid={`container-social-media-${social.id}`}
-                      >
-                        <button 
-                          onClick={() => handleSocialAction(social.platform, social.value)}
-                          className={`tl-social-button ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
-                          data-platform={social.platform}
-                          style={{
-                            ...getStyleProps('socialMedia'),
-                            // Standard styling properties - using directional border properties to avoid conflicts
-                            ...(getSectionStyle('socialMedia', 'iconBorderColor') ? {
-                              borderTopWidth: `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px`,
-                              borderRightWidth: `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px`,
-                              borderBottomWidth: `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px`,
-                              borderLeftWidth: `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px`,
-                              borderStyle: 'solid',
-                              borderColor: getSectionStyle('socialMedia', 'iconBorderColor')
-                            } : {
-                              borderTopWidth: '0',
-                              borderRightWidth: '0',
-                              borderBottomWidth: '4px',
-                              borderLeftWidth: '0',
-                              borderBottomStyle: 'solid',
-                              borderBottomColor: data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')
-                            }),
-                            width: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundWidth'), parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48))}px`,
-                            height: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundHeight'), parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48))}px`,
-                            boxShadow: getSectionStyle('socialMedia', 'dropShadowEnabled') === 'true' 
-                              ? `${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('socialMedia', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('socialMedia', 'dropShadowOpacity') || '0.25'))}`
-                              : 'none'
-                          }}
-                          data-testid={`button-social-media-${social.id}`}
-                        >
-                          {shouldShowIcons && (
-                            <i 
-                              className={`${social.icon} tl-icon-symbol`}
-                              style={{
-                                fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconSize'), 18)}px`
-                              }}
-                            ></i>
-                          )}
-                        </button>
-                        {shouldShowText && showLabel && (
-                          <span 
-                            className="tl-simple-text"
-                            style={{
-                              '--tl-simple-text-color': getSectionStyle('socialMedia', 'iconTextColor') || '#374151',
-                              '--tl-simple-text-size': `${parseNumeric(getSectionStyle('socialMedia', 'iconTextSize'), 12)}px`,
-                              '--tl-simple-text-font': getSectionStyle('socialMedia', 'iconTextFont') || 'Inter, sans-serif',
-                              '--tl-simple-text-weight': getSectionStyle('socialMedia', 'iconTextWeight') || '500'
-                            } as React.CSSProperties}
-                          >
-                            {social.label || 'Social'}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  }
-                  
-                  // Text inside button layout (new style)
                   return (
                     <button 
                       key={social.id} 
@@ -1038,7 +786,7 @@ END:VCARD`;
                           ? `${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('socialMedia', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('socialMedia', 'dropShadowOpacity') || '0.25'))}`
                           : 'none',
                         // Icon container dimensions - for icon and icon-text views
-                        ...(shouldShowIcons && viewType === 'icon' && {
+                        ...(shouldShowIcons && {
                           width: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundWidth'), parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48))}px`,
                           height: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundHeight'), parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48))}px`
                         })
