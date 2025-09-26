@@ -1,3 +1,4 @@
+import type React from "react";
 import { forwardRef, useState } from "react";
 import { BusinessCard } from "@shared/schema";
 import { Button } from "@/components/ui/button";
@@ -14,12 +15,12 @@ import { useButtonTracking } from "@/modules/automation/useButtonTracking";
 // Helper function to get optimized image source
 const getOptimizedImageSrc = (originalSrc: string | null | undefined, variant: 'thumb' | 'card' | 'large' = 'card'): string => {
   if (!originalSrc) return "";
-  
+
   // If it's already a base64 image, return as-is (backward compatibility)
   if (originalSrc.startsWith('data:')) {
     return originalSrc;
   }
-  
+
   // If it's a Supabase storage URL, try to get WebP variant
   if (originalSrc.includes('supabase') && originalSrc.includes('storage')) {
     // Extract the path and try to construct WebP variant URL
@@ -31,13 +32,13 @@ const getOptimizedImageSrc = (originalSrc: string | null | undefined, variant: '
       const webpVariant = variant === 'thumb' ? 'thumb_200.webp' : 
                          variant === 'card' ? 'card_430.webp' : 
                          'large_1200.webp';
-      
+
       // Construct optimized URL
       const optimizedUrl = originalSrc.replace(storagePath, `${basePath}_${webpVariant}`);
       return optimizedUrl;
     }
   }
-  
+
   // Fallback to original URL
   return originalSrc;
 };
@@ -46,17 +47,17 @@ const getOptimizedImageSrc = (originalSrc: string | null | undefined, variant: '
 const adjustColor = (color: string, amount: number): string => {
   // Remove # if present
   const hex = color.replace('#', '');
-  
+
   // Convert to RGB
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
   const b = parseInt(hex.slice(4, 6), 16);
-  
+
   // Adjust brightness
   const newR = Math.max(0, Math.min(255, r + amount));
   const newG = Math.max(0, Math.min(255, g + amount));
   const newB = Math.max(0, Math.min(255, b + amount));
-  
+
   // Convert back to hex
   const newHex = ((newR << 16) | (newG << 8) | newB).toString(16).padStart(6, '0');
   return `#${newHex}`;
@@ -70,7 +71,8 @@ interface BusinessCardProps {
   onNavigatePage?: (pageId: string) => void;
 }
 
-export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProps>(
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+
   ({ data, showQR = false, isInteractive = true, isMobilePreview = false, onNavigatePage }, ref) => {
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const [showShareMenu, setShowShareMenu] = useState(false);
@@ -87,7 +89,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
 
     const handleContactAction = async (type: string, value?: string) => {
       if (!isInteractive || !value) return;
-      
+
       // Track button click for automation
       if (data.id) {
         const buttonActionMap: Record<string, 'call' | 'email' | 'link' | 'whatsapp'> = {
@@ -100,14 +102,14 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           'twitter': 'link',
           'facebook': 'link'
         };
-        
+
         const buttonAction = buttonActionMap[type] || 'link';
         const buttonLabel = type === 'phone' ? 'Call' : 
                            type === 'email' ? 'Email' :
                            type === 'whatsapp' ? 'WhatsApp' :
                            type === 'website' ? 'Website' :
                            type.charAt(0).toUpperCase() + type.slice(1);
-        
+
         // Track interaction (don't wait for response)
         trackButtonClick(
           data.id, 
@@ -117,7 +119,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           value
         ).catch(console.error);
       }
-      
+
       switch (type) {
         case 'phone':
           window.open(`tel:${value}`);
@@ -153,7 +155,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     const handleShare = async (platform?: string) => {
       const url = shareUrl;
       const text = `Check out ${data.fullName}'s business card`;
-      
+
       if (platform === 'copy') {
         try {
           await navigator.clipboard.writeText(url);
@@ -202,7 +204,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           setShowShareMenu(false);
           return;
       }
-      
+
       if (shareUrl_platform) {
         window.open(shareUrl_platform, '_blank', 'width=600,height=400');
         setShowShareMenu(false);
@@ -212,24 +214,24 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     // Use optimized profile image with fallback
     const fallbackImage = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300";
     const profileImageSrc = getOptimizedImageSrc(data.profilePhoto, 'card') || fallbackImage;
-    
+
     // Helper function to get section-specific styling with global fallback
     const getSectionStyle = (section: 'basicInfo' | 'contactInfo' | 'socialMedia', styleType: string): string | undefined => {
       const sectionStyle = data.sectionStyles?.[section];
-      
+
       if (sectionStyle && sectionStyle[styleType as keyof typeof sectionStyle]) {
         const sectionValue = sectionStyle[styleType as keyof typeof sectionStyle];
         if (sectionValue !== undefined && sectionValue !== null) {
           return String(sectionValue);
         }
       }
-      
+
       // Fallback to global style, but only return string values appropriate for CSS
       const globalValue = data[styleType as keyof typeof data];
       if (globalValue !== undefined && globalValue !== null) {
         return String(globalValue);
       }
-      
+
       return undefined;
     };
 
@@ -262,7 +264,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     const shouldShowLabel = (section: 'contactInfo' | 'socialMedia'): boolean => {
       const viewType = getViewType(section);
       if (viewType !== 'icon-text') return false;
-      
+
       const showLabel = getSectionStyle(section, 'showLabel');
       // Handle both string and boolean values for backward compatibility
       if (typeof showLabel === 'boolean') return showLabel;
@@ -298,7 +300,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
     // Generate primary contact buttons
     const getPrimaryContacts = () => {
       const contacts = [];
-      
+
       if (data.phone) {
         contacts.push({
           id: 'primary-phone',
@@ -308,7 +310,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           icon: 'fas fa-phone'
         });
       }
-      
+
       if (data.email) {
         contacts.push({
           id: 'primary-email', 
@@ -318,7 +320,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           icon: 'fas fa-envelope'
         });
       }
-      
+
       if (data.website) {
         contacts.push({
           id: 'primary-website',
@@ -328,7 +330,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           icon: 'fas fa-globe'
         });
       }
-      
+
       if (data.linkedin) {
         contacts.push({
           id: 'primary-linkedin',
@@ -338,7 +340,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
           icon: 'fab fa-linkedin'
         });
       }
-      
+
       return contacts;
     };
 
@@ -384,7 +386,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                       />
                     </div>
                   )}
-                  
+
                   {/* Profile Photo with White Border */}
                   <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 z-30">
                     <div className="w-24 h-24 rounded-full bg-white p-1">
@@ -421,7 +423,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                       />
                     </div>
                   </div>
-                  
+
                   {/* Logo in top right */}
                   {data.logo && (
                     <div className="absolute top-4 right-4 z-10">
@@ -461,7 +463,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Right side - Logo space */}
                   <div 
                     className="w-24 flex items-center justify-center z-10"
@@ -488,7 +490,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                 />
               )}
         </div>
-          
+
         {/* Content */}
         <div className={`pb-8 px-6 text-center text-slate-800 ${
           data.headerDesign === 'profile-center' ? 'pt-20' : 
@@ -537,7 +539,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
               {data.company}
             </p>
           )}
-          
+
           {/* New Button Layout - Top 8 Buttons from Contact Information */}
           <div className="mb-6 space-y-2">
             {/* Grid of Contact Buttons ONLY - Responsive 2 rows of 4 */}
@@ -559,7 +561,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     const shouldShowIcons = viewType === 'icon' || viewType === 'icon-text';
                     const shouldShowText = viewType === 'text' || viewType === 'icon-text';
                     const showLabel = shouldShowLabel('contactInfo');
-                    
+
                     // For text-only view, render as simple link/button
                     if (viewType === 'text') {
                       return (
@@ -579,7 +581,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         </button>
                       );
                     }
-                    
+
                     // For icon and icon-text views
                     return (
                       <div 
@@ -605,7 +607,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                           boxShadow: getSectionStyle('contactInfo', 'containerDropShadowEnabled') === 'true' 
                             ? `${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'containerDropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'containerDropShadowOpacity') || '0.25'))}`
                             : 'none'
-                        } : {}}
+                        } : {})} as React.CSSProperties
                         data-testid={`container-custom-contact-${contact.id}`}
                       >
                         {shouldShowIcons && (
@@ -675,7 +677,7 @@ TEL:${data.phone || ''}
 EMAIL:${data.email || ''}
 URL:${data.website || ''}
 END:VCARD`;
-                  
+
                   const blob = new Blob([vCard], { type: 'text/vcard' });
                   const url = URL.createObjectURL(blob);
                   const link = document.createElement('a');
@@ -744,7 +746,7 @@ END:VCARD`;
                   const shouldShowIcons = viewType === 'icon' || viewType === 'icon-text';
                   const shouldShowText = viewType === 'text' || viewType === 'icon-text';
                   const showLabel = shouldShowLabel('socialMedia');
-                  
+
                   // For text-only view, render as simple link/button
                   if (viewType === 'text') {
                     return (
@@ -764,7 +766,7 @@ END:VCARD`;
                       </button>
                     );
                   }
-                  
+
                   // For icon and icon-text views
                   return (
                     <button 
@@ -830,7 +832,7 @@ END:VCARD`;
           )}
 
 
-          
+
           {/* QR Code */}
           {showQR && (
             <div className="text-center">
@@ -865,7 +867,7 @@ END:VCARD`;
                 >
                   <Share2 className="h-4 w-4 text-gray-700" />
                 </Button>
-                
+
                 {/* Share Menu */}
                 {showShareMenu && (
                   <div className="absolute top-12 right-0 bg-white rounded-lg shadow-xl border p-2 min-w-48 z-20">
