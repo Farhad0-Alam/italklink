@@ -1,4 +1,3 @@
-import type React from "react";
 import { forwardRef, useState } from "react";
 import { BusinessCard } from "@shared/schema";
 import { Button } from "@/components/ui/button";
@@ -15,12 +14,12 @@ import { useButtonTracking } from "@/modules/automation/useButtonTracking";
 // Helper function to get optimized image source
 const getOptimizedImageSrc = (originalSrc: string | null | undefined, variant: 'thumb' | 'card' | 'large' = 'card'): string => {
   if (!originalSrc) return "";
-
+  
   // If it's already a base64 image, return as-is (backward compatibility)
   if (originalSrc.startsWith('data:')) {
     return originalSrc;
   }
-
+  
   // If it's a Supabase storage URL, try to get WebP variant
   if (originalSrc.includes('supabase') && originalSrc.includes('storage')) {
     // Extract the path and try to construct WebP variant URL
@@ -32,13 +31,13 @@ const getOptimizedImageSrc = (originalSrc: string | null | undefined, variant: '
       const webpVariant = variant === 'thumb' ? 'thumb_200.webp' : 
                          variant === 'card' ? 'card_430.webp' : 
                          'large_1200.webp';
-
+      
       // Construct optimized URL
       const optimizedUrl = originalSrc.replace(storagePath, `${basePath}_${webpVariant}`);
       return optimizedUrl;
     }
   }
-
+  
   // Fallback to original URL
   return originalSrc;
 };
@@ -47,17 +46,17 @@ const getOptimizedImageSrc = (originalSrc: string | null | undefined, variant: '
 const adjustColor = (color: string, amount: number): string => {
   // Remove # if present
   const hex = color.replace('#', '');
-
+  
   // Convert to RGB
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
   const b = parseInt(hex.slice(4, 6), 16);
-
+  
   // Adjust brightness
   const newR = Math.max(0, Math.min(255, r + amount));
   const newG = Math.max(0, Math.min(255, g + amount));
   const newB = Math.max(0, Math.min(255, b + amount));
-
+  
   // Convert back to hex
   const newHex = ((newR << 16) | (newG << 8) | newB).toString(16).padStart(6, '0');
   return `#${newHex}`;
@@ -71,8 +70,7 @@ interface BusinessCardProps {
   onNavigatePage?: (pageId: string) => void;
 }
 
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
-
+export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProps>(
   ({ data, showQR = false, isInteractive = true, isMobilePreview = false, onNavigatePage }, ref) => {
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const [showShareMenu, setShowShareMenu] = useState(false);
@@ -89,7 +87,7 @@ interface BusinessCardProps {
 
     const handleContactAction = async (type: string, value?: string) => {
       if (!isInteractive || !value) return;
-
+      
       // Track button click for automation
       if (data.id) {
         const buttonActionMap: Record<string, 'call' | 'email' | 'link' | 'whatsapp'> = {
@@ -102,14 +100,14 @@ interface BusinessCardProps {
           'twitter': 'link',
           'facebook': 'link'
         };
-
+        
         const buttonAction = buttonActionMap[type] || 'link';
         const buttonLabel = type === 'phone' ? 'Call' : 
                            type === 'email' ? 'Email' :
                            type === 'whatsapp' ? 'WhatsApp' :
                            type === 'website' ? 'Website' :
                            type.charAt(0).toUpperCase() + type.slice(1);
-
+        
         // Track interaction (don't wait for response)
         trackButtonClick(
           data.id, 
@@ -119,7 +117,7 @@ interface BusinessCardProps {
           value
         ).catch(console.error);
       }
-
+      
       switch (type) {
         case 'phone':
           window.open(`tel:${value}`);
@@ -155,7 +153,7 @@ interface BusinessCardProps {
     const handleShare = async (platform?: string) => {
       const url = shareUrl;
       const text = `Check out ${data.fullName}'s business card`;
-
+      
       if (platform === 'copy') {
         try {
           await navigator.clipboard.writeText(url);
@@ -204,7 +202,7 @@ interface BusinessCardProps {
           setShowShareMenu(false);
           return;
       }
-
+      
       if (shareUrl_platform) {
         window.open(shareUrl_platform, '_blank', 'width=600,height=400');
         setShowShareMenu(false);
@@ -214,24 +212,24 @@ interface BusinessCardProps {
     // Use optimized profile image with fallback
     const fallbackImage = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300";
     const profileImageSrc = getOptimizedImageSrc(data.profilePhoto, 'card') || fallbackImage;
-
+    
     // Helper function to get section-specific styling with global fallback
     const getSectionStyle = (section: 'basicInfo' | 'contactInfo' | 'socialMedia', styleType: string): string | undefined => {
       const sectionStyle = data.sectionStyles?.[section];
-
+      
       if (sectionStyle && sectionStyle[styleType as keyof typeof sectionStyle]) {
         const sectionValue = sectionStyle[styleType as keyof typeof sectionStyle];
         if (sectionValue !== undefined && sectionValue !== null) {
           return String(sectionValue);
         }
       }
-
+      
       // Fallback to global style, but only return string values appropriate for CSS
       const globalValue = data[styleType as keyof typeof data];
       if (globalValue !== undefined && globalValue !== null) {
         return String(globalValue);
       }
-
+      
       return undefined;
     };
 
@@ -264,7 +262,7 @@ interface BusinessCardProps {
     const shouldShowLabel = (section: 'contactInfo' | 'socialMedia'): boolean => {
       const viewType = getViewType(section);
       if (viewType !== 'icon-text') return false;
-
+      
       const showLabel = getSectionStyle(section, 'showLabel');
       // Handle both string and boolean values for backward compatibility
       if (typeof showLabel === 'boolean') return showLabel;
@@ -300,7 +298,7 @@ interface BusinessCardProps {
     // Generate primary contact buttons
     const getPrimaryContacts = () => {
       const contacts = [];
-
+      
       if (data.phone) {
         contacts.push({
           id: 'primary-phone',
@@ -310,7 +308,7 @@ interface BusinessCardProps {
           icon: 'fas fa-phone'
         });
       }
-
+      
       if (data.email) {
         contacts.push({
           id: 'primary-email', 
@@ -320,7 +318,7 @@ interface BusinessCardProps {
           icon: 'fas fa-envelope'
         });
       }
-
+      
       if (data.website) {
         contacts.push({
           id: 'primary-website',
@@ -330,7 +328,7 @@ interface BusinessCardProps {
           icon: 'fas fa-globe'
         });
       }
-
+      
       if (data.linkedin) {
         contacts.push({
           id: 'primary-linkedin',
@@ -340,7 +338,7 @@ interface BusinessCardProps {
           icon: 'fab fa-linkedin'
         });
       }
-
+      
       return contacts;
     };
 
@@ -386,7 +384,7 @@ interface BusinessCardProps {
                       />
                     </div>
                   )}
-
+                  
                   {/* Profile Photo with White Border */}
                   <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 z-30">
                     <div className="w-24 h-24 rounded-full bg-white p-1">
@@ -423,7 +421,7 @@ interface BusinessCardProps {
                       />
                     </div>
                   </div>
-
+                  
                   {/* Logo in top right */}
                   {data.logo && (
                     <div className="absolute top-4 right-4 z-10">
@@ -463,7 +461,7 @@ interface BusinessCardProps {
                       </div>
                     </div>
                   </div>
-
+                  
                   {/* Right side - Logo space */}
                   <div 
                     className="w-24 flex items-center justify-center z-10"
@@ -490,7 +488,7 @@ interface BusinessCardProps {
                 />
               )}
         </div>
-
+          
         {/* Content */}
         <div className={`pb-8 px-6 text-center text-slate-800 ${
           data.headerDesign === 'profile-center' ? 'pt-20' : 
@@ -539,7 +537,7 @@ interface BusinessCardProps {
               {data.company}
             </p>
           )}
-
+          
           {/* New Button Layout - Top 8 Buttons from Contact Information */}
           <div className="mb-6 space-y-2">
             {/* Grid of Contact Buttons ONLY - Responsive 2 rows of 4 */}
@@ -561,7 +559,7 @@ interface BusinessCardProps {
                     const shouldShowIcons = viewType === 'icon' || viewType === 'icon-text';
                     const shouldShowText = viewType === 'text' || viewType === 'icon-text';
                     const showLabel = shouldShowLabel('contactInfo');
-
+                    
                     // For text-only view, render as simple link/button
                     if (viewType === 'text') {
                       return (
@@ -581,21 +579,13 @@ interface BusinessCardProps {
                         </button>
                       );
                     }
-
+                    
                     // For icon and icon-text views
                     return (
                       <div 
-                        key={contact.id}
-                        onClick={viewType === 'icon-text' ? () => handleContactAction(contact.type, contact.value) : undefined}
-                        className={`${viewType === 'icon-text' ? `icon-text-container cursor-pointer ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getTextPositionClass('contactInfo')}` : `tl-icon-container flex items-center`} ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''}`}
-                        style={{
-                          ...(viewType === 'icon-text' ? {
-                            // CSS variables for unified styling
-                            '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
-                            '--tl-icon-color': getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff',
-                            '--tl-border': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
-                          } : {}),
-                          ...(getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? {
+                        key={contact.id} 
+                        className={`tl-icon-container ${viewType === 'icon-text' ? `flex w-full ${getTextPositionClass('contactInfo')}` : 'flex items-center'} ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''}`}
+                        style={getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? {
                           backgroundColor: getSectionStyle('contactInfo', 'containerBackgroundColor') || 'transparent',
                           borderWidth: getSectionStyle('contactInfo', 'containerBorderColor') ? '1px' : '0',
                           borderStyle: getSectionStyle('contactInfo', 'containerBorderColor') ? 'solid' : 'none',
@@ -607,13 +597,13 @@ interface BusinessCardProps {
                           boxShadow: getSectionStyle('contactInfo', 'containerDropShadowEnabled') === 'true' 
                             ? `${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'containerDropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'containerDropShadowOpacity') || '0.25'))}`
                             : 'none'
-                        } : {})} as React.CSSProperties
+                        } : {}}
                         data-testid={`container-custom-contact-${contact.id}`}
                       >
                         {shouldShowIcons && (
-                          <div 
-                            onClick={viewType !== 'icon-text' ? () => handleContactAction(contact.type, contact.value) : undefined}
-                            className={`flex items-center justify-center ${viewType !== 'icon-text' ? 'cursor-pointer' : ''} ${viewType === 'icon-text' ? 'icon-part' : `tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')}`} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
+                          <button 
+                            onClick={() => handleContactAction(contact.type, contact.value)}
+                            className={`flex items-center justify-center ${viewType === 'icon-text' ? 'mb-1' : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
                             style={{
                               // Base CSS variables - always applied
                               '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
@@ -641,7 +631,7 @@ interface BusinessCardProps {
                                 fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconSize'), 14)}px`
                               }}
                             ></i>
-                          </div>
+                          </button>
                         )}
                         {shouldShowText && showLabel && (
                           <span 
@@ -677,7 +667,7 @@ TEL:${data.phone || ''}
 EMAIL:${data.email || ''}
 URL:${data.website || ''}
 END:VCARD`;
-
+                  
                   const blob = new Blob([vCard], { type: 'text/vcard' });
                   const url = URL.createObjectURL(blob);
                   const link = document.createElement('a');
@@ -732,7 +722,7 @@ END:VCARD`;
                     borderRadius: `${parseNumeric(getSectionStyle('socialMedia', 'containerBorderRadius'), 8)}px`,
                     padding: getSectionStyle('socialMedia', 'containerStylingEnabled') === 'true' ? '12px' : '1rem',
                     width: getSectionStyle('socialMedia', 'containerWidth') ? `${parseNumeric(getSectionStyle('socialMedia', 'containerWidth'), 100)}%` : '100%',
-                    minHeight: getSectionStyle('socialMedia', 'containerHeight') ? `${parseNumeric(getSectionStyle('socialMedia', 'containerHeight'), 100)}px` : 'auto',
+                    minHeight: getSectionStyle('socialMedia', 'containerHeight') ? `${parseNumeric(getSectionStyle('socialMedia', 'containerHeight'), 'auto')}px` : 'auto',
                     boxShadow: getSectionStyle('socialMedia', 'containerDropShadowEnabled') === 'true' 
                       ? `${parseNumeric(getSectionStyle('socialMedia', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('socialMedia', 'containerDropShadowBlur'), 8)}px ${hexToRgba(getSectionStyle('socialMedia', 'containerDropShadowColor') || '#000000', parseFloat(getSectionStyle('socialMedia', 'containerDropShadowOpacity') || '0.1'))}`
                       : 'none'
@@ -746,7 +736,7 @@ END:VCARD`;
                   const shouldShowIcons = viewType === 'icon' || viewType === 'icon-text';
                   const shouldShowText = viewType === 'text' || viewType === 'icon-text';
                   const showLabel = shouldShowLabel('socialMedia');
-
+                  
                   // For text-only view, render as simple link/button
                   if (viewType === 'text') {
                     return (
@@ -766,16 +756,16 @@ END:VCARD`;
                       </button>
                     );
                   }
-
+                  
                   // For icon and icon-text views
                   return (
                     <button 
                       key={social.id} 
                       onClick={() => handleContactAction(social.platform, social.value)}
-                      className={`${viewType === 'icon-text' ? `icon-text-container ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getTextPositionClass('socialMedia')}` : `tl-social-button ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')}`} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
+                      className={`tl-social-button ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${viewType === 'icon-text' ? `w-full ${getTextPositionClass('socialMedia')}` : 'w-auto'}`}
                       data-platform={social.platform}
                       style={{
-                        // CSS variables for unified styling - moved to container for icon-text mode
+                        // Base CSS variables - always applied
                         '--tl-icon-bg': getSectionStyle('socialMedia', 'iconBackgroundColor') || data.brandColor || '#22c55e',
                         '--tl-icon-color': getSectionStyle('socialMedia', 'iconTextColor') || data.tertiaryColor || '#ffffff',
                         '--tl-border': getSectionStyle('socialMedia', 'iconBorderColor') || 'transparent',
@@ -800,7 +790,7 @@ END:VCARD`;
                           width: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundWidth'), parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48))}px`,
                           height: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundHeight'), parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48))}px`
                         })
-                      } as React.CSSProperties}
+                      }}
                       data-testid={`button-custom-social-${social.id}`}
                     >
                       {shouldShowIcons && (
@@ -832,7 +822,7 @@ END:VCARD`;
           )}
 
 
-
+          
           {/* QR Code */}
           {showQR && (
             <div className="text-center">
@@ -867,7 +857,7 @@ END:VCARD`;
                 >
                   <Share2 className="h-4 w-4 text-gray-700" />
                 </Button>
-
+                
                 {/* Share Menu */}
                 {showShareMenu && (
                   <div className="absolute top-12 right-0 bg-white rounded-lg shadow-xl border p-2 min-w-48 z-20">
