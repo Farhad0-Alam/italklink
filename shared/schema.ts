@@ -3308,7 +3308,7 @@ export const businessCardSchema = z.object({
       iconBackgroundWidth: z.number().min(24).max(120).optional(),
       iconBackgroundHeight: z.number().min(24).max(120).optional(),
       // Text Position relative to icon
-      textPosition: z.enum(['left', 'right', 'top', 'bottom', 'outside-right']).optional(),
+      textPosition: z.enum(['left', 'right', 'top', 'bottom']).optional(),
     }).default({}),
     socialMedia: z.object({
       iconColor: z.string().optional(),
@@ -3357,7 +3357,7 @@ export const businessCardSchema = z.object({
       iconBackgroundWidth: z.number().min(24).max(120).optional(),
       iconBackgroundHeight: z.number().min(24).max(120).optional(),
       // Text Position relative to icon
-      textPosition: z.enum(['left', 'right', 'top', 'bottom', 'outside-right']).optional(),
+      textPosition: z.enum(['left', 'right', 'top', 'bottom']).optional(),
     }).default({}),
     about: z.object({
       primaryColor: z.string().optional(),
