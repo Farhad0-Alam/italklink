@@ -581,8 +581,8 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     }
                     
                     // For icon and icon-text views
-                    const textLayout = getSectionStyle('contactInfo', 'textLayout') || 'simple';
-                    const textPosition = getSectionStyle('contactInfo', 'textPosition') || 'below';
+                    const textLayout = getSectionStyle('contactInfo', 'textLayout') || 'advanced';
+                    const textPosition = getSectionStyle('contactInfo', 'textPosition') || 'right';
                     
                     // Advanced layout - text integrated in button
                     if (viewType === 'icon-text' && textLayout === 'advanced') {
@@ -670,9 +670,22 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                                 '--tl-icon-color-hover': getSectionStyle('contactInfo', 'iconHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconTextColor') || data.tertiaryColor || '#ffffff', -20),
                                 '--tl-border-hover': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
                               } : {}),
-                              borderWidth: getSectionStyle('contactInfo', 'iconBorderColor') ? `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px` : '0',
-                              borderStyle: getSectionStyle('contactInfo', 'iconBorderColor') ? 'solid' : 'none',
-                              borderBottom: getSectionStyle('contactInfo', 'iconBorderColor') ? 'none' : `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
+                              // Standard styling properties - using directional border properties to avoid conflicts
+                              ...(getSectionStyle('contactInfo', 'iconBorderColor') ? {
+                                borderTopWidth: `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px`,
+                                borderRightWidth: `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px`,
+                                borderBottomWidth: `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px`,
+                                borderLeftWidth: `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px`,
+                                borderStyle: 'solid',
+                                borderColor: getSectionStyle('contactInfo', 'iconBorderColor')
+                              } : {
+                                borderTopWidth: '0',
+                                borderRightWidth: '0',
+                                borderBottomWidth: '4px',
+                                borderLeftWidth: '0',
+                                borderBottomStyle: 'solid',
+                                borderBottomColor: data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')
+                              }),
                               width: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundWidth'), parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48))}px`,
                               height: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundHeight'), parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48))}px`,
                               boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
@@ -865,8 +878,8 @@ END:VCARD`;
                   }
                   
                   // For icon and icon-text views
-                  const textLayout = getSectionStyle('socialMedia', 'textLayout') || 'simple';
-                  const textPosition = getSectionStyle('socialMedia', 'textPosition') || 'below';
+                  const textLayout = getSectionStyle('socialMedia', 'textLayout') || 'advanced';
+                  const textPosition = getSectionStyle('socialMedia', 'textPosition') || 'right';
                   // Advanced layout - text integrated in button
                   if (viewType === 'icon-text' && textLayout === 'advanced') {
                     return (
@@ -946,9 +959,22 @@ END:VCARD`;
                           data-platform={social.platform}
                           style={{
                             ...getStyleProps('socialMedia'),
-                            borderWidth: getSectionStyle('socialMedia', 'iconBorderColor') ? `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px` : '0',
-                            borderStyle: getSectionStyle('socialMedia', 'iconBorderColor') ? 'solid' : 'none',
-                            borderBottom: getSectionStyle('socialMedia', 'iconBorderColor') ? 'none' : `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
+                            // Standard styling properties - using directional border properties to avoid conflicts
+                            ...(getSectionStyle('socialMedia', 'iconBorderColor') ? {
+                              borderTopWidth: `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px`,
+                              borderRightWidth: `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px`,
+                              borderBottomWidth: `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px`,
+                              borderLeftWidth: `${parseNumeric(getSectionStyle('socialMedia', 'borderSize'), 1)}px`,
+                              borderStyle: 'solid',
+                              borderColor: getSectionStyle('socialMedia', 'iconBorderColor')
+                            } : {
+                              borderTopWidth: '0',
+                              borderRightWidth: '0',
+                              borderBottomWidth: '4px',
+                              borderLeftWidth: '0',
+                              borderBottomStyle: 'solid',
+                              borderBottomColor: data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')
+                            }),
                             width: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundWidth'), parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48))}px`,
                             height: `${parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundHeight'), parseNumeric(getSectionStyle('socialMedia', 'iconBackgroundSize'), 48))}px`,
                             boxShadow: getSectionStyle('socialMedia', 'dropShadowEnabled') === 'true' 
