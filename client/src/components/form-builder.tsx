@@ -1023,17 +1023,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <Label className="text-white text-xs">Skin</Label>
                             <Select
                               value={watchedValues.sectionStyles?.contactInfo?.skin || "flat"}
-                              onValueChange={(value) => form.setValue("sectionStyles.contactInfo.skin", value as "gradient" | "minimal" | "framed" | "boxed" | "flat" | "gradient-dark" | "gradient-vibrant" | "outlined" | "soft-solid" | "icon-circle")}
+                              onValueChange={(value) => form.setValue("sectionStyles.contactInfo.skin", value as "gradient" | "minimal" | "framed" | "boxed" | "flat")}
                             >
                               <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-contact-skin">
                                 <SelectValue placeholder="Select skin" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="gradient-dark">🌙 Dark Gradient</SelectItem>
-                                <SelectItem value="gradient-vibrant">✨ Vibrant Gradient</SelectItem>
-                                <SelectItem value="outlined">📝 Outlined</SelectItem>
-                                <SelectItem value="soft-solid">🌸 Soft Solid</SelectItem>
-                                <SelectItem value="icon-circle">⭕ Icon Circle</SelectItem>
                                 <SelectItem value="gradient">Gradient</SelectItem>
                                 <SelectItem value="minimal">Minimal</SelectItem>
                                 <SelectItem value="framed">Framed</SelectItem>
@@ -1919,17 +1914,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <Label className="text-white text-xs">Skin</Label>
                             <Select
                               value={watchedValues.sectionStyles?.socialMedia?.skin || "flat"}
-                              onValueChange={(value) => form.setValue("sectionStyles.socialMedia.skin", value as "gradient" | "minimal" | "framed" | "boxed" | "flat" | "gradient-dark" | "gradient-vibrant" | "outlined" | "soft-solid" | "icon-circle")}
+                              onValueChange={(value) => form.setValue("sectionStyles.socialMedia.skin", value as "gradient" | "minimal" | "framed" | "boxed" | "flat")}
                             >
                               <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8" data-testid="select-social-skin">
                                 <SelectValue placeholder="Select skin" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="gradient-dark">🌙 Dark Gradient</SelectItem>
-                                <SelectItem value="gradient-vibrant">✨ Vibrant Gradient</SelectItem>
-                                <SelectItem value="outlined">📝 Outlined</SelectItem>
-                                <SelectItem value="soft-solid">🌸 Soft Solid</SelectItem>
-                                <SelectItem value="icon-circle">⭕ Icon Circle</SelectItem>
                                 <SelectItem value="gradient">Gradient</SelectItem>
                                 <SelectItem value="minimal">Minimal</SelectItem>
                                 <SelectItem value="framed">Framed</SelectItem>

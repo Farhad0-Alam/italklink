@@ -3276,7 +3276,6 @@ export const businessCardSchema = z.object({
       iconTextSize: z.number().optional(),
       iconTextWeight: z.enum(['300', '400', '500', '600', '700', '800']).optional(),
       iconTextStyle: z.enum(['normal', 'italic']).optional(),
-      fontFamily: z.enum(['default', 'script', 'serif', 'sans-serif']).optional(),
       dropShadowEnabled: z.boolean().optional(),
       dropShadowColor: z.string().optional(),
       dropShadowOpacity: z.number().optional(),
@@ -3299,7 +3298,7 @@ export const businessCardSchema = z.object({
       sectionBorderColor: z.string().optional(),
       // Enhanced Icon Styling Options
       view: z.enum(['icon-text', 'icon', 'text']).optional(),
-      skin: z.enum(['gradient', 'minimal', 'framed', 'boxed', 'flat', 'gradient-dark', 'gradient-vibrant', 'outlined', 'soft-solid', 'icon-circle']).optional(),
+      skin: z.enum(['gradient', 'minimal', 'framed', 'boxed', 'flat']).optional(),
       shape: z.enum(['square', 'rounded', 'circle']).optional(),
       columns: z.union([z.enum(['auto']), z.number().min(1).max(6)]).optional(),
       alignment: z.enum(['left', 'center', 'right', 'justify']).optional(),
@@ -3325,7 +3324,6 @@ export const businessCardSchema = z.object({
       iconTextSize: z.number().optional(),
       iconTextWeight: z.enum(['300', '400', '500', '600', '700', '800']).optional(),
       iconTextStyle: z.enum(['normal', 'italic']).optional(),
-      fontFamily: z.enum(['default', 'script', 'serif', 'sans-serif']).optional(),
       dropShadowEnabled: z.boolean().optional(),
       dropShadowColor: z.string().optional(),
       dropShadowOpacity: z.number().optional(),
@@ -3348,7 +3346,7 @@ export const businessCardSchema = z.object({
       sectionBorderColor: z.string().optional(),
       // Enhanced Icon Styling Options
       view: z.enum(['icon-text', 'icon', 'text']).optional(),
-      skin: z.enum(['gradient', 'minimal', 'framed', 'boxed', 'flat', 'gradient-dark', 'gradient-vibrant', 'outlined', 'soft-solid', 'icon-circle']).optional(),
+      skin: z.enum(['gradient', 'minimal', 'framed', 'boxed', 'flat']).optional(),
       shape: z.enum(['square', 'rounded', 'circle']).optional(),
       columns: z.union([z.enum(['auto']), z.number().min(1).max(6)]).optional(),
       alignment: z.enum(['left', 'center', 'right', 'justify']).optional(),

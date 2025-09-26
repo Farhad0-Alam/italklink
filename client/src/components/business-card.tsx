@@ -254,12 +254,6 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
       return `tl-align-${alignment}`;
     };
 
-    // Helper function to determine if buttons should be full width
-    const shouldUseFullWidth = (section: 'contactInfo' | 'socialMedia'): boolean => {
-      const columns = getSectionStyle(section, 'columns') || 'auto';
-      return columns === '1' || columns === 1;
-    };
-
     const getViewType = (section: 'contactInfo' | 'socialMedia'): 'icon-text' | 'icon' | 'text' => {
       const view = getSectionStyle(section, 'view') || 'icon-text';
       return view as 'icon-text' | 'icon' | 'text';
@@ -572,7 +566,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         <button
                           key={contact.id}
                           onClick={() => handleContactAction(contact.type, contact.value)}
-                          className={`text-left p-2 rounded transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${shouldUseFullWidth('contactInfo') ? 'w-full' : 'w-auto'}`}
+                          className={`text-left p-2 rounded transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')}`}
                           style={{
                             color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151',
                             fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 14)}px`,
@@ -590,7 +584,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     return (
                       <div 
                         key={contact.id} 
-                        className={`tl-icon-container ${viewType === 'icon-text' ? `flex ${shouldUseFullWidth('contactInfo') ? 'w-full' : 'w-auto'} ${getTextPositionClass('contactInfo')}` : 'flex items-center'} ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''} ${shouldUseFullWidth('contactInfo') ? 'w-full' : ''}`}
+                        className={`tl-icon-container ${viewType === 'icon-text' ? `flex w-full ${getTextPositionClass('contactInfo')}` : 'flex items-center'} ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''}`}
                         style={getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? {
                           backgroundColor: getSectionStyle('contactInfo', 'containerBackgroundColor') || 'transparent',
                           borderWidth: getSectionStyle('contactInfo', 'containerBorderColor') ? '1px' : '0',
@@ -609,7 +603,7 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                         {shouldShowIcons && (
                           <button 
                             onClick={() => handleContactAction(contact.type, contact.value)}
-                            className={`flex items-center justify-center ${viewType === 'icon-text' ? `mb-1 ${getTextPositionClass('contactInfo')}` : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${shouldUseFullWidth('contactInfo') ? 'w-full' : ''}`}
+                            className={`flex items-center justify-center ${viewType === 'icon-text' ? 'mb-1' : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
                             style={{
                               // Base CSS variables - always applied
                               '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
@@ -684,11 +678,12 @@ END:VCARD`;
                   document.body.removeChild(link);
                   URL.revokeObjectURL(url);
                 }}
-                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors w-[70%]"
+                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{
                   backgroundColor: data.secondaryColor || data.accentColor || '#16a34a',
                   color: data.tertiaryColor || '#ffffff',
-                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`
+                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : '#16a34a'}`,
+                  width: '70%'
                 }}
                 data-testid="button-save-contact"
               >
@@ -699,11 +694,12 @@ END:VCARD`;
               {/* Share Button */}
               <button 
                 onClick={() => handleShare()}
-                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors w-[30%]"
+                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{ 
                   backgroundColor: data.brandColor || '#22c55e',
                   color: data.tertiaryColor || '#ffffff',
-                  borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`
+                  borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
+                  width: '30%'
                 }}
                 data-testid="button-share-main"
               >
@@ -747,7 +743,7 @@ END:VCARD`;
                       <button
                         key={social.id}
                         onClick={() => handleContactAction(social.platform, social.value)}
-                        className={`text-left p-2 rounded transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${shouldUseFullWidth('socialMedia') ? 'w-full' : 'w-auto'}`}
+                        className={`text-left p-2 rounded transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')}`}
                         style={{
                           color: getSectionStyle('socialMedia', 'iconTextColor') || '#374151',
                           fontSize: `${parseNumeric(getSectionStyle('socialMedia', 'iconTextSize'), 14)}px`,
@@ -766,7 +762,7 @@ END:VCARD`;
                     <button 
                       key={social.id} 
                       onClick={() => handleContactAction(social.platform, social.value)}
-                      className={`tl-social-button ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${shouldUseFullWidth('socialMedia') ? 'w-full' : (viewType === 'icon-text' ? `w-full ${getTextPositionClass('socialMedia')}` : 'w-auto')}`}
+                      className={`tl-social-button ${getSkinClass('socialMedia')} ${getShapeClass('socialMedia')} ${getSectionStyle('socialMedia', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${viewType === 'icon-text' ? `w-full ${getTextPositionClass('socialMedia')}` : 'w-auto'}`}
                       data-platform={social.platform}
                       style={{
                         // Base CSS variables - always applied
