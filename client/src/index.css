@@ -508,6 +508,28 @@
   min-width: fit-content;
 }
 
+/* Advanced Text Styling Support */
+.tl-social-button .tl-text-advanced {
+  background: var(--tl-text-bg, transparent);
+  background-image: var(--tl-text-bg-gradient, none);
+  color: var(--tl-text-color, inherit);
+  padding: var(--tl-text-padding, 4px 8px);
+  border-radius: var(--tl-text-border-radius, 4px);
+  border: var(--tl-text-border, none);
+  box-shadow: var(--tl-text-shadow, none);
+  text-shadow: var(--tl-text-outline, none);
+  transition: all 0.2s ease;
+}
+
+.tl-social-button:hover .tl-text-advanced {
+  background: var(--tl-text-bg-hover, var(--tl-text-bg, transparent));
+  background-image: var(--tl-text-bg-gradient-hover, var(--tl-text-bg-gradient, none));
+  color: var(--tl-text-color-hover, var(--tl-text-color, inherit));
+  border: var(--tl-text-border-hover, var(--tl-text-border, none));
+  box-shadow: var(--tl-text-shadow-hover, var(--tl-text-shadow, none));
+  text-shadow: var(--tl-text-outline-hover, var(--tl-text-outline, none));
+}
+
 /* Icon and Text Spacing */
 .tl-social-button .tl-icon-symbol {
   display: inline-flex;
@@ -794,7 +816,9 @@
 }
 
 /* View Type Classes */
-.tl-view-icon .tl-icon-text {
+.tl-view-icon .tl-icon-text,
+.tl-view-icon .tl-text-advanced,
+.tl-view-icon .tl-simple-text {
   display: none !important;
 }
 
@@ -802,12 +826,24 @@
   display: none !important;
 }
 
-.tl-view-icon-text .tl-icon-text {
+.tl-view-icon-text .tl-icon-text,
+.tl-view-icon-text .tl-text-advanced,
+.tl-view-icon-text .tl-simple-text {
   display: inline-block;
 }
 
 .tl-view-icon-text .tl-icon-symbol {
   display: inline-flex;
+}
+
+/* Simple Layout Text Styling */
+.tl-layout-simple .tl-simple-text {
+  font-size: var(--tl-simple-text-size, 12px);
+  font-weight: var(--tl-simple-text-weight, 500);
+  font-family: var(--tl-simple-text-font, inherit);
+  color: var(--tl-simple-text-color, #374151);
+  text-align: center;
+  line-height: 1.2;
 }
 
 /* Label Toggle Classes */
@@ -901,8 +937,17 @@
   }
 }
 
-/* Text Position Classes for Icon-Text Layout */
-.tl-text-left {
+/* Layout Mode Classes */
+.tl-layout-simple {
+  /* Simple layout uses container with separate button and text */
+}
+
+.tl-layout-advanced {
+  /* Advanced layout uses unified button styling */
+}
+
+/* Text Position Classes for Icon-Text Layout - Advanced Mode */
+.tl-layout-advanced.tl-text-left {
   display: inline-flex !important;
   flex-direction: row-reverse !important;
   align-items: center !important;
@@ -912,7 +957,7 @@
   padding: 8px 16px !important;
 }
 
-.tl-text-right {
+.tl-layout-advanced.tl-text-right {
   display: inline-flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -922,7 +967,7 @@
   padding: 8px 16px !important;
 }
 
-.tl-text-top {
+.tl-layout-advanced.tl-text-top {
   display: inline-flex !important;
   flex-direction: column-reverse !important;
   align-items: center !important;
@@ -933,7 +978,7 @@
   min-width: 80px;
 }
 
-.tl-text-bottom {
+.tl-layout-advanced.tl-text-bottom {
   display: inline-flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -942,6 +987,35 @@
   text-align: center !important;
   padding: 10px 16px !important;
   min-width: 80px;
+}
+
+/* Simple Layout - Text positioning around button */
+.tl-layout-simple.tl-text-below {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.tl-layout-simple.tl-text-above {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 8px;
+}
+
+.tl-layout-simple.tl-text-left-side {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 12px;
+}
+
+.tl-layout-simple.tl-text-right-side {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
 }
 
 /* Icon Container Sizing - Dynamic Utility Classes */
