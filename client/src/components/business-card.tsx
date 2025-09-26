@@ -582,71 +582,51 @@ export const BusinessCardComponent = forwardRef<HTMLDivElement, BusinessCardProp
                     
                     // For icon and icon-text views
                     return (
-                      <div 
-                        key={contact.id} 
-                        className={`tl-icon-container ${viewType === 'icon-text' ? `flex w-full ${getTextPositionClass('contactInfo')}` : 'flex items-center'} ${getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? 'justify-center' : ''}`}
-                        style={getSectionStyle('contactInfo', 'containerStylingEnabled') === 'true' ? {
-                          backgroundColor: getSectionStyle('contactInfo', 'containerBackgroundColor') || 'transparent',
-                          borderWidth: getSectionStyle('contactInfo', 'containerBorderColor') ? '1px' : '0',
-                          borderStyle: getSectionStyle('contactInfo', 'containerBorderColor') ? 'solid' : 'none',
-                          borderColor: getSectionStyle('contactInfo', 'containerBorderColor') || 'transparent',
-                          borderRadius: `${parseNumeric(getSectionStyle('contactInfo', 'containerBorderRadius'), 8)}px`,
-                          width: `${parseNumeric(getSectionStyle('contactInfo', 'containerWidth'), 80)}px`,
-                          height: `${parseNumeric(getSectionStyle('contactInfo', 'containerHeight'), 80)}px`,
-                          padding: '8px',
-                          boxShadow: getSectionStyle('contactInfo', 'containerDropShadowEnabled') === 'true' 
-                            ? `${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'containerDropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'containerDropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'containerDropShadowOpacity') || '0.25'))}`
-                            : 'none'
-                        } : {}}
-                        data-testid={`container-custom-contact-${contact.id}`}
+                      <button 
+                        key={contact.id}
+                        onClick={() => handleContactAction(contact.type, contact.value)}
+                        className={`tl-social-button ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''} ${viewType === 'icon-text' ? `w-full ${getTextPositionClass('contactInfo')}` : 'w-auto'}`}
+                        style={{
+                          // Base CSS variables - always applied
+                          '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.brandColor || '#22c55e',
+                          '--tl-icon-color': getSectionStyle('contactInfo', 'iconTextColor') || data.tertiaryColor || '#ffffff',
+                          '--tl-border': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
+                          // Hover CSS variables - only when toggle enabled
+                          ...(getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? {
+                            '--tl-icon-bg-hover': getSectionStyle('contactInfo', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconBackgroundColor') || data.brandColor || '#22c55e', 20),
+                            '--tl-icon-color-hover': getSectionStyle('contactInfo', 'iconHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconTextColor') || data.tertiaryColor || '#ffffff', -20),
+                            '--tl-border-hover': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
+                          } : {}),
+                          borderWidth: getSectionStyle('contactInfo', 'iconBorderColor') ? `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px` : '0',
+                          borderStyle: getSectionStyle('contactInfo', 'iconBorderColor') ? 'solid' : 'none',
+                          borderBottom: getSectionStyle('contactInfo', 'iconBorderColor') ? 'none' : `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : (data.accentColor ? adjustColor(data.accentColor, -20) : '#16a34a')}`,
+                          fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'inherit',
+                          fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 14)}px`,
+                          fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || '600',
+                          fontStyle: getSectionStyle('contactInfo', 'iconTextStyle') || 'normal',
+                          boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
+                            ? `${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'dropShadowOpacity') || '0.25'))}`
+                            : 'none',
+                          // Icon container dimensions - for icon and icon-text views
+                          ...(shouldShowIcons && viewType === 'icon' && {
+                            width: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundWidth'), parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48))}px`,
+                            height: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundHeight'), parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48))}px`
+                          })
+                        } as React.CSSProperties}
+                        data-testid={`button-custom-contact-${contact.id}`}
                       >
                         {shouldShowIcons && (
-                          <button 
-                            onClick={() => handleContactAction(contact.type, contact.value)}
-                            className={`flex items-center justify-center ${viewType === 'icon-text' ? 'mb-1' : ''} tl-icon-base ${getSkinClass('contactInfo')} ${getShapeClass('contactInfo')} ${getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? 'tl-icon-hover' : ''}`}
+                          <i 
+                            className={`${contact.icon} tl-icon-symbol`}
                             style={{
-                              // Base CSS variables - always applied
-                              '--tl-icon-bg': getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a',
-                              '--tl-icon-color': getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff',
-                              '--tl-border': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
-                              // Hover CSS variables - only when toggle enabled
-                              ...(getSectionStyle('contactInfo', 'enableHoverColor') === 'true' ? {
-                                '--tl-icon-bg-hover': getSectionStyle('contactInfo', 'iconBackgroundHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconBackgroundColor') || data.secondaryColor || data.accentColor || '#16a34a', 20),
-                                '--tl-icon-color-hover': getSectionStyle('contactInfo', 'iconHoverColor') || adjustColor(getSectionStyle('contactInfo', 'iconColor') || data.tertiaryColor || '#ffffff', -20),
-                                '--tl-border-hover': getSectionStyle('contactInfo', 'iconBorderColor') || 'transparent',
-                              } : {}),
-                              borderWidth: getSectionStyle('contactInfo', 'iconBorderColor') ? `${parseNumeric(getSectionStyle('contactInfo', 'borderSize'), 1)}px` : '0',
-                              borderStyle: getSectionStyle('contactInfo', 'iconBorderColor') ? 'solid' : 'none',
-                              width: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundWidth'), parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48))}px`,
-                              height: `${parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundHeight'), parseNumeric(getSectionStyle('contactInfo', 'iconBackgroundSize'), 48))}px`,
-                              boxShadow: getSectionStyle('contactInfo', 'dropShadowEnabled') === 'true' 
-                                ? `${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowOffset'), 2)}px ${parseNumeric(getSectionStyle('contactInfo', 'dropShadowBlur'), 4)}px ${hexToRgba(getSectionStyle('contactInfo', 'dropShadowColor') || '#000000', parseFloat(getSectionStyle('contactInfo', 'dropShadowOpacity') || '0.25'))}`
-                                : 'none'
-                            } as React.CSSProperties}
-                            data-testid={`button-custom-contact-${contact.id}`}
-                          >
-                            <i 
-                              className={contact.icon}
-                              style={{
-                                fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconSize'), 14)}px`
-                              }}
-                            ></i>
-                          </button>
+                              fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconSize'), 18)}px`
+                            }}
+                          ></i>
                         )}
                         {shouldShowText && showLabel && (
-                          <span 
-                            className="font-medium text-center"
-                            style={{ 
-                              color: getSectionStyle('contactInfo', 'iconTextColor') || '#374151',
-                              fontSize: `${parseNumeric(getSectionStyle('contactInfo', 'iconTextSize'), 12)}px`,
-                              fontFamily: getSectionStyle('contactInfo', 'iconTextFont') || 'Inter, sans-serif',
-                              fontWeight: getSectionStyle('contactInfo', 'iconTextWeight') || '500'
-                            }}
-                          >
-                            {contact.label}
-                          </span>
+                          <span className="tl-icon-text">{contact.label || 'Contact'}</span>
                         )}
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
