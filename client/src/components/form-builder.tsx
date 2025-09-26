@@ -91,7 +91,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
-  
+
   // Drag and drop sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -109,7 +109,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
   const [builderMode, setBuilderMode] = useState<'card' | 'page'>('card');
   const [selectedPageId, setSelectedPageId] = useState<string>('home');
-  
+
   const [collapsedSections, setCollapsedSections] = useState<{ [key: string]: boolean }>({
     coverLogo: true,
     basicInfo: true,
@@ -153,12 +153,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   // Drag end handlers for reordering
   const handleContactDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
+
     if (active.id !== over?.id) {
       const contacts = form.getValues("customContacts") || [];
       const oldIndex = contacts.findIndex((contact) => contact.id === active.id);
       const newIndex = contacts.findIndex((contact) => contact.id === over?.id);
-      
+
       if (oldIndex !== -1 && newIndex !== -1) {
         const reorderedContacts = arrayMove(contacts, oldIndex, newIndex);
         form.setValue("customContacts", reorderedContacts);
@@ -168,12 +168,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
   const handleSocialDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
+
     if (active.id !== over?.id) {
       const socials = form.getValues("customSocials") || [];
       const oldIndex = socials.findIndex((social) => social.id === active.id);
       const newIndex = socials.findIndex((social) => social.id === over?.id);
-      
+
       if (oldIndex !== -1 && newIndex !== -1) {
         const reorderedSocials = arrayMove(socials, oldIndex, newIndex);
         form.setValue("customSocials", reorderedSocials);
@@ -184,7 +184,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   // sync to parent with memoized callback to prevent infinite loops
   const watchedValues = form.watch();
   const prevDataRef = useRef<string>("");
-  
+
   const memoizedOnDataChange = useCallback(onDataChange, []);
 
   // Helper function to get elements for a specific page
@@ -212,16 +212,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     const currentPages = (watchedValues as any).pages || [
       { id: 'home', key: 'home', path: '', label: 'Home', visible: true, elements: [] }
     ];
-    
+
     const updatedPages = currentPages.map((page: any) => 
       page.id === pageId 
         ? { ...page, elements } 
         : page
     );
-    
+
     form.setValue('pages' as any, updatedPages);
   };
-  
+
   useEffect(() => {
     const s = JSON.stringify(enhancedCardData);
     if (s !== prevDataRef.current) {
@@ -235,7 +235,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     if (builderMode === 'page') {
       const availablePages = ((watchedValues as any).pages as any[]) || [];
       const nonHomePages = availablePages.filter((page: any) => page.key !== 'home');
-      
+
       if (nonHomePages.length > 0 && (!selectedPageId || !nonHomePages.find(p => p.id === selectedPageId))) {
         setSelectedPageId(nonHomePages[0].id);
       }
@@ -283,7 +283,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <i className="fas fa-edit text-talklink-500 mr-3" />
               {t("form.title")}
             </CardTitle>
-            
+
             {/* Builder Mode Toggle */}
             <div className="flex items-center bg-slate-700 rounded-lg p-1">
               <Button
@@ -402,14 +402,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         )}
                       </SelectContent>
                     </Select>
-                    
+
                     {watchedValues.headerTemplate && (
                       <div className="text-sm text-purple-300">
                         <p><strong>Template:</strong> {(watchedValues.headerTemplate as any).name}</p>
                         <p><strong>Description:</strong> {(watchedValues.headerTemplate as any).description || "Custom header with advanced layouts and SVG shapes"}</p>
                       </div>
                     )}
-                    
+
                     {headerTemplates.length === 0 && (
                       <div className="text-sm text-yellow-300 bg-yellow-900/20 border border-yellow-600/30 rounded p-3">
                         <i className="fas fa-info-circle mr-2"></i>
@@ -2644,7 +2644,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         Remove
                       </Button>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label className="text-white text-sm">Content</Label>
@@ -3277,7 +3277,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           </div>
                         )}
                       </div>
-                      
+
                       {/* Delete button */}
                       <Button
                         type="button"
