@@ -135,30 +135,38 @@ export const corsMiddleware = (req: Request, res: Response, next: NextFunction) 
 
 // Built-in security headers middleware
 export const securityHeaders = (req: Request, res: Response, next: NextFunction) => {
-  // Content Security Policy - Allow Vite bundled JavaScript with inline scripts/eval
+  // Skip static assets - they don't need CSP headers
+  if (req.path.startsWith('/assets/') || req.path.match(/\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|ico|json)$/)) {
+    return next();
+  }
+  
+  // Content Security Policy - Permissive for Vite in development and production
   const csp = [
     "default-src 'self'",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' data: https: blob:",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-    "connect-src 'self' https://api.stripe.com https://api.zoom.us https://graph.microsoft.com",
-    "frame-src 'self' https://js.stripe.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "img-src 'self' data: https: blob: http:",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:",
+    "connect-src 'self' https://api.stripe.com https://api.zoom.us https://graph.microsoft.com wss: ws:",
+    "frame-src 'self' https://js.stripe.com https://*.zoom.us",
+    "media-src 'self' blob: data:",
+    "worker-src 'self' blob:",
+    "child-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'none'"
+    "form-action 'self'"
   ].join('; ');
   
   res.setHeader('Content-Security-Policy', csp);
   
   // Other security headers
-  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  
+  // More permissive Permissions-Policy to reduce warnings
+  res.setHeader('Permissions-Policy', 'geolocation=(self), microphone=(self), camera=(self)');
   
   next();
 };

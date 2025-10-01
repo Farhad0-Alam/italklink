@@ -4145,7 +4145,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       border: 'none',
                       borderRadius: '0'
                     }}
-                    sandbox="allow-same-origin"
+                    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
                     title="Custom HTML Content"
                     data-testid="html-iframe"
                   />
