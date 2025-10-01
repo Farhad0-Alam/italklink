@@ -135,17 +135,19 @@ export const corsMiddleware = (req: Request, res: Response, next: NextFunction) 
 
 // Built-in security headers middleware
 export const securityHeaders = (req: Request, res: Response, next: NextFunction) => {
-  // Content Security Policy
+  // Content Security Policy - Allow Vite bundled JavaScript with inline scripts/eval
   const csp = [
     "default-src 'self'",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
-    "script-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
     "connect-src 'self' https://api.stripe.com https://api.zoom.us https://graph.microsoft.com",
     "frame-src 'self' https://js.stripe.com",
     "object-src 'none'",
-    "upgrade-insecure-requests"
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'"
   ].join('; ');
   
   res.setHeader('Content-Security-Policy', csp);
