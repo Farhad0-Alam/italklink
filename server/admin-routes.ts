@@ -1079,16 +1079,23 @@ router.post('/templates/:id/publish', requireOwner, async (req, res) => {
 // Duplicate template
 router.post('/templates/:id/duplicate', requireOwner, async (req, res) => {
   try {
+    console.log('=== DUPLICATE ENDPOINT HIT ===');
+    console.log('Template ID:', req.params.id);
+    console.log('User:', req.user?.id);
+    
     const { id } = req.params;
     
     const [originalTemplate] = await db.select()
       .from(globalTemplates)
       .where(eq(globalTemplates.id, id));
     
+    console.log('Original template found:', !!originalTemplate);
+    
     if (!originalTemplate) {
       return res.status(404).json({ message: 'Template not found' });
     }
     
+    console.log('Attempting to insert duplicate...');
     const [duplicatedTemplate] = await db.insert(globalTemplates).values({
       name: `${originalTemplate.name} (Copy)`,
       description: originalTemplate.description,
@@ -1098,11 +1105,12 @@ router.post('/templates/:id/duplicate', requireOwner, async (req, res) => {
       createdBy: req.user!.id
     }).returning();
     
+    console.log('Duplicate created:', duplicatedTemplate.id);
     await logAdminAction(req.user!.id, 'duplicate', 'template', duplicatedTemplate.id, { originalId: id });
     
     res.json({ message: 'Template duplicated successfully', template: duplicatedTemplate });
   } catch (error) {
-    console.error('Failed to duplicate template:', error);
+    console.error('Failed to duplicate template - ERROR:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
