@@ -1,7 +1,9 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, log } from "./vite";
 import { notificationScheduler } from "./notification-scheduler";
+import path from "path";
+import fs from "fs";
 
 // Start the notification scheduler for background processing
 notificationScheduler.start();
@@ -42,6 +44,26 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // In production, serve static assets BEFORE registering routes
+  // This prevents security middleware from blocking /assets/*.js and *.css files
+  if (app.get("env") !== "development") {
+    const distPath = path.resolve(import.meta.dirname, "public");
+    if (fs.existsSync(distPath)) {
+      // Serve static assets (JS, CSS, images, etc.) with cache headers
+      app.use(express.static(distPath, {
+        maxAge: '1y',
+        immutable: true,
+        setHeaders: (res, filepath) => {
+          // Only cache immutable assets, not index.html
+          if (filepath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache');
+          }
+        }
+      }));
+      log("Static assets served from: " + distPath);
+    }
+  }
+
   const server = await registerRoutes(app);
 
   // Serve uploaded files from local storage (development)
@@ -61,7 +83,11 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    // In production, serve index.html for all non-API routes (SPA routing)
+    const distPath = path.resolve(import.meta.dirname, "public");
+    app.use("*", (_req, res) => {
+      res.sendFile(path.resolve(distPath, "index.html"));
+    });
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
