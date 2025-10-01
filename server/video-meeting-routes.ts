@@ -405,7 +405,7 @@ export function setupVideoMeetingRoutes(app: Express) {
         }
       } else if (provider.provider === 'microsoft_teams') {
         // Microsoft Teams meeting creation
-        const meetingData = {
+        const teamsRequestData = {
           subject: title,
           startDateTime: startTime,
           endDateTime: new Date(new Date(startTime).getTime() + duration * 60000).toISOString(),
@@ -427,7 +427,7 @@ export function setupVideoMeetingRoutes(app: Express) {
             'Authorization': `Bearer ${provider.accessToken}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(meetingData)
+          body: JSON.stringify(teamsRequestData)
         });
 
         if (response.ok) {
