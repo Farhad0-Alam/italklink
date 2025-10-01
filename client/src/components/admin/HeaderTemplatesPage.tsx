@@ -125,7 +125,11 @@ export default function HeaderTemplatesPage() {
   const handleDuplicateTemplate = async (templateId: string) => {
     try {
       const response = await fetch(`/api/admin/header-templates/${templateId}/duplicate`, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
       });
       if (!response.ok) throw new Error('Failed to duplicate template');
       refetch();

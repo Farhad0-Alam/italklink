@@ -81,7 +81,11 @@ export default function TemplatesPage() {
     try {
       const response = await fetch(`/api/admin/templates/${templateId}/duplicate`, {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
       });
       if (response.ok) {
         refetch();
@@ -95,7 +99,11 @@ export default function TemplatesPage() {
     try {
       const response = await fetch(`/api/admin/templates/${template.id}/publish`, {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
       });
       
       if (response.ok) {
