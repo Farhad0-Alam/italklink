@@ -201,15 +201,13 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <motion.div 
-              className="flex items-center"
+              className="flex items-center space-x-2"
               whileHover={{ scale: 1.02 }}
             >
-              <img 
-                src={new URL('@assets/2TalkLink_1759425629906.gif', import.meta.url).href}
-                alt="2TalkLink"
-                className="h-8"
-                data-testid="logo-2talklink"
-              />
+              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
+                <i className="fas fa-address-card text-white text-sm"></i>
+              </div>
+              <span className="text-xl font-bold text-gray-900">2TalkLink</span>
             </motion.div>
             
             <div className="hidden md:flex items-center space-x-8">
