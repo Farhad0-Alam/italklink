@@ -1,45 +1,147 @@
-import { useState, useEffect } from "react";
-import { motion, useScroll, useTransform, AnimatePresence, useInView } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Link } from "wouter";
-import { useTheme } from "@/components/theme-provider";
-import { Moon, Sun, Smartphone, Monitor } from "lucide-react";
+import { 
+  Sparkles, Calendar, Users, BarChart3, Bell, Zap, Globe, 
+  QrCode, Smartphone, Layout, MessageSquare, Bot, Brain, FileText,
+  Camera, Video, Mail, Phone, MapPin, Share2, CreditCard, Clock,
+  TrendingUp, Target, Workflow, Megaphone, Database, ShieldCheck,
+  Palette, Layers, Code, Wand2, CircleDot, ChevronDown, ChevronRight,
+  CheckCircle2, Star, ArrowRight, PlayCircle, Image, Sliders
+} from "lucide-react";
 
+// Comprehensive feature data organized by category
+const cardBuilderElements = [
+  { icon: "fas fa-heading", name: "Headings", description: "Multiple heading levels" },
+  { icon: "fas fa-paragraph", name: "Text Blocks", description: "Rich paragraph text" },
+  { icon: "fas fa-image", name: "Images", description: "Upload & display images" },
+  { icon: "fas fa-images", name: "Image Sliders", description: "Beautiful carousels" },
+  { icon: "fas fa-video", name: "Videos", description: "Embed videos" },
+  { icon: "fas fa-file-pdf", name: "PDF Viewer", description: "Display PDF documents" },
+  { icon: "fas fa-link", name: "Link Buttons", description: "Call-to-action buttons" },
+  { icon: "fas fa-qrcode", name: "QR Codes", description: "Dynamic QR generation" },
+  { icon: "fas fa-phone", name: "Contact Section", description: "Phone, email, address" },
+  { icon: "fas fa-share-nodes", name: "Social Links", description: "Social media icons" },
+  { icon: "fas fa-envelope", name: "Contact Forms", description: "Custom form builder" },
+  { icon: "fas fa-list", name: "Accordions", description: "Collapsible sections" },
+  { icon: "fas fa-quote-left", name: "Testimonials", description: "Customer reviews" },
+  { icon: "fas fa-map-marker-alt", name: "Google Maps", description: "Location embeds" },
+  { icon: "fas fa-code", name: "HTML", description: "Custom HTML code" },
+  { icon: "fas fa-robot", name: "AI Chatbot", description: "Smart assistant" },
+  { icon: "fas fa-brain", name: "RAG Knowledge Base", description: "AI-powered Q&A" },
+  { icon: "fas fa-file-upload", name: "Document Manager", description: "Upload training docs" },
+  { icon: "fas fa-globe", name: "URL Manager", description: "Import web content" },
+  { icon: "fas fa-wallet", name: "Apple Wallet", description: "Wallet passes" },
+  { icon: "fas fa-wallet", name: "Google Wallet", description: "Wallet passes" },
+  { icon: "fas fa-calendar-check", name: "Book Appointment", description: "Booking button" },
+  { icon: "fas fa-phone-volume", name: "Schedule Call", description: "Call scheduling" },
+  { icon: "fas fa-handshake", name: "Meeting Request", description: "Request meetings" },
+  { icon: "fas fa-cube", name: "AR Preview", description: "Augmented reality" },
+  { icon: "fas fa-bars", name: "Navigation Menu", description: "Multi-page navigation" }
+];
 
+const appointmentFeatures = [
+  { icon: Calendar, title: "Public Booking Pages", description: "Multi-step booking flow with timezone detection" },
+  { icon: Clock, title: "Event Types", description: "Different appointment types with custom durations" },
+  { icon: Users, title: "Team Scheduling", description: "Round-robin assignment & collective availability" },
+  { icon: Globe, title: "Calendar Integration", description: "Google Calendar, Zoom, Microsoft Teams sync" },
+  { icon: Clock, title: "Availability Management", description: "Set working hours & buffer times" },
+  { icon: CreditCard, title: "Payment Processing", description: "Stripe integration with multi-currency" },
+  { icon: Bell, title: "Automated Reminders", description: "Email & SMS notifications" },
+  { icon: BarChart3, title: "Booking Analytics", description: "Track conversions & no-shows" }
+];
 
-const features = [
+const crmFeatures = [
+  { icon: Users, title: "Auto Lead Capture", description: "Card views & bookings create contacts" },
+  { icon: Database, title: "Contact Management", description: "Lead scoring & lifecycle stages" },
+  { icon: Layers, title: "Visual Pipeline", description: "Kanban board with drag-drop" },
+  { icon: CheckCircle2, title: "Task Management", description: "Assign, prioritize, track tasks" },
+  { icon: FileText, title: "Activity Timeline", description: "Complete interaction history" },
+  { icon: ShieldCheck, title: "Team Collaboration", description: "Role-based access control" }
+];
+
+const automationFeatures = [
+  { icon: Bell, title: "Multi-Channel Notifications", description: "Email, SMS, push notifications" },
+  { icon: FileText, title: "Custom Templates", description: "Personalized message templates" },
+  { icon: Workflow, title: "Follow-up Sequences", description: "Automated drip campaigns" },
+  { icon: Bot, title: "AI Chatbot", description: "Intelligent customer support" },
+  { icon: Brain, title: "RAG Knowledge Base", description: "Train AI on your documents" },
+  { icon: Layout, title: "Form Builder", description: "Custom lead capture forms" }
+];
+
+const analyticsFeatures = [
+  { icon: BarChart3, title: "Booking Trends", description: "Appointment analytics & forecasting" },
+  { icon: TrendingUp, title: "Conversion Tracking", description: "View-to-booking conversion rates" },
+  { icon: CreditCard, title: "Revenue Analytics", description: "Track earnings & commissions" },
+  { icon: Target, title: "Engagement Metrics", description: "Card views & click tracking" },
+  { icon: Clock, title: "No-Show Analysis", description: "Track & reduce no-shows" },
+  { icon: FileText, title: "Export Reports", description: "Download data in multiple formats" }
+];
+
+const integrations = [
+  { name: "Google Calendar", icon: "fab fa-google", color: "bg-blue-500" },
+  { name: "Zoom", icon: "fas fa-video", color: "bg-blue-600" },
+  { name: "Microsoft Teams", icon: "fab fa-microsoft", color: "bg-blue-700" },
+  { name: "Stripe", icon: "fab fa-stripe", color: "bg-purple-600" },
+  { name: "Email", icon: "fas fa-envelope", color: "bg-red-500" },
+  { name: "SMS", icon: "fas fa-sms", color: "bg-green-500" }
+];
+
+const pricingTiers = [
   {
-    icon: "fas fa-magic",
-    title: "AI-Powered Design",
-    description: "Create stunning business cards in seconds with our intelligent design system"
+    name: "Free",
+    price: "$0",
+    description: "Perfect for individuals",
+    features: ["1 Digital Card", "Basic Templates", "QR Code", "Limited Analytics"],
+    cta: "Get Started Free",
+    popular: false
   },
   {
-    icon: "fas fa-mobile-alt",
-    title: "Mobile Optimized",
-    description: "Perfect viewing experience on all devices with responsive design"
+    name: "Pro",
+    price: "$19",
+    description: "For professionals",
+    features: ["Unlimited Cards", "All Templates", "Appointment Booking", "Full CRM", "Advanced Analytics", "Custom Branding"],
+    cta: "Start Free Trial",
+    popular: true
   },
   {
-    icon: "fas fa-qrcode",
-    title: "Smart QR Codes",
-    description: "Generate dynamic QR codes that update automatically with your latest info"
+    name: "Enterprise",
+    price: "Custom",
+    description: "For teams & businesses",
+    features: ["Everything in Pro", "Team Collaboration", "API Access", "White Label", "Priority Support", "Custom Integration"],
+    cta: "Contact Sales",
+    popular: false
+  }
+];
+
+const faqs = [
+  {
+    question: "What makes 2TalkLink different from other digital business card platforms?",
+    answer: "2TalkLink is a complete business solution, not just a card creator. You get digital business cards PLUS appointment booking, CRM, AI chatbot, automated notifications, and analytics - all in one platform. It's like having a virtual sales team working 24/7."
   },
   {
-    icon: "fas fa-chart-line",
-    title: "Real-time Analytics",
-    description: "Track views, engagement, and leads with detailed analytics dashboard"
+    question: "Can I add AI chatbot to my business card?",
+    answer: "Yes! Our AI-powered chatbot and RAG Knowledge Base let you train an AI assistant on your documents and website content. It can answer questions, qualify leads, and provide 24/7 customer support directly from your digital card."
   },
   {
-    icon: "fas fa-palette",
-    title: "Custom Branding",
-    description: "Match your brand with custom colors, fonts, and professional templates"
+    question: "How does appointment booking work?",
+    answer: "Add booking elements to your card, connect your calendar (Google/Zoom/Teams), set your availability, and clients can book directly. You'll get automatic reminders, can accept payments via Stripe, and track all bookings in your CRM."
   },
   {
-    icon: "fas fa-share-alt",
-    title: "Easy Sharing",
-    description: "Share via link, QR code, email, or social media with one click"
+    question: "What builder elements can I add to my cards?",
+    answer: "Over 25 elements including: text, images, videos, PDFs, contact forms, AI chatbot, QR codes, social links, testimonials, maps, appointment booking, AR preview, digital wallet passes, and more. Build rich, interactive experiences!"
+  },
+  {
+    question: "Does it include CRM and lead management?",
+    answer: "Yes! Every card view and appointment automatically creates a contact in your CRM. Track leads through your pipeline, manage tasks, score contacts, and see complete activity timelines. Perfect for sales teams."
+  },
+  {
+    question: "Can I use it for my team?",
+    answer: "Absolutely! Enterprise plans include team scheduling, role-based access, shared pipelines, and collaborative workflows. Perfect for agencies, sales teams, and businesses."
   }
 ];
 
@@ -49,48 +151,21 @@ const testimonials = [
     role: "Marketing Director",
     company: "TechCorp",
     image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-    content: "2TalkLink transformed how I network. I've generated 10x more leads since switching from paper cards."
+    content: "The AI chatbot on my card has qualified 100+ leads automatically. Game changer!"
   },
   {
     name: "Michael Chen",
     role: "Entrepreneur",
     company: "StartupXYZ",
     image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-    content: "The analytics feature is amazing. I can see exactly who's interested in my services."
+    content: "Appointment booking + CRM in one platform saved me $200/month in software costs."
   },
   {
     name: "Emily Rodriguez",
     role: "Sales Manager",
     company: "GrowthCo",
     image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-    content: "My conversion rate increased by 300% after switching to digital business cards."
-  }
-];
-
-const faqs = [
-  {
-    question: "How does 2TalkLink compare to traditional business cards?",
-    answer: "2TalkLink digital business cards are environmentally friendly, always up-to-date, include rich media like videos and links, provide analytics, and cost less than constantly reprinting paper cards."
-  },
-  {
-    question: "Can I customize the design to match my brand?",
-    answer: "Absolutely! Pro and Enterprise plans include custom branding options including colors, fonts, logos, and premium templates. You can make your card uniquely yours."
-  },
-  {
-    question: "How do people access my digital business card?",
-    answer: "Share your card via QR code, direct link, email, text message, or social media. Recipients don't need to download any app - it works in any web browser."
-  },
-  {
-    question: "What analytics do you provide?",
-    answer: "Track total views, unique visitors, click-through rates on links, contact saves, and more. See when and where people engage with your card."
-  },
-  {
-    question: "Is there a free plan available?",
-    answer: "Yes! Our free plan includes 1 business card with basic features. Perfect for trying out the platform and personal use."
-  },
-  {
-    question: "Can I import my existing contacts?",
-    answer: "Yes, you can easily import your existing contact information and sync with popular CRM systems and contact management tools."
+    content: "My team's conversion rate increased 300% with the automated follow-up system."
   }
 ];
 
@@ -105,105 +180,20 @@ const staggerContainer = {
   initial: {},
   animate: {
     transition: {
-      staggerChildren: 0.1
+      staggerChildren: 0.08
     }
   }
 };
 
-const slideInLeft = {
-  initial: { opacity: 0, x: -60 },
-  animate: { opacity: 1, x: 0 },
-  transition: { duration: 0.8, ease: "easeOut" }
-};
-
-const slideInRight = {
-  initial: { opacity: 0, x: 60 },
-  animate: { opacity: 1, x: 0 },
-  transition: { duration: 0.8, ease: "easeOut" }
-};
-
-const scaleIn = {
-  initial: { opacity: 0, scale: 0.8 },
-  animate: { opacity: 1, scale: 1 },
-  transition: { duration: 0.6, ease: "easeOut" }
-};
-
-// Theme Toggle Component
-function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
-  return (
-    <motion.button
-      onClick={toggleTheme}
-      className="relative p-3 rounded-xl bg-background/80 backdrop-blur-sm border border-border hover:bg-accent transition-colors"
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      data-testid="theme-toggle"
-    >
-      <AnimatePresence mode="wait">
-        {theme === "light" ? (
-          <motion.div
-            key="moon"
-            initial={{ opacity: 0, rotate: -90 }}
-            animate={{ opacity: 1, rotate: 0 }}
-            exit={{ opacity: 0, rotate: 90 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Moon className="h-5 w-5 text-foreground" />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="sun"
-            initial={{ opacity: 0, rotate: 90 }}
-            animate={{ opacity: 1, rotate: 0 }}
-            exit={{ opacity: 0, rotate: -90 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Sun className="h-5 w-5 text-foreground" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.button>
-  );
-}
-
 export default function Landing() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const { scrollY } = useScroll();
-  const { theme } = useTheme();
-
-  
-  // Parallax effects
-  const heroY = useTransform(scrollY, [0, 500], [0, -150]);
-  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
-  
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const [activeFeatureTab, setActiveFeatureTab] = useState(0);
 
   return (
-    <motion.div 
-      className="min-h-screen bg-background transition-colors duration-300"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
       <motion.nav 
-        className="fixed top-0 w-full bg-background/95 backdrop-blur-md border-b border-border z-50 transition-colors duration-300"
+        className="fixed top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-200 z-50"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -213,325 +203,867 @@ export default function Landing() {
             <motion.div 
               className="flex items-center space-x-2"
               whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              <motion.div 
-                className="w-8 h-8 bg-gradient-to-br from-talklink-500 to-talklink-600 rounded-lg flex items-center justify-center shadow-lg"
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
-              >
+              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
                 <i className="fas fa-address-card text-white text-sm"></i>
-              </motion.div>
-              <span className="text-xl font-bold text-foreground">2TalkLink</span>
+              </div>
+              <span className="text-xl font-bold text-gray-900">2TalkLink</span>
             </motion.div>
             
             <div className="hidden md:flex items-center space-x-8">
-              {["Features", "Templates", "FAQ"].map((item, index) => (
-                <motion.a 
+              {["Features", "Pricing", "FAQ"].map((item) => (
+                <a 
                   key={item}
                   href={`#${item.toLowerCase()}`}
-                  className="text-muted-foreground hover:text-foreground transition-colors relative"
-                  whileHover={{ y: -2 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  style={{ transitionDelay: `${index * 0.1}s` }}
+                  className="text-gray-600 hover:text-orange-500 transition-colors font-medium"
+                  data-testid={`link-nav-${item.toLowerCase()}`}
                 >
                   {item}
-                  <motion.div
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-talklink-500"
-                    initial={{ scaleX: 0 }}
-                    whileHover={{ scaleX: 1 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                </motion.a>
+                </a>
               ))}
             </div>
             
-            <div className="flex items-center space-x-2">
-              <ThemeToggle />
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button variant="ghost" asChild>
-                  <Link href="/login">Sign In</Link>
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button asChild className="bg-talklink-500 hover:bg-talklink-600">
-                  <Link href="/register">Get Started Free</Link>
-                </Button>
-              </motion.div>
+            <div className="flex items-center space-x-3">
+              <Button variant="ghost" asChild className="font-medium" data-testid="button-signin">
+                <Link href="/login">Sign In</Link>
+              </Button>
+              <Button asChild className="bg-orange-500 hover:bg-orange-600 font-medium" data-testid="button-get-started-nav">
+                <Link href="/register">Get Started Free</Link>
+              </Button>
             </div>
           </div>
         </div>
       </motion.nav>
 
       {/* Hero Section */}
-      <section className="pt-24 pb-20 lg:pt-32 lg:pb-32 bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-orange-50 via-white to-blue-50 overflow-hidden relative">
+        {/* Background decoration */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-2 bg-talklink-50 rounded-full mb-8">
-              <div className="w-2 h-2 bg-talklink-500 rounded-full mr-3 animate-pulse"></div>
-              <span className="text-talklink-700 font-medium text-sm">Transform Your Professional Network</span>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center px-4 py-2 bg-orange-100 rounded-full mb-6"
+            >
+              <Sparkles className="w-4 h-4 text-orange-600 mr-2" />
+              <span className="text-orange-700 font-semibold text-sm">All-in-One Business Platform</span>
+            </motion.div>
             
-            <h1 className="text-5xl lg:text-7xl font-black text-slate-900 mb-8 leading-[0.9] tracking-tight">
-              Digital Cards.
-              <br />
-              <span className="text-talklink-500">Real Results.</span>
-            </h1>
+            <motion.h1 
+              className="text-5xl sm:text-6xl lg:text-7xl font-black text-gray-900 mb-6 leading-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+            >
+              Digital Cards +<br />
+              <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                AI + Booking + CRM
+              </span>
+            </motion.h1>
             
-            <p className="text-xl lg:text-2xl text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
-              Create stunning digital business cards in 60 seconds.
+            <motion.p 
+              className="text-xl sm:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            >
+              Create smart business cards with AI chatbot, appointment booking, and built-in CRM.
               <br className="hidden sm:block" />
-              Share instantly. Track everything. Never run out.
-            </p>
+              <span className="font-semibold text-gray-800">Everything you need to grow your business.</span>
+            </motion.p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button size="lg" className="bg-talklink-500 hover:bg-talklink-600 text-lg px-8 py-4 h-auto" asChild>
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
+            >
+              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-lg px-8 py-6 h-auto shadow-xl hover:shadow-2xl transition-all" asChild data-testid="button-create-card-hero">
                 <Link href="/register">
+                  <Sparkles className="w-5 h-5 mr-2" />
                   Create Your Card Free
-                  <i className="fas fa-arrow-right ml-2"></i>
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-4 h-auto border-2" asChild>
-                <Link href="/builder">
-                  <i className="fas fa-play mr-2"></i>
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6 h-auto border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600 transition-all" asChild data-testid="button-watch-demo">
+                <Link href="/dashboard">
+                  <PlayCircle className="w-5 h-5 mr-2" />
                   Watch Demo
                 </Link>
               </Button>
-            </div>
+            </motion.div>
             
-            <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-slate-500">
+            <motion.div 
+              className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
+            >
               <div className="flex items-center">
-                <div className="w-3 h-3 bg-talklink-500 rounded-full mr-3"></div>
-                No credit card
+                <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
+                No credit card required
               </div>
               <div className="flex items-center">
-                <div className="w-3 h-3 bg-talklink-500 rounded-full mr-3"></div>
-                Free forever
+                <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
+                Free forever plan
               </div>
               <div className="flex items-center">
-                <div className="w-3 h-3 bg-talklink-500 rounded-full mr-3"></div>
-                60-second setup
+                <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
+                Setup in 60 seconds
               </div>
-            </div>
+            </motion.div>
           </div>
           
-          {/* Interactive Card Preview */}
-          <div className="relative max-w-md mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-r from-talklink-400 to-blue-500 rounded-3xl blur-2xl opacity-20 scale-110"></div>
-            <div className="relative bg-white rounded-3xl shadow-2xl p-8 border border-slate-100">
-              <div className="text-center">
-                <div className="relative inline-block mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-talklink-500 to-talklink-600 rounded-2xl flex items-center justify-center">
-                    <i className="fas fa-user text-white text-2xl"></i>
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                    <i className="fas fa-check text-white text-xs"></i>
-                  </div>
-                </div>
-                
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">Alex Rivera</h3>
-                <p className="text-slate-600 mb-6">Product Designer</p>
-                
-                <div className="space-y-3 mb-6">
-                  <button className="w-full bg-slate-900 text-white py-3 rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors">
-                    <i className="fas fa-download mr-2"></i>Save Contact
-                  </button>
-                  <button className="w-full bg-talklink-500 text-white py-3 rounded-xl text-sm font-medium hover:bg-talklink-600 transition-colors">
-                    <i className="fas fa-calendar mr-2"></i>Schedule Meeting
-                  </button>
-                </div>
-                
-                <div className="flex justify-center space-x-4">
-                  <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer">
-                    <i className="fab fa-linkedin-in text-slate-600"></i>
-                  </div>
-                  <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer">
-                    <i className="fab fa-twitter text-slate-600"></i>
-                  </div>
-                  <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer">
-                    <i className="fas fa-envelope text-slate-600"></i>
-                  </div>
-                  <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer">
-                    <i className="fas fa-globe text-slate-600"></i>
+          {/* Hero Card Preview */}
+          <motion.div 
+            className="max-w-5xl mx-auto"
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.8, duration: 0.8 }}
+          >
+            <div className="relative">
+              {/* Glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-orange-500 to-blue-500 rounded-3xl blur-3xl opacity-20"></div>
+              
+              {/* Main preview card */}
+              <div className="relative bg-white rounded-3xl shadow-2xl p-1 border border-gray-200">
+                <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8">
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {/* Card Preview */}
+                    <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                      <div className="flex items-center justify-center mb-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center">
+                          <i className="fas fa-user text-white text-2xl"></i>
+                        </div>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 text-center mb-1">Alex Rivera</h3>
+                      <p className="text-gray-600 text-center text-sm mb-4">Product Designer</p>
+                      <button className="w-full bg-gray-900 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors mb-2" data-testid="button-preview-save-contact">
+                        <i className="fas fa-download mr-2"></i>Save Contact
+                      </button>
+                      <button className="w-full bg-orange-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-600 transition-colors" data-testid="button-preview-book-meeting">
+                        <i className="fas fa-calendar mr-2"></i>Book Meeting
+                      </button>
+                    </div>
+                    
+                    {/* Features highlight */}
+                    <div className="md:col-span-2 space-y-4">
+                      <div className="flex items-start space-x-3 bg-white rounded-xl p-4 border border-gray-100">
+                        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Bot className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-900 text-sm">AI Chatbot Included</h4>
+                          <p className="text-gray-600 text-xs">24/7 automated customer support</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start space-x-3 bg-white rounded-xl p-4 border border-gray-100">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Calendar className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-900 text-sm">Appointment Booking</h4>
+                          <p className="text-gray-600 text-xs">Clients book directly from your card</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start space-x-3 bg-white rounded-xl p-4 border border-gray-100">
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Database className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-900 text-sm">Built-in CRM</h4>
+                          <p className="text-gray-600 text-xs">Track leads & manage pipeline</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Digital Business Cards Section */}
+      <section id="features" className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-100">
+              <Layout className="w-3 h-3 mr-1" />
+              25+ Builder Elements
+            </Badge>
+            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+              Build <span className="text-orange-500">Anything</span> You Want
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Create rich, interactive digital business cards with 25+ powerful elements.
+              From AI chatbots to appointment booking, build the perfect experience for your clients.
+            </p>
+          </motion.div>
+
+          {/* Builder Elements Grid */}
+          <motion.div 
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-16"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {cardBuilderElements.map((element, index) => (
+              <motion.div
+                key={index}
+                variants={fadeInUp}
+                className="group"
+              >
+                <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-orange-200 h-full cursor-pointer" data-testid={`card-builder-element-${index}`}>
+                  <CardContent className="p-4 text-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                      <i className={`${element.icon} text-orange-600 text-lg`}></i>
+                    </div>
+                    <h4 className="font-bold text-gray-900 text-sm mb-1" data-testid={`text-element-${index}-name`}>{element.name}</h4>
+                    <p className="text-gray-600 text-xs" data-testid={`text-element-${index}-desc`}>{element.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* Featured Elements Spotlight */}
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <motion.div
+              className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-8 border-2 border-orange-200"
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                <Bot className="w-8 h-8 text-orange-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">AI Chatbot</h3>
+              <p className="text-gray-700 mb-4">
+                Add an intelligent chatbot to your card that answers questions, qualifies leads, 
+                and provides 24/7 customer support automatically.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex items-center">
+                  <CheckCircle2 className="w-4 h-4 text-orange-600 mr-2 flex-shrink-0" />
+                  Custom personality & responses
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle2 className="w-4 h-4 text-orange-600 mr-2 flex-shrink-0" />
+                  Lead qualification automation
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle2 className="w-4 h-4 text-orange-600 mr-2 flex-shrink-0" />
+                  24/7 availability
+                </li>
+              </ul>
+            </motion.div>
+
+            <motion.div
+              className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8 border-2 border-blue-200"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                <Brain className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">RAG Knowledge Base</h3>
+              <p className="text-gray-700 mb-4">
+                Train AI on your documents and website content to create an intelligent 
+                knowledge assistant for your customers.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex items-center">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 mr-2 flex-shrink-0" />
+                  Upload PDFs & documents
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 mr-2 flex-shrink-0" />
+                  Import website URLs
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 mr-2 flex-shrink-0" />
+                  Accurate AI responses
+                </li>
+              </ul>
+            </motion.div>
+
+            <motion.div
+              className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-8 border-2 border-purple-200"
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                <Layers className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Multi-Page Cards</h3>
+              <p className="text-gray-700 mb-4">
+                Create comprehensive digital experiences with multiple pages, custom navigation, 
+                and professional templates.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex items-center">
+                  <CheckCircle2 className="w-4 h-4 text-purple-600 mr-2 flex-shrink-0" />
+                  Unlimited pages
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle2 className="w-4 h-4 text-purple-600 mr-2 flex-shrink-0" />
+                  Custom menu navigation
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle2 className="w-4 h-4 text-purple-600 mr-2 flex-shrink-0" />
+                  Professional templates
+                </li>
+              </ul>
+            </motion.div>
+          </div>
+
+          <motion.div 
+            className="text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-lg px-8 py-6 h-auto shadow-lg" asChild>
+              <Link href="/register">
+                Start Building Your Card
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Appointment Booking Section */}
+      <section className="py-24 bg-gradient-to-br from-blue-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Badge className="mb-4 bg-blue-100 text-blue-700 hover:bg-blue-100">
+              <Calendar className="w-3 h-3 mr-1" />
+              Appointment Booking
+            </Badge>
+            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+              Let Clients <span className="text-blue-600">Book Instantly</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Add appointment booking to your card. Clients book meetings directly, 
+              sync with your calendar, accept payments, and automate everything.
+            </p>
+          </motion.div>
+
+          {/* Visual Booking Flow */}
+          <motion.div 
+            className="mb-16"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-200">
+              <div className="grid md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <Calendar className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h4 className="font-bold text-gray-900 mb-1">Select Time</h4>
+                  <p className="text-sm text-gray-600">Client picks available slot</p>
+                </div>
+                <div className="flex items-center justify-center">
+                  <ArrowRight className="w-6 h-6 text-gray-400" />
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <CheckCircle2 className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h4 className="font-bold text-gray-900 mb-1">Auto Confirm</h4>
+                  <p className="text-sm text-gray-600">Calendar syncs instantly</p>
+                </div>
+                <div className="flex items-center justify-center">
+                  <ArrowRight className="w-6 h-6 text-gray-400" />
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <Bell className="w-8 h-8 text-purple-600" />
+                  </div>
+                  <h4 className="font-bold text-gray-900 mb-1">Reminders</h4>
+                  <p className="text-sm text-gray-600">Automated notifications</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Features Grid */}
+          <motion.div 
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {appointmentFeatures.map((feature, index) => (
+              <motion.div key={index} variants={fadeInUp}>
+                <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-200 h-full" data-testid={`card-appointment-feature-${index}`}>
+                  <CardContent className="p-6">
+                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                      <feature.icon className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 mb-2 text-lg" data-testid={`text-appointment-${index}-title`}>{feature.title}</h3>
+                    <p className="text-gray-600 text-sm" data-testid={`text-appointment-${index}-desc`}>{feature.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CRM Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <Badge className="mb-4 bg-purple-100 text-purple-700 hover:bg-purple-100">
+                <Database className="w-3 h-3 mr-1" />
+                CRM & Pipeline
+              </Badge>
+              <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+                <span className="text-purple-600">Built-in CRM</span>
+                <br />for Every Lead
+              </h2>
+              <p className="text-xl text-gray-600 mb-8">
+                Every card view and appointment automatically creates a contact. 
+                Track leads through your pipeline, manage tasks, and never miss a follow-up.
+              </p>
+
+              <div className="space-y-4">
+                {crmFeatures.map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    className="flex items-start space-x-4 bg-gray-50 rounded-xl p-4"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <feature.icon className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">{feature.title}</h4>
+                      <p className="text-gray-600 text-sm">{feature.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              {/* CRM Pipeline Visual */}
+              <div className="bg-gradient-to-br from-purple-50 to-white rounded-3xl shadow-2xl p-8 border border-purple-200">
+                <h3 className="font-bold text-gray-900 mb-6 text-xl">Sales Pipeline</h3>
+                <div className="space-y-4">
+                  {["New Leads", "Qualified", "Meeting Set", "Won"].map((stage, index) => (
+                    <div key={stage} className="bg-white rounded-xl p-4 border-2 border-gray-200 hover:border-purple-300 transition-all cursor-pointer">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-bold text-gray-900">{stage}</h4>
+                        <Badge className="bg-purple-100 text-purple-700">{[12, 8, 5, 3][index]}</Badge>
+                      </div>
+                      <div className="space-y-2">
+                        {Array(2).fill(null).map((_, i) => (
+                          <div key={i} className="bg-gray-50 rounded-lg p-3 flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                            <div className="flex-1">
+                              <div className="h-2 bg-gray-200 rounded w-3/4 mb-1"></div>
+                              <div className="h-2 bg-gray-100 rounded w-1/2"></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <motion.section 
-        id="features" 
-        className="py-24 bg-secondary/30 dark:bg-secondary/20"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8 }}
-      >
+      {/* Automation Section */}
+      <section className="py-24 bg-gradient-to-br from-green-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
-            className="text-center mb-20"
-            initial={{ opacity: 0, y: 60 }}
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
           >
-            <motion.h2 
-              className="text-4xl lg:text-5xl font-black text-foreground mb-6 tracking-tight"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-            >
-              Built for Modern
-              <span className="text-talklink-500 bg-gradient-to-r from-talklink-500 to-talklink-600 bg-clip-text text-transparent"> Professionals</span>
-            </motion.h2>
-            <motion.p 
-              className="text-xl text-muted-foreground max-w-2xl mx-auto font-light"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-            >
-              Everything you need to create, share, and track your digital presence.
-            </motion.p>
+            <Badge className="mb-4 bg-green-100 text-green-700 hover:bg-green-100">
+              <Zap className="w-3 h-3 mr-1" />
+              Automation & Notifications
+            </Badge>
+            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+              Work Smarter with <span className="text-green-600">Automation</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Automate follow-ups, notifications, and customer support. 
+              Let AI handle the repetitive tasks while you focus on closing deals.
+            </p>
           </motion.div>
-          
+
           <motion.div 
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
             variants={staggerContainer}
             initial="initial"
             whileInView="animate"
-            viewport={{ once: true, margin: "-50px" }}
+            viewport={{ once: true }}
           >
-            {features.map((feature, index) => (
-              <motion.div 
-                key={index} 
-                className="group"
-                variants={fadeInUp}
-                whileHover={{ y: -8, rotateY: 2 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                <motion.div 
-                  className="bg-card hover:bg-card/80 rounded-2xl p-8 h-full hover:shadow-xl transition-all duration-300 border border-border backdrop-blur-sm"
-                  whileHover={{ 
-                    boxShadow: "0 20px 40px -12px rgba(0, 0, 0, 0.1), 0 0 30px rgba(34, 197, 94, 0.1)"
-                  }}
-                >
-                  <motion.div 
-                    className="w-14 h-14 bg-talklink-100 dark:bg-talklink-950/50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-talklink-500 transition-colors duration-300"
-                    whileHover={{ rotate: 10, scale: 1.1 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  >
-                    <i className={`${feature.icon} text-talklink-500 group-hover:text-white text-xl transition-colors duration-300`}></i>
-                  </motion.div>
-                  <h3 className="text-xl font-bold text-foreground mb-4">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
-                </motion.div>
+            {automationFeatures.map((feature, index) => (
+              <motion.div key={index} variants={fadeInUp}>
+                <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-green-200 h-full">
+                  <CardContent className="p-6">
+                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                      <feature.icon className="w-6 h-6 text-green-600" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 mb-2 text-lg">{feature.title}</h3>
+                    <p className="text-gray-600 text-sm">{feature.description}</p>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
-          </motion.div>
-          
-          <motion.div 
-            className="text-center mt-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <motion.div
-                whileHover={{ scale: 1.05, y: -3 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                <Button size="lg" className="bg-talklink-500 hover:bg-talklink-600 text-lg px-8 py-4 h-auto shadow-xl hover:shadow-2xl transition-shadow" asChild>
-                  <Link href="/register">
-                    Start Building Your Card
-                    <motion.i 
-                      className="fas fa-arrow-right ml-2"
-                      animate={{ x: [0, 3, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    />
-                  </Link>
-                </Button>
-              </motion.div>
-              
-              <motion.div
-                whileHover={{ scale: 1.05, y: -3 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                <Button size="lg" variant="outline" className="text-lg px-8 py-4 h-auto border-2 border-slate-300 hover:border-talklink-500 hover:text-talklink-500 transition-colors" asChild>
-                  <Link href="/pricing">
-                    View Pricing
-                  </Link>
-                </Button>
-              </motion.div>
-            </div>
           </motion.div>
         </div>
-      </motion.section>
+      </section>
 
-
-      {/* Testimonials Section */}
-      <section className="py-20 bg-white">
+      {/* Analytics Section */}
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-              Loved by Professionals Worldwide
-            </h2>
-            <p className="text-xl text-slate-600">
-              Join thousands of professionals who've transformed their networking with 2TalkLink
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-0 shadow-lg">
-                <CardContent className="p-8">
-                  <div className="flex items-center mb-6">
-                    <img 
-                      src={testimonial.image} 
-                      alt={testimonial.name}
-                      className="w-12 h-12 rounded-full mr-4"
-                    />
-                    <div>
-                      <h4 className="font-bold text-slate-900">{testimonial.name}</h4>
-                      <p className="text-slate-600 text-sm">{testimonial.role}</p>
-                      <p className="text-slate-500 text-sm">{testimonial.company}</p>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              {/* Analytics Dashboard Visual */}
+              <div className="bg-gradient-to-br from-orange-50 to-white rounded-3xl shadow-2xl p-8 border border-orange-200">
+                <h3 className="font-bold text-gray-900 mb-6 text-xl">Performance Dashboard</h3>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
+                      <div className="text-3xl font-black text-gray-900 mb-1">1,247</div>
+                      <div className="text-sm text-gray-600">Card Views</div>
+                      <div className="text-xs text-green-600 mt-1">↑ 23% this month</div>
+                    </div>
+                    <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
+                      <div className="text-3xl font-black text-gray-900 mb-1">89</div>
+                      <div className="text-sm text-gray-600">Appointments</div>
+                      <div className="text-xs text-green-600 mt-1">↑ 15% this month</div>
                     </div>
                   </div>
-                  <blockquote className="text-slate-700 italic">
-                    "{testimonial.content}"
-                  </blockquote>
-                  <div className="flex text-yellow-400 mt-4">
-                    {[...Array(5)].map((_, i) => (
-                      <i key={i} className="fas fa-star"></i>
-                    ))}
+                  
+                  <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
+                    <div className="text-sm text-gray-600 mb-3">Conversion Rate</div>
+                    <div className="flex items-end space-x-1 h-32">
+                      {[60, 75, 45, 90, 70, 85, 100].map((height, i) => (
+                        <div key={i} className="flex-1 bg-gradient-to-t from-orange-500 to-orange-400 rounded-t" style={{ height: `${height}%` }}></div>
+                      ))}
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+
+                  <div className="bg-white rounded-xl p-4 border-2 border-gray-200">
+                    <div className="text-sm text-gray-600 mb-3">Top Performing Cards</div>
+                    <div className="space-y-2">
+                      {["Business Card A", "Business Card B"].map((name, i) => (
+                        <div key={i} className="flex items-center justify-between">
+                          <span className="text-sm text-gray-900">{name}</span>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-orange-500 rounded-full" style={{ width: `${[85, 72][i]}%` }}></div>
+                            </div>
+                            <span className="text-xs text-gray-600">{[85, 72][i]}%</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-100">
+                <BarChart3 className="w-3 h-3 mr-1" />
+                Analytics & Insights
+              </Badge>
+              <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+                <span className="text-orange-600">Track Everything</span>
+                <br />That Matters
+              </h2>
+              <p className="text-xl text-gray-600 mb-8">
+                Get real-time insights into card performance, booking trends, and revenue. 
+                Make data-driven decisions to grow your business.
+              </p>
+
+              <div className="space-y-4">
+                {analyticsFeatures.map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    className="flex items-start space-x-4 bg-gray-50 rounded-xl p-4"
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <feature.icon className="w-5 h-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">{feature.title}</h4>
+                      <p className="text-gray-600 text-sm">{feature.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="py-20 bg-slate-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-              Frequently Asked Questions
+      {/* Integrations Section */}
+      <section className="py-24 bg-gradient-to-br from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Badge className="mb-4 bg-gray-200 text-gray-700 hover:bg-gray-200">
+              <Globe className="w-3 h-3 mr-1" />
+              Integrations
+            </Badge>
+            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+              Connects with Your <span className="text-gray-600">Favorite Tools</span>
             </h2>
-            <p className="text-xl text-slate-600">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Seamlessly integrate with the tools you already use daily.
+            </p>
+          </motion.div>
+
+          <motion.div 
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {integrations.map((integration, index) => (
+              <motion.div key={index} variants={fadeInUp}>
+                <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-gray-300 h-full">
+                  <CardContent className="p-6 text-center">
+                    <div className={`w-16 h-16 ${integration.color} rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg`}>
+                      <i className={`${integration.icon} text-white text-2xl`}></i>
+                    </div>
+                    <h4 className="font-bold text-gray-900 text-sm">{integration.name}</h4>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-100">
+              <CreditCard className="w-3 h-3 mr-1" />
+              Simple Pricing
+            </Badge>
+            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+              Choose Your <span className="text-orange-500">Perfect Plan</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Start free and upgrade as you grow. All plans include core features.
+            </p>
+          </motion.div>
+
+          <motion.div 
+            className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {pricingTiers.map((tier, index) => (
+              <motion.div key={index} variants={fadeInUp}>
+                <Card className={`h-full relative ${tier.popular ? 'border-2 border-orange-500 shadow-2xl scale-105' : 'border-2 border-gray-200'}`} data-testid={`card-pricing-${tier.name.toLowerCase()}`}>
+                  {tier.popular && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-orange-500 text-white" data-testid="badge-most-popular">Most Popular</Badge>
+                    </div>
+                  )}
+                  <CardContent className="p-8">
+                    <h3 className="text-2xl font-black text-gray-900 mb-2" data-testid={`text-pricing-${tier.name.toLowerCase()}-name`}>{tier.name}</h3>
+                    <p className="text-gray-600 mb-6" data-testid={`text-pricing-${tier.name.toLowerCase()}-desc`}>{tier.description}</p>
+                    <div className="mb-6">
+                      <span className="text-5xl font-black text-gray-900" data-testid={`text-pricing-${tier.name.toLowerCase()}-price`}>{tier.price}</span>
+                      {tier.price !== "Custom" && <span className="text-gray-600">/month</span>}
+                    </div>
+                    <Button 
+                      className={`w-full mb-6 ${tier.popular ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-900 hover:bg-gray-800'}`}
+                      asChild
+                    >
+                      <Link href={tier.price === "Custom" ? "/register" : "/register"}>
+                        {tier.cta}
+                      </Link>
+                    </Button>
+                    <ul className="space-y-3">
+                      {tier.features.map((feature, i) => (
+                        <li key={i} className="flex items-start">
+                          <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-700 text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div 
+            className="text-center mt-12"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <Link href="/pricing" className="text-orange-600 hover:text-orange-700 font-semibold inline-flex items-center">
+              View Full Pricing Details
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-24 bg-gradient-to-br from-orange-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-100">
+              <Star className="w-3 h-3 mr-1" />
+              Customer Stories
+            </Badge>
+            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+              Loved by <span className="text-orange-500">Professionals</span> Worldwide
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Join thousands of professionals growing their business with 2TalkLink
+            </p>
+          </motion.div>
+          
+          <motion.div 
+            className="grid md:grid-cols-3 gap-8"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {testimonials.map((testimonial, index) => (
+              <motion.div key={index} variants={fadeInUp}>
+                <Card className="border-2 border-gray-200 hover:border-orange-200 hover:shadow-xl transition-all h-full" data-testid={`card-testimonial-${index}`}>
+                  <CardContent className="p-8">
+                    <div className="flex text-yellow-400 mb-4" data-testid={`stars-testimonial-${index}`}>
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 fill-current" />
+                      ))}
+                    </div>
+                    <blockquote className="text-gray-700 mb-6 italic" data-testid={`text-testimonial-${index}-content`}>
+                      "{testimonial.content}"
+                    </blockquote>
+                    <div className="flex items-center">
+                      <img 
+                        src={testimonial.image} 
+                        alt={testimonial.name}
+                        className="w-12 h-12 rounded-full mr-4"
+                      />
+                      <div>
+                        <h4 className="font-bold text-gray-900">{testimonial.name}</h4>
+                        <p className="text-gray-600 text-sm">{testimonial.role}</p>
+                        <p className="text-gray-500 text-sm">{testimonial.company}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-24 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Badge className="mb-4 bg-gray-200 text-gray-700 hover:bg-gray-200">
+              Frequently Asked
+            </Badge>
+            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+              Got <span className="text-orange-500">Questions?</span>
+            </h2>
+            <p className="text-xl text-gray-600">
               Everything you need to know about 2TalkLink
             </p>
-          </div>
+          </motion.div>
           
           <div className="space-y-4">
             {faqs.map((faq, index) => (
@@ -540,20 +1072,22 @@ export default function Landing() {
                 open={expandedFaq === index}
                 onOpenChange={() => setExpandedFaq(expandedFaq === index ? null : index)}
               >
-                <Card className="border border-slate-200">
+                <Card className="border-2 border-gray-200 hover:border-orange-200 transition-all" data-testid={`card-faq-${index}`}>
                   <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover:bg-slate-50">
+                    <CardContent className="p-6 cursor-pointer" data-testid={`button-faq-${index}-toggle`}>
                       <div className="flex justify-between items-center">
-                        <CardTitle className="text-left text-lg font-semibold text-slate-900">
+                        <h3 className="text-lg font-bold text-gray-900 text-left pr-8" data-testid={`text-faq-${index}-question`}>
                           {faq.question}
-                        </CardTitle>
-                        <i className={`fas fa-chevron-${expandedFaq === index ? 'up' : 'down'} text-slate-400`}></i>
+                        </h3>
+                        <ChevronDown className={`w-5 h-5 text-gray-500 flex-shrink-0 transition-transform ${expandedFaq === index ? 'transform rotate-180' : ''}`} />
                       </div>
-                    </CardHeader>
+                    </CardContent>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <CardContent className="pt-0">
-                      <p className="text-slate-600 leading-relaxed">{faq.answer}</p>
+                    <CardContent className="px-6 pb-6 pt-0">
+                      <p className="text-gray-600 leading-relaxed">
+                        {faq.answer}
+                      </p>
                     </CardContent>
                   </CollapsibleContent>
                 </Card>
@@ -564,115 +1098,128 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-slate-900">
+      <section className="py-24 bg-gradient-to-br from-orange-500 to-orange-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl lg:text-5xl font-black text-white mb-8 tracking-tight">
-            Ready to Go
-            <span className="text-talklink-400"> Digital?</span>
-          </h2>
-          <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto font-light">
-            Join thousands of professionals creating their digital presence.
-            <br />Get started in 60 seconds.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Button size="lg" className="bg-talklink-500 hover:bg-talklink-600 text-lg px-8 py-4 h-auto" asChild>
-              <Link href="/register">
-                Create Your Card Free
-                <i className="fas fa-arrow-right ml-2"></i>
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" className="border-2 border-slate-600 text-slate-300 hover:bg-slate-800 text-lg px-8 py-4 h-auto" asChild>
-              <Link href="/builder">
-                <i className="fas fa-play mr-2"></i>
-                Watch Demo
-              </Link>
-            </Button>
-          </div>
-          
-          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-slate-400">
-            <div className="flex items-center">
-              <div className="w-2 h-2 bg-talklink-500 rounded-full mr-3"></div>
-              No credit card required
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl lg:text-5xl font-black mb-6">
+              Ready to Transform Your Business?
+            </h2>
+            <p className="text-xl mb-10 text-orange-100">
+              Join thousands of professionals using 2TalkLink to grow their business.
+              <br />
+              Create your first card in 60 seconds. No credit card required.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="bg-white text-orange-600 hover:bg-gray-100 text-lg px-8 py-6 h-auto shadow-xl font-bold" asChild data-testid="button-cta-get-started">
+                <Link href="/register">
+                  Get Started Free
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-6 h-auto font-bold" asChild data-testid="button-cta-view-pricing">
+                <Link href="/pricing">
+                  View Pricing
+                </Link>
+              </Button>
             </div>
-            <div className="flex items-center">
-              <div className="w-2 h-2 bg-talklink-500 rounded-full mr-3"></div>
-              Free forever plan
+
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-orange-100">
+              <div className="flex items-center">
+                <CheckCircle2 className="w-5 h-5 mr-2" />
+                Free forever plan
+              </div>
+              <div className="flex items-center">
+                <CheckCircle2 className="w-5 h-5 mr-2" />
+                No credit card needed
+              </div>
+              <div className="flex items-center">
+                <CheckCircle2 className="w-5 h-5 mr-2" />
+                Cancel anytime
+              </div>
             </div>
-            <div className="flex items-center">
-              <div className="w-2 h-2 bg-talklink-500 rounded-full mr-3"></div>
-              Cancel anytime
-            </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-white py-16">
+      <footer className="py-12 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="flex items-center space-x-2 mb-6">
-                <div className="w-8 h-8 bg-gradient-to-br from-talklink-500 to-talklink-600 rounded-lg flex items-center justify-center">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
                   <i className="fas fa-address-card text-white text-sm"></i>
                 </div>
                 <span className="text-xl font-bold">2TalkLink</span>
               </div>
-              <p className="text-slate-400 mb-6">
-                The future of business networking is here. Create beautiful, interactive digital business cards that work.
+              <p className="text-gray-400 text-sm">
+                The all-in-one platform for digital business cards, appointments, and CRM.
               </p>
+            </div>
+            
+            <div>
+              <h4 className="font-bold mb-4">Product</h4>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="/dashboard" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="/templates" className="hover:text-white transition-colors">Templates</Link></li>
+                <li><Link href="/register" className="hover:text-white transition-colors">Get Started</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-bold mb-4">Company</h4>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><Link href="/help" className="hover:text-white transition-colors">Support</Link></li>
+                <li><Link href="/affiliate" className="hover:text-white transition-colors">Affiliates</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-bold mb-4">Connect</h4>
               <div className="flex space-x-4">
-                <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                  <i className="fab fa-twitter"></i>
+                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                  <i className="fab fa-twitter text-white"></i>
                 </a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                  <i className="fab fa-linkedin-in"></i>
+                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                  <i className="fab fa-linkedin-in text-white"></i>
                 </a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                  <i className="fab fa-facebook-f"></i>
-                </a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                  <i className="fab fa-instagram"></i>
+                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                  <i className="fab fa-facebook-f text-white"></i>
                 </a>
               </div>
             </div>
-            
-            <div>
-              <h4 className="font-bold mb-6">Product</h4>
-              <ul className="space-y-3 text-slate-400">
-                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-                <li><a href="#templates" className="hover:text-white transition-colors">Templates</a></li>
-                <li><a href="/builder" className="hover:text-white transition-colors">Demo</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-bold mb-6">Support</h4>
-              <ul className="space-y-3 text-slate-400">
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Status</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-bold mb-6">Company</h4>
-              <ul className="space-y-3 text-slate-400">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms</a></li>
-              </ul>
-            </div>
           </div>
           
-          <div className="border-t border-slate-800 mt-12 pt-8 text-center text-slate-400">
-            <p>&copy; 2024 2TalkLink. All rights reserved. Made with ❤️ for the future of networking.</p>
+          <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
+            <p>&copy; 2025 2TalkLink. All rights reserved.</p>
           </div>
         </div>
       </footer>
-    </motion.div>
+
+      {/* Custom animations */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes blob {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(20px, -50px) scale(1.1); }
+          50% { transform: translate(-20px, 20px) scale(0.9); }
+          75% { transform: translate(50px, 50px) scale(1.05); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}} />
+    </div>
   );
 }
