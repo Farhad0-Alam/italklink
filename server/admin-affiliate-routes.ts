@@ -271,7 +271,7 @@ router.get('/conversions', requireAdmin, async (req, res) => {
       whereClause = eq(conversions.status, status as any);
     }
 
-    // Get conversions with affiliate and plan info
+    // Get conversions with affiliate and plan info - flatten to avoid Drizzle nested object issues
     const allConversions = await db.select({
       id: conversions.id,
       orderId: conversions.orderId,
@@ -286,18 +286,12 @@ router.get('/conversions', requireAdmin, async (req, res) => {
       approvedAt: conversions.approvedAt,
       reversedAt: conversions.reversedAt,
       lockUntil: conversions.lockUntil,
-      affiliate: {
-        code: affiliates.code,
-        user: {
-          firstName: users.firstName,
-          lastName: users.lastName,
-          email: users.email
-        }
-      },
-      plan: subscriptionPlans.planId ? {
-        name: subscriptionPlans.name,
-        planType: subscriptionPlans.planType
-      } : null
+      affiliateCode: affiliates.code,
+      affiliateFirstName: users.firstName,
+      affiliateLastName: users.lastName,
+      affiliateEmail: users.email,
+      planName: subscriptionPlans.name,
+      planType: subscriptionPlans.planType
     })
       .from(conversions)
       .innerJoin(affiliates, eq(conversions.affiliateId, affiliates.id))
@@ -314,12 +308,41 @@ router.get('/conversions', requireAdmin, async (req, res) => {
       const searchTerm = (search as string).toLowerCase();
       filteredConversions = allConversions.filter(conversion => 
         conversion.orderId.toLowerCase().includes(searchTerm) ||
-        conversion.affiliate.code.toLowerCase().includes(searchTerm) ||
-        conversion.affiliate.user.email.toLowerCase().includes(searchTerm)
+        conversion.affiliateCode.toLowerCase().includes(searchTerm) ||
+        conversion.affiliateEmail.toLowerCase().includes(searchTerm)
       );
     }
 
-    res.json(filteredConversions);
+    // Transform to nested structure for backwards compatibility
+    const formattedConversions = filteredConversions.map(conv => ({
+      id: conv.id,
+      orderId: conv.orderId,
+      affiliateId: conv.affiliateId,
+      amount: conv.amount,
+      currency: conv.currency,
+      commissionAmount: conv.commissionAmount,
+      commissionRate: conv.commissionRate,
+      status: conv.status,
+      planId: conv.planId,
+      createdAt: conv.createdAt,
+      approvedAt: conv.approvedAt,
+      reversedAt: conv.reversedAt,
+      lockUntil: conv.lockUntil,
+      affiliate: {
+        code: conv.affiliateCode,
+        user: {
+          firstName: conv.affiliateFirstName,
+          lastName: conv.affiliateLastName,
+          email: conv.affiliateEmail
+        }
+      },
+      plan: conv.planName ? {
+        name: conv.planName,
+        planType: conv.planType
+      } : null
+    }));
+
+    res.json(formattedConversions);
   } catch (error) {
     console.error('Failed to get conversions:', error);
     res.status(500).json({ message: 'Internal server error' });
