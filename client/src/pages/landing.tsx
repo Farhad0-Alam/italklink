@@ -348,26 +348,26 @@ export default function Landing() {
                       {/* Quick Action Buttons */}
                       <div className="flex justify-center gap-3 mb-4">
                         <div className="text-center">
-                          <button className="w-12 h-12 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-call">
-                            <i className="fas fa-phone text-white"></i>
+                          <button className="w-10 h-10 bg-gray-900 hover:bg-gray-800 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-call">
+                            <i className="fas fa-phone text-white text-sm"></i>
                           </button>
                           <span className="text-xs text-gray-600 mt-1 block">Call</span>
                         </div>
                         <div className="text-center">
-                          <button className="w-12 h-12 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-email">
-                            <i className="fas fa-envelope text-white"></i>
+                          <button className="w-10 h-10 bg-gray-900 hover:bg-gray-800 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-email">
+                            <i className="fas fa-envelope text-white text-sm"></i>
                           </button>
                           <span className="text-xs text-gray-600 mt-1 block">Email</span>
                         </div>
                         <div className="text-center">
-                          <button className="w-12 h-12 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-text">
-                            <i className="fas fa-comment text-white"></i>
+                          <button className="w-10 h-10 bg-gray-900 hover:bg-gray-800 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-text">
+                            <i className="fas fa-comment text-white text-sm"></i>
                           </button>
                           <span className="text-xs text-gray-600 mt-1 block">Text</span>
                         </div>
                         <div className="text-center">
-                          <button className="w-12 h-12 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-website">
-                            <i className="fas fa-globe text-white"></i>
+                          <button className="w-10 h-10 bg-gray-900 hover:bg-gray-800 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-website">
+                            <i className="fas fa-globe text-white text-sm"></i>
                           </button>
                           <span className="text-xs text-gray-600 mt-1 block">Website</span>
                         </div>
@@ -376,9 +376,35 @@ export default function Landing() {
                       <button className="w-full bg-gray-900 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors mb-2" data-testid="button-preview-save-contact">
                         <i className="fas fa-download mr-2"></i>Save Contact
                       </button>
-                      <button className="w-full bg-orange-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-600 transition-colors" data-testid="button-preview-book-meeting">
+                      <button className="w-full bg-orange-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-600 transition-colors mb-4" data-testid="button-preview-book-meeting">
                         <i className="fas fa-calendar mr-2"></i>Book Meeting
                       </button>
+
+                      {/* Wallet Buttons */}
+                      <div className="space-y-2 mb-4">
+                        <button className="w-full bg-black text-white py-2 rounded-lg text-xs font-semibold hover:bg-gray-900 transition-colors flex items-center justify-center" data-testid="button-preview-apple-wallet">
+                          <i className="fab fa-apple mr-2"></i>Add to Apple Wallet
+                        </button>
+                        <button className="w-full bg-white text-gray-900 py-2 rounded-lg text-xs font-semibold border border-gray-300 hover:bg-gray-50 transition-colors flex items-center justify-center" data-testid="button-preview-google-wallet">
+                          <i className="fab fa-google mr-2"></i>Add to Google Wallet
+                        </button>
+                      </div>
+
+                      {/* Share Section */}
+                      <div className="pt-3 border-t border-gray-200">
+                        <p className="text-xs font-semibold text-gray-700 mb-2">Share by...</p>
+                        <div className="flex gap-2">
+                          <button className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-xs font-medium transition-colors" data-testid="button-preview-share-sms">
+                            <i className="fas fa-sms mr-1"></i>SMS
+                          </button>
+                          <button className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-xs font-medium transition-colors" data-testid="button-preview-share-email">
+                            <i className="fas fa-envelope mr-1"></i>Email
+                          </button>
+                          <button className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-xs font-medium transition-colors" data-testid="button-preview-share-link">
+                            <i className="fas fa-link mr-1"></i>Link
+                          </button>
+                        </div>
+                      </div>
                     </div>
                     
                     {/* Features highlight */}
