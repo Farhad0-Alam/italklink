@@ -2,6 +2,14 @@ import type { Request, Response, NextFunction } from 'express';
 import { randomBytes, createHash } from 'crypto';
 import { AuthenticationError } from './error-handling';
 
+// Extend session type to include CSRF token properties
+declare module 'express-session' {
+  interface SessionData {
+    csrfToken?: string;
+    csrfTokenExpiry?: number;
+  }
+}
+
 // CSRF token management
 const CSRF_TOKEN_LENGTH = 32;
 const CSRF_HEADER_NAME = 'x-csrf-token';
@@ -164,6 +172,7 @@ export const enhancedCORS = (req: Request, res: Response, next: NextFunction) =>
     allowedOrigins.includes(origin) ||
     origin.includes('.repl.co') || // Allow Replit domains
     origin.includes('.replit.dev') || // Allow new Replit dev domains
+    origin.includes('.replit.app') || // Allow Replit production domains
     origin.includes('.pike.replit.dev') || // Allow Replit pike domains
     origin.includes('localhost') || // Allow localhost variants
     origin.startsWith('http://127.0.0.1') || // Allow local IP

@@ -337,13 +337,6 @@ declare global {
     interface Request {
       id?: string;
       startTime?: number;
-      user?: {
-        id: string;
-        email: string;
-        role: string;
-        planType: string;
-        [key: string]: any;
-      };
     }
   }
 }
