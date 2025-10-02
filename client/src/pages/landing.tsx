@@ -348,26 +348,26 @@ export default function Landing() {
                       {/* Quick Action Buttons */}
                       <div className="flex justify-center gap-3 mb-4">
                         <div className="text-center">
-                          <button className="w-12 h-12 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-call">
-                            <i className="fas fa-phone text-blue-600"></i>
+                          <button className="w-12 h-12 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-call">
+                            <i className="fas fa-phone text-white"></i>
                           </button>
                           <span className="text-xs text-gray-600 mt-1 block">Call</span>
                         </div>
                         <div className="text-center">
-                          <button className="w-12 h-12 bg-green-100 hover:bg-green-200 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-email">
-                            <i className="fas fa-envelope text-green-600"></i>
+                          <button className="w-12 h-12 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-email">
+                            <i className="fas fa-envelope text-white"></i>
                           </button>
                           <span className="text-xs text-gray-600 mt-1 block">Email</span>
                         </div>
                         <div className="text-center">
-                          <button className="w-12 h-12 bg-purple-100 hover:bg-purple-200 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-text">
-                            <i className="fas fa-comment text-purple-600"></i>
+                          <button className="w-12 h-12 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-text">
+                            <i className="fas fa-comment text-white"></i>
                           </button>
                           <span className="text-xs text-gray-600 mt-1 block">Text</span>
                         </div>
                         <div className="text-center">
-                          <button className="w-12 h-12 bg-orange-100 hover:bg-orange-200 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-website">
-                            <i className="fas fa-globe text-orange-600"></i>
+                          <button className="w-12 h-12 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center transition-colors" data-testid="button-preview-website">
+                            <i className="fas fa-globe text-white"></i>
                           </button>
                           <span className="text-xs text-gray-600 mt-1 block">Website</span>
                         </div>
