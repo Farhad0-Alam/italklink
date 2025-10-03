@@ -112,19 +112,41 @@ Preferred communication style: Simple, everyday language.
 - ✅ Subscription form component with browser permission flow
 - ✅ PWA service worker with push notification handlers
 - ✅ Notification controller queries database subscribers
-- ⚠️ **Web Push Delivery Not Yet Implemented**: Push notification delivery requires web-push package integration (has peer dependency conflicts)
+- ✅ **Web Push Delivery Fully Implemented**: Push notifications now delivered using web-push package
 
-### Production Requirements
-To enable actual Web Push notification delivery, implement the following:
+### Web Push Notification System (October 2025)
+- **Package Installed**: web-push library integrated with .npmrc legacy-peer-deps configuration
+- **VAPID Keys Configured**: Secure VAPID key pair generated and stored in environment secrets
+- **Backend Implementation**:
+  - Automatic "mailto:" prefix handling for VAPID_MAILTO secret (user-friendly configuration)
+  - Actual Web Push notification delivery via webpush.sendNotification()
+  - Production-ready URL handling with APP_URL and Replit env var fallbacks
+  - Automatic cleanup of expired/invalid push subscriptions (410 Gone responses)
+  - VAPID key validation with 503 error when not configured
+  - /api/notify/vapid-public-key endpoint for secure public key distribution
+- **Frontend Integration**:
+  - Fetches VAPID public key from backend on component mount
+  - Uses real VAPID key for browser push subscription requests
+  - Proper state management for VAPID key
+- **Security & Error Handling**:
+  - No hardcoded keys in frontend
+  - Comprehensive error handling and logging
+  - Rate limiting (3 notifications per card per user per day)
+  - Authentication and card ownership verification
+- **Testing**: End-to-end validation confirmed notification API works correctly with proper authentication, authorization, and subscriber tracking
 
-1. **Install web-push Package**: `npm install web-push` (resolve peer dependency conflicts)
-2. **Generate VAPID Keys**: Use `web-push generate-vapid-keys` command
-3. **Configure Environment Variables**:
-   - `VAPID_PUBLIC_KEY`: Public key for frontend subscription
-   - `VAPID_PRIVATE_KEY`: Private key for backend sending
-   - `VAPID_MAILTO`: Contact email for push service
-4. **Update Notification Controller**: Uncomment Web Push sending code in `server/modules/notifications/controller.ts`
-5. **Test Push Notifications**: Verify delivery across different browsers (Chrome, Firefox, Safari)
+### Production Setup
+The Web Push system is fully configured and ready for production use:
+
+1. **Environment Secrets Required**:
+   - `VAPID_PUBLIC_KEY`: Public key for browser subscriptions
+   - `VAPID_PRIVATE_KEY`: Private key for server-side sending
+   - `VAPID_MAILTO`: Contact email (format: `mailto:email@domain.com` or just `email@domain.com` - prefix added automatically)
+   - `APP_URL`: Base URL for notification click-through links (optional, falls back to Replit env vars)
+
+2. **Browser Support**: Chrome, Firefox, Edge, Safari (iOS 16.4+)
+3. **User Permission Required**: Subscribers must grant browser notification permission
+4. **Service Worker**: PWA service worker handles notification display and click events
 
 ## External Dependencies
 
