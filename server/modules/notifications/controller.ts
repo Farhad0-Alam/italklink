@@ -11,8 +11,13 @@ const rateLimiter = new RateLimiter();
 
 // Configure VAPID details for Web Push
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY && process.env.VAPID_MAILTO) {
+  // Ensure mailto: prefix is present
+  const vapidMailto = process.env.VAPID_MAILTO.startsWith('mailto:') 
+    ? process.env.VAPID_MAILTO 
+    : `mailto:${process.env.VAPID_MAILTO}`;
+  
   webpush.setVapidDetails(
-    process.env.VAPID_MAILTO,
+    vapidMailto,
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
   );
