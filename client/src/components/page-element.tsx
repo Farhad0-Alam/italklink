@@ -18,6 +18,7 @@ import { MenuPageElement } from "@/modules/multi-page/components/MenuPageElement
 import ARPreviewMindAR from "@/elements/ARPreviewMindAR";
 import { compileMind } from "@/builder/api/ar";
 import { PdfViewerButton } from "@/components/PdfViewerButton";
+import { SubscribeForm as SubscribeFormComponent } from "@/components/SubscribeForm";
 import {
   DndContext,
   closestCenter,
@@ -4195,23 +4196,19 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 </div>
               </div>
             ) : (
-              <div 
-                className="p-6 rounded-lg border border-slate-200"
-                style={{ 
-                  backgroundColor: element.data.backgroundColor || "#ffffff",
-                  color: element.data.textColor || "#1e293b"
-                }}
-                data-testid="subscribe-form-preview"
-              >
-                <h3 className="text-xl font-bold mb-2 text-center">{element.data.title || "Stay Updated"}</h3>
-                {element.data.description && (
-                  <p className="text-sm mb-4 text-center opacity-80">{element.data.description}</p>
-                )}
-                <div className="text-center text-sm text-slate-600">
-                  <i className="fas fa-bell mr-2"></i>
-                  Subscribe form will appear here for visitors
-                </div>
-              </div>
+              <SubscribeFormComponent
+                cardId={cardData?.id || ""}
+                title={element.data.title}
+                description={element.data.description}
+                buttonText={element.data.buttonText}
+                successMessage={element.data.successMessage}
+                requireName={element.data.requireName}
+                requireEmail={element.data.requireEmail}
+                enablePushNotifications={element.data.enablePushNotifications}
+                primaryColor={element.data.primaryColor}
+                backgroundColor={element.data.backgroundColor}
+                textColor={element.data.textColor}
+              />
             )}
           </div>
         );
