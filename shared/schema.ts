@@ -302,6 +302,35 @@ export const businessCards = pgTable("business_cards", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Card subscriptions table (for visitor notifications)
+export const cardSubscriptions = pgTable("card_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cardId: varchar("card_id").references(() => businessCards.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Subscriber info
+  email: varchar("email").notNull(),
+  name: varchar("name"),
+  
+  // Push notification subscription (browser push)
+  pushSubscription: jsonb("push_subscription"), // Web Push API subscription object
+  
+  // Subscription management
+  isActive: boolean("is_active").default(true),
+  unsubscribeToken: varchar("unsubscribe_token").unique().notNull(),
+  
+  // Timestamps
+  subscribedAt: timestamp("subscribed_at").defaultNow(),
+  unsubscribedAt: timestamp("unsubscribed_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_card_subscriptions_card").on(table.cardId),
+  index("idx_card_subscriptions_email").on(table.email),
+  index("idx_card_subscriptions_active").on(table.isActive),
+  index("idx_card_subscriptions_token").on(table.unsubscribeToken),
+]);
+
 // Wallet passes table
 export const walletPasses = pgTable("wallet_passes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -3051,6 +3080,24 @@ export const pdfViewerElementSchema = baseElementSchema.extend({
   }),
 });
 
+// Subscribe to Updates element (visitor notifications)
+export const subscribeElementSchema = baseElementSchema.extend({
+  type: z.literal("subscribe"),
+  data: z.object({
+    title: z.string().default("Stay Updated"),
+    description: z.string().default("Get notified about new updates, offers, and announcements."),
+    buttonText: z.string().default("Subscribe"),
+    successMessage: z.string().default("Thanks for subscribing! You'll receive notifications from us."),
+    placeholderEmail: z.string().default("Enter your email"),
+    placeholderName: z.string().default("Enter your name (optional)"),
+    enableBrowserNotifications: z.boolean().default(true),
+    requireName: z.boolean().default(false),
+    buttonColor: z.string().default("#3b82f6"), // Blue default
+    textColor: z.string().default("#ffffff"),
+    iconColor: z.string().default("#3b82f6"),
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   headingElementSchema,
@@ -3077,6 +3124,7 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   availabilityDisplayElementSchema,
   htmlElementSchema,
   pdfViewerElementSchema,
+  subscribeElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;
