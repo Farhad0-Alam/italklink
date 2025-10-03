@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 import {
   Calendar as CalendarIcon, TrendingUp, Eye, MousePointerClick, Users,
-  Monitor, Smartphone, Tablet, Download, Globe, MapPin
+  Monitor, Smartphone, Tablet, Download, Globe, MapPin, ArrowLeft
 } from "lucide-react";
 import { format, subDays } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -124,6 +124,12 @@ export default function CardAnalytics({ className }: CardAnalyticsProps) {
       {/* Header with filters */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
+          <Link href="/dashboard">
+            <Button variant="ghost" size="sm" className="mb-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-950" data-testid="button-back-dashboard">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
+            </Button>
+          </Link>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent" data-testid="text-card-analytics-title">
             Card Analytics
           </h1>
