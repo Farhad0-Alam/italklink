@@ -82,6 +82,50 @@ Preferred communication style: Simple, everyday language.
 - **Integration**: External service connectivity with OAuth flows, webhook handling, error recovery, and health monitoring
 - **Scalability**: Multi-tenant architecture with horizontal scaling documentation, Redis-ready caching, and load balancing support
 
+## Visitor Notification Subscription System (October 2025)
+
+### Complete Subscription Infrastructure
+- **Database Schema**: `card_subscriptions` table with email, name, push subscription tokens, unsubscribe tokens, and subscription status tracking
+- **API Endpoints**: Public subscription endpoints (subscribe, unsubscribe), authenticated subscriber management (count, list)
+- **Builder Element**: "Subscribe to Updates" card element with full customization (title, description, button text, colors, field requirements)
+- **PWA Service Worker**: `card-sw.js` with push notification handling, notification click events, and subscription management
+- **Frontend Components**: `SubscribeForm` component with email validation, browser permission request, and success states
+
+### Subscription Features
+- **Email Subscription**: Visitors can subscribe with email + optional name to receive card updates
+- **Browser Push Notifications**: Request and store browser push subscriptions for real-time notifications
+- **Unsubscribe System**: Unique unsubscribe tokens for one-click unsubscribe functionality
+- **Subscription Management**: Card owners can view subscriber counts and lists with proper ownership verification
+- **Active/Inactive States**: Track subscription status, unsubscribe dates, and reactivation support
+- **Rate Limiting**: 3 notifications per card per user per day to prevent abuse
+
+### Database Subscribers Integration
+- **Query Actual Subscribers**: Notification system now queries `card_subscriptions` table for active subscribers
+- **Card Ownership Verification**: Validates card ownership before sending notifications
+- **Subscriber Tracking**: Logs found subscribers and their subscription types (email, push)
+- **OneSignal Fallback**: Maintains OneSignal integration for legacy subscribers
+
+### Implementation Status
+- ✅ Database table with indexes for performance
+- ✅ Complete API endpoints with validation and security
+- ✅ Builder element with customization options
+- ✅ Subscription form component with browser permission flow
+- ✅ PWA service worker with push notification handlers
+- ✅ Notification controller queries database subscribers
+- ⚠️ **Web Push Delivery Not Yet Implemented**: Push notification delivery requires web-push package integration (has peer dependency conflicts)
+
+### Production Requirements
+To enable actual Web Push notification delivery, implement the following:
+
+1. **Install web-push Package**: `npm install web-push` (resolve peer dependency conflicts)
+2. **Generate VAPID Keys**: Use `web-push generate-vapid-keys` command
+3. **Configure Environment Variables**:
+   - `VAPID_PUBLIC_KEY`: Public key for frontend subscription
+   - `VAPID_PRIVATE_KEY`: Private key for backend sending
+   - `VAPID_MAILTO`: Contact email for push service
+4. **Update Notification Controller**: Uncomment Web Push sending code in `server/modules/notifications/controller.ts`
+5. **Test Push Notifications**: Verify delivery across different browsers (Chrome, Firefox, Safari)
+
 ## External Dependencies
 
 ### Core Framework Dependencies
