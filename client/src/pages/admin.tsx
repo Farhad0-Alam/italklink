@@ -19,7 +19,6 @@ import AdminLogin from '@/components/admin/AdminLogin';
 export default function Admin() {
   const [location] = useLocation();
   const [adminUser, setAdminUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   // Check authentication on component mount
   useEffect(() => {
@@ -34,8 +33,6 @@ export default function Admin() {
         }
       } catch (error) {
         console.log('Not authenticated');
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -45,18 +42,6 @@ export default function Admin() {
   const handleLoginSuccess = (user: any) => {
     setAdminUser(user);
   };
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading admin panel...</p>
-        </div>
-      </div>
-    );
-  }
 
   // Show login form if not authenticated
   if (!adminUser) {
