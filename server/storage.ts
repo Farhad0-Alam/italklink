@@ -5,7 +5,7 @@ import {
   automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability, appointmentNotifications, appointmentPayments,
   calendarConnections, videoMeetingProviders, externalCalendarEvents, meetingLinks, integrationLogs,
   teamAssignments, roundRobinState, leadRoutingRules, teamMemberSkills, teamMemberCapacity, teamAvailabilityPatterns, assignmentAnalytics, routingAnalytics,
-  publicUploads, qrLinks, qrEvents,
+  publicUploads, qrLinks, qrEvents, cardSubscriptions,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -443,6 +443,29 @@ export interface IStorage {
     countryBreakdown: { country: string; count: number }[];
     dailyScans: { date: string; scans: number }[];
   }>;
+
+  // ===== CARD SUBSCRIPTION OPERATIONS =====
+  
+  // Card Subscription operations
+  createCardSubscription(subscriptionData: {
+    cardId: string;
+    email: string;
+    name?: string;
+    pushSubscription?: any;
+    unsubscribeToken: string;
+  }): Promise<any>;
+  getCardSubscription(id: string): Promise<any | undefined>;
+  getCardSubscriptionByToken(token: string): Promise<any | undefined>;
+  getCardSubscriptions(cardId: string, activeOnly?: boolean): Promise<any[]>;
+  getCardSubscriptionByCardAndEmail(cardId: string, email: string): Promise<any | undefined>;
+  updateCardSubscription(id: string, subscriptionData: Partial<{
+    name: string;
+    pushSubscription: any;
+    isActive: boolean;
+    unsubscribedAt: Date;
+  }>): Promise<any>;
+  deleteCardSubscription(id: string): Promise<void>;
+  countCardSubscribers(cardId: string, activeOnly?: boolean): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -4498,6 +4521,102 @@ export class DatabaseStorage implements IStorage {
       countryBreakdown: countryBreakdown.map(c => ({ country: c.country || 'Unknown', count: c.count })),
       dailyScans: dailyScans.map(d => ({ date: d.date, scans: d.scans }))
     };
+  }
+
+  // ===== CARD SUBSCRIPTION OPERATIONS =====
+
+  async createCardSubscription(subscriptionData: {
+    cardId: string;
+    email: string;
+    name?: string;
+    pushSubscription?: any;
+    unsubscribeToken: string;
+  }): Promise<any> {
+    const [subscription] = await db.insert(cardSubscriptions).values({
+      ...subscriptionData,
+      isActive: true,
+    }).returning();
+    return subscription;
+  }
+
+  async getCardSubscription(id: string): Promise<any | undefined> {
+    const [subscription] = await db
+      .select()
+      .from(cardSubscriptions)
+      .where(eq(cardSubscriptions.id, id));
+    return subscription;
+  }
+
+  async getCardSubscriptionByToken(token: string): Promise<any | undefined> {
+    const [subscription] = await db
+      .select()
+      .from(cardSubscriptions)
+      .where(eq(cardSubscriptions.unsubscribeToken, token));
+    return subscription;
+  }
+
+  async getCardSubscriptions(cardId: string, activeOnly: boolean = false): Promise<any[]> {
+    if (activeOnly) {
+      return await db
+        .select()
+        .from(cardSubscriptions)
+        .where(
+          and(
+            eq(cardSubscriptions.cardId, cardId),
+            eq(cardSubscriptions.isActive, true)
+          )
+        );
+    }
+    return await db
+      .select()
+      .from(cardSubscriptions)
+      .where(eq(cardSubscriptions.cardId, cardId));
+  }
+
+  async getCardSubscriptionByCardAndEmail(cardId: string, email: string): Promise<any | undefined> {
+    const [subscription] = await db
+      .select()
+      .from(cardSubscriptions)
+      .where(
+        and(
+          eq(cardSubscriptions.cardId, cardId),
+          eq(cardSubscriptions.email, email)
+        )
+      );
+    return subscription;
+  }
+
+  async updateCardSubscription(id: string, subscriptionData: Partial<{
+    name: string;
+    pushSubscription: any;
+    isActive: boolean;
+    unsubscribedAt: Date;
+  }>): Promise<any> {
+    const [subscription] = await db
+      .update(cardSubscriptions)
+      .set({ ...subscriptionData, updatedAt: new Date() })
+      .where(eq(cardSubscriptions.id, id))
+      .returning();
+    return subscription;
+  }
+
+  async deleteCardSubscription(id: string): Promise<void> {
+    await db.delete(cardSubscriptions).where(eq(cardSubscriptions.id, id));
+  }
+
+  async countCardSubscribers(cardId: string, activeOnly: boolean = false): Promise<number> {
+    const whereCondition = activeOnly
+      ? and(
+          eq(cardSubscriptions.cardId, cardId),
+          eq(cardSubscriptions.isActive, true)
+        )
+      : eq(cardSubscriptions.cardId, cardId);
+
+    const [result] = await db
+      .select({ count: count() })
+      .from(cardSubscriptions)
+      .where(whereCondition);
+    return result.count;
   }
 }
 
