@@ -19,7 +19,7 @@ export function requireAuth(req: AuthenticatedRequest, res: Response, next: Next
 }
 
 /**
- * Middleware to ensure user is an admin
+ * Middleware to ensure user is an admin or owner
  */
 export function requireAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   if (!req.user || !req.user.id) {
@@ -29,7 +29,7 @@ export function requireAdmin(req: AuthenticatedRequest, res: Response, next: Nex
     });
   }
 
-  if (req.user.role !== 'admin') {
+  if (req.user.role !== 'admin' && req.user.role !== 'owner') {
     return res.status(403).json({
       ok: false,
       error: 'Admin access required.',

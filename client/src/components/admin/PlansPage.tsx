@@ -179,15 +179,26 @@ export default function PlansPage() {
   // Fetch plans data
   const { data: plans = [], isLoading: plansLoading } = useQuery<SubscriptionPlan[]>({
     queryKey: ['/api/admin/plans', search, statusFilter, typeFilter],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (search.trim()) params.append('search', search.trim());
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (typeFilter !== 'all') params.append('type', typeFilter);
       
       const url = `/api/admin/plans${params.toString() ? '?' + params.toString() : ''}`;
-      return fetch(url, { credentials: 'include' }).then(res => res.json());
+      const res = await fetch(url, { credentials: 'include' });
+      
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = '/admin';
+          throw new Error('Unauthorized');
+        }
+        throw new Error(`Failed to fetch plans: ${res.statusText}`);
+      }
+      
+      return res.json();
     },
+    retry: false,
     initialData: []
   });
 

@@ -126,22 +126,44 @@ export default function CouponsPage() {
   // Fetch coupons data
   const { data: coupons = [], isLoading: couponsLoading } = useQuery<Coupon[]>({
     queryKey: ['/api/admin/coupons', search, statusFilter, typeFilter],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (search.trim()) params.append('search', search.trim());
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (typeFilter !== 'all') params.append('type', typeFilter);
       
       const url = `/api/admin/coupons${params.toString() ? '?' + params.toString() : ''}`;
-      return fetch(url, { credentials: 'include' }).then(res => res.json());
+      const res = await fetch(url, { credentials: 'include' });
+      
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = '/admin';
+          throw new Error('Unauthorized');
+        }
+        throw new Error(`Failed to fetch coupons: ${res.statusText}`);
+      }
+      
+      return res.json();
     },
+    retry: false,
     initialData: []
   });
 
   // Fetch available plans for restrictions
   const { data: availablePlans = [] } = useQuery<SubscriptionPlan[]>({
     queryKey: ['/api/admin/plans'],
-    queryFn: () => fetch('/api/admin/plans', { credentials: 'include' }).then(res => res.json()),
+    queryFn: async () => {
+      const res = await fetch('/api/admin/plans', { credentials: 'include' });
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = '/admin';
+          throw new Error('Unauthorized');
+        }
+        throw new Error(`Failed to fetch plans: ${res.statusText}`);
+      }
+      return res.json();
+    },
+    retry: false,
     initialData: []
   });
 
