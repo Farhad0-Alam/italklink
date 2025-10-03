@@ -703,8 +703,10 @@ export default function Dashboard() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-gray-400 hover:text-blue-600"
+                        className="text-gray-400 hover:text-orange-600 transition-colors"
+                        onClick={() => setLocation(`/card-analytics?cardId=${card.id}`)}
                         data-testid={`button-stats-${card.id}`}
+                        title="View Analytics"
                       >
                         <BarChart3 className="h-4 w-4" />
                       </Button>

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -31,12 +32,32 @@ type DateRange = {
 type PeriodType = '7d' | '30d' | '90d' | '6m' | '1y' | 'custom';
 
 export default function CardAnalytics({ className }: CardAnalyticsProps) {
+  const [location] = useLocation();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('30d');
   const [dateRange, setDateRange] = useState<DateRange>({
     from: subDays(new Date(), 30),
     to: new Date(),
   });
   const [selectedCard, setSelectedCard] = useState<string>('');
+  
+  // Read cardId from URL query parameters on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cardIdFromUrl = params.get('cardId');
+    if (cardIdFromUrl) {
+      setSelectedCard(cardIdFromUrl);
+    }
+  }, []);
+  
+  // Fetch user's business cards for the selector
+  const { data: businessCards = [] } = useQuery({
+    queryKey: ['/api/business-cards'],
+    queryFn: async () => {
+      const response = await fetch('/api/business-cards');
+      if (!response.ok) throw new Error('Failed to fetch business cards');
+      return response.json();
+    },
+  });
   
   // Fetch card analytics dashboard data
   const { data: dashboardData, isLoading: dashboardLoading } = useQuery({
@@ -112,6 +133,20 @@ export default function CardAnalytics({ className }: CardAnalyticsProps) {
         </div>
         
         <div className="flex flex-wrap gap-2">
+          <Select value={selectedCard} onValueChange={setSelectedCard} data-testid="select-card">
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="All Cards" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Cards</SelectItem>
+              {businessCards.map((card: any) => (
+                <SelectItem key={card.id} value={card.id}>
+                  {card.fullName || 'Untitled Card'}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
           <Select value={selectedPeriod} onValueChange={(value: PeriodType) => setSelectedPeriod(value)} data-testid="select-period">
             <SelectTrigger className="w-[180px]">
               <SelectValue />
