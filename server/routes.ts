@@ -3264,6 +3264,154 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // ===== CARD SUBSCRIPTION ROUTES =====
+
+  // Subscribe to card notifications (public endpoint)
+  app.post('/api/cards/:cardId/subscribe', async (req, res) => {
+    try {
+      const { cardId } = req.params;
+      const { email, name, pushSubscription } = req.body;
+
+      // Validate email
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ message: 'Valid email is required' });
+      }
+
+      // Check if card exists
+      const card = await storage.getBusinessCard(cardId);
+      if (!card) {
+        return res.status(404).json({ message: 'Card not found' });
+      }
+
+      // Check if already subscribed
+      const existing = await storage.getCardSubscriptionByCardAndEmail(cardId, email);
+      if (existing) {
+        // Reactivate if unsubscribed, or update push subscription
+        if (!existing.isActive) {
+          await storage.updateCardSubscription(existing.id, {
+            isActive: true,
+            pushSubscription: pushSubscription || existing.pushSubscription,
+            unsubscribedAt: undefined as any,
+          });
+          return res.json({ 
+            message: 'Subscription reactivated successfully',
+            subscription: { id: existing.id, email, name: name || existing.name }
+          });
+        } else if (pushSubscription && JSON.stringify(pushSubscription) !== JSON.stringify(existing.pushSubscription)) {
+          // Update push subscription if it changed
+          await storage.updateCardSubscription(existing.id, {
+            pushSubscription,
+            name: name || existing.name,
+          });
+          return res.json({ 
+            message: 'Subscription updated successfully',
+            subscription: { id: existing.id, email, name: name || existing.name }
+          });
+        }
+        return res.json({ 
+          message: 'Already subscribed',
+          subscription: { id: existing.id, email, name: existing.name }
+        });
+      }
+
+      // Generate unsubscribe token
+      const crypto = await import('crypto');
+      const unsubscribeToken = crypto.randomBytes(32).toString('hex');
+
+      // Create subscription
+      const subscription = await storage.createCardSubscription({
+        cardId,
+        email: email.toLowerCase().trim(),
+        name: name?.trim(),
+        pushSubscription,
+        unsubscribeToken,
+      });
+
+      res.json({ 
+        message: 'Subscribed successfully',
+        subscription: { id: subscription.id, email: subscription.email, name: subscription.name }
+      });
+    } catch (error) {
+      console.error('Subscription error:', error);
+      res.status(500).json({ message: 'Failed to subscribe' });
+    }
+  });
+
+  // Unsubscribe from card notifications (public endpoint)
+  app.post('/api/subscriptions/unsubscribe/:token', async (req, res) => {
+    try {
+      const { token } = req.params;
+
+      const subscription = await storage.getCardSubscriptionByToken(token);
+      if (!subscription) {
+        return res.status(404).json({ message: 'Subscription not found' });
+      }
+
+      if (!subscription.isActive) {
+        return res.json({ message: 'Already unsubscribed' });
+      }
+
+      await storage.updateCardSubscription(subscription.id, {
+        isActive: false,
+        unsubscribedAt: new Date(),
+      });
+
+      res.json({ message: 'Unsubscribed successfully' });
+    } catch (error) {
+      console.error('Unsubscribe error:', error);
+      res.status(500).json({ message: 'Failed to unsubscribe' });
+    }
+  });
+
+  // Get subscription count for a card (requires auth)
+  app.get('/api/cards/:cardId/subscribers/count', requireAuth, async (req, res) => {
+    try {
+      const { cardId } = req.params;
+      const user = req.user as User;
+
+      // Verify card ownership
+      const card = await storage.getBusinessCard(cardId);
+      if (!card || card.userId !== user.id) {
+        return res.status(404).json({ message: 'Card not found' });
+      }
+
+      const count = await storage.countCardSubscribers(cardId, true);
+      res.json({ cardId, subscriberCount: count });
+    } catch (error) {
+      console.error('Get subscriber count error:', error);
+      res.status(500).json({ message: 'Failed to get subscriber count' });
+    }
+  });
+
+  // Get all subscribers for a card (requires auth)
+  app.get('/api/cards/:cardId/subscribers', requireAuth, async (req, res) => {
+    try {
+      const { cardId } = req.params;
+      const user = req.user as User;
+
+      // Verify card ownership
+      const card = await storage.getBusinessCard(cardId);
+      if (!card || card.userId !== user.id) {
+        return res.status(404).json({ message: 'Card not found' });
+      }
+
+      const subscribers = await storage.getCardSubscriptions(cardId, true);
+      
+      // Don't expose sensitive data like push subscriptions
+      const sanitized = subscribers.map(sub => ({
+        id: sub.id,
+        email: sub.email,
+        name: sub.name,
+        subscribedAt: sub.subscribedAt,
+      }));
+
+      res.json({ cardId, subscribers: sanitized, total: sanitized.length });
+    } catch (error) {
+      console.error('Get subscribers error:', error);
+      res.status(500).json({ message: 'Failed to get subscribers' });
+    }
+  });
+  
   // Apply comprehensive error handling middleware (must be last)
   setupErrorHandling(app);
   
