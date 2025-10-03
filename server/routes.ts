@@ -2,6 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import passport from 'passport';
 import bcrypt from 'bcryptjs';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import { setupAuth, requireAuth, optionalAuth, requireAdmin } from './auth';
 import { storage } from './storage';
 import { emitAutomationEvent } from './automation-engine';
@@ -610,6 +613,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(userProfile);
     } else {
       res.status(401).json({ message: 'Not authenticated' });
+    }
+  });
+
+  // Update user profile
+  app.patch('/api/auth/profile', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const { firstName, lastName, email } = req.body;
+
+      // Validate required fields
+      if (!firstName || !lastName || !email) {
+        return res.status(400).json({ message: 'All fields are required' });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: 'Invalid email format' });
+      }
+
+      // Check if email is already in use by another user
+      if (email !== user.email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser && existingUser.id !== user.id) {
+          return res.status(400).json({ message: 'Email is already in use' });
+        }
+      }
+
+      // Update user profile
+      const updatedUser = await storage.updateUser(user.id, {
+        firstName,
+        lastName,
+        email,
+      });
+
+      const { password, ...userProfile } = updatedUser as any;
+      res.json(userProfile);
+    } catch (error) {
+      console.error('Profile update error:', error);
+      res.status(500).json({ message: 'Failed to update profile' });
+    }
+  });
+
+  // Configure multer for profile image uploads
+  const profileUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed'), false);
+      }
+    }
+  });
+
+  // Upload profile avatar
+  app.post('/api/auth/upload-avatar', requireAuth, profileUpload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No image file provided' });
+      }
+
+      const user = req.user as User;
+      const file = req.file;
+
+      // Create uploads directory if it doesn't exist
+      const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      // Generate unique filename
+      const fileExtension = path.extname(file.originalname);
+      const filename = `avatar-${user.id}-${Date.now()}${fileExtension}`;
+      const filepath = path.join(uploadsDir, filename);
+
+      // Save file to disk
+      fs.writeFileSync(filepath, file.buffer);
+
+      // Update user profile with new image URL
+      const imageUrl = `/uploads/avatars/${filename}`;
+      const updatedUser = await storage.updateUser(user.id, {
+        profileImageUrl: imageUrl,
+      });
+
+      const { password, ...userProfile } = updatedUser as any;
+      res.json({ 
+        message: 'Profile image updated successfully',
+        user: userProfile,
+        imageUrl 
+      });
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      res.status(500).json({ message: 'Failed to upload profile image' });
     }
   });
 
