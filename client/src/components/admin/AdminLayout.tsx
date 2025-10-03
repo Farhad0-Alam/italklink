@@ -96,9 +96,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     try {
       await fetch('/api/auth/logout', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
       });
-      window.location.href = '/login';
+      window.location.href = '/admin';
     } catch (error) {
       console.error('Logout error:', error);
     }
