@@ -101,7 +101,7 @@ export default function Dashboard() {
   });
 
   const logoutMutation = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/auth/logout'),
+    mutationFn: () => apiRequest('POST', '/api/auth/logout', {}),
     onSuccess: () => {
       toast({
         title: "Logged out successfully",
