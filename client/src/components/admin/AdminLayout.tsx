@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import { 
   LayoutDashboard, 
@@ -87,6 +87,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location]);
+
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/logout', {
@@ -100,21 +105,33 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   const HorizontalNavContent = () => (
-    <div className="flex items-center space-x-1 overflow-x-auto">
+    <div className="flex items-center justify-center space-x-2 overflow-x-auto scrollbar-hide py-1">
       {sidebarNavItems.map((item) => {
         const Icon = item.icon;
         const isActive = location === item.href;
         
         return (
-          <Link key={item.href} href={item.href} className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
-            isActive 
-              ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' 
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700'
-          }`}>
-            <Icon className={`w-4 h-4 mr-2 ${
-              isActive ? 'text-green-600 dark:text-green-300' : ''
+          <Link 
+            key={item.href} 
+            href={item.href} 
+            data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+            className={`
+              group relative flex items-center gap-2 px-4 py-2.5 
+              text-sm font-medium rounded-xl whitespace-nowrap 
+              transition-all duration-200 ease-in-out
+              ${isActive 
+                ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30 scale-105' 
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700/50'
+              }
+            `}
+          >
+            <Icon className={`w-4 h-4 transition-transform duration-200 ${
+              isActive ? 'text-white' : 'group-hover:scale-110'
             }`} />
-            {item.title}
+            <span className="hidden sm:inline">{item.title}</span>
+            {isActive && (
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-white rounded-full" />
+            )}
           </Link>
         );
       })}
@@ -123,16 +140,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Single row header with everything */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b sticky top-0 z-50">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Left side: Navigation */}
-            <div className="flex items-center flex-1 min-w-0">
-              {/* Horizontal navigation */}
-              <div className="hidden lg:block flex-1 min-w-0">
-                <HorizontalNavContent />
-              </div>
+      {/* Modern centered header */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 backdrop-blur-sm bg-white/95 dark:bg-gray-800/95">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+          <div className="flex items-center justify-between h-16 gap-4">
+            {/* Logo - Left (Mobile only) */}
+            <div className="flex items-center lg:hidden">
+              <Link href="/admin" className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-md">
+                  <span className="text-white font-bold text-sm">2T</span>
+                </div>
+              </Link>
+            </div>
+
+            {/* Center: Navigation (Desktop) */}
+            <div className="hidden lg:flex flex-1 items-center justify-center">
+              <HorizontalNavContent />
             </div>
 
             {/* Right side: Actions */}
@@ -176,41 +199,54 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               {/* Mobile menu button */}
               <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="lg:hidden">
-                    <Menu className="h-6 w-6" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="lg:hidden hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                    data-testid="button-mobile-menu"
+                  >
+                    <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="p-0">
-                  <div className="h-full px-3 py-4 overflow-y-auto bg-white dark:bg-gray-800">
-                    <div className="flex items-center mb-5 px-3">
-                      <Link href="/admin" className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">2T</span>
+                <SheetContent side="left" className="p-0 w-72">
+                  <div className="h-full px-4 py-6 overflow-y-auto bg-white dark:bg-gray-800">
+                    <div className="flex items-center mb-8 px-2">
+                      <Link href="/admin" className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <span className="text-white font-bold text-lg">2T</span>
                         </div>
-                        <span className="text-xl font-semibold text-gray-800 dark:text-white">
+                        <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
                           2TalkLink
                         </span>
                       </Link>
                     </div>
-                    <ul className="space-y-2 font-medium">
+                    <nav className="space-y-2">
                       {sidebarNavItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = location === item.href;
                         
                         return (
-                          <li key={item.href}>
-                            <Link href={item.href} className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ${
-                              isActive ? 'bg-gray-100 dark:bg-gray-700' : ''
-                            }`}>
-                              <Icon className={`w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white ${
-                                isActive ? 'text-gray-900 dark:text-white' : ''
-                              }`} />
-                              <span className="ms-3">{item.title}</span>
-                            </Link>
-                          </li>
+                          <Link 
+                            key={item.href} 
+                            href={item.href} 
+                            onClick={() => setSidebarOpen(false)}
+                            className={`
+                              group flex items-center gap-3 px-4 py-3 
+                              rounded-xl font-medium transition-all duration-200
+                              ${isActive 
+                                ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30' 
+                                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                              }
+                            `}
+                          >
+                            <Icon className={`w-5 h-5 transition-transform duration-200 ${
+                              isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400 group-hover:scale-110'
+                            }`} />
+                            <span className={isActive ? 'text-white' : ''}>{item.title}</span>
+                          </Link>
                         );
                       })}
-                    </ul>
+                    </nav>
                   </div>
                 </SheetContent>
               </Sheet>
