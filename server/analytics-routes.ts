@@ -994,4 +994,367 @@ export function setupAnalyticsRoutes(app: Express) {
       res.status(500).json({ message: 'Failed to export analytics data' });
     }
   });
+
+  // ===== CARD ANALYTICS ENDPOINTS =====
+
+  // Card analytics dashboard - Overview metrics
+  app.get('/api/analytics/cards/dashboard', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { period = '30d', cardId, startDate, endDate } = req.query;
+      const { start, end } = getDateRange(period as string, startDate as string, endDate as string);
+
+      const { buttonInteractions, leadProfiles, businessCards } = await import('@shared/schema');
+
+      // Build filter conditions
+      const filterConditions = [eq(businessCards.userId, user.id)];
+      if (cardId) {
+        filterConditions.push(eq(buttonInteractions.cardId, cardId as string));
+      }
+
+      // Get total views (page_view interactions)
+      const viewsResult = await db.select({ count: count() })
+        .from(buttonInteractions)
+        .leftJoin(businessCards, eq(buttonInteractions.cardId, businessCards.id))
+        .where(and(
+          ...filterConditions,
+          eq(buttonInteractions.interactionType, 'view'),
+          gte(buttonInteractions.createdAt, start),
+          lte(buttonInteractions.createdAt, end)
+        ));
+
+      // Get unique visitors
+      const uniqueVisitorsResult = await db.select({
+        count: sql<number>`COUNT(DISTINCT ${buttonInteractions.visitorIp})`
+      })
+        .from(buttonInteractions)
+        .leftJoin(businessCards, eq(buttonInteractions.cardId, businessCards.id))
+        .where(and(
+          ...filterConditions,
+          gte(buttonInteractions.createdAt, start),
+          lte(buttonInteractions.createdAt, end)
+        ));
+
+      // Get total clicks (all non-view interactions)
+      const clicksResult = await db.select({ count: count() })
+        .from(buttonInteractions)
+        .leftJoin(businessCards, eq(buttonInteractions.cardId, businessCards.id))
+        .where(and(
+          ...filterConditions,
+          eq(buttonInteractions.interactionType, 'click'),
+          gte(buttonInteractions.createdAt, start),
+          lte(buttonInteractions.createdAt, end)
+        ));
+
+      // Get device breakdown
+      const deviceBreakdown = await db.select({
+        device: buttonInteractions.visitorDevice,
+        count: count()
+      })
+        .from(buttonInteractions)
+        .leftJoin(businessCards, eq(buttonInteractions.cardId, businessCards.id))
+        .where(and(
+          ...filterConditions,
+          gte(buttonInteractions.createdAt, start),
+          lte(buttonInteractions.createdAt, end)
+        ))
+        .groupBy(buttonInteractions.visitorDevice);
+
+      // Get clicks by action type
+      const clicksByAction = await db.select({
+        action: buttonInteractions.buttonAction,
+        label: buttonInteractions.buttonLabel,
+        count: count()
+      })
+        .from(buttonInteractions)
+        .leftJoin(businessCards, eq(buttonInteractions.cardId, businessCards.id))
+        .where(and(
+          ...filterConditions,
+          eq(buttonInteractions.interactionType, 'click'),
+          gte(buttonInteractions.createdAt, start),
+          lte(buttonInteractions.createdAt, end)
+        ))
+        .groupBy(buttonInteractions.buttonAction, buttonInteractions.buttonLabel)
+        .orderBy(desc(count()));
+
+      // Get location breakdown (top countries)
+      const locationBreakdown = await db.select({
+        country: sql<string>`${buttonInteractions.visitorLocation}->>'country'`,
+        city: sql<string>`${buttonInteractions.visitorLocation}->>'city'`,
+        count: count()
+      })
+        .from(buttonInteractions)
+        .leftJoin(businessCards, eq(buttonInteractions.cardId, businessCards.id))
+        .where(and(
+          ...filterConditions,
+          gte(buttonInteractions.createdAt, start),
+          lte(buttonInteractions.createdAt, end),
+          isNotNull(buttonInteractions.visitorLocation)
+        ))
+        .groupBy(sql`${buttonInteractions.visitorLocation}->>'country'`, sql`${buttonInteractions.visitorLocation}->>'city'`)
+        .orderBy(desc(count()))
+        .limit(10);
+
+      res.json({
+        period: {
+          startDate: start.toISOString(),
+          endDate: end.toISOString(),
+          period
+        },
+        overview: {
+          totalViews: viewsResult[0]?.count || 0,
+          uniqueVisitors: uniqueVisitorsResult[0]?.count || 0,
+          totalClicks: clicksResult[0]?.count || 0,
+          clickThroughRate: viewsResult[0]?.count > 0 
+            ? ((clicksResult[0]?.count || 0) / viewsResult[0].count * 100).toFixed(2)
+            : 0
+        },
+        deviceBreakdown: deviceBreakdown.map(d => ({
+          device: d.device || 'unknown',
+          count: d.count
+        })),
+        clicksByAction: clicksByAction.map(c => ({
+          action: c.action,
+          label: c.label,
+          count: c.count
+        })),
+        topLocations: locationBreakdown.filter(l => l.country).map(l => ({
+          country: l.country,
+          city: l.city,
+          count: l.count
+        }))
+      });
+
+    } catch (error) {
+      console.error('Error fetching card analytics dashboard:', error);
+      res.status(500).json({ message: 'Failed to fetch card analytics dashboard' });
+    }
+  });
+
+  // Card analytics - Time-based trends
+  app.get('/api/analytics/cards/trends', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { period = '30d', cardId, granularity = 'day', startDate, endDate } = req.query;
+      const { start, end } = getDateRange(period as string, startDate as string, endDate as string);
+
+      const { buttonInteractions, businessCards } = await import('@shared/schema');
+
+      const filterConditions = [eq(businessCards.userId, user.id)];
+      if (cardId) {
+        filterConditions.push(eq(buttonInteractions.cardId, cardId as string));
+      }
+
+      // Build date grouping based on granularity
+      const dateGrouping = granularity === 'hour' 
+        ? sql`DATE_TRUNC('hour', ${buttonInteractions.createdAt})`
+        : granularity === 'week'
+        ? sql`DATE_TRUNC('week', ${buttonInteractions.createdAt})`
+        : granularity === 'month'
+        ? sql`DATE_TRUNC('month', ${buttonInteractions.createdAt})`
+        : sql`DATE_TRUNC('day', ${buttonInteractions.createdAt})`;
+
+      // Get view and click trends over time
+      const trends = await db.select({
+        date: dateGrouping,
+        views: count(sql`CASE WHEN ${buttonInteractions.interactionType} = 'view' THEN 1 END`),
+        clicks: count(sql`CASE WHEN ${buttonInteractions.interactionType} = 'click' THEN 1 END`),
+        uniqueVisitors: sql<number>`COUNT(DISTINCT ${buttonInteractions.visitorIp})`
+      })
+        .from(buttonInteractions)
+        .leftJoin(businessCards, eq(buttonInteractions.cardId, businessCards.id))
+        .where(and(
+          ...filterConditions,
+          gte(buttonInteractions.createdAt, start),
+          lte(buttonInteractions.createdAt, end)
+        ))
+        .groupBy(dateGrouping)
+        .orderBy(dateGrouping);
+
+      res.json({
+        period: {
+          startDate: start.toISOString(),
+          endDate: end.toISOString(),
+          granularity
+        },
+        trends: trends.map(t => ({
+          date: t.date,
+          views: t.views,
+          clicks: t.clicks,
+          uniqueVisitors: t.uniqueVisitors,
+          clickThroughRate: t.views > 0 ? ((t.clicks / t.views) * 100).toFixed(2) : 0
+        }))
+      });
+
+    } catch (error) {
+      console.error('Error fetching card analytics trends:', error);
+      res.status(500).json({ message: 'Failed to fetch card analytics trends' });
+    }
+  });
+
+  // Card analytics - Individual card performance
+  app.get('/api/analytics/cards/performance', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { period = '30d', cardId, startDate, endDate } = req.query;
+      const { start, end } = getDateRange(period as string, startDate as string, endDate as string);
+
+      const { buttonInteractions, businessCards } = await import('@shared/schema');
+
+      // Get performance metrics for each card
+      const filterConditions = [
+        eq(businessCards.userId, user.id),
+        gte(buttonInteractions.createdAt, start),
+        lte(buttonInteractions.createdAt, end)
+      ];
+      
+      if (cardId) {
+        filterConditions.push(eq(buttonInteractions.cardId, cardId as string));
+      }
+
+      const cardPerformance = await db.select({
+        cardId: buttonInteractions.cardId,
+        cardTitle: sql<string>`${businessCards.templateData}->>'name'`,
+        totalViews: count(sql`CASE WHEN ${buttonInteractions.interactionType} = 'view' THEN 1 END`),
+        totalClicks: count(sql`CASE WHEN ${buttonInteractions.interactionType} = 'click' THEN 1 END`),
+        uniqueVisitors: sql<number>`COUNT(DISTINCT ${buttonInteractions.visitorIp})`,
+        avgLeadScore: avg(buttonInteractions.leadScore)
+      })
+        .from(buttonInteractions)
+        .leftJoin(businessCards, eq(buttonInteractions.cardId, businessCards.id))
+        .where(and(...filterConditions))
+        .groupBy(buttonInteractions.cardId, sql`${businessCards.templateData}->>'name'`)
+        .orderBy(desc(count()));
+
+      res.json({
+        period: {
+          startDate: start.toISOString(),
+          endDate: end.toISOString()
+        },
+        cards: cardPerformance.map(c => ({
+          cardId: c.cardId,
+          cardTitle: c.cardTitle || 'Untitled Card',
+          totalViews: c.totalViews,
+          totalClicks: c.totalClicks,
+          uniqueVisitors: c.uniqueVisitors,
+          clickThroughRate: c.totalViews > 0 ? ((c.totalClicks / c.totalViews) * 100).toFixed(2) : 0,
+          avgLeadScore: Math.round(c.avgLeadScore || 0)
+        }))
+      });
+
+    } catch (error) {
+      console.error('Error fetching card performance:', error);
+      res.status(500).json({ message: 'Failed to fetch card performance' });
+    }
+  });
+
+  // QR scan tracking endpoint
+  app.post('/api/analytics/qr-scan', async (req, res) => {
+    try {
+      const { qrId, shortId } = req.body;
+
+      if (!qrId && !shortId) {
+        return res.status(400).json({ message: 'QR ID or Short ID is required' });
+      }
+
+      const { qrEvents, qrLinks } = await import('@shared/schema');
+      
+      // Get device type from user agent
+      const userAgent = req.headers['user-agent'] || '';
+      const device = userAgent.match(/mobile/i) ? 'mobile' : 
+                     userAgent.match(/tablet|ipad/i) ? 'tablet' : 
+                     userAgent.match(/bot|crawler|spider/i) ? 'bot' : 'desktop';
+
+      // Hash IP for privacy
+      const crypto = await import('crypto');
+      const ipHash = crypto.createHash('sha256')
+        .update((req.ip || 'unknown') + process.env.IP_SALT || 'default-salt')
+        .digest('hex');
+
+      // Get country from headers (Cloudflare or similar)
+      const country = (req.headers['cf-ipcountry'] as string) || 
+                     (req.headers['x-country'] as string) || null;
+
+      // Record the scan event
+      await db.insert(qrEvents).values({
+        qrId: qrId || shortId,
+        ipHash,
+        ua: userAgent,
+        device: device as any,
+        country,
+        referrer: req.headers.referer || req.headers.referrer,
+        landingHost: req.headers.host
+      });
+
+      res.json({ success: true, message: 'QR scan tracked' });
+
+    } catch (error) {
+      console.error('Error tracking QR scan:', error);
+      res.status(500).json({ message: 'Failed to track QR scan' });
+    }
+  });
+
+  // QR analytics endpoint
+  app.get('/api/analytics/qr/:qrId', requireAuth, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { qrId } = req.params;
+      const { period = '30d' } = req.query;
+      const { start, end } = getDateRange(period as string);
+
+      const { qrEvents, qrLinks } = await import('@shared/schema');
+
+      // Verify QR link belongs to user
+      const qrLink = await db.select()
+        .from(qrLinks)
+        .where(eq(qrLinks.id, qrId))
+        .limit(1);
+
+      if (!qrLink.length || qrLink[0].userId !== user.id) {
+        return res.status(404).json({ message: 'QR code not found' });
+      }
+
+      // Get scan statistics
+      const scanStats = await db.select({
+        totalScans: count(),
+        uniqueScans: sql<number>`COUNT(DISTINCT ${qrEvents.ipHash})`,
+        deviceBreakdown: sql<any>`json_agg(DISTINCT ${qrEvents.device})`,
+        countryBreakdown: sql<any>`json_agg(DISTINCT ${qrEvents.country})`
+      })
+        .from(qrEvents)
+        .where(and(
+          eq(qrEvents.qrId, qrId),
+          gte(qrEvents.ts, start),
+          lte(qrEvents.ts, end)
+        ));
+
+      // Get daily scan trends
+      const scanTrends = await db.select({
+        date: sql<string>`DATE_TRUNC('day', ${qrEvents.ts})`,
+        scans: count()
+      })
+        .from(qrEvents)
+        .where(and(
+          eq(qrEvents.qrId, qrId),
+          gte(qrEvents.ts, start),
+          lte(qrEvents.ts, end)
+        ))
+        .groupBy(sql`DATE_TRUNC('day', ${qrEvents.ts})`)
+        .orderBy(sql`DATE_TRUNC('day', ${qrEvents.ts})`);
+
+      res.json({
+        qrLink: qrLink[0],
+        period: {
+          startDate: start.toISOString(),
+          endDate: end.toISOString()
+        },
+        stats: scanStats[0] || { totalScans: 0, uniqueScans: 0 },
+        trends: scanTrends
+      });
+
+    } catch (error) {
+      console.error('Error fetching QR analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch QR analytics' });
+    }
+  });
 }

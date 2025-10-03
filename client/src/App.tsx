@@ -37,6 +37,7 @@ const CRM = lazy(() => import("./pages/crm"));
 const BookingPage = lazy(() => import("./pages/booking"));
 const EmailTemplatesPage = lazy(() => import("./pages/EmailTemplatesPage"));
 const Analytics = lazy(() => import("./pages/analytics"));
+const CardAnalytics = lazy(() => import("./pages/card-analytics"));
 const TeamDashboard = lazy(() => import("./pages/TeamDashboard"));
 const Uploads = lazy(() => import("./pages/uploads"));
 const QrCodes = lazy(() => import("./pages/qr-codes"));
@@ -86,6 +87,7 @@ function Router() {
       <Route path="/qr-codes">{() => <PageSuspense><QrCodes /></PageSuspense>}</Route>
       <Route path="/crm">{() => <PageSuspense><CRM /></PageSuspense>}</Route>
       <Route path="/analytics">{() => <PageSuspense><Analytics /></PageSuspense>}</Route>
+      <Route path="/card-analytics">{() => <PageSuspense><CardAnalytics /></PageSuspense>}</Route>
       <Route path="/teams">{() => <PageSuspense><TeamDashboard /></PageSuspense>}</Route>
       <Route path="/help">{() => <PageSuspense><Help /></PageSuspense>}</Route>
       <Route path="/booking/:eventTypeSlug">{(params) => <PageSuspense><BookingPage {...params} /></PageSuspense>}</Route>
