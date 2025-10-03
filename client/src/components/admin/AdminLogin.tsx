@@ -7,11 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Shield, Eye, EyeOff } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
+  rememberMe: z.boolean().default(false),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -30,6 +32,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
     defaultValues: {
       email: 'admin@test.com', // Pre-fill for testing
       password: '',
+      rememberMe: true, // Default to checked (recommended)
     },
   });
 
@@ -62,14 +65,18 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100 dark:bg-gray-900">
       <div className="w-full max-w-md p-6">
-        <Card>
+        <Card className="shadow-xl border-orange-100">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <Shield className="h-12 w-12 text-blue-600" />
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/30">
+                <span className="text-white font-bold text-2xl">2T</span>
+              </div>
             </div>
-            <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
+              2TalkLink Admin
+            </CardTitle>
             <CardDescription>
               Sign in to access the admin dashboard
             </CardDescription>
@@ -82,12 +89,14 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email / Username</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
+                          autoComplete="username"
                           placeholder="admin@example.com"
                           data-testid="input-admin-email"
+                          className="focus-visible:ring-orange-500"
                           {...field}
                         />
                       </FormControl>
@@ -106,8 +115,10 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                         <div className="relative">
                           <Input
                             type={showPassword ? 'text' : 'password'}
+                            autoComplete="current-password"
                             placeholder="Enter your password"
                             data-testid="input-admin-password"
+                            className="focus-visible:ring-orange-500"
                             {...field}
                           />
                           <Button
@@ -119,14 +130,36 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                             data-testid="button-toggle-password"
                           >
                             {showPassword ? (
-                              <EyeOff className="h-4 w-4" />
+                              <EyeOff className="h-4 w-4 text-gray-400" />
                             ) : (
-                              <Eye className="h-4 w-4" />
+                              <Eye className="h-4 w-4 text-gray-400" />
                             )}
                           </Button>
                         </div>
                       </FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="rememberMe"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          data-testid="checkbox-remember-me"
+                          className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="text-sm font-normal cursor-pointer">
+                          Keep me logged in for 30 days
+                        </FormLabel>
+                      </div>
                     </FormItem>
                   )}
                 />
@@ -139,7 +172,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium shadow-lg shadow-orange-500/30 transition-all duration-200"
                   disabled={isLoading}
                   data-testid="button-admin-login"
                 >
@@ -148,9 +181,15 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
               </form>
             </Form>
 
-            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Test Credentials:</p>
-              <p className="text-xs font-mono text-gray-500">
+            <div className="mt-6 text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                💡 <span className="font-medium">Tip:</span> Your browser can also securely save your password for faster login.
+              </p>
+            </div>
+
+            <div className="mt-4 p-4 bg-orange-50 dark:bg-gray-800 rounded-lg border border-orange-100">
+              <p className="text-sm text-orange-600 dark:text-orange-400 mb-2 font-medium">Test Credentials:</p>
+              <p className="text-xs font-mono text-gray-600 dark:text-gray-500">
                 Email: admin@test.com<br />
                 Password: password
               </p>
