@@ -299,6 +299,10 @@ export default function Register() {
                         {(/[a-z]/.test(formData.password) && /[A-Z]/.test(formData.password)) ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                         <span>Mix of uppercase & lowercase</span>
                       </div>
+                      <div className={`flex items-center gap-2 text-xs ${/[^a-zA-Z0-9]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>
+                        {/[^a-zA-Z0-9]/.test(formData.password) ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                        <span>One special character (!@#$%^&*)</span>
+                      </div>
                     </div>
                   </div>
                 )}

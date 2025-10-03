@@ -435,10 +435,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         acceptTerms,
       });
       
-      // Remove sensitive data from response
-      const { password: _, ...userResponse } = newUser;
-      
-      successResponse(res, userResponse, 'User registered successfully', 201);
+      // Auto-login the user after successful registration
+      req.login(newUser as any, (err) => {
+        if (err) {
+          console.error('Auto-login after registration failed:', err);
+          // Remove sensitive data from response
+          const { password: _, ...userResponse } = newUser;
+          return res.status(201).json({
+            success: true,
+            data: userResponse,
+            message: 'Account created successfully. Please log in.',
+          });
+        }
+        
+        // Remove sensitive data from response
+        const { password: _, ...userResponse } = newUser;
+        successResponse(res, userResponse, 'User registered and logged in successfully', 201);
+      });
     })
   );
   
