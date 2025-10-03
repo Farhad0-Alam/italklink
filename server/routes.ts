@@ -674,7 +674,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Email/password login
   app.post('/api/auth/login', async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password, rememberMe = false } = req.body;
       
       // Validate required fields
       if (!email || !password) {
@@ -706,11 +706,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Set session cookie duration based on rememberMe
+      // 30 days if rememberMe is true, 1 day if false
+      const sessionDuration = rememberMe 
+        ? 30 * 24 * 60 * 60 * 1000  // 30 days in milliseconds
+        : 24 * 60 * 60 * 1000;       // 1 day in milliseconds
+      
       // Log the user in
       req.login(user as any, (err) => {
         if (err) {
           console.error('Login error:', err);
           return res.status(500).json({ message: 'Login failed' });
+        }
+        
+        // Set session cookie maxAge
+        if (req.session.cookie) {
+          req.session.cookie.maxAge = sessionDuration;
         }
         
         // Remove password from response
