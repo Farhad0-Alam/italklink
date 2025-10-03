@@ -4,9 +4,22 @@ import { RateLimiter } from './rate-limiter';
 import type { User } from '@shared/schema';
 import { getDb } from '../../db';
 import { storage } from '../../storage';
+import webpush from 'web-push';
 
 const oneSignalService = new OneSignalService();
 const rateLimiter = new RateLimiter();
+
+// Configure VAPID details for Web Push
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY && process.env.VAPID_MAILTO) {
+  webpush.setVapidDetails(
+    process.env.VAPID_MAILTO,
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+  console.log('[Notifications] Web Push VAPID configured successfully');
+} else {
+  console.warn('[Notifications] Web Push VAPID keys not configured - push notifications will be disabled');
+}
 
 export interface AuthenticatedRequest extends Request {
   user?: User;
@@ -54,6 +67,14 @@ export async function notifyCardSubscribers(req: AuthenticatedRequest, res: Resp
       });
     }
 
+    // Check if Web Push is configured
+    if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+      return res.status(503).json({
+        ok: false,
+        error: 'Web Push not configured - VAPID keys missing',
+      });
+    }
+
     // Get active subscribers from database
     const subscribers = await storage.getCardSubscriptions(cardId, true);
     console.log(`[Notifications] Found ${subscribers.length} active subscribers for card ${cardId}`);
@@ -70,35 +91,51 @@ export async function notifyCardSubscribers(req: AuthenticatedRequest, res: Resp
             ? JSON.parse(subscriber.pushSubscription) 
             : subscriber.pushSubscription;
 
-          // NOTE: Actual Web Push sending is not yet implemented
-          // The web-push package has peer dependency conflicts
-          // In production, implement Web Push sending using web-push library:
-          // 
-          // import webpush from 'web-push';
-          // webpush.setVapidDetails(
-          //   'mailto:your-email@example.com',
-          //   process.env.VAPID_PUBLIC_KEY,
-          //   process.env.VAPID_PRIVATE_KEY
-          // );
-          // 
-          // const payload = JSON.stringify({
-          //   title,
-          //   message,
-          //   url,
-          //   icon: '/icon-192x192.png',
-          //   badge: '/icon-192x192.png',
-          // });
-          // 
-          // await webpush.sendNotification(pushSub, payload);
+          // Prepare the notification payload with proper URL
+          let notificationUrl = url;
+          if (!notificationUrl) {
+            // Fallback to card URL or configured app URL
+            const baseUrl = process.env.APP_URL || 
+                           (process.env.REPL_SLUG && process.env.REPL_OWNER 
+                            ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`
+                            : null);
+            
+            if (baseUrl && card?.slug) {
+              notificationUrl = `${baseUrl}/share/${card.slug}`;
+            } else if (baseUrl) {
+              notificationUrl = baseUrl;
+            }
+          }
           
-          console.log(`[Notifications] Web Push subscriber found: ${subscriber.email}`);
-          console.log(`[Notifications] Push endpoint:`, pushSub.endpoint?.substring(0, 50) + '...');
+          const payload = JSON.stringify({
+            title,
+            body: message,
+            url: notificationUrl,
+            icon: '/icon-192x192.png',
+            badge: '/icon-192x192.png',
+          });
+
+          // Send the push notification
+          await webpush.sendNotification(pushSub, payload);
           
-          // For now, we log the subscription but don't send
-          // Don't increment success count until actual sending is implemented
-        } catch (error) {
-          console.error(`[Notifications] Failed to send Web Push to ${subscriber.email}:`, error);
+          console.log(`[Notifications] Web Push sent successfully to ${subscriber.email}`);
+          successCount++;
+        } catch (error: any) {
+          console.error(`[Notifications] Failed to send Web Push to ${subscriber.email}:`, error?.message || error);
           failureCount++;
+          
+          // If the subscription is no longer valid (410 Gone), we should remove it
+          if (error?.statusCode === 410) {
+            console.log(`[Notifications] Removing invalid push subscription for ${subscriber.email}`);
+            // Update subscriber to remove invalid push subscription
+            try {
+              await storage.updateCardSubscription(subscriber.id, {
+                pushSubscription: null,
+              });
+            } catch (updateError) {
+              console.error(`[Notifications] Failed to update subscription:`, updateError);
+            }
+          }
         }
       }
     }
@@ -125,9 +162,9 @@ export async function notifyCardSubscribers(req: AuthenticatedRequest, res: Resp
       data: {
         cardId,
         totalSubscribers: subscribers.length,
-        webPushQueued: subscribers.filter(s => s.pushSubscription).length,
-        note: 'Web Push delivery not yet implemented - subscribers found and logged',
-        recipients: successCount, // Will be accurate once Web Push is implemented
+        webPushSent: successCount,
+        webPushFailed: failureCount,
+        recipients: successCount,
       },
     });
 

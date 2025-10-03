@@ -51,6 +51,28 @@ router.get(
 );
 
 /**
+ * Get VAPID public key for Web Push subscriptions
+ * GET /api/notify/vapid-public-key
+ */
+router.get('/vapid-public-key', (req, res) => {
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
+  
+  if (!publicKey) {
+    return res.status(503).json({
+      ok: false,
+      error: 'Web Push not configured',
+    });
+  }
+  
+  res.json({
+    ok: true,
+    data: {
+      publicKey,
+    },
+  });
+});
+
+/**
  * Get rate limit status for current user (authenticated)
  * GET /api/notify/limits
  */

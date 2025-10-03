@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -35,10 +35,32 @@ export function SubscribeForm({
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [vapidPublicKey, setVapidPublicKey] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Fetch VAPID public key on component mount
+  useEffect(() => {
+    const fetchVapidKey = async () => {
+      try {
+        const response = await fetch('/api/notify/vapid-public-key');
+        const data = await response.json();
+        if (data.ok && data.data?.publicKey) {
+          setVapidPublicKey(data.data.publicKey);
+        }
+      } catch (error) {
+        console.error("Failed to fetch VAPID key:", error);
+      }
+    };
+    fetchVapidKey();
+  }, []);
 
   const requestPushPermission = async (): Promise<PushSubscription | null> => {
     if (!enablePushNotifications || !("Notification" in window) || !("serviceWorker" in navigator)) {
+      return null;
+    }
+
+    if (!vapidPublicKey) {
+      console.warn("VAPID public key not available");
       return null;
     }
 
@@ -54,15 +76,10 @@ export function SubscribeForm({
       let subscription = await registration.pushManager.getSubscription();
       
       if (!subscription) {
-        // Create new subscription - we'll need VAPID keys for production
-        // For now, this will work with service worker registration
+        // Create new subscription with actual VAPID public key
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(
-            // This is a placeholder public VAPID key - should be env var in production
-            import.meta.env.VITE_VAPID_PUBLIC_KEY || 
-            "BMh1TfHB-pOyNPqSrRMV_Rm_LvbBsaEgLKYLnB2LvDxALh8-YC8T_XtqpGFSPZvZz8hL9qDJCRfL_Ew7Hkp3Nuo"
-          )
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
         });
       }
 
