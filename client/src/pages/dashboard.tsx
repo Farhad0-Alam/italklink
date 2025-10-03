@@ -248,6 +248,10 @@ export default function Dashboard() {
                   <Users className="w-4 h-4" />
                   <span>CRM</span>
                 </Link>
+                <Link href="/card-analytics" className="text-gray-500 hover:text-orange-600 flex items-center space-x-1" data-testid="link-card-analytics">
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Analytics</span>
+                </Link>
                 <Link href="/availability" className="text-gray-500 hover:text-gray-700 flex items-center space-x-1" data-testid="link-availability">
                   <CalendarDays className="w-4 h-4" />
                   <span>Availability</span>
