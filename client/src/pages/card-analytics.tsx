@@ -133,12 +133,12 @@ export default function CardAnalytics({ className }: CardAnalyticsProps) {
         </div>
         
         <div className="flex flex-wrap gap-2">
-          <Select value={selectedCard} onValueChange={setSelectedCard} data-testid="select-card">
+          <Select value={selectedCard || 'all'} onValueChange={(value) => setSelectedCard(value === 'all' ? '' : value)} data-testid="select-card">
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="All Cards" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Cards</SelectItem>
+              <SelectItem value="all">All Cards</SelectItem>
               {businessCards.map((card: any) => (
                 <SelectItem key={card.id} value={card.id}>
                   {card.fullName || 'Untitled Card'}

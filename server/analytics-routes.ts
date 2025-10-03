@@ -1214,7 +1214,7 @@ export function setupAnalyticsRoutes(app: Express) {
 
       const cardPerformance = await db.select({
         cardId: buttonInteractions.cardId,
-        cardTitle: sql<string>`${businessCards.templateData}->>'name'`,
+        cardTitle: sql<string>`COALESCE(${businessCards.fullName}, ${businessCards.templateData}->>'name', 'Untitled Card')`,
         totalViews: count(sql`CASE WHEN ${buttonInteractions.interactionType} = 'view' THEN 1 END`),
         totalClicks: count(sql`CASE WHEN ${buttonInteractions.interactionType} = 'click' THEN 1 END`),
         uniqueVisitors: sql<number>`COUNT(DISTINCT ${buttonInteractions.visitorIp})`,
@@ -1223,7 +1223,7 @@ export function setupAnalyticsRoutes(app: Express) {
         .from(buttonInteractions)
         .leftJoin(businessCards, eq(buttonInteractions.cardId, businessCards.id))
         .where(and(...filterConditions))
-        .groupBy(buttonInteractions.cardId, sql`${businessCards.templateData}->>'name'`)
+        .groupBy(buttonInteractions.cardId, businessCards.fullName, sql`${businessCards.templateData}->>'name'`)
         .orderBy(desc(count()));
 
       res.json({
