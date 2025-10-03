@@ -211,7 +211,7 @@ export default function Landing() {
             </motion.div>
             
             <div className="hidden md:flex items-center space-x-8">
-              {["Features", "Pricing", "FAQ"].map((item) => (
+              {["About", "Features", "Integrations", "Pricing", "FAQ", "Contact"].map((item) => (
                 <a 
                   key={item}
                   href={`#${item.toLowerCase()}`}
@@ -236,7 +236,7 @@ export default function Landing() {
       </motion.nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-orange-50 via-white to-blue-50 overflow-hidden relative">
+      <section id="about" className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-orange-50 via-white to-blue-50 overflow-hidden relative">
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
@@ -892,7 +892,7 @@ export default function Landing() {
       </section>
 
       {/* Integrations Section */}
-      <section className="py-24 bg-gradient-to-br from-gray-50 to-white">
+      <section id="integrations" className="py-24 bg-gradient-to-br from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16"
@@ -1127,7 +1127,7 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+      <section id="contact" className="py-24 bg-gradient-to-br from-orange-500 to-orange-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
