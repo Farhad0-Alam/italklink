@@ -2108,7 +2108,7 @@ router.delete('/profile/sessions/:sessionId', requireOwner, async (req, res) => 
 // Simple admin login for testing - only uses existing DB fields
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe = false } = req.body;
     
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password required' });
@@ -2139,6 +2139,14 @@ router.post('/login', async (req, res) => {
     // Create a new session and store user info
     req.session.passport = { user: adminUser[0].id };
     req.user = adminUser[0];
+    
+    // Set session cookie duration based on rememberMe
+    // 30 days if rememberMe is true, 1 day if false
+    const sessionDuration = rememberMe 
+      ? 30 * 24 * 60 * 60 * 1000  // 30 days in milliseconds
+      : 24 * 60 * 60 * 1000;       // 1 day in milliseconds
+    
+    req.session.cookie.maxAge = sessionDuration;
     
     // Save session explicitly
     req.session.save((err) => {
