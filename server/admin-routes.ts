@@ -348,14 +348,34 @@ router.delete('/users/:id', requireOwner, async (req, res) => {
   try {
     const { id } = req.params;
     
-    await db.delete(users).where(eq(users.id, id));
+    // Use a transaction to ensure all deletions succeed or all fail
+    await db.transaction(async (tx) => {
+      // Delete in order to respect foreign key constraints
+      // First delete business cards
+      await tx.delete(businessCards).where(eq(businessCards.userId, id));
+      
+      // Delete user plans
+      await tx.delete(userPlans).where(eq(userPlans.userId, id));
+      
+      // Delete the user
+      await tx.delete(users).where(eq(users.id, id));
+    });
     
     await logAdminAction(req.user!.id, 'delete', 'user', id);
     
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Failed to delete user:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    
+    // Provide more specific error messages
+    if (error.code === '23503') { // Foreign key constraint violation
+      res.status(400).json({ 
+        message: 'Cannot delete user: user has associated data that must be removed first',
+        error: 'FOREIGN_KEY_CONSTRAINT' 
+      });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
   }
 });
 
@@ -418,6 +438,26 @@ router.get('/plans', requireOwner, async (req, res) => {
     res.json(plans);
   } catch (error) {
     console.error('Failed to get plans:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get single plan by ID
+router.get('/plans/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [plan] = await db.select()
+      .from(subscriptionPlans)
+      .where(eq(subscriptionPlans.id, Number(id)))
+      .limit(1);
+    
+    if (!plan) {
+      return res.status(404).json({ message: 'Plan not found' });
+    }
+    
+    res.json(plan);
+  } catch (error) {
+    console.error('Failed to get plan:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

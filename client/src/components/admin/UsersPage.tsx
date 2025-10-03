@@ -89,24 +89,46 @@ export default function UsersPage() {
   const queryClient = useQueryClient();
 
   // Fetch users data
-  const { data: users = [], isLoading } = useQuery<User[]>({
+  const { data: users = [], isLoading, error } = useQuery<User[]>({
     queryKey: ['/api/admin/users', search, statusFilter, planFilter],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (search.trim()) params.append('search', search.trim());
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (planFilter !== 'all') params.append('plan', planFilter);
       
       const url = `/api/admin/users${params.toString() ? '?' + params.toString() : ''}`;
-      return fetch(url, { credentials: 'include' }).then(res => res.json());
+      const res = await fetch(url, { credentials: 'include' });
+      
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = '/admin';
+          throw new Error('Unauthorized');
+        }
+        throw new Error(`Failed to fetch users: ${res.statusText}`);
+      }
+      
+      return res.json();
     },
+    retry: false,
     initialData: []
   });
 
   // Fetch available plans for assignment
   const { data: availablePlans = [] } = useQuery({
     queryKey: ['/api/admin/plans'],
-    queryFn: () => fetch('/api/admin/plans', { credentials: 'include' }).then(res => res.json()),
+    queryFn: async () => {
+      const res = await fetch('/api/admin/plans', { credentials: 'include' });
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = '/admin';
+          throw new Error('Unauthorized');
+        }
+        throw new Error(`Failed to fetch plans: ${res.statusText}`);
+      }
+      return res.json();
+    },
+    retry: false,
     initialData: []
   });
 
