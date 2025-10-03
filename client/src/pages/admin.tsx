@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { ShieldCheck } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import DashboardPage from '@/components/admin/DashboardPage';
 import UsersPage from '@/components/admin/UsersPage';
@@ -49,10 +50,12 @@ export default function Admin() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading admin panel...</p>
+          <div className="mb-4 inline-block">
+            <ShieldCheck className="w-16 h-16 text-blue-600 animate-pulse" />
+          </div>
+          <p className="text-gray-700 font-medium">Loading admin panel...</p>
         </div>
       </div>
     );
