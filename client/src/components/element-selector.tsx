@@ -166,6 +166,13 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       icon: "fas fa-clock",
       color: "bg-gradient-to-r from-amber-500 to-orange-600",
       description: "Show your availability schedule"
+    },
+    {
+      type: "subscribeForm",
+      title: "Subscribe to Updates",
+      icon: "fas fa-bell",
+      color: "bg-gradient-to-r from-orange-500 to-red-600",
+      description: "Let visitors subscribe to notifications"
     }
   ];
 
@@ -587,6 +594,26 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             button_text: "View PDF",
             scale: 1.0,
             file_name: "",
+          },
+        };
+        break;
+      
+      case "subscribeForm":
+        element = {
+          id,
+          type: "subscribeForm",
+          order: Date.now(),
+          data: {
+            title: "Stay Updated",
+            description: "Subscribe to get notified about updates and news.",
+            buttonText: "Subscribe",
+            successMessage: "Thank you for subscribing!",
+            requireName: false,
+            requireEmail: true,
+            enablePushNotifications: true,
+            primaryColor: "#f97316",
+            backgroundColor: "#ffffff",
+            textColor: "#1e293b",
           },
         };
         break;

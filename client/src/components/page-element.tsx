@@ -4065,6 +4065,157 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
           </div>
         );
 
+      case "subscribeForm":
+        return (
+          <div className="mb-4">
+            {isEditing ? (
+              <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-md font-semibold text-slate-800">Subscribe Form Element</h4>
+                  <Button
+                    onClick={() => onDelete && onDelete(element.id)}
+                    variant="destructive"
+                    size="sm"
+                    data-testid="button-delete"
+                  >
+                    <i className="fas fa-trash text-xs"></i>
+                  </Button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Title</label>
+                    <Input
+                      value={element.data.title || ""}
+                      onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                      placeholder="Stay Updated"
+                      data-testid="input-title"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 block mb-1">Description</label>
+                    <Textarea
+                      value={element.data.description || ""}
+                      onChange={(e) => handleDataUpdate({ description: e.target.value })}
+                      placeholder="Subscribe to get notified about updates and news."
+                      rows={3}
+                      data-testid="input-description"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-slate-700 block mb-1">Button Text</label>
+                      <Input
+                        value={element.data.buttonText || ""}
+                        onChange={(e) => handleDataUpdate({ buttonText: e.target.value })}
+                        placeholder="Subscribe"
+                        data-testid="input-buttonText"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-slate-700 block mb-1">Success Message</label>
+                      <Input
+                        value={element.data.successMessage || ""}
+                        onChange={(e) => handleDataUpdate({ successMessage: e.target.value })}
+                        placeholder="Thank you for subscribing!"
+                        data-testid="input-successMessage"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id={`requireName-${element.id}`}
+                        checked={element.data.requireName || false}
+                        onCheckedChange={(checked) => handleDataUpdate({ requireName: checked })}
+                        data-testid="checkbox-requireName"
+                      />
+                      <label htmlFor={`requireName-${element.id}`} className="text-sm font-medium text-slate-700">
+                        Require Name
+                      </label>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id={`requireEmail-${element.id}`}
+                        checked={element.data.requireEmail !== false}
+                        onCheckedChange={(checked) => handleDataUpdate({ requireEmail: checked })}
+                        data-testid="checkbox-requireEmail"
+                      />
+                      <label htmlFor={`requireEmail-${element.id}`} className="text-sm font-medium text-slate-700">
+                        Require Email
+                      </label>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id={`enablePush-${element.id}`}
+                        checked={element.data.enablePushNotifications !== false}
+                        onCheckedChange={(checked) => handleDataUpdate({ enablePushNotifications: checked })}
+                        data-testid="checkbox-enablePush"
+                      />
+                      <label htmlFor={`enablePush-${element.id}`} className="text-sm font-medium text-slate-700">
+                        Enable Push Notifications
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-slate-700 block mb-1">Primary Color</label>
+                      <Input
+                        type="color"
+                        value={element.data.primaryColor || "#f97316"}
+                        onChange={(e) => handleDataUpdate({ primaryColor: e.target.value })}
+                        data-testid="input-primaryColor"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-slate-700 block mb-1">Background Color</label>
+                      <Input
+                        type="color"
+                        value={element.data.backgroundColor || "#ffffff"}
+                        onChange={(e) => handleDataUpdate({ backgroundColor: e.target.value })}
+                        data-testid="input-backgroundColor"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-slate-700 block mb-1">Text Color</label>
+                      <Input
+                        type="color"
+                        value={element.data.textColor || "#1e293b"}
+                        onChange={(e) => handleDataUpdate({ textColor: e.target.value })}
+                        data-testid="input-textColor"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div 
+                className="p-6 rounded-lg border border-slate-200"
+                style={{ 
+                  backgroundColor: element.data.backgroundColor || "#ffffff",
+                  color: element.data.textColor || "#1e293b"
+                }}
+                data-testid="subscribe-form-preview"
+              >
+                <h3 className="text-xl font-bold mb-2 text-center">{element.data.title || "Stay Updated"}</h3>
+                {element.data.description && (
+                  <p className="text-sm mb-4 text-center opacity-80">{element.data.description}</p>
+                )}
+                <div className="text-center text-sm text-slate-600">
+                  <i className="fas fa-bell mr-2"></i>
+                  Subscribe form will appear here for visitors
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
       case "html":
         return (
           <div className="w-full max-w-[430px] mx-auto">
