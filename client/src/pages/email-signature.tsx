@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Copy, Download, Mail, Palette, Image as ImageIcon, X, Plus, ArrowLeft } from 'lucide-react';
+import { Copy, Download, Mail, Palette, Image as ImageIcon, X, Plus, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -66,18 +66,29 @@ const socialPlatforms = [
   { value: 'github', label: 'GitHub', icon: SiGithub },
 ];
 
+const stylePresets = [
+  { name: 'Modern', primaryColor: '#3B82F6', secondaryColor: '#1E293B' },
+  { name: 'Professional', primaryColor: '#1F2937', secondaryColor: '#6B7280' },
+  { name: 'Creative', primaryColor: '#EC4899', secondaryColor: '#8B5CF6' },
+  { name: 'Minimal', primaryColor: '#000000', secondaryColor: '#9CA3AF' },
+  { name: 'Corporate', primaryColor: '#0F172A', secondaryColor: '#64748B' },
+  { name: 'Bold', primaryColor: '#DC2626', secondaryColor: '#F59E0B' },
+  { name: 'Elegant', primaryColor: '#7C3AED', secondaryColor: '#A78BFA' },
+];
+
 export default function EmailSignature() {
   const { toast } = useToast();
   const [templateType, setTemplateType] = useState<'simple' | 'advanced' | 'premium'>('simple');
+  const [selectedStyle, setSelectedStyle] = useState(0);
   const [signatureData, setSignatureData] = useState<SignatureData>({
-    name: '',
-    title: '',
-    company: '',
-    cellPhone: '',
-    officePhone: '',
-    email: '',
-    website: '',
-    address: '',
+    name: 'John Doe',
+    title: 'CEO & Founder',
+    company: '2TalkLink Inc.',
+    cellPhone: '+1 (555) 123-4567',
+    officePhone: '+1 (555) 987-6543',
+    email: 'john@2talklink.com',
+    website: 'https://www.2talklink.com',
+    address: '123 Main St, City, State 12345',
     profilePhoto: '',
     companyLogo: '',
     primaryColor: '#FF6A00',
@@ -91,6 +102,15 @@ export default function EmailSignature() {
     showBanner: false,
     bannerText: 'Get in touch today!',
   });
+
+  useEffect(() => {
+    const preset = stylePresets[selectedStyle];
+    setSignatureData(prev => ({
+      ...prev,
+      primaryColor: preset.primaryColor,
+      secondaryColor: preset.secondaryColor,
+    }));
+  }, [selectedStyle]);
 
   const updateField = (field: keyof SignatureData, value: any) => {
     setSignatureData(prev => ({ ...prev, [field]: value }));
@@ -436,6 +456,72 @@ export default function EmailSignature() {
                     <TabsTrigger value="premium" data-testid="tab-premium">Premium</TabsTrigger>
                   </TabsList>
                 </Tabs>
+              </CardContent>
+            </Card>
+
+            {/* Style Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Choose Style</CardTitle>
+                <CardDescription>Select a color preset for your signature</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="relative">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="shrink-0"
+                      onClick={() => setSelectedStyle(Math.max(0, selectedStyle - 1))}
+                      disabled={selectedStyle === 0}
+                      data-testid="button-style-prev"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    
+                    <div className="flex-1 overflow-x-auto">
+                      <div className="flex gap-3 pb-2">
+                        {stylePresets.map((preset, index) => (
+                          <button
+                            key={preset.name}
+                            onClick={() => setSelectedStyle(index)}
+                            className={`flex-shrink-0 w-32 p-3 rounded-lg border-2 transition-all ${
+                              selectedStyle === index
+                                ? 'border-[#FF6A00] shadow-md'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            data-testid={`button-style-${preset.name.toLowerCase()}`}
+                          >
+                            <div className="space-y-2">
+                              <div className="flex gap-1 h-8">
+                                <div
+                                  className="flex-1 rounded"
+                                  style={{ backgroundColor: preset.primaryColor }}
+                                />
+                                <div
+                                  className="flex-1 rounded"
+                                  style={{ backgroundColor: preset.secondaryColor }}
+                                />
+                              </div>
+                              <p className="text-xs font-medium text-center">{preset.name}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="shrink-0"
+                      onClick={() => setSelectedStyle(Math.min(stylePresets.length - 1, selectedStyle + 1))}
+                      disabled={selectedStyle === stylePresets.length - 1}
+                      data-testid="button-style-next"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
