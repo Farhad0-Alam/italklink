@@ -110,6 +110,8 @@ const staticQrSchema = z.object({
   dark: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').default('#FF6A00'),
   light: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').default('#ffffff'),
   logo: z.any().optional(),
+  logoShape: z.enum(['circle', 'rectangle']).default('circle'),
+  logoSize: z.number().min(10).max(40).default(20),
 });
 
 export default function QrCodes() {
@@ -251,6 +253,8 @@ export default function QrCodes() {
       dark: '#FF6A00',
       light: '#ffffff',
       logo: null,
+      logoShape: 'circle' as const,
+      logoSize: 20,
     },
   });
 
@@ -295,7 +299,7 @@ export default function QrCodes() {
       generateQrPreview(watchedData);
     }, 500);
     return () => clearTimeout(timeoutId);
-  }, [watchedData.data, watchedData.dark, watchedData.light, watchedData.size, watchedData.margin]);
+  }, [watchedData.data, watchedData.dark, watchedData.light, watchedData.size, watchedData.margin, watchedData.logo, watchedData.logoShape, watchedData.logoSize]);
 
   const [previewAbortController, setPreviewAbortController] = useState<AbortController | null>(null);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
@@ -328,6 +332,9 @@ export default function QrCodes() {
           margin: Number(data.margin) || 2,
           dark: data.dark || '#FF6A00',
           light: data.light || '#ffffff',
+          logo: data.logo || null,
+          logoShape: data.logoShape || 'circle',
+          logoSize: data.logoSize || 20,
         }),
         signal: controller.signal,
       });
@@ -365,6 +372,9 @@ export default function QrCodes() {
           margin: Number(data.margin) || 2,
           dark: data.dark || '#FF6A00',
           light: data.light || '#ffffff',
+          logo: data.logo || null,
+          logoShape: data.logoShape || 'circle',
+          logoSize: data.logoSize || 20,
         }),
       });
 
@@ -1085,7 +1095,85 @@ export default function QrCodes() {
                             )}
                           />
 
-                          {/* Logo upload temporarily disabled - backend support pending */}
+                          {/* Logo Upload Section */}
+                          <div className="space-y-4 p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-900">
+                            <FormField
+                              control={staticQrForm.control}
+                              name="logo"
+                              render={({ field: { value, onChange, ...field } }) => (
+                                <FormItem>
+                                  <FormLabel>Logo (Optional)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="file"
+                                      accept="image/*"
+                                      className="border-orange-200 cursor-pointer"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          const reader = new FileReader();
+                                          reader.onloadend = () => {
+                                            onChange(reader.result);
+                                          };
+                                          reader.readAsDataURL(file);
+                                        }
+                                      }}
+                                      {...field}
+                                      data-testid="input-logo"
+                                    />
+                                  </FormControl>
+                                  <FormDescription>
+                                    Upload a logo to display in the QR code center
+                                  </FormDescription>
+                                </FormItem>
+                              )}
+                            />
+
+                            {staticQrForm.watch('logo') && (
+                              <>
+                                <FormField
+                                  control={staticQrForm.control}
+                                  name="logoShape"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Logo Shape</FormLabel>
+                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                          <SelectTrigger className="border-orange-200" data-testid="select-logo-shape">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="circle">Circle</SelectItem>
+                                          <SelectItem value="rectangle">Rectangle</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={staticQrForm.control}
+                                  name="logoSize"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Logo Size: {field.value}%</FormLabel>
+                                      <FormControl>
+                                        <Slider
+                                          min={10}
+                                          max={40}
+                                          step={1}
+                                          value={[field.value]}
+                                          onValueChange={(value) => field.onChange(value[0])}
+                                          className="py-4"
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </>
+                            )}
+                          </div>
 
                           <div className="grid grid-cols-2 gap-4">
                             <FormField
