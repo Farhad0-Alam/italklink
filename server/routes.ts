@@ -2922,7 +2922,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Validate and sanitize target URL
-      const { targetUrl, name, rules, utm } = req.body;
+      const { targetUrl, name, rules, utm, shortId, darkColor, lightColor, logoUrl, logoShape, logoSize } = req.body;
       
       if (!targetUrl) {
         return res.status(400).json({ message: 'Target URL is required' });
@@ -2939,13 +2939,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Sanitize name to prevent XSS
       const sanitizedName = name ? name.replace(/<[^>]*>/g, '').substring(0, 200) : undefined;
       
+      // Use custom shortId or generate one
+      let finalShortId = shortId || nanoid(8);
+      
+      // Check if custom shortId is already taken
+      if (shortId) {
+        const existing = await storage.getQrLinkByShortId(shortId);
+        if (existing) {
+          return res.status(400).json({ 
+            message: 'This custom URL is already taken. Please choose another.',
+            code: 'SHORT_ID_EXISTS'
+          });
+        }
+      }
+      
       const linkData = insertQrLinkSchema.parse({
         name: sanitizedName,
         targetUrl,
         rules: rules || {},
         utm: utm || {},
         userId: user.id,
-        shortId: nanoid(8) // Generate unique short ID
+        shortId: finalShortId,
+        darkColor: darkColor || '#000000',
+        lightColor: lightColor || '#FFFFFF',
+        logoUrl: logoUrl || null,
+        logoShape: logoShape || 'circle',
+        logoSize: logoSize || 20
       });
       
       const qrLink = await storage.createQrLink(linkData);
