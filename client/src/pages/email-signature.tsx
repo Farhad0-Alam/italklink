@@ -1544,66 +1544,6 @@ export default function EmailSignature() {
               </CardContent>
             </Card>
 
-            {/* Brand Colors */}
-            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-slate-900 dark:text-white">
-                  Brand Colors
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="primaryColor">Primary Color</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="color"
-                        value={signatureData.primaryColor}
-                        onChange={(e) =>
-                          updateField("primaryColor", e.target.value)
-                        }
-                        className="w-16 h-9"
-                        data-testid="input-primary-color"
-                      />
-                      <Input
-                        value={signatureData.primaryColor}
-                        onChange={(e) =>
-                          updateField("primaryColor", e.target.value)
-                        }
-                        placeholder="#FF6A00"
-                        className="flex-1"
-                        data-testid="input-primary-color-hex"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="secondaryColor">Secondary Color</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="color"
-                        value={signatureData.secondaryColor}
-                        onChange={(e) =>
-                          updateField("secondaryColor", e.target.value)
-                        }
-                        className="w-16 h-9"
-                        data-testid="input-secondary-color"
-                      />
-                      <Input
-                        value={signatureData.secondaryColor}
-                        onChange={(e) =>
-                          updateField("secondaryColor", e.target.value)
-                        }
-                        placeholder="#333333"
-                        className="flex-1"
-                        data-testid="input-secondary-color-hex"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Social Links */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader>
