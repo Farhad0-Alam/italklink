@@ -793,21 +793,22 @@ export default function EmailSignature() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signatureName">Signature Name</Label>
-                  <Input
-                    id="signatureName"
-                    value={signatureData.signatureName}
-                    onChange={(e) =>
-                      updateField("signatureName", e.target.value)
-                    }
-                    placeholder="John Doe"
-                    data-testid="input-signature-name"
-                  />
-                </div>
-
                 {!collapsedSections.signatureSection && (
-                  <div className="space-y-3 pt-3">
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="signatureName">Signature Name</Label>
+                      <Input
+                        id="signatureName"
+                        value={signatureData.signatureName}
+                        onChange={(e) =>
+                          updateField("signatureName", e.target.value)
+                        }
+                        placeholder="John Doe"
+                        data-testid="input-signature-name"
+                      />
+                    </div>
+
+                    <div className="space-y-3 pt-3">
                     {/* Signature Style Subsection */}
                     <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
                       <div
@@ -891,7 +892,7 @@ export default function EmailSignature() {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </>
                 )}
               </CardContent>
             </Card>
