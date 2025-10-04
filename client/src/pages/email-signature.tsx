@@ -45,6 +45,13 @@ interface SignatureData {
   primaryColor: string;
   secondaryColor: string;
   
+  // Fonts
+  signatureFont: string;
+  signatureSize: number;
+  signatureColor: string;
+  headerFont: string;
+  contactFont: string;
+  
   // Social Links
   socialLinks: { platform: string; url: string; icon: string }[];
   
@@ -57,6 +64,27 @@ interface SignatureData {
   showBanner: boolean;
   bannerText: string;
 }
+
+const signatureFonts = [
+  'Alex Brush',
+  'Dancing Script',
+  'Great Vibes',
+  'Allura',
+  'Sacramento',
+  'Parisienne',
+  'Mr De Haviland'
+];
+
+const professionalFonts = [
+  'Arial',
+  'Georgia',
+  'Verdana',
+  'Tahoma',
+  'Times New Roman',
+  'Roboto',
+  'Open Sans',
+  'Lato'
+];
 
 const socialPlatforms = [
   { value: 'facebook', label: 'Facebook', icon: SiFacebook },
@@ -88,6 +116,11 @@ export default function EmailSignature() {
     companyLogo: '',
     primaryColor: '#FF6A00',
     secondaryColor: '#333333',
+    signatureFont: 'Alex Brush',
+    signatureSize: 32,
+    signatureColor: '#333333',
+    headerFont: 'Arial',
+    contactFont: 'Arial',
     socialLinks: [],
     showDisclaimer: false,
     disclaimerText: 'This email and any attachments are confidential and intended solely for the recipient.',
@@ -159,7 +192,7 @@ export default function EmailSignature() {
   };
 
   const generateSimpleSignature = (): string => {
-    const { signatureName, name, title, company, cellPhone, email, website, profilePhoto, primaryColor, socialLinks, customFields } = signatureData;
+    const { signatureName, name, title, company, cellPhone, email, website, profilePhoto, primaryColor, socialLinks, customFields, signatureFont, signatureSize, signatureColor, headerFont, contactFont } = signatureData;
     
     const socialIconsHTML = socialLinks.map(link => {
       const platform = socialPlatforms.find(p => p.value === link.platform);
@@ -168,7 +201,7 @@ export default function EmailSignature() {
     }).join('');
 
     const customFieldsHTML = customFields.filter(f => f.label && f.value).map(field => {
-      return `<tr><td style="font-size: 13px; color: #333; padding-bottom: 3px;">${field.label}: ${field.value}</td></tr>`;
+      return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 13px; color: #333; padding-bottom: 3px;">${field.label}: ${field.value}</td></tr>`;
     }).join('');
 
     return `
@@ -184,15 +217,15 @@ export default function EmailSignature() {
           ` : ''}
           <td style="vertical-align: top; padding-top: 5px;">
             <table cellpadding="0" cellspacing="0" border="0">
-              ${signatureName ? `<tr><td style="font-family: 'Amsterdam One', cursive; font-size: 28px; color: ${primaryColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ''}
+              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ''}
               <tr>
-                <td style="font-size: 18px; font-weight: bold; color: ${primaryColor}; padding-bottom: 5px;">${name}</td>
+                <td style="font-family: ${headerFont}, sans-serif; font-size: 18px; font-weight: bold; color: ${primaryColor}; padding-bottom: 5px;">${name}</td>
               </tr>
-              ${title ? `<tr><td style="font-size: 14px; color: #666; padding-bottom: 3px;">${title}</td></tr>` : ''}
-              ${company ? `<tr><td style="font-size: 14px; color: #666; padding-bottom: 10px;">${company}</td></tr>` : ''}
-              ${cellPhone ? `<tr><td style="font-size: 13px; color: #333; padding-bottom: 3px;">📱 ${cellPhone}</td></tr>` : ''}
-              ${email ? `<tr><td style="font-size: 13px; padding-bottom: 3px;"><a href="mailto:${email}" style="color: #333; text-decoration: none;">✉️ ${email}</a></td></tr>` : ''}
-              ${website ? `<tr><td style="font-size: 13px; padding-bottom: 8px;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none;">🌐 ${website}</a></td></tr>` : ''}
+              ${title ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: 14px; color: #666; padding-bottom: 3px;">${title}</td></tr>` : ''}
+              ${company ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: 14px; color: #666; padding-bottom: 10px;">${company}</td></tr>` : ''}
+              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 13px; color: #333; padding-bottom: 3px;">📱 ${cellPhone}</td></tr>` : ''}
+              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 13px; padding-bottom: 3px;"><a href="mailto:${email}" style="color: #333; text-decoration: none;">✉️ ${email}</a></td></tr>` : ''}
+              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 13px; padding-bottom: 8px;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none;">🌐 ${website}</a></td></tr>` : ''}
               ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: 5px;">${socialIconsHTML}</td></tr>` : ''}
             </table>
@@ -206,7 +239,7 @@ export default function EmailSignature() {
   };
 
   const generateAdvancedSignature = (): string => {
-    const { signatureName, name, title, company, cellPhone, officePhone, email, website, address, profilePhoto, companyLogo, primaryColor, secondaryColor, socialLinks, showCTA, ctaText, ctaUrl, customFields } = signatureData;
+    const { signatureName, name, title, company, cellPhone, officePhone, email, website, address, profilePhoto, companyLogo, primaryColor, secondaryColor, socialLinks, showCTA, ctaText, ctaUrl, customFields, signatureFont, signatureSize, signatureColor, headerFont, contactFont } = signatureData;
     
     const socialIconsHTML = socialLinks.map(link => {
       const iconSVG = getSocialIconSVG(link.platform);
@@ -214,7 +247,7 @@ export default function EmailSignature() {
     }).join('');
 
     const customFieldsHTML = customFields.filter(f => f.label && f.value).map(field => {
-      return `<tr><td style="font-size: 14px; color: #333; padding: 3px 0;">${field.label}: ${field.value}</td></tr>`;
+      return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; color: #333; padding: 3px 0;">${field.label}: ${field.value}</td></tr>`;
     }).join('');
 
     return `
@@ -230,16 +263,16 @@ export default function EmailSignature() {
           ` : ''}
           <td style="vertical-align: top; border-left: 3px solid ${primaryColor}; padding-left: 20px;">
             <table cellpadding="0" cellspacing="0" border="0">
-              ${signatureName ? `<tr><td style="font-family: 'Amsterdam One', cursive; font-size: 30px; color: ${primaryColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ''}
+              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ''}
               <tr>
-                <td style="font-size: 20px; font-weight: bold; color: ${primaryColor}; padding-bottom: 5px;">${name}</td>
+                <td style="font-family: ${headerFont}, sans-serif; font-size: 20px; font-weight: bold; color: ${primaryColor}; padding-bottom: 5px;">${name}</td>
               </tr>
-              ${title ? `<tr><td style="font-size: 15px; color: ${secondaryColor}; padding-bottom: 10px;">${title}${company ? ` | ${company}` : ''}</td></tr>` : ''}
-              ${cellPhone ? `<tr><td style="font-size: 14px; color: #333; padding: 3px 0;">📱 <a href="tel:${cellPhone}" style="color: #333; text-decoration: none;">${cellPhone}</a></td></tr>` : ''}
-              ${officePhone ? `<tr><td style="font-size: 14px; color: #333; padding: 3px 0;">☎️ <a href="tel:${officePhone}" style="color: #333; text-decoration: none;">${officePhone}</a></td></tr>` : ''}
-              ${email ? `<tr><td style="font-size: 14px; padding: 3px 0;"><a href="mailto:${email}" style="color: #333; text-decoration: none;">✉️ ${email}</a></td></tr>` : ''}
-              ${website ? `<tr><td style="font-size: 14px; padding: 3px 0;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none;">🌐 ${website}</a></td></tr>` : ''}
-              ${address ? `<tr><td style="font-size: 13px; color: #666; padding: 5px 0;">📍 ${address}</td></tr>` : ''}
+              ${title ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: 15px; color: ${secondaryColor}; padding-bottom: 10px;">${title}${company ? ` | ${company}` : ''}</td></tr>` : ''}
+              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; color: #333; padding: 3px 0;">📱 <a href="tel:${cellPhone}" style="color: #333; text-decoration: none;">${cellPhone}</a></td></tr>` : ''}
+              ${officePhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; color: #333; padding: 3px 0;">☎️ <a href="tel:${officePhone}" style="color: #333; text-decoration: none;">${officePhone}</a></td></tr>` : ''}
+              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; padding: 3px 0;"><a href="mailto:${email}" style="color: #333; text-decoration: none;">✉️ ${email}</a></td></tr>` : ''}
+              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; padding: 3px 0;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none;">🌐 ${website}</a></td></tr>` : ''}
+              ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 13px; color: #666; padding: 5px 0;">📍 ${address}</td></tr>` : ''}
               ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: 10px;">${socialIconsHTML}</td></tr>` : ''}
             </table>
@@ -269,7 +302,7 @@ export default function EmailSignature() {
   };
 
   const generatePremiumSignature = (): string => {
-    const { signatureName, name, title, company, cellPhone, officePhone, email, website, address, profilePhoto, companyLogo, primaryColor, secondaryColor, socialLinks, showCTA, ctaText, ctaUrl, showBanner, bannerText, customFields } = signatureData;
+    const { signatureName, name, title, company, cellPhone, officePhone, email, website, address, profilePhoto, companyLogo, primaryColor, secondaryColor, socialLinks, showCTA, ctaText, ctaUrl, showBanner, bannerText, customFields, signatureFont, signatureSize, signatureColor, headerFont, contactFont } = signatureData;
     
     const socialIconsHTML = socialLinks.map(link => {
       const iconSVG = getSocialIconSVG(link.platform);
@@ -277,7 +310,7 @@ export default function EmailSignature() {
     }).join('');
 
     const customFieldsHTML = customFields.filter(f => f.label && f.value).map(field => {
-      return `<tr><td style="font-size: 14px; color: #333; padding: 5px 0; font-weight: 500;">${field.label}: ${field.value}</td></tr>`;
+      return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; color: #333; padding: 5px 0; font-weight: 500;">${field.label}: ${field.value}</td></tr>`;
     }).join('');
 
     return `
@@ -300,18 +333,18 @@ export default function EmailSignature() {
           ` : ''}
           <td style="vertical-align: top;">
             <table cellpadding="0" cellspacing="0" border="0">
-              ${signatureName ? `<tr><td style="font-family: 'Amsterdam One', cursive; font-size: 32px; color: ${primaryColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ''}
+              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ''}
               <tr>
-                <td style="font-size: 24px; font-weight: bold; color: ${primaryColor}; padding-bottom: 5px;">${name}</td>
+                <td style="font-family: ${headerFont}, sans-serif; font-size: 24px; font-weight: bold; color: ${primaryColor}; padding-bottom: 5px;">${name}</td>
               </tr>
-              ${title ? `<tr><td style="font-size: 16px; color: ${secondaryColor}; font-weight: 600; padding-bottom: 3px;">${title}</td></tr>` : ''}
-              ${company ? `<tr><td style="font-size: 14px; color: #777; padding-bottom: 15px;">${company}</td></tr>` : ''}
+              ${title ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: 16px; color: ${secondaryColor}; font-weight: 600; padding-bottom: 3px;">${title}</td></tr>` : ''}
+              ${company ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: 14px; color: #777; padding-bottom: 15px;">${company}</td></tr>` : ''}
               <tr><td style="height: 2px; background-color: ${primaryColor}; margin: 10px 0;"></td></tr>
-              ${cellPhone ? `<tr><td style="font-size: 14px; color: #333; padding: 5px 0;">📱 <a href="tel:${cellPhone}" style="color: #333; text-decoration: none; font-weight: 500;">${cellPhone}</a></td></tr>` : ''}
-              ${officePhone ? `<tr><td style="font-size: 14px; color: #333; padding: 5px 0;">☎️ <a href="tel:${officePhone}" style="color: #333; text-decoration: none; font-weight: 500;">${officePhone}</a></td></tr>` : ''}
-              ${email ? `<tr><td style="font-size: 14px; padding: 5px 0;"><a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">✉️ ${email}</a></td></tr>` : ''}
-              ${website ? `<tr><td style="font-size: 14px; padding: 5px 0;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">🌐 ${website}</a></td></tr>` : ''}
-              ${address ? `<tr><td style="font-size: 13px; color: #666; padding: 5px 0;">📍 ${address}</td></tr>` : ''}
+              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; color: #333; padding: 5px 0;">📱 <a href="tel:${cellPhone}" style="color: #333; text-decoration: none; font-weight: 500;">${cellPhone}</a></td></tr>` : ''}
+              ${officePhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; color: #333; padding: 5px 0;">☎️ <a href="tel:${officePhone}" style="color: #333; text-decoration: none; font-weight: 500;">${officePhone}</a></td></tr>` : ''}
+              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; padding: 5px 0;"><a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">✉️ ${email}</a></td></tr>` : ''}
+              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; padding: 5px 0;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">🌐 ${website}</a></td></tr>` : ''}
+              ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 13px; color: #666; padding: 5px 0;">📍 ${address}</td></tr>` : ''}
               ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: 15px;">${socialIconsHTML}</td></tr>` : ''}
             </table>
@@ -504,6 +537,67 @@ export default function EmailSignature() {
                   <p className="text-xs text-gray-500">This will appear above your name in handwritten style</p>
                 </div>
 
+                {/* Signature Style */}
+                {signatureData.signatureName && (
+                  <div className="space-y-3 p-4 bg-gray-50 rounded-md">
+                    <Label className="text-sm font-semibold">Signature Style</Label>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="signatureFont" className="text-xs">Font</Label>
+                        <Select
+                          value={signatureData.signatureFont}
+                          onValueChange={(v) => updateField('signatureFont', v)}
+                        >
+                          <SelectTrigger id="signatureFont" data-testid="select-signature-font">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {signatureFonts.map((font) => (
+                              <SelectItem key={font} value={font}>
+                                {font}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="signatureSize" className="text-xs">Size (px)</Label>
+                          <Input
+                            id="signatureSize"
+                            type="number"
+                            min="20"
+                            max="50"
+                            value={signatureData.signatureSize}
+                            onChange={(e) => updateField('signatureSize', parseInt(e.target.value) || 32)}
+                            data-testid="input-signature-size"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="signatureColor" className="text-xs">Color</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              id="signatureColor"
+                              type="color"
+                              value={signatureData.signatureColor}
+                              onChange={(e) => updateField('signatureColor', e.target.value)}
+                              className="w-16 h-9"
+                              data-testid="input-signature-color"
+                            />
+                            <Input
+                              value={signatureData.signatureColor}
+                              onChange={(e) => updateField('signatureColor', e.target.value)}
+                              placeholder="#333333"
+                              className="flex-1"
+                              data-testid="input-signature-color-hex"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Name *</Label>
@@ -536,6 +630,25 @@ export default function EmailSignature() {
                     placeholder="2TalkLink Inc."
                     data-testid="input-company"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="headerFont">Name/Title/Company Font</Label>
+                  <Select
+                    value={signatureData.headerFont}
+                    onValueChange={(v) => updateField('headerFont', v)}
+                  >
+                    <SelectTrigger id="headerFont" data-testid="select-header-font">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {professionalFonts.map((font) => (
+                        <SelectItem key={font} value={font}>
+                          {font}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -584,6 +697,25 @@ export default function EmailSignature() {
                     placeholder="https://www.2talklink.com"
                     data-testid="input-website"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="contactFont">Contact Info Font</Label>
+                  <Select
+                    value={signatureData.contactFont}
+                    onValueChange={(v) => updateField('contactFont', v)}
+                  >
+                    <SelectTrigger id="contactFont" data-testid="select-contact-font">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {professionalFonts.map((font) => (
+                        <SelectItem key={font} value={font}>
+                          {font}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {templateType !== 'simple' && (
