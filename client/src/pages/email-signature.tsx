@@ -110,9 +110,7 @@ export default function EmailSignature() {
   const [templateType, setTemplateType] = useState<'simple' | 'advanced' | 'premium'>('simple');
   const [collapsedSections, setCollapsedSections] = useState<{ [key: string]: boolean }>({
     signatureSection: false,
-    signatureFont: true,
-    signatureSize: true,
-    signatureColor: true,
+    signatureStyle: true,
     nameSection: false,
     nameStyle: true,
     titleStyle: true,
@@ -540,87 +538,67 @@ export default function EmailSignature() {
 
                 {!collapsedSections.signatureSection && (
                   <div className="space-y-3 pt-3">
-                    {/* Font Subsection */}
+                    {/* Signature Style Subsection */}
                     <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
                       <div 
                         className="flex items-center justify-between cursor-pointer mb-3" 
-                        onClick={() => toggleSection('signatureFont')}
-                        data-testid="toggle-signature-font"
+                        onClick={() => toggleSection('signatureStyle')}
+                        data-testid="toggle-signature-style"
                       >
-                        <Label className="text-sm font-semibold">Font</Label>
-                        {collapsedSections.signatureFont ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                        <Label className="text-sm font-semibold">Signature Style</Label>
+                        {collapsedSections.signatureStyle ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
                       </div>
-                      {!collapsedSections.signatureFont && (
-                        <Select
-                          value={signatureData.signatureFont}
-                          onValueChange={(v) => updateField('signatureFont', v)}
-                        >
-                          <SelectTrigger data-testid="select-signature-font">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {signatureFonts.map((font) => (
-                              <SelectItem key={font} value={font}>
-                                {font}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </div>
-
-                    {/* Font Size Subsection */}
-                    <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
-                      <div 
-                        className="flex items-center justify-between cursor-pointer mb-3" 
-                        onClick={() => toggleSection('signatureSize')}
-                        data-testid="toggle-signature-size"
-                      >
-                        <Label className="text-sm font-semibold">Font Size</Label>
-                        {collapsedSections.signatureSize ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-                      </div>
-                      {!collapsedSections.signatureSize && (
-                        <div className="space-y-2">
-                          <Label className="text-sm">Size: {signatureData.signatureSize}px</Label>
-                          <input
-                            type="range"
-                            min="20"
-                            max="50"
-                            value={signatureData.signatureSize}
-                            onChange={(e) => updateField('signatureSize', parseInt(e.target.value))}
-                            className="custom-range w-full"
-                            data-testid="slider-signature-size"
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Color Subsection */}
-                    <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
-                      <div 
-                        className="flex items-center justify-between cursor-pointer mb-3" 
-                        onClick={() => toggleSection('signatureColor')}
-                        data-testid="toggle-signature-color"
-                      >
-                        <Label className="text-sm font-semibold">Color</Label>
-                        {collapsedSections.signatureColor ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-                      </div>
-                      {!collapsedSections.signatureColor && (
-                        <div className="flex gap-2">
-                          <Input
-                            type="color"
-                            value={signatureData.signatureColor}
-                            onChange={(e) => updateField('signatureColor', e.target.value)}
-                            className="w-16 h-9"
-                            data-testid="input-signature-color"
-                          />
-                          <Input
-                            value={signatureData.signatureColor}
-                            onChange={(e) => updateField('signatureColor', e.target.value)}
-                            placeholder="#333333"
-                            className="flex-1"
-                            data-testid="input-signature-color-hex"
-                          />
+                      {!collapsedSections.signatureStyle && (
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-xs mb-1">Font</Label>
+                            <Select
+                              value={signatureData.signatureFont}
+                              onValueChange={(v) => updateField('signatureFont', v)}
+                            >
+                              <SelectTrigger data-testid="select-signature-font">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {signatureFonts.map((font) => (
+                                  <SelectItem key={font} value={font}>
+                                    {font}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-xs">Font Size: {signatureData.signatureSize}px</Label>
+                            <input
+                              type="range"
+                              min="20"
+                              max="50"
+                              value={signatureData.signatureSize}
+                              onChange={(e) => updateField('signatureSize', parseInt(e.target.value))}
+                              className="custom-range w-full"
+                              data-testid="slider-signature-size"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs mb-1">Color</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="color"
+                                value={signatureData.signatureColor}
+                                onChange={(e) => updateField('signatureColor', e.target.value)}
+                                className="w-16 h-9"
+                                data-testid="input-signature-color"
+                              />
+                              <Input
+                                value={signatureData.signatureColor}
+                                onChange={(e) => updateField('signatureColor', e.target.value)}
+                                placeholder="#333333"
+                                className="flex-1"
+                                data-testid="input-signature-color-hex"
+                              />
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1348,9 +1326,9 @@ export default function EmailSignature() {
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 sticky top-4">
               <CardHeader>
                 <CardTitle className="text-slate-900 dark:text-white">Preview</CardTitle>
-                <CardDescription>This is how your signature will look</CardDescription>
               </CardHeader>
               <CardContent>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">This is how your signature will look</p>
                 <div 
                   className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 bg-white min-h-[300px]"
                   dangerouslySetInnerHTML={{ __html: generateSignatureHTML() }}
