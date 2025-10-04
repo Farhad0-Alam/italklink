@@ -24,6 +24,7 @@ import {
 
 interface SignatureData {
   // Basic Info
+  signatureName: string;
   name: string;
   title: string;
   company: string;
@@ -32,6 +33,9 @@ interface SignatureData {
   email: string;
   website: string;
   address: string;
+  
+  // Custom Fields
+  customFields: { label: string; value: string }[];
   
   // Images
   profilePhoto: string;
@@ -70,6 +74,7 @@ export default function EmailSignature() {
   const { toast } = useToast();
   const [templateType, setTemplateType] = useState<'simple' | 'advanced' | 'premium'>('simple');
   const [signatureData, setSignatureData] = useState<SignatureData>({
+    signatureName: '',
     name: '',
     title: '',
     company: '',
@@ -78,6 +83,7 @@ export default function EmailSignature() {
     email: '',
     website: '',
     address: '',
+    customFields: [],
     profilePhoto: '',
     companyLogo: '',
     primaryColor: '#FF6A00',
@@ -130,13 +136,39 @@ export default function EmailSignature() {
     });
   };
 
+  const addCustomField = () => {
+    setSignatureData(prev => ({
+      ...prev,
+      customFields: [...prev.customFields, { label: '', value: '' }]
+    }));
+  };
+
+  const removeCustomField = (index: number) => {
+    setSignatureData(prev => ({
+      ...prev,
+      customFields: prev.customFields.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateCustomField = (index: number, field: 'label' | 'value', value: string) => {
+    setSignatureData(prev => {
+      const newFields = [...prev.customFields];
+      newFields[index] = { ...newFields[index], [field]: value };
+      return { ...prev, customFields: newFields };
+    });
+  };
+
   const generateSimpleSignature = (): string => {
-    const { name, title, company, cellPhone, email, website, profilePhoto, primaryColor, socialLinks } = signatureData;
+    const { signatureName, name, title, company, cellPhone, email, website, profilePhoto, primaryColor, socialLinks, customFields } = signatureData;
     
     const socialIconsHTML = socialLinks.map(link => {
       const platform = socialPlatforms.find(p => p.value === link.platform);
       const iconSVG = getSocialIconSVG(link.platform);
       return `<a href="${link.url}" style="display:inline-block;margin:0 5px;"><img src="${iconSVG}" alt="${platform?.label}" width="24" height="24" style="border:0;display:block;"></a>`;
+    }).join('');
+
+    const customFieldsHTML = customFields.filter(f => f.label && f.value).map(field => {
+      return `<tr><td style="font-size: 13px; color: #333; padding-bottom: 3px;">${field.label}: ${field.value}</td></tr>`;
     }).join('');
 
     return `
@@ -152,6 +184,7 @@ export default function EmailSignature() {
           ` : ''}
           <td style="vertical-align: top; padding-top: 5px;">
             <table cellpadding="0" cellspacing="0" border="0">
+              ${signatureName ? `<tr><td style="font-family: 'Euphoria Script', cursive; font-size: 28px; color: ${primaryColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ''}
               <tr>
                 <td style="font-size: 18px; font-weight: bold; color: ${primaryColor}; padding-bottom: 5px;">${name}</td>
               </tr>
@@ -160,6 +193,7 @@ export default function EmailSignature() {
               ${cellPhone ? `<tr><td style="font-size: 13px; color: #333; padding-bottom: 3px;">📱 ${cellPhone}</td></tr>` : ''}
               ${email ? `<tr><td style="font-size: 13px; padding-bottom: 3px;"><a href="mailto:${email}" style="color: #333; text-decoration: none;">✉️ ${email}</a></td></tr>` : ''}
               ${website ? `<tr><td style="font-size: 13px; padding-bottom: 8px;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none;">🌐 ${website}</a></td></tr>` : ''}
+              ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: 5px;">${socialIconsHTML}</td></tr>` : ''}
             </table>
           </td>
@@ -172,11 +206,15 @@ export default function EmailSignature() {
   };
 
   const generateAdvancedSignature = (): string => {
-    const { name, title, company, cellPhone, officePhone, email, website, address, profilePhoto, companyLogo, primaryColor, secondaryColor, socialLinks, showCTA, ctaText, ctaUrl } = signatureData;
+    const { signatureName, name, title, company, cellPhone, officePhone, email, website, address, profilePhoto, companyLogo, primaryColor, secondaryColor, socialLinks, showCTA, ctaText, ctaUrl, customFields } = signatureData;
     
     const socialIconsHTML = socialLinks.map(link => {
       const iconSVG = getSocialIconSVG(link.platform);
       return `<a href="${link.url}" style="display:inline-block;margin:0 5px;"><img src="${iconSVG}" alt="${link.platform}" width="28" height="28" style="border:0;display:block;"></a>`;
+    }).join('');
+
+    const customFieldsHTML = customFields.filter(f => f.label && f.value).map(field => {
+      return `<tr><td style="font-size: 14px; color: #333; padding: 3px 0;">${field.label}: ${field.value}</td></tr>`;
     }).join('');
 
     return `
@@ -192,6 +230,7 @@ export default function EmailSignature() {
           ` : ''}
           <td style="vertical-align: top; border-left: 3px solid ${primaryColor}; padding-left: 20px;">
             <table cellpadding="0" cellspacing="0" border="0">
+              ${signatureName ? `<tr><td style="font-family: 'Euphoria Script', cursive; font-size: 30px; color: ${primaryColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ''}
               <tr>
                 <td style="font-size: 20px; font-weight: bold; color: ${primaryColor}; padding-bottom: 5px;">${name}</td>
               </tr>
@@ -201,6 +240,7 @@ export default function EmailSignature() {
               ${email ? `<tr><td style="font-size: 14px; padding: 3px 0;"><a href="mailto:${email}" style="color: #333; text-decoration: none;">✉️ ${email}</a></td></tr>` : ''}
               ${website ? `<tr><td style="font-size: 14px; padding: 3px 0;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none;">🌐 ${website}</a></td></tr>` : ''}
               ${address ? `<tr><td style="font-size: 13px; color: #666; padding: 5px 0;">📍 ${address}</td></tr>` : ''}
+              ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: 10px;">${socialIconsHTML}</td></tr>` : ''}
             </table>
           </td>
@@ -229,11 +269,15 @@ export default function EmailSignature() {
   };
 
   const generatePremiumSignature = (): string => {
-    const { name, title, company, cellPhone, officePhone, email, website, address, profilePhoto, companyLogo, primaryColor, secondaryColor, socialLinks, showCTA, ctaText, ctaUrl, showBanner, bannerText } = signatureData;
+    const { signatureName, name, title, company, cellPhone, officePhone, email, website, address, profilePhoto, companyLogo, primaryColor, secondaryColor, socialLinks, showCTA, ctaText, ctaUrl, showBanner, bannerText, customFields } = signatureData;
     
     const socialIconsHTML = socialLinks.map(link => {
       const iconSVG = getSocialIconSVG(link.platform);
       return `<a href="${link.url}" style="display:inline-block;margin:0 6px;"><img src="${iconSVG}" alt="${link.platform}" width="32" height="32" style="border:0;display:block;border-radius:50%;"></a>`;
+    }).join('');
+
+    const customFieldsHTML = customFields.filter(f => f.label && f.value).map(field => {
+      return `<tr><td style="font-size: 14px; color: #333; padding: 5px 0; font-weight: 500;">${field.label}: ${field.value}</td></tr>`;
     }).join('');
 
     return `
@@ -256,6 +300,7 @@ export default function EmailSignature() {
           ` : ''}
           <td style="vertical-align: top;">
             <table cellpadding="0" cellspacing="0" border="0">
+              ${signatureName ? `<tr><td style="font-family: 'Euphoria Script', cursive; font-size: 32px; color: ${primaryColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ''}
               <tr>
                 <td style="font-size: 24px; font-weight: bold; color: ${primaryColor}; padding-bottom: 5px;">${name}</td>
               </tr>
@@ -267,6 +312,7 @@ export default function EmailSignature() {
               ${email ? `<tr><td style="font-size: 14px; padding: 5px 0;"><a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">✉️ ${email}</a></td></tr>` : ''}
               ${website ? `<tr><td style="font-size: 14px; padding: 5px 0;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">🌐 ${website}</a></td></tr>` : ''}
               ${address ? `<tr><td style="font-size: 13px; color: #666; padding: 5px 0;">📍 ${address}</td></tr>` : ''}
+              ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: 15px;">${socialIconsHTML}</td></tr>` : ''}
             </table>
           </td>
@@ -445,6 +491,19 @@ export default function EmailSignature() {
                 <CardTitle>Basic Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signatureName">Signature (Handwritten Style)</Label>
+                  <Input
+                    id="signatureName"
+                    value={signatureData.signatureName}
+                    onChange={(e) => updateField('signatureName', e.target.value)}
+                    placeholder="John Doe"
+                    className="font-['Euphoria_Script'] text-2xl"
+                    data-testid="input-signature-name"
+                  />
+                  <p className="text-xs text-gray-500">This will appear above your name in handwritten style</p>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Name *</Label>
@@ -539,6 +598,56 @@ export default function EmailSignature() {
                     />
                   </div>
                 )}
+
+                {/* Custom Fields */}
+                <div className="space-y-3 pt-4 border-t">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-semibold">Custom Fields</Label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={addCustomField}
+                      className="gap-1"
+                      data-testid="button-add-custom-field"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Field
+                    </Button>
+                  </div>
+                  {signatureData.customFields.length > 0 && (
+                    <div className="space-y-2">
+                      {signatureData.customFields.map((field, index) => (
+                        <div key={index} className="grid grid-cols-2 gap-2 items-center">
+                          <Input
+                            value={field.label}
+                            onChange={(e) => updateCustomField(index, 'label', e.target.value)}
+                            placeholder="Label (e.g., LinkedIn)"
+                            data-testid={`input-custom-field-label-${index}`}
+                          />
+                          <div className="flex gap-2">
+                            <Input
+                              value={field.value}
+                              onChange={(e) => updateCustomField(index, 'value', e.target.value)}
+                              placeholder="Value"
+                              data-testid={`input-custom-field-value-${index}`}
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeCustomField(index)}
+                              data-testid={`button-remove-custom-field-${index}`}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-500">Add any additional information like LinkedIn, Skype, Department, etc.</p>
+                </div>
               </CardContent>
             </Card>
 
