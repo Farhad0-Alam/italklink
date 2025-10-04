@@ -1227,34 +1227,36 @@ export default function EmailSignature() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="cellPhone">Cell Phone</Label>
-                    <Input
-                      id="cellPhone"
-                      value={signatureData.cellPhone}
-                      onChange={(e) => updateField("cellPhone", e.target.value)}
-                      placeholder="+1 (555) 123-4567"
-                      data-testid="input-cell-phone"
-                    />
-                  </div>
-                  {templateType !== "simple" && (
-                    <div className="space-y-2">
-                      <Label htmlFor="officePhone">Office Phone</Label>
-                      <Input
-                        id="officePhone"
-                        value={signatureData.officePhone}
-                        onChange={(e) =>
-                          updateField("officePhone", e.target.value)
-                        }
-                        placeholder="+1 (555) 987-6543"
-                        data-testid="input-office-phone"
-                      />
+                {!collapsedSections.contactSection && (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="cellPhone">Cell Phone</Label>
+                        <Input
+                          id="cellPhone"
+                          value={signatureData.cellPhone}
+                          onChange={(e) => updateField("cellPhone", e.target.value)}
+                          placeholder="+1 (555) 123-4567"
+                          data-testid="input-cell-phone"
+                        />
+                      </div>
+                      {templateType !== "simple" && (
+                        <div className="space-y-2">
+                          <Label htmlFor="officePhone">Office Phone</Label>
+                          <Input
+                            id="officePhone"
+                            value={signatureData.officePhone}
+                            onChange={(e) =>
+                              updateField("officePhone", e.target.value)
+                            }
+                            placeholder="+1 (555) 987-6543"
+                            data-testid="input-office-phone"
+                          />
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
 
-                <div className="space-y-2">
+                    <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
@@ -1355,8 +1357,7 @@ export default function EmailSignature() {
                   </p>
                 </div>
 
-                {!collapsedSections.contactSection && (
-                  <div className="space-y-3 pt-3">
+                    <div className="space-y-3 pt-3">
                     {/* Contact Info Style Subsection */}
                     <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
                       <div
@@ -1516,7 +1517,8 @@ export default function EmailSignature() {
                         </div>
                       )}
                     </div>
-                  </div>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
