@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { 
   QrCode, Plus, Download, BarChart3, Settings, Trash2, Eye, Copy, 
   ExternalLink, ArrowLeft, Sparkles, Palette, ImageIcon, Layers,
-  TrendingUp, Users, Globe, Zap, FolderOpen, Grid3x3
+  TrendingUp, Users, Globe, Zap, FolderOpen, Grid3x3, Share2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -163,21 +163,20 @@ export default function QrCodes() {
   });
 
   const [qrPreview, setQrPreview] = useState<string | null>(null);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
 
   // Handlers
   const handleCreateQrLink = (data: any) => {
     createQrLinkMutation.mutate(data);
   };
 
-  // Watch form data for preview (including logo changes)
+  // Watch form data for preview
   const watchedData = staticQrForm.watch();
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       generateQrPreview(watchedData);
     }, 500);
     return () => clearTimeout(timeoutId);
-  }, [watchedData.data, watchedData.dark, watchedData.light, watchedData.size, watchedData.margin, logoFile]);
+  }, [watchedData.data, watchedData.dark, watchedData.light, watchedData.size, watchedData.margin]);
 
   const [previewAbortController, setPreviewAbortController] = useState<AbortController | null>(null);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
@@ -198,21 +197,19 @@ export default function QrCodes() {
     setIsGeneratingPreview(true);
 
     try {
-      const formData = new FormData();
-      formData.append('data', data.data);
-      formData.append('format', 'svg');
-      formData.append('size', data.size || '512');
-      formData.append('margin', data.margin?.toString() || '2');
-      formData.append('dark', data.dark || '#FF6A00');
-      formData.append('light', data.light || '#ffffff');
-      
-      if (logoFile) {
-        formData.append('logo', logoFile);
-      }
-
       const response = await fetch('/api/qr/generate', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: data.data,
+          format: 'svg',
+          size: data.size || '512',
+          margin: Number(data.margin) || 2,
+          dark: data.dark || '#FF6A00',
+          light: data.light || '#ffffff',
+        }),
         signal: controller.signal,
       });
 
@@ -237,21 +234,19 @@ export default function QrCodes() {
 
   const downloadQrCode = async (data: any) => {
     try {
-      const formData = new FormData();
-      formData.append('data', data.data);
-      formData.append('format', data.format || 'svg');
-      formData.append('size', data.size || '512');
-      formData.append('margin', data.margin?.toString() || '2');
-      formData.append('dark', data.dark || '#FF6A00');
-      formData.append('light', data.light || '#ffffff');
-      
-      if (logoFile) {
-        formData.append('logo', logoFile);
-      }
-
       const response = await fetch('/api/qr/generate', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: data.data,
+          format: data.format || 'png',
+          size: data.size || '512',
+          margin: Number(data.margin) || 2,
+          dark: data.dark || '#FF6A00',
+          light: data.light || '#ffffff',
+        }),
       });
 
       if (!response.ok) {
@@ -263,7 +258,7 @@ export default function QrCodes() {
       
       const link = document.createElement('a');
       link.href = url;
-      link.download = `qr-code.${data.format}`;
+      link.download = `qr-code.${data.format || 'png'}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -282,21 +277,6 @@ export default function QrCodes() {
     }
   };
 
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        setLogoFile(file);
-        staticQrForm.setValue('logo', file);
-      } else {
-        toast({
-          title: 'Invalid File',
-          description: 'Please select an image file for the logo.',
-          variant: 'destructive',
-        });
-      }
-    }
-  };
 
   const copyQrUrl = (shortId: string) => {
     const url = `${window.location.origin}/q/${shortId}`;
@@ -305,6 +285,76 @@ export default function QrCodes() {
       title: '✨ URL Copied!',
       description: 'QR code URL is now in your clipboard.',
     });
+  };
+
+  const downloadDynamicQr = async (shortId: string, name: string) => {
+    try {
+      const qrUrl = `${window.location.origin}/q/${shortId}`;
+      const response = await fetch('/api/qr/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: qrUrl,
+          format: 'png',
+          size: '1024',
+          margin: 2,
+          dark: '#FF6A00',
+          light: '#ffffff',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate QR code');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${name || shortId}-qr.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: '✨ QR Downloaded!',
+        description: 'Your QR code has been saved.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to download QR code',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const shareDynamicQr = async (shortId: string) => {
+    const qrUrl = `${window.location.origin}/q/${shortId}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'QR Code Link',
+          text: 'Check out this QR code link',
+          url: qrUrl,
+        });
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          console.error('Error sharing:', error);
+        }
+      }
+    } else {
+      navigator.clipboard.writeText(qrUrl);
+      toast({
+        title: '✨ Link Copied!',
+        description: 'QR link copied to clipboard.',
+      });
+    }
   };
 
   if (!user) {
@@ -595,19 +645,29 @@ export default function QrCodes() {
                             <Button 
                               size="sm" 
                               variant="outline" 
+                              onClick={() => downloadDynamicQr(qrLink.shortId, qrLink.name || '')}
+                              className="flex-1 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-950/30"
+                              data-testid={`button-download-${qrLink.id}`}
+                            >
+                              <Download className="w-3 h-3" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => shareDynamicQr(qrLink.shortId)}
+                              className="flex-1 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-950/30"
+                              data-testid={`button-share-${qrLink.id}`}
+                            >
+                              <Share2 className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
                               onClick={() => copyQrUrl(qrLink.shortId)}
                               className="flex-1 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-950/30"
                               data-testid={`button-copy-${qrLink.id}`}
                             >
                               <Copy className="w-3 h-3" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="flex-1 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-950/30"
-                              data-testid={`button-analytics-${qrLink.id}`}
-                            >
-                              <BarChart3 className="w-3 h-3" />
                             </Button>
                             <Button
                               size="sm"
@@ -780,36 +840,7 @@ export default function QrCodes() {
                             )}
                           />
 
-                          <div className="space-y-3">
-                            <Label className="text-lg font-semibold flex items-center gap-2">
-                              <ImageIcon className="w-5 h-5" />
-                              Logo (Optional)
-                            </Label>
-                            <div className="border-2 border-dashed border-orange-300 dark:border-orange-800 rounded-xl p-6 text-center hover:border-orange-500 transition-colors">
-                              <Input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleLogoUpload}
-                                className="hidden"
-                                id="logo-upload"
-                              />
-                              <label htmlFor="logo-upload" className="cursor-pointer">
-                                {logoFile ? (
-                                  <div className="space-y-2">
-                                    <ImageIcon className="w-12 h-12 mx-auto text-orange-500" />
-                                    <p className="font-medium text-slate-900 dark:text-white">{logoFile.name}</p>
-                                    <p className="text-sm text-slate-500">Click to change</p>
-                                  </div>
-                                ) : (
-                                  <div className="space-y-2">
-                                    <Upload className="w-12 h-12 mx-auto text-slate-400" />
-                                    <p className="font-medium text-slate-900 dark:text-white">Upload Logo</p>
-                                    <p className="text-sm text-slate-500">PNG, JPG up to 5MB</p>
-                                  </div>
-                                )}
-                              </label>
-                            </div>
-                          </div>
+                          {/* Logo upload temporarily disabled - backend support pending */}
 
                           <div className="grid grid-cols-2 gap-4">
                             <FormField
