@@ -3126,7 +3126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let contentType: string;
       
       if (sanitizedParams.format === 'svg') {
-        data = await QRCode.toString(sanitizedParams.data, {
+        let svgData = await QRCode.toString(sanitizedParams.data, {
           type: 'svg',
           width: parseInt(sanitizedParams.size),
           margin: sanitizedParams.margin,
@@ -3135,8 +3135,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
             light: sanitizedParams.light
           }
         });
+        
+        // Add logo to SVG if provided
+        if (sanitizedParams.logo) {
+          const size = parseInt(sanitizedParams.size);
+          const logoSizePercent = sanitizedParams.logoSize || 20;
+          const logoSize = (size * logoSizePercent) / 100;
+          const logoX = (size - logoSize) / 2;
+          const logoY = (size - logoSize) / 2;
+          
+          // Create logo element based on shape
+          let logoElement = '';
+          if (sanitizedParams.logoShape === 'circle') {
+            logoElement = `
+              <clipPath id="logo-clip">
+                <circle cx="${size / 2}" cy="${size / 2}" r="${logoSize / 2}" />
+              </clipPath>
+              <image 
+                href="${sanitizedParams.logo}" 
+                x="${logoX}" 
+                y="${logoY}" 
+                width="${logoSize}" 
+                height="${logoSize}" 
+                clip-path="url(#logo-clip)"
+              />`;
+          } else {
+            logoElement = `
+              <image 
+                href="${sanitizedParams.logo}" 
+                x="${logoX}" 
+                y="${logoY}" 
+                width="${logoSize}" 
+                height="${logoSize}"
+              />`;
+          }
+          
+          // Insert logo before closing svg tag
+          svgData = svgData.replace('</svg>', `${logoElement}</svg>`);
+        }
+        
+        data = svgData;
         contentType = 'image/svg+xml';
       } else {
+        // PNG format - logo embedding requires image processing library
+        // For now, generate QR without logo for PNG format
         data = await QRCode.toBuffer(sanitizedParams.data, {
           type: 'png',
           width: parseInt(sanitizedParams.size),
