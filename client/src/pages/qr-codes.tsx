@@ -57,12 +57,42 @@ interface QrLink {
 const qrLinkSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
   targetUrl: z.string().url('Must be a valid URL'),
-  shortId: z.string().min(3).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, hyphens, and underscores').optional(),
+  shortId: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.string().min(3).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, hyphens, and underscores').optional()
+  ),
   darkColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').default('#000000'),
   lightColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').default('#FFFFFF'),
-  logoUrl: z.string().url().optional(),
+  logoUrl: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.string().url().optional()
+  ),
   logoShape: z.enum(['circle', 'rectangle']).default('circle'),
   logoSize: z.number().min(10).max(40).default(20),
+  utm: z.object({
+    utm_source: z.string().optional(),
+    utm_medium: z.string().optional(),
+    utm_campaign: z.string().optional(),
+    utm_term: z.string().optional(),
+    utm_content: z.string().optional(),
+  }).optional(),
+});
+
+const editQrLinkSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100).optional(),
+  targetUrl: z.string().url('Must be a valid URL').optional(),
+  shortId: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.string().min(3).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, hyphens, and underscores').optional()
+  ),
+  darkColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').optional(),
+  lightColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').optional(),
+  logoUrl: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.string().url().optional()
+  ),
+  logoShape: z.enum(['circle', 'rectangle']).optional(),
+  logoSize: z.number().min(10).max(40).optional(),
   utm: z.object({
     utm_source: z.string().optional(),
     utm_medium: z.string().optional(),
@@ -191,10 +221,11 @@ export default function QrCodes() {
   });
 
   const editForm = useForm({
-    resolver: zodResolver(qrLinkSchema.partial()),
+    resolver: zodResolver(editQrLinkSchema),
     defaultValues: {
       name: '',
       targetUrl: '',
+      shortId: '',
       darkColor: '#000000',
       lightColor: '#FFFFFF',
       logoUrl: '',
@@ -240,6 +271,7 @@ export default function QrCodes() {
     editForm.reset({
       name: qr.name || '',
       targetUrl: qr.targetUrl,
+      shortId: qr.shortId || '',
       darkColor: qr.darkColor || '#000000',
       lightColor: qr.lightColor || '#FFFFFF',
       logoUrl: qr.logoUrl || '',
@@ -1186,6 +1218,20 @@ export default function QrCodes() {
                       <FormControl>
                         <Input placeholder="https://example.com" {...field} className="border-orange-200 focus:border-orange-500" />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="shortId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Custom Short URL (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="my-custom-link" {...field} className="border-orange-200 focus:border-orange-500" />
+                      </FormControl>
+                      <FormDescription className="text-xs">Leave empty for auto-generated ID. Min 3 characters, letters, numbers, hyphens, underscores only.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

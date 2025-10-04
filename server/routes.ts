@@ -2939,12 +2939,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Sanitize name to prevent XSS
       const sanitizedName = name ? name.replace(/<[^>]*>/g, '').substring(0, 200) : undefined;
       
-      // Use custom shortId or generate one
-      let finalShortId = shortId || nanoid(8);
+      // Use custom shortId or generate one (preprocess empty string to undefined)
+      const processedShortId = shortId === '' ? undefined : shortId;
+      let finalShortId = processedShortId || nanoid(8);
       
       // Check if custom shortId is already taken
-      if (shortId) {
-        const existing = await storage.getQrLinkByShortId(shortId);
+      if (processedShortId) {
+        const existing = await storage.getQrLinkByShortId(processedShortId);
         if (existing) {
           return res.status(400).json({ 
             message: 'This custom URL is already taken. Please choose another.',
@@ -2952,6 +2953,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       }
+      
+      // Preprocess logoUrl: empty string to null
+      const processedLogoUrl = logoUrl === '' ? null : logoUrl;
       
       const linkData = insertQrLinkSchema.parse({
         name: sanitizedName,
@@ -2962,7 +2966,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shortId: finalShortId,
         darkColor: darkColor || '#000000',
         lightColor: lightColor || '#FFFFFF',
-        logoUrl: logoUrl || null,
+        logoUrl: processedLogoUrl,
         logoShape: logoShape || 'circle',
         logoSize: logoSize || 20
       });
@@ -3028,11 +3032,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Sanitize name to prevent XSS
       const sanitizedName = name ? name.replace(/<[^>]*>/g, '').substring(0, 200) : undefined;
       
-      const updateData = insertQrLinkSchema.partial().parse({
+      // Preprocess optional fields: convert empty strings to undefined
+      const preprocessedData = {
         ...otherData,
         targetUrl,
-        name: sanitizedName
-      });
+        name: sanitizedName,
+        shortId: otherData.shortId === '' ? undefined : otherData.shortId,
+        logoUrl: otherData.logoUrl === '' ? undefined : otherData.logoUrl,
+      };
+      
+      const updateData = insertQrLinkSchema.partial().parse(preprocessedData);
       
       const updatedLink = await storage.updateQrLink(req.params.id, updateData);
       
