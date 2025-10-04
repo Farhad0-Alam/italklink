@@ -307,9 +307,12 @@ export default function EmailSignature() {
 
   const generateSimpleSignature = (): string => {
     const baseUrl = window.location.origin;
-    const phoneIcon = `${baseUrl}/signature/Phone.png`;
-    const emailIcon = `${baseUrl}/signature/Email.png`;
-    const websiteIcon = `${baseUrl}/signature/Website.png`;
+    const phoneIcon = `${baseUrl}/signature/phone.png`;
+    const emailIcon = `${baseUrl}/signature/email.png`;
+    const websiteIcon = `${baseUrl}/signature/website.png`;
+    const cellIcon = `${baseUrl}/signature/cell.png`;
+    const locationIcon = `${baseUrl}/signature/location.png`;
+    const ecardIcon = `${baseUrl}/signature/ecard.png`;
 
     const {
       signatureName,
@@ -378,9 +381,9 @@ export default function EmailSignature() {
                 </td>
               </tr>
               ${company ? `<tr><td style="font-family: Arial, sans-serif; font-size: ${companySize}px; color: ${companyColor}; padding-bottom: 5px;">${company}</td></tr>` : ""}
-              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding-bottom: 0px;"><span style="display:inline-block; width:16px; height:16px; line-height:16px; text-align:center; background-color:${contactIconColor}; border-radius:3px; margin-right:5px; vertical-align:middle;"><img src="${phoneIcon}" alt="📱" style="width:10px; height:10px; border:none; margin-top:3px; filter:brightness(0) invert(1);" onerror="this.style.display='none';this.parentElement.innerHTML='📱';"></span>${cellPhone}</td></tr>` : ""}
-              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding-bottom: 2px;"><a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="display:inline-block; width:16px; height:16px; line-height:16px; text-align:center; background-color:${contactIconColor}; border-radius:3px; margin-right:5px; vertical-align:middle;"><img src="${emailIcon}" alt="✉" style="width:10px; height:10px; border:none; margin-top:3px; filter:brightness(0) invert(1);" onerror="this.style.display='none';this.parentElement.innerHTML='✉';"></span>${email}</a></td></tr>` : ""}
-              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding-bottom: 2px;"><a href="${website}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="display:inline-block; width:16px; height:16px; line-height:16px; text-align:center; background-color:${contactIconColor}; border-radius:3px; margin-right:5px; vertical-align:middle;"><img src="${websiteIcon}" alt="🌐" style="width:10px; height:10px; border:none; margin-top:3px; filter:brightness(0) invert(1);" onerror="this.style.display='none';this.parentElement.innerHTML='🌐';"></span>${website}</a></td></tr>` : ""}
+              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding-bottom: 2px;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${cellIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${cellPhone}</td></tr>` : ""}
+              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding-bottom: 2px;"><a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${emailIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${email}</a></td></tr>` : ""}
+              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding-bottom: 2px;"><a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${websiteIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${website}</a></td></tr>` : ""}
               ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: 5px;">${socialIconsHTML}</td></tr>` : ""}
             </table>
@@ -395,9 +398,12 @@ export default function EmailSignature() {
 
   const generateAdvancedSignature = (): string => {
     const baseUrl = window.location.origin;
-    const phoneIcon = `${baseUrl}/signature/Phone.png`;
-    const emailIcon = `${baseUrl}/signature/Email.png`;
-    const websiteIcon = `${baseUrl}/signature/Website.png`;
+    const phoneIcon = `${baseUrl}/signature/phone.png`;
+    const emailIcon = `${baseUrl}/signature/email.png`;
+    const websiteIcon = `${baseUrl}/signature/website.png`;
+    const cellIcon = `${baseUrl}/signature/cell.png`;
+    const locationIcon = `${baseUrl}/signature/location.png`;
+    const ecardIcon = `${baseUrl}/signature/ecard.png`;
 
     const {
       signatureName,
@@ -472,11 +478,11 @@ export default function EmailSignature() {
                 </td>
               </tr>
               ${company ? `<tr><td style="font-family: Arial, sans-serif; font-size: ${companySize}px; color: ${companyColor}; padding-bottom: 10px;">${company}</td></tr>` : ""}
-              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;"><span style="display:inline-block; width:16px; height:16px; line-height:16px; text-align:center; background-color:${contactIconColor}; border-radius:3px; margin-right:5px; vertical-align:middle;"><img src="${phoneIcon}" alt="📱" style="width:10px; height:10px; border:none; margin-top:3px; filter:brightness(0) invert(1);" onerror="this.style.display='none';this.parentElement.innerHTML='📱';"></span><a href="tel:${cellPhone}" style="color: ${contactInfoColor}; text-decoration: none;">${cellPhone}</a></td></tr>` : ""}
-              ${officePhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;"><span style="display:inline-block; width:16px; height:16px; line-height:16px; text-align:center; background-color:${contactIconColor}; border-radius:3px; margin-right:5px; vertical-align:middle;"><img src="${phoneIcon}" alt="📞" style="width:10px; height:10px; border:none; margin-top:3px; filter:brightness(0) invert(1);" onerror="this.style.display='none';this.parentElement.innerHTML='📞';"></span><a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none;">${officePhone}</a></td></tr>` : ""}
-              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 2px 0;"><a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="display:inline-block; width:16px; height:16px; line-height:16px; text-align:center; background-color:${contactIconColor}; border-radius:3px; margin-right:5px; vertical-align:middle;"><img src="${emailIcon}" alt="✉" style="width:10px; height:10px; border:none; margin-top:3px; filter:brightness(0) invert(1);" onerror="this.style.display='none';this.parentElement.innerHTML='✉';"></span>${email}</a></td></tr>` : ""}
-              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 2px 0;"><a href="${website}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="display:inline-block; width:16px; height:16px; line-height:16px; text-align:center; background-color:${contactIconColor}; border-radius:3px; margin-right:5px; vertical-align:middle;"><img src="${websiteIcon}" alt="🌐" style="width:10px; height:10px; border:none; margin-top:3px; filter:brightness(0) invert(1);" onerror="this.style.display='none';this.parentElement.innerHTML='🌐';"></span>${website}</a></td></tr>` : ""}
-              ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 2px 0;"><span style="color: ${contactIconColor}; font-size: ${contactIconSize}px;">📍</span> ${address}</td></tr>` : ""}
+              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${cellIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${cellPhone}" style="color: ${contactInfoColor}; text-decoration: none;">${cellPhone}</a></td></tr>` : ""}
+              ${officePhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${phoneIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none;">${officePhone}</a></td></tr>` : ""}
+              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 2px 0;"><a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${emailIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${email}</a></td></tr>` : ""}
+              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 2px 0;"><a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${websiteIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${website}</a></td></tr>` : ""}
+              ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 2px 0;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${locationIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${address}</td></tr>` : ""}
               ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: 10px;">${socialIconsHTML}</td></tr>` : ""}
             </table>
@@ -515,9 +521,12 @@ export default function EmailSignature() {
 
   const generatePremiumSignature = (): string => {
     const baseUrl = window.location.origin;
-    const phoneIcon = `${baseUrl}/signature/Phone.png`;
-    const emailIcon = `${baseUrl}/signature/Email.png`;
-    const websiteIcon = `${baseUrl}/signature/Website.png`;
+    const phoneIcon = `${baseUrl}/signature/phone.png`;
+    const emailIcon = `${baseUrl}/signature/email.png`;
+    const websiteIcon = `${baseUrl}/signature/website.png`;
+    const cellIcon = `${baseUrl}/signature/cell.png`;
+    const locationIcon = `${baseUrl}/signature/location.png`;
+    const ecardIcon = `${baseUrl}/signature/ecard.png`;
 
     const {
       signatureName,
@@ -606,11 +615,11 @@ export default function EmailSignature() {
               </tr>
               ${company ? `<tr><td style="font-family: Arial, sans-serif; font-size: ${companySize}px; color: ${companyColor}; padding-bottom: 15px;">${company}</td></tr>` : ""}
               <tr><td style="height: 2px; background-color: ${primaryColor}; margin: 10px 0;"></td></tr>
-              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;"><span style="display:inline-block; width:16px; height:16px; line-height:16px; text-align:center; background-color:${contactIconColor}; border-radius:3px; margin-right:5px; vertical-align:middle;"><img src="${phoneIcon}" alt="📱" style="width:10px; height:10px; border:none; margin-top:3px; filter:brightness(0) invert(1);" onerror="this.style.display='none';this.parentElement.innerHTML='📱';"></span><a href="tel:${cellPhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${cellPhone}</a></td></tr>` : ""}
-              ${officePhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;"><span style="display:inline-block; width:16px; height:16px; line-height:16px; text-align:center; background-color:${contactIconColor}; border-radius:3px; margin-right:5px; vertical-align:middle;"><img src="${phoneIcon}" alt="📞" style="width:10px; height:10px; border:none; margin-top:3px; filter:brightness(0) invert(1);" onerror="this.style.display='none';this.parentElement.innerHTML='📞';"></span><a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${officePhone}</a></td></tr>` : ""}
-              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 2px 0;"><a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:16px; height:16px; line-height:16px; text-align:center; background-color:${contactIconColor}; border-radius:3px; margin-right:5px; vertical-align:middle;"><img src="${emailIcon}" alt="✉" style="width:10px; height:10px; border:none; margin-top:3px; filter:brightness(0) invert(1);" onerror="this.style.display='none';this.parentElement.innerHTML='✉';"></span>${email}</a></td></tr>` : ""}
-              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 2px 0;"><a href="${website}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:16px; height:16px; line-height:16px; text-align:center; background-color:${contactIconColor}; border-radius:3px; margin-right:5px; vertical-align:middle;"><img src="${websiteIcon}" alt="🌐" style="width:10px; height:10px; border:none; margin-top:3px; filter:brightness(0) invert(1);" onerror="this.style.display='none';this.parentElement.innerHTML='🌐';"></span>${website}</a></td></tr>` : ""}
-              ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 2px 0;"><span style="color: ${contactIconColor}; font-size: ${contactIconSize}px;">📍</span> ${address}</td></tr>` : ""}
+              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${cellIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${cellPhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${cellPhone}</a></td></tr>` : ""}
+              ${officePhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${phoneIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${officePhone}</a></td></tr>` : ""}
+              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 2px 0;"><a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${emailIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${email}</a></td></tr>` : ""}
+              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 2px 0;"><a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${websiteIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${website}</a></td></tr>` : ""}
+              ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 2px 0;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${locationIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${address}</td></tr>` : ""}
               ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: 15px;">${socialIconsHTML}</td></tr>` : ""}
             </table>
