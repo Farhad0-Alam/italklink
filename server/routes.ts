@@ -3139,18 +3139,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Add logo to SVG if provided
         if (sanitizedParams.logo) {
           const size = parseInt(sanitizedParams.size);
+          const margin = sanitizedParams.margin || 2;
           const logoSizePercent = sanitizedParams.logoSize || 20;
           const logoSize = (size * logoSizePercent) / 100;
           const logoX = (size - logoSize) / 2;
           const logoY = (size - logoSize) / 2;
           
+          // Add white background behind logo for visibility
+          const padding = 5;
+          const bgX = logoX - padding;
+          const bgY = logoY - padding;
+          const bgSize = logoSize + (padding * 2);
+          
           // Create logo element based on shape
           let logoElement = '';
           if (sanitizedParams.logoShape === 'circle') {
+            const bgRadius = (logoSize / 2) + padding;
             logoElement = `
-              <clipPath id="logo-clip">
-                <circle cx="${size / 2}" cy="${size / 2}" r="${logoSize / 2}" />
-              </clipPath>
+              <defs>
+                <clipPath id="logo-clip">
+                  <circle cx="${size / 2}" cy="${size / 2}" r="${logoSize / 2}" />
+                </clipPath>
+              </defs>
+              <circle 
+                cx="${size / 2}" 
+                cy="${size / 2}" 
+                r="${bgRadius}" 
+                fill="white"
+              />
               <image 
                 href="${sanitizedParams.logo}" 
                 x="${logoX}" 
@@ -3161,6 +3177,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               />`;
           } else {
             logoElement = `
+              <rect 
+                x="${bgX}" 
+                y="${bgY}" 
+                width="${bgSize}" 
+                height="${bgSize}" 
+                fill="white"
+              />
               <image 
                 href="${sanitizedParams.logo}" 
                 x="${logoX}" 
