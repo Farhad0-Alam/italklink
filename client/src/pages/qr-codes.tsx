@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { 
   QrCode, Plus, Download, BarChart3, Settings, Trash2, Eye, Copy, 
   ExternalLink, ArrowLeft, Sparkles, Palette, ImageIcon, Layers,
-  TrendingUp, Users, Globe, Zap, FolderOpen, Grid3x3, Share2
+  TrendingUp, Users, Globe, Zap, FolderOpen, Grid3x3, Share2, Edit
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -37,6 +37,11 @@ interface QrLink {
   utm: any;
   rules: any;
   enabled: boolean;
+  darkColor?: string;
+  lightColor?: string;
+  logoUrl?: string | null;
+  logoShape?: 'circle' | 'rectangle';
+  logoSize?: number;
   createdAt: string;
   updatedAt: string;
   analytics?: {
@@ -52,6 +57,12 @@ interface QrLink {
 const qrLinkSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
   targetUrl: z.string().url('Must be a valid URL'),
+  shortId: z.string().min(3).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, hyphens, and underscores').optional(),
+  darkColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').default('#000000'),
+  lightColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').default('#FFFFFF'),
+  logoUrl: z.string().url().optional(),
+  logoShape: z.enum(['circle', 'rectangle']).default('circle'),
+  logoSize: z.number().min(10).max(40).default(20),
   utm: z.object({
     utm_source: z.string().optional(),
     utm_medium: z.string().optional(),
@@ -78,6 +89,8 @@ export default function QrCodes() {
   const [, setLocation] = useLocation();
   const [selectedQr, setSelectedQr] = useState<QrLink | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingQr, setEditingQr] = useState<QrLink | null>(null);
   const [showStaticGenerator, setShowStaticGenerator] = useState(false);
   const qrPreviewRef = useRef<HTMLDivElement>(null);
 
@@ -114,6 +127,28 @@ export default function QrCodes() {
     },
   });
 
+  // Update QR link mutation
+  const updateQrLinkMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => 
+      apiRequest('PUT', `/api/qr/links/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/qr/links'] });
+      setShowEditDialog(false);
+      setEditingQr(null);
+      toast({
+        title: '✨ QR Link Updated!',
+        description: 'Your changes have been saved successfully.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update QR link',
+        variant: 'destructive',
+      });
+    },
+  });
+
   // Delete QR link mutation
   const deleteQrLinkMutation = useMutation({
     mutationFn: (id: string) => apiRequest('DELETE', `/api/qr/links/${id}`),
@@ -139,6 +174,32 @@ export default function QrCodes() {
     defaultValues: {
       name: '',
       targetUrl: '',
+      shortId: '',
+      darkColor: '#000000',
+      lightColor: '#FFFFFF',
+      logoUrl: '',
+      logoShape: 'circle' as const,
+      logoSize: 20,
+      utm: {
+        utm_source: '',
+        utm_medium: '',
+        utm_campaign: '',
+        utm_term: '',
+        utm_content: '',
+      },
+    },
+  });
+
+  const editForm = useForm({
+    resolver: zodResolver(qrLinkSchema.partial()),
+    defaultValues: {
+      name: '',
+      targetUrl: '',
+      darkColor: '#000000',
+      lightColor: '#FFFFFF',
+      logoUrl: '',
+      logoShape: 'circle' as const,
+      logoSize: 20,
       utm: {
         utm_source: '',
         utm_medium: '',
@@ -167,6 +228,32 @@ export default function QrCodes() {
   // Handlers
   const handleCreateQrLink = (data: any) => {
     createQrLinkMutation.mutate(data);
+  };
+
+  const handleEditQrLink = (data: any) => {
+    if (!editingQr) return;
+    updateQrLinkMutation.mutate({ id: editingQr.id, data });
+  };
+
+  const openEditDialog = (qr: QrLink) => {
+    setEditingQr(qr);
+    editForm.reset({
+      name: qr.name || '',
+      targetUrl: qr.targetUrl,
+      darkColor: qr.darkColor || '#000000',
+      lightColor: qr.lightColor || '#FFFFFF',
+      logoUrl: qr.logoUrl || '',
+      logoShape: qr.logoShape || 'circle',
+      logoSize: qr.logoSize || 20,
+      utm: qr.utm || {
+        utm_source: '',
+        utm_medium: '',
+        utm_campaign: '',
+        utm_term: '',
+        utm_content: '',
+      },
+    });
+    setShowEditDialog(true);
   };
 
   // Watch form data for preview
@@ -491,13 +578,13 @@ export default function QrCodes() {
                     Create QR Link
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-2xl bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
                       Create Dynamic QR Link
                     </DialogTitle>
                     <DialogDescription>
-                      Create a trackable QR code that you can edit and analyze
+                      Create a trackable QR code with custom branding and colors
                     </DialogDescription>
                   </DialogHeader>
                   <Form {...createForm}>
@@ -528,6 +615,123 @@ export default function QrCodes() {
                           </FormItem>
                         )}
                       />
+                      
+                      {/* Custom URL Name */}
+                      <FormField
+                        control={createForm.control}
+                        name="shortId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Custom URL Name (Optional)</FormLabel>
+                            <FormControl>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-slate-500 dark:text-slate-400">{window.location.origin}/q/</span>
+                                <Input placeholder="mylink" {...field} data-testid="input-short-id" className="border-orange-200 focus:border-orange-500" />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {/* QR Code Colors */}
+                      <div className="space-y-3 p-4 border border-orange-200 dark:border-orange-900 rounded-lg">
+                        <Label className="text-sm font-medium">QR Code Colors</Label>
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={createForm.control}
+                            name="darkColor"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Dark Color</FormLabel>
+                                <FormControl>
+                                  <div className="flex items-center gap-2">
+                                    <Input type="color" {...field} className="w-12 h-10 p-1 border-orange-200" />
+                                    <Input {...field} placeholder="#000000" className="flex-1 border-orange-200" />
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={createForm.control}
+                            name="lightColor"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Light Color</FormLabel>
+                                <FormControl>
+                                  <div className="flex items-center gap-2">
+                                    <Input type="color" {...field} className="w-12 h-10 p-1 border-orange-200" />
+                                    <Input {...field} placeholder="#FFFFFF" className="flex-1 border-orange-200" />
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Logo Options */}
+                      <div className="space-y-3 p-4 border border-orange-200 dark:border-orange-900 rounded-lg">
+                        <Label className="text-sm font-medium">Logo (Optional)</Label>
+                        <FormField
+                          control={createForm.control}
+                          name="logoUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input placeholder="https://example.com/logo.png" {...field} className="border-orange-200" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={createForm.control}
+                            name="logoShape"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Shape</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger className="border-orange-200">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="circle">Circle</SelectItem>
+                                    <SelectItem value="rectangle">Rectangle</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={createForm.control}
+                            name="logoSize"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Size: {field.value}%</FormLabel>
+                                <FormControl>
+                                  <Slider
+                                    min={10}
+                                    max={40}
+                                    step={1}
+                                    value={[field.value]}
+                                    onValueChange={(value) => field.onChange(value[0])}
+                                    className="py-2"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
                       
                       {/* UTM Parameters */}
                       <div className="space-y-3">
@@ -677,6 +881,15 @@ export default function QrCodes() {
                               data-testid={`button-visit-${qrLink.id}`}
                             >
                               <ExternalLink className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openEditDialog(qrLink)}
+                              className="flex-1 border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                              data-testid={`button-edit-${qrLink.id}`}
+                            >
+                              <Edit className="w-3 h-3" />
                             </Button>
                             <Button
                               size="sm"
@@ -937,6 +1150,191 @@ export default function QrCodes() {
             </motion.div>
           </TabsContent>
         </Tabs>
+
+        {/* Edit QR Link Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
+                Edit QR Link
+              </DialogTitle>
+              <DialogDescription>
+                Update your QR code settings and customization
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...editForm}>
+              <form onSubmit={editForm.handleSubmit(handleEditQrLink)} className="space-y-4">
+                <FormField
+                  control={editForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="My Awesome QR" {...field} className="border-orange-200 focus:border-orange-500" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="targetUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Target URL</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://example.com" {...field} className="border-orange-200 focus:border-orange-500" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                {/* QR Code Colors */}
+                <div className="space-y-3 p-4 border border-orange-200 dark:border-orange-900 rounded-lg">
+                  <Label className="text-sm font-medium">QR Code Colors</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={editForm.control}
+                      name="darkColor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Dark Color</FormLabel>
+                          <FormControl>
+                            <div className="flex items-center gap-2">
+                              <Input type="color" {...field} className="w-12 h-10 p-1 border-orange-200" />
+                              <Input {...field} placeholder="#000000" className="flex-1 border-orange-200" />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="lightColor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Light Color</FormLabel>
+                          <FormControl>
+                            <div className="flex items-center gap-2">
+                              <Input type="color" {...field} className="w-12 h-10 p-1 border-orange-200" />
+                              <Input {...field} placeholder="#FFFFFF" className="flex-1 border-orange-200" />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                {/* Logo Options */}
+                <div className="space-y-3 p-4 border border-orange-200 dark:border-orange-900 rounded-lg">
+                  <Label className="text-sm font-medium">Logo (Optional)</Label>
+                  <FormField
+                    control={editForm.control}
+                    name="logoUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="https://example.com/logo.png" {...field} className="border-orange-200" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={editForm.control}
+                      name="logoShape"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Shape</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="border-orange-200">
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="circle">Circle</SelectItem>
+                              <SelectItem value="rectangle">Rectangle</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="logoSize"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs">Size: {field.value}%</FormLabel>
+                          <FormControl>
+                            <Slider
+                              min={10}
+                              max={40}
+                              step={1}
+                              value={[field.value]}
+                              onValueChange={(value) => field.onChange(value[0])}
+                              className="py-2"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                {/* UTM Parameters */}
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">UTM Parameters (Optional)</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField
+                      control={editForm.control}
+                      name="utm.utm_source"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input placeholder="Source" {...field} className="border-orange-200" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="utm.utm_medium"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input placeholder="Medium" {...field} className="border-orange-200" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={updateQrLinkMutation.isPending}
+                    className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                  >
+                    {updateQrLinkMutation.isPending ? 'Updating...' : 'Update QR Link'}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
