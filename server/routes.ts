@@ -3138,32 +3138,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Add logo to SVG if provided
         if (sanitizedParams.logo) {
-          const size = parseInt(sanitizedParams.size);
-          const margin = sanitizedParams.margin || 2;
-          const logoSizePercent = sanitizedParams.logoSize || 20;
-          const logoSize = (size * logoSizePercent) / 100;
-          const logoX = (size - logoSize) / 2;
-          const logoY = (size - logoSize) / 2;
-          
-          // Add white background behind logo for visibility
-          const padding = 5;
-          const bgX = logoX - padding;
-          const bgY = logoY - padding;
-          const bgSize = logoSize + (padding * 2);
-          
-          // Create logo element based on shape
-          let logoElement = '';
-          if (sanitizedParams.logoShape === 'circle') {
-            const bgRadius = (logoSize / 2) + padding;
-            logoElement = `
+          // Parse viewBox to get coordinate system
+          const viewBoxMatch = svgData.match(/viewBox="([^"]+)"/);
+          if (viewBoxMatch) {
+            const [vbX, vbY, vbWidth, vbHeight] = viewBoxMatch[1].split(' ').map(Number);
+            
+            // Calculate scale from pixels to viewBox units
+            const size = parseInt(sanitizedParams.size);
+            const scale = size / vbWidth;
+            
+            // Logo dimensions in viewBox units
+            const logoSizePercent = sanitizedParams.logoSize || 20;
+            const logoSizePixels = (size * logoSizePercent) / 100;
+            const logoSize = logoSizePixels / scale; // Convert to viewBox units
+            
+            // Center position in viewBox units
+            const centerX = vbWidth / 2;
+            const centerY = vbHeight / 2;
+            const logoX = centerX - (logoSize / 2);
+            const logoY = centerY - (logoSize / 2);
+            
+            // Background padding in viewBox units
+            const paddingPixels = 8;
+            const padding = paddingPixels / scale;
+            const bgX = logoX - padding;
+            const bgY = logoY - padding;
+            const bgSize = logoSize + (padding * 2);
+            
+            // Create logo element based on shape
+            let logoElement = '';
+            if (sanitizedParams.logoShape === 'circle') {
+              const bgRadius = (logoSize / 2) + padding;
+              logoElement = `
               <defs>
                 <clipPath id="logo-clip">
-                  <circle cx="${size / 2}" cy="${size / 2}" r="${logoSize / 2}" />
+                  <circle cx="${centerX}" cy="${centerY}" r="${logoSize / 2}" />
                 </clipPath>
               </defs>
               <circle 
-                cx="${size / 2}" 
-                cy="${size / 2}" 
+                cx="${centerX}" 
+                cy="${centerY}" 
                 r="${bgRadius}" 
                 fill="white"
               />
@@ -3175,8 +3189,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 height="${logoSize}" 
                 clip-path="url(#logo-clip)"
               />`;
-          } else {
-            logoElement = `
+            } else {
+              logoElement = `
               <rect 
                 x="${bgX}" 
                 y="${bgY}" 
@@ -3191,10 +3205,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 width="${logoSize}" 
                 height="${logoSize}"
               />`;
+            }
+            
+            // Insert logo before closing svg tag
+            svgData = svgData.replace('</svg>', `${logoElement}</svg>`);
           }
-          
-          // Insert logo before closing svg tag
-          svgData = svgData.replace('</svg>', `${logoElement}</svg>`);
         }
         
         data = svgData;
