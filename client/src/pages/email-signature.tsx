@@ -50,7 +50,11 @@ interface SignatureData {
   signatureSize: number;
   signatureColor: string;
   headerFont: string;
+  headerSize: number;
+  headerColor: string;
   contactFont: string;
+  contactInfoSize: number;
+  contactInfoColor: string;
   
   // Social Links
   socialLinks: { platform: string; url: string; icon: string }[];
@@ -101,6 +105,20 @@ const socialPlatforms = [
 export default function EmailSignature() {
   const { toast } = useToast();
   const [templateType, setTemplateType] = useState<'simple' | 'advanced' | 'premium'>('simple');
+  const [collapsedSections, setCollapsedSections] = useState<{ [key: string]: boolean }>({
+    signatureSection: true,
+    signatureFont: true,
+    signatureSize: true,
+    signatureColor: true,
+    headerSection: true,
+    headerFont: true,
+    headerSize: true,
+    headerColor: true,
+    contactSection: true,
+    contactInfoFont: true,
+    contactInfoSize: true,
+    contactInfoColor: true,
+  });
   const [signatureData, setSignatureData] = useState<SignatureData>({
     signatureName: '',
     name: '',
@@ -120,7 +138,11 @@ export default function EmailSignature() {
     signatureSize: 32,
     signatureColor: '#333333',
     headerFont: 'Arial',
+    headerSize: 18,
+    headerColor: '#FF6A00',
     contactFont: 'Arial',
+    contactInfoSize: 13,
+    contactInfoColor: '#333333',
     socialLinks: [],
     showDisclaimer: false,
     disclaimerText: 'This email and any attachments are confidential and intended solely for the recipient.',
@@ -130,6 +152,8 @@ export default function EmailSignature() {
     showBanner: false,
     bannerText: 'Get in touch today!',
   });
+
+  const toggleSection = (k: string) => setCollapsedSections((p) => ({ ...p, [k]: !p[k] }));
 
   const updateField = (field: keyof SignatureData, value: any) => {
     setSignatureData(prev => ({ ...prev, [field]: value }));
@@ -192,7 +216,7 @@ export default function EmailSignature() {
   };
 
   const generateSimpleSignature = (): string => {
-    const { signatureName, name, title, company, cellPhone, email, website, profilePhoto, primaryColor, socialLinks, customFields, signatureFont, signatureSize, signatureColor, headerFont, contactFont } = signatureData;
+    const { signatureName, name, title, company, cellPhone, email, website, profilePhoto, primaryColor, socialLinks, customFields, signatureFont, signatureSize, signatureColor, headerFont, headerSize, headerColor, contactFont, contactInfoSize, contactInfoColor } = signatureData;
     
     const socialIconsHTML = socialLinks.map(link => {
       const platform = socialPlatforms.find(p => p.value === link.platform);
@@ -201,7 +225,7 @@ export default function EmailSignature() {
     }).join('');
 
     const customFieldsHTML = customFields.filter(f => f.label && f.value).map(field => {
-      return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 13px; color: #333; padding-bottom: 3px;">${field.label}: ${field.value}</td></tr>`;
+      return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding-bottom: 3px;">${field.label}: ${field.value}</td></tr>`;
     }).join('');
 
     return `
@@ -219,13 +243,13 @@ export default function EmailSignature() {
             <table cellpadding="0" cellspacing="0" border="0">
               ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ''}
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: 18px; font-weight: bold; color: ${primaryColor}; padding-bottom: 5px;">${name}</td>
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${headerSize}px; font-weight: bold; color: ${headerColor}; padding-bottom: 5px;">${name}</td>
               </tr>
-              ${title ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: 14px; color: #666; padding-bottom: 3px;">${title}</td></tr>` : ''}
-              ${company ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: 14px; color: #666; padding-bottom: 10px;">${company}</td></tr>` : ''}
-              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 13px; color: #333; padding-bottom: 3px;">📱 ${cellPhone}</td></tr>` : ''}
-              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 13px; padding-bottom: 3px;"><a href="mailto:${email}" style="color: #333; text-decoration: none;">✉️ ${email}</a></td></tr>` : ''}
-              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 13px; padding-bottom: 8px;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none;">🌐 ${website}</a></td></tr>` : ''}
+              ${title ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: ${Math.round(headerSize * 0.8)}px; color: ${headerColor}; opacity: 0.8; padding-bottom: 3px;">${title}</td></tr>` : ''}
+              ${company ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: ${Math.round(headerSize * 0.8)}px; color: ${headerColor}; opacity: 0.8; padding-bottom: 10px;">${company}</td></tr>` : ''}
+              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding-bottom: 3px;">📱 ${cellPhone}</td></tr>` : ''}
+              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding-bottom: 3px;"><a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none;">✉️ ${email}</a></td></tr>` : ''}
+              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding-bottom: 8px;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none;">🌐 ${website}</a></td></tr>` : ''}
               ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: 5px;">${socialIconsHTML}</td></tr>` : ''}
             </table>
@@ -239,7 +263,7 @@ export default function EmailSignature() {
   };
 
   const generateAdvancedSignature = (): string => {
-    const { signatureName, name, title, company, cellPhone, officePhone, email, website, address, profilePhoto, companyLogo, primaryColor, secondaryColor, socialLinks, showCTA, ctaText, ctaUrl, customFields, signatureFont, signatureSize, signatureColor, headerFont, contactFont } = signatureData;
+    const { signatureName, name, title, company, cellPhone, officePhone, email, website, address, profilePhoto, companyLogo, primaryColor, secondaryColor, socialLinks, showCTA, ctaText, ctaUrl, customFields, signatureFont, signatureSize, signatureColor, headerFont, headerSize, headerColor, contactFont, contactInfoSize, contactInfoColor } = signatureData;
     
     const socialIconsHTML = socialLinks.map(link => {
       const iconSVG = getSocialIconSVG(link.platform);
@@ -247,7 +271,7 @@ export default function EmailSignature() {
     }).join('');
 
     const customFieldsHTML = customFields.filter(f => f.label && f.value).map(field => {
-      return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; color: #333; padding: 3px 0;">${field.label}: ${field.value}</td></tr>`;
+      return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 3px 0;">${field.label}: ${field.value}</td></tr>`;
     }).join('');
 
     return `
@@ -265,14 +289,14 @@ export default function EmailSignature() {
             <table cellpadding="0" cellspacing="0" border="0">
               ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ''}
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: 20px; font-weight: bold; color: ${primaryColor}; padding-bottom: 5px;">${name}</td>
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${headerSize}px; font-weight: bold; color: ${headerColor}; padding-bottom: 5px;">${name}</td>
               </tr>
-              ${title ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: 15px; color: ${secondaryColor}; padding-bottom: 10px;">${title}${company ? ` | ${company}` : ''}</td></tr>` : ''}
-              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; color: #333; padding: 3px 0;">📱 <a href="tel:${cellPhone}" style="color: #333; text-decoration: none;">${cellPhone}</a></td></tr>` : ''}
-              ${officePhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; color: #333; padding: 3px 0;">☎️ <a href="tel:${officePhone}" style="color: #333; text-decoration: none;">${officePhone}</a></td></tr>` : ''}
-              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; padding: 3px 0;"><a href="mailto:${email}" style="color: #333; text-decoration: none;">✉️ ${email}</a></td></tr>` : ''}
-              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; padding: 3px 0;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none;">🌐 ${website}</a></td></tr>` : ''}
-              ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 13px; color: #666; padding: 5px 0;">📍 ${address}</td></tr>` : ''}
+              ${title ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: ${Math.round(headerSize * 0.85)}px; color: ${headerColor}; opacity: 0.85; padding-bottom: 10px;">${title}${company ? ` | ${company}` : ''}</td></tr>` : ''}
+              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 3px 0;">📱 <a href="tel:${cellPhone}" style="color: ${contactInfoColor}; text-decoration: none;">${cellPhone}</a></td></tr>` : ''}
+              ${officePhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 3px 0;">☎️ <a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none;">${officePhone}</a></td></tr>` : ''}
+              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 3px 0;"><a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none;">✉️ ${email}</a></td></tr>` : ''}
+              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 3px 0;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none;">🌐 ${website}</a></td></tr>` : ''}
+              ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 5px 0;">📍 ${address}</td></tr>` : ''}
               ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: 10px;">${socialIconsHTML}</td></tr>` : ''}
             </table>
@@ -302,7 +326,7 @@ export default function EmailSignature() {
   };
 
   const generatePremiumSignature = (): string => {
-    const { signatureName, name, title, company, cellPhone, officePhone, email, website, address, profilePhoto, companyLogo, primaryColor, secondaryColor, socialLinks, showCTA, ctaText, ctaUrl, showBanner, bannerText, customFields, signatureFont, signatureSize, signatureColor, headerFont, contactFont } = signatureData;
+    const { signatureName, name, title, company, cellPhone, officePhone, email, website, address, profilePhoto, companyLogo, primaryColor, secondaryColor, socialLinks, showCTA, ctaText, ctaUrl, showBanner, bannerText, customFields, signatureFont, signatureSize, signatureColor, headerFont, headerSize, headerColor, contactFont, contactInfoSize, contactInfoColor } = signatureData;
     
     const socialIconsHTML = socialLinks.map(link => {
       const iconSVG = getSocialIconSVG(link.platform);
@@ -310,7 +334,7 @@ export default function EmailSignature() {
     }).join('');
 
     const customFieldsHTML = customFields.filter(f => f.label && f.value).map(field => {
-      return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; color: #333; padding: 5px 0; font-weight: 500;">${field.label}: ${field.value}</td></tr>`;
+      return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 5px 0; font-weight: 500;">${field.label}: ${field.value}</td></tr>`;
     }).join('');
 
     return `
@@ -335,16 +359,16 @@ export default function EmailSignature() {
             <table cellpadding="0" cellspacing="0" border="0">
               ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ''}
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: 24px; font-weight: bold; color: ${primaryColor}; padding-bottom: 5px;">${name}</td>
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${headerSize}px; font-weight: bold; color: ${headerColor}; padding-bottom: 5px;">${name}</td>
               </tr>
-              ${title ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: 16px; color: ${secondaryColor}; font-weight: 600; padding-bottom: 3px;">${title}</td></tr>` : ''}
-              ${company ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: 14px; color: #777; padding-bottom: 15px;">${company}</td></tr>` : ''}
+              ${title ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: ${Math.round(headerSize * 0.7)}px; color: ${headerColor}; font-weight: 600; opacity: 0.85; padding-bottom: 3px;">${title}</td></tr>` : ''}
+              ${company ? `<tr><td style="font-family: ${headerFont}, sans-serif; font-size: ${Math.round(headerSize * 0.6)}px; color: ${headerColor}; opacity: 0.7; padding-bottom: 15px;">${company}</td></tr>` : ''}
               <tr><td style="height: 2px; background-color: ${primaryColor}; margin: 10px 0;"></td></tr>
-              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; color: #333; padding: 5px 0;">📱 <a href="tel:${cellPhone}" style="color: #333; text-decoration: none; font-weight: 500;">${cellPhone}</a></td></tr>` : ''}
-              ${officePhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; color: #333; padding: 5px 0;">☎️ <a href="tel:${officePhone}" style="color: #333; text-decoration: none; font-weight: 500;">${officePhone}</a></td></tr>` : ''}
-              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; padding: 5px 0;"><a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">✉️ ${email}</a></td></tr>` : ''}
-              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 14px; padding: 5px 0;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">🌐 ${website}</a></td></tr>` : ''}
-              ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: 13px; color: #666; padding: 5px 0;">📍 ${address}</td></tr>` : ''}
+              ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 5px 0;">📱 <a href="tel:${cellPhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${cellPhone}</a></td></tr>` : ''}
+              ${officePhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 5px 0;">☎️ <a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${officePhone}</a></td></tr>` : ''}
+              ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 5px 0;"><a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">✉️ ${email}</a></td></tr>` : ''}
+              ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 5px 0;"><a href="${website}" style="color: ${primaryColor}; text-decoration: none; font-weight: 500;">🌐 ${website}</a></td></tr>` : ''}
+              ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 5px 0;">📍 ${address}</td></tr>` : ''}
               ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: 15px;">${socialIconsHTML}</td></tr>` : ''}
             </table>
@@ -537,67 +561,6 @@ export default function EmailSignature() {
                   <p className="text-xs text-gray-500">This will appear above your name in handwritten style</p>
                 </div>
 
-                {/* Signature Style */}
-                {signatureData.signatureName && (
-                  <div className="space-y-3 p-4 bg-gray-50 rounded-md">
-                    <Label className="text-sm font-semibold">Signature Style</Label>
-                    <div className="grid grid-cols-1 gap-3">
-                      <div className="space-y-2">
-                        <Label htmlFor="signatureFont" className="text-xs">Font</Label>
-                        <Select
-                          value={signatureData.signatureFont}
-                          onValueChange={(v) => updateField('signatureFont', v)}
-                        >
-                          <SelectTrigger id="signatureFont" data-testid="select-signature-font">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {signatureFonts.map((font) => (
-                              <SelectItem key={font} value={font}>
-                                {font}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-2">
-                          <Label htmlFor="signatureSize" className="text-xs">Size (px)</Label>
-                          <Input
-                            id="signatureSize"
-                            type="number"
-                            min="20"
-                            max="50"
-                            value={signatureData.signatureSize}
-                            onChange={(e) => updateField('signatureSize', parseInt(e.target.value) || 32)}
-                            data-testid="input-signature-size"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="signatureColor" className="text-xs">Color</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              id="signatureColor"
-                              type="color"
-                              value={signatureData.signatureColor}
-                              onChange={(e) => updateField('signatureColor', e.target.value)}
-                              className="w-16 h-9"
-                              data-testid="input-signature-color"
-                            />
-                            <Input
-                              value={signatureData.signatureColor}
-                              onChange={(e) => updateField('signatureColor', e.target.value)}
-                              placeholder="#333333"
-                              className="flex-1"
-                              data-testid="input-signature-color-hex"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Name *</Label>
@@ -630,25 +593,6 @@ export default function EmailSignature() {
                     placeholder="2TalkLink Inc."
                     data-testid="input-company"
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="headerFont">Name/Title/Company Font</Label>
-                  <Select
-                    value={signatureData.headerFont}
-                    onValueChange={(v) => updateField('headerFont', v)}
-                  >
-                    <SelectTrigger id="headerFont" data-testid="select-header-font">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {professionalFonts.map((font) => (
-                        <SelectItem key={font} value={font}>
-                          {font}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -697,25 +641,6 @@ export default function EmailSignature() {
                     placeholder="https://www.2talklink.com"
                     data-testid="input-website"
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="contactFont">Contact Info Font</Label>
-                  <Select
-                    value={signatureData.contactFont}
-                    onValueChange={(v) => updateField('contactFont', v)}
-                  >
-                    <SelectTrigger id="contactFont" data-testid="select-contact-font">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {professionalFonts.map((font) => (
-                        <SelectItem key={font} value={font}>
-                          {font}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
 
                 {templateType !== 'simple' && (
@@ -779,6 +704,309 @@ export default function EmailSignature() {
                     </div>
                   )}
                   <p className="text-xs text-gray-500">Add any additional information like LinkedIn, Skype, Department, etc.</p>
+                </div>
+
+                {/* Signature (Handwritten Style) Font Customization */}
+                <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
+                  <div 
+                    className="flex items-center justify-between cursor-pointer" 
+                    onClick={() => toggleSection("signatureSection")}
+                    data-testid="toggle-signature-section"
+                  >
+                    <h3 className="text-lg font-semibold text-purple-300">Signature (Handwritten Style)</h3>
+                    <i className={`fas ${collapsedSections.signatureSection ? "fa-chevron-down" : "fa-chevron-up"} text-purple-300`} />
+                  </div>
+
+                  {!collapsedSections.signatureSection && (
+                    <div className="space-y-3">
+                      {/* Font Subsection */}
+                      <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer" 
+                          onClick={() => toggleSection("signatureFont")}
+                          data-testid="toggle-signature-font"
+                        >
+                          <h4 className="text-sm font-semibold text-green-300">Font</h4>
+                          <i className={`fas ${collapsedSections.signatureFont ? "fa-chevron-down" : "fa-chevron-up"} text-green-300 text-xs`} />
+                        </div>
+                        {!collapsedSections.signatureFont && (
+                          <Select
+                            value={signatureData.signatureFont}
+                            onValueChange={(v) => updateField('signatureFont', v)}
+                          >
+                            <SelectTrigger data-testid="select-signature-font">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {signatureFonts.map((font) => (
+                                <SelectItem key={font} value={font}>
+                                  {font}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+
+                      {/* Font Size Subsection */}
+                      <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer" 
+                          onClick={() => toggleSection("signatureSize")}
+                          data-testid="toggle-signature-size"
+                        >
+                          <h4 className="text-sm font-semibold text-green-300">Font Size</h4>
+                          <i className={`fas ${collapsedSections.signatureSize ? "fa-chevron-down" : "fa-chevron-up"} text-green-300 text-xs`} />
+                        </div>
+                        {!collapsedSections.signatureSize && (
+                          <div className="space-y-2">
+                            <Label className="text-sm text-gray-300">Size: {signatureData.signatureSize}px</Label>
+                            <input
+                              type="range"
+                              min="20"
+                              max="50"
+                              value={signatureData.signatureSize}
+                              onChange={(e) => updateField('signatureSize', parseInt(e.target.value))}
+                              className="custom-range w-full"
+                              data-testid="range-signature-size"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Color Subsection */}
+                      <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer" 
+                          onClick={() => toggleSection("signatureColor")}
+                          data-testid="toggle-signature-color"
+                        >
+                          <h4 className="text-sm font-semibold text-green-300">Color</h4>
+                          <i className={`fas ${collapsedSections.signatureColor ? "fa-chevron-down" : "fa-chevron-up"} text-green-300 text-xs`} />
+                        </div>
+                        {!collapsedSections.signatureColor && (
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value={signatureData.signatureColor}
+                              onChange={(e) => updateField('signatureColor', e.target.value)}
+                              className="w-16 h-9"
+                              data-testid="input-signature-color"
+                            />
+                            <Input
+                              value={signatureData.signatureColor}
+                              onChange={(e) => updateField('signatureColor', e.target.value)}
+                              placeholder="#333333"
+                              className="flex-1"
+                              data-testid="input-signature-color-hex"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Name/Title/Company Font Customization */}
+                <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
+                  <div 
+                    className="flex items-center justify-between cursor-pointer" 
+                    onClick={() => toggleSection("headerSection")}
+                    data-testid="toggle-header-section"
+                  >
+                    <h3 className="text-lg font-semibold text-blue-300">Name/Title/Company Font</h3>
+                    <i className={`fas ${collapsedSections.headerSection ? "fa-chevron-down" : "fa-chevron-up"} text-blue-300`} />
+                  </div>
+
+                  {!collapsedSections.headerSection && (
+                    <div className="space-y-3">
+                      {/* Font Subsection */}
+                      <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer" 
+                          onClick={() => toggleSection("headerFont")}
+                          data-testid="toggle-header-font"
+                        >
+                          <h4 className="text-sm font-semibold text-green-300">Font</h4>
+                          <i className={`fas ${collapsedSections.headerFont ? "fa-chevron-down" : "fa-chevron-up"} text-green-300 text-xs`} />
+                        </div>
+                        {!collapsedSections.headerFont && (
+                          <Select
+                            value={signatureData.headerFont}
+                            onValueChange={(v) => updateField('headerFont', v)}
+                          >
+                            <SelectTrigger data-testid="select-header-font">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {professionalFonts.map((font) => (
+                                <SelectItem key={font} value={font}>
+                                  {font}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+
+                      {/* Font Size Subsection */}
+                      <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer" 
+                          onClick={() => toggleSection("headerSize")}
+                          data-testid="toggle-header-size"
+                        >
+                          <h4 className="text-sm font-semibold text-green-300">Font Size</h4>
+                          <i className={`fas ${collapsedSections.headerSize ? "fa-chevron-down" : "fa-chevron-up"} text-green-300 text-xs`} />
+                        </div>
+                        {!collapsedSections.headerSize && (
+                          <div className="space-y-2">
+                            <Label className="text-sm text-gray-300">Size: {signatureData.headerSize}px</Label>
+                            <input
+                              type="range"
+                              min="10"
+                              max="32"
+                              value={signatureData.headerSize}
+                              onChange={(e) => updateField('headerSize', parseInt(e.target.value))}
+                              className="custom-range w-full"
+                              data-testid="range-header-size"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Color Subsection */}
+                      <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer" 
+                          onClick={() => toggleSection("headerColor")}
+                          data-testid="toggle-header-color"
+                        >
+                          <h4 className="text-sm font-semibold text-green-300">Color</h4>
+                          <i className={`fas ${collapsedSections.headerColor ? "fa-chevron-down" : "fa-chevron-up"} text-green-300 text-xs`} />
+                        </div>
+                        {!collapsedSections.headerColor && (
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value={signatureData.headerColor}
+                              onChange={(e) => updateField('headerColor', e.target.value)}
+                              className="w-16 h-9"
+                              data-testid="input-header-color"
+                            />
+                            <Input
+                              value={signatureData.headerColor}
+                              onChange={(e) => updateField('headerColor', e.target.value)}
+                              placeholder="#FF6A00"
+                              className="flex-1"
+                              data-testid="input-header-color-hex"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Contact Info Fonts Customization */}
+                <div className="bg-green-900/30 border border-green-600/30 rounded-lg p-4 space-y-4">
+                  <div 
+                    className="flex items-center justify-between cursor-pointer" 
+                    onClick={() => toggleSection("contactSection")}
+                    data-testid="toggle-contact-section"
+                  >
+                    <h3 className="text-lg font-semibold text-green-300">Contact Info Fonts</h3>
+                    <i className={`fas ${collapsedSections.contactSection ? "fa-chevron-down" : "fa-chevron-up"} text-green-300`} />
+                  </div>
+
+                  {!collapsedSections.contactSection && (
+                    <div className="space-y-3">
+                      {/* Font Subsection */}
+                      <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer" 
+                          onClick={() => toggleSection("contactInfoFont")}
+                          data-testid="toggle-contact-info-font"
+                        >
+                          <h4 className="text-sm font-semibold text-green-300">Font</h4>
+                          <i className={`fas ${collapsedSections.contactInfoFont ? "fa-chevron-down" : "fa-chevron-up"} text-green-300 text-xs`} />
+                        </div>
+                        {!collapsedSections.contactInfoFont && (
+                          <Select
+                            value={signatureData.contactFont}
+                            onValueChange={(v) => updateField('contactFont', v)}
+                          >
+                            <SelectTrigger data-testid="select-contact-font">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {professionalFonts.map((font) => (
+                                <SelectItem key={font} value={font}>
+                                  {font}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+
+                      {/* Font Size Subsection */}
+                      <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer" 
+                          onClick={() => toggleSection("contactInfoSize")}
+                          data-testid="toggle-contact-info-size"
+                        >
+                          <h4 className="text-sm font-semibold text-green-300">Font Size</h4>
+                          <i className={`fas ${collapsedSections.contactInfoSize ? "fa-chevron-down" : "fa-chevron-up"} text-green-300 text-xs`} />
+                        </div>
+                        {!collapsedSections.contactInfoSize && (
+                          <div className="space-y-2">
+                            <Label className="text-sm text-gray-300">Size: {signatureData.contactInfoSize}px</Label>
+                            <input
+                              type="range"
+                              min="10"
+                              max="24"
+                              value={signatureData.contactInfoSize}
+                              onChange={(e) => updateField('contactInfoSize', parseInt(e.target.value))}
+                              className="custom-range w-full"
+                              data-testid="range-contact-info-size"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Color Subsection */}
+                      <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer" 
+                          onClick={() => toggleSection("contactInfoColor")}
+                          data-testid="toggle-contact-info-color"
+                        >
+                          <h4 className="text-sm font-semibold text-green-300">Color</h4>
+                          <i className={`fas ${collapsedSections.contactInfoColor ? "fa-chevron-down" : "fa-chevron-up"} text-green-300 text-xs`} />
+                        </div>
+                        {!collapsedSections.contactInfoColor && (
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value={signatureData.contactInfoColor}
+                              onChange={(e) => updateField('contactInfoColor', e.target.value)}
+                              className="w-16 h-9"
+                              data-testid="input-contact-info-color"
+                            />
+                            <Input
+                              value={signatureData.contactInfoColor}
+                              onChange={(e) => updateField('contactInfoColor', e.target.value)}
+                              placeholder="#333333"
+                              className="flex-1"
+                              data-testid="input-contact-info-color-hex"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
