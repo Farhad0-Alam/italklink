@@ -1,195 +1,47 @@
 # 2TalkLink - Digital Business Card Platform
 
 ## Overview
-
-This is a comprehensive enterprise-grade platform that combines professional digital business cards with a complete appointment booking and CRM system. Users can create business cards with integrated appointment booking functionality, manage their scheduling, track leads through a full CRM pipeline, and analyze their business performance. The platform includes advanced features like team scheduling, calendar integrations, automated notifications, and revenue analytics.
+2TalkLink is an enterprise-grade platform offering professional digital business cards integrated with a comprehensive appointment booking and CRM system. It enables users to create customizable business cards, manage scheduling, track leads, and analyze business performance. The platform supports team scheduling, calendar integrations, automated notifications, and revenue analytics, aiming to provide a complete solution for business networking and client management. It also includes an email signature generator and a visitor notification subscription system.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Frontend Architecture
-- **Framework**: React 18 with TypeScript and Vite for fast development and building
-- **UI Library**: Shadcn/ui components built on top of Radix UI primitives for accessibility
-- **Styling**: Tailwind CSS with custom color schemes including TalkLink branding
-- **State Management**: React hooks with localStorage persistence for user data
-- **Form Handling**: React Hook Form with Zod validation for type-safe form management
-- **Routing**: Wouter for lightweight client-side routing (/, /builder, /share)
+### Frontend
+- **Framework**: React 18 with TypeScript and Vite.
+- **UI/UX**: Shadcn/ui (built on Radix UI) and Tailwind CSS for styling, with custom branding and responsive design (mobile-first approach, light/dark mode).
+- **State Management**: React hooks with localStorage persistence.
+- **Form Handling**: React Hook Form with Zod validation.
+- **Routing**: Wouter for client-side routing.
+- **Internationalization**: i18next supporting English and Bengali, with language preference saved in localStorage.
 
-### Data Management
-- **Storage**: Browser localStorage only - no server-side data persistence
-- **Schema**: Zod-validated BusinessCard schema with comprehensive field validation
-- **Image Handling**: Client-side file processing with base64 encoding for previews
-- **Persistence**: Auto-save functionality with debounced localStorage updates
+### Backend & Data Management
+- **Database**: PostgreSQL with Drizzle ORM (20+ tables for appointments, CRM, etc.), optimized for performance and multi-tenancy.
+- **Server**: Express.js with 50+ API endpoints, comprehensive security (CSRF, rate limiting, authentication), and real-time features.
+- **Data Persistence**: Browser localStorage for frontend, PostgreSQL for backend.
+- **Security**: Multi-tenant architecture with role-based access control, data isolation, and robust security measures.
 
-### Core Features Architecture
-- **Card Builder**: Real-time form with live preview updates
-- **Template System**: Three template variants (minimal, bold, photo) with dynamic styling
-- **QR Code Generation**: Client-side QR generation linking to shareable URLs
-- **Image Export**: HTML-to-image conversion for PNG downloads
-- **URL Sharing**: Base64-encoded card data in URL hash for share functionality
-
-### Internationalization
-- **i18next**: Supports English and Bengali localization
-- **Persistence**: Language preference saved in localStorage
-- **Dynamic**: Runtime language switching without page reload
-
-### Responsive Design
-- **Mobile-First**: Responsive layout optimized for mobile and desktop
-- **Theme Support**: Light/dark mode toggle with system preference detection
-- **Adaptive UI**: Collapsible sections and mobile-optimized interactions
-
-### Build System
-- **Development**: Vite dev server with HMR and TypeScript checking
-- **Production**: Optimized Vite build with code splitting
-- **Asset Handling**: Vite asset processing with automatic optimization
-
-## Comprehensive Appointment Booking & CRM System (September 2025)
-
-### Complete Enterprise-Grade Architecture
-- **Database Schema**: 20+ comprehensive tables covering appointments, availability, event types, team scheduling, CRM, notifications, and analytics
-- **API Endpoints**: 50+ enterprise-grade endpoints with comprehensive security, CSRF protection, rate limiting, and standardized validation
-- **Frontend System**: React 18 with TypeScript, modern UI components, and comprehensive dashboard modules
-- **Complete Integration**: Seamless flow from business cards → appointment booking → CRM → notifications → analytics
-- **Multi-Tenant Security**: Enterprise-grade authentication, authorization, and data isolation with role-based access control
-- **Production Architecture**: Real-time monitoring, performance tracking, comprehensive error handling, and scalability documentation
-
-### Appointment Booking System Features
-- **Public Booking Pages**: Multi-step booking flow with timezone detection, real-time availability checking, and mobile optimization
-- **Business Card Integration**: 4 booking element types (Book Appointment, Calendar Widget, Quick Book, Schedule Meeting) with customizable styling
-- **Event Types Management**: Different appointment types with durations, descriptions, pricing, buffer times, and custom branding
-- **Team Scheduling**: Round-robin assignment, collective availability, intelligent lead routing, and capacity management
-- **Calendar Integration**: Google Calendar, Zoom, Microsoft Teams with OAuth flows, two-way sync, and automated meeting creation
-- **Payment Processing**: Stripe integration with multi-currency support, refunds, transaction management, and revenue tracking
-- **Automated Notifications**: Multi-channel delivery (email, SMS, push) with customizable templates, scheduling, and follow-up sequences
-- **Analytics Dashboard**: Booking trends, conversion rates, revenue analytics, no-show tracking, export capabilities, and performance insights
-
-### Advanced CRM Integration
-- **Automatic Lead Capture**: Business card interactions and appointment bookings automatically create CRM contacts with lead scoring
-- **Contact Management**: Lead scoring, lifecycle stages (visitor, lead, customer, evangelist), deduplication, and data enrichment
-- **Deal Pipeline**: Visual Kanban with drag-drop management, customizable stages, revenue tracking, and win/loss analysis
-- **Task Management**: Assignment, priorities, due dates, completion tracking, and team collaboration
-- **Activity Timeline**: Complete interaction history, automated CRM event tracking, and comprehensive audit trails
-- **Team Collaboration**: Role-based access (super_admin, owner, user), team assignments, and collaborative workflows
-
-### Technical Excellence
-- **Frontend**: React Query with optimistic updates, cache invalidation, real-time synchronization, and comprehensive error boundaries
-- **Backend**: Express.js with comprehensive validation, security middleware, performance monitoring, and standardized API responses
-- **Database**: PostgreSQL with Drizzle ORM, proper normalization, optimized queries, and performance indexing
-- **Security**: CSRF protection, rate limiting, authentication middleware, input sanitization, and comprehensive audit logging
-- **Integration**: External service connectivity with OAuth flows, webhook handling, error recovery, and health monitoring
-- **Scalability**: Multi-tenant architecture with horizontal scaling documentation, Redis-ready caching, and load balancing support
-
-## Visitor Notification Subscription System (October 2025)
-
-### Complete Subscription Infrastructure
-- **Database Schema**: `card_subscriptions` table with email, name, push subscription tokens, unsubscribe tokens, and subscription status tracking
-- **API Endpoints**: Public subscription endpoints (subscribe, unsubscribe), authenticated subscriber management (count, list)
-- **Builder Element**: "Subscribe to Updates" card element with full customization (title, description, button text, colors, field requirements)
-- **PWA Service Worker**: `card-sw.js` with push notification handling, notification click events, and subscription management
-- **Frontend Components**: `SubscribeForm` component with email validation, browser permission request, and success states
-
-### Subscription Features
-- **Email Subscription**: Visitors can subscribe with email + optional name to receive card updates
-- **Browser Push Notifications**: Request and store browser push subscriptions for real-time notifications
-- **Unsubscribe System**: Unique unsubscribe tokens for one-click unsubscribe functionality
-- **Subscription Management**: Card owners can view subscriber counts and lists with proper ownership verification
-- **Active/Inactive States**: Track subscription status, unsubscribe dates, and reactivation support
-- **Rate Limiting**: 3 notifications per card per user per day to prevent abuse
-
-### Database Subscribers Integration
-- **Query Actual Subscribers**: Notification system now queries `card_subscriptions` table for active subscribers
-- **Card Ownership Verification**: Validates card ownership before sending notifications
-- **Subscriber Tracking**: Logs found subscribers and their subscription types (email, push)
-- **OneSignal Fallback**: Maintains OneSignal integration for legacy subscribers
-
-### Implementation Status
-- ✅ Database table with indexes for performance
-- ✅ Complete API endpoints with validation and security
-- ✅ Builder element with customization options
-- ✅ Subscription form component with browser permission flow
-- ✅ PWA service worker with push notification handlers
-- ✅ Notification controller queries database subscribers
-- ✅ **Web Push Delivery Fully Implemented**: Push notifications now delivered using web-push package
-
-### Web Push Notification System (October 2025)
-- **Package Installed**: web-push library integrated with .npmrc legacy-peer-deps configuration
-- **VAPID Keys Configured**: Secure VAPID key pair generated and stored in environment secrets
-- **Backend Implementation**:
-  - Automatic "mailto:" prefix handling for VAPID_MAILTO secret (user-friendly configuration)
-  - Actual Web Push notification delivery via webpush.sendNotification()
-  - Production-ready URL handling with APP_URL and Replit env var fallbacks
-  - Automatic cleanup of expired/invalid push subscriptions (410 Gone responses)
-  - VAPID key validation with 503 error when not configured
-  - /api/notify/vapid-public-key endpoint for secure public key distribution
-- **Frontend Integration**:
-  - Fetches VAPID public key from backend on component mount
-  - Uses real VAPID key for browser push subscription requests
-  - Proper state management for VAPID key
-- **Security & Error Handling**:
-  - No hardcoded keys in frontend
-  - Comprehensive error handling and logging
-  - Rate limiting (3 notifications per card per user per day)
-  - Authentication and card ownership verification
-- **Testing**: End-to-end validation confirmed notification API works correctly with proper authentication, authorization, and subscriber tracking
-
-### Production Setup
-The Web Push system is fully configured and ready for production use:
-
-1. **Environment Secrets Required**:
-   - `VAPID_PUBLIC_KEY`: Public key for browser subscriptions
-   - `VAPID_PRIVATE_KEY`: Private key for server-side sending
-   - `VAPID_MAILTO`: Contact email (format: `mailto:email@domain.com` or just `email@domain.com` - prefix added automatically)
-   - `APP_URL`: Base URL for notification click-through links (optional, falls back to Replit env vars)
-
-2. **Browser Support**: Chrome, Firefox, Edge, Safari (iOS 16.4+)
-3. **User Permission Required**: Subscribers must grant browser notification permission
-4. **Service Worker**: PWA service worker handles notification display and click events
+### Core Features
+- **Digital Business Card Builder**: Real-time form with live preview, multiple templates, QR code generation, image export, and URL sharing.
+- **Appointment Booking System**: Public booking pages, integration with business cards, customizable event types, team scheduling, calendar integrations (Google Calendar, Zoom, Microsoft Teams), payment processing (Stripe), and automated multi-channel notifications.
+- **CRM Integration**: Automatic lead capture, contact management (scoring, lifecycle), visual deal pipeline, task management, activity timeline, and team collaboration.
+- **Visitor Notification Subscription**: "Subscribe to Updates" card element, email and browser push notification subscriptions, unsubscribe system, subscriber management for card owners, and rate limiting.
+- **Web Push Notification System**: Utilizes `web-push` library with VAPID keys for secure, real-time push notification delivery, including automatic cleanup of invalid subscriptions.
+- **Email Signature Generator**: Live preview, multiple templates, comprehensive customization (contact info, visuals, colors, social links), and HTML export compatible with various email clients (inline CSS, table-based layout).
 
 ## External Dependencies
 
-### Core Framework Dependencies
-- **React Ecosystem**: React 18, React DOM, React Hook Form for UI and form management
-- **Build Tools**: Vite for development server and production builds
-- **TypeScript**: Full TypeScript support with strict type checking
-
-### UI and Styling
-- **Radix UI**: Complete set of unstyled, accessible UI primitives
-- **Tailwind CSS**: Utility-first CSS framework with custom design system
-- **Shadcn/ui**: Pre-built component library extending Radix UI
-- **Class Variance Authority**: Type-safe variant-based styling system
-
-### Utility Libraries
-- **Zod**: Runtime type validation and schema definition
-- **date-fns**: Date manipulation utilities
-- **clsx & tailwind-merge**: Conditional class name utilities
-- **React Query**: Server state management (minimal usage for health checks)
-
-### Feature-Specific Libraries
-- **qrcode.react**: QR code generation component
-- **html-to-image**: DOM-to-image conversion for PNG export
-- **i18next**: Internationalization framework with React integration
-- **Wouter**: Lightweight routing library
-
-### Development Tools
-- **ESBuild**: Fast bundling for server-side code
-- **PostCSS**: CSS processing with Tailwind and Autoprefixer
-- **Font Awesome**: Icon library for social media and UI icons
-
-### Production Database System
-- **PostgreSQL**: Enterprise-grade database with 20+ tables, proper relationships, and foreign key constraints
-- **Drizzle ORM**: Full schema management with automated migrations, type safety, and query optimization
-- **Performance**: Optimized queries, proper indexing, connection pooling, and query performance monitoring
-- **Data Integrity**: Transaction safety, validation constraints, audit trails, and backup procedures
-- **Multi-Tenant**: User-scoped data isolation, role-based access control, and secure data segregation
-- **Monitoring**: Database health checks, query performance tracking, and automated alerting
-
-### Enterprise Server Infrastructure
-- **Express.js**: Full-featured server with 50+ API endpoints, middleware stack, and comprehensive routing
-- **Enterprise Security**: CSRF protection, rate limiting, authentication, authorization, and audit logging
-- **Real-Time Features**: WebSocket support, notification delivery, calendar sync workers, and background processing
-- **Production Ready**: Health monitoring, performance tracking, error handling, and deployment documentation
-- **Integration Hub**: OAuth providers, webhook endpoints, external service connectors, and API gateway functionality
-- **Scalability**: Horizontal scaling support, Redis-ready architecture, and load balancing configuration
+- **UI & Styling**: Radix UI, Tailwind CSS, Shadcn/ui, Class Variance Authority.
+- **Data Validation**: Zod.
+- **Date Utilities**: date-fns.
+- **Routing**: Wouter.
+- **Internationalization**: i18next.
+- **QR Code Generation**: qrcode.react.
+- **Image Export**: html-to-image.
+- **Icons**: Lucide React, react-icons/si (for social platforms).
+- **Database ORM**: Drizzle ORM.
+- **Push Notifications**: web-push library.
+- **Payment Processing**: Stripe.
+- **Calendar Integrations**: Google Calendar, Zoom, Microsoft Teams (via OAuth).
+- **Server-side Framework**: Express.js.

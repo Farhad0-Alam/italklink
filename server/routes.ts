@@ -2591,13 +2591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/:slug', asyncHandler(async (req, res, next) => {
     const slug = req.params.slug;
     
-    // Skip Vite-specific paths in development (these start with @ or are special paths)
-    if (process.env.NODE_ENV === 'development' && 
-        (slug.startsWith('@') || slug === 'src' || slug === 'node_modules' || slug.startsWith('__vite'))) {
-      return next(); // Pass to next middleware (Vite)
-    }
-    
-    // Reserved slugs that should skip file serving
+    // Reserved slugs that should skip file serving and pass to SPA
     const RESERVED_SLUGS = [
       "", "api", "auth", "admin", "builder", "dashboard", "login", "register",
       "logout", "static", "assets", "public", "favicon.ico", "robots.txt", "sitemap.xml",
@@ -2605,12 +2599,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       "health", "status", "webhook", "hooks", "oauth", "pay", "stripe", "paypal",
       "uploads", "templates", "appointments", "crm", "availability", "affiliate",
       "profile", "account-settings", "billing", "usage", "automation", "event-types",
-      "email-templates", "analytics", "card-analytics", "teams", "help", "booking"
+      "email-templates", "analytics", "card-analytics", "teams", "help", "booking",
+      "qr-codes", "email-signature"
     ];
     
     // Skip reserved slugs - let them fall through to other handlers
     if (RESERVED_SLUGS.includes(slug)) {
       return next(); // Pass control to next middleware (Vite/SPA)
+    }
+    
+    // Skip Vite-specific paths in development (these start with @ or are special paths)
+    if (process.env.NODE_ENV === 'development' && 
+        (slug.startsWith('@') || slug === 'src' || slug === 'node_modules' || slug.startsWith('__vite'))) {
+      return next(); // Pass to next middleware (Vite)
     }
     
     // Check if this slug exists in public uploads

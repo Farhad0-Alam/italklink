@@ -86,12 +86,12 @@ function Router() {
       <Route path="/email-templates">{() => <PageSuspense><EmailTemplatesPage /></PageSuspense>}</Route>
       <Route path="/uploads">{() => <PageSuspense><Uploads /></PageSuspense>}</Route>
       <Route path="/qr-codes">{() => <PageSuspense><QrCodes /></PageSuspense>}</Route>
-      <Route path="/email-signature">{() => <PageSuspense><EmailSignature /></PageSuspense>}</Route>
       <Route path="/crm">{() => <PageSuspense><CRM /></PageSuspense>}</Route>
       <Route path="/analytics">{() => <PageSuspense><Analytics /></PageSuspense>}</Route>
       <Route path="/card-analytics">{() => <PageSuspense><CardAnalytics /></PageSuspense>}</Route>
       <Route path="/teams">{() => <PageSuspense><TeamDashboard /></PageSuspense>}</Route>
       <Route path="/help">{() => <PageSuspense><Help /></PageSuspense>}</Route>
+      <Route path="/email-signature">{() => <PageSuspense><EmailSignature /></PageSuspense>}</Route>
       <Route path="/booking/:eventTypeSlug">{(params) => <PageSuspense><BookingPage {...params} /></PageSuspense>}</Route>
       <Route path="/admin/templates/import">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/templates/builder">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
@@ -115,6 +115,7 @@ function Router() {
         </PageSuspense>
       </Route>
       
+      {/* Catch-all route for sharing - must be LAST */}
       <Route path="/:shareSlug">{(params) => <PageSuspense><Share {...params} /></PageSuspense>}</Route>
       <Route>{() => <PageSuspense><NotFound /></PageSuspense>}</Route>
     </Switch>
