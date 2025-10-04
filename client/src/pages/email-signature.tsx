@@ -916,41 +916,42 @@ export default function EmailSignature() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={signatureData.name}
-                    onChange={(e) => updateField("name", e.target.value)}
-                    placeholder="John Doe"
-                    data-testid="input-name"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    value={signatureData.title}
-                    onChange={(e) => updateField("title", e.target.value)}
-                    placeholder="CEO & Founder"
-                    data-testid="input-title"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="company">Company</Label>
-                  <Input
-                    id="company"
-                    value={signatureData.company}
-                    onChange={(e) => updateField("company", e.target.value)}
-                    placeholder="2TalkLink Inc."
-                    data-testid="input-company"
-                  />
-                </div>
-
                 {!collapsedSections.nameSection && (
-                  <div className="space-y-3 pt-3">
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Name</Label>
+                      <Input
+                        id="name"
+                        value={signatureData.name}
+                        onChange={(e) => updateField("name", e.target.value)}
+                        placeholder="John Doe"
+                        data-testid="input-name"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Title</Label>
+                      <Input
+                        id="title"
+                        value={signatureData.title}
+                        onChange={(e) => updateField("title", e.target.value)}
+                        placeholder="CEO & Founder"
+                        data-testid="input-title"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="company">Company</Label>
+                      <Input
+                        id="company"
+                        value={signatureData.company}
+                        onChange={(e) => updateField("company", e.target.value)}
+                        placeholder="2TalkLink Inc."
+                        data-testid="input-company"
+                      />
+                    </div>
+
+                    <div className="space-y-3 pt-3">
                     {/* Name Style Subsection */}
                     <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
                       <div
@@ -1202,7 +1203,7 @@ export default function EmailSignature() {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </>
                 )}
               </CardContent>
             </Card>
