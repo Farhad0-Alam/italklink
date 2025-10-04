@@ -892,6 +892,7 @@ export default function EmailSignature() {
                         </div>
                       )}
                     </div>
+                    </div>
                   </>
                 )}
               </CardContent>
@@ -1202,6 +1203,7 @@ export default function EmailSignature() {
                           </div>
                         </div>
                       )}
+                    </div>
                     </div>
                   </>
                 )}
