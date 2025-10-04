@@ -78,6 +78,7 @@ export const syncDirectionEnum = pgEnum('sync_direction', ['one_way_to_external'
 
 // QR Code system enums
 export const deviceTypeEnum = pgEnum('device_type', ['mobile', 'desktop', 'tablet', 'bot']);
+export const logoShapeEnum = pgEnum('logo_shape', ['circle', 'rectangle']);
 
 // Database Tables
 
@@ -3920,12 +3921,20 @@ export const mediaVariants = pgTable("media_variants", {
 export const qrLinks = pgTable("qr_links", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
-  shortId: varchar("short_id").unique().notNull(), // 7-10 URL-safe chars
+  shortId: varchar("short_id").unique().notNull(), // 7-10 URL-safe chars (now customizable)
   name: text("name"), // Optional label for UI
   targetUrl: text("target_url").notNull(), // Absolute http/https URL
   utm: jsonb("utm"), // UTM parameters as JSON object
   rules: jsonb("rules"), // Smart routing rules as JSON object
   enabled: boolean("enabled").default(true),
+  
+  // QR code customization
+  darkColor: text("dark_color").default('#000000'), // QR code dark color (hex)
+  lightColor: text("light_color").default('#FFFFFF'), // QR code light color (hex)
+  logoUrl: text("logo_url"), // Optional logo URL
+  logoShape: logoShapeEnum("logo_shape").default('circle'), // Logo shape
+  logoSize: integer("logo_size").default(20), // Logo size as percentage (10-40)
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
@@ -4114,7 +4123,13 @@ export const insertQrLinkSchema = createInsertSchema(qrLinks).omit({
   createdAt: true,
   updatedAt: true,
 }).extend({
+  shortId: z.string().min(3).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Short ID can only contain letters, numbers, hyphens, and underscores'),
   targetUrl: z.string().url('Target URL must be a valid HTTP/HTTPS URL'),
+  darkColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Dark color must be a valid hex color').optional(),
+  lightColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Light color must be a valid hex color').optional(),
+  logoUrl: z.string().url().optional().nullable(),
+  logoShape: z.enum(['circle', 'rectangle']).optional(),
+  logoSize: z.number().min(10).max(40).optional(),
   utm: z.object({
     utm_source: z.string().optional(),
     utm_medium: z.string().optional(),
