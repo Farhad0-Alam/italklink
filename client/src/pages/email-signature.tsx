@@ -368,9 +368,10 @@ export default function EmailSignature() {
             <table cellpadding="0" cellspacing="0" border="0">
               ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 1px;">${signatureName}</td></tr>` : ""}
               <tr>
-                <td style="font-family: Arial, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 0px;">${name}</td>
+                <td style="font-family: Arial, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 3px;">
+                  ${name}${title ? ` <span style="color: ${nameColor}; opacity: 0.7; margin: 0 8px;">|</span> <span style="font-family: Arial, sans-serif; font-size: ${titleSize}px; color: ${titleColor};">${title}</span>` : ''}
+                </td>
               </tr>
-              ${title ? `<tr><td style="font-family: Arial, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; padding-bottom: 1px;">${title}</td></tr>` : ""}
               ${company ? `<tr><td style="font-family: Arial, sans-serif; font-size: ${companySize}px; color: ${companyColor}; padding-bottom: 5px;">${company}</td></tr>` : ""}
               ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding-bottom: 0px;"><span style="color: ${contactIconColor}; font-size: ${contactIconSize}px;">📱</span> ${cellPhone}</td></tr>` : ""}
               ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding-bottom: 2px;"><a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="color: ${contactIconColor}; font-size: ${contactIconSize}px;">✉️</span> ${email}</a></td></tr>` : ""}
@@ -456,9 +457,10 @@ export default function EmailSignature() {
             <table cellpadding="0" cellspacing="0" border="0">
               ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
               <tr>
-                <td style="font-family: Arial, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 5px;">${name}</td>
+                <td style="font-family: Arial, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 3px;">
+                  ${name}${title ? ` <span style="color: ${nameColor}; opacity: 0.7; margin: 0 8px;">|</span> <span style="font-family: Arial, sans-serif; font-size: ${titleSize}px; color: ${titleColor};">${title}</span>` : ''}
+                </td>
               </tr>
-              ${title ? `<tr><td style="font-family: Arial, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; padding-bottom: ${company ? "3px" : "10px"};">${title}</td></tr>` : ""}
               ${company ? `<tr><td style="font-family: Arial, sans-serif; font-size: ${companySize}px; color: ${companyColor}; padding-bottom: 10px;">${company}</td></tr>` : ""}
               ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;"><span style="color: ${contactIconColor}; font-size: ${contactIconSize}px;">📱</span> <a href="tel:${cellPhone}" style="color: ${contactInfoColor}; text-decoration: none;">${cellPhone}</a></td></tr>` : ""}
               ${officePhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;"><span style="color: ${contactIconColor}; font-size: ${contactIconSize}px;">☎️</span> <a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none;">${officePhone}</a></td></tr>` : ""}
@@ -583,9 +585,10 @@ export default function EmailSignature() {
             <table cellpadding="0" cellspacing="0" border="0">
               ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
               <tr>
-                <td style="font-family: Arial, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 5px;">${name}</td>
+                <td style="font-family: Arial, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 3px;">
+                  ${name}${title ? ` <span style="color: ${nameColor}; opacity: 0.7; margin: 0 8px;">|</span> <span style="font-family: Arial, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; font-weight: 600;">${title}</span>` : ''}
+                </td>
               </tr>
-              ${title ? `<tr><td style="font-family: Arial, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; font-weight: 600; padding-bottom: 3px;">${title}</td></tr>` : ""}
               ${company ? `<tr><td style="font-family: Arial, sans-serif; font-size: ${companySize}px; color: ${companyColor}; padding-bottom: 15px;">${company}</td></tr>` : ""}
               <tr><td style="height: 2px; background-color: ${primaryColor}; margin: 10px 0;"></td></tr>
               ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;"><span style="color: ${contactIconColor}; font-size: ${contactIconSize}px;">📱</span> <a href="tel:${cellPhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${cellPhone}</a></td></tr>` : ""}
