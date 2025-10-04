@@ -1,0 +1,64 @@
+Build a modern full-stack SaaS QR Code Maker web app with the following requirements:
+
+1. **UI/UX Design**
+   - Clean, minimal, responsive dashboard using TailwindCSS + Shadcn UI components.
+   - Branding color: #FF6A00 (modern orange).
+   - Typography: Use "Inter" or "Poppins" for a professional SaaS feel.
+   - Dark mode + light mode support.
+   - Each QR card should have a modern rounded style with hover effects and animated previews.
+
+2. **QR Code Features**
+   - **Dynamic QR Codes**: Links can be updated after creation without changing the QR image.
+   - **Static QR Codes**: Quick generation option with direct download.
+   - Advanced **QR design customization**:
+     - Logo in center.
+     - Custom colors & gradients.
+     - Rounded corner styles and patterns.
+     - Different frame shapes with labels (e.g., “Scan Me”).
+   - Export options: PNG, SVG, PDF, EPS.
+   - Download in multiple sizes (300px–2000px).
+
+3. **Advanced Functionality**
+   - **Analytics Dashboard**:
+     - Track total scans, device types (iOS/Android), geolocation (country, city), browser/OS stats, and time-based scan reports (daily/weekly/monthly).
+     - Charts with Recharts or Chart.js.
+   - **Link Management**:
+     - Create, edit, pause/activate, delete.
+     - Add UTM parameters for campaign tracking.
+   - **Folder/Project Organization**:
+     - Users can group QR codes in folders or campaigns.
+   - **Short Links Integration**:
+     - Every dynamic QR also generates a branded short link.
+   - **Bulk QR Code Creation**:
+     - Upload CSV with multiple URLs to generate QR codes at once.
+   - **API Access**:
+     - REST API for developers to programmatically create/manage QR codes.
+
+4. **Authentication & Accounts**
+   - User registration/login with JWT or Supabase Auth.
+   - Session management: Option 2 (longer sessions without saving password) and Option 3 (browser password manager).
+   - Role system: admin / user.
+
+5. **Extra Features**
+   - Multi-language support (English, Bengali).
+   - Add “Add to Apple/Google Wallet” option for saved QR passes.
+   - Optional password-protected QR codes.
+   - Expiry date for QR codes (auto deactivate after a set date).
+   - Push notification alerts for scan milestones.
+   - White-label option for SaaS resellers.
+
+6. **Backend**
+   - Node.js + Express or Next.js 15 API routes.
+   - Database: Supabase (Postgres).
+   - Store scan logs & analytics in real-time.
+   - OneSignal for push notifications.
+   - Stripe/PayPal integration for subscriptions.
+
+Deliver a **production-ready SaaS project structure**:
+- `/auth` → login/signup
+- `/dashboard` → manage QR codes
+- `/qr/[id]` → details & analytics
+- `/api/qr` → CRUD endpoints for QR codes
+- `/billing` → subscription management
+
+Ensure **all missing advanced QR features** are implemented, with scalability and SaaS-ready architecture.

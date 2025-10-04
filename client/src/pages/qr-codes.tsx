@@ -4,7 +4,12 @@ import { useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { QrCode, Plus, Download, BarChart3, Settings, Trash2, Eye, Copy, ExternalLink, ArrowLeft } from 'lucide-react';
+import { 
+  QrCode, Plus, Download, BarChart3, Settings, Trash2, Eye, Copy, 
+  ExternalLink, ArrowLeft, Sparkles, Palette, ImageIcon, Layers,
+  TrendingUp, Users, Globe, Zap, FolderOpen, Grid3x3
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +21,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
@@ -59,7 +66,7 @@ const staticQrSchema = z.object({
   format: z.enum(['png', 'svg']).default('svg'),
   size: z.enum(['256', '512', '1024']).default('512'),
   margin: z.number().min(0).max(10).default(2),
-  dark: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').default('#000000'),
+  dark: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').default('#FF6A00'),
   light: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be valid hex color').default('#ffffff'),
   logo: z.any().optional(),
 });
@@ -94,8 +101,8 @@ export default function QrCodes() {
       queryClient.invalidateQueries({ queryKey: ['/api/qr/links'] });
       setShowCreateDialog(false);
       toast({
-        title: 'QR Link Created',
-        description: 'Your dynamic QR link has been created successfully.',
+        title: '✨ QR Link Created!',
+        description: 'Your dynamic QR link is ready to use.',
       });
     },
     onError: (error: any) => {
@@ -114,7 +121,7 @@ export default function QrCodes() {
       queryClient.invalidateQueries({ queryKey: ['/api/qr/links'] });
       toast({
         title: 'QR Link Deleted',
-        description: 'The QR link has been deleted successfully.',
+        description: 'The QR link has been removed successfully.',
       });
     },
     onError: (error: any) => {
@@ -149,7 +156,7 @@ export default function QrCodes() {
       format: 'svg' as const,
       size: '512' as const,
       margin: 2,
-      dark: '#000000',
+      dark: '#FF6A00',
       light: '#ffffff',
       logo: null,
     },
@@ -193,13 +200,12 @@ export default function QrCodes() {
     try {
       const formData = new FormData();
       formData.append('data', data.data);
-      formData.append('format', 'svg'); // Always use SVG for preview
+      formData.append('format', 'svg');
       formData.append('size', data.size || '512');
       formData.append('margin', data.margin?.toString() || '2');
-      formData.append('dark', data.dark || '#000000');
+      formData.append('dark', data.dark || '#FF6A00');
       formData.append('light', data.light || '#ffffff');
       
-      // Add logo if selected
       if (logoFile) {
         formData.append('logo', logoFile);
       }
@@ -215,12 +221,10 @@ export default function QrCodes() {
       }
 
       const svgText = await response.text();
-      // Create safe data URL for SVG
       const svgDataUrl = `data:image/svg+xml;base64,${btoa(svgText)}`;
       setQrPreview(svgDataUrl);
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        // Request was cancelled, ignore
         return;
       }
       console.error('Preview generation error:', error);
@@ -238,10 +242,9 @@ export default function QrCodes() {
       formData.append('format', data.format || 'svg');
       formData.append('size', data.size || '512');
       formData.append('margin', data.margin?.toString() || '2');
-      formData.append('dark', data.dark || '#000000');
+      formData.append('dark', data.dark || '#FF6A00');
       formData.append('light', data.light || '#ffffff');
       
-      // Add logo if selected
       if (logoFile) {
         formData.append('logo', logoFile);
       }
@@ -258,7 +261,6 @@ export default function QrCodes() {
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       
-      // Create download link
       const link = document.createElement('a');
       link.href = url;
       link.download = `qr-code.${data.format}`;
@@ -268,8 +270,8 @@ export default function QrCodes() {
       URL.revokeObjectURL(url);
 
       toast({
-        title: 'QR Code Downloaded',
-        description: 'Your static QR code has been downloaded successfully.',
+        title: '✨ Downloaded!',
+        description: 'Your QR code has been saved successfully.',
       });
     } catch (error: any) {
       toast({
@@ -300,64 +302,150 @@ export default function QrCodes() {
     const url = `${window.location.origin}/q/${shortId}`;
     navigator.clipboard.writeText(url);
     toast({
-      title: 'URL Copied',
-      description: 'QR code URL has been copied to clipboard.',
+      title: '✨ URL Copied!',
+      description: 'QR code URL is now in your clipboard.',
     });
   };
 
   if (!user) {
-    return null; // Will redirect
+    return null;
   }
 
+  const qrLinks = (qrLinksData as any)?.links || [];
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50 dark:from-slate-950 dark:via-slate-900 dark:to-orange-950">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={() => setLocation('/dashboard')}
-          className="mb-4"
-          data-testid="button-back-dashboard"
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
-        </Button>
+          <Button
+            variant="ghost"
+            onClick={() => setLocation('/dashboard')}
+            className="mb-6 hover:bg-orange-100 dark:hover:bg-orange-950/50"
+            data-testid="button-back-dashboard"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </motion.div>
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            QR Code Manager
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            Create dynamic QR codes with tracking and analytics, or generate static QR codes instantly.
-          </p>
-        </div>
+        <motion.div 
+          className="mb-12"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/30">
+                  <QrCode className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-black text-slate-900 dark:text-white bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
+                    QR Code Studio
+                  </h1>
+                  <p className="text-slate-600 dark:text-slate-400 mt-1">
+                    Create stunning, trackable QR codes in seconds
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Stats Cards */}
+            <div className="hidden lg:flex gap-4">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-lg border border-orange-200 dark:border-orange-900"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Total Scans</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                      {qrLinks.reduce((acc: number, qr: QrLink) => acc + (qr.analytics?.totalScans || 0), 0)}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+              
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-lg border border-orange-200 dark:border-orange-900"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                    <Layers className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Active QR Codes</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                      {qrLinks.filter((qr: QrLink) => qr.enabled).length}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
 
-        <Tabs defaultValue="dynamic" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="dynamic" data-testid="tab-dynamic">Dynamic QR Codes</TabsTrigger>
-            <TabsTrigger value="static" data-testid="tab-static">Static Generator</TabsTrigger>
+        <Tabs defaultValue="dynamic" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-2 bg-white dark:bg-slate-800 p-1 rounded-2xl shadow-lg border border-orange-200 dark:border-orange-900">
+            <TabsTrigger 
+              value="dynamic" 
+              className="rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+              data-testid="tab-dynamic"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Dynamic QR Codes
+            </TabsTrigger>
+            <TabsTrigger 
+              value="static" 
+              className="rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+              data-testid="tab-static"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              Quick Generator
+            </TabsTrigger>
           </TabsList>
 
           {/* Dynamic QR Codes Tab */}
           <TabsContent value="dynamic" className="space-y-6">
-            <div className="flex justify-between items-center">
+            <motion.div 
+              className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-orange-200 dark:border-orange-900"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
               <div>
-                <h2 className="text-xl font-semibold">Dynamic QR Links</h2>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Trackable QR codes that you can edit and analyze
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
+                  Dynamic QR Links
+                </h2>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  Trackable QR codes with real-time analytics
                 </p>
               </div>
               <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                 <DialogTrigger asChild>
-                  <Button data-testid="button-create-qr">
+                  <Button 
+                    className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-lg shadow-orange-500/30"
+                    data-testid="button-create-qr"
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Create QR Link
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Create Dynamic QR Link</DialogTitle>
+                    <DialogTitle className="text-2xl bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
+                      Create Dynamic QR Link
+                    </DialogTitle>
                     <DialogDescription>
                       Create a trackable QR code that you can edit and analyze
                     </DialogDescription>
@@ -371,7 +459,7 @@ export default function QrCodes() {
                           <FormItem>
                             <FormLabel>Name</FormLabel>
                             <FormControl>
-                              <Input placeholder="My QR Link" {...field} data-testid="input-qr-name" />
+                              <Input placeholder="My Awesome QR" {...field} data-testid="input-qr-name" className="border-orange-200 focus:border-orange-500" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -384,7 +472,7 @@ export default function QrCodes() {
                           <FormItem>
                             <FormLabel>Target URL</FormLabel>
                             <FormControl>
-                              <Input placeholder="https://example.com" {...field} data-testid="input-target-url" />
+                              <Input placeholder="https://example.com" {...field} data-testid="input-target-url" className="border-orange-200 focus:border-orange-500" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -401,7 +489,7 @@ export default function QrCodes() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
-                                  <Input placeholder="Source" {...field} />
+                                  <Input placeholder="Source" {...field} className="border-orange-200" />
                                 </FormControl>
                               </FormItem>
                             )}
@@ -412,7 +500,7 @@ export default function QrCodes() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
-                                  <Input placeholder="Medium" {...field} />
+                                  <Input placeholder="Medium" {...field} className="border-orange-200" />
                                 </FormControl>
                               </FormItem>
                             )}
@@ -427,6 +515,7 @@ export default function QrCodes() {
                         <Button 
                           type="submit" 
                           disabled={createQrLinkMutation.isPending}
+                          className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
                           data-testid="button-submit-qr"
                         >
                           {createQrLinkMutation.isPending ? 'Creating...' : 'Create QR Link'}
@@ -436,290 +525,409 @@ export default function QrCodes() {
                   </Form>
                 </DialogContent>
               </Dialog>
-            </div>
+            </motion.div>
 
-            {/* QR Links List */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {linksLoading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardContent className="p-6">
-                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
-                      <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded mb-4"></div>
-                      <div className="flex justify-between">
-                        <div className="h-8 w-16 bg-slate-200 dark:bg-slate-700 rounded"></div>
-                        <div className="h-8 w-20 bg-slate-200 dark:bg-slate-700 rounded"></div>
+            {/* QR Links Grid */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <AnimatePresence mode="popLayout">
+                {linksLoading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ delay: i * 0.1 }}
+                    >
+                      <Card className="animate-pulse border-orange-200 dark:border-orange-900">
+                        <CardContent className="p-6">
+                          <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
+                          <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded mb-4"></div>
+                          <div className="flex justify-between">
+                            <div className="h-8 w-16 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                            <div className="h-8 w-20 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))
+                ) : qrLinks.length > 0 ? (
+                  qrLinks.map((qrLink: QrLink, index: number) => (
+                    <motion.div
+                      key={qrLink.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ y: -5 }}
+                    >
+                      <Card 
+                        className="group hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-300 border-orange-200 dark:border-orange-900 bg-white dark:bg-slate-800 overflow-hidden" 
+                        data-testid={`card-qr-${qrLink.id}`}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <CardHeader className="pb-3 relative">
+                          <CardTitle className="text-lg flex items-center justify-between">
+                            <span className="truncate font-bold" data-testid={`text-qr-name-${qrLink.id}`}>
+                              {qrLink.name || 'Unnamed QR'}
+                            </span>
+                            <Badge 
+                              variant={qrLink.enabled ? 'default' : 'secondary'}
+                              className={qrLink.enabled ? 'bg-gradient-to-r from-green-500 to-emerald-500' : ''}
+                              data-testid={`status-qr-${qrLink.id}`}
+                            >
+                              {qrLink.enabled ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </CardTitle>
+                          <CardDescription className="truncate" data-testid={`text-target-url-${qrLink.id}`}>
+                            {qrLink.targetUrl}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-0 relative">
+                          <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400 mb-4 p-3 bg-orange-50 dark:bg-orange-950/30 rounded-xl">
+                            <span className="font-mono font-semibold">/{qrLink.shortId}</span>
+                            <div className="flex items-center gap-2">
+                              <Eye className="w-3 h-3" />
+                              <span className="font-bold">{qrLink.analytics?.totalScans || 0}</span>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => copyQrUrl(qrLink.shortId)}
+                              className="flex-1 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-950/30"
+                              data-testid={`button-copy-${qrLink.id}`}
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="flex-1 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-950/30"
+                              data-testid={`button-analytics-${qrLink.id}`}
+                            >
+                              <BarChart3 className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(`/q/${qrLink.shortId}`, '_blank')}
+                              className="flex-1 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-950/30"
+                              data-testid={`button-visit-${qrLink.id}`}
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteQrLinkMutation.mutate(qrLink.id)}
+                              disabled={deleteQrLinkMutation.isPending}
+                              className="flex-1 border-red-200 hover:bg-red-50 dark:hover:bg-red-950/30"
+                              data-testid={`button-delete-${qrLink.id}`}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))
+                ) : (
+                  <motion.div 
+                    className="col-span-full"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border-2 border-dashed border-orange-300 dark:border-orange-800">
+                      <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-pink-500 rounded-3xl flex items-center justify-center">
+                        <QrCode className="w-10 h-10 text-white" />
                       </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : qrLinksData?.links?.length > 0 ? (
-                qrLinksData.links.map((qrLink: QrLink) => (
-                  <Card key={qrLink.id} className="hover:shadow-md transition-shadow" data-testid={`card-qr-${qrLink.id}`}>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg flex items-center justify-between">
-                        <span className="truncate" data-testid={`text-qr-name-${qrLink.id}`}>
-                          {qrLink.name || 'Unnamed QR'}
-                        </span>
-                        <Badge variant={qrLink.enabled ? 'default' : 'secondary'} data-testid={`status-qr-${qrLink.id}`}>
-                          {qrLink.enabled ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </CardTitle>
-                      <CardDescription className="truncate" data-testid={`text-target-url-${qrLink.id}`}>
-                        {qrLink.targetUrl}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400 mb-3">
-                        <span>/{qrLink.shortId}</span>
-                        <span>{qrLink.analytics?.totalScans || 0} scans</span>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => copyQrUrl(qrLink.shortId)}
-                          data-testid={`button-copy-${qrLink.id}`}
-                        >
-                          <Copy className="w-3 h-3" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          data-testid={`button-analytics-${qrLink.id}`}
-                        >
-                          <BarChart3 className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => window.open(`/q/${qrLink.shortId}`, '_blank')}
-                          data-testid={`button-visit-${qrLink.id}`}
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => deleteQrLinkMutation.mutate(qrLink.id)}
-                          disabled={deleteQrLinkMutation.isPending}
-                          data-testid={`button-delete-${qrLink.id}`}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  <QrCode className="w-12 h-12 mx-auto text-slate-400 mb-4" />
-                  <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-2">
-                    No QR codes yet
-                  </h3>
-                  <p className="text-slate-600 dark:text-slate-400 mb-4">
-                    Create your first dynamic QR code to get started
-                  </p>
-                  <Button onClick={() => setShowCreateDialog(true)} data-testid="button-create-first-qr">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create QR Link
-                  </Button>
-                </div>
-              )}
+                      <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+                        No QR codes yet
+                      </h3>
+                      <p className="text-slate-600 dark:text-slate-400 mb-6">
+                        Create your first dynamic QR code to get started
+                      </p>
+                      <Button 
+                        onClick={() => setShowCreateDialog(true)} 
+                        className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 shadow-lg shadow-orange-500/30"
+                        data-testid="button-create-first-qr"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create QR Link
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </TabsContent>
 
           {/* Static QR Generator Tab */}
           <TabsContent value="static" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Static QR Code Generator</CardTitle>
-                <CardDescription>
-                  Generate QR codes instantly without tracking. Perfect for URLs, text, or contact information.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...staticQrForm}>
-                  <form className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <FormField
-                          control={staticQrForm.control}
-                          name="data"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Data</FormLabel>
-                              <FormControl>
-                                <Textarea 
-                                  placeholder="Enter URL, text, or any data..." 
-                                  className="min-h-[100px]"
-                                  {...field} 
-                                  data-testid="input-qr-data"
-                                />
-                              </FormControl>
-                              <FormDescription>
-                                Enter any text, URL, or data you want to encode
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <div className="grid grid-cols-2 gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card className="border-orange-200 dark:border-orange-900 shadow-2xl">
+                <CardHeader className="bg-gradient-to-r from-orange-50 to-pink-50 dark:from-orange-950/30 dark:to-pink-950/30">
+                  <CardTitle className="text-2xl bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
+                    <Palette className="w-6 h-6" />
+                    Design Your QR Code
+                  </CardTitle>
+                  <CardDescription>
+                    Create custom QR codes with your brand colors and logo
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <Form {...staticQrForm}>
+                    <form className="space-y-6">
+                      <div className="grid lg:grid-cols-2 gap-8">
+                        {/* Left Column - Settings */}
+                        <div className="space-y-6">
                           <FormField
                             control={staticQrForm.control}
-                            name="format"
+                            name="data"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Format</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger data-testid="select-format">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="svg">SVG</SelectItem>
-                                    <SelectItem value="png">PNG</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={staticQrForm.control}
-                            name="size"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Size</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger data-testid="select-size">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="256">256x256</SelectItem>
-                                    <SelectItem value="512">512x512</SelectItem>
-                                    <SelectItem value="1024">1024x1024</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        <FormField
-                          control={staticQrForm.control}
-                          name="logo"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Logo (Optional)</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  type="file" 
-                                  accept="image/*"
-                                  onChange={handleLogoUpload}
-                                  data-testid="input-logo-upload"
-                                />
-                              </FormControl>
-                              <FormDescription>
-                                Upload a logo to display in the center of the QR code
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField
-                            control={staticQrForm.control}
-                            name="dark"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Dark Color</FormLabel>
+                                <FormLabel className="text-lg font-semibold">Content</FormLabel>
                                 <FormControl>
-                                  <Input type="color" {...field} data-testid="input-dark-color" />
+                                  <Textarea 
+                                    placeholder="Enter URL, text, or any data..." 
+                                    className="min-h-[120px] border-orange-200 focus:border-orange-500 resize-none"
+                                    {...field} 
+                                    data-testid="input-qr-data"
+                                  />
                                 </FormControl>
+                                <FormDescription>
+                                  Enter any text, URL, or data you want to encode
+                                </FormDescription>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
 
-                          <FormField
-                            control={staticQrForm.control}
-                            name="light"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Light Color</FormLabel>
-                                <FormControl>
-                                  <Input type="color" {...field} data-testid="input-light-color" />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <Label>Preview</Label>
-                        <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 flex items-center justify-center min-h-[200px]">
-                          {isGeneratingPreview ? (
-                            <div className="flex flex-col items-center text-slate-400">
-                              <QrCode className="w-8 h-8 mb-2 animate-pulse" />
-                              <p className="text-sm">Generating preview...</p>
-                            </div>
-                          ) : qrPreview ? (
-                            <img 
-                              ref={qrPreviewRef} 
-                              src={qrPreview}
-                              alt="QR Code Preview"
-                              className="max-w-[200px] max-h-[200px] rounded"
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={staticQrForm.control}
+                              name="dark"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>QR Color</FormLabel>
+                                  <FormControl>
+                                    <div className="flex gap-2">
+                                      <Input 
+                                        type="color" 
+                                        {...field} 
+                                        className="w-16 h-10 p-1 border-orange-200" 
+                                      />
+                                      <Input 
+                                        type="text" 
+                                        {...field} 
+                                        className="flex-1 border-orange-200" 
+                                        placeholder="#FF6A00"
+                                      />
+                                    </div>
+                                  </FormControl>
+                                </FormItem>
+                              )}
                             />
-                          ) : (
-                            <div className="flex flex-col items-center text-slate-400">
-                              <QrCode className="w-16 h-16 mb-2" />
-                              <p className="text-sm">Preview will appear here</p>
-                            </div>
-                          )}
-                        </div>
-                        {logoFile && (
-                          <div className="text-center">
-                            <p className="text-sm text-slate-600 dark:text-slate-400">
-                              Logo: {logoFile.name}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
 
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        type="button" 
-                        variant="outline"
-                        onClick={() => generateQrPreview(staticQrForm.getValues())}
-                        data-testid="button-refresh-preview"
-                      >
-                        <QrCode className="w-4 h-4 mr-2" />
-                        Refresh Preview
-                      </Button>
-                      <Button 
-                        type="button" 
-                        onClick={() => downloadQrCode(staticQrForm.getValues())}
-                        disabled={!qrPreview}
-                        data-testid="button-download-qr"
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        Download
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
+                            <FormField
+                              control={staticQrForm.control}
+                              name="light"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Background</FormLabel>
+                                  <FormControl>
+                                    <div className="flex gap-2">
+                                      <Input 
+                                        type="color" 
+                                        {...field} 
+                                        className="w-16 h-10 p-1 border-orange-200" 
+                                      />
+                                      <Input 
+                                        type="text" 
+                                        {...field} 
+                                        className="flex-1 border-orange-200" 
+                                        placeholder="#FFFFFF"
+                                      />
+                                    </div>
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+
+                          <FormField
+                            control={staticQrForm.control}
+                            name="margin"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Margin: {field.value}</FormLabel>
+                                <FormControl>
+                                  <Slider
+                                    min={0}
+                                    max={10}
+                                    step={1}
+                                    value={[field.value]}
+                                    onValueChange={(value) => field.onChange(value[0])}
+                                    className="py-4"
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="space-y-3">
+                            <Label className="text-lg font-semibold flex items-center gap-2">
+                              <ImageIcon className="w-5 h-5" />
+                              Logo (Optional)
+                            </Label>
+                            <div className="border-2 border-dashed border-orange-300 dark:border-orange-800 rounded-xl p-6 text-center hover:border-orange-500 transition-colors">
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleLogoUpload}
+                                className="hidden"
+                                id="logo-upload"
+                              />
+                              <label htmlFor="logo-upload" className="cursor-pointer">
+                                {logoFile ? (
+                                  <div className="space-y-2">
+                                    <ImageIcon className="w-12 h-12 mx-auto text-orange-500" />
+                                    <p className="font-medium text-slate-900 dark:text-white">{logoFile.name}</p>
+                                    <p className="text-sm text-slate-500">Click to change</p>
+                                  </div>
+                                ) : (
+                                  <div className="space-y-2">
+                                    <Upload className="w-12 h-12 mx-auto text-slate-400" />
+                                    <p className="font-medium text-slate-900 dark:text-white">Upload Logo</p>
+                                    <p className="text-sm text-slate-500">PNG, JPG up to 5MB</p>
+                                  </div>
+                                )}
+                              </label>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={staticQrForm.control}
+                              name="format"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Format</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger className="border-orange-200" data-testid="select-format">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="svg">SVG</SelectItem>
+                                      <SelectItem value="png">PNG</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={staticQrForm.control}
+                              name="size"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Size</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger className="border-orange-200" data-testid="select-size">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="256">256px</SelectItem>
+                                      <SelectItem value="512">512px</SelectItem>
+                                      <SelectItem value="1024">1024px</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Right Column - Preview */}
+                        <div className="space-y-4">
+                          <Label className="text-lg font-semibold">Live Preview</Label>
+                          <div className="relative bg-gradient-to-br from-orange-50 to-pink-50 dark:from-orange-950/30 dark:to-pink-950/30 rounded-2xl p-8 border-2 border-orange-200 dark:border-orange-900 min-h-[400px] flex items-center justify-center">
+                            {isGeneratingPreview ? (
+                              <div className="text-center">
+                                <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                <p className="text-slate-600 dark:text-slate-400">Generating preview...</p>
+                              </div>
+                            ) : qrPreview ? (
+                              <motion.div
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className="relative"
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-pink-500 rounded-3xl blur-2xl opacity-20"></div>
+                                <img 
+                                  src={qrPreview} 
+                                  alt="QR Preview" 
+                                  className="relative max-w-full h-auto rounded-2xl shadow-2xl"
+                                />
+                              </motion.div>
+                            ) : (
+                              <div className="text-center">
+                                <QrCode className="w-24 h-24 mx-auto text-slate-300 dark:text-slate-700 mb-4" />
+                                <p className="text-slate-600 dark:text-slate-400">Enter content to see preview</p>
+                              </div>
+                            )}
+                          </div>
+
+                          <Button
+                            type="button"
+                            onClick={() => downloadQrCode(staticQrForm.getValues())}
+                            disabled={!qrPreview || isGeneratingPreview}
+                            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-lg shadow-orange-500/30 h-12 text-lg"
+                            data-testid="button-download-qr"
+                          >
+                            <Download className="w-5 h-5 mr-2" />
+                            Download QR Code
+                          </Button>
+                        </div>
+                      </div>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
         </Tabs>
       </div>
     </div>
+  );
+}
+
+function Upload(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" x2="12" y1="3" y2="15" />
+    </svg>
   );
 }
