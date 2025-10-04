@@ -41,6 +41,7 @@ const CardAnalytics = lazy(() => import("./pages/card-analytics"));
 const TeamDashboard = lazy(() => import("./pages/TeamDashboard"));
 const Uploads = lazy(() => import("./pages/uploads"));
 const QrCodes = lazy(() => import("./pages/qr-codes"));
+const EmailSignature = lazy(() => import("./pages/email-signature"));
 
 // Lazy load CardRoutes to prevent loading multi-page module eagerly
 const LazyCardRoutes = lazy(() => import("@/modules/multi-page").then(module => ({ default: module.CardRoutes })));
@@ -85,6 +86,7 @@ function Router() {
       <Route path="/email-templates">{() => <PageSuspense><EmailTemplatesPage /></PageSuspense>}</Route>
       <Route path="/uploads">{() => <PageSuspense><Uploads /></PageSuspense>}</Route>
       <Route path="/qr-codes">{() => <PageSuspense><QrCodes /></PageSuspense>}</Route>
+      <Route path="/email-signature">{() => <PageSuspense><EmailSignature /></PageSuspense>}</Route>
       <Route path="/crm">{() => <PageSuspense><CRM /></PageSuspense>}</Route>
       <Route path="/analytics">{() => <PageSuspense><Analytics /></PageSuspense>}</Route>
       <Route path="/card-analytics">{() => <PageSuspense><CardAnalytics /></PageSuspense>}</Route>
