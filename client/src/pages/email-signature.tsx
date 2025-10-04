@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Copy, Download, Mail, Palette, Image as ImageIcon, X, Plus, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
+import { Copy, Download, Mail, Palette, Image as ImageIcon, X, Plus, ArrowLeft, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -174,6 +174,17 @@ export default function EmailSignature() {
     showBanner: false,
     bannerText: 'Get in touch today!',
   });
+
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.href = `https://fonts.googleapis.com/css2?family=${signatureFonts.map(f => f.replace(/ /g, '+')).join('&family=')}&display=swap`;
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
 
   const toggleSection = (k: string) => setCollapsedSections((p) => ({ ...p, [k]: !p[k] }));
 
@@ -1350,6 +1361,24 @@ export default function EmailSignature() {
                   <Mail className="w-4 h-4" />
                   Preview in Email
                 </Button>
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-4">
+                  <div className="flex items-start gap-2">
+                    <Info className="w-4 h-4 text-blue-900 dark:text-blue-300 mt-0.5" />
+                    <div>
+                      <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">
+                        How to use HTML Email Signature
+                      </h3>
+                      <ol className="text-xs text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
+                        <li>Click "Copy HTML" button above</li>
+                        <li>Open your email client settings (Gmail, Outlook, etc.)</li>
+                        <li>Find the signature section</li>
+                        <li>Paste the HTML code</li>
+                        <li>Save your settings</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
