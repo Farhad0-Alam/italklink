@@ -53,6 +53,7 @@ const createCheckoutSchema = z.object({
   planId: z.number().int(),
   userCount: z.number().int().min(1),
   couponCode: z.string().optional(),
+  isYearly: z.boolean().default(false),
 });
 
 router.post('/admin/plans', requireAdmin, asyncHandler(async (req, res) => {
@@ -120,7 +121,7 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
     return res.status(401).json({ success: false, message: 'Not authenticated' });
   }
 
-  const { planId, userCount, couponCode } = createCheckoutSchema.parse(req.body);
+  const { planId, userCount, couponCode, isYearly } = createCheckoutSchema.parse(req.body);
   
   const plans = await storage.getPlans();
   const plan = plans.find(p => p.id === planId);
@@ -129,11 +130,20 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
     return res.status(404).json({ success: false, message: 'Plan not found' });
   }
 
-  let totalAmount = plan.price;
+  let monthlyAmount = plan.price;
   
   if (userCount > (plan.baseUsers || 1)) {
     const additionalUsers = userCount - (plan.baseUsers || 1);
-    totalAmount += additionalUsers * (plan.pricePerUser || 0);
+    monthlyAmount += additionalUsers * (plan.pricePerUser || 0);
+  }
+  
+  let totalAmount = monthlyAmount;
+  let yearlyDiscount = 0;
+  
+  if (isYearly) {
+    const yearlyBeforeDiscount = monthlyAmount * 12;
+    yearlyDiscount = Math.floor(yearlyBeforeDiscount * 0.20);
+    totalAmount = yearlyBeforeDiscount - yearlyDiscount;
   }
   
   totalAmount += plan.setupFee || 0;
@@ -179,7 +189,7 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
         price_data: {
           currency: 'usd',
           product_data: {
-            name: `${plan.name} - ${userCount} user${userCount > 1 ? 's' : ''}`,
+            name: `${plan.name} - ${userCount} user${userCount > 1 ? 's' : ''}${isYearly ? ' (Yearly - 20% off)' : ''}`,
             description: plan.description || undefined,
           },
           unit_amount: finalAmount,
@@ -196,6 +206,8 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
       userCount: userCount.toString(),
       couponId: couponId || '',
       pricePaid: finalAmount.toString(),
+      isYearly: isYearly.toString(),
+      yearlyDiscount: yearlyDiscount.toString(),
     },
   });
 

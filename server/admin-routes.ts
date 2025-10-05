@@ -479,7 +479,8 @@ router.post('/plans', requireOwner, async (req, res) => {
     const {
       name, planType, price, currency, frequency, businessCardsLimit, 
       features, isActive, stripePriceId, extraCardOptions, hasUnlimitedOption, 
-      unlimitedPrice, templateLimit, templates, trialDays, cardLabel, customDurationDays
+      unlimitedPrice, templateLimit, templates, trialDays, cardLabel, customDurationDays,
+      description, baseUsers, pricePerUser, setupFee, allowUserSelection, minUsers, maxUsers
     } = req.body;
     
     // Validate required fields
@@ -500,7 +501,7 @@ router.post('/plans', requireOwner, async (req, res) => {
       });
     }
     
-    // Create the plan (store all new fields in features JSON until migration)
+    // Create the plan
     const [newPlan] = await db.insert(subscriptionPlans).values({
       name,
       planType,
@@ -519,7 +520,20 @@ router.post('/plans', requireOwner, async (req, res) => {
         customDurationDays: customDurationDays
       },
       stripePriceId,
-      isActive: isActive !== undefined ? isActive : true
+      isActive: isActive !== undefined ? isActive : true,
+      cardLabel: cardLabel || null,
+      trialDays: trialDays || 0,
+      extraCardOptions: extraCardOptions || [],
+      hasUnlimitedOption: hasUnlimitedOption || false,
+      unlimitedPrice: unlimitedPrice || null,
+      templateLimit: templateLimit !== undefined ? templateLimit : -1,
+      description: description || null,
+      baseUsers: baseUsers || 1,
+      pricePerUser: pricePerUser || 0,
+      setupFee: setupFee || 0,
+      allowUserSelection: allowUserSelection || false,
+      minUsers: minUsers || 1,
+      maxUsers: maxUsers || null
     }).returning();
     
     // Insert plan templates if provided
@@ -543,6 +557,26 @@ router.post('/plans', requireOwner, async (req, res) => {
 
 // Update plan
 router.patch('/plans/:id', requireOwner, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    
+    const [updatedPlan] = await db.update(subscriptionPlans)
+      .set(updates)
+      .where(eq(subscriptionPlans.id, Number(id)))
+      .returning();
+    
+    await logAdminAction(req.user!.id, 'update', 'plan', id, updates);
+    
+    res.json({ message: 'Plan updated successfully', plan: updatedPlan });
+  } catch (error) {
+    console.error('Failed to update plan:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update plan (PUT - same as PATCH for compatibility)
+router.put('/plans/:id', requireOwner, async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;

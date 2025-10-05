@@ -23,6 +23,10 @@ interface BillingPlan {
   baseUsers: number;
   pricePerUser: number;
   setupFee: number;
+  allowUserSelection: boolean;
+  minUsers: number;
+  maxUsers: number | null;
+  description: string | null;
   features: {
     featureList: number[];
     unlimitedPrice?: number;
@@ -72,9 +76,9 @@ export default function Pricing() {
   const { toast } = useToast();
 
   const { data: plans, isLoading } = useQuery<BillingPlan[]>({
-    queryKey: ['/api/billing/plans'],
+    queryKey: ['/api/plans'],
     queryFn: async () => {
-      const res = await fetch('/api/billing/plans', { credentials: 'include' });
+      const res = await fetch('/api/plans?active=true', { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch plans');
       const json = await res.json();
       return json.data || json;
@@ -120,7 +124,8 @@ export default function Pricing() {
       return apiRequest('POST', '/api/billing/checkout/create-session', {
         planId,
         userCount,
-        couponCode: couponCode?.toUpperCase() || undefined
+        couponCode: couponCode?.toUpperCase() || undefined,
+        isYearly
       });
     },
     onSuccess: (response: any) => {
@@ -142,10 +147,13 @@ export default function Pricing() {
     const plan = plans?.find(p => p.id === planId);
     if (!plan) return;
     
-    const minUsers = plan.baseUsers || 1;
+    const minUsers = plan.minUsers || plan.baseUsers || 1;
+    const maxUsers = plan.maxUsers || 9999;
+    const clampedCount = Math.min(Math.max(minUsers, count), maxUsers);
+    
     setUserQuantities(prev => ({ 
       ...prev, 
-      [planId]: Math.max(minUsers, count) 
+      [planId]: clampedCount 
     }));
     
     setValidatedCoupon(null);
@@ -157,21 +165,26 @@ export default function Pricing() {
   };
 
   const calculatePlanPrice = (plan: BillingPlan, userCount: number) => {
-    if (plan.price === 0) return { basePrice: 0, perUserPrice: 0, setupFee: 0, total: 0, monthlyTotal: 0 };
+    if (plan.price === 0) return { basePrice: 0, perUserPrice: 0, setupFee: 0, total: 0, monthlyTotal: 0, yearlyDiscount: 0, yearlySavings: 0 };
     
     const basePrice = plan.price;
     const additionalUsers = Math.max(0, userCount - (plan.baseUsers || 1));
     const perUserPrice = additionalUsers * (plan.pricePerUser || 0);
     const setupFee = plan.setupFee || 0;
     
-    const subtotal = basePrice + perUserPrice;
+    const monthlySubtotal = basePrice + perUserPrice;
     
-    let monthlyTotal = subtotal;
-    let total = subtotal;
+    let monthlyTotal = monthlySubtotal;
+    let total = monthlySubtotal;
+    let yearlyDiscount = 0;
+    let yearlySavings = 0;
     
     if (isYearly) {
-      total = subtotal * 12;
+      const yearlyBeforeDiscount = monthlySubtotal * 12;
+      yearlyDiscount = yearlyBeforeDiscount * 0.20;
+      total = yearlyBeforeDiscount - yearlyDiscount;
       monthlyTotal = total / 12;
+      yearlySavings = yearlyDiscount;
     }
     
     return { 
@@ -180,7 +193,9 @@ export default function Pricing() {
       setupFee, 
       total: total + setupFee, 
       monthlyTotal,
-      subtotal 
+      subtotal: monthlySubtotal,
+      yearlyDiscount,
+      yearlySavings
     };
   };
 
@@ -326,7 +341,7 @@ export default function Pricing() {
                 const finalTotal = applyDiscount(pricing.total, validatedCoupon?.valid && selectedPlan === plan.id ? validatedCoupon.discount : undefined);
                 const popular = isPopular(plan.planType);
                 const isSelected = selectedPlan === plan.id;
-                const hasPerUserPricing = (plan.pricePerUser || 0) > 0;
+                const hasPerUserPricing = plan.allowUserSelection && (plan.pricePerUser || 0) > 0;
                 
                 return (
                   <motion.div
@@ -370,6 +385,11 @@ export default function Pricing() {
                                 )}
                               </div>
                             )}
+                            {isYearly && pricing.yearlySavings > 0 && (
+                              <Badge className="mt-2 bg-green-500 text-white">
+                                Save ${pricing.yearlySavings.toFixed(2)} (20% off)
+                              </Badge>
+                            )}
                             {validatedCoupon?.valid && isSelected && validatedCoupon.discount && (
                               <div className="mt-2 text-sm text-green-600 dark:text-green-400 font-semibold">
                                 Coupon applied: -${validatedCoupon.discount.toFixed(2)}
@@ -388,7 +408,7 @@ export default function Pricing() {
                                   size="sm"
                                   className="h-8 w-8 p-0 rounded-md"
                                   onClick={() => handleUserCountChange(plan.id, userCount - 1)}
-                                  disabled={userCount <= (plan.baseUsers || 1)}
+                                  disabled={userCount <= (plan.minUsers || plan.baseUsers || 1)}
                                   data-testid={`decrease-users-${plan.id}`}
                                 >
                                   <Minus className="h-4 w-4" />
@@ -401,6 +421,7 @@ export default function Pricing() {
                                   size="sm"
                                   className="h-8 w-8 p-0 rounded-md"
                                   onClick={() => handleUserCountChange(plan.id, userCount + 1)}
+                                  disabled={plan.maxUsers !== null && userCount >= plan.maxUsers}
                                   data-testid={`increase-users-${plan.id}`}
                                 >
                                   <Plus className="h-4 w-4" />

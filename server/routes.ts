@@ -129,6 +129,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup billing routes
   app.use('/api/billing', billingRoutes);
   
+  // Public endpoint: Get active subscription plans (for pricing page)
+  app.get('/api/plans', async (req, res) => {
+    try {
+      const { db, subscriptionPlans } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      const plans = await db.select()
+        .from(subscriptionPlans)
+        .where(eq(subscriptionPlans.isActive, true))
+        .orderBy(subscriptionPlans.price);
+      res.json(plans);
+    } catch (error) {
+      console.error('Failed to get active plans:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+  
   // Setup wallet routes
   const walletRoutes = (await import('./wallet-routes')).default;
   app.use('/api/wallet', walletRoutes);

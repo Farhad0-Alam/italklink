@@ -105,6 +105,14 @@ interface PlanFormData {
   hasUnlimitedOption: boolean;
   unlimitedPrice: number;
   templateLimit: number;
+  // Stripe billing fields
+  description: string;
+  baseUsers: number;
+  pricePerUser: number;
+  setupFee: number;
+  allowUserSelection: boolean;
+  minUsers: number;
+  maxUsers: number | null;
 }
 
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'BDT'];
@@ -171,7 +179,14 @@ export default function PlansPage() {
     extraCardOptions: [],
     hasUnlimitedOption: false,
     unlimitedPrice: 0,
-    templateLimit: -1
+    templateLimit: -1,
+    description: '',
+    baseUsers: 1,
+    pricePerUser: 0,
+    setupFee: 0,
+    allowUserSelection: false,
+    minUsers: 1,
+    maxUsers: null
   });
 
   const queryClient = useQueryClient();
@@ -265,7 +280,14 @@ export default function PlansPage() {
       extraCardOptions: [],
       hasUnlimitedOption: false,
       unlimitedPrice: 0,
-      templateLimit: -1
+      templateLimit: -1,
+      description: '',
+      baseUsers: 1,
+      pricePerUser: 0,
+      setupFee: 0,
+      allowUserSelection: false,
+      minUsers: 1,
+      maxUsers: null
     });
   };
 
@@ -403,7 +425,14 @@ export default function PlansPage() {
       extraCardOptions: plan.features?.extraCardOptions || [],
       hasUnlimitedOption: plan.features?.hasUnlimitedOption || false,
       unlimitedPrice: plan.features?.unlimitedPrice || 0,
-      templateLimit: plan.features?.templateLimit || -1
+      templateLimit: plan.features?.templateLimit || -1,
+      description: (plan as any).description || '',
+      baseUsers: (plan as any).baseUsers || 1,
+      pricePerUser: (plan as any).pricePerUser || 0,
+      setupFee: (plan as any).setupFee || 0,
+      allowUserSelection: (plan as any).allowUserSelection || false,
+      minUsers: (plan as any).minUsers || 1,
+      maxUsers: (plan as any).maxUsers || null
     });
     setEditPlanOpen(true);
   };
@@ -592,6 +621,97 @@ export default function PlansPage() {
             onChange={(e) => setFormData(prev => ({ ...prev, businessCardsLimit: Number(e.target.value) }))}
           />
         </div>
+      </div>
+
+      {/* Plan Description */}
+      <div className="space-y-2">
+        <Label htmlFor="description">Plan Description</Label>
+        <Textarea
+          id="description"
+          placeholder="Enter plan description for customers"
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          rows={3}
+        />
+      </div>
+
+      {/* Per-User Pricing Section */}
+      <div className="space-y-3 border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+        <h3 className="font-semibold text-sm">Per-User/Per-Card Pricing</h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="baseUsers">Base Users Included</Label>
+            <Input
+              id="baseUsers"
+              type="number"
+              placeholder="1"
+              value={formData.baseUsers}
+              onChange={(e) => setFormData(prev => ({ ...prev, baseUsers: Number(e.target.value) }))}
+            />
+            <p className="text-xs text-gray-500">Users/cards included in base price</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pricePerUser">Price Per Additional User</Label>
+            <Input
+              id="pricePerUser"
+              type="number"
+              placeholder="0"
+              value={formData.pricePerUser}
+              onChange={(e) => setFormData(prev => ({ ...prev, pricePerUser: Number(e.target.value) }))}
+            />
+            <p className="text-xs text-gray-500">Cost per extra user (in cents)</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="setupFee">Setup Fee</Label>
+            <Input
+              id="setupFee"
+              type="number"
+              placeholder="0"
+              value={formData.setupFee}
+              onChange={(e) => setFormData(prev => ({ ...prev, setupFee: Number(e.target.value) }))}
+            />
+            <p className="text-xs text-gray-500">One-time fee (in cents)</p>
+          </div>
+        </div>
+      </div>
+
+      {/* User Selection Controls */}
+      <div className="space-y-3 border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="allowUserSelection"
+            checked={formData.allowUserSelection}
+            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allowUserSelection: checked }))}
+          />
+          <Label htmlFor="allowUserSelection" className="font-semibold text-sm">
+            Allow User Count Selection on Pricing Page
+          </Label>
+        </div>
+        
+        {formData.allowUserSelection && (
+          <div className="grid grid-cols-2 gap-4 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="minUsers">Minimum Users</Label>
+              <Input
+                id="minUsers"
+                type="number"
+                placeholder="1"
+                value={formData.minUsers}
+                onChange={(e) => setFormData(prev => ({ ...prev, minUsers: Number(e.target.value) }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="maxUsers">Maximum Users (leave empty for unlimited)</Label>
+              <Input
+                id="maxUsers"
+                type="number"
+                placeholder="Unlimited"
+                value={formData.maxUsers || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, maxUsers: e.target.value ? Number(e.target.value) : null }))}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Trial and Custom Duration */}

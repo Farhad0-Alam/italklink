@@ -52,11 +52,6 @@ const sidebarNavItems = [
     icon: CreditCard,
   },
   {
-    title: 'Billing',
-    href: '/admin/billing-plans',
-    icon: CreditCard,
-  },
-  {
     title: 'Coupons',
     href: '/admin/coupons',
     icon: Ticket,
