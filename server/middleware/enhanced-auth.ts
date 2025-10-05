@@ -15,7 +15,7 @@ const PUBLIC_ENDPOINTS = [
   '/admin/login',
   '/admin/register',
   '/public',
-  '/plans',
+  '/billing/plans',
   '/templates',
   '/availability',
   '/appointments/book'
