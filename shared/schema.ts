@@ -150,6 +150,10 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   unlimitedPrice: integer("unlimited_price"), // price for unlimited cards in cents
   // Template limits
   templateLimit: integer("template_limit").default(-1), // -1 for unlimited, number for limit
+  // Per-user/per-card pricing fields
+  baseUsers: integer("base_users").default(1), // Number of users/cards included in base price
+  pricePerUser: integer("price_per_user").default(0), // Additional cost per user/card in cents
+  setupFee: integer("setup_fee").default(0), // One-time setup fee in cents
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -622,6 +626,38 @@ export const userPlans = pgTable("user_plans", {
   endsAt: timestamp("ends_at"),
   note: text("note"),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User subscriptions table (tracks active subscriptions with quantity and payment details)
+export const userSubscriptions = pgTable("user_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  planId: integer("plan_id").references(() => subscriptionPlans.id, { onDelete: 'set null' }),
+  couponId: varchar("coupon_id").references(() => coupons.id, { onDelete: 'set null' }),
+  
+  // Subscription details
+  stripeSubscriptionId: varchar("stripe_subscription_id").unique(),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  userCount: integer("user_count").default(1).notNull(), // Number of users/cards purchased
+  pricePaid: integer("price_paid").notNull(), // Actual amount paid in cents
+  
+  // Feature snapshot (preserves features even if plan changes)
+  features: jsonb("features").default('{}').notNull(), // Snapshot of plan features at time of purchase
+  
+  // Subscription period
+  startDate: timestamp("start_date").defaultNow().notNull(),
+  endDate: timestamp("end_date"), // null for active subscriptions, set on cancellation
+  cancelAt: timestamp("cancel_at"), // Scheduled cancellation date
+  canceledAt: timestamp("canceled_at"), // When user canceled
+  
+  // Status
+  isActive: boolean("is_active").default(true).notNull(),
+  status: varchar("status").default('active'), // active, canceled, past_due, etc.
+  
+  // Metadata
+  metadata: jsonb("metadata").default('{}'), // Additional data from Stripe
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Icon types table
@@ -1102,6 +1138,9 @@ export type InsertPlanTemplate = typeof planTemplates.$inferInsert;
 export type UserPlan = typeof userPlans.$inferSelect;
 export type InsertUserPlan = typeof userPlans.$inferInsert;
 
+export type UserSubscription = typeof userSubscriptions.$inferSelect;
+export type InsertUserSubscription = typeof userSubscriptions.$inferInsert;
+
 export type IconType = typeof iconTypes.$inferSelect;
 export type InsertIconType = typeof iconTypes.$inferInsert;
 
@@ -1145,6 +1184,7 @@ export const insertFeatureSchema = createInsertSchema(features);
 export const insertPlanFeatureSchema = createInsertSchema(planFeatures);
 export const insertPlanTemplateSchema = createInsertSchema(planTemplates);
 export const insertUserPlanSchema = createInsertSchema(userPlans);
+export const insertUserSubscriptionSchema = createInsertSchema(userSubscriptions);
 export const insertIconTypeSchema = createInsertSchema(iconTypes);
 export const insertIconPackSchema = createInsertSchema(iconPacks);
 export const insertIconSchema = createInsertSchema(icons);
