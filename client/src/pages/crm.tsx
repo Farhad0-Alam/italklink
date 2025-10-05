@@ -3,7 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { Users, Target, CheckSquare, Activity, BarChart3, Zap, ArrowLeft } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Users, Target, CheckSquare, Activity, BarChart3, Zap, ArrowLeft, Loader2 } from "lucide-react";
 import { 
   CRMStats,
   ContactsManager,
@@ -12,10 +13,32 @@ import {
   ActivitiesTimeline
 } from "@/modules/crm";
 import AutomationManager from "@/modules/crm/components/AutomationManager";
+import { FeatureGate } from "@/components/FeatureGate";
+import { Feature } from "@/lib/featureAccess";
+
+interface UserSubscription {
+  id: string;
+  planId: number;
+  userCount: number;
+  pricePaid: number;
+  features: any;
+  isActive: boolean;
+  status: string;
+}
 
 export default function CRM() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
+
+  const { data: subscription, isLoading: subscriptionLoading } = useQuery<UserSubscription | null>({
+    queryKey: ['/api/billing/subscription'],
+    queryFn: async () => {
+      const res = await fetch('/api/billing/subscription', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch subscription');
+      const json = await res.json();
+      return json.data || null;
+    },
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,7 +72,16 @@ export default function CRM() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        {subscriptionLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          </div>
+        ) : (
+          <FeatureGate
+            feature={Feature.CRM_ACCESS}
+            subscription={subscription}
+          >
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-6 lg:w-fit lg:grid-cols-6" data-testid="tabs-crm-navigation">
             <TabsTrigger value="overview" className="flex items-center space-x-2" data-testid="tab-overview">
               <BarChart3 className="h-4 w-4" />
@@ -101,6 +133,8 @@ export default function CRM() {
             <AutomationManager />
           </TabsContent>
         </Tabs>
+          </FeatureGate>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -205,9 +206,35 @@ const staggerContainer = {
   }
 };
 
+interface BillingPlan {
+  id: number;
+  name: string;
+  planType: string;
+  price: number;
+  currency: string;
+  interval: string;
+  baseUsers: number;
+  pricePerUser: number;
+  setupFee: number;
+  description?: string;
+  features: any;
+  isActive: boolean;
+}
+
 export default function Landing() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [activeFeatureTab, setActiveFeatureTab] = useState(0);
+
+  const { data: billingPlans, isLoading: plansLoading } = useQuery<BillingPlan[]>({
+    queryKey: ['/api/billing/plans'],
+    queryFn: async () => {
+      const res = await fetch('/api/billing/plans', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch plans');
+      const json = await res.json();
+      return json.data || [];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
   return (
     <div className="min-h-screen bg-white">
@@ -1070,49 +1097,107 @@ export default function Landing() {
             </p>
           </motion.div>
 
-          <motion.div 
-            className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-          >
-            {pricingTiers.map((tier, index) => (
-              <motion.div key={index} variants={fadeInUp}>
-                <Card className={`h-full relative ${tier.popular ? 'border-2 border-orange-500 shadow-2xl scale-105' : 'border-2 border-gray-200'}`} data-testid={`card-pricing-${tier.name.toLowerCase()}`}>
-                  {tier.popular && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-orange-500 text-white" data-testid="badge-most-popular">Most Popular</Badge>
-                    </div>
-                  )}
-                  <CardContent className="p-8">
-                    <h3 className="text-2xl font-black text-gray-900 mb-2" data-testid={`text-pricing-${tier.name.toLowerCase()}-name`}>{tier.name}</h3>
-                    <p className="text-gray-600 mb-6" data-testid={`text-pricing-${tier.name.toLowerCase()}-desc`}>{tier.description}</p>
-                    <div className="mb-6">
-                      <span className="text-5xl font-black text-gray-900" data-testid={`text-pricing-${tier.name.toLowerCase()}-price`}>{tier.price}</span>
-                      {tier.price !== "Custom" && <span className="text-gray-600">/month</span>}
-                    </div>
-                    <Button 
-                      className={`w-full mb-6 ${tier.popular ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-900 hover:bg-gray-800'}`}
-                      asChild
-                    >
-                      <Link href={tier.price === "Custom" ? "/register" : "/register"}>
-                        {tier.cta}
-                      </Link>
-                    </Button>
-                    <ul className="space-y-3">
-                      {tier.features.map((feature, i) => (
-                        <li key={i} className="flex items-start">
-                          <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-700 text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
+          {plansLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading pricing plans...</p>
+            </div>
+          ) : (billingPlans && billingPlans.length > 0) ? (
+            <motion.div 
+              className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+              variants={staggerContainer}
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+            >
+              {billingPlans.map((plan, index) => {
+                const isPopular = plan.planType === 'pro' || index === 1;
+                const featureList = plan.features?.featureList || [];
+                const displayPrice = plan.price === 0 ? '$0' : `$${(plan.price / 100).toFixed(0)}`;
+                
+                return (
+                  <motion.div key={plan.id} variants={fadeInUp}>
+                    <Card className={`h-full relative ${isPopular ? 'border-2 border-orange-500 shadow-2xl scale-105' : 'border-2 border-gray-200'}`} data-testid={`card-pricing-${plan.name.toLowerCase()}`}>
+                      {isPopular && (
+                        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                          <Badge className="bg-orange-500 text-white" data-testid="badge-most-popular">Most Popular</Badge>
+                        </div>
+                      )}
+                      <CardContent className="p-8">
+                        <h3 className="text-2xl font-black text-gray-900 mb-2" data-testid={`text-pricing-${plan.name.toLowerCase()}-name`}>{plan.name}</h3>
+                        <p className="text-gray-600 mb-6" data-testid={`text-pricing-${plan.name.toLowerCase()}-desc`}>
+                          {plan.description || `${plan.baseUsers} user${plan.baseUsers > 1 ? 's' : ''} included`}
+                        </p>
+                        <div className="mb-6">
+                          <span className="text-5xl font-black text-gray-900" data-testid={`text-pricing-${plan.name.toLowerCase()}-price`}>{displayPrice}</span>
+                          <span className="text-gray-600">/month</span>
+                        </div>
+                        <Button 
+                          className={`w-full mb-6 ${isPopular ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-900 hover:bg-gray-800'}`}
+                          asChild
+                        >
+                          <Link href="/pricing">
+                            {plan.price === 0 ? 'Get Started Free' : 'Start Free Trial'}
+                          </Link>
+                        </Button>
+                        <ul className="space-y-3">
+                          <li className="flex items-start">
+                            <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                            <span className="text-gray-700 text-sm">{plan.baseUsers} User{plan.baseUsers > 1 ? 's' : ''}</span>
+                          </li>
+                          {plan.features?.unlimitedCards ? (
+                            <li className="flex items-start">
+                              <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700 text-sm">Unlimited Cards</span>
+                            </li>
+                          ) : (
+                            <li className="flex items-start">
+                              <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700 text-sm">{plan.features?.businessCardsLimit || 1} Business Card{(plan.features?.businessCardsLimit || 1) > 1 ? 's' : ''}</span>
+                            </li>
+                          )}
+                          {plan.features?.appointmentBooking && (
+                            <li className="flex items-start">
+                              <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700 text-sm">Appointment Booking</span>
+                            </li>
+                          )}
+                          {plan.features?.crmAccess && (
+                            <li className="flex items-start">
+                              <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700 text-sm">Full CRM</span>
+                            </li>
+                          )}
+                          {plan.features?.advancedAnalytics && (
+                            <li className="flex items-start">
+                              <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700 text-sm">Advanced Analytics</span>
+                            </li>
+                          )}
+                          {plan.features?.teamManagement && (
+                            <li className="flex items-start">
+                              <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700 text-sm">Team Management</span>
+                            </li>
+                          )}
+                          {plan.features?.prioritySupport && (
+                            <li className="flex items-start">
+                              <CheckCircle2 className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700 text-sm">Priority Support</span>
+                            </li>
+                          )}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-600">No pricing plans available at the moment.</p>
+            </div>
+          )}
 
           <motion.div 
             className="text-center mt-12"
