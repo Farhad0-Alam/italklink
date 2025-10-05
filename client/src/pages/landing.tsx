@@ -688,6 +688,100 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* HTML Email Signature Generator Section */}
+      <section className="py-24 bg-gradient-to-br from-orange-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-100">
+              <Mail className="w-3 h-3 mr-1" />
+              HTML Email Signature
+            </Badge>
+            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+              Professional <span className="text-orange-600">Email Signatures</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Create stunning HTML email signatures with live preview. Choose from multiple templates, 
+              customize everything, and export ready-to-use HTML for any email client.
+            </p>
+          </motion.div>
+
+          {/* Features Grid */}
+          <motion.div 
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {emailSignatureFeatures.map((feature, index) => (
+              <motion.div key={index} variants={fadeInUp}>
+                <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-orange-200 h-full" data-testid={`card-email-signature-feature-${index}`}>
+                  <CardContent className="p-6">
+                    <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
+                      <feature.icon className="w-6 h-6 text-orange-600" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 mb-2 text-lg" data-testid={`text-email-signature-${index}-title`}>{feature.title}</h3>
+                    <p className="text-gray-600 text-sm" data-testid={`text-email-signature-${index}-desc`}>{feature.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* QR Code Feature Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Badge className="mb-4 bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
+              <QrCode className="w-3 h-3 mr-1" />
+              QR Code Generator
+            </Badge>
+            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
+              Dynamic <span className="text-indigo-600">QR Codes</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Generate custom QR codes instantly for your business cards. Add your logo, 
+              customize colors, and download in multiple formats for any use case.
+            </p>
+          </motion.div>
+
+          {/* Features Grid */}
+          <motion.div 
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {qrCodeFeatures.map((feature, index) => (
+              <motion.div key={index} variants={fadeInUp}>
+                <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-indigo-200 h-full" data-testid={`card-qr-feature-${index}`}>
+                  <CardContent className="p-6">
+                    <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                      <feature.icon className="w-6 h-6 text-indigo-600" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 mb-2 text-lg" data-testid={`text-qr-${index}-title`}>{feature.title}</h3>
+                    <p className="text-gray-600 text-sm" data-testid={`text-qr-${index}-desc`}>{feature.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
       {/* CRM Section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
