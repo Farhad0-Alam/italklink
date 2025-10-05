@@ -223,10 +223,24 @@ export default function Dashboard() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCards = businessCards.slice(startIndex, startIndex + itemsPerPage);
 
+  // Scroll to My Links section
+  const scrollToMyLinks = () => {
+    const myLinksSection = document.getElementById('my-links-section');
+    if (myLinksSection) {
+      myLinksSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   // Navigation menu items
-  const navigationItems = [
+  const navigationItems: Array<{
+    href: string;
+    label: string;
+    icon: any;
+    testId?: string;
+    onClick?: () => void;
+  }> = [
     { href: "/dashboard", label: "Dashboard", icon: null },
-    { href: "/dashboard", label: "My Links", icon: null },
+    { href: "#my-links", label: "My Links", icon: null, onClick: scrollToMyLinks },
     { href: "/templates", label: "Templates", icon: null },
     { href: "/appointments", label: "Appointments", icon: null },
     { href: "/crm", label: "CRM", icon: Users, testId: "link-crm" },
@@ -277,16 +291,31 @@ export default function Dashboard() {
                     <div className="flex-1 overflow-y-auto py-4">
                       <div className="px-3 space-y-1">
                         {navigationItems.map((item) => (
-                          <Link
-                            key={item.href + item.label}
-                            href={item.href}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-orange-600 transition-colors"
-                            onClick={() => setMobileMenuOpen(false)}
-                            data-testid={item.testId}
-                          >
-                            {item.icon && <item.icon className="w-5 h-5" />}
-                            <span className="font-medium">{item.label}</span>
-                          </Link>
+                          item.onClick ? (
+                            <button
+                              key={item.href + item.label}
+                              onClick={() => {
+                                item.onClick?.();
+                                setMobileMenuOpen(false);
+                              }}
+                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-orange-600 transition-colors"
+                              data-testid={item.testId}
+                            >
+                              {item.icon && <item.icon className="w-5 h-5" />}
+                              <span className="font-medium">{item.label}</span>
+                            </button>
+                          ) : (
+                            <Link
+                              key={item.href + item.label}
+                              href={item.href}
+                              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-orange-600 transition-colors"
+                              onClick={() => setMobileMenuOpen(false)}
+                              data-testid={item.testId}
+                            >
+                              {item.icon && <item.icon className="w-5 h-5" />}
+                              <span className="font-medium">{item.label}</span>
+                            </Link>
+                          )
                         ))}
                       </div>
                     </div>
@@ -309,15 +338,27 @@ export default function Dashboard() {
             {/* Center: Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-1">
               {navigationItems.slice(0, 8).map((item) => (
-                <Link
-                  key={item.href + item.label}
-                  href={item.href}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors"
-                  data-testid={item.testId}
-                >
-                  {item.icon && <item.icon className="w-4 h-4" />}
-                  <span>{item.label}</span>
-                </Link>
+                item.onClick ? (
+                  <button
+                    key={item.href + item.label}
+                    onClick={item.onClick}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                    data-testid={item.testId}
+                  >
+                    {item.icon && <item.icon className="w-4 h-4" />}
+                    <span>{item.label}</span>
+                  </button>
+                ) : (
+                  <Link
+                    key={item.href + item.label}
+                    href={item.href}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                    data-testid={item.testId}
+                  >
+                    {item.icon && <item.icon className="w-4 h-4" />}
+                    <span>{item.label}</span>
+                  </Link>
+                )
               ))}
               
               {/* More Dropdown for remaining items */}
@@ -330,11 +371,18 @@ export default function Dashboard() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {navigationItems.slice(8).map((item) => (
-                    <DropdownMenuItem key={item.href + item.label} asChild>
-                      <Link href={item.href} className="flex items-center gap-2 cursor-pointer">
-                        {item.icon && <item.icon className="w-4 h-4" />}
-                        <span>{item.label}</span>
-                      </Link>
+                    <DropdownMenuItem key={item.href + item.label} asChild={!item.onClick}>
+                      {item.onClick ? (
+                        <button onClick={item.onClick} className="flex items-center gap-2 cursor-pointer w-full">
+                          {item.icon && <item.icon className="w-4 h-4" />}
+                          <span>{item.label}</span>
+                        </button>
+                      ) : (
+                        <Link href={item.href} className="flex items-center gap-2 cursor-pointer">
+                          {item.icon && <item.icon className="w-4 h-4" />}
+                          <span>{item.label}</span>
+                        </Link>
+                      )}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -653,7 +701,7 @@ export default function Dashboard() {
         )}
 
         {/* Newly Created Links Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div id="my-links-section" className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Newly Created Links</h2>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
