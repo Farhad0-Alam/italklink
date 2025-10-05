@@ -68,6 +68,11 @@ router.put('/admin/plans/:id', requireAdmin, asyncHandler(async (req, res) => {
   res.json({ success: true, data: plan });
 }));
 
+router.get('/admin/plans', requireAdmin, asyncHandler(async (req, res) => {
+  const plans = await storage.getPlans();
+  res.json({ success: true, data: plans });
+}));
+
 router.delete('/admin/plans/:id', requireAdmin, asyncHandler(async (req, res) => {
   const id = parseInt(req.params.id);
   await storage.deletePlan(id);
