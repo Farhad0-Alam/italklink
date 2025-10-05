@@ -1,0 +1,83 @@
+🧩 Step 1: Create a Test Project in Stripe
+
+Go to your Stripe Dashboard → Developers → API keys
+.
+
+Make sure you’re in Test Mode (toggle in top-right).
+
+Copy these:
+
+Publishable key → starts with pk_test_...
+
+Secret key → starts with sk_test_...
+
+⚙️ Step 2: Add Environment Variables in Replit
+
+In your Replit project’s Secrets (Environment Variables) panel, add:
+
+STRIPE_PUBLIC_KEY=pk_test_xxxxxxxxxxxxx
+STRIPE_SECRET_KEY=sk_test_xxxxxxxxxxxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx   # (optional for checkout success handling)
+DOMAIN_URL=https://<your-replit-username>.<your-app-name>.repl.co
+
+
+The DOMAIN_URL is very important — Stripe uses this to redirect users after checkout.
+Example: https://2talklink-test.replit.app
+
+💳 Step 3: Update Your Stripe Checkout Server Code
+
+Make sure your server code (Node.js / Express / Next / etc.) includes the success and cancel URLs based on the DOMAIN_URL.
+
+// Example for Node.js
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+app.post('/api/create-checkout-session', async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: req.body.priceId, // your Stripe price ID
+          quantity: 1,
+        },
+      ],
+      success_url: `${process.env.DOMAIN_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.DOMAIN_URL}/pricing`,
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Stripe checkout creation failed' });
+  }
+});
+
+🌐 Step 4: Ensure the Front-End Uses the Correct URL
+
+When the user clicks “Subscribe,” call your backend endpoint correctly:
+
+const response = await fetch('/api/create-checkout-session', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ priceId: 'price_xxx' }),
+});
+const data = await response.json();
+window.location.href = data.url;
+
+🧠 Step 5: Verify Redirects in Stripe Dashboard
+
+Go to Developers → Logs in Stripe Dashboard.
+
+You’ll see your test API calls.
+
+If any “Missing success_url” or “Invalid domain” errors appear — check your environment variables.
+
+✅ Quick Checklist Before Retesting
+
+ You’re using Test API keys, not live.
+
+ DOMAIN_URL matches your Replit live preview URL.
+
+ success_url and cancel_url both resolve correctly.
+
+ Your backend route /api/create-checkout-session returns a valid Stripe session URL.
