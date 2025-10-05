@@ -73,6 +73,12 @@ export default function Pricing() {
 
   const { data: plans, isLoading } = useQuery<BillingPlan[]>({
     queryKey: ['/api/billing/plans'],
+    queryFn: async () => {
+      const res = await fetch('/api/billing/plans', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch plans');
+      const json = await res.json();
+      return json.data || json;
+    },
     staleTime: 1000 * 30,
   });
 
