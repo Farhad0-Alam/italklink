@@ -8,7 +8,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays, QrCode, Mail } from "lucide-react";
+import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays, QrCode, Mail, Menu, X } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,6 +74,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
   const [showContactModal, setShowContactModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // All hooks must be called unconditionally at the top level
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
@@ -217,84 +223,142 @@ export default function Dashboard() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCards = businessCards.slice(startIndex, startIndex + itemsPerPage);
 
+  // Navigation menu items
+  const navigationItems = [
+    { href: "/dashboard", label: "Dashboard", icon: null },
+    { href: "/dashboard", label: "My Links", icon: null },
+    { href: "/templates", label: "Templates", icon: null },
+    { href: "/appointments", label: "Appointments", icon: null },
+    { href: "/crm", label: "CRM", icon: Users, testId: "link-crm" },
+    { href: "/card-analytics", label: "Analytics", icon: BarChart3, testId: "link-card-analytics" },
+    { href: "/availability", label: "Availability", icon: CalendarDays, testId: "link-availability" },
+    { href: "/uploads", label: "Uploads", icon: FileText, testId: "link-uploads" },
+    { href: "/qr-codes", label: "QR Codes", icon: QrCode, testId: "link-qr-codes" },
+    { href: "/email-signature", label: "Email Signature", icon: Mail, testId: "link-email-signature" },
+    { href: "/affiliate", label: "Affiliate", icon: DollarSign },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Modern Navigation Header */}
+      <nav className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
+            {/* Left: Logo & Mobile Menu */}
+            <div className="flex items-center gap-4">
+              {/* Mobile Menu Button */}
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="lg:hidden"
+                    data-testid="button-mobile-menu"
+                  >
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-72 p-0">
+                  <div className="flex flex-col h-full">
+                    {/* Mobile Menu Header */}
+                    <div className="p-6 border-b border-gray-200">
+                      <Link href="/" className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                          <i className="fas fa-address-card text-white text-sm"></i>
+                        </div>
+                        <div className="text-xl font-bold">
+                          <span className="text-blue-600">2talk</span>
+                          <span className="text-orange-500">Link</span>
+                        </div>
+                      </Link>
+                    </div>
+                    
+                    {/* Mobile Menu Items */}
+                    <div className="flex-1 overflow-y-auto py-4">
+                      <div className="px-3 space-y-1">
+                        {navigationItems.map((item) => (
+                          <Link
+                            key={item.href + item.label}
+                            href={item.href}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-orange-600 transition-colors"
+                            onClick={() => setMobileMenuOpen(false)}
+                            data-testid={item.testId}
+                          >
+                            {item.icon && <item.icon className="w-5 h-5" />}
+                            <span className="font-medium">{item.label}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+
+              {/* Logo */}
               <Link href="/" className="flex items-center space-x-2">
-                <div className="text-2xl font-bold">
+                <div className="hidden sm:flex w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg items-center justify-center shadow-sm">
+                  <i className="fas fa-address-card text-white text-sm"></i>
+                </div>
+                <div className="text-xl font-bold">
                   <span className="text-blue-600">2talk</span>
                   <span className="text-orange-500">Link</span>
                 </div>
               </Link>
-              
-              <div className="hidden md:flex items-center space-x-8">
-                <Link href="/dashboard" className="text-gray-900 font-medium hover:text-blue-600">
-                  Dashboard
-                </Link>
-                <Link href="/dashboard" className="text-gray-500 hover:text-gray-700">
-                  My Links
-                </Link>
-                <Link href="/templates" className="text-gray-500 hover:text-gray-700">
-                  Templates
-                </Link>
-                <Link href="/appointments" className="text-gray-500 hover:text-gray-700">
-                  Appointments
-                </Link>
-                <Link href="/crm" className="text-gray-500 hover:text-gray-700 flex items-center space-x-1" data-testid="link-crm">
-                  <Users className="w-4 h-4" />
-                  <span>CRM</span>
-                </Link>
-                <Link href="/card-analytics" className="text-gray-500 hover:text-orange-600 flex items-center space-x-1" data-testid="link-card-analytics">
-                  <BarChart3 className="w-4 h-4" />
-                  <span>Analytics</span>
-                </Link>
-                <Link href="/availability" className="text-gray-500 hover:text-gray-700 flex items-center space-x-1" data-testid="link-availability">
-                  <CalendarDays className="w-4 h-4" />
-                  <span>Availability</span>
-                </Link>
-                <Link href="/uploads" className="text-gray-500 hover:text-gray-700 flex items-center space-x-1" data-testid="link-uploads">
-                  <FileText className="w-4 h-4" />
-                  <span>Uploads</span>
-                </Link>
-                <Link href="/qr-codes" className="text-gray-500 hover:text-gray-700 flex items-center space-x-1" data-testid="link-qr-codes">
-                  <QrCode className="w-4 h-4" />
-                  <span>QR Codes</span>
-                </Link>
-                <Link href="/email-signature" className="text-gray-500 hover:text-gray-700 flex items-center space-x-1" data-testid="link-email-signature">
-                  <Mail className="w-4 h-4" />
-                  <span>Email Signature</span>
-                </Link>
-                <Link href="/affiliate" className="text-gray-500 hover:text-gray-700">
-                  Affiliate
-                </Link>
-                <Link href="/pricing" className="text-gray-500 hover:text-gray-700">
-                  Pricing
-                </Link>
-              </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-              {/* Profile Dropdown */}
+            {/* Center: Desktop Navigation */}
+            <div className="hidden lg:flex items-center gap-1">
+              {navigationItems.slice(0, 8).map((item) => (
+                <Link
+                  key={item.href + item.label}
+                  href={item.href}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                  data-testid={item.testId}
+                >
+                  {item.icon && <item.icon className="w-4 h-4" />}
+                  <span>{item.label}</span>
+                </Link>
+              ))}
+              
+              {/* More Dropdown for remaining items */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-3 h-10 px-3 rounded-lg hover:bg-gray-50">
-                    <Avatar className="h-8 w-8">
+                  <Button variant="ghost" size="sm" className="text-sm font-medium text-gray-600 hover:text-orange-600">
+                    More
+                    <i className="fas fa-chevron-down text-xs ml-1"></i>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {navigationItems.slice(8).map((item) => (
+                    <DropdownMenuItem key={item.href + item.label} asChild>
+                      <Link href={item.href} className="flex items-center gap-2 cursor-pointer">
+                        {item.icon && <item.icon className="w-4 h-4" />}
+                        <span>{item.label}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Right: Profile Dropdown */}
+            <div className="flex items-center gap-3">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2 h-10 px-2 sm:px-3 rounded-lg hover:bg-gray-50">
+                    <Avatar className="h-8 w-8 ring-2 ring-orange-100">
                       <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
                       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-orange-500 text-white text-sm font-medium">
                         {user.firstName?.[0]}{user.lastName?.[0]}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col items-start">
+                    <div className="hidden md:flex flex-col items-start">
                       <span className="text-sm font-medium text-gray-900">
                         {user.firstName} {user.lastName}
                       </span>
                       <span className="text-xs text-gray-500">{user.email}</span>
                     </div>
-                    <i className="fas fa-chevron-down text-xs text-gray-400"></i>
+                    <i className="fas fa-chevron-down text-xs text-gray-400 hidden sm:block"></i>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-64 p-2" sideOffset={8}>
@@ -435,7 +499,7 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-8">
           <Card className="bg-white shadow-sm border border-gray-200">
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -590,16 +654,19 @@ export default function Dashboard() {
 
         {/* Newly Created Links Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-900">Newly Created Links</h2>
-            <div className="flex items-center space-x-3">
-              <NotifyAllCardsButton 
-                totalCards={businessCards.length}
-              />
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white" asChild>
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Newly Created Links</h2>
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="hidden sm:block">
+                <NotifyAllCardsButton 
+                  totalCards={businessCards.length}
+                />
+              </div>
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white flex-1 sm:flex-initial" asChild>
                 <Link href="/templates" data-testid="button-create-link">
                   <i className="fas fa-plus mr-2"></i>
-                  Create New Link
+                  <span className="hidden sm:inline">Create New Link</span>
+                  <span className="sm:hidden">Create Link</span>
                 </Link>
               </Button>
             </div>
@@ -629,71 +696,78 @@ export default function Dashboard() {
           ) : (
             <div className="divide-y divide-gray-200">
               {paginatedCards.map((card, index) => (
-                <div key={card.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
+                <div key={card.id} className="px-4 sm:px-6 py-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    {/* Card Info */}
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
                       <div className="flex-shrink-0">
-                        <Avatar className="h-12 w-12">
+                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
                           <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${card.fullName}`} alt={card.fullName} />
                           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
                             {card.fullName.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
                         </Avatar>
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{card.fullName}</h3>
-                          <i className="fas fa-edit text-orange-500 text-sm"></i>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{card.fullName}</h3>
+                          <i className="fas fa-edit text-orange-500 text-xs sm:text-sm flex-shrink-0"></i>
                         </div>
-                        <div className="flex items-center space-x-4 mt-1">
-                          <p className="text-sm text-gray-600">
+                        <div className="flex items-center gap-2 sm:gap-4 mt-1">
+                          <p className="text-xs sm:text-sm text-gray-600 truncate">
                             {window.location.origin}/{card.shareSlug || card.fullName.toLowerCase().replace(/\s+/g, '-')}
                           </p>
-                          <i 
-                            className="fas fa-copy text-gray-400 text-xs cursor-pointer hover:text-gray-600 transition-colors" 
-                            onClick={() => copyUrl(card)}
-                            title="Copy link to clipboard"
-                            data-testid={`icon-copy-${card.id}`}
-                          ></i>
-                          <i 
-                            className="fas fa-external-link-alt text-gray-400 text-xs cursor-pointer hover:text-gray-600 transition-colors"
-                            onClick={() => {
-                              const slug = card.shareSlug || card.fullName.toLowerCase().replace(/\s+/g, '-');
-                              window.open(`${window.location.origin}/${slug}`, '_blank');
-                            }}
-                            title="Open in new tab"
-                            data-testid={`icon-external-${card.id}`}
-                          ></i>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <i 
+                              className="fas fa-copy text-gray-400 text-xs cursor-pointer hover:text-gray-600 transition-colors" 
+                              onClick={() => copyUrl(card)}
+                              title="Copy link"
+                              data-testid={`icon-copy-${card.id}`}
+                            ></i>
+                            <i 
+                              className="fas fa-external-link-alt text-gray-400 text-xs cursor-pointer hover:text-gray-600 transition-colors"
+                              onClick={() => {
+                                const slug = card.shareSlug || card.fullName.toLowerCase().replace(/\s+/g, '-');
+                                window.open(`${window.location.origin}/${slug}`, '_blank');
+                              }}
+                              title="Open"
+                              data-testid={`icon-external-${card.id}`}
+                            ></i>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-6 mt-2">
-                          <span className="text-sm text-gray-500">
+                        <div className="flex items-center gap-4 sm:gap-6 mt-2">
+                          <span className="text-xs sm:text-sm text-gray-500">
                             <i className="fas fa-eye mr-1 text-orange-500"></i>
-                            Visitor ({card.viewCount})
+                            <span className="hidden sm:inline">Visitor </span>({card.viewCount})
                           </span>
-                          <span className="text-sm text-gray-500">
+                          <span className="text-xs sm:text-sm text-gray-500">
                             <i className="fas fa-mouse-pointer mr-1 text-green-500"></i>
-                            Clicks (0)
+                            <span className="hidden sm:inline">Clicks </span>(0)
                           </span>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-4">
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 sm:gap-3 sm:flex-shrink-0">
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="text-orange-500 border-orange-200 hover:bg-orange-50"
+                        className="text-orange-500 border-orange-200 hover:bg-orange-50 flex-1 sm:flex-initial"
                         asChild
                       >
                         <Link href={`/cards/${card.id}/edit`} data-testid={`button-edit-${card.id}`}>
-                          Edit
+                          <Edit className="h-3 w-3 sm:mr-1" />
+                          <span className="hidden sm:inline">Edit</span>
                         </Link>
                       </Button>
                       
-                      <NotifyCardButton 
-                        cardId={card.id}
-                        cardTitle={card.fullName}
-                      />
+                      <div className="hidden sm:block">
+                        <NotifyCardButton 
+                          cardId={card.id}
+                          cardTitle={card.fullName}
+                        />
+                      </div>
                       
                       <Switch 
                         checked={card.isPublic} 
@@ -710,7 +784,7 @@ export default function Dashboard() {
                         className="text-gray-400 hover:text-orange-600 transition-colors"
                         onClick={() => setLocation(`/card-analytics?cardId=${card.id}`)}
                         data-testid={`button-stats-${card.id}`}
-                        title="View Analytics"
+                        title="Analytics"
                       >
                         <BarChart3 className="h-4 w-4" />
                       </Button>
