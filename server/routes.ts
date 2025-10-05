@@ -79,6 +79,7 @@ const moveDealSchema = z.object({
 });
 import { setupAIRoutes } from './ai-routes';
 import adminRoutes from './admin-routes';
+import billingRoutes from './billing-routes';
 import { templateCollectionsRoutes } from './template-collections-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 import ragRoutes from './rag-routes';
@@ -124,6 +125,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup admin routes
   app.use('/api/admin', adminRoutes);
+  
+  // Setup billing routes
+  app.use('/api/billing', billingRoutes);
   
   // Setup wallet routes
   const walletRoutes = (await import('./wallet-routes')).default;

@@ -5,7 +5,7 @@ import {
   automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability, appointmentNotifications, appointmentPayments,
   calendarConnections, videoMeetingProviders, externalCalendarEvents, meetingLinks, integrationLogs,
   teamAssignments, roundRobinState, leadRoutingRules, teamMemberSkills, teamMemberCapacity, teamAvailabilityPatterns, assignmentAnalytics, routingAnalytics,
-  publicUploads, qrLinks, qrEvents, cardSubscriptions,
+  publicUploads, qrLinks, qrEvents, cardSubscriptions, coupons, userSubscriptions,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -207,6 +207,24 @@ export interface IStorage {
   
   // Plans operations
   getPlans(): Promise<SubscriptionPlan[]>;
+  createPlan(planData: any): Promise<SubscriptionPlan>;
+  updatePlan(id: number, planData: any): Promise<SubscriptionPlan>;
+  deletePlan(id: number): Promise<void>;
+  
+  // Coupon operations
+  getCoupons(filters?: { isActive?: boolean }): Promise<any[]>;
+  getCouponByCode(code: string): Promise<any | undefined>;
+  getCouponById(id: string): Promise<any | undefined>;
+  createCoupon(couponData: any): Promise<any>;
+  updateCoupon(id: string, couponData: any): Promise<any>;
+  deleteCoupon(id: string): Promise<void>;
+  validateCoupon(code: string, planId: number, userCount: number): Promise<{ valid: boolean; discount?: number; message?: string }>;
+  
+  // User Subscription operations
+  getUserSubscription(userId: string): Promise<any | undefined>;
+  createUserSubscription(subscriptionData: any): Promise<any>;
+  updateUserSubscription(id: string, subscriptionData: any): Promise<any>;
+  cancelUserSubscription(id: string): Promise<any>;
   
   // Global templates operations
   getGlobalTemplates(filters?: { isActive?: boolean }): Promise<GlobalTemplate[]>;
@@ -796,6 +814,156 @@ export class DatabaseStorage implements IStorage {
       .from(subscriptionPlans)
       .where(eq(subscriptionPlans.isActive, true))
       .orderBy(subscriptionPlans.price);
+  }
+
+  async createPlan(planData: any): Promise<SubscriptionPlan> {
+    const [plan] = await db.insert(subscriptionPlans).values(planData).returning();
+    return plan;
+  }
+
+  async updatePlan(id: number, planData: any): Promise<SubscriptionPlan> {
+    const [plan] = await db
+      .update(subscriptionPlans)
+      .set(planData)
+      .where(eq(subscriptionPlans.id, id))
+      .returning();
+    return plan;
+  }
+
+  async deletePlan(id: number): Promise<void> {
+    await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+  }
+
+  // Coupon operations
+  async getCoupons(filters?: { isActive?: boolean }): Promise<any[]> {
+    const conditions = [];
+    if (filters?.isActive !== undefined) {
+      conditions.push(eq(coupons.isActive, filters.isActive));
+    }
+    
+    return await db
+      .select()
+      .from(coupons)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(coupons.createdAt));
+  }
+
+  async getCouponByCode(code: string): Promise<any | undefined> {
+    const [coupon] = await db
+      .select()
+      .from(coupons)
+      .where(eq(coupons.code, code.toUpperCase()));
+    return coupon;
+  }
+
+  async getCouponById(id: string): Promise<any | undefined> {
+    const [coupon] = await db
+      .select()
+      .from(coupons)
+      .where(eq(coupons.id, id));
+    return coupon;
+  }
+
+  async createCoupon(couponData: any): Promise<any> {
+    const [coupon] = await db.insert(coupons).values({
+      ...couponData,
+      code: couponData.code.toUpperCase()
+    }).returning();
+    return coupon;
+  }
+
+  async updateCoupon(id: string, couponData: any): Promise<any> {
+    const updates: any = { ...couponData };
+    if (updates.code) {
+      updates.code = updates.code.toUpperCase();
+    }
+    
+    const [coupon] = await db
+      .update(coupons)
+      .set(updates)
+      .where(eq(coupons.id, id))
+      .returning();
+    return coupon;
+  }
+
+  async deleteCoupon(id: string): Promise<void> {
+    await db.delete(coupons).where(eq(coupons.id, id));
+  }
+
+  async validateCoupon(code: string, planId: number, userCount: number): Promise<{ valid: boolean; discount?: number; message?: string }> {
+    const coupon = await this.getCouponByCode(code);
+    
+    if (!coupon) {
+      return { valid: false, message: 'Invalid coupon code' };
+    }
+
+    if (!coupon.isActive) {
+      return { valid: false, message: 'This coupon is no longer active' };
+    }
+
+    const now = new Date();
+    if (coupon.validFrom && new Date(coupon.validFrom) > now) {
+      return { valid: false, message: 'This coupon is not yet valid' };
+    }
+
+    if (coupon.validUntil && new Date(coupon.validUntil) < now) {
+      return { valid: false, message: 'This coupon has expired' };
+    }
+
+    if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
+      return { valid: false, message: 'This coupon has reached its usage limit' };
+    }
+
+    if (coupon.applicablePlans && coupon.applicablePlans.length > 0 && !coupon.applicablePlans.includes(planId)) {
+      return { valid: false, message: 'This coupon is not valid for the selected plan' };
+    }
+
+    return {
+      valid: true,
+      discount: coupon.type === 'percentage' ? coupon.discountValue : coupon.discountValue
+    };
+  }
+
+  // User Subscription operations
+  async getUserSubscription(userId: string): Promise<any | undefined> {
+    const [subscription] = await db
+      .select()
+      .from(userSubscriptions)
+      .where(and(
+        eq(userSubscriptions.userId, userId),
+        eq(userSubscriptions.isActive, true)
+      ))
+      .orderBy(desc(userSubscriptions.createdAt))
+      .limit(1);
+    return subscription;
+  }
+
+  async createUserSubscription(subscriptionData: any): Promise<any> {
+    const [subscription] = await db.insert(userSubscriptions).values(subscriptionData).returning();
+    return subscription;
+  }
+
+  async updateUserSubscription(id: string, subscriptionData: any): Promise<any> {
+    const [subscription] = await db
+      .update(userSubscriptions)
+      .set({ ...subscriptionData, updatedAt: new Date() })
+      .where(eq(userSubscriptions.id, id))
+      .returning();
+    return subscription;
+  }
+
+  async cancelUserSubscription(id: string): Promise<any> {
+    const [subscription] = await db
+      .update(userSubscriptions)
+      .set({
+        isActive: false,
+        status: 'canceled',
+        canceledAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(userSubscriptions.id, id))
+      .returning();
+    return subscription;
   }
 
   // Global templates operations

@@ -5,6 +5,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import DashboardPage from '@/components/admin/DashboardPage';
 import UsersPage from '@/components/admin/UsersPage';
 import PlansPage from '@/components/admin/PlansPage';
+import BillingPlansPage from '@/components/admin/BillingPlansPage';
 import CouponsPage from '@/components/admin/CouponsPage';
 import TemplatesPage from '@/components/admin/TemplatesPage';
 import TemplateImportPage from '@/components/admin/TemplateImportPage';
@@ -72,6 +73,8 @@ export default function Admin() {
         return <UsersPage />;
       case '/admin/plans':
         return <PlansPage />;
+      case '/admin/billing-plans':
+        return <BillingPlansPage />;
       case '/admin/coupons':
         return <CouponsPage />;
       case '/admin/templates/header-builder':
