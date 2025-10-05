@@ -82,6 +82,26 @@ const analyticsFeatures = [
   { icon: FileText, title: "Export Reports", description: "Download data in multiple formats" }
 ];
 
+const emailSignatureFeatures = [
+  { icon: Layout, title: "Multiple Templates", description: "Simple, Advanced, and Premium signature designs" },
+  { icon: Palette, title: "Full Customization", description: "Custom fonts, colors, sizes, and styles" },
+  { icon: Mail, title: "Contact Info Fields", description: "Name, title, company, phones, email, website, address" },
+  { icon: Share2, title: "Social Links", description: "Add LinkedIn, Twitter, Facebook, Instagram links" },
+  { icon: Image, title: "Profile Images", description: "Add your photo or company logo" },
+  { icon: Code, title: "HTML Export", description: "Copy ready-to-use HTML for any email client" },
+  { icon: CheckCircle2, title: "Live Preview", description: "See changes in real-time as you design" },
+  { icon: Smartphone, title: "Email Client Compatible", description: "Works with Gmail, Outlook, Apple Mail, and more" }
+];
+
+const qrCodeFeatures = [
+  { icon: QrCode, title: "Dynamic Generation", description: "Instantly create QR codes for any content" },
+  { icon: Palette, title: "Color Customization", description: "Match your brand with custom colors" },
+  { icon: Sliders, title: "Size Options", description: "Generate codes in any size you need" },
+  { icon: Image, title: "Logo Embedding", description: "Add your logo to the center of QR codes" },
+  { icon: FileText, title: "Multiple Formats", description: "Download as PNG, SVG, or PDF" },
+  { icon: Share2, title: "Share Anywhere", description: "Business cards, marketing materials, websites" }
+];
+
 const integrations = [
   { name: "Google Calendar", icon: "fab fa-google", color: "bg-blue-500" },
   { name: "Zoom", icon: "fas fa-video", color: "bg-blue-600" },
