@@ -338,10 +338,6 @@ export default function Pricing() {
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedPlan(plan.id);
-                              const detailsSection = document.getElementById('plan-details');
-                              if (detailsSection) {
-                                detailsSection.scrollIntoView({ behavior: 'smooth' });
-                              }
                             }}
                             data-testid={`select-plan-${plan.planType}`}
                           >
