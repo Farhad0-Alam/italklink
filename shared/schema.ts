@@ -154,6 +154,29 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   baseUsers: integer("base_users").default(1), // Number of users/cards included in base price
   pricePerUser: integer("price_per_user").default(0), // Additional cost per user/card in cents
   setupFee: integer("setup_fee").default(0), // One-time setup fee in cents
+  
+  // User selection controls
+  allowUserSelection: boolean("allow_user_selection").default(false), // Show user count selector
+  minUsers: integer("min_users").default(1), // Minimum selectable users
+  maxUsers: integer("max_users"), // Maximum selectable users (null = unlimited)
+  
+  // Comprehensive feature controls (stored in features jsonb for backward compatibility)
+  // Structure: {
+  //   analytics: boolean,
+  //   crm: boolean,
+  //   crmContactsLimit: number (-1 = unlimited),
+  //   appointments: boolean,
+  //   appointmentLimit: number (-1 = unlimited),
+  //   emailSignature: boolean,
+  //   bulkGeneration: boolean,
+  //   customDomain: boolean,
+  //   apiAccess: boolean,
+  //   visitorNotifications: boolean,
+  //   prioritySupport: boolean,
+  //   whiteLabel: boolean
+  // }
+  
+  description: text("description"), // Plan description for customers
   createdAt: timestamp("created_at").defaultNow(),
 });
 
