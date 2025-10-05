@@ -1,0 +1,220 @@
+You are a Senior Full-Stack SaaS Engineer specializing in React 19, TypeScript, Supabase, and shadcn/ui.
+Your task is to build a complete dynamic Plans, Pricing, and Coupons system for the SaaS platform 2TalkLink.
+The system must connect admin, public pricing, and user dashboards, supporting feature-based access control, coupons, and a dynamic “Add Users/Cards” quantity selector with live pricing updates.
+
+⚙️ Tech Stack
+
+Frontend: React 19 + Tailwind + shadcn/ui
+
+Backend: Node.js + TypeScript server routes or Supabase Edge Functions
+
+Database: Supabase (PostgreSQL)
+
+🎯 Core Objectives
+
+Make the existing modals and pricing page fully functional, syncing real data between:
+
+Admin Plan creation (Add New Plan)
+
+Admin Coupon creation (Add New Coupon)
+
+Public Pricing Page (shows all active plans)
+
+User Dashboard (features enabled/locked)
+
+Dynamic Add-Users/Card quantity pricing
+
+🧩 Database Schema (Supabase)
+CREATE TABLE plans (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  plan_type text CHECK (plan_type IN ('Free','Paid')),
+  frequency text CHECK (frequency IN ('Monthly','Yearly')),
+  currency text DEFAULT 'USD',
+  price numeric DEFAULT 0,
+  trial_days integer DEFAULT 0,
+  card_limit integer DEFAULT 1,
+  base_users integer DEFAULT 1,
+  price_per_user numeric DEFAULT 0,
+  setup_fee numeric DEFAULT 0,
+  features jsonb DEFAULT '{}',
+  templates jsonb DEFAULT '[]',
+  active boolean DEFAULT true,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE coupons (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  code text UNIQUE NOT NULL,
+  display_name text,
+  description text,
+  type text CHECK (type IN ('Percentage','Fixed')),
+  percentage numeric DEFAULT 0,
+  max_discount numeric DEFAULT 0,
+  start_date date,
+  expiry_date date,
+  total_usage_limit integer DEFAULT 0,
+  uses_per_user integer DEFAULT 1,
+  min_order_amount numeric DEFAULT 0,
+  applicable_plans uuid[] DEFAULT '{}',
+  active boolean DEFAULT true,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE user_subscriptions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id),
+  plan_id uuid REFERENCES plans(id),
+  coupon_id uuid REFERENCES coupons(id),
+  user_count integer DEFAULT 1,
+  price_paid numeric DEFAULT 0,
+  start_date timestamptz DEFAULT now(),
+  end_date timestamptz,
+  active boolean DEFAULT true,
+  features jsonb DEFAULT '{}'
+);
+
+🧠 Backend Logic
+1️⃣ Create Plan — /api/admin/plans/create
+
+Validate inputs.
+
+Insert new record into plans.
+
+Serialize selected checkboxes/features → JSON.
+
+Return updated plan list.
+
+2️⃣ Create Coupon — /api/admin/coupons/create
+
+Check unique code.
+
+Validate date range and limits.
+
+Store applicable_plans[].
+
+3️⃣ Apply Coupon — /api/user/coupons/validate
+
+Input: coupon_code, plan_id, user_id.
+
+Validate active, date, usage, applicable plan.
+
+Return discount %, fixed value, and message.
+
+4️⃣ Fetch Active Plans — /api/plans/list
+
+Return all active=true plans.
+
+Filter by frequency.
+
+5️⃣ Subscribe User — /api/user/subscribe
+const total =
+  plan.price +
+  (userCount - plan.base_users) * plan.price_per_user +
+  plan.setup_fee;
+
+
+Apply coupon discount (if valid).
+
+Save to user_subscriptions.
+
+Copy plan.features JSON into user’s record.
+
+🖥️ Frontend Logic
+🔸 Admin Panel
+Add New Plan Modal
+
+Fields: name, type, price, base users, price per user, setup fee, features, templates.
+
+POST → /api/admin/plans/create.
+
+Toast + refresh list.
+
+Add New Coupon Modal
+
+Fields: code, display name, description, type, value, dates, limits, applicable plans.
+
+POST → /api/admin/coupons/create.
+
+Toast + refresh table.
+
+🔸 Public Pricing Page
+
+Fetch /api/plans/list and display dynamically.
+Each card includes user count selector:
+
+const [userCount, setUserCount] = useState(plan.base_users);
+const monthlyTotal = (
+  plan.price + (userCount - plan.base_users) * plan.price_per_user
+).toFixed(2);
+const yearlyTotal = (monthlyTotal * 12).toFixed(2);
+
+<p>{userCount} users included!</p>
+<h2>${monthlyTotal}/month</h2>
+<p>Billed at ${yearlyTotal}/year + ${plan.setup_fee} setup fee</p>
+
+<div className="flex items-center gap-2">
+  <button onClick={() => setUserCount(Math.max(plan.base_users, userCount - 1))}>–</button>
+  <span>{userCount}</span>
+  <button onClick={() => setUserCount(userCount + 1)}>+</button>
+</div>
+
+
+When user clicks Select Plan:
+
+await subscribeUser({ plan_id: plan.id, user_count: userCount });
+
+
+Live total updates as count changes.
+
+🔸 User Dashboard
+
+After purchase → fetch user_subscriptions.features.
+
+Render feature-locked sections conditionally:
+
+if (!features.analytics_dashboard)
+  return <LockedMessage text="Upgrade to unlock Analytics" />;
+
+
+Admin can toggle features → auto-update user access.
+
+🧠 Feature Access Helper
+async function featureAccess(userId) {
+  const sub = await getActiveSubscription(userId);
+  return sub?.features || {};
+}
+
+🎨 UI / UX Notes
+
+Colors: Orange #F77F00, Deep Blue #1D3557
+
+Font: Inter or Poppins
+
+Components: shadcn/ui Card + Dialog
+
+Animation: Framer Motion for price changes
+
+Add Yearly toggle with “Save 20%” badge
+
+💰 Optional Integration
+
+Stripe/PayPal checkout
+
+Sync plans & coupons with payment provider
+
+On payment success → call /api/user/subscribe
+
+✅ Expected Result
+
+After implementation:
+
+Admin can create/edit plans and coupons dynamically.
+
+Users can increase/decrease users/cards before purchase.
+
+Pricing auto-updates with base price + per-user + setup fee – coupon discount.
+
+Features unlock/lock automatically based on plan.
+
+Full responsiveness, clean UI, production-ready SaaS billing logic.
