@@ -185,8 +185,8 @@ export default function Pricing() {
         </Button>
       </div>
       
-      {/* Plan Selection Toggle - Fixed Header */}
-      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 sticky top-16 z-40">
+      {/* Plan Selection Toggle */}
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -376,47 +376,6 @@ export default function Pricing() {
           </div>
         </div>
       </div>
-      
-      {/* Plan Details Section */}
-      {selectedPlan && plans && (
-        <div id="plan-details" className="bg-gray-100 dark:bg-slate-800 py-16 px-4">
-          <div className="container mx-auto max-w-4xl">
-            {(() => {
-              const plan = plans.find(p => p.id === selectedPlan);
-              if (!plan) return null;
-              
-              const isTeamPlan = plan.planType.toLowerCase().includes('team');
-              const userCount = isTeamPlan ? (additionalUsers[plan.id] || 0) + 3 : 1;
-              const totalPrice = isTeamPlan ? getTeamPlanPrice(plan, additionalUsers[plan.id] || 0) : getDisplayPrice(plan);
-              
-              return (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-center"
-                >
-                  <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                    You selected: {plan.name}
-                  </h3>
-                  <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-                    ${totalPrice === 0 ? '0' : totalPrice.toFixed(2)}/month
-                    {isTeamPlan && userCount > 1 && (
-                      <span className="text-sm block mt-2">for {userCount} user{userCount > 1 ? 's' : ''}</span>
-                    )}
-                  </p>
-                  <Button 
-                    size="lg"
-                    className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-12 py-4 text-lg"
-                    data-testid="proceed-to-checkout"
-                  >
-                    {plan.price === 0 ? 'Get Started Free' : 'Proceed to Checkout'}
-                  </Button>
-                </motion.div>
-              );
-            })()}
-          </div>
-        </div>
-      )}
       
       {/* FAQ Section */}
       <div className="py-16 px-4">
