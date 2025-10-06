@@ -86,6 +86,9 @@ export default function Pricing() {
     staleTime: 1000 * 30,
   });
 
+  // Get the discount percentage from plans (use the first plan's discount or default to 20%)
+  const yearlyDiscountPercent = plans?.find(p => (p as any).discount > 0)?.discount || 20;
+
   const validateCouponMutation = useMutation({
     mutationFn: async ({ code, planId, userCount }: { code: string; planId: number; userCount: number }) => {
       return apiRequest('POST', '/api/billing/coupons/validate', {
@@ -182,13 +185,13 @@ export default function Pricing() {
     
     const fullMonthlyPrice = baseMonthlyPrice + baseMonthlyPerUserPrice;
     
-    // Apply 20% discount if yearly toggle is selected
+    // Apply discount if yearly toggle is selected
     let monthlyTotal = fullMonthlyPrice;
     let yearlyTotal = fullMonthlyPrice * 12;
     let yearlySavings = 0;
     
     if (isYearly) {
-      yearlySavings = yearlyTotal * 0.20;
+      yearlySavings = yearlyTotal * (yearlyDiscountPercent / 100);
       yearlyTotal = yearlyTotal - yearlySavings;
       monthlyTotal = yearlyTotal / 12;
     }
@@ -327,7 +330,7 @@ export default function Pricing() {
                     }}
                     data-testid="toggle-yearly"
                   >
-                    Yearly and save 20%
+                    Yearly and save {yearlyDiscountPercent}%
                   </button>
                 </div>
               </div>
@@ -392,7 +395,7 @@ export default function Pricing() {
                             )}
                             {isYearly && pricing.yearlySavings > 0 && (
                               <Badge className="mt-2 bg-green-500 text-white">
-                                Save ${pricing.yearlySavings.toFixed(2)} (20% off)
+                                Save ${pricing.yearlySavings.toFixed(2)} ({yearlyDiscountPercent}% off)
                               </Badge>
                             )}
                             {validatedCoupon?.valid && isSelected && validatedCoupon.discount && (
