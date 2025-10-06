@@ -151,7 +151,7 @@ export const requireAdmin: RequestHandler = (req, res, next) => {
   }
   
   const user = req.user as any;
-  if (user.role !== 'admin') {
+  if (user.role !== 'admin' && user.role !== 'owner') {
     return res.status(403).json({ message: 'Admin access required' });
   }
   
