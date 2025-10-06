@@ -18,7 +18,7 @@ import { createInsertSchema } from "drizzle-zod";
 
 // Database Enums
 export const subscriptionStatusEnum = pgEnum('subscription_status', ['active', 'canceled', 'past_due', 'incomplete']);
-export const planTypeEnum = pgEnum('plan_type', ['free', 'pro', 'enterprise']);
+export const planTypeEnum = pgEnum('plan_type', ['free', 'paid', 'pro', 'enterprise']);
 export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'super_admin', 'owner']);
 export const teamRoleEnum = pgEnum('team_role', ['owner', 'admin', 'member']);
 export const teamMemberStatusEnum = pgEnum('team_member_status', ['active', 'invited', 'suspended']);

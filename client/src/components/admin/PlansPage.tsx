@@ -55,10 +55,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 interface SubscriptionPlan {
   id: number;
   name: string;
-  planType: 'free' | 'pro' | 'enterprise';
+  planType: 'free' | 'paid';
   price: number;
   currency: string;
-  frequency?: 'monthly' | 'yearly' | 'weekly' | 'daily' | 'custom';
+  frequency?: 'monthly' | 'yearly';
   interval: string;
   businessCardsLimit: number;
   features: any; // Can contain both legacy array and new object structure
@@ -94,10 +94,10 @@ interface ExtraCardOption {
 
 interface PlanFormData {
   name: string;
-  planType: 'free' | 'pro' | 'enterprise';
+  planType: 'free' | 'paid';
   price: number;
   currency: string;
-  frequency: 'monthly' | 'yearly' | 'weekly' | 'daily' | 'custom';
+  frequency: 'monthly' | 'yearly';
   discount: number; // Discount percentage for yearly plans
   businessCardsLimit: number;
   cardLabel: string;
@@ -125,10 +125,7 @@ interface PlanFormData {
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'BDT'];
 const FREQUENCIES = [
   { value: 'monthly', label: 'Monthly' },
-  { value: 'yearly', label: 'Yearly' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'daily', label: 'Daily' },
-  { value: 'custom', label: 'Custom' }
+  { value: 'yearly', label: 'Yearly' }
 ];
 
 const AVAILABLE_FEATURES = [
@@ -424,13 +421,25 @@ export default function PlansPage() {
     }
   };
 
+  // Normalize legacy plan values to current allowed values
+  const normalizePlanType = (planType: string): 'free' | 'paid' => {
+    if (planType === 'free') return 'free';
+    return 'paid'; // Map 'pro' and 'enterprise' to 'paid'
+  };
+
+  const normalizeFrequency = (frequency?: string): 'monthly' | 'yearly' => {
+    if (frequency === 'yearly') return 'yearly';
+    return 'monthly'; // Map all other values to 'monthly' as default
+  };
+
   const handleDuplicatePlan = (plan: SubscriptionPlan) => {
     setFormData({
       name: `${plan.name} (Copy)`,
-      planType: plan.planType,
+      planType: normalizePlanType(plan.planType),
       price: plan.price,
       currency: plan.currency,
-      frequency: plan.frequency || 'monthly',
+      frequency: normalizeFrequency(plan.frequency),
+      discount: 0,
       businessCardsLimit: plan.businessCardsLimit,
       cardLabel: plan.cardLabel || '',
       trialDays: plan.trialDays,
@@ -442,7 +451,14 @@ export default function PlansPage() {
       extraCardOptions: plan.features?.extraCardOptions || [],
       hasUnlimitedOption: plan.features?.hasUnlimitedOption || false,
       unlimitedPrice: plan.features?.unlimitedPrice || 0,
-      templateLimit: plan.features?.templateLimit || -1
+      templateLimit: plan.features?.templateLimit || -1,
+      description: (plan as any).description || '',
+      baseUsers: (plan as any).baseUsers || 1,
+      pricePerUser: (plan as any).pricePerUser || 0,
+      setupFee: (plan as any).setupFee || 0,
+      allowUserSelection: (plan as any).allowUserSelection || false,
+      minUsers: (plan as any).minUsers || 1,
+      maxUsers: (plan as any).maxUsers || null
     });
     setAddPlanOpen(true);
   };
@@ -451,10 +467,10 @@ export default function PlansPage() {
     setSelectedPlan(plan);
     setFormData({
       name: plan.name,
-      planType: plan.planType,
+      planType: normalizePlanType(plan.planType),
       price: plan.price,
       currency: plan.currency,
-      frequency: plan.frequency || 'monthly',
+      frequency: normalizeFrequency(plan.frequency),
       discount: (plan as any).discount || 0,
       businessCardsLimit: plan.businessCardsLimit,
       cardLabel: plan.cardLabel || '',
@@ -596,6 +612,7 @@ export default function PlansPage() {
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
           />
+          <p className="text-xs text-gray-500">The display name of the plan shown on the pricing page.</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="planType">Plan Type*</Label>
@@ -605,10 +622,10 @@ export default function PlansPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="free">Free</SelectItem>
-              <SelectItem value="pro">Pro</SelectItem>
-              <SelectItem value="enterprise">Enterprise</SelectItem>
+              <SelectItem value="paid">Paid</SelectItem>
             </SelectContent>
           </Select>
+          <p className="text-xs text-gray-500">Defines whether the plan is free or paid.</p>
         </div>
       </div>
 
@@ -626,6 +643,7 @@ export default function PlansPage() {
               ))}
             </SelectContent>
           </Select>
+          <p className="text-xs text-gray-500">Determines billing interval for the plan.</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="currency">Currency*</Label>
@@ -796,22 +814,6 @@ export default function PlansPage() {
           </div>
         )}
       </div>
-
-      {/* Custom Duration for Custom Frequency */}
-      {formData.frequency === 'custom' && (
-        <div className="space-y-2">
-          <Label htmlFor="customDuration">Custom Duration (days)</Label>
-          <Input
-            id="customDuration"
-            type="number"
-            placeholder="Enter custom duration in days"
-            value={formData.customDurationDays || ''}
-            onChange={(e) => setFormData(prev => ({ ...prev, customDurationDays: Number(e.target.value) || undefined }))}
-          />
-        </div>
-      )}
-
-
 
       {/* Features Selection with Accordion */}
       <div className="space-y-3">
