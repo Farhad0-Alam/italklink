@@ -438,7 +438,7 @@ export default function PlansPage() {
     }
     
     try {
-      const response = await fetch(`/api/admin/plans/${planId}`, {
+      const response = await fetch(`/api/billing/admin/plans/${planId}`, {
         method: 'DELETE',
         credentials: 'include'
       });
