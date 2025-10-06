@@ -64,6 +64,7 @@ const allFeatures: Feature[] = [
 
 export default function Pricing() {
   const [, setLocation] = useLocation();
+  const [isYearly, setIsYearly] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
   const [userQuantities, setUserQuantities] = useState<{[key: number]: number}>({});
   const [couponCode, setCouponCode] = useState('');
@@ -123,7 +124,8 @@ export default function Pricing() {
       return apiRequest('POST', '/api/billing/checkout/create-session', {
         planId,
         userCount,
-        couponCode: couponCode?.toUpperCase() || undefined
+        couponCode: couponCode?.toUpperCase() || undefined,
+        isYearly
       });
     },
     onSuccess: (response: any) => {
@@ -163,48 +165,42 @@ export default function Pricing() {
   };
 
   const calculatePlanPrice = (plan: BillingPlan, userCount: number) => {
-    if (plan.price === 0) return { basePrice: 0, perUserPrice: 0, setupFee: 0, total: 0, monthlyTotal: 0, yearlyDiscount: 0, yearlySavings: 0 };
+    if (plan.price === 0) return { basePrice: 0, perUserPrice: 0, setupFee: 0, total: 0, monthlyTotal: 0, yearlyTotal: 0, yearlySavings: 0 };
     
     // Convert from cents to dollars
     const priceInDollars = plan.price / 100;
     const perUserPriceInDollars = (plan.pricePerUser || 0) / 100;
     const setupFeeInDollars = (plan.setupFee || 0) / 100;
     
-    // Check if the plan is already a yearly plan (stored price is yearly total)
+    // Derive base monthly price from plan
+    // If plan is yearly, divide by 12; if monthly, use as-is
     const isYearlyPlan = plan.interval === 'yearly';
-    
-    // For yearly plans: price is total yearly amount, divide by 12 for monthly
-    // For monthly plans: price is monthly amount
-    const monthlyBasePrice = isYearlyPlan ? priceInDollars / 12 : priceInDollars;
-    const yearlyBasePrice = isYearlyPlan ? priceInDollars : priceInDollars * 12;
+    const baseMonthlyPrice = isYearlyPlan ? priceInDollars / 12 : priceInDollars;
     
     const additionalUsers = Math.max(0, userCount - (plan.baseUsers || 1));
-    const monthlyPerUserPrice = additionalUsers * (perUserPriceInDollars / (isYearlyPlan ? 12 : 1));
+    const baseMonthlyPerUserPrice = additionalUsers * (isYearlyPlan ? perUserPriceInDollars / 12 : perUserPriceInDollars);
     
-    // Calculate monthly total for display
-    const monthlyTotal = monthlyBasePrice + monthlyPerUserPrice;
+    const fullMonthlyPrice = baseMonthlyPrice + baseMonthlyPerUserPrice;
     
-    // Calculate actual billing total based on plan's interval
-    let total = 0;
-    if (isYearlyPlan) {
-      // For yearly plans, the total is already the yearly price
-      total = yearlyBasePrice + (additionalUsers * perUserPriceInDollars);
-    } else {
-      // For monthly plans, just the monthly price
-      total = monthlyBasePrice + monthlyPerUserPrice;
+    // Apply 20% discount if yearly toggle is selected
+    let monthlyTotal = fullMonthlyPrice;
+    let yearlyTotal = fullMonthlyPrice * 12;
+    let yearlySavings = 0;
+    
+    if (isYearly) {
+      yearlySavings = yearlyTotal * 0.20;
+      yearlyTotal = yearlyTotal - yearlySavings;
+      monthlyTotal = yearlyTotal / 12;
     }
     
-    // No additional discounts - discounts are already included in the plan price
-    
     return { 
-      basePrice: monthlyBasePrice, 
-      perUserPrice: monthlyPerUserPrice, 
+      basePrice: baseMonthlyPrice, 
+      perUserPrice: baseMonthlyPerUserPrice, 
       setupFee: setupFeeInDollars, 
-      total: total + setupFeeInDollars, 
+      total: isYearly ? yearlyTotal + setupFeeInDollars : monthlyTotal + setupFeeInDollars, 
       monthlyTotal,
-      subtotal: monthlyTotal,
-      yearlyDiscount: 0, // Discount already included in plan price
-      yearlySavings: 0 // Savings already reflected in plan price
+      yearlyTotal,
+      yearlySavings
     };
   };
 
@@ -298,6 +294,44 @@ export default function Pricing() {
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
               Create stunning digital business cards with unlimited customization
             </p>
+            
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+                Plan selection
+              </h2>
+              <div className="flex items-center justify-center">
+                <div className="bg-gray-100 dark:bg-slate-700 rounded-full p-1 flex items-center">
+                  <button
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                      !isYearly 
+                        ? 'bg-orange-500 text-white shadow-sm' 
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }`}
+                    onClick={() => {
+                      setIsYearly(false);
+                      setValidatedCoupon(null);
+                    }}
+                    data-testid="toggle-monthly"
+                  >
+                    Pay monthly
+                  </button>
+                  <button
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                      isYearly 
+                        ? 'bg-orange-500 text-white shadow-sm' 
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }`}
+                    onClick={() => {
+                      setIsYearly(true);
+                      setValidatedCoupon(null);
+                    }}
+                    data-testid="toggle-yearly"
+                  >
+                    Yearly and save 20%
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -346,15 +380,20 @@ export default function Pricing() {
                           
                           <div className="mb-6">
                             <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                              ${pricing.monthlyTotal.toFixed(2)}/{plan.interval === 'yearly' ? 'month' : 'month'}
+                              ${pricing.monthlyTotal.toFixed(2)}/month
                             </div>
                             {plan.price > 0 && (
                               <div className="text-sm text-gray-500 dark:text-gray-400">
-                                {plan.interval === 'yearly' ? `Billed at $${pricing.total.toFixed(2)}/year` : `Billed monthly`}
+                                {isYearly ? `Billed at $${pricing.yearlyTotal.toFixed(2)}/year` : `Billed monthly`}
                                 {pricing.setupFee > 0 && (
                                   <div className="text-xs mt-1">+ ${pricing.setupFee.toFixed(2)} setup fee</div>
                                 )}
                               </div>
+                            )}
+                            {isYearly && pricing.yearlySavings > 0 && (
+                              <Badge className="mt-2 bg-green-500 text-white">
+                                Save ${pricing.yearlySavings.toFixed(2)} (20% off)
+                              </Badge>
                             )}
                             {validatedCoupon?.valid && isSelected && validatedCoupon.discount && (
                               <div className="mt-2 text-sm text-green-600 dark:text-green-400 font-semibold">
@@ -395,7 +434,7 @@ export default function Pricing() {
                               </div>
                               {userCount > (plan.baseUsers || 1) && (
                                 <div className="text-xs text-gray-600 dark:text-gray-400">
-                                  +${pricing.perUserPrice.toFixed(2)}/{isYearly ? 'year' : 'month'} for {userCount - (plan.baseUsers || 1)} additional user{userCount - (plan.baseUsers || 1) > 1 ? 's' : ''}
+                                  +${pricing.perUserPrice.toFixed(2)}/month for {userCount - (plan.baseUsers || 1)} additional user{userCount - (plan.baseUsers || 1) > 1 ? 's' : ''}
                                 </div>
                               )}
                             </div>
