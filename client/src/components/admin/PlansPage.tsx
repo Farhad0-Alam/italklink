@@ -20,6 +20,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { 
   Select,
   SelectContent,
@@ -92,6 +98,7 @@ interface PlanFormData {
   price: number;
   currency: string;
   frequency: 'monthly' | 'yearly' | 'weekly' | 'daily' | 'custom';
+  discount: number; // Discount percentage for yearly plans
   businessCardsLimit: number;
   cardLabel: string;
   trialDays: number;
@@ -125,30 +132,52 @@ const FREQUENCIES = [
 ];
 
 const AVAILABLE_FEATURES = [
-  // Basic Elements
-  { key: 'heading', label: 'Heading', category: 'Basic' },
-  { key: 'paragraph', label: 'Paragraph', category: 'Basic' },
-  { key: 'link', label: 'Link', category: 'Basic' },
-  { key: 'image', label: 'Image', category: 'Media' },
-  { key: 'qrcode', label: 'QR Code', category: 'Basic' },
-  { key: 'video', label: 'Video', category: 'Media' },
+  // Page Elements - Basic
+  { key: 'heading', label: 'Heading', category: 'Page Elements' },
+  { key: 'paragraph', label: 'Paragraph', category: 'Page Elements' },
+  { key: 'link', label: 'Link', category: 'Page Elements' },
+  { key: 'image', label: 'Image', category: 'Page Elements' },
+  { key: 'video', label: 'Video', category: 'Page Elements' },
+  { key: 'html', label: 'Custom HTML', category: 'Page Elements' },
   
-  // Form Elements
+  // Forms
   { key: 'contactForm', label: 'Contact Form', category: 'Forms' },
+  { key: 'subscribeForm', label: 'Subscribe Form', category: 'Forms' },
   
   // Interactive Elements
   { key: 'accordion', label: 'Accordion', category: 'Interactive' },
-  { key: 'imageSlider', label: 'Image Slider', category: 'Media' },
+  { key: 'imageSlider', label: 'Image Slider', category: 'Interactive' },
+  { key: 'testimonials', label: 'Testimonials', category: 'Interactive' },
+  { key: 'pdfViewer', label: 'PDF Viewer', category: 'Interactive' },
+  { key: 'navigationMenu', label: 'Navigation Menu', category: 'Interactive' },
   
-  // Contact & Social
-  { key: 'contactSection', label: 'Contact Section', category: 'Contact' },
-  { key: 'socialSection', label: 'Social Media Section', category: 'Social' },
-  
-  // Advanced Elements
-  { key: 'testimonials', label: 'Testimonials', category: 'Advanced' },
+  // Advanced Features
   { key: 'googleMaps', label: 'Google Maps', category: 'Advanced' },
+  { key: 'digitalWallet', label: 'Digital Wallet (Apple/Google)', category: 'Advanced' },
+  { key: 'arPreview', label: 'AR Preview', category: 'Advanced' },
+  { key: 'qrcode', label: 'QR Code Generator', category: 'Advanced' },
+  
+  // AI Features
   { key: 'aiChatbot', label: 'AI Chatbot', category: 'AI Features' },
-  { key: 'ragKnowledge', label: 'Knowledge Base AI', category: 'AI Features' },
+  { key: 'ragKnowledge', label: 'RAG Knowledge Base', category: 'AI Features' },
+  
+  // Appointment & Booking
+  { key: 'bookAppointment', label: 'Book Appointment', category: 'Appointments' },
+  { key: 'scheduleCall', label: 'Schedule Call', category: 'Appointments' },
+  { key: 'meetingRequest', label: 'Meeting Request', category: 'Appointments' },
+  { key: 'availabilityDisplay', label: 'Availability Display', category: 'Appointments' },
+  
+  // Tools & Features
+  { key: 'crm', label: 'CRM (Customer Management)', category: 'Tools' },
+  { key: 'analytics', label: 'Analytics Dashboard', category: 'Tools' },
+  { key: 'qrCodes', label: 'QR Codes Management', category: 'Tools' },
+  { key: 'emailSignature', label: 'Email Signature Generator', category: 'Tools' },
+  { key: 'automation', label: 'Automation & Workflows', category: 'Tools' },
+  { key: 'teamFeatures', label: 'Team Collaboration', category: 'Tools' },
+  { key: 'affiliateSystem', label: 'Affiliate System', category: 'Tools' },
+  { key: 'bulkGeneration', label: 'Bulk Card Generation', category: 'Tools' },
+  { key: 'customDomain', label: 'Custom Domain', category: 'Tools' },
+  { key: 'apiAccess', label: 'API Access', category: 'Tools' },
 ];
 
 export default function PlansPage() {
@@ -168,6 +197,7 @@ export default function PlansPage() {
     price: 0,
     currency: 'USD',
     frequency: 'monthly',
+    discount: 0,
     businessCardsLimit: 1,
     cardLabel: '',
     trialDays: 0,
@@ -269,6 +299,7 @@ export default function PlansPage() {
       price: 0,
       currency: 'USD',
       frequency: 'monthly',
+      discount: 0,
       businessCardsLimit: 1,
       cardLabel: '',
       trialDays: 0,
@@ -289,6 +320,16 @@ export default function PlansPage() {
       minUsers: 1,
       maxUsers: null
     });
+  };
+
+  // Calculate yearly price with discount
+  const calculateDisplayPrice = () => {
+    if (formData.frequency === 'yearly') {
+      const monthlyPrice = formData.price;
+      const yearlyPrice = monthlyPrice * 12 * (1 - formData.discount / 100);
+      return Math.round(yearlyPrice);
+    }
+    return formData.price;
   };
 
   const handleAddPlan = async () => {
@@ -414,6 +455,7 @@ export default function PlansPage() {
       price: plan.price,
       currency: plan.currency,
       frequency: plan.frequency || 'monthly',
+      discount: (plan as any).discount || 0,
       businessCardsLimit: plan.businessCardsLimit,
       cardLabel: plan.cardLabel || '',
       trialDays: plan.trialDays,
@@ -606,33 +648,73 @@ export default function PlansPage() {
           <Input
             id="price"
             type="number"
-            placeholder="0"
+            placeholder="12"
             value={formData.price}
             onChange={(e) => setFormData(prev => ({ ...prev, price: Number(e.target.value) }))}
           />
+          <p className="text-xs text-gray-500">Monthly price or auto-calculated annual price (based on discount %).</p>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="cardNumber">Card Number*</Label>
+          <Label htmlFor="discount">Discount (%)</Label>
+          <Input
+            id="discount"
+            type="number"
+            placeholder="20"
+            value={formData.discount}
+            onChange={(e) => setFormData(prev => ({ ...prev, discount: Number(e.target.value) }))}
+          />
+          <p className="text-xs text-gray-500">Optional — used for yearly plans to calculate discounted annual pricing.</p>
+        </div>
+      </div>
+
+      {/* Display Calculated Price */}
+      {formData.frequency === 'yearly' && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+          <p className="text-sm text-blue-900 dark:text-blue-100">
+            <strong>Calculated Yearly Price:</strong> ${(calculateDisplayPrice() / 100).toFixed(2)} 
+            <span className="text-xs ml-2">
+              (Monthly: ${(formData.price / 100).toFixed(2)} × 12 months × {100 - formData.discount}% = ${(formData.price * 12 * (1 - formData.discount / 100) / 100).toFixed(2)})
+            </span>
+          </p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="cardNumber">Card Limit*</Label>
           <Input
             id="cardNumber"
             type="number"
-            placeholder="-1"
+            placeholder="3"
             value={formData.businessCardsLimit}
             onChange={(e) => setFormData(prev => ({ ...prev, businessCardsLimit: Number(e.target.value) }))}
           />
+          <p className="text-xs text-gray-500">Number of digital cards included in this plan.</p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="trialDays">Trial Days*</Label>
+          <Input
+            id="trialDays"
+            type="number"
+            placeholder="7"
+            value={formData.trialDays}
+            onChange={(e) => setFormData(prev => ({ ...prev, trialDays: Number(e.target.value) }))}
+          />
+          <p className="text-xs text-gray-500">Number of free trial days before billing starts.</p>
         </div>
       </div>
 
       {/* Plan Description */}
       <div className="space-y-2">
-        <Label htmlFor="description">Plan Description</Label>
+        <Label htmlFor="description">Description*</Label>
         <Textarea
           id="description"
-          placeholder="Enter plan description for customers"
+          placeholder="For creators and solopreneurs looking to grow and monetize"
           value={formData.description}
           onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
           rows={3}
         />
+        <p className="text-xs text-gray-500">Short description of plan benefits.</p>
       </div>
 
       {/* Per-User Pricing Section */}
@@ -648,7 +730,7 @@ export default function PlansPage() {
               value={formData.baseUsers}
               onChange={(e) => setFormData(prev => ({ ...prev, baseUsers: Number(e.target.value) }))}
             />
-            <p className="text-xs text-gray-500">Users/cards included in base price</p>
+            <p className="text-xs text-gray-500">Number of users/cards included in base price.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="pricePerUser">Price Per Additional User</Label>
@@ -659,7 +741,7 @@ export default function PlansPage() {
               value={formData.pricePerUser}
               onChange={(e) => setFormData(prev => ({ ...prev, pricePerUser: Number(e.target.value) }))}
             />
-            <p className="text-xs text-gray-500">Cost per extra user (in cents)</p>
+            <p className="text-xs text-gray-500">Extra charge (USD) per additional user/card.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="setupFee">Setup Fee</Label>
@@ -670,7 +752,7 @@ export default function PlansPage() {
               value={formData.setupFee}
               onChange={(e) => setFormData(prev => ({ ...prev, setupFee: Number(e.target.value) }))}
             />
-            <p className="text-xs text-gray-500">One-time fee (in cents)</p>
+            <p className="text-xs text-gray-500">One-time setup cost (optional).</p>
           </div>
         </div>
       </div>
@@ -701,7 +783,7 @@ export default function PlansPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="maxUsers">Maximum Users (leave empty for unlimited)</Label>
+              <Label htmlFor="maxUsers">Maximum Users</Label>
               <Input
                 id="maxUsers"
                 type="number"
@@ -709,21 +791,10 @@ export default function PlansPage() {
                 value={formData.maxUsers || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, maxUsers: e.target.value ? Number(e.target.value) : null }))}
               />
+              <p className="text-xs text-gray-500">Maximum number of users or cards allowed (leave empty for unlimited).</p>
             </div>
           </div>
         )}
-      </div>
-
-      {/* Trial and Custom Duration */}
-      <div className="space-y-2">
-        <Label htmlFor="trialDays">Test days</Label>
-        <Input
-          id="trialDays"
-          type="number"
-          placeholder="Enter test days"
-          value={formData.trialDays}
-          onChange={(e) => setFormData(prev => ({ ...prev, trialDays: Number(e.target.value) }))}
-        />
       </div>
 
       {/* Custom Duration for Custom Frequency */}
@@ -742,10 +813,10 @@ export default function PlansPage() {
 
 
 
-      {/* Features Selection */}
+      {/* Features Selection with Accordion */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-base font-medium">Page Elements*</Label>
+          <Label className="text-base font-medium">Features & Elements*</Label>
           <Button
             type="button"
             variant="outline"
@@ -756,7 +827,7 @@ export default function PlansPage() {
           </Button>
         </div>
         
-        <div className="max-h-80 overflow-y-auto border rounded-lg p-3">
+        <Accordion type="multiple" className="border rounded-lg">
           {Object.entries(
             AVAILABLE_FEATURES.reduce((acc, feature) => {
               if (!acc[feature.category]) acc[feature.category] = [];
@@ -764,28 +835,40 @@ export default function PlansPage() {
               return acc;
             }, {} as Record<string, typeof AVAILABLE_FEATURES>)
           ).map(([category, categoryFeatures]) => (
-            <div key={category} className="mb-4">
-              <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2 border-b pb-1">
-                {category}
-              </h4>
-              <div className="grid grid-cols-2 gap-2 pl-2">
-                {categoryFeatures.map((feature) => {
-                  const featureIndex = AVAILABLE_FEATURES.findIndex(f => f.key === feature.key);
-                  return (
-                    <div key={feature.key} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={feature.key}
-                        checked={formData.features.includes(featureIndex + 1)}
-                        onCheckedChange={() => toggleFeature(featureIndex + 1)}
-                      />
-                      <Label htmlFor={feature.key} className="text-sm">{feature.label}</Label>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <AccordionItem key={category} value={category}>
+              <AccordionTrigger className="px-4">
+                <div className="flex items-center justify-between w-full pr-4">
+                  <span className="font-medium">{category}</span>
+                  <span className="text-sm text-gray-500">
+                    {categoryFeatures.filter(f => {
+                      const idx = AVAILABLE_FEATURES.findIndex(feat => feat.key === f.key);
+                      return formData.features.includes(idx + 1);
+                    }).length} / {categoryFeatures.length}
+                  </span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <div className="grid grid-cols-2 gap-3">
+                  {categoryFeatures.map((feature) => {
+                    const featureIndex = AVAILABLE_FEATURES.findIndex(f => f.key === feature.key);
+                    return (
+                      <div key={feature.key} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`${category}-${feature.key}`}
+                          checked={formData.features.includes(featureIndex + 1)}
+                          onCheckedChange={() => toggleFeature(featureIndex + 1)}
+                        />
+                        <Label htmlFor={`${category}-${feature.key}`} className="text-sm cursor-pointer">
+                          {feature.label}
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </div>
 
       {/* Extra Card Pricing Options */}

@@ -21,6 +21,7 @@ const createPlanSchema = z.object({
   name: z.string().min(1),
   type: z.string(),
   price: z.number().int().min(0),
+  discount: z.number().int().min(0).max(100).default(0),
   baseUsers: z.number().int().min(1).default(1),
   pricePerUser: z.number().int().min(0).default(0),
   setupFee: z.number().int().min(0).default(0),

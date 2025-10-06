@@ -135,6 +135,7 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   name: varchar("name").notNull(),
   planType: planTypeEnum("plan_type").notNull(),
   price: integer("price").notNull(), // in cents
+  discount: integer("discount").default(0), // Discount percentage for yearly plans
   currency: varchar("currency").default('usd'),
   interval: varchar("interval").notNull(), // keep existing for compatibility
   businessCardsLimit: integer("business_cards_limit").notNull(),
