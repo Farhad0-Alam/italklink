@@ -64,7 +64,6 @@ const allFeatures: Feature[] = [
 
 export default function Pricing() {
   const [, setLocation] = useLocation();
-  const [isYearly, setIsYearly] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
   const [userQuantities, setUserQuantities] = useState<{[key: number]: number}>({});
   const [couponCode, setCouponCode] = useState('');
@@ -124,8 +123,7 @@ export default function Pricing() {
       return apiRequest('POST', '/api/billing/checkout/create-session', {
         planId,
         userCount,
-        couponCode: couponCode?.toUpperCase() || undefined,
-        isYearly
+        couponCode: couponCode?.toUpperCase() || undefined
       });
     },
     onSuccess: (response: any) => {
@@ -167,35 +165,46 @@ export default function Pricing() {
   const calculatePlanPrice = (plan: BillingPlan, userCount: number) => {
     if (plan.price === 0) return { basePrice: 0, perUserPrice: 0, setupFee: 0, total: 0, monthlyTotal: 0, yearlyDiscount: 0, yearlySavings: 0 };
     
-    const basePrice = plan.price;
+    // Convert from cents to dollars
+    const priceInDollars = plan.price / 100;
+    const perUserPriceInDollars = (plan.pricePerUser || 0) / 100;
+    const setupFeeInDollars = (plan.setupFee || 0) / 100;
+    
+    // Check if the plan is already a yearly plan (stored price is yearly total)
+    const isYearlyPlan = plan.interval === 'yearly';
+    
+    // For yearly plans: price is total yearly amount, divide by 12 for monthly
+    // For monthly plans: price is monthly amount
+    const monthlyBasePrice = isYearlyPlan ? priceInDollars / 12 : priceInDollars;
+    const yearlyBasePrice = isYearlyPlan ? priceInDollars : priceInDollars * 12;
+    
     const additionalUsers = Math.max(0, userCount - (plan.baseUsers || 1));
-    const perUserPrice = additionalUsers * (plan.pricePerUser || 0);
-    const setupFee = plan.setupFee || 0;
+    const monthlyPerUserPrice = additionalUsers * (perUserPriceInDollars / (isYearlyPlan ? 12 : 1));
     
-    const monthlySubtotal = basePrice + perUserPrice;
+    // Calculate monthly total for display
+    const monthlyTotal = monthlyBasePrice + monthlyPerUserPrice;
     
-    let monthlyTotal = monthlySubtotal;
-    let total = monthlySubtotal;
-    let yearlyDiscount = 0;
-    let yearlySavings = 0;
-    
-    if (isYearly) {
-      const yearlyBeforeDiscount = monthlySubtotal * 12;
-      yearlyDiscount = yearlyBeforeDiscount * 0.20;
-      total = yearlyBeforeDiscount - yearlyDiscount;
-      monthlyTotal = total / 12;
-      yearlySavings = yearlyDiscount;
+    // Calculate actual billing total based on plan's interval
+    let total = 0;
+    if (isYearlyPlan) {
+      // For yearly plans, the total is already the yearly price
+      total = yearlyBasePrice + (additionalUsers * perUserPriceInDollars);
+    } else {
+      // For monthly plans, just the monthly price
+      total = monthlyBasePrice + monthlyPerUserPrice;
     }
     
+    // No additional discounts - discounts are already included in the plan price
+    
     return { 
-      basePrice, 
-      perUserPrice, 
-      setupFee, 
-      total: total + setupFee, 
+      basePrice: monthlyBasePrice, 
+      perUserPrice: monthlyPerUserPrice, 
+      setupFee: setupFeeInDollars, 
+      total: total + setupFeeInDollars, 
       monthlyTotal,
-      subtotal: monthlySubtotal,
-      yearlyDiscount,
-      yearlySavings
+      subtotal: monthlyTotal,
+      yearlyDiscount: 0, // Discount already included in plan price
+      yearlySavings: 0 // Savings already reflected in plan price
     };
   };
 
@@ -289,44 +298,6 @@ export default function Pricing() {
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
               Create stunning digital business cards with unlimited customization
             </p>
-            
-            <div className="mb-6">
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-                Plan selection
-              </h2>
-              <div className="flex items-center justify-center">
-                <div className="bg-gray-100 dark:bg-slate-700 rounded-full p-1 flex items-center">
-                  <button
-                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                      !isYearly 
-                        ? 'bg-orange-500 text-white shadow-sm' 
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }`}
-                    onClick={() => {
-                      setIsYearly(false);
-                      setValidatedCoupon(null);
-                    }}
-                    data-testid="toggle-monthly"
-                  >
-                    Pay monthly
-                  </button>
-                  <button
-                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                      isYearly 
-                        ? 'bg-orange-500 text-white shadow-sm' 
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }`}
-                    onClick={() => {
-                      setIsYearly(true);
-                      setValidatedCoupon(null);
-                    }}
-                    data-testid="toggle-yearly"
-                  >
-                    Pay yearly
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -375,20 +346,15 @@ export default function Pricing() {
                           
                           <div className="mb-6">
                             <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                              ${pricing.monthlyTotal.toFixed(2)}/month
+                              ${pricing.monthlyTotal.toFixed(2)}/{plan.interval === 'yearly' ? 'month' : 'month'}
                             </div>
                             {plan.price > 0 && (
                               <div className="text-sm text-gray-500 dark:text-gray-400">
-                                {isYearly ? `Billed at $${finalTotal.toFixed(2)}/year` : `Billed monthly`}
+                                {plan.interval === 'yearly' ? `Billed at $${pricing.total.toFixed(2)}/year` : `Billed monthly`}
                                 {pricing.setupFee > 0 && (
                                   <div className="text-xs mt-1">+ ${pricing.setupFee.toFixed(2)} setup fee</div>
                                 )}
                               </div>
-                            )}
-                            {isYearly && pricing.yearlySavings > 0 && (
-                              <Badge className="mt-2 bg-green-500 text-white">
-                                Save ${pricing.yearlySavings.toFixed(2)} (20% off)
-                              </Badge>
                             )}
                             {validatedCoupon?.valid && isSelected && validatedCoupon.discount && (
                               <div className="mt-2 text-sm text-green-600 dark:text-green-400 font-semibold">
