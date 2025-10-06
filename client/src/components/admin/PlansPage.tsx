@@ -319,12 +319,12 @@ export default function PlansPage() {
     });
   };
 
-  // Calculate yearly price with discount
+  // Calculate yearly price with discount (matches server-side calculation)
   const calculateDisplayPrice = () => {
     if (formData.frequency === 'yearly') {
-      const monthlyPrice = formData.price;
-      const yearlyPrice = monthlyPrice * 12 * (1 - formData.discount / 100);
-      return Math.round(yearlyPrice);
+      const monthlyPriceCents = Math.round(formData.price * 100);
+      const yearlyPriceCents = Math.floor(monthlyPriceCents * 12 * (100 - formData.discount) / 100);
+      return yearlyPriceCents / 100; // Convert back to dollars
     }
     return formData.price;
   };
@@ -337,11 +337,29 @@ export default function PlansPage() {
 
     setIsSubmitting(true);
     try {
+      // Calculate final price in cents based on frequency
+      // For monthly: convert dollars to cents
+      // For yearly: calculate yearly price in cents (floor to avoid rounding up)
+      let finalPriceCents = Math.round(formData.price * 100);
+      if (formData.frequency === 'yearly') {
+        const monthlyPriceCents = Math.round(formData.price * 100);
+        finalPriceCents = Math.floor(monthlyPriceCents * 12 * (100 - formData.discount) / 100);
+      }
+      
+      // Convert other prices from dollars to cents for storage
+      const dataToSend = {
+        ...formData,
+        price: finalPriceCents,
+        pricePerUser: Math.round(formData.pricePerUser * 100),
+        setupFee: Math.round(formData.setupFee * 100),
+        unlimitedPrice: Math.round(formData.unlimitedPrice * 100)
+      };
+      
       const response = await fetch('/api/admin/plans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(formData)
+        body: JSON.stringify(dataToSend)
       });
 
       if (response.ok) {
@@ -370,11 +388,29 @@ export default function PlansPage() {
 
     setIsSubmitting(true);
     try {
+      // Calculate final price in cents based on frequency
+      // For monthly: convert dollars to cents
+      // For yearly: calculate yearly price in cents (floor to avoid rounding up)
+      let finalPriceCents = Math.round(formData.price * 100);
+      if (formData.frequency === 'yearly') {
+        const monthlyPriceCents = Math.round(formData.price * 100);
+        finalPriceCents = Math.floor(monthlyPriceCents * 12 * (100 - formData.discount) / 100);
+      }
+      
+      // Convert other prices from dollars to cents for storage
+      const dataToSend = {
+        ...formData,
+        price: finalPriceCents,
+        pricePerUser: Math.round(formData.pricePerUser * 100),
+        setupFee: Math.round(formData.setupFee * 100),
+        unlimitedPrice: Math.round(formData.unlimitedPrice * 100)
+      };
+      
       const response = await fetch(`/api/admin/plans/${selectedPlan.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(formData)
+        body: JSON.stringify(dataToSend)
       });
 
       if (response.ok) {
@@ -433,13 +469,34 @@ export default function PlansPage() {
   };
 
   const handleDuplicatePlan = (plan: SubscriptionPlan) => {
+    const normalizedFrequency = normalizeFrequency(plan.frequency);
+    const discount = (plan as any).discount || 0;
+    const yearlyPrice = plan.price / 100; // Convert from cents to dollars
+    
+    // For yearly plans, derive monthly price from yearly price and discount
+    let monthlyPrice = yearlyPrice;
+    if (normalizedFrequency === 'yearly') {
+      if (discount >= 100) {
+        // Free plan (100% discount or more) - set monthly to 0
+        monthlyPrice = 0;
+      } else if (discount > 0) {
+        const discountMultiplier = 1 - (discount / 100);
+        monthlyPrice = yearlyPrice / (12 * discountMultiplier);
+        monthlyPrice = Math.round(monthlyPrice * 100) / 100; // Round to cents
+      } else {
+        // No discount
+        monthlyPrice = yearlyPrice / 12;
+        monthlyPrice = Math.round(monthlyPrice * 100) / 100; // Round to cents
+      }
+    }
+    
     setFormData({
       name: `${plan.name} (Copy)`,
       planType: normalizePlanType(plan.planType),
-      price: plan.price,
+      price: monthlyPrice, // Always use monthly price for consistency
       currency: plan.currency,
-      frequency: normalizeFrequency(plan.frequency),
-      discount: 0,
+      frequency: normalizedFrequency,
+      discount: discount, // Keep the discount from original plan
       businessCardsLimit: plan.businessCardsLimit,
       cardLabel: plan.cardLabel || '',
       trialDays: plan.trialDays,
@@ -450,12 +507,12 @@ export default function PlansPage() {
       stripePriceId: '',
       extraCardOptions: plan.features?.extraCardOptions || [],
       hasUnlimitedOption: plan.features?.hasUnlimitedOption || false,
-      unlimitedPrice: plan.features?.unlimitedPrice || 0,
+      unlimitedPrice: (plan.features?.unlimitedPrice || 0) / 100, // Convert from cents to dollars
       templateLimit: plan.features?.templateLimit || -1,
       description: (plan as any).description || '',
       baseUsers: (plan as any).baseUsers || 1,
-      pricePerUser: (plan as any).pricePerUser || 0,
-      setupFee: (plan as any).setupFee || 0,
+      pricePerUser: ((plan as any).pricePerUser || 0) / 100, // Convert from cents to dollars
+      setupFee: ((plan as any).setupFee || 0) / 100, // Convert from cents to dollars
       allowUserSelection: (plan as any).allowUserSelection || false,
       minUsers: (plan as any).minUsers || 1,
       maxUsers: (plan as any).maxUsers || null
@@ -465,13 +522,37 @@ export default function PlansPage() {
 
   const openEditModal = (plan: SubscriptionPlan) => {
     setSelectedPlan(plan);
+    
+    const normalizedFrequency = normalizeFrequency(plan.frequency);
+    const discount = (plan as any).discount || 0;
+    const yearlyPrice = plan.price / 100; // Convert from cents to dollars
+    
+    // For yearly plans, derive monthly price from yearly price and discount
+    // yearlyPrice = monthlyPrice * 12 * (1 - discount / 100)
+    // monthlyPrice = yearlyPrice / (12 * (1 - discount / 100))
+    let monthlyPrice = yearlyPrice;
+    if (normalizedFrequency === 'yearly') {
+      if (discount >= 100) {
+        // Free plan (100% discount or more) - set monthly to 0
+        monthlyPrice = 0;
+      } else if (discount > 0) {
+        const discountMultiplier = 1 - (discount / 100);
+        monthlyPrice = yearlyPrice / (12 * discountMultiplier);
+        monthlyPrice = Math.round(monthlyPrice * 100) / 100; // Round to cents
+      } else {
+        // No discount, so yearly = monthly * 12
+        monthlyPrice = yearlyPrice / 12;
+        monthlyPrice = Math.round(monthlyPrice * 100) / 100; // Round to cents
+      }
+    }
+    
     setFormData({
       name: plan.name,
       planType: normalizePlanType(plan.planType),
-      price: plan.price,
+      price: monthlyPrice, // Always use monthly price for consistency
       currency: plan.currency,
-      frequency: normalizeFrequency(plan.frequency),
-      discount: (plan as any).discount || 0,
+      frequency: normalizedFrequency,
+      discount: discount,
       businessCardsLimit: plan.businessCardsLimit,
       cardLabel: plan.cardLabel || '',
       trialDays: plan.trialDays,
@@ -482,12 +563,12 @@ export default function PlansPage() {
       stripePriceId: plan.stripePriceId || '',
       extraCardOptions: plan.features?.extraCardOptions || [],
       hasUnlimitedOption: plan.features?.hasUnlimitedOption || false,
-      unlimitedPrice: plan.features?.unlimitedPrice || 0,
+      unlimitedPrice: (plan.features?.unlimitedPrice || 0) / 100, // Convert from cents to dollars
       templateLimit: plan.features?.templateLimit || -1,
       description: (plan as any).description || '',
       baseUsers: (plan as any).baseUsers || 1,
-      pricePerUser: (plan as any).pricePerUser || 0,
-      setupFee: (plan as any).setupFee || 0,
+      pricePerUser: ((plan as any).pricePerUser || 0) / 100, // Convert from cents to dollars
+      setupFee: ((plan as any).setupFee || 0) / 100, // Convert from cents to dollars
       allowUserSelection: (plan as any).allowUserSelection || false,
       minUsers: (plan as any).minUsers || 1,
       maxUsers: (plan as any).maxUsers || null
@@ -689,9 +770,9 @@ export default function PlansPage() {
       {formData.frequency === 'yearly' && (
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
           <p className="text-sm text-blue-900 dark:text-blue-100">
-            <strong>Calculated Yearly Price:</strong> ${(calculateDisplayPrice() / 100).toFixed(2)} 
+            <strong>Calculated Yearly Price:</strong> ${calculateDisplayPrice().toFixed(2)} 
             <span className="text-xs ml-2">
-              (Monthly: ${(formData.price / 100).toFixed(2)} × 12 months × {100 - formData.discount}% = ${(formData.price * 12 * (1 - formData.discount / 100) / 100).toFixed(2)})
+              (Monthly: ${formData.price.toFixed(2)} × 12 months × {100 - formData.discount}% = ${calculateDisplayPrice().toFixed(2)})
             </span>
           </p>
         </div>

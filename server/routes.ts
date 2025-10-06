@@ -132,7 +132,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public endpoint: Get active subscription plans (for pricing page)
   app.get('/api/plans', async (req, res) => {
     try {
-      const { db, subscriptionPlans } = await import('./db');
+      const { db } = await import('./db');
+      const { subscriptionPlans } = await import('@shared/schema');
       const { eq } = await import('drizzle-orm');
       const plans = await db.select()
         .from(subscriptionPlans)

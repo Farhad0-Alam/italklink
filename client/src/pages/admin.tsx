@@ -72,8 +72,6 @@ export default function Admin() {
         return <UsersPage />;
       case '/admin/plans':
         return <PlansPage />;
-      case '/admin/billing-plans':
-        return <BillingPlansPage />;
       case '/admin/coupons':
         return <CouponsPage />;
       case '/admin/templates/header-builder':
