@@ -19,15 +19,29 @@ const router = Router();
 
 const createPlanSchema = z.object({
   name: z.string().min(1),
-  type: z.string(),
+  planType: z.string(),
   price: z.number().int().min(0),
+  currency: z.string().default('USD'),
+  frequency: z.string(),
   discount: z.number().int().min(0).max(100).default(0),
+  businessCardsLimit: z.number().int().min(0).default(1),
+  cardLabel: z.string().optional(),
+  trialDays: z.number().int().min(0).default(0),
+  features: z.array(z.number()).default([]),
+  templates: z.array(z.string()).default([]),
+  isActive: z.boolean().default(true),
+  stripePriceId: z.string().optional(),
+  extraCardOptions: z.array(z.any()).default([]),
+  hasUnlimitedOption: z.boolean().default(false),
+  unlimitedPrice: z.number().int().min(0).default(0),
+  templateLimit: z.number().int().default(-1),
+  description: z.string().optional(),
   baseUsers: z.number().int().min(1).default(1),
   pricePerUser: z.number().int().min(0).default(0),
   setupFee: z.number().int().min(0).default(0),
-  features: z.record(z.any()).default({}),
-  description: z.string().optional(),
-  isActive: z.boolean().default(true),
+  allowUserSelection: z.boolean().default(false),
+  minUsers: z.number().int().min(1).default(1),
+  maxUsers: z.number().int().nullable().optional(),
 });
 
 const createCouponSchema = z.object({
