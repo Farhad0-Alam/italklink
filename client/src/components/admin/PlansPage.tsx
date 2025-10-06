@@ -220,14 +220,14 @@ export default function PlansPage() {
 
   // Fetch plans data
   const { data: plans = [], isLoading: plansLoading } = useQuery<SubscriptionPlan[]>({
-    queryKey: ['/api/admin/plans', search, statusFilter, typeFilter],
+    queryKey: ['/api/billing/admin/plans', search, statusFilter, typeFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (search.trim()) params.append('search', search.trim());
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (typeFilter !== 'all') params.append('type', typeFilter);
       
-      const url = `/api/admin/plans${params.toString() ? '?' + params.toString() : ''}`;
+      const url = `/api/billing/admin/plans${params.toString() ? '?' + params.toString() : ''}`;
       const res = await fetch(url, { credentials: 'include' });
       
       if (!res.ok) {
@@ -355,7 +355,7 @@ export default function PlansPage() {
         unlimitedPrice: Math.round(formData.unlimitedPrice * 100)
       };
       
-      const response = await fetch('/api/admin/plans', {
+      const response = await fetch('/api/billing/admin/plans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -365,7 +365,7 @@ export default function PlansPage() {
       if (response.ok) {
         resetForm();
         setAddPlanOpen(false);
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/plans'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/billing/admin/plans'] });
         queryClient.invalidateQueries({ queryKey: ['/api/plans'] }); // Also refresh public plans
         console.log('Plan created successfully');
       } else {
@@ -406,7 +406,7 @@ export default function PlansPage() {
         unlimitedPrice: Math.round(formData.unlimitedPrice * 100)
       };
       
-      const response = await fetch(`/api/admin/plans/${selectedPlan.id}`, {
+      const response = await fetch(`/api/billing/admin/plans/${selectedPlan.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -417,7 +417,7 @@ export default function PlansPage() {
         resetForm();
         setEditPlanOpen(false);
         setSelectedPlan(null);
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/plans'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/billing/admin/plans'] });
         queryClient.invalidateQueries({ queryKey: ['/api/plans'] }); // Also refresh public plans
         console.log('Plan updated successfully');
       } else {
@@ -444,7 +444,7 @@ export default function PlansPage() {
       });
       
       if (response.ok) {
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/plans'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/billing/admin/plans'] });
         queryClient.invalidateQueries({ queryKey: ['/api/plans'] }); // Also refresh public plans
         console.log('Plan deleted successfully');
       } else {
