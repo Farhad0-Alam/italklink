@@ -232,7 +232,7 @@ export default function BillingPlansPage() {
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            Configure the plan pricing and features
+            Create a new subscription plan with features and pricing.
           </DialogDescription>
         </DialogHeader>
 
