@@ -872,6 +872,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin login route
+  app.post('/api/admin/login', async (req, res) => {
+    try {
+      const { email, password, rememberMe = false } = req.body;
+      
+      // Validate required fields
+      if (!email || !password) {
+        return res.status(400).json({ 
+          message: 'Email and password are required' 
+        });
+      }
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ 
+          message: 'Invalid email or password' 
+        });
+      }
+      
+      // Check if user is an admin
+      if (user.role !== 'admin' && user.role !== 'super_admin' && user.role !== 'owner') {
+        return res.status(403).json({ 
+          message: 'Access denied. Admin privileges required.' 
+        });
+      }
+      
+      // Check if user has a password (Google OAuth users might not)
+      if (!user.password) {
+        return res.status(401).json({ 
+          message: 'This account was created with Google. Please use Google Sign-In.' 
+        });
+      }
+      
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ 
+          message: 'Invalid email or password' 
+        });
+      }
+      
+      // Set session cookie duration based on rememberMe
+      // 30 days if rememberMe is true, 1 day if false
+      const sessionDuration = rememberMe 
+        ? 30 * 24 * 60 * 60 * 1000  // 30 days in milliseconds
+        : 24 * 60 * 60 * 1000;       // 1 day in milliseconds
+      
+      // Log the user in
+      req.login(user as any, (err) => {
+        if (err) {
+          console.error('Admin login error:', err);
+          return res.status(500).json({ message: 'Login failed' });
+        }
+        
+        // Set session cookie maxAge
+        if (req.session.cookie) {
+          req.session.cookie.maxAge = sessionDuration;
+        }
+        
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = user as any;
+        res.json({ 
+          message: 'Admin login successful',
+          user: userWithoutPassword 
+        });
+      });
+    } catch (error) {
+      console.error('Admin login error:', error);
+      res.status(500).json({ message: 'Login failed' });
+    }
+  });
+
   // Teams API  
   app.get('/api/teams', requireAuth, async (req, res) => {
     try {
