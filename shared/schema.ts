@@ -622,6 +622,7 @@ export const features = pgTable("features", {
   label: varchar("label").notNull(), // e.g. "Custom Colors", "Analytics"
   description: text("description"),
   category: varchar("category").default('general'), // e.g. "design", "functionality"
+  icon: varchar("icon"), // lucide-react icon name, e.g. "Check", "Palette", "BarChart"
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -629,6 +630,7 @@ export const features = pgTable("features", {
 export const planFeatures = pgTable("plan_features", {
   planId: integer("plan_id").references(() => subscriptionPlans.id, { onDelete: 'cascade' }).notNull(),
   featureId: integer("feature_id").references(() => features.id, { onDelete: 'cascade' }).notNull(),
+  isIncluded: boolean("is_included").default(true).notNull(), // true = checkmark, false = cross
 }, (table) => [{
   pk: { columns: [table.planId, table.featureId] }
 }]);
