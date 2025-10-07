@@ -42,6 +42,11 @@ const createPlanSchema = z.object({
   allowUserSelection: z.boolean().default(false),
   minUsers: z.number().int().min(1).default(1),
   maxUsers: z.number().int().nullable().optional(),
+  pricingFeatures: z.array(z.object({
+    name: z.string(),
+    description: z.string().optional(),
+    icon: z.string().optional().default('Check')
+  })).default([]),
 });
 
 const createCouponSchema = z.object({

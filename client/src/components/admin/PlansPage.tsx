@@ -48,7 +48,20 @@ import {
   Users,
   Calendar,
   CheckCircle,
-  XCircle
+  XCircle,
+  Check,
+  X,
+  Star,
+  Sparkles,
+  Zap,
+  Heart,
+  Crown,
+  Shield,
+  Award,
+  Gift,
+  Rocket,
+  TrendingUp,
+  Infinity
 } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -89,6 +102,7 @@ interface Template {
 interface PricingFeature {
   name: string;
   description: string;
+  icon?: string;
 }
 
 interface PlanFormData {
@@ -116,6 +130,24 @@ const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'BDT'];
 const FREQUENCIES = [
   { value: 'monthly', label: 'Monthly' },
   { value: 'yearly', label: 'Yearly' }
+];
+
+const ICON_OPTIONS = [
+  { value: 'Check', label: 'Check', Icon: Check },
+  { value: 'X', label: 'X', Icon: X },
+  { value: 'CheckCircle', label: 'Check Circle', Icon: CheckCircle },
+  { value: 'XCircle', label: 'X Circle', Icon: XCircle },
+  { value: 'Star', label: 'Star', Icon: Star },
+  { value: 'Sparkles', label: 'Sparkles', Icon: Sparkles },
+  { value: 'Zap', label: 'Zap', Icon: Zap },
+  { value: 'Heart', label: 'Heart', Icon: Heart },
+  { value: 'Crown', label: 'Crown', Icon: Crown },
+  { value: 'Shield', label: 'Shield', Icon: Shield },
+  { value: 'Award', label: 'Award', Icon: Award },
+  { value: 'Gift', label: 'Gift', Icon: Gift },
+  { value: 'Rocket', label: 'Rocket', Icon: Rocket },
+  { value: 'TrendingUp', label: 'Trending Up', Icon: TrendingUp },
+  { value: 'Infinity', label: 'Infinity', Icon: Infinity },
 ];
 
 const AVAILABLE_FEATURES = [
@@ -815,44 +847,74 @@ export default function PlansPage() {
         <p className="text-sm text-gray-500">Add custom features to display on the pricing card (e.g., "Professional Templates", "Custom Branding")</p>
         
         <div className="space-y-2">
-          {(formData.pricingFeatures || []).map((feature, index) => (
-            <div key={index} className="flex items-center space-x-2 p-3 border rounded-lg">
-              <Input
-                placeholder="Feature name"
-                value={feature.name}
-                onChange={(e) => {
-                  const newFeatures = [...formData.pricingFeatures];
-                  newFeatures[index] = { ...feature, name: e.target.value };
-                  setFormData(prev => ({ ...prev, pricingFeatures: newFeatures }));
-                }}
-                className="flex-1"
-                data-testid={`input-pricing-feature-name-${index}`}
-              />
-              <Input
-                placeholder="Description (optional)"
-                value={feature.description}
-                onChange={(e) => {
-                  const newFeatures = [...formData.pricingFeatures];
-                  newFeatures[index] = { ...feature, description: e.target.value };
-                  setFormData(prev => ({ ...prev, pricingFeatures: newFeatures }));
-                }}
-                className="flex-1"
-                data-testid={`input-pricing-feature-desc-${index}`}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const newFeatures = formData.pricingFeatures.filter((_, i) => i !== index);
-                  setFormData(prev => ({ ...prev, pricingFeatures: newFeatures }));
-                }}
-                data-testid={`button-remove-pricing-feature-${index}`}
-              >
-                Remove
-              </Button>
-            </div>
-          ))}
+          {(formData.pricingFeatures || []).map((feature, index) => {
+            const IconComponent = ICON_OPTIONS.find(opt => opt.value === (feature.icon || 'Check'))?.Icon || Check;
+            return (
+              <div key={index} className="flex items-center space-x-2 p-3 border rounded-lg">
+                {/* Icon Selector */}
+                <Select
+                  value={feature.icon || 'Check'}
+                  onValueChange={(value) => {
+                    const newFeatures = [...formData.pricingFeatures];
+                    newFeatures[index] = { ...feature, icon: value };
+                    setFormData(prev => ({ ...prev, pricingFeatures: newFeatures }));
+                  }}
+                >
+                  <SelectTrigger className="w-[120px]" data-testid={`select-pricing-feature-icon-${index}`}>
+                    <div className="flex items-center space-x-2">
+                      <IconComponent className="h-4 w-4" />
+                      <span className="text-sm">{ICON_OPTIONS.find(opt => opt.value === (feature.icon || 'Check'))?.label}</span>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ICON_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center space-x-2">
+                          <option.Icon className="h-4 w-4" />
+                          <span>{option.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Input
+                  placeholder="Feature name"
+                  value={feature.name}
+                  onChange={(e) => {
+                    const newFeatures = [...formData.pricingFeatures];
+                    newFeatures[index] = { ...feature, name: e.target.value };
+                    setFormData(prev => ({ ...prev, pricingFeatures: newFeatures }));
+                  }}
+                  className="flex-1"
+                  data-testid={`input-pricing-feature-name-${index}`}
+                />
+                <Input
+                  placeholder="Description (optional)"
+                  value={feature.description}
+                  onChange={(e) => {
+                    const newFeatures = [...formData.pricingFeatures];
+                    newFeatures[index] = { ...feature, description: e.target.value };
+                    setFormData(prev => ({ ...prev, pricingFeatures: newFeatures }));
+                  }}
+                  className="flex-1"
+                  data-testid={`input-pricing-feature-desc-${index}`}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const newFeatures = formData.pricingFeatures.filter((_, i) => i !== index);
+                    setFormData(prev => ({ ...prev, pricingFeatures: newFeatures }));
+                  }}
+                  data-testid={`button-remove-pricing-feature-${index}`}
+                >
+                  Remove
+                </Button>
+              </div>
+            );
+          })}
           
           <Button
             type="button"
@@ -860,7 +922,7 @@ export default function PlansPage() {
             onClick={() => {
               setFormData(prev => ({
                 ...prev,
-                pricingFeatures: [...prev.pricingFeatures, { name: '', description: '' }]
+                pricingFeatures: [...prev.pricingFeatures, { name: '', description: '', icon: 'Check' }]
               }));
             }}
             data-testid="button-add-pricing-feature"
