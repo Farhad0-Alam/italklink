@@ -930,7 +930,7 @@ export default function PlansPage() {
         <p className="text-sm text-gray-500">Add custom features to display on the pricing card (e.g., "Professional Templates", "Custom Branding")</p>
         
         <div className="space-y-2">
-          {formData.pricingFeatures.map((feature, index) => (
+          {(formData.pricingFeatures || []).map((feature, index) => (
             <div key={index} className="flex items-center space-x-2 p-3 border rounded-lg">
               <Input
                 placeholder="Feature name"
