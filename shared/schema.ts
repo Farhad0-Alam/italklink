@@ -145,12 +145,10 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   // New admin dashboard fields
   cardLabel: varchar("card_label"), // "Card Number" label string from admin
   trialDays: integer("trial_days").default(0),
-  // Extra card pricing options
-  extraCardOptions: jsonb("extra_card_options").default([]), // [{ cards: 5, price: 4500, label: "5 cards for $45" }]
-  hasUnlimitedOption: boolean("has_unlimited_option").default(false),
-  unlimitedPrice: integer("unlimited_price"), // price for unlimited cards in cents
   // Template limits
   templateLimit: integer("template_limit").default(-1), // -1 for unlimited, number for limit
+  // Custom pricing card features
+  pricingFeatures: jsonb("pricing_features").default([]), // [{ name: "Professional Templates", description: "Access to premium card designs" }]
   // Per-user/per-card pricing fields
   baseUsers: integer("base_users").default(1), // Number of users/cards included in base price
   pricePerUser: integer("price_per_user").default(0), // Additional cost per user/card in cents
