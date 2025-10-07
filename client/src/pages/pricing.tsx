@@ -375,6 +375,11 @@ export default function Pricing() {
                           <CardTitle className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                             {plan.name}
                           </CardTitle>
+                          {plan.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                              {plan.description}
+                            </p>
+                          )}
                           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             {plan.price === 0 ? 'For Individuals' : 
                              hasPerUserPricing ? `Base: ${plan.baseUsers} user${plan.baseUsers > 1 ? 's' : ''}` : 
