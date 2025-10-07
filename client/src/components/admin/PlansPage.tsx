@@ -233,7 +233,8 @@ export default function PlansPage() {
         throw new Error(`Failed to fetch plans: ${res.statusText}`);
       }
       
-      return res.json();
+      const result = await res.json();
+      return result.data || result;
     },
     retry: false,
     initialData: []
