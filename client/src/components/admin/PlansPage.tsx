@@ -224,14 +224,15 @@ export default function PlansPage() {
       return result.data || result;
     },
     retry: false,
-    initialData: []
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
 
   // Fetch available features
   const { data: features = [] } = useQuery<Feature[]>({
     queryKey: ['/api/admin/features'],
     queryFn: () => fetch('/api/admin/features', { credentials: 'include' }).then(res => res.json()),
-    initialData: []
+    staleTime: 0
   });
 
   // Fetch available templates
