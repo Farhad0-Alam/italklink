@@ -16,6 +16,7 @@ const PUBLIC_ENDPOINTS = [
   '/admin/register',
   '/public',
   '/billing/plans',
+  '/plans', // Public pricing page plans endpoint
   '/templates',
   '/availability',
   '/appointments/book'
