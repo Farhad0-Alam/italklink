@@ -505,23 +505,58 @@ export default function Pricing() {
                       
                       <CardContent className="pt-0 flex-1">
                         <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-                          <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Includes:</h4>
-                          <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                              <span className="text-sm text-gray-600 dark:text-gray-300">
-                                {plan.businessCardsLimit === -1 ? 'Unlimited' : plan.businessCardsLimit} business card{plan.businessCardsLimit !== 1 ? 's' : ''}
-                              </span>
-                            </div>
-                            {getPlanFeatures(plan).slice(0, 5).map((feature) => (
-                              <div key={feature.id} className="flex items-center space-x-2">
-                                <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                                <span className="text-sm text-gray-600 dark:text-gray-300">{feature.name}</span>
+                          <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Includes:</h4>
+                          <div className="space-y-4">
+                            {/* Business Cards - Always show first */}
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                  <Check className="h-3 w-3 text-green-600 dark:text-green-400" />
+                                </div>
+                                <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+                                  {plan.businessCardsLimit === -1 ? 'Unlimited' : plan.businessCardsLimit} business card{plan.businessCardsLimit !== 1 ? 's' : ''}
+                                </span>
                               </div>
-                            ))}
-                            {getPlanFeatures(plan).length > 5 && (
-                              <div className="text-sm text-gray-500 dark:text-gray-400">
-                                +{getPlanFeatures(plan).length - 5} more features
+                            </div>
+                            
+                            {/* Group features by category */}
+                            {(() => {
+                              const planFeatures = getPlanFeatures(plan);
+                              const categorizedFeatures = planFeatures.reduce((acc, feature) => {
+                                const cat = feature.category || 'Other';
+                                if (!acc[cat]) acc[cat] = [];
+                                acc[cat].push(feature);
+                                return acc;
+                              }, {} as Record<string, Feature[]>);
+                              
+                              return Object.entries(categorizedFeatures).map(([category, features]) => (
+                                <div key={category} className="space-y-2">
+                                  <h5 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                    {category}
+                                  </h5>
+                                  {features.map((feature) => {
+                                    const IconComponent = feature.icon || Check;
+                                    return (
+                                      <div key={feature.id} className="flex items-start space-x-2">
+                                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mt-0.5">
+                                          <IconComponent className="h-3 w-3 text-green-600 dark:text-green-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-sm text-gray-700 dark:text-gray-200 font-medium">{feature.name}</p>
+                                          {feature.description && (
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{feature.description}</p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              ));
+                            })()}
+                            
+                            {getPlanFeatures(plan).length > 10 && (
+                              <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                                +{getPlanFeatures(plan).length - 10} more features
                               </div>
                             )}
                           </div>
