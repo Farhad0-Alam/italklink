@@ -123,7 +123,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               text-sm font-medium rounded-xl whitespace-nowrap 
               transition-all duration-200 ease-in-out
               ${isActive 
-                ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30 scale-105' 
+                ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 scale-105' 
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700/50'
               }
             `}
@@ -150,7 +150,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             {/* Logo - Left (Mobile only) */}
             <div className="flex items-center lg:hidden">
               <Link href="/admin" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-md">
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md">
                   <span className="text-white font-bold text-sm">2T</span>
                 </div>
               </Link>
@@ -169,7 +169,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="" alt="Admin" />
-                      <AvatarFallback className="bg-green-600 text-white">
+                      <AvatarFallback className="bg-orange-600 text-white">
                         AB
                       </AvatarFallback>
                     </Avatar>
@@ -215,10 +215,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <div className="h-full px-4 py-6 overflow-y-auto bg-white dark:bg-gray-800">
                     <div className="flex items-center mb-8 px-2">
                       <Link href="/admin" className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
                           <span className="text-white font-bold text-lg">2T</span>
                         </div>
-                        <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+                        <span className="text-xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
                           2TalkLink
                         </span>
                       </Link>
@@ -237,7 +237,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                               group flex items-center gap-3 px-4 py-3 
                               rounded-xl font-medium transition-all duration-200
                               ${isActive 
-                                ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30' 
+                                ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30' 
                                 : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50'
                               }
                             `}

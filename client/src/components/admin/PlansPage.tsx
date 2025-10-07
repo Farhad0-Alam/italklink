@@ -109,14 +109,7 @@ interface PlanFormData {
   // Custom pricing card features
   pricingFeatures: PricingFeature[];
   templateLimit: number;
-  // Stripe billing fields
   description: string;
-  baseUsers: number;
-  pricePerUser: number;
-  setupFee: number;
-  allowUserSelection: boolean;
-  minUsers: number;
-  maxUsers: number | null;
 }
 
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'BDT'];
@@ -202,13 +195,7 @@ export default function PlansPage() {
     stripePriceId: '',
     pricingFeatures: [],
     templateLimit: -1,
-    description: '',
-    baseUsers: 1,
-    pricePerUser: 0,
-    setupFee: 0,
-    allowUserSelection: false,
-    minUsers: 1,
-    maxUsers: null
+    description: ''
   });
 
   const queryClient = useQueryClient();
@@ -303,13 +290,7 @@ export default function PlansPage() {
       stripePriceId: '',
       pricingFeatures: [],
       templateLimit: -1,
-      description: '',
-      baseUsers: 1,
-      pricePerUser: 0,
-      setupFee: 0,
-      allowUserSelection: false,
-      minUsers: 1,
-      maxUsers: null
+      description: ''
     });
   };
 
@@ -340,12 +321,9 @@ export default function PlansPage() {
         finalPriceCents = Math.floor(monthlyPriceCents * 12 * (100 - formData.discount) / 100);
       }
       
-      // Convert other prices from dollars to cents for storage
       const dataToSend = {
         ...formData,
-        price: finalPriceCents,
-        pricePerUser: Math.round(formData.pricePerUser * 100),
-        setupFee: Math.round(formData.setupFee * 100)
+        price: finalPriceCents
       };
       
       const response = await fetch('/api/billing/admin/plans', {
@@ -390,12 +368,9 @@ export default function PlansPage() {
         finalPriceCents = Math.floor(monthlyPriceCents * 12 * (100 - formData.discount) / 100);
       }
       
-      // Convert other prices from dollars to cents for storage
       const dataToSend = {
         ...formData,
-        price: finalPriceCents,
-        pricePerUser: Math.round(formData.pricePerUser * 100),
-        setupFee: Math.round(formData.setupFee * 100)
+        price: finalPriceCents
       };
       
       const response = await fetch(`/api/billing/admin/plans/${selectedPlan.id}`, {
@@ -499,13 +474,7 @@ export default function PlansPage() {
       stripePriceId: '',
       pricingFeatures: (plan as any).pricingFeatures || [],
       templateLimit: plan.features?.templateLimit || -1,
-      description: (plan as any).description || '',
-      baseUsers: (plan as any).baseUsers || 1,
-      pricePerUser: ((plan as any).pricePerUser || 0) / 100, // Convert from cents to dollars
-      setupFee: ((plan as any).setupFee || 0) / 100, // Convert from cents to dollars
-      allowUserSelection: (plan as any).allowUserSelection || false,
-      minUsers: (plan as any).minUsers || 1,
-      maxUsers: (plan as any).maxUsers || null
+      description: (plan as any).description || ''
     });
     setAddPlanOpen(true);
   };
@@ -553,13 +522,7 @@ export default function PlansPage() {
       stripePriceId: plan.stripePriceId || '',
       pricingFeatures: (plan as any).pricingFeatures || [],
       templateLimit: plan.features?.templateLimit || -1,
-      description: (plan as any).description || '',
-      baseUsers: (plan as any).baseUsers || 1,
-      pricePerUser: ((plan as any).pricePerUser || 0) / 100, // Convert from cents to dollars
-      setupFee: ((plan as any).setupFee || 0) / 100, // Convert from cents to dollars
-      allowUserSelection: (plan as any).allowUserSelection || false,
-      minUsers: (plan as any).minUsers || 1,
-      maxUsers: (plan as any).maxUsers || null
+      description: (plan as any).description || ''
     });
     setEditPlanOpen(true);
   };
@@ -785,86 +748,6 @@ export default function PlansPage() {
           rows={3}
         />
         <p className="text-xs text-gray-500">Short description of plan benefits.</p>
-      </div>
-
-      {/* Per-User Pricing Section */}
-      <div className="space-y-3 border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
-        <h3 className="font-semibold text-sm">Per-User/Per-Card Pricing</h3>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="baseUsers">Base Users Included</Label>
-            <Input
-              id="baseUsers"
-              type="number"
-              placeholder="1"
-              value={formData.baseUsers}
-              onChange={(e) => setFormData(prev => ({ ...prev, baseUsers: Number(e.target.value) }))}
-            />
-            <p className="text-xs text-gray-500">Number of users/cards included in base price.</p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="pricePerUser">Price Per Additional User</Label>
-            <Input
-              id="pricePerUser"
-              type="number"
-              placeholder="0"
-              value={formData.pricePerUser}
-              onChange={(e) => setFormData(prev => ({ ...prev, pricePerUser: Number(e.target.value) }))}
-            />
-            <p className="text-xs text-gray-500">Extra charge (USD) per additional user/card.</p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="setupFee">Setup Fee</Label>
-            <Input
-              id="setupFee"
-              type="number"
-              placeholder="0"
-              value={formData.setupFee}
-              onChange={(e) => setFormData(prev => ({ ...prev, setupFee: Number(e.target.value) }))}
-            />
-            <p className="text-xs text-gray-500">One-time setup cost (optional).</p>
-          </div>
-        </div>
-      </div>
-
-      {/* User Selection Controls */}
-      <div className="space-y-3 border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="allowUserSelection"
-            checked={formData.allowUserSelection}
-            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allowUserSelection: checked }))}
-          />
-          <Label htmlFor="allowUserSelection" className="font-semibold text-sm">
-            Allow User Count Selection on Pricing Page
-          </Label>
-        </div>
-        
-        {formData.allowUserSelection && (
-          <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="space-y-2">
-              <Label htmlFor="minUsers">Minimum Users</Label>
-              <Input
-                id="minUsers"
-                type="number"
-                placeholder="1"
-                value={formData.minUsers}
-                onChange={(e) => setFormData(prev => ({ ...prev, minUsers: Number(e.target.value) }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="maxUsers">Maximum Users</Label>
-              <Input
-                id="maxUsers"
-                type="number"
-                placeholder="Unlimited"
-                value={formData.maxUsers || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, maxUsers: e.target.value ? Number(e.target.value) : null }))}
-              />
-              <p className="text-xs text-gray-500">Maximum number of users or cards allowed (leave empty for unlimited).</p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Features Selection with Accordion */}
@@ -1165,8 +1048,7 @@ export default function PlansPage() {
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="free">Free</SelectItem>
-                  <SelectItem value="pro">Pro</SelectItem>
-                  <SelectItem value="enterprise">Enterprise</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
                 </SelectContent>
               </Select>
             </div>
