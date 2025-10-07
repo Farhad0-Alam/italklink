@@ -86,10 +86,9 @@ interface Template {
   previewImage?: string;
 }
 
-interface ExtraCardOption {
-  cards: number;
-  price: number;
-  label: string;
+interface PricingFeature {
+  name: string;
+  description: string;
 }
 
 interface PlanFormData {
@@ -107,10 +106,8 @@ interface PlanFormData {
   templates: string[];
   isActive: boolean;
   stripePriceId: string;
-  // Extra card pricing
-  extraCardOptions: ExtraCardOption[];
-  hasUnlimitedOption: boolean;
-  unlimitedPrice: number;
+  // Custom pricing card features
+  pricingFeatures: PricingFeature[];
   templateLimit: number;
   // Stripe billing fields
   description: string;
@@ -203,9 +200,7 @@ export default function PlansPage() {
     templates: [],
     isActive: true,
     stripePriceId: '',
-    extraCardOptions: [],
-    hasUnlimitedOption: false,
-    unlimitedPrice: 0,
+    pricingFeatures: [],
     templateLimit: -1,
     description: '',
     baseUsers: 1,
@@ -305,9 +300,7 @@ export default function PlansPage() {
       templates: [],
       isActive: true,
       stripePriceId: '',
-      extraCardOptions: [],
-      hasUnlimitedOption: false,
-      unlimitedPrice: 0,
+      pricingFeatures: [],
       templateLimit: -1,
       description: '',
       baseUsers: 1,
@@ -351,8 +344,7 @@ export default function PlansPage() {
         ...formData,
         price: finalPriceCents,
         pricePerUser: Math.round(formData.pricePerUser * 100),
-        setupFee: Math.round(formData.setupFee * 100),
-        unlimitedPrice: Math.round(formData.unlimitedPrice * 100)
+        setupFee: Math.round(formData.setupFee * 100)
       };
       
       const response = await fetch('/api/billing/admin/plans', {
@@ -402,8 +394,7 @@ export default function PlansPage() {
         ...formData,
         price: finalPriceCents,
         pricePerUser: Math.round(formData.pricePerUser * 100),
-        setupFee: Math.round(formData.setupFee * 100),
-        unlimitedPrice: Math.round(formData.unlimitedPrice * 100)
+        setupFee: Math.round(formData.setupFee * 100)
       };
       
       const response = await fetch(`/api/billing/admin/plans/${selectedPlan.id}`, {
@@ -505,9 +496,7 @@ export default function PlansPage() {
       templates: [], // Will be populated from API
       isActive: true,
       stripePriceId: '',
-      extraCardOptions: plan.features?.extraCardOptions || [],
-      hasUnlimitedOption: plan.features?.hasUnlimitedOption || false,
-      unlimitedPrice: (plan.features?.unlimitedPrice || 0) / 100, // Convert from cents to dollars
+      pricingFeatures: (plan as any).pricingFeatures || [],
       templateLimit: plan.features?.templateLimit || -1,
       description: (plan as any).description || '',
       baseUsers: (plan as any).baseUsers || 1,
@@ -561,9 +550,7 @@ export default function PlansPage() {
       templates: [], // Will be populated from API
       isActive: plan.isActive,
       stripePriceId: plan.stripePriceId || '',
-      extraCardOptions: plan.features?.extraCardOptions || [],
-      hasUnlimitedOption: plan.features?.hasUnlimitedOption || false,
-      unlimitedPrice: (plan.features?.unlimitedPrice || 0) / 100, // Convert from cents to dollars
+      pricingFeatures: (plan as any).pricingFeatures || [],
       templateLimit: plan.features?.templateLimit || -1,
       description: (plan as any).description || '',
       baseUsers: (plan as any).baseUsers || 1,
@@ -617,23 +604,6 @@ export default function PlansPage() {
             {plan.businessCardsLimit === -1 ? 'Unlimited' : plan.businessCardsLimit} cards
           </span>
         </div>
-        
-        {plan.features?.extraCardOptions && plan.features.extraCardOptions.length > 0 && (
-          <div className="space-y-1">
-            <div className="text-xs text-gray-500">Extra Options:</div>
-            {plan.features.extraCardOptions.map((option: any, index: number) => (
-              <div key={index} className="text-xs text-gray-600">
-                {option.label}
-              </div>
-            ))}
-          </div>
-        )}
-        
-        {plan.features?.hasUnlimitedOption && (
-          <div className="text-xs text-gray-600">
-            Unlimited: ${(plan.features.unlimitedPrice / 100).toFixed(2)}
-          </div>
-        )}
         
         {plan.trialDays > 0 && (
           <div className="flex items-center space-x-2">
@@ -954,54 +924,45 @@ export default function PlansPage() {
         </Accordion>
       </div>
 
-      {/* Extra Card Pricing Options */}
+      {/* Custom Pricing Card Features */}
       <div className="space-y-3">
-        <Label className="text-base font-medium">Extra Card Pricing Options</Label>
+        <Label className="text-base font-medium">Custom Pricing Card Features</Label>
+        <p className="text-sm text-gray-500">Add custom features to display on the pricing card (e.g., "Professional Templates", "Custom Branding")</p>
         
         <div className="space-y-2">
-          {formData.extraCardOptions.map((option, index) => (
+          {formData.pricingFeatures.map((feature, index) => (
             <div key={index} className="flex items-center space-x-2 p-3 border rounded-lg">
               <Input
-                type="number"
-                placeholder="Cards"
-                value={option.cards}
+                placeholder="Feature name"
+                value={feature.name}
                 onChange={(e) => {
-                  const newOptions = [...formData.extraCardOptions];
-                  newOptions[index] = { ...option, cards: Number(e.target.value) };
-                  setFormData(prev => ({ ...prev, extraCardOptions: newOptions }));
-                }}
-                className="w-20"
-              />
-              <span className="text-sm">cards for</span>
-              <Input
-                type="number"
-                placeholder="Price in cents"
-                value={option.price}
-                onChange={(e) => {
-                  const newOptions = [...formData.extraCardOptions];
-                  newOptions[index] = { ...option, price: Number(e.target.value) };
-                  setFormData(prev => ({ ...prev, extraCardOptions: newOptions }));
-                }}
-                className="w-32"
-              />
-              <Input
-                placeholder="Display label"
-                value={option.label}
-                onChange={(e) => {
-                  const newOptions = [...formData.extraCardOptions];
-                  newOptions[index] = { ...option, label: e.target.value };
-                  setFormData(prev => ({ ...prev, extraCardOptions: newOptions }));
+                  const newFeatures = [...formData.pricingFeatures];
+                  newFeatures[index] = { ...feature, name: e.target.value };
+                  setFormData(prev => ({ ...prev, pricingFeatures: newFeatures }));
                 }}
                 className="flex-1"
+                data-testid={`input-pricing-feature-name-${index}`}
+              />
+              <Input
+                placeholder="Description (optional)"
+                value={feature.description}
+                onChange={(e) => {
+                  const newFeatures = [...formData.pricingFeatures];
+                  newFeatures[index] = { ...feature, description: e.target.value };
+                  setFormData(prev => ({ ...prev, pricingFeatures: newFeatures }));
+                }}
+                className="flex-1"
+                data-testid={`input-pricing-feature-desc-${index}`}
               />
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  const newOptions = formData.extraCardOptions.filter((_, i) => i !== index);
-                  setFormData(prev => ({ ...prev, extraCardOptions: newOptions }));
+                  const newFeatures = formData.pricingFeatures.filter((_, i) => i !== index);
+                  setFormData(prev => ({ ...prev, pricingFeatures: newFeatures }));
                 }}
+                data-testid={`button-remove-pricing-feature-${index}`}
               >
                 Remove
               </Button>
@@ -1014,12 +975,13 @@ export default function PlansPage() {
             onClick={() => {
               setFormData(prev => ({
                 ...prev,
-                extraCardOptions: [...prev.extraCardOptions, { cards: 5, price: 4500, label: '5 cards for $45' }]
+                pricingFeatures: [...prev.pricingFeatures, { name: '', description: '' }]
               }));
             }}
+            data-testid="button-add-pricing-feature"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Extra Card Option
+            Add Pricing Feature
           </Button>
         </div>
       </div>
