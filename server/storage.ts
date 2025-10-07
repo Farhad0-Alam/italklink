@@ -818,11 +818,10 @@ export class DatabaseStorage implements IStorage {
 
   async createPlan(planData: any): Promise<SubscriptionPlan> {
     // Map frontend field names to database column names
-    const { frequency, planType, ...rest } = planData;
+    const { frequency, ...rest } = planData;
     const dbData = {
       ...rest,
       interval: frequency,
-      type: planType,
     };
     const [plan] = await db.insert(subscriptionPlans).values(dbData).returning();
     return plan;
@@ -830,10 +829,9 @@ export class DatabaseStorage implements IStorage {
 
   async updatePlan(id: number, planData: any): Promise<SubscriptionPlan> {
     // Map frontend field names to database column names
-    const { frequency, planType, ...rest } = planData;
+    const { frequency, ...rest } = planData;
     const dbData: any = { ...rest };
     if (frequency !== undefined) dbData.interval = frequency;
-    if (planType !== undefined) dbData.type = planType;
     
     const [plan] = await db
       .update(subscriptionPlans)
