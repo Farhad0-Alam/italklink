@@ -6,6 +6,7 @@ import {
   calendarConnections, videoMeetingProviders, externalCalendarEvents, meetingLinks, integrationLogs,
   teamAssignments, roundRobinState, leadRoutingRules, teamMemberSkills, teamMemberCapacity, teamAvailabilityPatterns, assignmentAnalytics, routingAnalytics,
   publicUploads, qrLinks, qrEvents, cardSubscriptions, coupons, userSubscriptions,
+  bios, connections, subscriptions, analytics,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -32,7 +33,9 @@ import {
   type AssignmentAnalytics, type InsertAssignmentAnalytics,
   type RoutingAnalytics, type InsertRoutingAnalytics,
   type PublicUpload, type InsertPublicUpload,
-  type QrLink, type InsertQrLink, type QrEvent, type InsertQrEvent
+  type QrLink, type InsertQrLink, type QrEvent, type InsertQrEvent,
+  type Bio, type InsertBio, type Connection, type InsertConnection,
+  type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -484,6 +487,40 @@ export interface IStorage {
   }>): Promise<any>;
   deleteCardSubscription(id: string): Promise<void>;
   countCardSubscribers(cardId: string, activeOnly?: boolean): Promise<number>;
+  
+  // Bio operations
+  getBio(userId: string): Promise<Bio | undefined>;
+  createBio(bioData: InsertBio): Promise<Bio>;
+  updateBio(userId: string, bioData: Partial<InsertBio>): Promise<Bio>;
+  deleteBio(userId: string): Promise<void>;
+  
+  // Connection operations
+  createConnection(connectionData: InsertConnection): Promise<Connection>;
+  getConnection(id: string): Promise<Connection | undefined>;
+  getUserConnections(userId: string, filters?: { platform?: string; eventType?: string }): Promise<Connection[]>;
+  getCardConnections(cardId: string, filters?: { eventType?: string }): Promise<Connection[]>;
+  deleteConnection(id: string): Promise<void>;
+  
+  // Subscription operations
+  getSubscription(id: string): Promise<Subscription | undefined>;
+  getUserSubscription(userId: string): Promise<Subscription | undefined>;
+  getSubscriptionByStripeId(stripeSubscriptionId: string): Promise<Subscription | undefined>;
+  createSubscription(subscriptionData: InsertSubscription): Promise<Subscription>;
+  updateSubscription(id: string, subscriptionData: Partial<InsertSubscription>): Promise<Subscription>;
+  cancelSubscription(id: string): Promise<Subscription>;
+  deleteSubscription(id: string): Promise<void>;
+  
+  // Analytics operations
+  getAnalytics(id: string): Promise<Analytics | undefined>;
+  getCardAnalytics(cardId: string, periodType?: string): Promise<Analytics[]>;
+  getUserAnalytics(userId: string, periodType?: string): Promise<Analytics[]>;
+  createAnalytics(analyticsData: InsertAnalytics): Promise<Analytics>;
+  updateAnalytics(id: string, analyticsData: Partial<InsertAnalytics>): Promise<Analytics>;
+  incrementCardViews(cardId: string, userId: string): Promise<void>;
+  incrementLinkClicks(cardId: string, userId: string): Promise<void>;
+  incrementQrScans(cardId: string, userId: string): Promise<void>;
+  incrementVcardDownloads(cardId: string, userId: string): Promise<void>;
+  deleteAnalytics(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -4796,6 +4833,296 @@ export class DatabaseStorage implements IStorage {
       .from(cardSubscriptions)
       .where(whereCondition);
     return result.count;
+  }
+  
+  async getBio(userId: string): Promise<Bio | undefined> {
+    const [bio] = await db.select().from(bios).where(eq(bios.userId, userId));
+    return bio;
+  }
+
+  async createBio(bioData: InsertBio): Promise<Bio> {
+    const [bio] = await db.insert(bios).values(bioData).returning();
+    return bio;
+  }
+
+  async updateBio(userId: string, bioData: Partial<InsertBio>): Promise<Bio> {
+    const [bio] = await db
+      .update(bios)
+      .set({ ...bioData, updatedAt: new Date() })
+      .where(eq(bios.userId, userId))
+      .returning();
+    return bio;
+  }
+
+  async deleteBio(userId: string): Promise<void> {
+    await db.delete(bios).where(eq(bios.userId, userId));
+  }
+
+  async createConnection(connectionData: InsertConnection): Promise<Connection> {
+    const [connection] = await db.insert(connections).values(connectionData).returning();
+    return connection;
+  }
+
+  async getConnection(id: string): Promise<Connection | undefined> {
+    const [connection] = await db.select().from(connections).where(eq(connections.id, id));
+    return connection;
+  }
+
+  async getUserConnections(userId: string, filters?: { platform?: string; eventType?: string }): Promise<Connection[]> {
+    let whereCondition = eq(connections.userId, userId);
+    
+    if (filters?.platform && filters?.eventType) {
+      whereCondition = and(
+        eq(connections.userId, userId),
+        eq(connections.platform, filters.platform),
+        eq(connections.eventType, filters.eventType)
+      ) as any;
+    } else if (filters?.platform) {
+      whereCondition = and(
+        eq(connections.userId, userId),
+        eq(connections.platform, filters.platform)
+      ) as any;
+    } else if (filters?.eventType) {
+      whereCondition = and(
+        eq(connections.userId, userId),
+        eq(connections.eventType, filters.eventType)
+      ) as any;
+    }
+    
+    return await db.select().from(connections).where(whereCondition).orderBy(desc(connections.clickedAt));
+  }
+
+  async getCardConnections(cardId: string, filters?: { eventType?: string }): Promise<Connection[]> {
+    let whereCondition = eq(connections.cardId, cardId);
+    
+    if (filters?.eventType) {
+      whereCondition = and(
+        eq(connections.cardId, cardId),
+        eq(connections.eventType, filters.eventType)
+      ) as any;
+    }
+    
+    return await db.select().from(connections).where(whereCondition).orderBy(desc(connections.clickedAt));
+  }
+
+  async deleteConnection(id: string): Promise<void> {
+    await db.delete(connections).where(eq(connections.id, id));
+  }
+
+  async getSubscription(id: string): Promise<Subscription | undefined> {
+    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.id, id));
+    return subscription;
+  }
+
+  async getUserSubscription(userId: string): Promise<Subscription | undefined> {
+    const [subscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
+      .orderBy(desc(subscriptions.createdAt));
+    return subscription;
+  }
+
+  async getSubscriptionByStripeId(stripeSubscriptionId: string): Promise<Subscription | undefined> {
+    const [subscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId));
+    return subscription;
+  }
+
+  async createSubscription(subscriptionData: InsertSubscription): Promise<Subscription> {
+    const [subscription] = await db.insert(subscriptions).values(subscriptionData).returning();
+    return subscription;
+  }
+
+  async updateSubscription(id: string, subscriptionData: Partial<InsertSubscription>): Promise<Subscription> {
+    const [subscription] = await db
+      .update(subscriptions)
+      .set({ ...subscriptionData, updatedAt: new Date() })
+      .where(eq(subscriptions.id, id))
+      .returning();
+    return subscription;
+  }
+
+  async cancelSubscription(id: string): Promise<Subscription> {
+    const [subscription] = await db
+      .update(subscriptions)
+      .set({ 
+        status: 'canceled',
+        canceledAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(subscriptions.id, id))
+      .returning();
+    return subscription;
+  }
+
+  async deleteSubscription(id: string): Promise<void> {
+    await db.delete(subscriptions).where(eq(subscriptions.id, id));
+  }
+
+  async getAnalytics(id: string): Promise<Analytics | undefined> {
+    const [analyticsRecord] = await db.select().from(analytics).where(eq(analytics.id, id));
+    return analyticsRecord;
+  }
+
+  async getCardAnalytics(cardId: string, periodType?: string): Promise<Analytics[]> {
+    let whereCondition = eq(analytics.cardId, cardId);
+    
+    if (periodType) {
+      whereCondition = and(
+        eq(analytics.cardId, cardId),
+        eq(analytics.periodType, periodType)
+      ) as any;
+    }
+    
+    return await db.select().from(analytics).where(whereCondition);
+  }
+
+  async getUserAnalytics(userId: string, periodType?: string): Promise<Analytics[]> {
+    let whereCondition = eq(analytics.userId, userId);
+    
+    if (periodType) {
+      whereCondition = and(
+        eq(analytics.userId, userId),
+        eq(analytics.periodType, periodType)
+      ) as any;
+    }
+    
+    return await db.select().from(analytics).where(whereCondition);
+  }
+
+  async createAnalytics(analyticsData: InsertAnalytics): Promise<Analytics> {
+    const [analyticsRecord] = await db.insert(analytics).values(analyticsData).returning();
+    return analyticsRecord;
+  }
+
+  async updateAnalytics(id: string, analyticsData: Partial<InsertAnalytics>): Promise<Analytics> {
+    const [analyticsRecord] = await db
+      .update(analytics)
+      .set({ ...analyticsData, updatedAt: new Date() })
+      .where(eq(analytics.id, id))
+      .returning();
+    return analyticsRecord;
+  }
+
+  async incrementCardViews(cardId: string, userId: string): Promise<void> {
+    const existing = await db
+      .select()
+      .from(analytics)
+      .where(and(
+        eq(analytics.cardId, cardId),
+        eq(analytics.userId, userId),
+        eq(analytics.periodType, 'all_time')
+      ));
+
+    if (existing.length > 0) {
+      await db
+        .update(analytics)
+        .set({
+          pageViews: sql`${analytics.pageViews} + 1`,
+          lastVisitedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(analytics.id, existing[0].id));
+    } else {
+      await db.insert(analytics).values({
+        cardId,
+        userId,
+        pageViews: 1,
+        periodType: 'all_time',
+        lastVisitedAt: new Date()
+      });
+    }
+  }
+
+  async incrementLinkClicks(cardId: string, userId: string): Promise<void> {
+    const existing = await db
+      .select()
+      .from(analytics)
+      .where(and(
+        eq(analytics.cardId, cardId),
+        eq(analytics.userId, userId),
+        eq(analytics.periodType, 'all_time')
+      ));
+
+    if (existing.length > 0) {
+      await db
+        .update(analytics)
+        .set({
+          linkClicks: sql`${analytics.linkClicks} + 1`,
+          updatedAt: new Date()
+        })
+        .where(eq(analytics.id, existing[0].id));
+    } else {
+      await db.insert(analytics).values({
+        cardId,
+        userId,
+        linkClicks: 1,
+        periodType: 'all_time'
+      });
+    }
+  }
+
+  async incrementQrScans(cardId: string, userId: string): Promise<void> {
+    const existing = await db
+      .select()
+      .from(analytics)
+      .where(and(
+        eq(analytics.cardId, cardId),
+        eq(analytics.userId, userId),
+        eq(analytics.periodType, 'all_time')
+      ));
+
+    if (existing.length > 0) {
+      await db
+        .update(analytics)
+        .set({
+          qrScans: sql`${analytics.qrScans} + 1`,
+          updatedAt: new Date()
+        })
+        .where(eq(analytics.id, existing[0].id));
+    } else {
+      await db.insert(analytics).values({
+        cardId,
+        userId,
+        qrScans: 1,
+        periodType: 'all_time'
+      });
+    }
+  }
+
+  async incrementVcardDownloads(cardId: string, userId: string): Promise<void> {
+    const existing = await db
+      .select()
+      .from(analytics)
+      .where(and(
+        eq(analytics.cardId, cardId),
+        eq(analytics.userId, userId),
+        eq(analytics.periodType, 'all_time')
+      ));
+
+    if (existing.length > 0) {
+      await db
+        .update(analytics)
+        .set({
+          vcardDownloads: sql`${analytics.vcardDownloads} + 1`,
+          updatedAt: new Date()
+        })
+        .where(eq(analytics.id, existing[0].id));
+    } else {
+      await db.insert(analytics).values({
+        cardId,
+        userId,
+        vcardDownloads: 1,
+        periodType: 'all_time'
+      });
+    }
+  }
+
+  async deleteAnalytics(id: string): Promise<void> {
+    await db.delete(analytics).where(eq(analytics.id, id));
   }
 }
 
