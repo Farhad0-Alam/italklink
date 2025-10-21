@@ -2556,6 +2556,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // User management endpoints
+  
+  // Get available plans for admin assignment
+  app.get('/api/admin/plans',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const plans = await storage.getAllPlans();
+      res.json(plans);
+    })
+  );
+
   app.get('/api/admin/users',
     enhancedAuth,
     requireRole('admin'),
