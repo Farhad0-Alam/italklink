@@ -546,6 +546,22 @@ export interface IStorage {
   incrementQrScans(cardId: string, userId: string): Promise<void>;
   incrementVcardDownloads(cardId: string, userId: string): Promise<void>;
   deleteAnalytics(id: string): Promise<void>;
+
+  // Dashboard metrics
+  getDashboardMetrics(): Promise<{
+    weeklyClicks: number;
+    weeklyVisitor: number;
+    monthlyVisitor: number;
+  }>;
+  getAdminLinks(): Promise<{
+    id: string;
+    title: string;
+    url: string;
+    ownerName: string;
+    visitorCount: number;
+    clicksCount: number;
+    initials: string;
+  }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -5293,6 +5309,128 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAnalytics(id: string): Promise<void> {
     await db.delete(analytics).where(eq(analytics.id, id));
+  }
+
+  // Dashboard metrics implementation
+  async getDashboardMetrics(): Promise<{
+    weeklyClicks: number;
+    weeklyVisitor: number;
+    monthlyVisitor: number;
+  }> {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // Get weekly clicks - sum of all link clicks in last 7 days
+    const weeklyClicksResult = await db
+      .select({
+        totalClicks: sql<number>`COALESCE(SUM(${analytics.clickCount}), 0)::integer`
+      })
+      .from(analytics)
+      .where(and(
+        gte(analytics.createdAt, sevenDaysAgo),
+        eq(analytics.periodType, 'all_time')
+      ));
+
+    // Get weekly visitors - sum of unique visitors in last 7 days
+    const weeklyVisitorResult = await db
+      .select({
+        totalVisitors: sql<number>`COALESCE(SUM(${analytics.viewCount}), 0)::integer`
+      })
+      .from(analytics)
+      .where(and(
+        gte(analytics.createdAt, sevenDaysAgo),
+        eq(analytics.periodType, 'all_time')
+      ));
+
+    // Get monthly visitors - sum of unique visitors in last 30 days
+    const monthlyVisitorResult = await db
+      .select({
+        totalVisitors: sql<number>`COALESCE(SUM(${analytics.viewCount}), 0)::integer`
+      })
+      .from(analytics)
+      .where(and(
+        gte(analytics.createdAt, thirtyDaysAgo),
+        eq(analytics.periodType, 'all_time')
+      ));
+
+    return {
+      weeklyClicks: weeklyClicksResult[0]?.totalClicks || 0,
+      weeklyVisitor: weeklyVisitorResult[0]?.totalVisitors || 0,
+      monthlyVisitor: monthlyVisitorResult[0]?.totalVisitors || 0
+    };
+  }
+
+  async getAdminLinks(): Promise<{
+    id: string;
+    title: string;
+    url: string;
+    ownerName: string;
+    visitorCount: number;
+    clicksCount: number;
+    initials: string;
+  }[]> {
+    // Get all business cards with their analytics
+    const cardsWithAnalytics = await db
+      .select({
+        id: businessCards.id,
+        name: businessCards.name,
+        cardName: businessCards.cardName,
+        userId: businessCards.userId,
+        viewCount: sql<number>`COALESCE(SUM(${analytics.viewCount}), 0)::integer`,
+        clickCount: sql<number>`COALESCE(SUM(${analytics.clickCount}), 0)::integer`
+      })
+      .from(businessCards)
+      .leftJoin(
+        analytics,
+        and(
+          eq(businessCards.id, analytics.cardId),
+          eq(analytics.periodType, 'all_time')
+        )
+      )
+      .where(eq(businessCards.visibility, 'public'))
+      .groupBy(businessCards.id, businessCards.name, businessCards.cardName, businessCards.userId)
+      .orderBy(desc(sql`COALESCE(SUM(${analytics.viewCount}), 0)`))
+      .limit(100);
+
+    // Get user information for each card
+    const userIds = [...new Set(cardsWithAnalytics.map(card => card.userId))];
+    const usersData = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email
+      })
+      .from(users)
+      .where(sql`${users.id} IN (${sql.raw(userIds.map(id => `'${id}'`).join(',') || "''")})`);
+
+    const userMap = new Map(usersData.map(u => [u.id, u]));
+
+    // Format the response
+    return cardsWithAnalytics.map(card => {
+      const owner = userMap.get(card.userId);
+      const ownerName = owner?.name || owner?.email || 'Unknown User';
+      const cardTitle = card.name || card.cardName || 'Untitled Card';
+      
+      // Generate initials from owner name or card title
+      const nameForInitials = ownerName !== 'Unknown User' ? ownerName : cardTitle;
+      const initials = nameForInitials
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2) || 'UC';
+
+      return {
+        id: card.id,
+        title: cardTitle,
+        url: `${process.env.VITE_APP_URL || 'https://2talklink.com'}/${card.cardName}`,
+        ownerName,
+        visitorCount: card.viewCount || 0,
+        clicksCount: card.clickCount || 0,
+        initials
+      };
+    });
   }
 }
 
