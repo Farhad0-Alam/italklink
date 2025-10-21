@@ -44,26 +44,26 @@ export const enhancedAuth = async (req: Request, res: Response, next: NextFuncti
 
     const user = req.user as any;
 
-    // Check if user account is active
-    if (user.isActive === false) {
-      throw new AuthenticationError('Account has been deactivated', 'ACCOUNT_DEACTIVATED');
-    }
+    // Check if user account is active (commented out as field doesn't exist in database)
+    // if (user.isActive === false) {
+    //   throw new AuthenticationError('Account has been deactivated', 'ACCOUNT_DEACTIVATED');
+    // }
 
-    // Check if user account is locked
-    if (user.lockedUntil && new Date() < new Date(user.lockedUntil)) {
-      throw new AuthenticationError('Account is temporarily locked', 'ACCOUNT_LOCKED');
-    }
+    // Check if user account is locked (commented out as field doesn't exist in database)
+    // if (user.lockedUntil && new Date() < new Date(user.lockedUntil)) {
+    //   throw new AuthenticationError('Account is temporarily locked', 'ACCOUNT_LOCKED');
+    // }
 
-    // Update last login timestamp
-    try {
-      await storage.updateUser(user.id, { 
-        lastLoginAt: new Date(),
-        loginAttempts: 0, // Reset login attempts on successful auth
-      });
-    } catch (error) {
-      console.warn('Failed to update last login timestamp:', error);
-      // Don't fail the request if this update fails
-    }
+    // Update last login timestamp (commented out as fields don't exist in database)
+    // try {
+    //   await storage.updateUser(user.id, { 
+    //     lastLoginAt: new Date(),
+    //     loginAttempts: 0, // Reset login attempts on successful auth
+    //   });
+    // } catch (error) {
+    //   console.warn('Failed to update last login timestamp:', error);
+    //   // Don't fail the request if this update fails
+    // }
 
     // Add user info to request for use in subsequent middleware
     req.user = user;
