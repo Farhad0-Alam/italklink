@@ -499,6 +499,109 @@ export const analyticsEvents = pgTable("analytics_events", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Bios table - User professional bios linked to their profile
+export const bios = pgTable("bios", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull().unique(),
+  
+  // Bio content
+  role: varchar("role"), // Job title/role
+  company: varchar("company"),
+  bio: text("bio"), // Professional bio/about text
+  tags: jsonb("tags").default([]), // Skills, interests, expertise tags
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_bios_user").on(table.userId),
+]);
+
+// Connections table - Track card interactions and scans
+export const connections = pgTable("connections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(), // Card owner
+  targetUserId: varchar("target_user_id").references(() => users.id, { onDelete: 'cascade' }), // Person who clicked/scanned (if known)
+  cardId: varchar("card_id").references(() => businessCards.id, { onDelete: 'cascade' }),
+  
+  // Interaction details
+  platform: varchar("platform"), // web, mobile, qr, nfc, etc.
+  eventType: varchar("event_type").default('view'), // view, click, save, share
+  
+  // Metadata
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  location: varchar("location"), // Geo location if available
+  referrer: varchar("referrer"),
+  
+  clickedAt: timestamp("clicked_at").defaultNow(),
+}, (table) => [
+  index("idx_connections_user").on(table.userId),
+  index("idx_connections_card").on(table.cardId),
+  index("idx_connections_date").on(table.clickedAt),
+]);
+
+// Subscriptions table - Detailed subscription management separate from users table
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  planId: integer("plan_id").references(() => subscriptionPlans.id, { onDelete: 'set null' }),
+  
+  // Subscription details
+  status: subscriptionStatusEnum("status").default('active'),
+  
+  // Stripe integration
+  stripeSubscriptionId: varchar("stripe_subscription_id").unique(),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  stripePriceId: varchar("stripe_price_id"),
+  
+  // Dates
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  nextBillingDate: timestamp("next_billing_date"),
+  canceledAt: timestamp("canceled_at"),
+  trialEndsAt: timestamp("trial_ends_at"),
+  
+  // Billing
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_subscriptions_user").on(table.userId),
+  index("idx_subscriptions_status").on(table.status),
+  index("idx_subscriptions_stripe").on(table.stripeSubscriptionId),
+]);
+
+// Analytics table - Aggregate analytics for digital cards
+export const analytics = pgTable("analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cardId: varchar("card_id").references(() => businessCards.id, { onDelete: 'cascade' }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Metrics
+  pageViews: integer("page_views").default(0),
+  linkClicks: integer("link_clicks").default(0),
+  uniqueVisitors: integer("unique_visitors").default(0),
+  qrScans: integer("qr_scans").default(0),
+  vcardDownloads: integer("vcard_downloads").default(0),
+  
+  // Time tracking
+  lastVisitedAt: timestamp("last_visited_at"),
+  
+  // Period tracking (for daily/weekly/monthly aggregates)
+  periodType: varchar("period_type").default('all_time'), // all_time, daily, weekly, monthly
+  periodStart: timestamp("period_start"),
+  periodEnd: timestamp("period_end"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_analytics_card").on(table.cardId),
+  index("idx_analytics_user").on(table.userId),
+  index("idx_analytics_period").on(table.periodType, table.periodStart),
+]);
+
 // Global templates table
 export const globalTemplates = pgTable("global_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -1134,6 +1237,18 @@ export type InsertAdminLog = typeof adminLogs.$inferInsert;
 export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
 export type InsertAnalyticsEvent = typeof analyticsEvents.$inferInsert;
 
+export type Bio = typeof bios.$inferSelect;
+export type InsertBio = typeof bios.$inferInsert;
+
+export type Connection = typeof connections.$inferSelect;
+export type InsertConnection = typeof connections.$inferInsert;
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;
+
+export type Analytics = typeof analytics.$inferSelect;
+export type InsertAnalytics = typeof analytics.$inferInsert;
+
 export type GlobalTemplate = typeof globalTemplates.$inferSelect;
 export type InsertGlobalTemplate = typeof globalTemplates.$inferInsert;
 
@@ -1197,6 +1312,10 @@ export const insertTeamMemberSchema = createInsertSchema(teamMembers);
 export const insertBulkGenerationJobSchema = createInsertSchema(bulkGenerationJobs);
 export const insertAdminLogSchema = createInsertSchema(adminLogs);
 export const insertAnalyticsEventSchema = createInsertSchema(analyticsEvents);
+export const insertBioSchema = createInsertSchema(bios);
+export const insertConnectionSchema = createInsertSchema(connections);
+export const insertSubscriptionSchema = createInsertSchema(subscriptions);
+export const insertAnalyticsSchema = createInsertSchema(analytics);
 export const insertGlobalTemplateSchema = createInsertSchema(globalTemplates);
 export const insertTemplateCollectionSchema = createInsertSchema(templateCollections);
 export const insertTemplateCollectionItemSchema = createInsertSchema(templateCollectionItems);
