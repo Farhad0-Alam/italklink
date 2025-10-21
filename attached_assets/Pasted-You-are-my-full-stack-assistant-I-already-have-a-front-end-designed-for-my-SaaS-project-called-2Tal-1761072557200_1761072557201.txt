@@ -1,0 +1,161 @@
+You are my full-stack assistant. I already have a front-end designed for my SaaS project called 2TalkLink (React 19 + Tailwind + shadcn/ui).
+Your job is to make this project fully dynamic and production-ready, powered by Supabase + Stripe + Drizzle + Express + PostgreSQL — without breaking the existing UI design.
+
+🧩 Your Tasks
+
+1️⃣ Detect and preserve existing frontend:
+
+Do not overwrite any of my visual components (UI, layout, or styling).
+
+Instead, inject real-time logic so components display live data from Supabase (users, cards, plans, etc.).
+
+If a component already fetches mock/static data, replace that logic with Supabase queries.
+
+Keep all design structure, Tailwind classes, and custom branding intact.
+
+2️⃣ Backend and Database Setup (Drizzle + Express + Supabase):
+
+If not already connected, configure a Supabase connection using environment variables:
+
+SUPABASE_URL  
+SUPABASE_KEY  
+STRIPE_SECRET_KEY  
+STRIPE_WEBHOOK_SECRET  
+
+
+Use Drizzle ORM for PostgreSQL to define and sync the following tables (create only if missing):
+
+users (id, email, name, avatar_url, role, created_at)
+
+digital_cards (user_id, name, title, company, phone, email, website, profile_image_url, social_links jsonb, custom_actions jsonb, theme, is_public, created_at, updated_at)
+
+bios (user_id, role, company, bio, tags jsonb, created_at)
+
+connections (user_id, target_user_id, platform, clicked_at)
+
+plans (plan_name, plan_type, frequency, price, currency, features jsonb, trial_days, card_limit, created_at)
+
+subscriptions (user_id FK, plan_id FK, status, start_date, end_date, next_billing_date, stripe_subscription_id)
+
+analytics (card_id, user_id, page_views, link_clicks, last_visited_at)
+
+Include Row-Level Security (RLS) logic via Express middleware (so each user only accesses their own data).
+
+⚠️ If any important field or relationship is missing, automatically create it (do not wait for me to specify).
+
+3️⃣ Admin Dashboard (Dynamic):
+
+Create or upgrade the Plan Management section:
+
+Add, edit, delete plans (auto-sync to Supabase plans table).
+
+Include Monthly/Yearly toggle, feature checklist (CRM, Chatbot, QR, Analytics, etc.).
+
+Display plans in a responsive table with search/filter and edit icons.
+
+Add User Management view: list all users, active plans, roles, and creation dates.
+
+Add Analytics Dashboard: daily signups, card views, and total revenue using Recharts or Chart.js.
+
+If these modules already exist, make them dynamic instead of static.
+
+4️⃣ User Dashboard (Dynamic):
+
+Show user’s current plan, digital cards, analytics, and upgrade options (live data).
+
+Integrate Stripe Checkout for upgrading plans.
+
+Show subscription status and renewal dates dynamically via Supabase + Stripe sync.
+
+Allow users to edit their cards (name, title, social links, etc.) with instant Supabase updates.
+
+5️⃣ Stripe Payment Integration (Production-ready):
+
+Connect Stripe Checkout and Billing Portal.
+
+Add server-side routes in Express:
+
+/api/stripe/create-checkout-session
+
+/api/stripe/webhook
+
+Handle webhooks:
+
+checkout.session.completed → create subscription
+
+customer.subscription.updated → update subscription
+
+customer.subscription.deleted → cancel subscription
+
+Auto-sync Stripe subscriptions with Supabase subscriptions table.
+
+⚠️ If any Stripe config (price ID, webhook URL, etc.) is missing, create placeholder values and comment them clearly.
+
+6️⃣ Authentication:
+
+Use Supabase Auth (email + magic link) for login/signup.
+
+Sync Supabase user ID with users table automatically.
+
+Restrict admin routes to users with role = "admin".
+
+7️⃣ Email Automation (Optional but Recommended):
+
+Integrate Resend or Mailgun API for transactional emails (welcome, payment success, renewal).
+
+Only implement if not already present — otherwise, skip.
+
+8️⃣ Analytics Tracking:
+
+Record digital card views and link clicks in the analytics table.
+
+Display user analytics (views, clicks, reach) in dashboard charts.
+
+9️⃣ Production & Deployment:
+
+Configure Replit Deployments for always-on backend.
+
+Optimize build for production mode.
+
+Auto-generate .env.example with all required keys.
+
+⚙️ Smart Behavior Rules
+
+🔁 If something already exists and works, don’t duplicate it — just enhance.
+
+🧠 If any essential function or model is missing, add it automatically.
+
+🔒 If any route or key is missing, create and secure it automatically.
+
+🧰 If something conflicts, keep the working version and comment the alternative.
+
+💾 If any environment variable is missing, create placeholder and comment “// replace with real key”.
+
+🧹 Skip unnecessary code — focus on dynamic Supabase + Stripe integration.
+
+📄 At the end, print a summary of everything you created or updated (tables, routes, dashboards, functions).
+
+🎨 UI/UX Guidelines
+
+Keep all Tailwind and shadcn/ui structure untouched.
+
+Use brand colors: orange #F97316 + dark navy #0F172A.
+
+Font: Inter or Plus Jakarta Sans.
+
+Ensure all pages are responsive and mobile-first.
+
+✅ Final Goal
+
+Deliver a fully dynamic, production-ready SaaS web app for 2TalkLink, where:
+
+All data is live from Supabase
+
+All payments and upgrades work through Stripe
+
+All dashboards are connected and secure
+
+The project runs 24/7 on Replit Deployments
+
+If any step or feature is unclear, automatically infer and include it — do not skip important logic.
+Your goal is to make the project function perfectly end-to-end without additional prompts.
