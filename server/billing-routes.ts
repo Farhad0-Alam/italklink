@@ -76,6 +76,12 @@ const createCheckoutSchema = z.object({
   isYearly: z.boolean().default(false),
 });
 
+const createSubscriptionCheckoutSchema = z.object({
+  planId: z.number().int(),
+  isYearly: z.boolean().default(false),
+  userCount: z.number().int().min(1).optional(),
+});
+
 router.post('/admin/plans', requireAdmin, asyncHandler(async (req, res) => {
   const planData = createPlanSchema.parse(req.body);
   const plan = await storage.createPlan(planData);
@@ -333,7 +339,7 @@ router.post('/checkout/create-subscription', requireAuth, asyncHandler(async (re
     return res.status(401).json({ success: false, message: 'Not authenticated' });
   }
 
-  const { planId, isYearly } = createCheckoutSchema.parse(req.body);
+  const { planId, isYearly } = createSubscriptionCheckoutSchema.parse(req.body);
   
   const plans = await storage.getPlans();
   const plan = plans.find(p => p.id === planId);
@@ -369,7 +375,7 @@ router.post('/checkout/create-subscription', requireAuth, asyncHandler(async (re
 
     const price = await stripe.prices.create({
       product: product.id,
-      unit_amount: plan.price * 100,
+      unit_amount: plan.price,
       currency: 'usd',
       recurring: {
         interval: isYearly ? 'year' : 'month',
