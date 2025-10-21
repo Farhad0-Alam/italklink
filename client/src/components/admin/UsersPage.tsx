@@ -108,10 +108,12 @@ export default function UsersPage() {
         throw new Error(`Failed to fetch users: ${res.statusText}`);
       }
       
-      return res.json();
+      const result = await res.json();
+      return result.data || result;
     },
     retry: false,
-    initialData: []
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
 
   // Fetch available plans for assignment
@@ -126,10 +128,11 @@ export default function UsersPage() {
         }
         throw new Error(`Failed to fetch plans: ${res.statusText}`);
       }
-      return res.json();
+      const result = await res.json();
+      return result.data || result;
     },
     retry: false,
-    initialData: []
+    staleTime: 0
   });
 
   const handleVisitUser = (userId: string) => {
