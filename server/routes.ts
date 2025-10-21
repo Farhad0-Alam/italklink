@@ -2554,6 +2554,173 @@ export async function registerRoutes(app: Express): Promise<Server> {
       successResponse(res, userStats, 'User statistics retrieved successfully');
     })
   );
+
+  // User management endpoints
+  app.get('/api/admin/users',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { search, status, plan } = req.query;
+      
+      // Fetch all users from database
+      const allUsers = await storage.getAllUsers();
+      
+      // Transform to match frontend format
+      let users = allUsers.map((user, index) => {
+        const firstName = user.firstName || '';
+        const lastName = user.lastName || '';
+        const fullName = `${firstName} ${lastName}`.trim() || user.email;
+        const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || user.email.charAt(0).toUpperCase();
+        
+        // Determine status based on subscription end date
+        const isActive = !user.subscriptionEndsAt || new Date(user.subscriptionEndsAt) > new Date();
+        
+        return {
+          id: user.id,
+          sn: index + 1,
+          name: fullName,
+          initials: initials,
+          email: user.email || '',
+          registrationDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          }) : 'N/A',
+          planValidity: user.subscriptionEndsAt 
+            ? new Date(user.subscriptionEndsAt).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+              })
+            : 'Unlimited',
+          status: isActive ? 'active' : 'inactive',
+          planType: user.planType || 'free',
+          role: user.role || 'user'
+        };
+      });
+      
+      // Apply filters
+      if (search) {
+        const searchLower = String(search).toLowerCase();
+        users = users.filter(user => 
+          user.name.toLowerCase().includes(searchLower) || 
+          user.email.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      if (status && status !== 'all') {
+        users = users.filter(user => user.status === status);
+      }
+      
+      if (plan && plan !== 'all') {
+        users = users.filter(user => user.planType === plan);
+      }
+      
+      res.json(users);
+    })
+  );
+
+  app.post('/api/admin/users',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { firstName, lastName, email, password, planId } = validateRequest(z.object({
+        firstName: z.string().min(1),
+        lastName: z.string().min(1),
+        email: z.string().email(),
+        password: z.string().min(6),
+        planId: z.string().optional(),
+      }));
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        throw businessLogicError('User with this email already exists', 'USER_EXISTS');
+      }
+      
+      // Create user
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = await storage.createUser({
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role: 'user',
+        planType: 'free',
+        subscriptionStatus: 'active',
+      });
+      
+      successResponse(res, { id: newUser.id, email: newUser.email }, 'User created successfully', 201);
+    })
+  );
+
+  app.patch('/api/admin/users/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const userId = req.params.id;
+      const updates = validateRequest(z.object({
+        firstName: z.string().min(1).optional(),
+        lastName: z.string().min(1).optional(),
+        email: z.string().email().optional(),
+        subscriptionEndsAt: z.string().nullable().optional(),
+      }));
+      
+      // Update user
+      await storage.updateUser(userId, updates);
+      
+      successResponse(res, { id: userId }, 'User updated successfully');
+    })
+  );
+
+  app.delete('/api/admin/users/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const userId = req.params.id;
+      
+      // Prevent admin from deleting themselves
+      if ((req.user as any).id === userId) {
+        throw businessLogicError('Cannot delete your own account', 'CANNOT_DELETE_SELF');
+      }
+      
+      // Delete user
+      await storage.deleteUser(userId);
+      
+      successResponse(res, { id: userId }, 'User deleted successfully');
+    })
+  );
+
+  app.post('/api/admin/users/:id/assign-plan',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const userId = req.params.id;
+      const { planId, endsAt, note } = validateRequest(z.object({
+        planId: z.number().int(),
+        endsAt: z.string().nullable().optional(),
+        note: z.string().nullable().optional(),
+      }));
+      
+      // Get plan details
+      const plans = await storage.getPlans();
+      const plan = plans.find(p => p.id === planId);
+      
+      if (!plan) {
+        throw notFoundError('Plan not found');
+      }
+      
+      // Update user with plan
+      await storage.updateUser(userId, {
+        planType: plan.planType === 'free' ? 'free' : plan.planType === 'paid' ? 'pro' : 'enterprise',
+        subscriptionStatus: 'active',
+        subscriptionEndsAt: endsAt ? new Date(endsAt) : null,
+        businessCardsLimit: plan.businessCardsLimit,
+      });
+      
+      successResponse(res, { userId, planId }, 'Plan assigned successfully');
+    })
+  );
   
   // Enhanced Public Booking API
   app.post('/api/public/book/:eventTypeSlug',

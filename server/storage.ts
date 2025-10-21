@@ -42,10 +42,12 @@ import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-
 export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(userData: InsertUser): Promise<User>;
   updateUser(id: string, userData: Partial<InsertUser>): Promise<User>;
   updateUserLimits(id: string, businessCardsCount: number, businessCardsLimit?: number): Promise<User>;
+  deleteUser(id: string): Promise<void>;
   
   // Business card operations
   getUserBusinessCards(userId: string): Promise<DbBusinessCard[]>;
@@ -566,6 +568,17 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .orderBy(desc(users.createdAt));
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
   }
 
   // Business card operations
