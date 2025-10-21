@@ -117,7 +117,8 @@ export default function AdminProfilePage() {
 
   const { data: user, isLoading: userLoading, error: userError } = useQuery<AdminUser>({
     queryKey: ['/api/auth/user'],
-    retry: false,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   const profileForm = useForm<ProfileFormData>({
@@ -148,9 +149,10 @@ export default function AdminProfilePage() {
 
   // Additional data queries
 
-  const { data: sessions } = useQuery<AdminSession[]>({
+  const { data: sessions = [] } = useQuery<AdminSession[]>({
     queryKey: ['/api/admin/profile/sessions'],
-    retry: false,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   // Update forms when user data loads
