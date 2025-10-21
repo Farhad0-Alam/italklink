@@ -36,19 +36,17 @@ export default function DashboardPage() {
                   currentHour < 17 ? 'Good Afternoon' : 'Good Evening';
 
   // Fetch metrics data
-  const { data: metrics } = useQuery<DashboardMetrics>({
+  const { data: metrics, isLoading: metricsLoading } = useQuery<DashboardMetrics>({
     queryKey: ['/api/admin/metrics/summary'],
-    initialData: {
-      weeklyClicks: 10,
-      weeklyVisitor: 2,
-      monthlyVisitor: 118
-    }
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
 
   // Fetch links data
   const { data: links = [], isLoading: linksLoading } = useQuery<LinkItem[]>({
     queryKey: ['/api/admin/links'],
-    initialData: []
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
 
   const handleCopyLink = (url: string) => {
@@ -60,14 +58,23 @@ export default function DashboardPage() {
     window.open(url, '_blank');
   };
 
-  const MetricCard = ({ title, value, description }: { title: string; value: number; description: string }) => (
+  const MetricCard = ({ title, value, description, isLoading }: { title: string; value: number; description: string; isLoading?: boolean }) => (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        {isLoading ? (
+          <div className="space-y-2">
+            <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
+            <div className="h-3 w-32 bg-gray-200 animate-pulse rounded"></div>
+          </div>
+        ) : (
+          <>
+            <div className="text-2xl font-bold">{value.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">{description}</p>
+          </>
+        )}
       </CardContent>
     </Card>
   );
@@ -88,16 +95,19 @@ export default function DashboardPage() {
           title="Weekly Clicks" 
           value={metrics?.weeklyClicks || 0} 
           description="Clicks in the last 7 days" 
+          isLoading={metricsLoading}
         />
         <MetricCard 
           title="Weekly Visitor" 
           value={metrics?.weeklyVisitor || 0} 
           description="Visitors in the last 7 days" 
+          isLoading={metricsLoading}
         />
         <MetricCard 
           title="Monthly Visitor" 
           value={metrics?.monthlyVisitor || 0} 
           description="Visitors in the last 30 days" 
+          isLoading={metricsLoading}
         />
       </div>
 
