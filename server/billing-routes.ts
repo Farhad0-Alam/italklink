@@ -328,4 +328,268 @@ router.post('/subscription/cancel', requireAuth, asyncHandler(async (req, res) =
   res.json({ success: true, message: 'Subscription cancelled successfully' });
 }));
 
+router.post('/checkout/create-subscription', requireAuth, asyncHandler(async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'Not authenticated' });
+  }
+
+  const { planId, isYearly } = createCheckoutSchema.parse(req.body);
+  
+  const plans = await storage.getPlans();
+  const plan = plans.find(p => p.id === planId);
+  
+  if (!plan) {
+    return res.status(404).json({ success: false, message: 'Plan not found' });
+  }
+
+  let stripeCustomerId = req.user.stripeCustomerId;
+  
+  if (!stripeCustomerId) {
+    const customer = await stripe.customers.create({
+      email: req.user.email || undefined,
+      name: req.user.username,
+      metadata: {
+        userId: req.user.id,
+      },
+    });
+    stripeCustomerId = customer.id;
+    await storage.updateUser(req.user.id, { stripeCustomerId });
+  }
+
+  let priceId = plan.stripePriceId;
+  
+  if (!priceId) {
+    const product = await stripe.products.create({
+      name: plan.name,
+      description: plan.description || undefined,
+      metadata: {
+        planId: planId.toString(),
+      },
+    });
+
+    const price = await stripe.prices.create({
+      product: product.id,
+      unit_amount: plan.price * 100,
+      currency: 'usd',
+      recurring: {
+        interval: isYearly ? 'year' : 'month',
+      },
+      metadata: {
+        planId: planId.toString(),
+      },
+    });
+
+    priceId = price.id;
+    await storage.updatePlan(planId, { stripePriceId: priceId });
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    customer: stripeCustomerId,
+    payment_method_types: ['card'],
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ],
+    mode: 'subscription',
+    success_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/dashboard?subscription=success`,
+    cancel_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/pricing?subscription=cancelled`,
+    metadata: {
+      userId: req.user.id,
+      planId: planId.toString(),
+    },
+    subscription_data: {
+      trial_period_days: plan.trialDays || undefined,
+      metadata: {
+        userId: req.user.id,
+        planId: planId.toString(),
+      },
+    },
+  });
+
+  res.json({ success: true, data: { url: session.url, sessionId: session.id } });
+}));
+
+router.post('/subscription/manage-recurring', requireAuth, asyncHandler(async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'Not authenticated' });
+  }
+
+  const subscription = await storage.getSubscription(req.user.id);
+  
+  if (!subscription || !subscription.stripeSubscriptionId) {
+    return res.status(404).json({ success: false, message: 'No active recurring subscription found' });
+  }
+
+  if (req.body.action === 'cancel') {
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      cancel_at_period_end: true,
+    });
+
+    await storage.cancelSubscription(subscription.id);
+
+    return res.json({ success: true, message: 'Subscription will be cancelled at the end of the billing period' });
+  }
+
+  if (req.body.action === 'reactivate') {
+    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+      cancel_at_period_end: false,
+    });
+
+    await storage.updateSubscription(subscription.id, {
+      status: 'active',
+      canceledAt: null,
+    });
+
+    return res.json({ success: true, message: 'Subscription reactivated successfully' });
+  }
+
+  return res.status(400).json({ success: false, message: 'Invalid action' });
+}));
+
+router.post('/webhooks/stripe/recurring', asyncHandler(async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  
+  if (!sig) {
+    return res.status(400).send('No signature');
+  }
+
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    console.error('STRIPE_WEBHOOK_SECRET is not configured');
+    return res.status(500).send('Webhook secret not configured');
+  }
+
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err: any) {
+    console.error('Webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  switch (event.type) {
+    case 'checkout.session.completed': {
+      const session = event.data.object as Stripe.Checkout.Session;
+      
+      if (session.mode === 'subscription' && session.subscription) {
+        const { userId, planId } = session.metadata || {};
+        
+        if (userId && planId) {
+          const stripeSubscription = await stripe.subscriptions.retrieve(session.subscription as string);
+          
+          await storage.createSubscription({
+            userId,
+            planId: parseInt(planId),
+            status: 'active',
+            stripeSubscriptionId: stripeSubscription.id,
+            stripeCustomerId: session.customer as string,
+            stripePriceId: stripeSubscription.items.data[0]?.price.id,
+            startDate: new Date(stripeSubscription.current_period_start * 1000),
+            currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
+            currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+            nextBillingDate: new Date(stripeSubscription.current_period_end * 1000),
+          });
+
+          await storage.updateUser(userId, {
+            subscriptionStatus: 'active',
+            stripeSubscriptionId: stripeSubscription.id,
+          });
+        }
+      }
+      break;
+    }
+
+    case 'customer.subscription.updated': {
+      const subscription = event.data.object as Stripe.Subscription;
+      
+      const dbSubscription = await storage.getSubscriptionByStripeId(subscription.id);
+      
+      if (dbSubscription) {
+        const status = subscription.status === 'active' ? 'active' : 
+                      subscription.status === 'past_due' ? 'past_due' :
+                      subscription.status === 'canceled' ? 'canceled' :
+                      subscription.status === 'unpaid' ? 'unpaid' : 'active';
+        
+        await storage.updateSubscription(dbSubscription.id, {
+          status,
+          currentPeriodStart: new Date(subscription.current_period_start * 1000),
+          currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+          nextBillingDate: new Date(subscription.current_period_end * 1000),
+          canceledAt: subscription.cancel_at ? new Date(subscription.cancel_at * 1000) : null,
+        });
+
+        await storage.updateUser(dbSubscription.userId, {
+          subscriptionStatus: status,
+        });
+      }
+      break;
+    }
+
+    case 'customer.subscription.deleted': {
+      const subscription = event.data.object as Stripe.Subscription;
+      
+      const dbSubscription = await storage.getSubscriptionByStripeId(subscription.id);
+      
+      if (dbSubscription) {
+        await storage.updateSubscription(dbSubscription.id, {
+          status: 'canceled',
+          endDate: new Date(),
+          canceledAt: new Date(),
+        });
+
+        await storage.updateUser(dbSubscription.userId, {
+          subscriptionStatus: 'canceled',
+        });
+      }
+      break;
+    }
+
+    case 'invoice.payment_succeeded': {
+      const invoice = event.data.object as Stripe.Invoice;
+      
+      if (invoice.subscription) {
+        const dbSubscription = await storage.getSubscriptionByStripeId(invoice.subscription as string);
+        
+        if (dbSubscription) {
+          await storage.updateSubscription(dbSubscription.id, {
+            status: 'active',
+          });
+
+          await storage.updateUser(dbSubscription.userId, {
+            subscriptionStatus: 'active',
+          });
+        }
+      }
+      break;
+    }
+
+    case 'invoice.payment_failed': {
+      const invoice = event.data.object as Stripe.Invoice;
+      
+      if (invoice.subscription) {
+        const dbSubscription = await storage.getSubscriptionByStripeId(invoice.subscription as string);
+        
+        if (dbSubscription) {
+          await storage.updateSubscription(dbSubscription.id, {
+            status: 'past_due',
+          });
+
+          await storage.updateUser(dbSubscription.userId, {
+            subscriptionStatus: 'past_due',
+          });
+        }
+      }
+      break;
+    }
+  }
+
+  res.json({ received: true });
+}));
+
 export default router;
