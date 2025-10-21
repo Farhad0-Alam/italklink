@@ -3018,6 +3018,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
 
+  // ===== ADMIN DASHBOARD API ENDPOINTS =====
+  app.get('/api/admin/metrics/summary',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const metrics = await storage.getDashboardMetrics();
+      res.json(metrics);
+    })
+  );
+
+  app.get('/api/admin/links',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const links = await storage.getAdminLinks();
+      res.json(links);
+    })
+  );
+
   // Enhanced Public Booking API
   app.post('/api/public/book/:eventTypeSlug',
     validateRequest(z.object({
