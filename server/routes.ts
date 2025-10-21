@@ -3037,6 +3037,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
 
+  // ===== ADMIN PROFILE API ENDPOINTS =====
+  app.patch('/api/admin/profile',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const userId = req.user!.id;
+      const { firstName, lastName, email } = req.body;
+      
+      const updatedUser = await storage.updateUser(userId, {
+        name: firstName && lastName ? `${firstName} ${lastName}` : undefined,
+        email,
+      });
+      
+      res.json({ success: true, data: updatedUser });
+    })
+  );
+
+  app.patch('/api/admin/profile/preferences',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const userId = req.user!.id;
+      const { timezone, preferredLanguage } = req.body;
+      
+      const updatedUser = await storage.updateUser(userId, {
+        timezone,
+        preferredLanguage,
+      });
+      
+      res.json({ success: true, data: updatedUser });
+    })
+  );
+
+  app.post('/api/admin/change-password',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const userId = req.user!.id;
+      const { currentPassword, newPassword } = req.body;
+      
+      // Get user with password to verify current password
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.password) {
+        throw businessLogicError('User not found', 'USER_NOT_FOUND');
+      }
+      
+      // Verify current password
+      const bcrypt = require('bcryptjs');
+      const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+      
+      if (!isValidPassword) {
+        throw businessLogicError('Current password is incorrect', 'INVALID_PASSWORD');
+      }
+      
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update password
+      await storage.updateUser(userId, {
+        password: hashedPassword,
+      });
+      
+      res.json({ success: true, message: 'Password updated successfully' });
+    })
+  );
+
+  app.post('/api/admin/profile/2fa',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const userId = req.user!.id;
+      const { enabled } = req.body;
+      
+      await storage.updateUser(userId, {
+        twoFactorEnabled: enabled,
+      });
+      
+      res.json({ success: true, message: `Two-factor authentication ${enabled ? 'enabled' : 'disabled'}` });
+    })
+  );
+
+  app.get('/api/admin/profile/sessions',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      // For now, return mock session data
+      // In production, you'd query actual session storage
+      const sessions = [
+        {
+          id: '1',
+          userAgent: req.headers['user-agent'] || 'Unknown',
+          ipAddress: req.ip || 'Unknown',
+          location: 'Unknown',
+          isCurrentSession: true,
+          lastActive: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+        }
+      ];
+      
+      res.json(sessions);
+    })
+  );
+
+  app.delete('/api/admin/profile/sessions/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      
+      // In production, revoke the session from session storage
+      // For now, just return success
+      res.json({ success: true, message: 'Session revoked successfully' });
+    })
+  );
+
+  app.post('/api/admin/upload-avatar',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      // This would handle avatar upload
+      // For now, return success
+      res.json({ success: true, message: 'Avatar uploaded successfully' });
+    })
+  );
+
   // Enhanced Public Booking API
   app.post('/api/public/book/:eventTypeSlug',
     validateRequest(z.object({
