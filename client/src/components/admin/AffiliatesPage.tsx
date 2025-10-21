@@ -78,8 +78,28 @@ export default function AffiliatesPage() {
 
   // Fetch affiliates
   const { data: affiliates = [], isLoading } = useQuery<Affiliate[]>({
-    queryKey: ['/api/admin/affiliates'],
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    queryKey: ['/api/admin/affiliates', statusFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      
+      const url = `/api/admin/affiliates${params.toString() ? '?' + params.toString() : ''}`;
+      const res = await fetch(url, { credentials: 'include' });
+      
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = '/admin';
+          throw new Error('Unauthorized');
+        }
+        throw new Error(`Failed to fetch affiliates: ${res.statusText}`);
+      }
+      
+      const result = await res.json();
+      return result.data || result;
+    },
+    retry: false,
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
 
   // Fetch affiliate stats

@@ -143,10 +143,12 @@ export default function CouponsPage() {
         throw new Error(`Failed to fetch coupons: ${res.statusText}`);
       }
       
-      return res.json();
+      const result = await res.json();
+      return result.data || result;
     },
     retry: false,
-    initialData: []
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
 
   // Fetch available plans for restrictions
@@ -161,10 +163,11 @@ export default function CouponsPage() {
         }
         throw new Error(`Failed to fetch plans: ${res.statusText}`);
       }
-      return res.json();
+      const result = await res.json();
+      return result.data || result;
     },
     retry: false,
-    initialData: []
+    staleTime: 0
   });
 
   // Fetch usage statistics for selected coupon

@@ -71,9 +71,30 @@ export default function HeaderTemplatesPage() {
 
   // Fetch header templates data
   const { data: templates = [], isLoading, refetch } = useQuery<HeaderTemplate[]>({
-    queryKey: ['/api/admin/header-templates'],
-    retry: 1,
-    refetchOnWindowFocus: false
+    queryKey: ['/api/admin/header-templates', search, categoryFilter, statusFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (search.trim()) params.append('search', search.trim());
+      if (categoryFilter !== 'all') params.append('category', categoryFilter);
+      if (statusFilter !== 'all') params.append('isActive', statusFilter === 'active' ? 'true' : 'false');
+      
+      const url = `/api/admin/header-templates${params.toString() ? '?' + params.toString() : ''}`;
+      const res = await fetch(url, { credentials: 'include' });
+      
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = '/admin';
+          throw new Error('Unauthorized');
+        }
+        throw new Error(`Failed to fetch header templates: ${res.statusText}`);
+      }
+      
+      const result = await res.json();
+      return result.data || result;
+    },
+    retry: false,
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
 
   // Delete template mutation

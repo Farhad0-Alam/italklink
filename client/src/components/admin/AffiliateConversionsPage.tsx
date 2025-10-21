@@ -83,8 +83,28 @@ export default function AffiliateConversionsPage() {
 
   // Fetch conversions
   const { data: conversions = [], isLoading } = useQuery<Conversion[]>({
-    queryKey: ['/api/admin/conversions'],
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    queryKey: ['/api/admin/conversions', statusFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      
+      const url = `/api/admin/conversions${params.toString() ? '?' + params.toString() : ''}`;
+      const res = await fetch(url, { credentials: 'include' });
+      
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = '/admin';
+          throw new Error('Unauthorized');
+        }
+        throw new Error(`Failed to fetch conversions: ${res.statusText}`);
+      }
+      
+      const result = await res.json();
+      return result.data || result;
+    },
+    retry: false,
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
 
   // Fetch conversion stats

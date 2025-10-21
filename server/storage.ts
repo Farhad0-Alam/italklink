@@ -6,7 +6,7 @@ import {
   calendarConnections, videoMeetingProviders, externalCalendarEvents, meetingLinks, integrationLogs,
   teamAssignments, roundRobinState, leadRoutingRules, teamMemberSkills, teamMemberCapacity, teamAvailabilityPatterns, assignmentAnalytics, routingAnalytics,
   publicUploads, qrLinks, qrEvents, cardSubscriptions, coupons, userSubscriptions,
-  bios, connections, subscriptions, analytics,
+  bios, connections, subscriptions, analytics, affiliates, conversions, headerTemplates,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -233,6 +233,29 @@ export interface IStorage {
   
   // Global templates operations
   getGlobalTemplates(filters?: { isActive?: boolean }): Promise<GlobalTemplate[]>;
+  createGlobalTemplate(templateData: any): Promise<GlobalTemplate>;
+  updateGlobalTemplate(id: string, templateData: any): Promise<GlobalTemplate>;
+  deleteGlobalTemplate(id: string): Promise<void>;
+  
+  // Header templates operations
+  getHeaderTemplates(filters?: { isActive?: boolean }): Promise<any[]>;
+  createHeaderTemplate(templateData: any): Promise<any>;
+  updateHeaderTemplate(id: string, templateData: any): Promise<any>;
+  deleteHeaderTemplate(id: string): Promise<void>;
+  
+  // Affiliates operations
+  getAffiliates(filters?: { status?: string }): Promise<any[]>;
+  getAffiliate(id: string): Promise<any | undefined>;
+  createAffiliate(affiliateData: any): Promise<any>;
+  updateAffiliate(id: string, affiliateData: any): Promise<any>;
+  deleteAffiliate(id: string): Promise<void>;
+  
+  // Conversions operations
+  getConversions(filters?: { affiliateId?: string; dateFrom?: Date; dateTo?: Date }): Promise<any[]>;
+  getConversion(id: string): Promise<any | undefined>;
+  createConversion(conversionData: any): Promise<any>;
+  updateConversion(id: string, conversionData: any): Promise<any>;
+  deleteConversion(id: string): Promise<void>;
   
   // Wallet pass operations
   getWalletPass(ecardId: string): Promise<WalletPass | undefined>;
@@ -1038,6 +1061,140 @@ export class DatabaseStorage implements IStorage {
     }
     
     return await baseQuery.orderBy(desc(globalTemplates.createdAt));
+  }
+
+  async createGlobalTemplate(templateData: any): Promise<GlobalTemplate> {
+    const [template] = await db.insert(globalTemplates).values(templateData).returning();
+    return template;
+  }
+
+  async updateGlobalTemplate(id: string, templateData: any): Promise<GlobalTemplate> {
+    const [template] = await db
+      .update(globalTemplates)
+      .set({ ...templateData, updatedAt: new Date() })
+      .where(eq(globalTemplates.id, id))
+      .returning();
+    return template;
+  }
+
+  async deleteGlobalTemplate(id: string): Promise<void> {
+    await db.delete(globalTemplates).where(eq(globalTemplates.id, id));
+  }
+
+  // Header templates operations
+  async getHeaderTemplates(filters?: { isActive?: boolean }): Promise<any[]> {
+    const baseQuery = db.select().from(headerTemplates);
+    
+    if (filters?.isActive !== undefined) {
+      return await baseQuery
+        .where(eq(headerTemplates.isActive, filters.isActive))
+        .orderBy(desc(headerTemplates.createdAt));
+    }
+    
+    return await baseQuery.orderBy(desc(headerTemplates.createdAt));
+  }
+
+  async createHeaderTemplate(templateData: any): Promise<any> {
+    const [template] = await db.insert(headerTemplates).values(templateData).returning();
+    return template;
+  }
+
+  async updateHeaderTemplate(id: string, templateData: any): Promise<any> {
+    const [template] = await db
+      .update(headerTemplates)
+      .set({ ...templateData, updatedAt: new Date() })
+      .where(eq(headerTemplates.id, id))
+      .returning();
+    return template;
+  }
+
+  async deleteHeaderTemplate(id: string): Promise<void> {
+    await db.delete(headerTemplates).where(eq(headerTemplates.id, id));
+  }
+
+  // Affiliates operations
+  async getAffiliates(filters?: { status?: string }): Promise<any[]> {
+    const baseQuery = db.select().from(affiliates);
+    
+    if (filters?.status) {
+      return await baseQuery
+        .where(eq(affiliates.status, filters.status))
+        .orderBy(desc(affiliates.createdAt));
+    }
+    
+    return await baseQuery.orderBy(desc(affiliates.createdAt));
+  }
+
+  async getAffiliate(id: string): Promise<any | undefined> {
+    const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.id, id));
+    return affiliate;
+  }
+
+  async createAffiliate(affiliateData: any): Promise<any> {
+    const [affiliate] = await db.insert(affiliates).values(affiliateData).returning();
+    return affiliate;
+  }
+
+  async updateAffiliate(id: string, affiliateData: any): Promise<any> {
+    const [affiliate] = await db
+      .update(affiliates)
+      .set({ ...affiliateData, updatedAt: new Date() })
+      .where(eq(affiliates.id, id))
+      .returning();
+    return affiliate;
+  }
+
+  async deleteAffiliate(id: string): Promise<void> {
+    await db.delete(affiliates).where(eq(affiliates.id, id));
+  }
+
+  // Conversions operations
+  async getConversions(filters?: { affiliateId?: string; dateFrom?: Date; dateTo?: Date }): Promise<any[]> {
+    let baseQuery = db.select().from(conversions);
+    const conditions: any[] = [];
+    
+    if (filters?.affiliateId) {
+      conditions.push(eq(conversions.affiliateId, filters.affiliateId));
+    }
+    if (filters?.dateFrom) {
+      conditions.push(gte(conversions.createdAt, filters.dateFrom));
+    }
+    if (filters?.dateTo) {
+      conditions.push(lte(conversions.createdAt, filters.dateTo));
+    }
+    
+    if (conditions.length > 0) {
+      return await db
+        .select()
+        .from(conversions)
+        .where(and(...conditions))
+        .orderBy(desc(conversions.createdAt));
+    }
+    
+    return await baseQuery.orderBy(desc(conversions.createdAt));
+  }
+
+  async getConversion(id: string): Promise<any | undefined> {
+    const [conversion] = await db.select().from(conversions).where(eq(conversions.id, id));
+    return conversion;
+  }
+
+  async createConversion(conversionData: any): Promise<any> {
+    const [conversion] = await db.insert(conversions).values(conversionData).returning();
+    return conversion;
+  }
+
+  async updateConversion(id: string, conversionData: any): Promise<any> {
+    const [conversion] = await db
+      .update(conversions)
+      .set({ ...conversionData, updatedAt: new Date() })
+      .where(eq(conversions.id, id))
+      .returning();
+    return conversion;
+  }
+
+  async deleteConversion(id: string): Promise<void> {
+    await db.delete(conversions).where(eq(conversions.id, id));
   }
 
   // Wallet pass operations

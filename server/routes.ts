@@ -2733,6 +2733,291 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
   
+  // ===== ADMIN COUPONS API ENDPOINTS =====
+  app.get('/api/admin/coupons',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { search, status, type } = req.query;
+      
+      let coupons = await storage.getCoupons();
+      
+      // Apply filters
+      if (search) {
+        const searchLower = String(search).toLowerCase();
+        coupons = coupons.filter(coupon => 
+          coupon.code.toLowerCase().includes(searchLower) || 
+          coupon.name?.toLowerCase().includes(searchLower) ||
+          coupon.description?.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      if (status && status !== 'all') {
+        coupons = coupons.filter(coupon => coupon.status === status);
+      }
+      
+      if (type && type !== 'all') {
+        coupons = coupons.filter(coupon => coupon.discountType === type);
+      }
+      
+      res.json({ success: true, data: coupons });
+    })
+  );
+
+  app.post('/api/admin/coupons',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const couponData = req.body;
+      const newCoupon = await storage.createCoupon(couponData);
+      res.json({ success: true, data: newCoupon });
+    })
+  );
+
+  app.put('/api/admin/coupons/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const couponData = req.body;
+      const updatedCoupon = await storage.updateCoupon(id, couponData);
+      res.json({ success: true, data: updatedCoupon });
+    })
+  );
+
+  app.delete('/api/admin/coupons/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      await storage.deleteCoupon(id);
+      res.json({ success: true, message: 'Coupon deleted successfully' });
+    })
+  );
+
+  // ===== ADMIN AFFILIATES API ENDPOINTS =====
+  app.get('/api/admin/affiliates',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { search, status } = req.query;
+      
+      let affiliates = await storage.getAffiliates(status ? { status: String(status) } : undefined);
+      
+      // Apply search filter
+      if (search) {
+        const searchLower = String(search).toLowerCase();
+        affiliates = affiliates.filter(affiliate => 
+          affiliate.name?.toLowerCase().includes(searchLower) || 
+          affiliate.email?.toLowerCase().includes(searchLower) ||
+          affiliate.code?.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      res.json({ success: true, data: affiliates });
+    })
+  );
+
+  app.post('/api/admin/affiliates',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const affiliateData = req.body;
+      const newAffiliate = await storage.createAffiliate(affiliateData);
+      res.json({ success: true, data: newAffiliate });
+    })
+  );
+
+  app.patch('/api/admin/affiliates/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const affiliateData = req.body;
+      const updatedAffiliate = await storage.updateAffiliate(id, affiliateData);
+      res.json({ success: true, data: updatedAffiliate });
+    })
+  );
+
+  app.delete('/api/admin/affiliates/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      await storage.deleteAffiliate(id);
+      res.json({ success: true, message: 'Affiliate deleted successfully' });
+    })
+  );
+
+  // ===== ADMIN CONVERSIONS API ENDPOINTS =====
+  app.get('/api/admin/conversions',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { affiliateId, search, dateFrom, dateTo, status } = req.query;
+      
+      let conversions = await storage.getConversions({
+        affiliateId: affiliateId ? String(affiliateId) : undefined,
+        dateFrom: dateFrom ? new Date(String(dateFrom)) : undefined,
+        dateTo: dateTo ? new Date(String(dateTo)) : undefined
+      });
+      
+      // Apply additional filters
+      if (search) {
+        const searchLower = String(search).toLowerCase();
+        conversions = conversions.filter(conversion => 
+          conversion.referrerUrl?.toLowerCase().includes(searchLower) || 
+          conversion.ipAddress?.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      if (status && status !== 'all') {
+        conversions = conversions.filter(conversion => conversion.status === status);
+      }
+      
+      res.json({ success: true, data: conversions });
+    })
+  );
+
+  app.post('/api/admin/conversions',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const conversionData = req.body;
+      const newConversion = await storage.createConversion(conversionData);
+      res.json({ success: true, data: newConversion });
+    })
+  );
+
+  app.patch('/api/admin/conversions/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const conversionData = req.body;
+      const updatedConversion = await storage.updateConversion(id, conversionData);
+      res.json({ success: true, data: updatedConversion });
+    })
+  );
+
+  // ===== ADMIN TEMPLATES API ENDPOINTS =====
+  app.get('/api/admin/templates',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { search, category, isActive } = req.query;
+      
+      let templates = await storage.getGlobalTemplates(
+        isActive !== undefined ? { isActive: isActive === 'true' } : undefined
+      );
+      
+      // Apply filters
+      if (search) {
+        const searchLower = String(search).toLowerCase();
+        templates = templates.filter(template => 
+          template.name?.toLowerCase().includes(searchLower) || 
+          template.description?.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      if (category && category !== 'all') {
+        templates = templates.filter(template => template.category === category);
+      }
+      
+      res.json({ success: true, data: templates });
+    })
+  );
+
+  app.post('/api/admin/templates',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const templateData = req.body;
+      const newTemplate = await storage.createGlobalTemplate(templateData);
+      res.json({ success: true, data: newTemplate });
+    })
+  );
+
+  app.put('/api/admin/templates/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const templateData = req.body;
+      const updatedTemplate = await storage.updateGlobalTemplate(id, templateData);
+      res.json({ success: true, data: updatedTemplate });
+    })
+  );
+
+  app.delete('/api/admin/templates/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      await storage.deleteGlobalTemplate(id);
+      res.json({ success: true, message: 'Template deleted successfully' });
+    })
+  );
+
+  // ===== ADMIN HEADER TEMPLATES API ENDPOINTS =====
+  app.get('/api/admin/header-templates',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { search, category, isActive } = req.query;
+      
+      let headerTemplates = await storage.getHeaderTemplates(
+        isActive !== undefined ? { isActive: isActive === 'true' } : undefined
+      );
+      
+      // Apply filters
+      if (search) {
+        const searchLower = String(search).toLowerCase();
+        headerTemplates = headerTemplates.filter(template => 
+          template.name?.toLowerCase().includes(searchLower) || 
+          template.description?.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      if (category && category !== 'all') {
+        headerTemplates = headerTemplates.filter(template => template.category === category);
+      }
+      
+      res.json({ success: true, data: headerTemplates });
+    })
+  );
+
+  app.post('/api/admin/header-templates',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const templateData = req.body;
+      const newTemplate = await storage.createHeaderTemplate(templateData);
+      res.json({ success: true, data: newTemplate });
+    })
+  );
+
+  app.put('/api/admin/header-templates/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const templateData = req.body;
+      const updatedTemplate = await storage.updateHeaderTemplate(id, templateData);
+      res.json({ success: true, data: updatedTemplate });
+    })
+  );
+
+  app.delete('/api/admin/header-templates/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      await storage.deleteHeaderTemplate(id);
+      res.json({ success: true, message: 'Header template deleted successfully' });
+    })
+  );
+
   // Enhanced Public Booking API
   app.post('/api/public/book/:eventTypeSlug',
     validateRequest(z.object({
