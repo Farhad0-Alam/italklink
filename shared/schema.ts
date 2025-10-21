@@ -597,9 +597,9 @@ export const analytics = pgTable("analytics", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
-  index("idx_analytics_card").on(table.cardId),
-  index("idx_analytics_user").on(table.userId),
-  index("idx_analytics_period").on(table.periodType, table.periodStart),
+  index("idx_card_analytics_card").on(table.cardId),
+  index("idx_card_analytics_user").on(table.userId),
+  index("idx_card_analytics_period").on(table.periodType, table.periodStart),
 ]);
 
 // Global templates table
