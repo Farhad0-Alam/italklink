@@ -173,26 +173,15 @@ export const requireAdmin: RequestHandler = (req, res, next) => {
   }
   
   const user = req.user as any;
-  if (user.role !== 'admin' && user.role !== 'owner') {
+  if (user.role !== 'admin') {
     return res.status(403).json({ message: 'Admin access required' });
   }
   
   next();
 };
 
-// Owner middleware (for admin dashboard access)
-export const requireOwner: RequestHandler = (req, res, next) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ message: 'Authentication required' });
-  }
-  
-  const user = req.user as any;
-  if (user.role !== 'owner' && user.role !== 'admin') {
-    return res.status(403).json({ message: 'Owner access required' });
-  }
-  
-  next();
-};
+// Deprecated: Use requireAdmin instead
+export const requireOwner: RequestHandler = requireAdmin;
 
 // Team membership verification middleware - CRITICAL for multi-tenant security
 export const requireTeamRole = (...allowedRoles: string[]): RequestHandler => {
@@ -290,7 +279,7 @@ declare global {
       firstName?: string;
       lastName?: string;
       profileImageUrl?: string;
-      role: 'user' | 'admin' | 'owner';
+      role: 'user' | 'admin';
       planType: 'free' | 'pro' | 'enterprise';
       businessCardsCount: number;
       businessCardsLimit: number;
