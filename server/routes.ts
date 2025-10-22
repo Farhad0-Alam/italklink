@@ -799,6 +799,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get current user
   app.get('/api/auth/user', optionalAuth, async (req, res) => {
+    // Prevent caching to ensure fresh user data during impersonation
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     if (req.isAuthenticated()) {
       let user = req.user as any;
       
