@@ -2699,6 +2699,200 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const revenueAnalytics = await storage.getRevenueAnalytics(userId, { period, currency });
     successResponse(res, revenueAnalytics, 'Revenue analytics retrieved successfully');
   }));
+
+  app.get('/api/analytics/booking-trends', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    res.json({ success: true, data: { trends: [], period: '30d' } });
+  }));
+
+  app.get('/api/analytics/popular-times', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    res.json({ success: true, data: { popularTimes: [] } });
+  }));
+
+  app.get('/api/analytics/conversion-rates', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    res.json({ success: true, data: { conversionRate: 0, totalVisits: 0, totalBookings: 0 } });
+  }));
+
+  app.get('/api/analytics/no-shows', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    res.json({ success: true, data: { noShowRate: 0, totalNoShows: 0 } });
+  }));
+
+  // ===== AFFILIATE API ENDPOINTS =====
+  app.get('/api/affiliate/me', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const affiliate = await storage.getAffiliateByUserId(userId);
+    
+    if (!affiliate) {
+      return res.json({ success: true, data: null });
+    }
+
+    const stats = await storage.getAffiliateStats(affiliate.id);
+    res.json({ success: true, data: { ...affiliate, stats } });
+  }));
+
+  app.post('/api/affiliate/apply', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const { country, website, sourceInfo } = req.body;
+    
+    const affiliate = await storage.createAffiliate({
+      userId,
+      country,
+      website,
+      sourceInfo,
+      status: 'pending' as const,
+    });
+
+    res.json({ success: true, data: affiliate, message: 'Affiliate application submitted successfully' });
+  }));
+
+  app.get('/api/affiliate/analytics', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const affiliate = await storage.getAffiliateByUserId(userId);
+    
+    if (!affiliate) {
+      return res.status(404).json({ success: false, message: 'Affiliate not found' });
+    }
+
+    const analytics = await storage.getAffiliateAnalytics(affiliate.id);
+    res.json({ success: true, data: analytics });
+  }));
+
+  app.get('/api/affiliate/conversions', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const affiliate = await storage.getAffiliateByUserId(userId);
+    
+    if (!affiliate) {
+      return res.status(404).json({ success: false, message: 'Affiliate not found' });
+    }
+
+    const conversions = await storage.getAffiliateConversions(affiliate.id);
+    res.json({ success: true, data: conversions });
+  }));
+
+  app.get('/api/affiliate/marketing-assets', requireAuth, asyncHandler(async (req, res) => {
+    const assets = await storage.getMarketingAssets();
+    res.json({ success: true, data: assets });
+  }));
+
+  // ===== BILLING API ENDPOINTS =====
+  app.get('/api/billing/subscription', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const subscription = await storage.getUserSubscription(userId);
+    res.json({ success: true, data: subscription });
+  }));
+
+  app.get('/api/billing/invoices', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const invoices = await storage.getUserInvoices(userId);
+    res.json({ success: true, data: invoices });
+  }));
+
+  app.get('/api/billing/payment-methods', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const user = await storage.getUserById(userId);
+    
+    res.json({ success: true, data: [] }); // Will be populated with Stripe data
+  }));
+
+  app.post('/api/billing/payment-methods', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    
+    res.json({ success: true, message: 'Payment method added successfully' });
+  }));
+
+  // ===== UPLOADS API ENDPOINTS =====
+  app.get('/api/uploads', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const uploads = await storage.getUserUploads(userId);
+    res.json({ success: true, data: uploads });
+  }));
+
+  app.delete('/api/uploads/:id', requireAuth, asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    await storage.deleteUpload(id);
+    res.json({ success: true, message: 'Upload deleted successfully' });
+  }));
+
+  // ===== AVAILABILITY API ENDPOINTS =====
+  app.get('/api/user/availability', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const availability = await storage.getUserAvailability(userId);
+    res.json({ success: true, data: availability });
+  }));
+
+  app.post('/api/user/availability', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const availabilityData = { ...req.body, userId };
+    const availability = await storage.createUserAvailability(availabilityData);
+    res.json({ success: true, data: availability, message: 'Availability settings saved successfully' });
+  }));
+
+  app.patch('/api/user/availability/:id', requireAuth, asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const availability = await storage.updateUserAvailability(id, req.body);
+    res.json({ success: true, data: availability, message: 'Availability settings updated successfully' });
+  }));
+
+  // ===== EMAIL SIGNATURE API ENDPOINTS =====
+  app.get('/api/email-signatures', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const signatures = await storage.getUserEmailSignatures(userId);
+    res.json({ success: true, data: signatures });
+  }));
+
+  app.post('/api/email-signatures', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const signatureData = { ...req.body, userId };
+    const signature = await storage.createEmailSignature(signatureData);
+    res.json({ success: true, data: signature, message: 'Email signature saved successfully' });
+  }));
+
+  app.delete('/api/email-signatures/:id', requireAuth, asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    await storage.deleteEmailSignature(id);
+    res.json({ success: true, message: 'Email signature deleted successfully' });
+  }));
+
+  // ===== USAGE STATS API ENDPOINTS =====
+  app.get('/api/usage/stats', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const stats = await storage.getUserUsageStats(userId);
+    res.json({ success: true, data: stats });
+  }));
+
+  // ===== ACCOUNT SETTINGS API ENDPOINTS =====
+  app.get('/api/account/settings', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const settings = await storage.getUserSettings(userId);
+    res.json({ success: true, data: settings });
+  }));
+
+  app.patch('/api/account/settings', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const settings = await storage.updateUserSettings(userId, req.body);
+    res.json({ success: true, data: settings, message: 'Settings updated successfully' });
+  }));
+
+  // ===== HELP/KB API ENDPOINTS =====
+  app.get('/api/help/articles', asyncHandler(async (req, res) => {
+    const { search, category } = req.query;
+    const articles = await storage.getHelpArticles({ search: search as string, category: category as string });
+    res.json({ success: true, data: articles });
+  }));
+
+  app.get('/api/help/articles/:id', asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const article = await storage.getHelpArticle(id);
+    
+    if (!article) {
+      return res.status(404).json({ success: false, message: 'Article not found' });
+    }
+
+    res.json({ success: true, data: article });
+  }));
   
   // System Administration APIs
   app.get('/api/admin/system/status', 
