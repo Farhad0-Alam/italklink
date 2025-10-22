@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Search, 
   Plus, 
@@ -60,6 +61,7 @@ interface User {
 }
 
 export default function UsersPage() {
+  const { toast } = useToast();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [planFilter, setPlanFilter] = useState('all');
@@ -135,9 +137,38 @@ export default function UsersPage() {
     staleTime: 0
   });
 
-  const handleVisitUser = (userId: string) => {
-    // Open user's business card in new tab
-    window.open(`/share/${userId}`, '_blank');
+  const handleVisitUser = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/admin/impersonate/${userId}`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Impersonation Started",
+          description: `Now viewing as ${data.data.impersonatedUser.email}`,
+        });
+        
+        // Redirect to user dashboard
+        window.location.href = '/dashboard';
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.message || 'Failed to impersonate user',
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error impersonating user:', error);
+      toast({
+        title: "Error",
+        description: 'Failed to impersonate user. Please try again.',
+        variant: "destructive",
+      });
+    }
   };
 
   const handleToggleUserStatus = async (userId: string, currentStatus: string) => {

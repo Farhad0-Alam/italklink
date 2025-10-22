@@ -3,6 +3,19 @@ import { z } from 'zod';
 import { AuthenticationError, AuthorizationError, businessLogicError } from './error-handling';
 import { storage } from '../storage';
 
+// Extend express-session to include impersonation data
+declare module 'express-session' {
+  interface SessionData {
+    impersonation?: {
+      originalUserId: string;
+      originalUserEmail: string;
+      impersonatedUserId: string;
+      impersonatedUserEmail: string;
+      startedAt: Date;
+    };
+  }
+}
+
 // List of public endpoints that don't require authentication
 const PUBLIC_ENDPOINTS = [
   '/health',
@@ -42,7 +55,24 @@ export const enhancedAuth = async (req: Request, res: Response, next: NextFuncti
       throw new AuthenticationError('Authentication required');
     }
 
-    const user = req.user as any;
+    let user = req.user as any;
+    
+    // Check for active impersonation
+    if (req.session.impersonation) {
+      // If impersonating, fetch the impersonated user instead
+      const impersonatedUser = await storage.getUserById(req.session.impersonation.impersonatedUserId);
+      if (!impersonatedUser) {
+        // If impersonated user no longer exists, clear impersonation
+        delete req.session.impersonation;
+        req.session.save();
+      } else {
+        // Use the impersonated user for all operations
+        user = impersonatedUser;
+        // Add flag to indicate this is an impersonation
+        (user as any).isImpersonated = true;
+        (user as any).originalUserId = req.session.impersonation.originalUserId;
+      }
+    }
 
     // Check if user account is active (commented out as field doesn't exist in database)
     // if (user.isActive === false) {

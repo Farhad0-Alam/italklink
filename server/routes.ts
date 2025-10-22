@@ -2893,6 +2893,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     res.json({ success: true, data: article });
   }));
+
+  // ===== ADMIN IMPERSONATION ENDPOINTS =====
+  app.post('/api/admin/impersonate/:userId', 
+    requireAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { userId } = req.params;
+      const adminUser = req.user as any;
+
+      // Don't allow impersonating another admin
+      const targetUser = await storage.getUserById(userId);
+      if (!targetUser) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      if (targetUser.role === 'admin' || targetUser.role === 'owner') {
+        return res.status(403).json({ success: false, message: 'Cannot impersonate admin users' });
+      }
+
+      // Store impersonation data in session
+      req.session.impersonation = {
+        originalUserId: adminUser.id,
+        originalUserEmail: adminUser.email,
+        impersonatedUserId: targetUser.id,
+        impersonatedUserEmail: targetUser.email,
+        startedAt: new Date()
+      };
+
+      await new Promise((resolve) => req.session.save(resolve));
+
+      res.json({ 
+        success: true, 
+        message: `Now impersonating ${targetUser.email}`,
+        data: {
+          impersonatedUser: {
+            id: targetUser.id,
+            email: targetUser.email,
+            firstName: targetUser.firstName,
+            lastName: targetUser.lastName
+          }
+        }
+      });
+    })
+  );
+
+  app.post('/api/admin/stop-impersonation',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      if (!req.session.impersonation) {
+        return res.status(400).json({ success: false, message: 'Not currently impersonating' });
+      }
+
+      const originalUserId = req.session.impersonation.originalUserId;
+      delete req.session.impersonation;
+      await new Promise((resolve) => req.session.save(resolve));
+
+      res.json({ 
+        success: true, 
+        message: 'Stopped impersonation',
+        data: { originalUserId }
+      });
+    })
+  );
+
+  app.get('/api/admin/impersonation-status',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      if (!req.session.impersonation) {
+        return res.json({ success: true, data: { isImpersonating: false } });
+      }
+
+      const impersonation = req.session.impersonation;
+      res.json({ 
+        success: true, 
+        data: {
+          isImpersonating: true,
+          originalUserEmail: impersonation.originalUserEmail,
+          impersonatedUserEmail: impersonation.impersonatedUserEmail,
+          startedAt: impersonation.startedAt
+        }
+      });
+    })
+  );
   
   // System Administration APIs
   app.get('/api/admin/system/status', 

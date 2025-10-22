@@ -6,6 +6,7 @@ import { queryClient } from "./lib/queryClient";
 import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import i18n from "./lib/i18n";
 
 // Eager load only critical pages (Landing, Login, Dashboard)
@@ -127,6 +128,7 @@ function App() {
         <ThemeProvider>
           <TooltipProvider>
             <div className="min-h-screen">
+              <ImpersonationBanner />
               <Router />
               <Toaster />
             </div>
