@@ -805,20 +805,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader('Expires', '0');
     
     if (req.isAuthenticated()) {
-      let user = req.user as any;
-      
-      // If admin is impersonating, return the impersonated user's data
-      if (req.session?.impersonation?.isImpersonating && req.session?.impersonation?.impersonatedUserId) {
-        try {
-          const impersonatedUser = await storage.getUserById(req.session.impersonation.impersonatedUserId);
-          if (impersonatedUser) {
-            user = impersonatedUser;
-          }
-        } catch (error) {
-          console.error('Error fetching impersonated user:', error);
-        }
-      }
-      
+      // The optionalAuth middleware already handles impersonation
+      const user = req.user as any;
       const { password, ...userProfile } = user;
       res.json(userProfile);
     } else {

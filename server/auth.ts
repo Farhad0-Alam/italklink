@@ -161,8 +161,28 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
 };
 
 // Optional authentication middleware (doesn't block)
-export const optionalAuth: RequestHandler = (req, res, next) => {
-  // Just passes through, user info available via req.user if authenticated
+export const optionalAuth: RequestHandler = async (req, res, next) => {
+  // If authenticated, check for active impersonation
+  if (req.isAuthenticated() && req.session.impersonation) {
+    try {
+      const { storage } = await import('./storage');
+      const impersonatedUser = await storage.getUserById(req.session.impersonation.impersonatedUserId);
+      if (!impersonatedUser) {
+        // If impersonated user no longer exists, clear impersonation
+        delete req.session.impersonation;
+        req.session.save();
+      } else {
+        // Use the impersonated user for all operations
+        req.user = impersonatedUser as any;
+        // Add flag to indicate this is an impersonation
+        (req.user as any).isImpersonated = true;
+        (req.user as any).originalUserId = req.session.impersonation.originalUserId;
+      }
+    } catch (error) {
+      console.error('Error fetching impersonated user:', error);
+    }
+  }
+  
   next();
 };
 
