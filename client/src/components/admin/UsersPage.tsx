@@ -601,7 +601,7 @@ export default function UsersPage() {
                           onClick={() => handleVisitUser(user.id)}
                           className="text-blue-600 hover:text-blue-700"
                         >
-                          Visit
+                          Switch To
                         </Button>
                         <Button
                           variant="outline"
