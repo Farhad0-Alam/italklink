@@ -1,33 +1,77 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { toPng } from "html-to-image";
 import { BusinessCard } from "@shared/schema";
 import { FormBuilder } from "@/components/form-builder";
 import { BusinessCardComponent } from "@/components/business-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { storage } from "@/lib/storage";
 import { generateShareUrl, copyToClipboard, logEvent } from "@/lib/share";
 import { useToast } from "@/hooks/use-toast";
 import { defaultCardData } from "@/lib/card-data";
 import { WalletButtons } from "@/components/WalletButtons";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
-export const Builder = () => {
+interface BuilderProps {
+  cardId?: string;
+}
+
+export const Builder = ({ cardId }: BuilderProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const cardRef = useRef<HTMLDivElement>(null);
-  const [cardData, setCardData] = useState<BusinessCard>(() => storage.loadCardData());
+  const [cardData, setCardData] = useState<BusinessCard>(defaultCardData);
   const [showQR, setShowQR] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Auto-save to localStorage
+  // Load card data from database if cardId is provided
+  const { data: loadedCard, isLoading } = useQuery<BusinessCard>({
+    queryKey: ['/api/business-cards', cardId],
+    enabled: !!cardId,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+  });
+
+  // Initialize card data when loaded from database
   useEffect(() => {
+    if (loadedCard) {
+      setCardData(loadedCard);
+    }
+  }, [loadedCard]);
+
+  // Auto-save mutation
+  const saveCardMutation = useMutation({
+    mutationFn: async (data: BusinessCard) => {
+      if (!cardId) return null;
+      
+      return apiRequest(`/api/business-cards/${cardId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/business-cards', cardId] });
+      setIsSaving(false);
+    },
+    onError: (error: any) => {
+      console.error('Auto-save failed:', error);
+      setIsSaving(false);
+    },
+  });
+
+  // Auto-save to database (debounced)
+  useEffect(() => {
+    if (!cardId || !cardData.fullName) return;
+
+    setIsSaving(true);
     const saveTimer = setTimeout(() => {
-      storage.saveCardData(cardData);
-    }, 1000);
+      saveCardMutation.mutate(cardData);
+    }, 2000); // 2 second debounce
 
     return () => clearTimeout(saveTimer);
-  }, [cardData]);
+  }, [cardData, cardId]);
 
   const handleDataChange = useCallback((newData: BusinessCard) => {
     setCardData(newData);
@@ -37,6 +81,17 @@ export const Builder = () => {
     setShowQR(true);
     logEvent("generate_qr");
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-talklink-500 mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading card...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleExportPNG = async () => {
     if (!cardRef.current) return;
@@ -99,6 +154,14 @@ export const Builder = () => {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Left Column: Form Builder */}
           <div className="space-y-6">
+            {isSaving && (
+              <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 mb-4">
+                <div className="flex items-center gap-2 text-sm text-talklink-400">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-talklink-500"></div>
+                  <span>Auto-saving changes...</span>
+                </div>
+              </div>
+            )}
             <FormBuilder
               cardData={cardData}
               onDataChange={handleDataChange}
