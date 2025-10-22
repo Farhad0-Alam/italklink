@@ -1122,6 +1122,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Password reset - Request reset
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ 
+          message: 'Email is required' 
+        });
+      }
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      
+      // Always return success to prevent email enumeration
+      // But only send email if user exists with password
+      if (user && user.password) {
+        // Generate reset token (random 32-byte hex string)
+        const crypto = await import('crypto');
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
+        
+        // Save token to database
+        await db.update(users)
+          .set({ 
+            resetToken,
+            resetTokenExpiry 
+          })
+          .where(eq(users.id, user.id));
+        
+        // Send password reset email
+        const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
+        
+        // TODO: Send email with resetUrl
+        // For now, log it (will implement SendGrid next)
+        console.log('Password reset link:', resetUrl);
+        console.log('Reset token for', email, ':', resetToken);
+      }
+      
+      res.json({ 
+        message: 'If an account exists with this email, you will receive a password reset link.' 
+      });
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({ message: 'Failed to process password reset request' });
+    }
+  });
+
+  // Password reset - Confirm reset with token
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      
+      if (!token || !password) {
+        return res.status(400).json({ 
+          message: 'Token and password are required' 
+        });
+      }
+      
+      if (password.length < 6) {
+        return res.status(400).json({ 
+          message: 'Password must be at least 6 characters long' 
+        });
+      }
+      
+      // Find user with this reset token that hasn't expired
+      const [user] = await db.select()
+        .from(users)
+        .where(eq(users.resetToken, token))
+        .limit(1);
+      
+      if (!user) {
+        return res.status(400).json({ 
+          message: 'Invalid or expired reset token' 
+        });
+      }
+      
+      // Check if token has expired
+      if (!user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+        return res.status(400).json({ 
+          message: 'Reset token has expired. Please request a new one.' 
+        });
+      }
+      
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(password, 12);
+      
+      // Update password and clear reset token
+      await db.update(users)
+        .set({ 
+          password: hashedPassword,
+          resetToken: null,
+          resetTokenExpiry: null 
+        })
+        .where(eq(users.id, user.id));
+      
+      res.json({ 
+        message: 'Password has been reset successfully' 
+      });
+    } catch (error) {
+      console.error('Reset password error:', error);
+      res.status(500).json({ message: 'Failed to reset password' });
+    }
+  });
+
   // Teams API  
   app.get('/api/teams', requireAuth, async (req, res) => {
     try {
