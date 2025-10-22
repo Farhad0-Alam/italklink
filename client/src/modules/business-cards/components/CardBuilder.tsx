@@ -21,6 +21,7 @@ export const Builder = ({ cardId }: BuilderProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const cardRef = useRef<HTMLDivElement>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [cardData, setCardData] = useState<BusinessCard>(defaultCardData);
   const [showQR, setShowQR] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -46,10 +47,7 @@ export const Builder = ({ cardId }: BuilderProps) => {
     mutationFn: async (data: BusinessCard) => {
       if (!cardId) return null;
       
-      return apiRequest(`/api/business-cards/${cardId}`, {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      });
+      return apiRequest('PATCH', `/api/business-cards/${cardId}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/business-cards', cardId] });
@@ -64,13 +62,22 @@ export const Builder = ({ cardId }: BuilderProps) => {
   // Auto-save to database (debounced)
   useEffect(() => {
     if (!cardId || !cardData.fullName) return;
+    
+    // Clear any existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
 
     setIsSaving(true);
-    const saveTimer = setTimeout(() => {
+    saveTimeoutRef.current = setTimeout(() => {
       saveCardMutation.mutate(cardData);
     }, 2000); // 2 second debounce
 
-    return () => clearTimeout(saveTimer);
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, [cardData, cardId]);
 
   const handleDataChange = useCallback((newData: BusinessCard) => {

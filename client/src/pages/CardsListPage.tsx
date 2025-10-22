@@ -57,13 +57,10 @@ export default function CardsListPage() {
 
   const createCardMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/business-cards', {
-        method: 'POST',
-        body: JSON.stringify({
-          ...defaultCardData,
-          fullName: "New Business Card",
-          title: "Professional",
-        }),
+      return apiRequest('POST', '/api/business-cards', {
+        ...defaultCardData,
+        fullName: "New Business Card",
+        title: "Professional",
       });
     },
     onSuccess: (data) => {
@@ -85,9 +82,7 @@ export default function CardsListPage() {
 
   const deleteCardMutation = useMutation({
     mutationFn: async (cardId: string) => {
-      return apiRequest(`/api/business-cards/${cardId}`, {
-        method: 'DELETE',
-      });
+      return apiRequest('DELETE', `/api/business-cards/${cardId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/business-cards'] });
@@ -108,13 +103,10 @@ export default function CardsListPage() {
   const duplicateCardMutation = useMutation({
     mutationFn: async (card: BusinessCard) => {
       const { id, createdAt, updatedAt, shareSlug, ...cardData } = card;
-      return apiRequest('/api/business-cards', {
-        method: 'POST',
-        body: JSON.stringify({
-          ...cardData,
-          fullName: `${card.fullName} (Copy)`,
-          shareSlug: undefined,
-        }),
+      return apiRequest('POST', '/api/business-cards', {
+        ...cardData,
+        fullName: `${card.fullName} (Copy)`,
+        shareSlug: undefined,
       });
     },
     onSuccess: () => {
