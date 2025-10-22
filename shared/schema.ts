@@ -103,6 +103,10 @@ export const users = pgTable("users", {
   password: varchar("password"), // For email/password authentication (null for OAuth users)
   role: userRoleEnum("role").default('user'),
   
+  // Password reset fields
+  resetToken: varchar("reset_token"),
+  resetTokenExpiry: timestamp("reset_token_expiry"),
+  
   // Subscription fields
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
