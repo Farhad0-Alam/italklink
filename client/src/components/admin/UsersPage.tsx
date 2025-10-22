@@ -141,6 +141,9 @@ export default function UsersPage() {
     try {
       const response = await fetch(`/api/admin/impersonate/${userId}`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
       });
 
