@@ -8,6 +8,7 @@ import fs from 'fs';
 import { setupAuth, requireAuth, optionalAuth, requireAdmin } from './auth';
 import { storage } from './storage';
 import { emitAutomationEvent } from './automation-engine';
+import { emailService } from './email-service';
 import type { User, Team, TeamMember, CrmContact, CrmActivity, CrmTask, CrmPipeline, CrmStage, CrmDeal, CrmSequence, EmailTemplate } from '@shared/schema';
 import { 
   insertUserSchema, teamInvitationSchema, teamSettingsSchema,
@@ -1155,10 +1156,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Send password reset email
         const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
         
-        // TODO: Send email with resetUrl
-        // For now, log it (will implement SendGrid next)
-        console.log('Password reset link:', resetUrl);
-        console.log('Reset token for', email, ':', resetToken);
+        // Send email
+        await emailService.sendEmail({
+          to: email,
+          subject: 'Reset Your Password - 2TalkLink',
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #374151; background-color: #f3f4f6; margin: 0; padding: 0; }
+                .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+                .header { background: linear-gradient(135deg, #ea580c 0%, #f97316 100%); padding: 40px 30px; text-align: center; }
+                .logo { width: 60px; height: 60px; background: white; border-radius: 12px; display: inline-flex; align-items: center; justify-center; font-size: 28px; font-weight: bold; color: #ea580c; margin-bottom: 20px; }
+                .header h1 { color: white; margin: 0; font-size: 24px; }
+                .content { padding: 40px 30px; }
+                .content h2 { color: #1f2937; margin-top: 0; }
+                .button { display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #ea580c 0%, #f97316 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0; }
+                .button:hover { background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%); }
+                .footer { background-color: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 14px; }
+                .warning { background-color: #fef3c7; border-left: 4px solid: #f59e0b; padding: 12px 16px; margin: 20px 0; border-radius: 4px; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <div class="logo">2T</div>
+                  <h1>Password Reset Request</h1>
+                </div>
+                <div class="content">
+                  <h2>Hello ${user.firstName || 'there'},</h2>
+                  <p>We received a request to reset your password for your 2TalkLink account. If you didn't make this request, you can safely ignore this email.</p>
+                  <p>To reset your password, click the button below:</p>
+                  <center>
+                    <a href="${resetUrl}" class="button">Reset Password</a>
+                  </center>
+                  <div class="warning">
+                    <strong>⚠️ Security Notice:</strong> This link will expire in 1 hour and can only be used once.
+                  </div>
+                  <p>If the button doesn't work, copy and paste this link into your browser:</p>
+                  <p style="word-break: break-all; color: #6b7280; font-size: 14px;">${resetUrl}</p>
+                </div>
+                <div class="footer">
+                  <p><strong>2TalkLink</strong> - Digital Business Cards & Networking</p>
+                  <p>This is an automated email. Please do not reply.</p>
+                </div>
+              </div>
+            </body>
+            </html>
+          `,
+        });
+        
+        console.log('Password reset email sent to:', email);
       }
       
       res.json({ 
