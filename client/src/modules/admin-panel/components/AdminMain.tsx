@@ -28,7 +28,7 @@ export default function Admin() {
         const response = await fetch('/api/auth/user');
         if (response.ok) {
           const user = await response.json();
-          if (user.role === 'admin') {
+          if (user.role === 'admin' || user.role === 'owner') {
             setAdminUser(user);
           }
         }

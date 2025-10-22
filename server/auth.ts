@@ -140,7 +140,7 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
   if (req.session.impersonation) {
     try {
       const { storage } = await import('./storage');
-      const impersonatedUser = await storage.getUser(req.session.impersonation.impersonatedUserId);
+      const impersonatedUser = await storage.getUserById(req.session.impersonation.impersonatedUserId);
       if (!impersonatedUser) {
         // If impersonated user no longer exists, clear impersonation
         delete req.session.impersonation;
@@ -173,15 +173,26 @@ export const requireAdmin: RequestHandler = (req, res, next) => {
   }
   
   const user = req.user as any;
-  if (user.role !== 'admin') {
+  if (user.role !== 'admin' && user.role !== 'owner') {
     return res.status(403).json({ message: 'Admin access required' });
   }
   
   next();
 };
 
-// Deprecated: Use requireAdmin instead
-export const requireOwner: RequestHandler = requireAdmin;
+// Owner middleware (for admin dashboard access)
+export const requireOwner: RequestHandler = (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Authentication required' });
+  }
+  
+  const user = req.user as any;
+  if (user.role !== 'owner' && user.role !== 'admin') {
+    return res.status(403).json({ message: 'Owner access required' });
+  }
+  
+  next();
+};
 
 // Team membership verification middleware - CRITICAL for multi-tenant security
 export const requireTeamRole = (...allowedRoles: string[]): RequestHandler => {
@@ -279,7 +290,7 @@ declare global {
       firstName?: string;
       lastName?: string;
       profileImageUrl?: string;
-      role: 'user' | 'admin';
+      role: 'user' | 'admin' | 'owner';
       planType: 'free' | 'pro' | 'enterprise';
       businessCardsCount: number;
       businessCardsLimit: number;

@@ -2792,7 +2792,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/billing/payment-methods', requireAuth, asyncHandler(async (req, res) => {
     const userId = req.user!.id;
-    const user = await storage.getUser(userId);
+    const user = await storage.getUserById(userId);
     
     res.json({ success: true, data: [] }); // Will be populated with Stripe data
   }));
@@ -2901,19 +2901,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId } = req.params;
       const adminUser = req.user as any;
 
-      // Only allow admin role to impersonate
-      if (adminUser.role !== 'admin') {
-        return res.status(403).json({ success: false, message: 'Access denied. Only admins can impersonate users.' });
+      // Only allow admin or owner roles to impersonate
+      if (adminUser.role !== 'admin' && adminUser.role !== 'owner') {
+        return res.status(403).json({ success: false, message: 'Access denied. Only admins and owners can impersonate users.' });
       }
 
       // Don't allow impersonating another admin
-      const targetUser = await storage.getUser(userId);
+      const targetUser = await storage.getUserById(userId);
       if (!targetUser) {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
 
-      if (targetUser.role === 'admin') {
-        return res.status(403).json({ success: false, message: 'Cannot impersonate other admin users' });
+      if (targetUser.role === 'admin' || targetUser.role === 'owner') {
+        return res.status(403).json({ success: false, message: 'Cannot impersonate admin or owner users' });
       }
 
       // Store impersonation data in session
