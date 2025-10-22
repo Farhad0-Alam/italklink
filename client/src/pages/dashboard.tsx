@@ -26,7 +26,6 @@ import { ContactSupportModal } from "@/components/contact-support-modal";
 import NotifyCardButton from "@/components/NotifyCardButton";
 import NotifyAllCardsButton from "@/components/NotifyAllCardsButton";
 import { SubscriptionCard } from "@/components/SubscriptionCard";
-import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 
 interface User {
   id: string;
@@ -77,23 +76,6 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showContactModal, setShowContactModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isImpersonating, setIsImpersonating] = useState(false);
-
-  // Check impersonation status
-  useEffect(() => {
-    const checkImpersonation = async () => {
-      try {
-        const response = await fetch('/api/admin/impersonation-status', { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
-          setIsImpersonating(data.data?.isImpersonating || false);
-        }
-      } catch (error) {
-        console.error('Failed to check impersonation status:', error);
-      }
-    };
-    checkImpersonation();
-  }, []);
 
   // All hooks must be called unconditionally at the top level
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
@@ -273,11 +255,8 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Impersonation Banner */}
-      <ImpersonationBanner />
-      
       {/* Modern Navigation Header */}
-      <nav className={`sticky ${isImpersonating ? 'top-[52px]' : 'top-0'} z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm`}>
+      <nav className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Left: Logo & Mobile Menu */}
