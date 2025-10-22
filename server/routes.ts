@@ -798,9 +798,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get current user
-  app.get('/api/auth/user', optionalAuth, (req, res) => {
+  app.get('/api/auth/user', optionalAuth, async (req, res) => {
     if (req.isAuthenticated()) {
-      const user = req.user as any;
+      let user = req.user as any;
+      
+      // If admin is impersonating, return the impersonated user's data
+      if (req.session?.impersonation?.isImpersonating && req.session?.impersonation?.impersonatedUserId) {
+        try {
+          const impersonatedUser = await storage.getUserById(req.session.impersonation.impersonatedUserId);
+          if (impersonatedUser) {
+            user = impersonatedUser;
+          }
+        } catch (error) {
+          console.error('Error fetching impersonated user:', error);
+        }
+      }
+      
       const { password, ...userProfile } = user;
       res.json(userProfile);
     } else {
