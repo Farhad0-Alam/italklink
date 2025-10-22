@@ -651,31 +651,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
   
-  app.post('/api/auth/forgot-password',
-    asyncHandler(async (req, res) => {
-      // Validate request body
-      const bodyValidation = z.object({ email: commonSchemas.email }).safeParse(req.body);
-      if (!bodyValidation.success) {
-        throw validationError('Invalid request body', bodyValidation.error.errors);
-      }
-      
-      const { email } = bodyValidation.data;
-      const user = await storage.getUserByEmail(email);
-      
-      if (user) {
-        const resetToken = await storage.createPasswordResetToken(user.id);
-        
-        await emitAutomationEvent({
-          type: 'user.password.reset.requested',
-          data: { user, resetToken }
-        });
-      }
-      
-      // Always return success for security (don't reveal if email exists)
-      successResponse(res, {}, 'Password reset email sent if account exists');
-    })
-  );
-  
   // Health check endpoint
   app.get("/api/health", (req, res) => {
     res.json({ 
@@ -1145,6 +1120,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const resetToken = crypto.randomBytes(32).toString('hex');
         const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
         
+        // Import database dependencies
+        const { db } = await import('./db');
+        const { users } = await import('@shared/schema');
+        const { eq } = await import('drizzle-orm');
+        
         // Save token to database
         await db.update(users)
           .set({ 
@@ -1237,6 +1217,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: 'Password must be at least 6 characters long' 
         });
       }
+      
+      // Import database dependencies
+      const { db } = await import('./db');
+      const { users } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
       
       // Find user with this reset token that hasn't expired
       const [user] = await db.select()

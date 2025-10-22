@@ -25,6 +25,8 @@ const PUBLIC_ENDPOINTS = [
   '/auth/logout',
   '/auth/google',
   '/auth/google/callback',
+  '/auth/forgot-password',
+  '/auth/reset-password',
   '/admin/login',
   '/admin/register',
   '/public',
