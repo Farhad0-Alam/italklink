@@ -21,6 +21,8 @@ const Builder = lazy(() => import("./pages/builder").then(module => ({ default: 
 const Share = lazy(() => import("./pages/share").then(module => ({ default: module.Share })));
 const TemplatePreview = lazy(() => import("./pages/template-preview"));
 const CardEditor = lazy(() => import("./pages/card-editor"));
+const CardsListPage = lazy(() => import("./pages/CardsListPage"));
+const CardBuilderPage = lazy(() => import("./pages/CardBuilderPage"));
 const Admin = lazy(() => import("./pages/admin"));
 const Pricing = lazy(() => import("./pages/pricing"));
 const Affiliate = lazy(() => import("./pages/affiliate"));
@@ -68,9 +70,10 @@ function Router() {
       <Route path="/templates">{() => <PageSuspense><Templates /></PageSuspense>}</Route>
       <Route path="/appointments/:rest*">{(params) => <PageSuspense><Appointments {...params} /></PageSuspense>}</Route>
       <Route path="/appointments">{() => <PageSuspense><Appointments /></PageSuspense>}</Route>
-      <Route path="/builder">{() => <PageSuspense><Builder /></PageSuspense>}</Route>
+      <Route path="/builder">{() => <PageSuspense><CardBuilderPage /></PageSuspense>}</Route>
+      <Route path="/cards">{() => <PageSuspense><CardsListPage /></PageSuspense>}</Route>
       <Route path="/cards/create">{() => <PageSuspense><CardEditor /></PageSuspense>}</Route>
-      <Route path="/cards/:id/edit">{(params) => <PageSuspense><CardEditor {...params} /></PageSuspense>}</Route>
+      <Route path="/cards/:id/edit">{(params) => <PageSuspense><CardBuilderPage {...params} /></PageSuspense>}</Route>
       <Route path="/card-editor/:id?">{(params) => <PageSuspense><CardEditor {...params} /></PageSuspense>}</Route>
       <Route path="/card-editor">{() => <PageSuspense><CardEditor /></PageSuspense>}</Route>
       <Route path="/share">{() => <PageSuspense><Share /></PageSuspense>}</Route>
