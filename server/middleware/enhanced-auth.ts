@@ -60,7 +60,7 @@ export const enhancedAuth = async (req: Request, res: Response, next: NextFuncti
     // Check for active impersonation
     if (req.session.impersonation) {
       // If impersonating, fetch the impersonated user instead
-      const impersonatedUser = await storage.getUserById(req.session.impersonation.impersonatedUserId);
+      const impersonatedUser = await storage.getUser(req.session.impersonation.impersonatedUserId);
       if (!impersonatedUser) {
         // If impersonated user no longer exists, clear impersonation
         delete req.session.impersonation;

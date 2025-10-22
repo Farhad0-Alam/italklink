@@ -140,7 +140,7 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
   if (req.session.impersonation) {
     try {
       const { storage } = await import('./storage');
-      const impersonatedUser = await storage.getUserById(req.session.impersonation.impersonatedUserId);
+      const impersonatedUser = await storage.getUser(req.session.impersonation.impersonatedUserId);
       if (!impersonatedUser) {
         // If impersonated user no longer exists, clear impersonation
         delete req.session.impersonation;

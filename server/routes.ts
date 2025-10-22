@@ -2792,7 +2792,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/billing/payment-methods', requireAuth, asyncHandler(async (req, res) => {
     const userId = req.user!.id;
-    const user = await storage.getUserById(userId);
+    const user = await storage.getUser(userId);
     
     res.json({ success: true, data: [] }); // Will be populated with Stripe data
   }));
@@ -2907,7 +2907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Don't allow impersonating another admin
-      const targetUser = await storage.getUserById(userId);
+      const targetUser = await storage.getUser(userId);
       if (!targetUser) {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
