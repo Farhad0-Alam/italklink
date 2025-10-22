@@ -810,7 +810,7 @@ export default function Dashboard() {
                         className="text-orange-500 border-orange-200 hover:bg-orange-50 flex-1 sm:flex-initial"
                         asChild
                       >
-                        <Link href={`/cards/${card.id}/edit`} data-testid={`button-edit-${card.id}`}>
+                        <Link href={`/card-editor/${card.id}`} data-testid={`button-edit-${card.id}`}>
                           <Edit className="h-3 w-3 sm:mr-1" />
                           <span className="hidden sm:inline">Edit</span>
                         </Link>
