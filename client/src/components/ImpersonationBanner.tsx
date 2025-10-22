@@ -91,7 +91,7 @@ export function ImpersonationBanner() {
           data-testid="button-stop-impersonation"
         >
           <LogOut className="h-4 w-4 mr-2" />
-          {isStoppingImpersonation ? "Stopping..." : "Stop Impersonating"}
+          {isStoppingImpersonation ? "Switching..." : "Switch back to Admin"}
         </Button>
       </div>
     </div>
