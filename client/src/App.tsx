@@ -14,6 +14,8 @@ import Landing from "./pages/landing";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
+import ForgotPassword from "./pages/forgot-password";
+import ResetPassword from "./pages/reset-password";
 
 // Lazy load all other pages to improve initial load performance
 const Templates = lazy(() => import("./pages/templates"));
@@ -62,6 +64,8 @@ function Router() {
       <Route path="/landing" component={Landing} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/dashboard" component={Dashboard} />
       
       {/* Lazy-loaded pages - Fixed to preserve route params */}
