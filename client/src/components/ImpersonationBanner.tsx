@@ -40,7 +40,7 @@ export function ImpersonationBanner() {
   const stopImpersonation = async () => {
     setIsStoppingImpersonation(true);
     try {
-      const response = await apiRequest('POST', '/api/admin/stop-impersonation');
+      const response = await apiRequest('POST', '/api/admin/stop-impersonation', {});
       
       toast({
         title: "Impersonation stopped",
