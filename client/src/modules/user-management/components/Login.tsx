@@ -20,7 +20,7 @@ export default function Login() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role === 'owner') {
+      if (user.role === 'admin') {
         setLocation('/admin');
       } else {
         setLocation('/dashboard');
@@ -45,7 +45,7 @@ export default function Login() {
       setTimeout(async () => {
         try {
           const updatedUserQuery = await queryClient.fetchQuery({ queryKey: ['/api/auth/user'] });
-          if (updatedUserQuery && (updatedUserQuery as any).role === 'owner') {
+          if (updatedUserQuery && (updatedUserQuery as any).role === 'admin') {
             setLocation('/admin');
           } else {
             setLocation('/dashboard');

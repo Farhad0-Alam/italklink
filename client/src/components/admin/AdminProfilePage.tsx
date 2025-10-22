@@ -52,7 +52,7 @@ interface AdminUser {
   firstName?: string;
   lastName?: string;
   profileImageUrl?: string;
-  role: 'admin' | 'owner';
+  role: 'admin';
   planType: 'free' | 'pro' | 'enterprise';
   businessCardsCount: number;
   businessCardsLimit: number;
@@ -424,7 +424,7 @@ export default function AdminProfilePage() {
                   <h3 className="font-semibold text-lg">{user.firstName} {user.lastName}</h3>
                   <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
                   <div className="flex justify-center space-x-2">
-                    <Badge variant={user.role === 'owner' ? 'default' : 'secondary'} className="capitalize">
+                    <Badge variant="default" className="capitalize">
                       <Shield className="w-3 h-3 mr-1" />
                       {user.role}
                     </Badge>
