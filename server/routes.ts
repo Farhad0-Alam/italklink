@@ -372,6 +372,177 @@ export async function registerRoutes(app: Express): Promise<Server> {
       successResponse(res, confirmedAppointment, 'Appointment confirmed successfully');
     })
   );
+
+  // ===== APPOINTMENT MANAGEMENT API ENDPOINTS =====
+  app.get('/api/appointments',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const userId = req.user!.id;
+      const { search, status, eventType, page = '1', limit = '10' } = req.query;
+      
+      const appointments = await storage.getUserAppointments(userId, {
+        search: search as string,
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+      });
+
+      res.json({ 
+        success: true, 
+        data: { 
+          appointments,
+          pagination: {
+            page: parseInt(page as string),
+            limit: parseInt(limit as string),
+            total: appointments.length,
+            pages: Math.ceil(appointments.length / parseInt(limit as string))
+          }
+        } 
+      });
+    })
+  );
+
+  app.get('/api/appointments/stats',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const userId = req.user!.id;
+      const appointments = await storage.getUserAppointments(userId, {});
+
+      const stats = {
+        totalAppointments: appointments.length,
+        upcomingAppointments: appointments.filter(a => a.status === 'scheduled' || a.status === 'confirmed').length,
+        completedAppointments: appointments.filter(a => a.status === 'completed').length,
+        cancelledAppointments: appointments.filter(a => a.status === 'cancelled').length,
+        totalRevenue: 0,
+        averageBookingValue: 0,
+        mostPopularEventType: 'consultation',
+        busyDay: 'Monday'
+      };
+
+      res.json({ success: true, data: stats });
+    })
+  );
+
+  app.post('/api/appointments',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const userId = req.user!.id;
+      const appointmentData = {
+        ...req.body,
+        hostId: userId,
+      };
+
+      const newAppointment = await storage.createAppointment(appointmentData);
+      
+      await emitAutomationEvent({
+        type: 'appointment.created',
+        data: { appointment: newAppointment }
+      });
+
+      res.json({ success: true, data: newAppointment, message: 'Appointment created successfully' });
+    })
+  );
+
+  app.patch('/api/appointments/:id',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const updatedAppointment = await storage.updateAppointment(id, req.body);
+      
+      await emitAutomationEvent({
+        type: 'appointment.updated',
+        data: { appointment: updatedAppointment }
+      });
+
+      res.json({ success: true, data: updatedAppointment, message: 'Appointment updated successfully' });
+    })
+  );
+
+  app.delete('/api/appointments/:id',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      await storage.cancelAppointment(id, 'Cancelled by user');
+      
+      await emitAutomationEvent({
+        type: 'appointment.cancelled',
+        data: { appointmentId: id }
+      });
+
+      res.json({ success: true, message: 'Appointment cancelled successfully' });
+    })
+  );
+
+  // ===== EVENT TYPES API ENDPOINTS =====
+  app.get('/api/event-types',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const userId = req.user!.id;
+      const { search, isActive } = req.query;
+      
+      const eventTypes = await storage.getUserAppointmentEventTypes(userId, {
+        search: search as string,
+        isActive: isActive !== undefined ? isActive === 'true' : undefined,
+      });
+
+      res.json({ success: true, data: eventTypes });
+    })
+  );
+
+  app.get('/api/event-types/:id',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const eventType = await storage.getAppointmentEventType(id);
+      
+      if (!eventType) {
+        return res.status(404).json({ success: false, message: 'Event type not found' });
+      }
+
+      res.json({ success: true, data: eventType });
+    })
+  );
+
+  app.post('/api/event-types',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const userId = req.user!.id;
+      const eventTypeData = {
+        ...req.body,
+        userId,
+      };
+
+      const newEventType = await storage.createAppointmentEventType(eventTypeData);
+      res.json({ success: true, data: newEventType, message: 'Event type created successfully' });
+    })
+  );
+
+  app.patch('/api/event-types/:id',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const updatedEventType = await storage.updateAppointmentEventType(id, req.body);
+      res.json({ success: true, data: updatedEventType, message: 'Event type updated successfully' });
+    })
+  );
+
+  app.delete('/api/event-types/:id',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      await storage.deleteAppointmentEventType(id);
+      res.json({ success: true, message: 'Event type deleted successfully' });
+    })
+  );
+
+  app.post('/api/event-types/:id/duplicate',
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const { name } = req.body;
+      const duplicatedEventType = await storage.duplicateAppointmentEventType(id, name);
+      res.json({ success: true, data: duplicatedEventType, message: 'Event type duplicated successfully' });
+    })
+  );
   
   // Availability & Scheduling Enhancement APIs
   app.get('/api/availability/check',
