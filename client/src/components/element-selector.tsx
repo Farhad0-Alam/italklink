@@ -27,6 +27,20 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       description: "Add text content"
     },
     {
+      type: "addToContacts",
+      title: "Add to Contacts",
+      icon: "fas fa-address-book",
+      color: "bg-emerald-100",
+      description: "Save contact button"
+    },
+    {
+      type: "shareButton",
+      title: "Share Button",
+      icon: "fas fa-share-alt",
+      color: "bg-sky-100",
+      description: "Share card button"
+    },
+    {
       type: "link",
       title: "Link",
       icon: "fas fa-link",
@@ -202,6 +216,37 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           data: {
             text: "Enter your text here...",
             alignment: "left" as const
+          }
+        };
+        break;
+      
+      case "addToContacts":
+        element = {
+          id,
+          type: "addToContacts",
+          order: Date.now(),
+          data: {
+            buttonText: "Add to Contacts",
+            style: "filled" as const,
+            buttonColor: "#22c55e",
+            textColor: "#ffffff",
+            showIcon: true
+          }
+        };
+        break;
+      
+      case "shareButton":
+        element = {
+          id,
+          type: "shareButton",
+          order: Date.now(),
+          data: {
+            buttonText: "Share",
+            style: "filled" as const,
+            buttonColor: "#22c55e",
+            textColor: "#ffffff",
+            showIcon: true,
+            showShareMenu: true
           }
         };
         break;

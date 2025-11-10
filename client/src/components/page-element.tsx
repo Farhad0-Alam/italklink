@@ -19,6 +19,11 @@ import ARPreviewMindAR from "@/elements/ARPreviewMindAR";
 import { compileMind } from "@/builder/api/ar";
 import { PdfViewerButton } from "@/components/PdfViewerButton";
 import { SubscribeForm as SubscribeFormComponent } from "@/components/SubscribeForm";
+import { downloadVCard } from "@/lib/vcard";
+import { createShareHandler, getSharePlatforms } from "@/lib/share";
+import { useToast } from "@/hooks/use-toast";
+import { useButtonTracking } from "@/hooks/useButtonTracking";
+import { UserPlus, Share2 } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -4437,6 +4442,32 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
               </div>
             )}
           </div>
+        );
+
+      case "addToContacts":
+        const AddToContactsElement = require("@/components/page-elements/AddToContactsElement").AddToContactsElement;
+        return (
+          <AddToContactsElement
+            element={element}
+            isEditing={isEditing}
+            handleDataUpdate={handleDataUpdate}
+            card={elementProps?.card}
+            trackButtonClick={elementProps?.trackButtonClick}
+          />
+        );
+
+      case "shareButton":
+        const ShareButtonElement = require("@/components/page-elements/ShareButtonElement").ShareButtonElement;
+        const { toast: shareToast } = useToast();
+        return (
+          <ShareButtonElement
+            element={element}
+            isEditing={isEditing}
+            handleDataUpdate={handleDataUpdate}
+            card={elementProps?.card}
+            toast={shareToast}
+            trackButtonClick={elementProps?.trackButtonClick}
+          />
         );
 
       default:
