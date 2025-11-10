@@ -1,10 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
+import { SelectItem } from "@/components/ui/select";
 import {
   DndContext,
   closestCenter,
@@ -22,7 +17,19 @@ import {
 } from "@dnd-kit/sortable";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import {
+  PanelWrapper,
+  PanelHeader,
+  SidebarSection,
+  PanelLabel,
+  PanelInput,
+  PanelSelect,
+  PanelCheckbox,
+  PanelSlider,
+  PanelColorPicker,
+  PanelButton,
+  panelTheme
+} from "./sidebar-panel-theme";
 
 // Sortable item component
 function SortableItem({ id, children }: { id: string; children: React.ReactNode }) {
