@@ -526,8 +526,6 @@ interface PageElementProps {
 export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, isInteractive = true, cardData, onNavigatePage }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isContactEditorOpen, setIsContactEditorOpen] = useState(false);
-  const [isSocialEditorOpen, setIsSocialEditorOpen] = useState(false);
   
   // Define sensors for drag and drop
   const sensors = useSensors(
@@ -898,23 +896,10 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
         return (
           <div className="mb-6">
             {isEditing ? (
-              <div className="border-2 border-dashed border-purple-500 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-white">Contact Section</span>
-                  <Button
-                    onClick={() => setIsContactEditorOpen(true)}
-                    size="sm"
-                    className="bg-purple-600 hover:bg-purple-700"
-                    data-testid="button-edit-contact-section"
-                  >
-                    <i className="fas fa-edit mr-2" />
-                    Edit
-                  </Button>
-                </div>
-                {!hasContacts && (
-                  <p className="text-gray-400 text-sm mt-2">Click Edit to add contact methods</p>
-                )}
-              </div>
+              <ContactSectionEditor
+                data={contactData}
+                onChange={(newData) => handleDataUpdate(newData)}
+              />
             ) : (
               <div 
                 className="flex justify-center space-x-4 flex-wrap gap-y-3"
@@ -989,23 +974,10 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
         return (
           <div className="mb-6">
             {isEditing ? (
-              <div className="border-2 border-dashed border-purple-500 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-white">Social Media Section</span>
-                  <Button
-                    onClick={() => setIsSocialEditorOpen(true)}
-                    size="sm"
-                    className="bg-purple-600 hover:bg-purple-700"
-                    data-testid="button-edit-social-section"
-                  >
-                    <i className="fas fa-edit mr-2" />
-                    Edit
-                  </Button>
-                </div>
-                {!hasSocials && (
-                  <p className="text-gray-400 text-sm mt-2">Click Edit to add social platforms</p>
-                )}
-              </div>
+              <SocialSectionEditor
+                data={socialData}
+                onChange={(newData) => handleDataUpdate(newData)}
+              />
             ) : (
               <div 
                 className="space-y-3"
@@ -4648,32 +4620,6 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
           </Button>
         )}
       </div>
-      
-      {/* Contact Section Editor */}
-      {element.type === 'contactSection' && (
-        <ContactSectionEditor
-          data={element.data || { contacts: [] }}
-          isOpen={isContactEditorOpen}
-          onClose={() => setIsContactEditorOpen(false)}
-          onSave={(newData) => {
-            handleDataUpdate(newData);
-            setIsContactEditorOpen(false);
-          }}
-        />
-      )}
-      
-      {/* Social Section Editor */}
-      {element.type === 'socialSection' && (
-        <SocialSectionEditor
-          data={element.data || { socials: [] }}
-          isOpen={isSocialEditorOpen}
-          onClose={() => setIsSocialEditorOpen(false)}
-          onSave={(newData) => {
-            handleDataUpdate(newData);
-            setIsSocialEditorOpen(false);
-          }}
-        />
-      )}
     </>
   );
 }
