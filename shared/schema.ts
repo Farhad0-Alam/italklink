@@ -3011,55 +3011,8 @@ export const contactSectionElementSchema = baseElementSchema.extend({
       label: z.string(),
       value: z.string(),
       icon: z.string(),
-      type: z.enum(["phone", "email", "website", "text", "other"]).optional()
-    })).optional(),
-    // Icon Styling
-    iconColor: z.string().optional(),
-    iconSize: z.string().optional(),
-    iconBgColor: z.string().optional(),
-    iconBorderColor: z.string().optional(),
-    iconBorderSize: z.string().optional(),
-    iconBgSize: z.string().optional(),
-    view: z.enum(['icon-text', 'text-only', 'icon-only']).optional(),
-    size: z.enum(['small', 'medium', 'large']).optional(),
-    shape: z.enum(['circle', 'square', 'rounded', 'auto']).optional(),
-    alignment: z.enum(['left', 'center', 'right', 'justified']).optional(),
-    showLabel: z.boolean().optional(),
-    iconWidth: z.string().optional(),
-    iconHeight: z.string().optional(),
-    // Hover Color
-    hoverColor: z.string().optional(),
-    enableHoverColor: z.boolean().optional(),
-    iconHoverColor: z.string().optional(),
-    bgHoverColor: z.string().optional(),
-    // Font Styling
-    fontFamily: z.string().optional(),
-    fontSize: z.string().optional(),
-    fontWeight: z.string().optional(),
-    fontStyle: z.enum(['normal', 'italic', 'oblique']).optional(),
-    textColor: z.string().optional(),
-    // Drop Shadow
-    shadowColor: z.string().optional(),
-    shadowBlur: z.string().optional(),
-    shadowOffsetX: z.string().optional(),
-    shadowOffsetY: z.string().optional(),
-    shadowOpacity: z.string().optional(),
-    // Container Styling
-    containerBackground: z.string().optional(),
-    containerBorderColor: z.string().optional(),
-    containerBorderWidth: z.string().optional(),
-    containerBorderRadius: z.string().optional(),
-    containerPadding: z.string().optional(),
-    gap: z.string().optional(),
-    enableContainerStyling: z.boolean().optional(),
-    containerWidth: z.string().optional(),
-    containerHeight: z.string().optional(),
-    enableContainerShadow: z.boolean().optional(),
-    containerShadowColor: z.string().optional(),
-    containerShadowOpacity: z.string().optional(),
-    containerShadowBlur: z.string().optional(),
-    containerShadowOffsetX: z.string().optional(),
-    containerShadowOffsetY: z.string().optional(),
+      type: z.enum(["phone", "email", "website", "text", "other"])
+    })),
   }),
 });
 
@@ -3072,54 +3025,7 @@ export const socialSectionElementSchema = baseElementSchema.extend({
       value: z.string(),
       icon: z.string(),
       platform: z.string()
-    })).optional(),
-    // Icon Styling
-    iconColor: z.string().optional(),
-    iconSize: z.string().optional(),
-    iconBgColor: z.string().optional(),
-    iconBorderColor: z.string().optional(),
-    iconBorderSize: z.string().optional(),
-    iconBgSize: z.string().optional(),
-    view: z.enum(['icon-text', 'text-only', 'icon-only']).optional(),
-    size: z.enum(['small', 'medium', 'large']).optional(),
-    shape: z.enum(['circle', 'square', 'rounded', 'auto']).optional(),
-    alignment: z.enum(['left', 'center', 'right', 'justified']).optional(),
-    showLabel: z.boolean().optional(),
-    iconWidth: z.string().optional(),
-    iconHeight: z.string().optional(),
-    // Hover Color
-    hoverColor: z.string().optional(),
-    enableHoverColor: z.boolean().optional(),
-    iconHoverColor: z.string().optional(),
-    bgHoverColor: z.string().optional(),
-    // Font Styling
-    fontFamily: z.string().optional(),
-    fontSize: z.string().optional(),
-    fontWeight: z.string().optional(),
-    fontStyle: z.enum(['normal', 'italic', 'oblique']).optional(),
-    textColor: z.string().optional(),
-    // Drop Shadow
-    shadowColor: z.string().optional(),
-    shadowBlur: z.string().optional(),
-    shadowOffsetX: z.string().optional(),
-    shadowOffsetY: z.string().optional(),
-    shadowOpacity: z.string().optional(),
-    // Container Styling
-    containerBackground: z.string().optional(),
-    containerBorderColor: z.string().optional(),
-    containerBorderWidth: z.string().optional(),
-    containerBorderRadius: z.string().optional(),
-    containerPadding: z.string().optional(),
-    gap: z.string().optional(),
-    enableContainerStyling: z.boolean().optional(),
-    containerWidth: z.string().optional(),
-    containerHeight: z.string().optional(),
-    enableContainerShadow: z.boolean().optional(),
-    containerShadowColor: z.string().optional(),
-    containerShadowOpacity: z.string().optional(),
-    containerShadowBlur: z.string().optional(),
-    containerShadowOffsetX: z.string().optional(),
-    containerShadowOffsetY: z.string().optional(),
+    })),
   }),
 });
 
@@ -3380,35 +3286,6 @@ export const subscribeElementSchema = baseElementSchema.extend({
   }),
 });
 
-// Add to Contacts button element
-export const addToContactsElementSchema = baseElementSchema.extend({
-  type: z.literal("addToContacts"),
-  data: z.object({
-    buttonText: z.string().default("Add to Contacts"),
-    buttonIcon: z.string().default("UserPlus"), // Lucide icon name
-    buttonColor: z.string().default("#22c55e"), // Green default
-    textColor: z.string().default("#ffffff"),
-    iconColor: z.string().default("#ffffff"),
-    showIcon: z.boolean().default(true),
-    style: z.enum(["filled", "outline", "ghost"]).default("filled"),
-  }),
-});
-
-// Share button element
-export const shareButtonElementSchema = baseElementSchema.extend({
-  type: z.literal("shareButton"),
-  data: z.object({
-    buttonText: z.string().default("Share"),
-    buttonIcon: z.string().default("Share2"), // Lucide icon name
-    buttonColor: z.string().default("#22c55e"), // Green default
-    textColor: z.string().default("#ffffff"),
-    iconColor: z.string().default("#ffffff"),
-    showIcon: z.boolean().default(true),
-    style: z.enum(["filled", "outline", "ghost"]).default("filled"),
-    showShareMenu: z.boolean().default(true), // Show dropdown menu with share options
-  }),
-});
-
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   headingElementSchema,
@@ -3436,8 +3313,6 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   htmlElementSchema,
   pdfViewerElementSchema,
   subscribeElementSchema,
-  addToContactsElementSchema,
-  shareButtonElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;

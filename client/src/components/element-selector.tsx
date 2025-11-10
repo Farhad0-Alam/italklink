@@ -27,34 +27,6 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       description: "Add text content"
     },
     {
-      type: "addToContacts",
-      title: "Add to Contacts",
-      icon: "fas fa-address-book",
-      color: "bg-emerald-100",
-      description: "Save contact button"
-    },
-    {
-      type: "shareButton",
-      title: "Share Button",
-      icon: "fas fa-share-alt",
-      color: "bg-sky-100",
-      description: "Share card button"
-    },
-    {
-      type: "contactSection",
-      title: "Contact Information",
-      icon: "fas fa-address-card",
-      color: "bg-blue-50",
-      description: "Contact details section"
-    },
-    {
-      type: "socialSection",
-      title: "Social Media",
-      icon: "fas fa-share-nodes",
-      color: "bg-pink-50",
-      description: "Social media links"
-    },
-    {
       type: "link",
       title: "Link",
       icon: "fas fa-link",
@@ -230,59 +202,6 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           data: {
             text: "Enter your text here...",
             alignment: "left" as const
-          }
-        };
-        break;
-      
-      case "addToContacts":
-        element = {
-          id,
-          type: "addToContacts",
-          order: Date.now(),
-          data: {
-            buttonText: "Add to Contacts",
-            style: "filled" as const,
-            buttonColor: "#22c55e",
-            textColor: "#ffffff",
-            showIcon: true
-          }
-        };
-        break;
-      
-      case "shareButton":
-        element = {
-          id,
-          type: "shareButton",
-          order: Date.now(),
-          data: {
-            buttonText: "Share",
-            style: "filled" as const,
-            buttonColor: "#22c55e",
-            textColor: "#ffffff",
-            showIcon: true,
-            showShareMenu: true
-          }
-        };
-        break;
-      
-      case "contactSection":
-        element = {
-          id,
-          type: "contactSection",
-          order: Date.now(),
-          data: {
-            contacts: []
-          }
-        };
-        break;
-      
-      case "socialSection":
-        element = {
-          id,
-          type: "socialSection",
-          order: Date.now(),
-          data: {
-            socials: []
           }
         };
         break;
