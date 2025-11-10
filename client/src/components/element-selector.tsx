@@ -41,6 +41,20 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       description: "Share card button"
     },
     {
+      type: "contactSection",
+      title: "Contact Information",
+      icon: "fas fa-address-card",
+      color: "bg-blue-50",
+      description: "Contact details section"
+    },
+    {
+      type: "socialSection",
+      title: "Social Media",
+      icon: "fas fa-share-nodes",
+      color: "bg-pink-50",
+      description: "Social media links"
+    },
+    {
       type: "link",
       title: "Link",
       icon: "fas fa-link",
@@ -247,6 +261,28 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             textColor: "#ffffff",
             showIcon: true,
             showShareMenu: true
+          }
+        };
+        break;
+      
+      case "contactSection":
+        element = {
+          id,
+          type: "contactSection",
+          order: Date.now(),
+          data: {
+            contacts: []
+          }
+        };
+        break;
+      
+      case "socialSection":
+        element = {
+          id,
+          type: "socialSection",
+          order: Date.now(),
+          data: {
+            socials: []
           }
         };
         break;
