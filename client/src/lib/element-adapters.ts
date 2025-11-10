@@ -14,6 +14,8 @@ export function schemaToEditorContact(data: PageElement & { type: "contactSectio
     iconBgSize: data.iconBgSize?.toString() || "40",
     iconWidth: data.iconWidth?.toString() || "40",
     iconHeight: data.iconHeight?.toString() || "40",
+    // Advanced Layout: convert columns number to string
+    columns: typeof data.columns === 'number' ? data.columns.toString() : (data.columns || "auto"),
     fontSize: data.fontSize?.toString() || "16",
     fontWeight: data.fontWeight?.toString() || "400",
     shadowBlur: data.shadowBlur?.toString() || "10",
@@ -40,6 +42,8 @@ export function editorToSchemaContact(editorData: any) {
     iconBgSize: editorData.iconBgSize ? parseInt(editorData.iconBgSize) : 40,
     iconWidth: editorData.iconWidth ? parseInt(editorData.iconWidth) : 40,
     iconHeight: editorData.iconHeight ? parseInt(editorData.iconHeight) : 40,
+    // Advanced Layout: convert columns string to number or keep "auto"
+    columns: editorData.columns === "auto" ? "auto" : (editorData.columns ? parseInt(editorData.columns) : "auto"),
     fontSize: editorData.fontSize ? parseInt(editorData.fontSize) : 16,
     fontWeight: editorData.fontWeight ? parseInt(editorData.fontWeight) : 400,
     shadowBlur: editorData.shadowBlur ? parseInt(editorData.shadowBlur) : 10,
@@ -66,6 +70,8 @@ export function schemaToEditorSocial(data: PageElement & { type: "socialSection"
     iconBgSize: data.iconBgSize?.toString() || "40",
     iconWidth: data.iconWidth?.toString() || "40",
     iconHeight: data.iconHeight?.toString() || "40",
+    // Advanced Layout: convert columns number to string
+    columns: typeof data.columns === 'number' ? data.columns.toString() : (data.columns || "auto"),
     fontSize: data.fontSize?.toString() || "16",
     fontWeight: data.fontWeight?.toString() || "400",
     shadowBlur: data.shadowBlur?.toString() || "10",
@@ -92,6 +98,8 @@ export function editorToSchemaSocial(editorData: any) {
     iconBgSize: editorData.iconBgSize ? parseInt(editorData.iconBgSize) : 40,
     iconWidth: editorData.iconWidth ? parseInt(editorData.iconWidth) : 40,
     iconHeight: editorData.iconHeight ? parseInt(editorData.iconHeight) : 40,
+    // Advanced Layout: convert columns string to number or keep "auto"
+    columns: editorData.columns === "auto" ? "auto" : (editorData.columns ? parseInt(editorData.columns) : "auto"),
     fontSize: editorData.fontSize ? parseInt(editorData.fontSize) : 16,
     fontWeight: editorData.fontWeight ? parseInt(editorData.fontWeight) : 400,
     shadowBlur: editorData.shadowBlur ? parseInt(editorData.shadowBlur) : 10,

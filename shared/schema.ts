@@ -3027,6 +3027,10 @@ export const contactSectionElementSchema = baseElementSchema.extend({
     showLabel: z.boolean().optional().default(true),
     iconWidth: z.number().optional().default(40),
     iconHeight: z.number().optional().default(40),
+    // Advanced Layout Options
+    skin: z.enum(['gradient', 'minimal', 'framed', 'boxed', 'flat']).optional().default('minimal'),
+    columns: z.union([z.enum(['auto']), z.number().min(1).max(6)]).optional().default('auto'),
+    textPosition: z.enum(['left', 'right', 'top', 'bottom']).optional().default('right'),
     // Hover Effects
     hoverColor: z.string().optional(),
     enableHoverColor: z.boolean().optional().default(false),
@@ -3087,6 +3091,10 @@ export const socialSectionElementSchema = baseElementSchema.extend({
     showLabel: z.boolean().optional().default(true),
     iconWidth: z.number().optional().default(40),
     iconHeight: z.number().optional().default(40),
+    // Advanced Layout Options
+    skin: z.enum(['gradient', 'minimal', 'framed', 'boxed', 'flat']).optional().default('minimal'),
+    columns: z.union([z.enum(['auto']), z.number().min(1).max(6)]).optional().default('auto'),
+    textPosition: z.enum(['left', 'right', 'top', 'bottom']).optional().default('right'),
     // Hover Effects
     hoverColor: z.string().optional(),
     enableHoverColor: z.boolean().optional().default(false),

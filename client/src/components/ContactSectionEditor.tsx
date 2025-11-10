@@ -97,6 +97,10 @@ interface ContactSectionData {
   showLabel?: boolean;
   iconWidth?: string;
   iconHeight?: string;
+  // Advanced Layout Options
+  skin?: 'gradient' | 'minimal' | 'framed' | 'boxed' | 'flat';
+  columns?: string;
+  textPosition?: 'left' | 'right' | 'top' | 'bottom';
   // Hover Color
   hoverColor?: string;
   enableHoverColor?: boolean;
@@ -401,6 +405,50 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
               onCheckedChange={(checked) => onChange({ ...data, showLabel: checked })}
               label="Show Label"
             />
+
+            <div>
+              <PanelLabel>Skin</PanelLabel>
+              <PanelSelect
+                value={data.skin || "minimal"}
+                onValueChange={(value: 'gradient' | 'minimal' | 'framed' | 'boxed' | 'flat') => onChange({ ...data, skin: value })}
+              >
+                <SelectItem value="gradient">Gradient</SelectItem>
+                <SelectItem value="minimal">Minimal</SelectItem>
+                <SelectItem value="framed">Framed</SelectItem>
+                <SelectItem value="boxed">Boxed</SelectItem>
+                <SelectItem value="flat">Flat</SelectItem>
+              </PanelSelect>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <PanelLabel>Columns</PanelLabel>
+                <PanelSelect
+                  value={data.columns || "auto"}
+                  onValueChange={(value) => onChange({ ...data, columns: value })}
+                >
+                  <SelectItem value="auto">Auto</SelectItem>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="4">4</SelectItem>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="6">6</SelectItem>
+                </PanelSelect>
+              </div>
+              <div>
+                <PanelLabel>Text Position</PanelLabel>
+                <PanelSelect
+                  value={data.textPosition || "right"}
+                  onValueChange={(value: 'left' | 'right' | 'top' | 'bottom') => onChange({ ...data, textPosition: value })}
+                >
+                  <SelectItem value="left">Left</SelectItem>
+                  <SelectItem value="right">Right</SelectItem>
+                  <SelectItem value="top">Top</SelectItem>
+                  <SelectItem value="bottom">Bottom</SelectItem>
+                </PanelSelect>
+              </div>
+            </div>
 
             <PanelSlider
               value={parseInt(data.iconWidth || "40")}

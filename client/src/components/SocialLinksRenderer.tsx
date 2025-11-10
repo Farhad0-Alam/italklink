@@ -32,6 +32,10 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
     showLabel = true,
     iconWidth = 40,
     iconHeight = 40,
+    // Advanced Layout Options
+    skin = "minimal",
+    columns = "auto",
+    textPosition = "right",
     enableHoverColor = false,
     iconHoverColor = "#a855f7",
     bgHoverColor = "#4c1d95",
@@ -189,20 +193,47 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
 
   const gapValue = gap !== undefined ? `${gap}px` : "12px";
 
+  // Determine grid/flex layout
+  const useGrid = columns !== "auto";
+  const gridCols = typeof columns === "number" ? columns : parseInt(columns || "auto");
+  
+  // Build container style
+  const containerLayoutStyle: React.CSSProperties = useGrid && !isNaN(gridCols)
+    ? {
+        display: "grid",
+        gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
+        gap: gapValue,
+      }
+    : {
+        display: "flex",
+        flexWrap: "wrap",
+        gap: gapValue,
+      };
+
+  // Determine item flex direction based on textPosition
+  const itemFlexClass = textPosition === "top" || textPosition === "bottom"
+    ? "flex-col"
+    : "flex-row";
+  const itemAlignClass = textPosition === "top" || textPosition === "bottom"
+    ? "items-center"
+    : "items-center";
+
   return (
     <div className="mb-6" style={styles.containerStyle}>
       <div
-        className={`flex flex-wrap ${styles.alignmentClass}`}
-        style={{ gap: gapValue }}
+        className={useGrid ? "" : styles.alignmentClass}
+        style={containerLayoutStyle}
       >
         {validSocials.map((social) => (
           <div
             key={social.id}
-            className="group flex flex-col items-center cursor-pointer"
+            className={`group flex ${itemFlexClass} ${itemAlignClass} cursor-pointer`}
             onClick={() => handleSocialClick(social)}
             style={{
               "--icon-hover-color": enableHoverColor ? iconHoverColor : iconColor,
               "--bg-hover-color": enableHoverColor ? bgHoverColor : iconBgColor,
+              flexDirection: textPosition === "left" ? "row-reverse" : 
+                           textPosition === "top" ? "column-reverse" : undefined,
             } as React.CSSProperties}
           >
             {/* Icon Container */}
@@ -224,7 +255,10 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
 
             {/* Label */}
             {view !== "icon-only" && showLabel && (
-              <span className="mt-1 text-center" style={styles.labelStyle}>
+              <span 
+                className={`${textPosition === "left" || textPosition === "right" ? "ml-2" : "mt-1"} text-center`}
+                style={styles.labelStyle}
+              >
                 {social.label || social.platform}
               </span>
             )}
