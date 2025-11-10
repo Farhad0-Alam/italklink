@@ -3286,6 +3286,35 @@ export const subscribeElementSchema = baseElementSchema.extend({
   }),
 });
 
+// Add to Contacts button element
+export const addToContactsElementSchema = baseElementSchema.extend({
+  type: z.literal("addToContacts"),
+  data: z.object({
+    buttonText: z.string().default("Add to Contacts"),
+    buttonIcon: z.string().default("UserPlus"), // Lucide icon name
+    buttonColor: z.string().default("#22c55e"), // Green default
+    textColor: z.string().default("#ffffff"),
+    iconColor: z.string().default("#ffffff"),
+    showIcon: z.boolean().default(true),
+    style: z.enum(["filled", "outline", "ghost"]).default("filled"),
+  }),
+});
+
+// Share button element
+export const shareButtonElementSchema = baseElementSchema.extend({
+  type: z.literal("shareButton"),
+  data: z.object({
+    buttonText: z.string().default("Share"),
+    buttonIcon: z.string().default("Share2"), // Lucide icon name
+    buttonColor: z.string().default("#22c55e"), // Green default
+    textColor: z.string().default("#ffffff"),
+    iconColor: z.string().default("#ffffff"),
+    showIcon: z.boolean().default(true),
+    style: z.enum(["filled", "outline", "ghost"]).default("filled"),
+    showShareMenu: z.boolean().default(true), // Show dropdown menu with share options
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   headingElementSchema,
@@ -3313,6 +3342,8 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   htmlElementSchema,
   pdfViewerElementSchema,
   subscribeElementSchema,
+  addToContactsElementSchema,
+  shareButtonElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;
