@@ -902,7 +902,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
               />
             ) : (
               <div 
-                className="flex justify-center space-x-4 flex-wrap gap-y-3"
+                className="flex flex-wrap gap-y-3"
                 style={{
                   backgroundColor: contactData.containerBackground || 'transparent',
                   borderColor: contactData.containerBorderColor || 'transparent',
@@ -911,53 +911,114 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   borderRadius: `${contactData.containerBorderRadius || 8}px`,
                   padding: `${contactData.containerPadding || 16}px`,
                   gap: `${contactData.gap || 12}px`,
+                  justifyContent: contactData.alignment === 'left' ? 'flex-start' : contactData.alignment === 'right' ? 'flex-end' : contactData.alignment === 'justified' ? 'space-between' : 'center',
+                  width: contactData.enableContainerStyling && contactData.containerWidth ? `${contactData.containerWidth}px` : 'auto',
+                  height: contactData.enableContainerStyling && contactData.containerHeight ? `${contactData.containerHeight}px` : 'auto',
+                  boxShadow: contactData.enableContainerShadow ? 
+                    `${contactData.containerShadowOffsetX || 0}px ${contactData.containerShadowOffsetY || 0}px ${contactData.containerShadowBlur || 0}px rgba(${parseInt((contactData.containerShadowColor || '#000000').slice(1,3), 16)}, ${parseInt((contactData.containerShadowColor || '#000000').slice(3,5), 16)}, ${parseInt((contactData.containerShadowColor || '#000000').slice(5,7), 16)}, ${contactData.containerShadowOpacity || 0.3})` : 
+                    'none',
                 }}
               >
-                {contactData.contacts?.map((contact) => (
-                  contact.value && (
+                {contactData.contacts?.map((contact) => {
+                  const view = contactData.view || 'icon-text';
+                  const size = contactData.size || 'medium';
+                  const shape = contactData.shape || 'auto';
+                  const showLabel = contactData.showLabel !== false;
+                  const sizeScale = size === 'small' ? 0.8 : size === 'large' ? 1.2 : 1;
+                  const iconBgSize = contactData.iconBgSize || 40;
+                  const scaledIconBgSize = iconBgSize * sizeScale;
+                  const iconWidth = contactData.iconWidth || 20;
+                  const iconHeight = contactData.iconHeight || 20;
+                  const scaledIconSize = Math.max(iconWidth, iconHeight) * sizeScale;
+                  
+                  // Calculate border radius based on shape
+                  let buttonBorderRadius;
+                  if (shape === 'circle') {
+                    buttonBorderRadius = '50%';
+                  } else if (shape === 'square') {
+                    buttonBorderRadius = '0';
+                  } else if (shape === 'rounded') {
+                    buttonBorderRadius = '8px';
+                  } else {
+                    buttonBorderRadius = `${contactData.containerBorderRadius || 8}px`;
+                  }
+                  
+                  // Parse shadow color and apply opacity
+                  const shadowColor = contactData.shadowColor || 'rgba(0,0,0,0.3)';
+                  const shadowOpacity = contactData.shadowOpacity !== undefined ? contactData.shadowOpacity : 0.3;
+                  let boxShadow;
+                  if (shadowColor.startsWith('#')) {
+                    const r = parseInt(shadowColor.slice(1,3), 16);
+                    const g = parseInt(shadowColor.slice(3,5), 16);
+                    const b = parseInt(shadowColor.slice(5,7), 16);
+                    boxShadow = `${contactData.shadowOffsetX || 0}px ${contactData.shadowOffsetY || 0}px ${contactData.shadowBlur || 0}px rgba(${r}, ${g}, ${b}, ${shadowOpacity})`;
+                  } else {
+                    boxShadow = `${contactData.shadowOffsetX || 0}px ${contactData.shadowOffsetY || 0}px ${contactData.shadowBlur || 0}px ${shadowColor}`;
+                  }
+                  
+                  return contact.value && (
                     <div key={contact.id} className="flex flex-col items-center">
-                      <button
-                        className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
-                        style={{
-                          backgroundColor: '#1e293b',
-                          color: contactData.iconColor || '#9333ea',
-                          fontSize: `${contactData.iconSize || 20}px`,
-                          boxShadow: `${contactData.shadowOffsetX || 0}px ${contactData.shadowOffsetY || 0}px ${contactData.shadowBlur || 0}px ${contactData.shadowColor || 'rgba(0,0,0,0.3)'}`,
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = contactData.hoverColor || '#a855f7';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = contactData.iconColor || '#9333ea';
-                        }}
-                        onClick={() => {
-                          if (contact.icon === 'fa-phone' || contact.icon === 'fa-mobile-alt') {
-                            window.open(`tel:${contact.value}`, '_self');
-                          } else if (contact.icon === 'fa-envelope') {
-                            window.open(`mailto:${contact.value}`, '_self');
-                          } else if (contact.icon === 'fa-globe' || contact.icon === 'fa-link') {
-                            window.open(contact.value.startsWith('http') ? contact.value : `https://${contact.value}`, '_blank');
-                          } else if (contact.icon === 'fa-map-marker-alt') {
-                            window.open(`https://maps.google.com/?q=${encodeURIComponent(contact.value)}`, '_blank');
-                          }
-                        }}
-                      >
-                        <i className={`fas ${contact.icon}`}></i>
-                      </button>
-                      <span 
-                        className="text-xs mt-1"
-                        style={{
-                          fontFamily: contactData.fontFamily || 'inherit',
-                          fontSize: `${contactData.fontSize || 12}px`,
-                          fontWeight: contactData.fontWeight || '400',
-                          color: contactData.textColor || '#475569',
-                        }}
-                      >
-                        {contact.label}
-                      </span>
+                      {view !== 'text-only' && (
+                        <button
+                          className="flex items-center justify-center transition-all"
+                          style={{
+                            width: `${scaledIconBgSize}px`,
+                            height: `${scaledIconBgSize}px`,
+                            borderRadius: buttonBorderRadius,
+                            backgroundColor: contactData.iconBgColor || '#1e293b',
+                            color: contactData.iconColor || '#9333ea',
+                            fontSize: `${scaledIconSize}px`,
+                            boxShadow: boxShadow,
+                            border: contactData.iconBorderSize ? `${contactData.iconBorderSize}px solid ${contactData.iconBorderColor || 'transparent'}` : 'none',
+                          }}
+                          onMouseEnter={(e) => {
+                            if (contactData.enableHoverColor) {
+                              if (contactData.iconHoverColor) {
+                                e.currentTarget.style.color = contactData.iconHoverColor;
+                              }
+                              if (contactData.bgHoverColor) {
+                                e.currentTarget.style.backgroundColor = contactData.bgHoverColor;
+                              }
+                            } else {
+                              e.currentTarget.style.color = contactData.hoverColor || '#a855f7';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = contactData.iconColor || '#9333ea';
+                            e.currentTarget.style.backgroundColor = contactData.iconBgColor || '#1e293b';
+                          }}
+                          onClick={() => {
+                            if (contact.icon === 'fa-phone' || contact.icon === 'fa-mobile-alt') {
+                              window.open(`tel:${contact.value}`, '_self');
+                            } else if (contact.icon === 'fa-envelope') {
+                              window.open(`mailto:${contact.value}`, '_self');
+                            } else if (contact.icon === 'fa-globe' || contact.icon === 'fa-link') {
+                              window.open(contact.value.startsWith('http') ? contact.value : `https://${contact.value}`, '_blank');
+                            } else if (contact.icon === 'fa-map-marker-alt') {
+                              window.open(`https://maps.google.com/?q=${encodeURIComponent(contact.value)}`, '_blank');
+                            }
+                          }}
+                        >
+                          <i className={`fas ${contact.icon}`}></i>
+                        </button>
+                      )}
+                      {view !== 'icon-only' && showLabel && (
+                        <span 
+                          className="text-xs mt-1"
+                          style={{
+                            fontFamily: contactData.fontFamily || 'inherit',
+                            fontSize: `${(contactData.fontSize || 12) * sizeScale}px`,
+                            fontWeight: contactData.fontWeight || '400',
+                            fontStyle: contactData.fontStyle || 'normal',
+                            color: contactData.textColor || '#475569',
+                          }}
+                        >
+                          {contact.label}
+                        </span>
+                      )}
                     </div>
-                  )
-                ))}
+                  );
+                })}
                 {!hasContacts && isEditing && (
                   <p className="text-gray-400 text-sm">No contact methods added yet</p>
                 )}
@@ -988,88 +1049,147 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   borderStyle: 'solid',
                   borderRadius: `${socialData.containerBorderRadius || 8}px`,
                   padding: `${socialData.containerPadding || 16}px`,
+                  ...(socialData.enableContainerStyling && {
+                    width: socialData.containerWidth ? `${socialData.containerWidth}px` : 'auto',
+                    height: socialData.containerHeight ? `${socialData.containerHeight}px` : 'auto',
+                  }),
+                  ...(socialData.enableContainerShadow && {
+                    boxShadow: `${socialData.containerShadowOffsetX || 0}px ${socialData.containerShadowOffsetY || 0}px ${socialData.containerShadowBlur || 0}px rgba(${parseInt((socialData.containerShadowColor || '#000000').slice(1, 3), 16)}, ${parseInt((socialData.containerShadowColor || '#000000').slice(3, 5), 16)}, ${parseInt((socialData.containerShadowColor || '#000000').slice(5, 7), 16)}, ${socialData.containerShadowOpacity !== undefined ? socialData.containerShadowOpacity / 100 : 0.3})`,
+                  }),
                 }}
               >
                 {/* Group socials into rows of 4 */}
-                {Array.from({ length: Math.ceil(activeSocials.length / 4) }, (_, rowIndex) => (
-                  <div 
-                    key={rowIndex} 
-                    className="flex justify-center"
-                    style={{ gap: `${socialData.gap || 16}px` }}
-                  >
-                    {activeSocials.slice(rowIndex * 4, (rowIndex + 1) * 4).map((social) => (
-                      <div key={social.id} className="flex flex-col items-center">
-                        <button
-                          className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
-                          style={{
-                            backgroundColor: '#334155',
-                            color: socialData.iconColor || '#9333ea',
-                            fontSize: `${socialData.iconSize || 24}px`,
-                            boxShadow: `${socialData.shadowOffsetX || 0}px ${socialData.shadowOffsetY || 0}px ${socialData.shadowBlur || 0}px ${socialData.shadowColor || 'rgba(0,0,0,0.3)'}`,
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.color = socialData.hoverColor || '#a855f7';
-                            e.currentTarget.style.backgroundColor = '#475569';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.color = socialData.iconColor || '#9333ea';
-                            e.currentTarget.style.backgroundColor = '#334155';
-                          }}
-                          onClick={() => {
-                            let url = social.url;
-                            
-                            // Handle platform-specific URL formatting
-                            if (!url.startsWith('http')) {
-                              switch(social.platform) {
-                                case 'whatsapp':
-                                  url = `https://wa.me/${url.replace(/\D/g, '')}`;
-                                  break;
-                                case 'telegram':
-                                  url = `https://t.me/${url.replace('@', '')}`;
-                                  break;
-                                case 'twitter':
-                                  url = `https://twitter.com/${url.replace('@', '')}`;
-                                  break;
-                                case 'instagram':
-                                  url = `https://instagram.com/${url.replace('@', '')}`;
-                                  break;
-                                case 'facebook':
-                                  url = url.includes('/') ? `https://${url}` : `https://facebook.com/${url}`;
-                                  break;
-                                case 'linkedin':
-                                  url = url.includes('linkedin.com') ? `https://${url}` : `https://linkedin.com/in/${url}`;
-                                  break;
-                                case 'youtube':
-                                  url = url.includes('youtube.com') ? `https://${url}` : `https://youtube.com/${url}`;
-                                  break;
-                                case 'github':
-                                  url = url.includes('github.com') ? `https://${url}` : `https://github.com/${url}`;
-                                  break;
-                                default:
-                                  url = `https://${social.platform?.toLowerCase() || 'www'}.com/${url.replace('@', '')}`;
-                              }
-                            }
-                            
-                            window.open(url, '_blank');
-                          }}
-                        >
-                          <i className={social.icon}></i>
-                        </button>
-                        <span 
-                          className="text-xs mt-1"
-                          style={{
-                            fontFamily: socialData.fontFamily || 'inherit',
-                            fontSize: `${(socialData.fontSize || 16) * 0.75}px`,
-                            fontWeight: socialData.fontWeight || '400',
-                            color: socialData.textColor || '#475569',
-                          }}
-                        >
-                          {social.label || social.platform}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ))}
+                {Array.from({ length: Math.ceil(activeSocials.length / 4) }, (_, rowIndex) => {
+                  const view = socialData.view || 'icon-text';
+                  const size = socialData.size || 'medium';
+                  const sizeScale = size === 'small' ? 0.8 : size === 'large' ? 1.2 : 1;
+                  const shape = socialData.shape || 'auto';
+                  const alignment = socialData.alignment || 'center';
+                  const showLabel = socialData.showLabel !== false;
+                  
+                  const alignmentMap = {
+                    left: 'flex-start',
+                    center: 'center',
+                    right: 'flex-end',
+                    justified: 'space-between',
+                  };
+                  
+                  const shapeMap = {
+                    circle: '50%',
+                    square: '0',
+                    rounded: '8px',
+                    auto: `${socialData.containerBorderRadius || 8}px`,
+                  };
+                  
+                  return (
+                    <div 
+                      key={rowIndex} 
+                      className="flex"
+                      style={{ 
+                        gap: `${socialData.gap || 16}px`,
+                        justifyContent: alignmentMap[alignment as keyof typeof alignmentMap] || 'center',
+                      }}
+                    >
+                      {activeSocials.slice(rowIndex * 4, (rowIndex + 1) * 4).map((social) => {
+                        const iconBgSize = socialData.iconBgSize || 40;
+                        const iconWidth = socialData.iconWidth || 24;
+                        const iconHeight = socialData.iconHeight || 24;
+                        const shadowOpacity = socialData.shadowOpacity !== undefined ? socialData.shadowOpacity / 100 : 0.3;
+                        const shadowColorRgba = socialData.shadowColor 
+                          ? `rgba(${parseInt(socialData.shadowColor.slice(1, 3), 16)}, ${parseInt(socialData.shadowColor.slice(3, 5), 16)}, ${parseInt(socialData.shadowColor.slice(5, 7), 16)}, ${shadowOpacity})`
+                          : `rgba(0, 0, 0, ${shadowOpacity})`;
+                        
+                        return (
+                          <div key={social.id} className="flex flex-col items-center">
+                            {view !== 'text-only' && (
+                              <button
+                                className="flex items-center justify-center transition-all"
+                                style={{
+                                  width: `${iconBgSize * sizeScale}px`,
+                                  height: `${iconBgSize * sizeScale}px`,
+                                  backgroundColor: socialData.iconBgColor || '#334155',
+                                  color: socialData.iconColor || '#9333ea',
+                                  fontSize: `${Math.min(iconWidth, iconHeight) * sizeScale}px`,
+                                  borderRadius: shapeMap[shape as keyof typeof shapeMap] || shapeMap.auto,
+                                  borderColor: socialData.iconBorderColor || 'transparent',
+                                  borderWidth: `${socialData.iconBorderSize || 0}px`,
+                                  borderStyle: 'solid',
+                                  boxShadow: `${socialData.shadowOffsetX || 0}px ${socialData.shadowOffsetY || 0}px ${socialData.shadowBlur || 0}px ${shadowColorRgba}`,
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (socialData.enableHoverColor) {
+                                    e.currentTarget.style.color = socialData.iconHoverColor || socialData.hoverColor || '#a855f7';
+                                    e.currentTarget.style.backgroundColor = socialData.bgHoverColor || '#475569';
+                                  } else {
+                                    e.currentTarget.style.color = socialData.hoverColor || '#a855f7';
+                                    e.currentTarget.style.backgroundColor = '#475569';
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.color = socialData.iconColor || '#9333ea';
+                                  e.currentTarget.style.backgroundColor = socialData.iconBgColor || '#334155';
+                                }}
+                                onClick={() => {
+                                  let url = social.url;
+                                  
+                                  // Handle platform-specific URL formatting
+                                  if (!url.startsWith('http')) {
+                                    switch(social.platform) {
+                                      case 'whatsapp':
+                                        url = `https://wa.me/${url.replace(/\D/g, '')}`;
+                                        break;
+                                      case 'telegram':
+                                        url = `https://t.me/${url.replace('@', '')}`;
+                                        break;
+                                      case 'twitter':
+                                        url = `https://twitter.com/${url.replace('@', '')}`;
+                                        break;
+                                      case 'instagram':
+                                        url = `https://instagram.com/${url.replace('@', '')}`;
+                                        break;
+                                      case 'facebook':
+                                        url = url.includes('/') ? `https://${url}` : `https://facebook.com/${url}`;
+                                        break;
+                                      case 'linkedin':
+                                        url = url.includes('linkedin.com') ? `https://${url}` : `https://linkedin.com/in/${url}`;
+                                        break;
+                                      case 'youtube':
+                                        url = url.includes('youtube.com') ? `https://${url}` : `https://youtube.com/${url}`;
+                                        break;
+                                      case 'github':
+                                        url = url.includes('github.com') ? `https://${url}` : `https://github.com/${url}`;
+                                        break;
+                                      default:
+                                        url = `https://${social.platform?.toLowerCase() || 'www'}.com/${url.replace('@', '')}`;
+                                    }
+                                  }
+                                  
+                                  window.open(url, '_blank');
+                                }}
+                              >
+                                <i className={social.icon}></i>
+                              </button>
+                            )}
+                            {view !== 'icon-only' && showLabel && (
+                              <span 
+                                className="text-xs mt-1"
+                                style={{
+                                  fontFamily: socialData.fontFamily || 'inherit',
+                                  fontSize: `${(socialData.fontSize || 12) * sizeScale}px`,
+                                  fontWeight: socialData.fontWeight || '400',
+                                  fontStyle: socialData.fontStyle || 'normal',
+                                  color: socialData.textColor || '#475569',
+                                }}
+                              >
+                                {social.label || social.platform}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
                 {!hasSocials && isEditing && (
                   <p className="text-gray-400 text-sm text-center">No social platforms added yet</p>
                 )}
