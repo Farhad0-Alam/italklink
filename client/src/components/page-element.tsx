@@ -24,6 +24,8 @@ import { createShareHandler, getSharePlatforms } from "@/lib/share";
 import { useToast } from "@/hooks/use-toast";
 import { useButtonTracking } from "@/hooks/useButtonTracking";
 import { UserPlus, Share2 } from "lucide-react";
+import { ContactSectionEditor } from "./page-elements/ContactSectionEditor";
+import { SocialSectionEditor } from "./page-elements/SocialSectionEditor";
 import {
   DndContext,
   closestCenter,
@@ -524,6 +526,8 @@ interface PageElementProps {
 export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, isInteractive = true, cardData, onNavigatePage }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isContactEditorOpen, setIsContactEditorOpen] = useState(false);
+  const [isSocialEditorOpen, setIsSocialEditorOpen] = useState(false);
   
   // Define sensors for drag and drop
   const sensors = useSensors(
@@ -888,65 +892,215 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
         );
 
       case "contactSection":
+        const contactData = element.data || { contacts: [] };
+        const hasContacts = contactData.contacts && contactData.contacts.length > 0;
+        
         return (
           <div className="mb-6">
             {isEditing ? (
-              <div className="text-white">Contact Section (Edit in form builder)</div>
+              <div className="border-2 border-dashed border-purple-500 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-white">Contact Section</span>
+                  <Button
+                    onClick={() => setIsContactEditorOpen(true)}
+                    size="sm"
+                    className="bg-purple-600 hover:bg-purple-700"
+                    data-testid="button-edit-contact-section"
+                  >
+                    <i className="fas fa-edit mr-2" />
+                    Edit
+                  </Button>
+                </div>
+                {!hasContacts && (
+                  <p className="text-gray-400 text-sm mt-2">Click Edit to add contact methods</p>
+                )}
+              </div>
             ) : (
-              <div className="flex justify-center space-x-4 flex-wrap gap-y-3">
-                {element.data.contacts.map((contact) => (
+              <div 
+                className="flex justify-center space-x-4 flex-wrap gap-y-3"
+                style={{
+                  backgroundColor: contactData.containerBackground || 'transparent',
+                  borderColor: contactData.containerBorderColor || 'transparent',
+                  borderWidth: `${contactData.containerBorderWidth || 0}px`,
+                  borderStyle: 'solid',
+                  borderRadius: `${contactData.containerBorderRadius || 8}px`,
+                  padding: `${contactData.containerPadding || 16}px`,
+                  gap: `${contactData.gap || 12}px`,
+                }}
+              >
+                {contactData.contacts?.map((contact) => (
                   contact.value && (
                     <div key={contact.id} className="flex flex-col items-center">
                       <button
-                        className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
+                        className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
+                        style={{
+                          backgroundColor: '#1e293b',
+                          color: contactData.iconColor || '#9333ea',
+                          fontSize: `${contactData.iconSize || 20}px`,
+                          boxShadow: `${contactData.shadowOffsetX || 0}px ${contactData.shadowOffsetY || 0}px ${contactData.shadowBlur || 0}px ${contactData.shadowColor || 'rgba(0,0,0,0.3)'}`,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = contactData.hoverColor || '#a855f7';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = contactData.iconColor || '#9333ea';
+                        }}
                         onClick={() => {
-                          if (contact.type === 'phone') {
+                          if (contact.icon === 'fa-phone' || contact.icon === 'fa-mobile-alt') {
                             window.open(`tel:${contact.value}`, '_self');
-                          } else if (contact.type === 'email') {
+                          } else if (contact.icon === 'fa-envelope') {
                             window.open(`mailto:${contact.value}`, '_self');
-                          } else if (contact.type === 'website') {
+                          } else if (contact.icon === 'fa-globe' || contact.icon === 'fa-link') {
                             window.open(contact.value.startsWith('http') ? contact.value : `https://${contact.value}`, '_blank');
+                          } else if (contact.icon === 'fa-map-marker-alt') {
+                            window.open(`https://maps.google.com/?q=${encodeURIComponent(contact.value)}`, '_blank');
                           }
                         }}
                       >
-                        <i className={`${contact.icon} text-sm`}></i>
+                        <i className={`fas ${contact.icon}`}></i>
                       </button>
-                      <span className="text-xs text-slate-600">{contact.label}</span>
+                      <span 
+                        className="text-xs mt-1"
+                        style={{
+                          fontFamily: contactData.fontFamily || 'inherit',
+                          fontSize: `${contactData.fontSize || 12}px`,
+                          fontWeight: contactData.fontWeight || '400',
+                          color: contactData.textColor || '#475569',
+                        }}
+                      >
+                        {contact.label}
+                      </span>
                     </div>
                   )
                 ))}
+                {!hasContacts && isEditing && (
+                  <p className="text-gray-400 text-sm">No contact methods added yet</p>
+                )}
               </div>
             )}
           </div>
         );
 
       case "socialSection":
-        const socials = element.data.socials.filter(social => social.value);
+        const socialData = element.data || { socials: [] };
+        const hasSocials = socialData.socials && socialData.socials.length > 0;
+        const activeSocials = socialData.socials?.filter(social => social.url) || [];
+        
         return (
           <div className="mb-6">
             {isEditing ? (
-              <div className="text-white">Social Section (Edit in form builder)</div>
+              <div className="border-2 border-dashed border-purple-500 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-white">Social Media Section</span>
+                  <Button
+                    onClick={() => setIsSocialEditorOpen(true)}
+                    size="sm"
+                    className="bg-purple-600 hover:bg-purple-700"
+                    data-testid="button-edit-social-section"
+                  >
+                    <i className="fas fa-edit mr-2" />
+                    Edit
+                  </Button>
+                </div>
+                {!hasSocials && (
+                  <p className="text-gray-400 text-sm mt-2">Click Edit to add social platforms</p>
+                )}
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div 
+                className="space-y-3"
+                style={{
+                  backgroundColor: socialData.containerBackground || 'transparent',
+                  borderColor: socialData.containerBorderColor || 'transparent',
+                  borderWidth: `${socialData.containerBorderWidth || 0}px`,
+                  borderStyle: 'solid',
+                  borderRadius: `${socialData.containerBorderRadius || 8}px`,
+                  padding: `${socialData.containerPadding || 16}px`,
+                }}
+              >
                 {/* Group socials into rows of 4 */}
-                {Array.from({ length: Math.ceil(socials.length / 4) }, (_, rowIndex) => (
-                  <div key={rowIndex} className="flex justify-center space-x-4">
-                    {socials.slice(rowIndex * 4, (rowIndex + 1) * 4).map((social) => (
+                {Array.from({ length: Math.ceil(activeSocials.length / 4) }, (_, rowIndex) => (
+                  <div 
+                    key={rowIndex} 
+                    className="flex justify-center"
+                    style={{ gap: `${socialData.gap || 16}px` }}
+                  >
+                    {activeSocials.slice(rowIndex * 4, (rowIndex + 1) * 4).map((social) => (
                       <div key={social.id} className="flex flex-col items-center">
                         <button
-                          className="w-10 h-10 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors mb-1"
+                          className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
+                          style={{
+                            backgroundColor: '#334155',
+                            color: socialData.iconColor || '#9333ea',
+                            fontSize: `${socialData.iconSize || 24}px`,
+                            boxShadow: `${socialData.shadowOffsetX || 0}px ${socialData.shadowOffsetY || 0}px ${socialData.shadowBlur || 0}px ${socialData.shadowColor || 'rgba(0,0,0,0.3)'}`,
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = socialData.hoverColor || '#a855f7';
+                            e.currentTarget.style.backgroundColor = '#475569';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = socialData.iconColor || '#9333ea';
+                            e.currentTarget.style.backgroundColor = '#334155';
+                          }}
                           onClick={() => {
-                            const url = social.value.startsWith('http') ? social.value : `https://${social.platform.toLowerCase()}.com/${social.value.replace('@', '')}`;
+                            let url = social.url;
+                            
+                            // Handle platform-specific URL formatting
+                            if (!url.startsWith('http')) {
+                              switch(social.platform) {
+                                case 'whatsapp':
+                                  url = `https://wa.me/${url.replace(/\D/g, '')}`;
+                                  break;
+                                case 'telegram':
+                                  url = `https://t.me/${url.replace('@', '')}`;
+                                  break;
+                                case 'twitter':
+                                  url = `https://twitter.com/${url.replace('@', '')}`;
+                                  break;
+                                case 'instagram':
+                                  url = `https://instagram.com/${url.replace('@', '')}`;
+                                  break;
+                                case 'facebook':
+                                  url = url.includes('/') ? `https://${url}` : `https://facebook.com/${url}`;
+                                  break;
+                                case 'linkedin':
+                                  url = url.includes('linkedin.com') ? `https://${url}` : `https://linkedin.com/in/${url}`;
+                                  break;
+                                case 'youtube':
+                                  url = url.includes('youtube.com') ? `https://${url}` : `https://youtube.com/${url}`;
+                                  break;
+                                case 'github':
+                                  url = url.includes('github.com') ? `https://${url}` : `https://github.com/${url}`;
+                                  break;
+                                default:
+                                  url = `https://${social.platform?.toLowerCase() || 'www'}.com/${url.replace('@', '')}`;
+                              }
+                            }
+                            
                             window.open(url, '_blank');
                           }}
                         >
-                          <i className={`${social.icon} text-sm`}></i>
+                          <i className={social.icon}></i>
                         </button>
-                        <span className="text-xs text-slate-600">{social.platform || social.label}</span>
+                        <span 
+                          className="text-xs mt-1"
+                          style={{
+                            fontFamily: socialData.fontFamily || 'inherit',
+                            fontSize: `${(socialData.fontSize || 16) * 0.75}px`,
+                            fontWeight: socialData.fontWeight || '400',
+                            color: socialData.textColor || '#475569',
+                          }}
+                        >
+                          {social.label || social.platform}
+                        </span>
                       </div>
                     ))}
                   </div>
                 ))}
+                {!hasSocials && isEditing && (
+                  <p className="text-gray-400 text-sm text-center">No social platforms added yet</p>
+                )}
               </div>
             )}
           </div>
@@ -4480,18 +4634,46 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
   };
 
   return (
-    <div className="relative group">
-      {renderElement()}
-      {isEditing && onDelete && (
-        <Button
-          onClick={() => onDelete(element.id)}
-          variant="destructive"
-          size="sm"
-          className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <i className="fas fa-trash text-xs"></i>
-        </Button>
+    <>
+      <div className="relative group">
+        {renderElement()}
+        {isEditing && onDelete && (
+          <Button
+            onClick={() => onDelete(element.id)}
+            variant="destructive"
+            size="sm"
+            className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <i className="fas fa-trash text-xs"></i>
+          </Button>
+        )}
+      </div>
+      
+      {/* Contact Section Editor */}
+      {element.type === 'contactSection' && (
+        <ContactSectionEditor
+          data={element.data || { contacts: [] }}
+          isOpen={isContactEditorOpen}
+          onClose={() => setIsContactEditorOpen(false)}
+          onSave={(newData) => {
+            handleDataUpdate(newData);
+            setIsContactEditorOpen(false);
+          }}
+        />
       )}
-    </div>
+      
+      {/* Social Section Editor */}
+      {element.type === 'socialSection' && (
+        <SocialSectionEditor
+          data={element.data || { socials: [] }}
+          isOpen={isSocialEditorOpen}
+          onClose={() => setIsSocialEditorOpen(false)}
+          onSave={(newData) => {
+            handleDataUpdate(newData);
+            setIsSocialEditorOpen(false);
+          }}
+        />
+      )}
+    </>
   );
 }
