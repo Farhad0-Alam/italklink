@@ -27,6 +27,20 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       description: "Add text content"
     },
     {
+      type: "contactSection",
+      title: "Contact Info",
+      icon: "fas fa-address-book",
+      color: "bg-slate-100",
+      description: "Add contact buttons (phone, email, etc.)"
+    },
+    {
+      type: "socialSection",
+      title: "Social Media",
+      icon: "fas fa-share-alt",
+      color: "bg-sky-100",
+      description: "Add social media links"
+    },
+    {
       type: "link",
       title: "Link",
       icon: "fas fa-link",
@@ -202,6 +216,44 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           data: {
             text: "Enter your text here...",
             alignment: "left" as const
+          }
+        };
+        break;
+      
+      case "contactSection":
+        element = {
+          id,
+          type: "contactSection",
+          order: Date.now(),
+          data: {
+            contacts: [
+              {
+                id: generateFieldId(),
+                label: "Phone",
+                value: "+1-234-567-8900",
+                icon: "fas fa-phone",
+                type: "phone" as const
+              }
+            ]
+          }
+        };
+        break;
+      
+      case "socialSection":
+        element = {
+          id,
+          type: "socialSection",
+          order: Date.now(),
+          data: {
+            socials: [
+              {
+                id: generateFieldId(),
+                label: "LinkedIn",
+                url: "https://linkedin.com/in/yourprofile",
+                icon: "fab fa-linkedin",
+                platform: "LinkedIn"
+              }
+            ]
           }
         };
         break;

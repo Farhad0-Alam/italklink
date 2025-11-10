@@ -37,6 +37,26 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { ContactLinksRenderer } from '@/components/ContactLinksRenderer';
+import { SocialLinksRenderer } from '@/components/SocialLinksRenderer';
+import { ContactSectionEditor } from '@/components/ContactSectionEditor';
+import { SocialSectionEditor } from '@/components/SocialSectionEditor';
+import {
+  schemaToEditorContact,
+  editorToSchemaContact,
+  schemaToEditorSocial,
+  editorToSchemaSocial,
+} from '@/lib/element-adapters';
+
+// Helper function to convert hex color to rgba
+function hexToRgba(hex: string, alpha: number = 1): string {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) return `rgba(0, 0, 0, ${alpha})`;
+  const r = parseInt(result[1], 16);
+  const g = parseInt(result[2], 16);
+  const b = parseInt(result[3], 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 // Sortable Image Item Component
 interface SortableImageItemProps {
@@ -882,70 +902,55 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
           </div>
         );
 
-      case "contactSection":
-        return (
-          <div className="mb-6">
-            {isEditing ? (
-              <div className="text-white">Contact Section (Edit in form builder)</div>
-            ) : (
-              <div className="flex justify-center space-x-4 flex-wrap gap-y-3">
-                {element.data.contacts.map((contact) => (
-                  contact.value && (
-                    <div key={contact.id} className="flex flex-col items-center">
-                      <button
-                        className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center hover:bg-talklink-500 transition-colors mb-1"
-                        onClick={() => {
-                          if (contact.type === 'phone') {
-                            window.open(`tel:${contact.value}`, '_self');
-                          } else if (contact.type === 'email') {
-                            window.open(`mailto:${contact.value}`, '_self');
-                          } else if (contact.type === 'website') {
-                            window.open(contact.value.startsWith('http') ? contact.value : `https://${contact.value}`, '_blank');
-                          }
-                        }}
-                      >
-                        <i className={`${contact.icon} text-sm`}></i>
-                      </button>
-                      <span className="text-xs text-slate-600">{contact.label}</span>
-                    </div>
-                  )
-                ))}
-              </div>
-            )}
-          </div>
-        );
+      case "contactSection": {
+        if (isEditing) {
+          // Convert schema data (numbers) to editor format (strings) for editing
+          const editorData = schemaToEditorContact(element.data);
+          
+          // Handle updates from the editor
+          const handleEditorChange = (updatedEditorData: any) => {
+            // Convert editor format (strings) back to schema (numbers)
+            const schemaData = editorToSchemaContact(updatedEditorData);
+            handleDataUpdate(schemaData);
+          };
+          
+          return (
+            <div className="mb-6">
+              <ContactSectionEditor
+                data={editorData}
+                onChange={handleEditorChange}
+              />
+            </div>
+          );
+        }
+        
+        return <ContactLinksRenderer data={element.data} />;
+      }
 
-      case "socialSection":
-        const socials = element.data.socials.filter(social => social.value);
-        return (
-          <div className="mb-6">
-            {isEditing ? (
-              <div className="text-white">Social Section (Edit in form builder)</div>
-            ) : (
-              <div className="space-y-3">
-                {/* Group socials into rows of 4 */}
-                {Array.from({ length: Math.ceil(socials.length / 4) }, (_, rowIndex) => (
-                  <div key={rowIndex} className="flex justify-center space-x-4">
-                    {socials.slice(rowIndex * 4, (rowIndex + 1) * 4).map((social) => (
-                      <div key={social.id} className="flex flex-col items-center">
-                        <button
-                          className="w-10 h-10 bg-slate-700 text-white rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors mb-1"
-                          onClick={() => {
-                            const url = social.value.startsWith('http') ? social.value : `https://${social.platform.toLowerCase()}.com/${social.value.replace('@', '')}`;
-                            window.open(url, '_blank');
-                          }}
-                        >
-                          <i className={`${social.icon} text-sm`}></i>
-                        </button>
-                        <span className="text-xs text-slate-600">{social.platform || social.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
+      case "socialSection": {
+        if (isEditing) {
+          // Convert schema data (numbers) to editor format (strings) for editing
+          const editorData = schemaToEditorSocial(element.data);
+          
+          // Handle updates from the editor
+          const handleEditorChange = (updatedEditorData: any) => {
+            // Convert editor format (strings) back to schema (numbers)
+            const schemaData = editorToSchemaSocial(updatedEditorData);
+            handleDataUpdate(schemaData);
+          };
+          
+          return (
+            <div className="mb-6">
+              <SocialSectionEditor
+                data={editorData}
+                onChange={handleEditorChange}
+              />
+            </div>
+          );
+        }
+        
+        return <SocialLinksRenderer data={element.data} />;
+      }
 
       case "video":
         return (
