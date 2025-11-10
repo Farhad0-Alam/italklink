@@ -117,8 +117,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   }>({
     coverLogo: true,
     basicInfo: true,
-    contactInfo: true,
-    customization: true,
     appearance: true,
     seo: true,
     pages: false, // Pages section expanded by default
@@ -127,18 +125,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     nameStyling: true,
     titleStyling: true,
     companyStyling: true,
-    // subsections inside Contact Info
-    contactIconStyling: true,
-    contactHoverColor: true, // Hover Color section collapsed by default
-    contactFontStyling: true,
-    contactDropShadow: true,
-    contactContainerStyling: true,
-    // subsections inside Social Media
-    socialIconStyling: true,
-    socialHoverColor: true, // Hover Color section collapsed by default
-    socialFontStyling: true,
-    socialDropShadow: true,
-    socialContainerStyling: true,
   });
 
   const form = useForm<BusinessCard>({
@@ -153,39 +139,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
   const toggleSection = (k: string) =>
     setCollapsedSections((p) => ({ ...p, [k]: !p[k] }));
-
-  // Drag end handlers for reordering
-  const handleContactDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (active.id !== over?.id) {
-      const contacts = form.getValues("customContacts") || [];
-      const oldIndex = contacts.findIndex(
-        (contact) => contact.id === active.id,
-      );
-      const newIndex = contacts.findIndex((contact) => contact.id === over?.id);
-
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const reorderedContacts = arrayMove(contacts, oldIndex, newIndex);
-        form.setValue("customContacts", reorderedContacts);
-      }
-    }
-  };
-
-  const handleSocialDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (active.id !== over?.id) {
-      const socials = form.getValues("customSocials") || [];
-      const oldIndex = socials.findIndex((social) => social.id === active.id);
-      const newIndex = socials.findIndex((social) => social.id === over?.id);
-
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const reorderedSocials = arrayMove(socials, oldIndex, newIndex);
-        form.setValue("customSocials", reorderedSocials);
-      }
-    }
-  };
 
   // sync to parent with memoized callback to prevent infinite loops
   const watchedValues = form.watch();
