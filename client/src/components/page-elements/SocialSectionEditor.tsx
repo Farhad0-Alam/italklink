@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
 import {
   DndContext,
   closestCenter,
@@ -75,23 +77,53 @@ interface Social {
 
 interface SocialSectionData {
   socials?: Social[];
+  // Icon Styling
   iconColor?: string;
   iconSize?: string;
+  iconBgColor?: string;
+  iconBorderColor?: string;
+  iconBorderSize?: string;
+  iconBgSize?: string;
+  view?: 'icon-text' | 'text-only' | 'icon-only';
+  size?: 'small' | 'medium' | 'large';
+  shape?: 'circle' | 'square' | 'rounded' | 'auto';
+  alignment?: 'left' | 'center' | 'right' | 'justified';
+  showLabel?: boolean;
+  iconWidth?: string;
+  iconHeight?: string;
+  // Hover Color
   hoverColor?: string;
+  enableHoverColor?: boolean;
+  iconHoverColor?: string;
+  bgHoverColor?: string;
+  // Font Styling
   fontFamily?: string;
   fontSize?: string;
   fontWeight?: string;
+  fontStyle?: 'normal' | 'italic' | 'oblique';
   textColor?: string;
+  // Drop Shadow
   shadowColor?: string;
   shadowBlur?: string;
   shadowOffsetX?: string;
   shadowOffsetY?: string;
+  shadowOpacity?: string;
+  // Container Styling
   containerBackground?: string;
   containerBorderColor?: string;
   containerBorderWidth?: string;
   containerBorderRadius?: string;
   containerPadding?: string;
   gap?: string;
+  enableContainerStyling?: boolean;
+  containerWidth?: string;
+  containerHeight?: string;
+  enableContainerShadow?: boolean;
+  containerShadowColor?: string;
+  containerShadowOpacity?: string;
+  containerShadowBlur?: string;
+  containerShadowOffsetX?: string;
+  containerShadowOffsetY?: string;
 }
 
 interface SocialSectionEditorProps {
@@ -306,6 +338,140 @@ export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps
                     className="bg-slate-700 border-slate-600 text-white"
                   />
                 </div>
+                <div>
+                  <Label className="text-white">Background Color</Label>
+                  <Input
+                    type="color"
+                    value={data.iconBgColor || "transparent"}
+                    onChange={(e) => onChange({ ...data, iconBgColor: e.target.value })}
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">Border Color</Label>
+                  <Input
+                    type="color"
+                    value={data.iconBorderColor || "transparent"}
+                    onChange={(e) => onChange({ ...data, iconBorderColor: e.target.value })}
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">Border Size (px)</Label>
+                  <Input
+                    type="number"
+                    value={data.iconBorderSize || "0"}
+                    onChange={(e) => onChange({ ...data, iconBorderSize: e.target.value })}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">Icon Background Size (px)</Label>
+                  <Input
+                    type="number"
+                    value={data.iconBgSize || "40"}
+                    onChange={(e) => onChange({ ...data, iconBgSize: e.target.value })}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">View</Label>
+                  <Select
+                    value={data.view || "icon-text"}
+                    onValueChange={(value: 'icon-text' | 'text-only' | 'icon-only') => onChange({ ...data, view: value })}
+                  >
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="icon-text">Icon & Text</SelectItem>
+                      <SelectItem value="text-only">Text Only</SelectItem>
+                      <SelectItem value="icon-only">Icon Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-white">Size</Label>
+                  <Select
+                    value={data.size || "medium"}
+                    onValueChange={(value: 'small' | 'medium' | 'large') => onChange({ ...data, size: value })}
+                  >
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="small">Small</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="large">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-white">Shape</Label>
+                  <Select
+                    value={data.shape || "circle"}
+                    onValueChange={(value: 'circle' | 'square' | 'rounded' | 'auto') => onChange({ ...data, shape: value })}
+                  >
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="circle">Circle</SelectItem>
+                      <SelectItem value="square">Square</SelectItem>
+                      <SelectItem value="rounded">Rounded</SelectItem>
+                      <SelectItem value="auto">Auto</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-white">Alignment</Label>
+                  <Select
+                    value={data.alignment || "center"}
+                    onValueChange={(value: 'left' | 'center' | 'right' | 'justified') => onChange({ ...data, alignment: value })}
+                  >
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="left">Left</SelectItem>
+                      <SelectItem value="center">Center</SelectItem>
+                      <SelectItem value="right">Right</SelectItem>
+                      <SelectItem value="justified">Justified</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="showLabel"
+                    checked={data.showLabel !== false}
+                    onCheckedChange={(checked) => onChange({ ...data, showLabel: checked as boolean })}
+                  />
+                  <Label htmlFor="showLabel" className="text-white cursor-pointer">
+                    Show Label
+                  </Label>
+                </div>
+                <div>
+                  <Label className="text-white">Icon Width: {data.iconWidth || "40"}px</Label>
+                  <Slider
+                    value={[parseInt(data.iconWidth || "40")]}
+                    onValueChange={(value) => onChange({ ...data, iconWidth: value[0].toString() })}
+                    min={0}
+                    max={100}
+                    step={1}
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">Icon Height: {data.iconHeight || "40"}px</Label>
+                  <Slider
+                    value={[parseInt(data.iconHeight || "40")]}
+                    onValueChange={(value) => onChange({ ...data, iconHeight: value[0].toString() })}
+                    min={0}
+                    max={100}
+                    step={1}
+                    className="mt-2"
+                  />
+                </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
@@ -322,14 +488,35 @@ export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps
               </div>
             </div>
             <CollapsibleContent>
-              <div className="bg-purple-900/30 border-x border-b border-purple-600/30 rounded-b-lg p-4 -mt-1">
-                <Label className="text-white">Hover Color</Label>
-                <Input
-                  type="color"
-                  value={data.hoverColor || "#a855f7"}
-                  onChange={(e) => onChange({ ...data, hoverColor: e.target.value })}
-                  className="bg-slate-700 border-slate-600"
-                />
+              <div className="bg-purple-900/30 border-x border-b border-purple-600/30 rounded-b-lg p-4 -mt-1 space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="enableHoverColor"
+                    checked={data.enableHoverColor || false}
+                    onCheckedChange={(checked) => onChange({ ...data, enableHoverColor: checked as boolean })}
+                  />
+                  <Label htmlFor="enableHoverColor" className="text-white cursor-pointer">
+                    Enable Hover Color
+                  </Label>
+                </div>
+                <div>
+                  <Label className="text-white">Icon Hover Color</Label>
+                  <Input
+                    type="color"
+                    value={data.iconHoverColor || "#a855f7"}
+                    onChange={(e) => onChange({ ...data, iconHoverColor: e.target.value })}
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">Background Hover Color</Label>
+                  <Input
+                    type="color"
+                    value={data.bgHoverColor || "rgba(168, 85, 247, 0.1)"}
+                    onChange={(e) => onChange({ ...data, bgHoverColor: e.target.value })}
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
@@ -390,6 +577,22 @@ export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps
                       <SelectItem value="500">Medium</SelectItem>
                       <SelectItem value="600">Semi-Bold</SelectItem>
                       <SelectItem value="700">Bold</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-white">Font Style</Label>
+                  <Select
+                    value={data.fontStyle || "normal"}
+                    onValueChange={(value: 'normal' | 'italic' | 'oblique') => onChange({ ...data, fontStyle: value })}
+                  >
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="italic">Italic</SelectItem>
+                      <SelectItem value="oblique">Oblique</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -457,6 +660,17 @@ export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps
                       className="bg-slate-700 border-slate-600 text-white"
                     />
                   </div>
+                </div>
+                <div>
+                  <Label className="text-white">Shadow Opacity: {data.shadowOpacity || "30"}%</Label>
+                  <Slider
+                    value={[parseInt(data.shadowOpacity || "30")]}
+                    onValueChange={(value) => onChange({ ...data, shadowOpacity: value[0].toString() })}
+                    min={0}
+                    max={100}
+                    step={1}
+                    className="mt-2"
+                  />
                 </div>
               </div>
             </CollapsibleContent>
@@ -534,6 +748,98 @@ export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps
                     onChange={(e) => onChange({ ...data, gap: e.target.value })}
                     className="bg-slate-700 border-slate-600 text-white"
                   />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="enableContainerStyling"
+                    checked={data.enableContainerStyling || false}
+                    onCheckedChange={(checked) => onChange({ ...data, enableContainerStyling: checked as boolean })}
+                  />
+                  <Label htmlFor="enableContainerStyling" className="text-white cursor-pointer">
+                    Enable Container Styling
+                  </Label>
+                </div>
+                <div>
+                  <Label className="text-white">Container Width: {data.containerWidth || "100"}%</Label>
+                  <Slider
+                    value={[parseInt(data.containerWidth || "100")]}
+                    onValueChange={(value) => onChange({ ...data, containerWidth: value[0].toString() })}
+                    min={0}
+                    max={100}
+                    step={1}
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">Container Height (px, 0 = auto)</Label>
+                  <Slider
+                    value={[parseInt(data.containerHeight || "0")]}
+                    onValueChange={(value) => onChange({ ...data, containerHeight: value[0].toString() })}
+                    min={0}
+                    max={500}
+                    step={10}
+                    className="mt-2"
+                  />
+                  <span className="text-sm text-gray-400">{data.containerHeight === "0" || !data.containerHeight ? "auto" : `${data.containerHeight}px`}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="enableContainerShadow"
+                    checked={data.enableContainerShadow || false}
+                    onCheckedChange={(checked) => onChange({ ...data, enableContainerShadow: checked as boolean })}
+                  />
+                  <Label htmlFor="enableContainerShadow" className="text-white cursor-pointer">
+                    Enable Container Drop Shadow
+                  </Label>
+                </div>
+                <div>
+                  <Label className="text-white">Container Shadow Color</Label>
+                  <Input
+                    type="color"
+                    value={data.containerShadowColor || "rgba(0,0,0,0.3)"}
+                    onChange={(e) => onChange({ ...data, containerShadowColor: e.target.value })}
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">Container Shadow Opacity: {data.containerShadowOpacity || "30"}%</Label>
+                  <Slider
+                    value={[parseInt(data.containerShadowOpacity || "30")]}
+                    onValueChange={(value) => onChange({ ...data, containerShadowOpacity: value[0].toString() })}
+                    min={0}
+                    max={100}
+                    step={1}
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">Container Shadow Blur (px)</Label>
+                  <Input
+                    type="number"
+                    value={data.containerShadowBlur || "10"}
+                    onChange={(e) => onChange({ ...data, containerShadowBlur: e.target.value })}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-white">Container Shadow Offset X (px)</Label>
+                    <Input
+                      type="number"
+                      value={data.containerShadowOffsetX || "0"}
+                      onChange={(e) => onChange({ ...data, containerShadowOffsetX: e.target.value })}
+                      className="bg-slate-700 border-slate-600 text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-white">Container Shadow Offset Y (px)</Label>
+                    <Input
+                      type="number"
+                      value={data.containerShadowOffsetY || "4"}
+                      onChange={(e) => onChange({ ...data, containerShadowOffsetY: e.target.value })}
+                      className="bg-slate-700 border-slate-600 text-white"
+                    />
+                  </div>
                 </div>
               </div>
             </CollapsibleContent>
