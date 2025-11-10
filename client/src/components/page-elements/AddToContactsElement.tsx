@@ -1,3 +1,4 @@
+import { type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { downloadVCard } from "@/lib/vcard";
@@ -45,7 +46,7 @@ export function AddToContactsElement({
 
   // Helper function to get button styles based on style type
   const getButtonStyles = () => {
-    const styles: React.CSSProperties = {};
+    const styles: CSSProperties = {};
     
     if (element.data.style === "filled") {
       styles.backgroundColor = element.data.buttonColor || "#22c55e";

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createShareHandler, getSharePlatforms } from "@/lib/share";
@@ -51,7 +51,7 @@ export function ShareButtonElement({
 
   // Helper function to get button styles based on style type
   const getButtonStyles = () => {
-    const styles: React.CSSProperties = {};
+    const styles: CSSProperties = {};
     
     if (element.data.style === "filled") {
       styles.backgroundColor = element.data.buttonColor || "#22c55e";
