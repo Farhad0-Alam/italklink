@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DndContext,
   closestCenter,
@@ -97,9 +96,7 @@ interface SocialSectionData {
 
 interface SocialSectionEditorProps {
   data: SocialSectionData;
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: SocialSectionData) => void;
+  onChange: (data: SocialSectionData) => void;
 }
 
 const socialPlatforms = [
@@ -124,34 +121,13 @@ const socialPlatforms = [
   { value: "custom", label: "Custom", icon: "fas fa-link", placeholder: "URL or username" },
 ];
 
-export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSectionEditorProps) {
-  const [editData, setEditData] = useState<SocialSectionData>({
-    socials: data.socials || [],
-    iconColor: data.iconColor || "#9333ea",
-    iconSize: data.iconSize || "24",
-    hoverColor: data.hoverColor || "#a855f7",
-    fontFamily: data.fontFamily || "inherit",
-    fontSize: data.fontSize || "16",
-    fontWeight: data.fontWeight || "400",
-    textColor: data.textColor || "#ffffff",
-    shadowColor: data.shadowColor || "rgba(0,0,0,0.3)",
-    shadowBlur: data.shadowBlur || "0",
-    shadowOffsetX: data.shadowOffsetX || "0",
-    shadowOffsetY: data.shadowOffsetY || "0",
-    containerBackground: data.containerBackground || "transparent",
-    containerBorderColor: data.containerBorderColor || "transparent",
-    containerBorderWidth: data.containerBorderWidth || "0",
-    containerBorderRadius: data.containerBorderRadius || "8",
-    containerPadding: data.containerPadding || "16",
-    gap: data.gap || "12",
-  });
-
+export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps) {
   const [collapsedSections, setCollapsedSections] = useState({
-    iconStyling: true,
-    hoverColor: true,
-    fontStyling: true,
-    dropShadow: true,
-    containerStyling: true,
+    iconStyling: false,
+    hoverColor: false,
+    fontStyling: false,
+    dropShadow: false,
+    containerStyling: false,
   });
 
   const sensors = useSensors(
@@ -164,12 +140,12 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
   const handleSocialDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (active.id !== over?.id) {
-      const socials = editData.socials || [];
+      const socials = data.socials || [];
       const oldIndex = socials.findIndex((s) => s.id === active.id);
       const newIndex = socials.findIndex((s) => s.id === over?.id);
       if (oldIndex !== -1 && newIndex !== -1) {
         const reorderedSocials = arrayMove(socials, oldIndex, newIndex);
-        setEditData({ ...editData, socials: reorderedSocials });
+        onChange({ ...data, socials: reorderedSocials });
       }
     }
   };
@@ -182,14 +158,14 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
       icon: "fab fa-facebook",
       platform: "facebook",
     };
-    setEditData({
-      ...editData,
-      socials: [...(editData.socials || []), newSocial],
+    onChange({
+      ...data,
+      socials: [...(data.socials || []), newSocial],
     });
   };
 
   const updateSocial = (index: number, updates: Partial<Social>) => {
-    const socials = [...(editData.socials || [])];
+    const socials = [...(data.socials || [])];
     
     // If platform changes, update icon and label automatically
     if (updates.platform) {
@@ -204,31 +180,20 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
     }
     
     socials[index] = { ...socials[index], ...updates };
-    setEditData({ ...editData, socials });
+    onChange({ ...data, socials });
   };
 
   const removeSocial = (index: number) => {
-    const socials = (editData.socials || []).filter((_, i) => i !== index);
-    setEditData({ ...editData, socials });
+    const socials = (data.socials || []).filter((_, i) => i !== index);
+    onChange({ ...data, socials });
   };
 
   const toggleSection = (section: keyof typeof collapsedSections) => {
     setCollapsedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const handleSave = () => {
-    onSave(editData);
-    onClose();
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-slate-900 text-white">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Edit Social Media Section</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4">
+        <div className="space-y-4" onPointerDown={(e) => e.stopPropagation()}>
           {/* Additional Social Platforms */}
           <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
             <h4 className="text-md font-medium text-purple-300">Additional Social Platforms</h4>
@@ -239,10 +204,10 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
               onDragEnd={handleSocialDragEnd}
             >
               <SortableContext
-                items={editData.socials?.map(s => s.id) || []}
+                items={data.socials?.map(s => s.id) || []}
                 strategy={verticalListSortingStrategy}
               >
-                {editData.socials?.map((social, index) => {
+                {data.socials?.map((social, index) => {
                   const platform = socialPlatforms.find(p => p.value === social.platform) || socialPlatforms[0];
                   return (
                     <SortableItem key={social.id} id={social.id}>
@@ -327,8 +292,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                   <Label className="text-white">Icon Color</Label>
                   <Input
                     type="color"
-                    value={editData.iconColor}
-                    onChange={(e) => setEditData({ ...editData, iconColor: e.target.value })}
+                    value={data.iconColor || "#9333ea"}
+                    onChange={(e) => onChange({ ...data, iconColor: e.target.value })}
                     className="bg-slate-700 border-slate-600"
                   />
                 </div>
@@ -336,8 +301,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                   <Label className="text-white">Icon Size (px)</Label>
                   <Input
                     type="number"
-                    value={editData.iconSize}
-                    onChange={(e) => setEditData({ ...editData, iconSize: e.target.value })}
+                    value={data.iconSize || "24"}
+                    onChange={(e) => onChange({ ...data, iconSize: e.target.value })}
                     className="bg-slate-700 border-slate-600 text-white"
                   />
                 </div>
@@ -361,8 +326,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                 <Label className="text-white">Hover Color</Label>
                 <Input
                   type="color"
-                  value={editData.hoverColor}
-                  onChange={(e) => setEditData({ ...editData, hoverColor: e.target.value })}
+                  value={data.hoverColor || "#a855f7"}
+                  onChange={(e) => onChange({ ...data, hoverColor: e.target.value })}
                   className="bg-slate-700 border-slate-600"
                 />
               </div>
@@ -385,8 +350,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                 <div>
                   <Label className="text-white">Font Family</Label>
                   <Select
-                    value={editData.fontFamily}
-                    onValueChange={(value) => setEditData({ ...editData, fontFamily: value })}
+                    value={data.fontFamily || "inherit"}
+                    onValueChange={(value) => onChange({ ...data, fontFamily: value })}
                   >
                     <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                       <SelectValue />
@@ -405,16 +370,16 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                   <Label className="text-white">Font Size (px)</Label>
                   <Input
                     type="number"
-                    value={editData.fontSize}
-                    onChange={(e) => setEditData({ ...editData, fontSize: e.target.value })}
+                    value={data.fontSize || "16"}
+                    onChange={(e) => onChange({ ...data, fontSize: e.target.value })}
                     className="bg-slate-700 border-slate-600 text-white"
                   />
                 </div>
                 <div>
                   <Label className="text-white">Font Weight</Label>
                   <Select
-                    value={editData.fontWeight}
-                    onValueChange={(value) => setEditData({ ...editData, fontWeight: value })}
+                    value={data.fontWeight || "400"}
+                    onValueChange={(value) => onChange({ ...data, fontWeight: value })}
                   >
                     <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                       <SelectValue />
@@ -432,8 +397,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                   <Label className="text-white">Text Color</Label>
                   <Input
                     type="color"
-                    value={editData.textColor}
-                    onChange={(e) => setEditData({ ...editData, textColor: e.target.value })}
+                    value={data.textColor || "#ffffff"}
+                    onChange={(e) => onChange({ ...data, textColor: e.target.value })}
                     className="bg-slate-700 border-slate-600"
                   />
                 </div>
@@ -458,8 +423,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                   <Label className="text-white">Shadow Color</Label>
                   <Input
                     type="text"
-                    value={editData.shadowColor}
-                    onChange={(e) => setEditData({ ...editData, shadowColor: e.target.value })}
+                    value={data.shadowColor || "rgba(0,0,0,0.3)"}
+                    onChange={(e) => onChange({ ...data, shadowColor: e.target.value })}
                     className="bg-slate-700 border-slate-600 text-white"
                     placeholder="rgba(0,0,0,0.3)"
                   />
@@ -469,8 +434,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                     <Label className="text-white">Blur (px)</Label>
                     <Input
                       type="number"
-                      value={editData.shadowBlur}
-                      onChange={(e) => setEditData({ ...editData, shadowBlur: e.target.value })}
+                      value={data.shadowBlur || "0"}
+                      onChange={(e) => onChange({ ...data, shadowBlur: e.target.value })}
                       className="bg-slate-700 border-slate-600 text-white"
                     />
                   </div>
@@ -478,8 +443,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                     <Label className="text-white">Offset X (px)</Label>
                     <Input
                       type="number"
-                      value={editData.shadowOffsetX}
-                      onChange={(e) => setEditData({ ...editData, shadowOffsetX: e.target.value })}
+                      value={data.shadowOffsetX || "0"}
+                      onChange={(e) => onChange({ ...data, shadowOffsetX: e.target.value })}
                       className="bg-slate-700 border-slate-600 text-white"
                     />
                   </div>
@@ -487,8 +452,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                     <Label className="text-white">Offset Y (px)</Label>
                     <Input
                       type="number"
-                      value={editData.shadowOffsetY}
-                      onChange={(e) => setEditData({ ...editData, shadowOffsetY: e.target.value })}
+                      value={data.shadowOffsetY || "0"}
+                      onChange={(e) => onChange({ ...data, shadowOffsetY: e.target.value })}
                       className="bg-slate-700 border-slate-600 text-white"
                     />
                   </div>
@@ -514,8 +479,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                   <Label className="text-white">Background Color</Label>
                   <Input
                     type="text"
-                    value={editData.containerBackground}
-                    onChange={(e) => setEditData({ ...editData, containerBackground: e.target.value })}
+                    value={data.containerBackground || "transparent"}
+                    onChange={(e) => onChange({ ...data, containerBackground: e.target.value })}
                     className="bg-slate-700 border-slate-600 text-white"
                     placeholder="transparent or #color"
                   />
@@ -525,8 +490,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                     <Label className="text-white">Border Color</Label>
                     <Input
                       type="text"
-                      value={editData.containerBorderColor}
-                      onChange={(e) => setEditData({ ...editData, containerBorderColor: e.target.value })}
+                      value={data.containerBorderColor || "transparent"}
+                      onChange={(e) => onChange({ ...data, containerBorderColor: e.target.value })}
                       className="bg-slate-700 border-slate-600 text-white"
                       placeholder="transparent or #color"
                     />
@@ -535,8 +500,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                     <Label className="text-white">Border Width (px)</Label>
                     <Input
                       type="number"
-                      value={editData.containerBorderWidth}
-                      onChange={(e) => setEditData({ ...editData, containerBorderWidth: e.target.value })}
+                      value={data.containerBorderWidth || "0"}
+                      onChange={(e) => onChange({ ...data, containerBorderWidth: e.target.value })}
                       className="bg-slate-700 border-slate-600 text-white"
                     />
                   </div>
@@ -546,8 +511,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                     <Label className="text-white">Border Radius (px)</Label>
                     <Input
                       type="number"
-                      value={editData.containerBorderRadius}
-                      onChange={(e) => setEditData({ ...editData, containerBorderRadius: e.target.value })}
+                      value={data.containerBorderRadius || "8"}
+                      onChange={(e) => onChange({ ...data, containerBorderRadius: e.target.value })}
                       className="bg-slate-700 border-slate-600 text-white"
                     />
                   </div>
@@ -555,8 +520,8 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                     <Label className="text-white">Padding (px)</Label>
                     <Input
                       type="number"
-                      value={editData.containerPadding}
-                      onChange={(e) => setEditData({ ...editData, containerPadding: e.target.value })}
+                      value={data.containerPadding || "16"}
+                      onChange={(e) => onChange({ ...data, containerPadding: e.target.value })}
                       className="bg-slate-700 border-slate-600 text-white"
                     />
                   </div>
@@ -565,26 +530,14 @@ export function SocialSectionEditor({ data, isOpen, onClose, onSave }: SocialSec
                   <Label className="text-white">Gap Between Items (px)</Label>
                   <Input
                     type="number"
-                    value={editData.gap}
-                    onChange={(e) => setEditData({ ...editData, gap: e.target.value })}
+                    value={data.gap || "12"}
+                    onChange={(e) => onChange({ ...data, gap: e.target.value })}
                     className="bg-slate-700 border-slate-600 text-white"
                   />
                 </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
-
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-2 pt-4">
-            <Button onClick={onClose} variant="outline" className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600">
-              Cancel
-            </Button>
-            <Button onClick={handleSave} className="bg-purple-600 hover:bg-purple-700">
-              Save Changes
-            </Button>
-          </div>
         </div>
-      </DialogContent>
-    </Dialog>
   );
 }
