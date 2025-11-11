@@ -72,8 +72,8 @@ export function ContactLinksRenderer({ data }: ContactLinksRendererProps) {
       justified: "justify-between",
     };
 
-    // Get skin preset styles
-    const skinStyles = getSkinStyles(skin, iconColor, enableLabelSkin);
+    // Get skin preset styles - skins always define both icon and label styling
+    const skinStyles = getSkinStyles(skin, iconColor);
 
     const iconContainerStyle: React.CSSProperties = {
       width: `${iconWidth}px`,
@@ -95,19 +95,24 @@ export function ContactLinksRenderer({ data }: ContactLinksRendererProps) {
       color: skinStyles.icon.color || iconColor,
     };
 
-    const labelStyle: React.CSSProperties = {
+    // Label style - always apply skin styling, use enableLabelSkin to optionally fall back to plain text
+    const labelStyle: React.CSSProperties = enableLabelSkin ? {
       fontFamily,
       fontSize: `${fontSize}px`,
       fontWeight,
       fontStyle,
-      color: enableLabelSkin ? (skinStyles.label.color || textColor) : textColor,
-      ...(enableLabelSkin && {
-        background: skinStyles.label.background,
-        padding: "4px 12px",
-        display: "inline-block",
-        ...skinStyles.label.border && { border: skinStyles.label.border },
-        ...skinStyles.label.borderBottom && { borderBottom: skinStyles.label.borderBottom },
-      }),
+      color: skinStyles.label.color || textColor,
+      background: skinStyles.label.background,
+      padding: "4px 12px",
+      display: "inline-block",
+      ...skinStyles.label.border && { border: skinStyles.label.border },
+      ...skinStyles.label.borderBottom && { borderBottom: skinStyles.label.borderBottom },
+    } : {
+      fontFamily,
+      fontSize: `${fontSize}px`,
+      fontWeight,
+      fontStyle,
+      color: textColor,
     };
 
     // Outer Container Style (wraps all icons)

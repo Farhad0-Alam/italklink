@@ -52,14 +52,13 @@ export interface SkinStyles {
 
 /**
  * Get preset styles for a specific skin type
+ * Each skin defines complete styling for both icon and label areas
  * @param skin - Skin type: 'gradient' | 'minimal' | 'framed' | 'boxed' | 'flat'
  * @param baseColor - Primary color for the skin (e.g., icon color)
- * @param matchLabelToIconSkin - Whether label should inherit icon styling
  */
 export function getSkinStyles(
   skin: string,
-  baseColor: string,
-  matchLabelToIconSkin: boolean = false
+  baseColor: string
 ): SkinStyles {
   const base = baseColor;
   const onBase = contrast(base);
@@ -72,50 +71,60 @@ export function getSkinStyles(
   switch (skin) {
     case "gradient":
       {
+        // Full gradient bar with darker icon area
         const grad = `linear-gradient(90deg, ${shade(base, -8)} 0%, ${base} 50%, ${shade(base, 10)} 100%)`;
-        styles.icon.background = grad;
-        styles.icon.color = onBase;
+        styles.icon.background = `linear-gradient(90deg, ${shade(base, -25)} 0%, ${shade(base, -10)} 100%)`;
+        styles.icon.color = "#fff";
         styles.label.background = grad;
-        styles.label.color = onBase;
+        styles.label.color = "#fff";
       }
       break;
 
     case "minimal":
-      styles.icon.background = shade(base, 35);
-      styles.icon.color = onBase;
-      styles.label.background = "#fff";
-      styles.label.color = "#111";
-      styles.label.borderBottom = `1px solid ${shade(base, 10)}`;
+      {
+        // Colored icon boxes with white labels and subtle divider
+        styles.icon.background = shade(base, 35);
+        styles.icon.color = onBase;
+        styles.label.background = "#fff";
+        styles.label.color = "#111";
+        styles.label.borderBottom = `1px solid ${shade(base, 10)}`;
+      }
       break;
 
     case "framed":
-      styles.icon.background = "#fff";
-      styles.icon.color = base;
-      styles.icon.border = `2px solid ${base}`;
-      styles.icon.borderRight = "0"; // Join visually
-      styles.label.background = "#fff";
-      styles.label.color = base;
-      styles.label.border = `2px solid ${base}`;
-      break;
-
-    case "boxed":
-      styles.icon.background = base;
-      styles.icon.color = onBase;
-      styles.label.background = "#fff";
-      styles.label.color = "#111";
-      styles.label.border = `2px solid ${shade(base, -5)}`;
-      break;
-
-    case "flat":
-      styles.icon.background = base;
-      styles.icon.color = onBase;
-      if (matchLabelToIconSkin) {
-        styles.label.background = base;
-        styles.label.color = onBase;
-      } else {
+      {
+        // White interior with colored outline
+        styles.icon.background = "#fff";
+        styles.icon.color = base;
+        styles.icon.border = `2px solid ${base}`;
+        styles.icon.borderRight = "0";
         styles.label.background = "#fff";
         styles.label.color = base;
         styles.label.border = `2px solid ${base}`;
+      }
+      break;
+
+    case "boxed":
+      {
+        // Colored icon box, white label with border
+        const border = `2px solid ${shade(base, -8)}`;
+        styles.icon.background = base;
+        styles.icon.color = onBase;
+        styles.icon.border = border;
+        styles.icon.borderRight = "0";
+        styles.label.background = "#fff";
+        styles.label.color = "#111";
+        styles.label.border = border;
+      }
+      break;
+
+    case "flat":
+      {
+        // Solid full bar
+        styles.icon.background = base;
+        styles.icon.color = onBase;
+        styles.label.background = base;
+        styles.label.color = onBase;
       }
       break;
 
