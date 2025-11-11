@@ -56,6 +56,7 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
     containerPadding = 16,
     gap,
     enableContainerStyling = false,
+    applyContainerToEachIcon = false,
     containerWidth = "100%",
     containerHeight = "auto",
     enableContainerShadow = false,
@@ -218,8 +219,19 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
     ? "items-center"
     : "items-center";
 
+  // Determine where to apply container styling
+  // When applyContainerToEachIcon is false (default): apply to outer wrapper, give items basic padding for clickability
+  // When applyContainerToEachIcon is true: apply to each icon individually, no outer wrapper styling
+  const outerContainerStyle = enableContainerStyling && !applyContainerToEachIcon ? styles.containerStyle : {};
+  const itemContainerStyle = enableContainerStyling && applyContainerToEachIcon 
+    ? styles.containerStyle 
+    : {}; 
+  
+  // Add minimal padding to items when outer wrapper has container (for clickability)
+  const itemBasePadding = enableContainerStyling && !applyContainerToEachIcon ? { padding: '8px' } : {};
+
   return (
-    <div className="mb-6">
+    <div className="mb-6" style={outerContainerStyle}>
       <div
         className={useGrid ? "" : styles.alignmentClass}
         style={containerLayoutStyle}
@@ -230,7 +242,8 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
             className={`group flex ${itemFlexClass} ${itemAlignClass} cursor-pointer`}
             onClick={() => handleSocialClick(social)}
             style={{
-              ...styles.containerStyle,
+              ...itemContainerStyle,
+              ...itemBasePadding,
               "--icon-hover-color": enableHoverColor ? iconHoverColor : iconColor,
               "--bg-hover-color": enableHoverColor ? bgHoverColor : iconBgColor,
               flexDirection: textPosition === "left" ? "row-reverse" : 

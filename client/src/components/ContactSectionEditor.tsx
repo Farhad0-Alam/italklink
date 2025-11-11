@@ -126,6 +126,7 @@ interface ContactSectionData {
   containerPadding?: string;
   gap?: string;
   enableContainerStyling?: boolean;
+  applyContainerToEachIcon?: boolean;
   containerWidth?: string;
   containerHeight?: string;
   enableContainerShadow?: boolean;
@@ -622,6 +623,13 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
             checked={data.enableContainerStyling || false}
             onCheckedChange={(checked) => onChange({ ...data, enableContainerStyling: checked })}
             label="Enable Contact Container Styling"
+          />
+
+          <PanelCheckbox
+            id="applyContainerToEachIcon"
+            checked={data.applyContainerToEachIcon || false}
+            onCheckedChange={(checked) => onChange({ ...data, applyContainerToEachIcon: checked })}
+            label="Apply Container to Each Icon"
           />
 
           <div>

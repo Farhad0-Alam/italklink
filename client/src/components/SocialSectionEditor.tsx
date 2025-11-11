@@ -134,6 +134,7 @@ interface SocialSectionData {
   containerPadding?: string;
   gap?: string;
   enableContainerStyling?: boolean;
+  applyContainerToEachIcon?: boolean;
   containerWidth?: string;
   containerHeight?: string;
   enableContainerShadow?: boolean;
@@ -654,6 +655,13 @@ export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps
             checked={data.enableContainerStyling || false}
             onCheckedChange={(checked) => onChange({ ...data, enableContainerStyling: checked })}
             label="Enable Social Container Styling"
+          />
+
+          <PanelCheckbox
+            id="applyContainerToEachIcon"
+            checked={data.applyContainerToEachIcon || false}
+            onCheckedChange={(checked) => onChange({ ...data, applyContainerToEachIcon: checked })}
+            label="Apply Container to Each Icon"
           />
 
           <div>
