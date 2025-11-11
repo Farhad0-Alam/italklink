@@ -52,6 +52,7 @@ export function ContactLinksRenderer({ data }: ContactLinksRendererProps) {
     gap,
     outerContainer,
     iconContainer,
+    labelBorder,
   } = data;
 
   // Build styles with useMemo for performance
@@ -94,6 +95,14 @@ export function ContactLinksRenderer({ data }: ContactLinksRendererProps) {
       fontWeight,
       fontStyle,
       color: textColor,
+      ...(labelBorder?.enabled && {
+        borderColor: labelBorder.color ?? "#000000",
+        borderWidth: `${labelBorder.width ?? 1}px`,
+        borderStyle: "solid",
+        borderRadius: `${labelBorder.radius ?? 4}px`,
+        padding: "4px 8px",
+        display: "inline-block",
+      }),
     };
 
     // Outer Container Style (wraps all icons)
@@ -165,6 +174,7 @@ export function ContactLinksRenderer({ data }: ContactLinksRendererProps) {
     alignment,
     outerContainer,
     iconContainer,
+    labelBorder,
   ]);
 
   // Filter contacts with values
