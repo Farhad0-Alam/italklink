@@ -3082,6 +3082,13 @@ export const contactSectionElementSchema = baseElementSchema.extend({
       shadowOffsetX: z.number().optional().default(0),
       shadowOffsetY: z.number().optional().default(4),
     }).optional().default({}),
+    // Label Border Styling (text label borders)
+    labelBorder: z.object({
+      enabled: z.boolean().optional().default(false),
+      color: z.string().optional().default("#000000"),
+      width: z.number().optional().default(1),
+      radius: z.number().optional().default(4),
+    }).optional().default({}),
   }),
 });
 
@@ -3163,6 +3170,13 @@ export const socialSectionElementSchema = baseElementSchema.extend({
       shadowBlur: z.number().optional().default(10),
       shadowOffsetX: z.number().optional().default(0),
       shadowOffsetY: z.number().optional().default(4),
+    }).optional().default({}),
+    // Label Border Styling (text label borders)
+    labelBorder: z.object({
+      enabled: z.boolean().optional().default(false),
+      color: z.string().optional().default("#000000"),
+      width: z.number().optional().default(1),
+      radius: z.number().optional().default(4),
     }).optional().default({}),
   }),
 });
