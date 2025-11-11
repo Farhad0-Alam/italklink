@@ -219,7 +219,7 @@ export function ContactLinksRenderer({ data }: ContactLinksRendererProps) {
     : "items-center";
 
   return (
-    <div className="mb-6" style={styles.containerStyle}>
+    <div className="mb-6">
       <div
         className={useGrid ? "" : styles.alignmentClass}
         style={containerLayoutStyle}
@@ -230,6 +230,7 @@ export function ContactLinksRenderer({ data }: ContactLinksRendererProps) {
             className={`group flex ${itemFlexClass} ${itemAlignClass} cursor-pointer`}
             onClick={() => handleContactClick(contact)}
             style={{
+              ...styles.containerStyle,
               "--icon-hover-color": enableHoverColor ? iconHoverColor : iconColor,
               "--bg-hover-color": enableHoverColor ? bgHoverColor : iconBgColor,
               flexDirection: textPosition === "left" ? "row-reverse" : 
