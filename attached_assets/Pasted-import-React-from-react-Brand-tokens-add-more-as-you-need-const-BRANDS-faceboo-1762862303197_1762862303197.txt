@@ -1,0 +1,163 @@
+import React from "react";
+
+/* Brand tokens (add more as you need) */
+const BRANDS = {
+  facebook: { name: "Facebook", color: "#4267B2", icon: "f" },
+  twitter:  { name: "Twitter",  color: "#1DA1F2", icon: "t" },
+  linkedin: { name: "LinkedIn", color: "#0A66C2", icon: "in" },
+};
+
+const lumaText = (hex) => {
+  const c = hex.replace("#","");
+  const r = parseInt(c.slice(0,2),16), g = parseInt(c.slice(2,4),16), b = parseInt(c.slice(4,6),16);
+  const L = 0.2126*r + 0.7152*g + 0.0722*b;
+  return L < 140 ? "#fff" : "#111";
+};
+const shade = (hex, pct) => {
+  const c = hex.replace("#","");
+  let r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+  const clamp = (v)=>Math.max(0, Math.min(255, Math.round(v*(100+pct)/100)));
+  r = clamp(r); g = clamp(g); b = clamp(b);
+  const h = (v)=>("0"+v.toString(16)).slice(-2);
+  return `#${h(r)}${h(g)}${h(b)}`;
+};
+
+/**
+ * Props:
+ *  - brand: 'facebook'|'twitter'|'linkedin'
+ *  - skin:  'gradient'|'minimal'|'framed'|'boxIcon'|'flat'
+ *  - shape: 'rounded'|'pill'|'square'
+ *  - size:  'sm'|'md'|'lg'
+ *  - label?: string
+ */
+export default function SocialButton({
+  brand="twitter",
+  skin="gradient",
+  shape="rounded",
+  size="md",
+  label
+}) {
+  const token   = BRANDS[brand] || BRANDS.twitter;
+  const base    = token.color;
+  const onBase  = lumaText(base);
+  const radius  = shape === "pill" ? 999 : shape === "square" ? 8 : 12;
+  const heights = { sm: 40, md: 50, lg: 60 };
+  const h       = heights[size] || heights.md;
+
+  /* wrapper keeps icon + label perfectly aligned */
+  const wrap = {
+    display:"flex", alignItems:"center", width:"100%", overflow:"hidden",
+    borderRadius: radius, border:"none", padding:0, cursor:"pointer",
+    transition:"filter .2s ease"
+  };
+
+  /* LEFT icon box */
+  const iconBox = {
+    display:"flex", alignItems:"center", justifyContent:"center",
+    minWidth: h, height: h, padding:"0 12px",
+    fontWeight:800, fontSize: size==="lg"?22 : size==="sm"?16 : 18,
+    borderTopLeftRadius: radius, borderBottomLeftRadius: radius,
+    transition:"all .2s ease"
+  };
+
+  /* RIGHT label box */
+  const labelBox = {
+    flex:1, height:h, display:"flex", alignItems:"center",
+    padding:"0 16px",
+    borderTopRightRadius: radius, borderBottomRightRadius: radius,
+    font: "600 16px/1.1 system-ui,-apple-system,Segoe UI,Roboto",
+    transition:"all .2s ease"
+  };
+
+  /* -------------- SKINS (apply to BOTH icon + label) -------------- */
+
+  if (skin === "flat") {
+    // solid full bar (your last screenshot)
+    iconBox.background  = base;  iconBox.color  = onBase;
+    labelBox.background = base;  labelBox.color = onBase;
+  }
+
+  if (skin === "boxIcon") {
+    // colored squares on left, white label area (second screenshot)
+    const border = `2px solid ${shade(base,-8)}`;
+    iconBox.background  = base;  iconBox.color  = onBase;  iconBox.border  = border;
+    labelBox.background = "#fff"; labelBox.color = "#111"; labelBox.border = border;
+    // visually join
+    iconBox.borderRight = "0";
+  }
+
+  if (skin === "framed") {
+    // white interior with colored outline (third screenshot)
+    iconBox.background  = "#fff"; iconBox.color  = base; iconBox.border  = `2px solid ${base}`;
+    labelBox.background = "#fff"; labelBox.color = base; labelBox.border = `2px solid ${base}`;
+    iconBox.borderRight = "0";
+  }
+
+  if (skin === "minimal") {
+    // white cards with thin colored stroke (fourth screenshot)
+    const stroke = `2px solid ${shade(base,-5)}`;
+    iconBox.background  = "#fff"; iconBox.color  = base;  iconBox.border  = stroke;
+    labelBox.background = "#fff"; labelBox.color = "#111"; labelBox.border = stroke;
+    iconBox.borderRight = "0";
+  }
+
+  if (skin === "gradient") {
+    // full-width gradient bar + darker band under icon (first screenshot)
+    const grad = `linear-gradient(90deg, ${shade(base,-8)} 0%, ${base} 55%, ${shade(base,10)} 100%)`;
+    iconBox.background  = `linear-gradient(90deg, ${shade(base,-25)} 0%, ${shade(base,-10)} 100%)`;
+    labelBox.background = grad;
+    iconBox.color = "#fff"; labelBox.color = "#fff";
+    // remove borders so it's a clean pill
+    iconBox.border = "none"; labelBox.border = "none";
+  }
+
+  /* Hover (same for all skins) */
+  const onHover = (e)=>{ e.currentTarget.style.filter = "brightness(.96)"; };
+  const offHover= (e)=>{ e.currentTarget.style.filter = "none"; };
+
+  return (
+    <button style={wrap} onMouseEnter={onHover} onMouseLeave={offHover}>
+      <span style={iconBox} aria-hidden>{token.icon}</span>
+      <span style={labelBox}>{label || token.name}</span>
+    </button>
+  );
+}
+Example list (renders exactly like your 5 screenshots)
+jsx
+Copy code
+import React, { useState } from "react";
+import SocialButton from "./SocialButton";
+
+export default function App() {
+  const [skin, setSkin] = useState("gradient"); // try: 'gradient'|'minimal'|'framed'|'boxIcon'|'flat'
+
+  const Row = (props) => <div style={{marginBottom:10}}><SocialButton size="md" shape="rounded" {...props} /></div>;
+
+  return (
+    <div style={{maxWidth:420, margin:"28px auto", padding:12, border:"2px solid #f1a8ff", borderRadius:12}}>
+      {/* QUICK TOGGLE */}
+      <div style={{display:"flex", gap:8, marginBottom:12, flexWrap:"wrap"}}>
+        {["gradient","minimal","framed","boxIcon","flat"].map(s => (
+          <button key={s} onClick={()=>setSkin(s)} style={{
+            padding:"6px 10px", borderRadius:8, border:"1px solid #bbb",
+            background: skin===s ? "#111" : "#fff", color: skin===s ? "#fff" : "#111", cursor:"pointer"
+          }}>{s}</button>
+        ))}
+      </div>
+
+      {/* LIST LIKE YOUR PREVIEW */}
+      <Row brand="facebook" skin={skin} />
+      <Row brand="twitter"  skin={skin} />
+      <Row brand="twitter"  skin={skin} />
+      <Row brand="linkedin" skin={skin} />
+    </div>
+  );
+}
+Notes that make it match your UI
+Gradient: label gets a full-width gradient; icon gets a slightly darker vertical band to mimic your left strip.
+
+Framed / Minimal: both sections receive the same border so the stroke stays continuous.
+
+Box Icon: both sides receive a border; label is white, icon is filled.
+
+Flat: both sides solid color.
