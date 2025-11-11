@@ -311,42 +311,37 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <PanelLabel>Border Color</PanelLabel>
-                <PanelColorPicker
-                  value={data.iconBorderColor || "transparent"}
-                  onChange={(e) => onChange({ ...data, iconBorderColor: e.target.value })}
-                />
-              </div>
-              <div>
-                <PanelLabel>Border Size (px)</PanelLabel>
-                <PanelInput
-                  type="number"
-                  value={data.iconBorderSize || "0"}
-                  onChange={(e) => onChange({ ...data, iconBorderSize: e.target.value })}
-                />
-              </div>
+            <div>
+              <PanelLabel>Border Color</PanelLabel>
+              <PanelColorPicker
+                value={data.iconBorderColor || "transparent"}
+                onChange={(e) => onChange({ ...data, iconBorderColor: e.target.value })}
+              />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <PanelLabel>Icon Size (px)</PanelLabel>
-                <PanelInput
-                  type="number"
-                  value={data.iconSize || "20"}
-                  onChange={(e) => onChange({ ...data, iconSize: e.target.value })}
-                />
-              </div>
-              <div>
-                <PanelLabel>Icon Bg Size (px)</PanelLabel>
-                <PanelInput
-                  type="number"
-                  value={data.iconBgSize || "40"}
-                  onChange={(e) => onChange({ ...data, iconBgSize: e.target.value })}
-                />
-              </div>
-            </div>
+            <PanelSlider
+              value={parseInt(data.iconBorderSize || "0")}
+              onChange={(value) => onChange({ ...data, iconBorderSize: value.toString() })}
+              min={0}
+              max={20}
+              label="Border Size"
+            />
+
+            <PanelSlider
+              value={parseInt(data.iconSize || "20")}
+              onChange={(value) => onChange({ ...data, iconSize: value.toString() })}
+              min={10}
+              max={100}
+              label="Icon Size"
+            />
+
+            <PanelSlider
+              value={parseInt(data.iconBgSize || "40")}
+              onChange={(value) => onChange({ ...data, iconBgSize: value.toString() })}
+              min={20}
+              max={200}
+              label="Icon Background Size"
+            />
 
             <div>
               <PanelLabel>View</PanelLabel>
