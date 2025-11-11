@@ -167,6 +167,7 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
     layout: true,
     outerContainer: true,
     iconContainer: true,
+    labelStyling: true,
   });
 
   const sensors = useSensors(
@@ -976,65 +977,24 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
           )}
         </SidebarSection>
 
-        {/* Label Border Styling */}
+        {/* Label Skin Matching */}
         <SidebarSection
-          title="Label Border"
-          isOpen={!collapsedSections.labelBorder}
-          onToggle={() => toggleSection("labelBorder")}
+          title="Label Styling"
+          isOpen={!collapsedSections.labelStyling}
+          onToggle={() => toggleSection("labelStyling")}
         >
           <PanelCheckbox
-            id="enableLabelBorder"
-            checked={data.labelBorder?.enabled || false}
+            id="enableLabelSkin"
+            checked={data.enableLabelSkin || false}
             onCheckedChange={(checked) => onChange({ 
               ...data, 
-              labelBorder: { ...(data.labelBorder || {}), enabled: checked }
+              enableLabelSkin: checked
             })}
-            label="Enable Label Border"
+            label="Match Label to Icon Skin"
           />
-
-          {data.labelBorder?.enabled && (
-            <>
-              <div>
-                <PanelLabel>Border Color</PanelLabel>
-                <PanelColorPicker
-                  value={data.labelBorder.color || "#000000"}
-                  onChange={(e) => onChange({ 
-                    ...data, 
-                    labelBorder: { ...(data.labelBorder || {}), color: e.target.value }
-                  })}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <PanelLabel>Border Width (px)</PanelLabel>
-                  <PanelSlider
-                    value={data.labelBorder.width || 1}
-                    onChange={(value) => onChange({ 
-                      ...data, 
-                      labelBorder: { ...(data.labelBorder || {}), width: value }
-                    })}
-                    min={0}
-                    max={10}
-                    label=""
-                  />
-                </div>
-                <div>
-                  <PanelLabel>Border Radius (px)</PanelLabel>
-                  <PanelSlider
-                    value={data.labelBorder.radius || 4}
-                    onChange={(value) => onChange({ 
-                      ...data, 
-                      labelBorder: { ...(data.labelBorder || {}), radius: value }
-                    })}
-                    min={0}
-                    max={20}
-                    label=""
-                  />
-                </div>
-              </div>
-            </>
-          )}
+          <p className="text-xs text-muted-foreground mt-1">
+            Apply the same border, background, and shape styling from icons to labels
+          </p>
         </SidebarSection>
       </div>
     </PanelWrapper>
