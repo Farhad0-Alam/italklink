@@ -126,23 +126,39 @@ interface SocialSectionData {
   shadowOffsetX?: string;
   shadowOffsetY?: string;
   shadowOpacity?: string;
-  // Container Styling
-  containerBackground?: string;
-  containerBorderColor?: string;
-  containerBorderWidth?: string;
-  containerBorderRadius?: string;
-  containerPadding?: string;
+  // Layout
   gap?: string;
-  enableContainerStyling?: boolean;
-  applyContainerToEachIcon?: boolean;
-  containerWidth?: string;
-  containerHeight?: string;
-  enableContainerShadow?: boolean;
-  containerShadowColor?: string;
-  containerShadowOpacity?: string;
-  containerShadowBlur?: string;
-  containerShadowOffsetX?: string;
-  containerShadowOffsetY?: string;
+  // Container Styling
+  outerContainer?: {
+    enabled?: boolean;
+    background?: string;
+    borderColor?: string;
+    borderWidth?: number;
+    borderRadius?: number;
+    padding?: number;
+    width?: string;
+    height?: string;
+    shadowEnabled?: boolean;
+    shadowColor?: string;
+    shadowOpacity?: number;
+    shadowBlur?: number;
+    shadowOffsetX?: number;
+    shadowOffsetY?: number;
+  };
+  iconContainer?: {
+    enabled?: boolean;
+    background?: string;
+    borderColor?: string;
+    borderWidth?: number;
+    borderRadius?: number;
+    padding?: number;
+    shadowEnabled?: boolean;
+    shadowColor?: string;
+    shadowOpacity?: number;
+    shadowBlur?: number;
+    shadowOffsetX?: number;
+    shadowOffsetY?: number;
+  };
 }
 
 interface SocialSectionEditorProps {
@@ -182,7 +198,9 @@ export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps
     hoverColor: true,
     fontStyling: true,
     dropShadow: true,
-    containerStyling: true,
+    layout: true,
+    outerContainer: true,
+    iconContainer: true,
   });
 
   const sensors = useSensors(
@@ -644,149 +662,350 @@ export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps
           </div>
         </SidebarSection>
 
-        {/* Container Styling */}
+        {/* Layout Options */}
         <SidebarSection
-          title="Social Container Styling"
-          isOpen={!collapsedSections.containerStyling}
-          onToggle={() => toggleSection("containerStyling")}
+          title="Layout Options"
+          isOpen={!collapsedSections.layout}
+          onToggle={() => toggleSection("layout")}
         >
-          <PanelCheckbox
-            id="enableContainerStyling"
-            checked={data.enableContainerStyling || false}
-            onCheckedChange={(checked) => onChange({ ...data, enableContainerStyling: checked })}
-            label="Enable Social Container Styling"
-          />
-
-          <PanelCheckbox
-            id="applyContainerToEachIcon"
-            checked={data.applyContainerToEachIcon || false}
-            onCheckedChange={(checked) => onChange({ ...data, applyContainerToEachIcon: checked })}
-            label="Apply Container to Each Icon"
-          />
-
           <div>
-            <PanelLabel>Container Background</PanelLabel>
-            <PanelColorPicker
-              value={data.containerBackground || "#ffffff"}
-              onChange={(e) => onChange({ ...data, containerBackground: e.target.value })}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <PanelLabel>Container Border</PanelLabel>
-              <PanelColorPicker
-                value={data.containerBorderColor || "#e5e7eb"}
-                onChange={(e) => onChange({ ...data, containerBorderColor: e.target.value })}
-              />
-            </div>
-            <div>
-              <PanelLabel>Border Width (px)</PanelLabel>
-              <PanelInput
-                type="number"
-                value={data.containerBorderWidth || "1"}
-                onChange={(e) => onChange({ ...data, containerBorderWidth: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <PanelLabel>Border Radius (px)</PanelLabel>
-              <PanelInput
-                type="number"
-                value={data.containerBorderRadius || "8"}
-                onChange={(e) => onChange({ ...data, containerBorderRadius: e.target.value })}
-              />
-            </div>
-            <div>
-              <PanelLabel>Container Padding (px)</PanelLabel>
-              <PanelInput
-                type="number"
-                value={data.containerPadding || "16"}
-                onChange={(e) => onChange({ ...data, containerPadding: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <PanelSlider
-            value={parseInt(data.containerWidth || "100")}
-            onChange={(value) => onChange({ ...data, containerWidth: value.toString() })}
-            min={0}
-            max={100}
-            label="Container Width"
-          />
-
-          <PanelSlider
-            value={parseInt(data.containerHeight || "200")}
-            onChange={(value) => onChange({ ...data, containerHeight: value.toString() })}
-            min={0}
-            max={500}
-            label="Container Height"
-          />
-
-          <PanelCheckbox
-            id="enableContainerShadow"
-            checked={data.enableContainerShadow || false}
-            onCheckedChange={(checked) => onChange({ ...data, enableContainerShadow: checked })}
-            label="Enable Container Drop Shadow"
-          />
-
-          {data.enableContainerShadow && (
-            <>
-              <div>
-                <PanelLabel>Shadow Color</PanelLabel>
-                <PanelColorPicker
-                  value={data.containerShadowColor || "#000000"}
-                  onChange={(e) => onChange({ ...data, containerShadowColor: e.target.value })}
-                />
-              </div>
-
-              <PanelSlider
-                value={parseInt(data.containerShadowOpacity || "10")}
-                onChange={(value) => onChange({ ...data, containerShadowOpacity: value.toString() })}
-                min={0}
-                max={100}
-                label="Shadow Opacity"
-              />
-
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <PanelLabel>Blur (px)</PanelLabel>
-                  <PanelInput
-                    type="number"
-                    value={data.containerShadowBlur || "10"}
-                    onChange={(e) => onChange({ ...data, containerShadowBlur: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <PanelLabel>Offset X</PanelLabel>
-                  <PanelInput
-                    type="number"
-                    value={data.containerShadowOffsetX || "0"}
-                    onChange={(e) => onChange({ ...data, containerShadowOffsetX: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <PanelLabel>Offset Y</PanelLabel>
-                  <PanelInput
-                    type="number"
-                    value={data.containerShadowOffsetY || "2"}
-                    onChange={(e) => onChange({ ...data, containerShadowOffsetY: e.target.value })}
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
-          <div>
-            <PanelLabel>Gap (px)</PanelLabel>
+            <PanelLabel>Gap Between Icons (px)</PanelLabel>
             <PanelInput
               type="number"
               value={data.gap || "12"}
               onChange={(e) => onChange({ ...data, gap: e.target.value })}
             />
           </div>
+        </SidebarSection>
+
+        {/* Outer Container Styling */}
+        <SidebarSection
+          title="Outer Container Styling"
+          isOpen={!collapsedSections.outerContainer}
+          onToggle={() => toggleSection("outerContainer")}
+        >
+          <PanelCheckbox
+            id="enableOuterContainer"
+            checked={data.outerContainer?.enabled || false}
+            onCheckedChange={(checked) => onChange({ 
+              ...data, 
+              outerContainer: { ...(data.outerContainer || {}), enabled: checked }
+            })}
+            label="Enable Outer Container"
+          />
+
+          {data.outerContainer?.enabled && (
+            <>
+              <div>
+                <PanelLabel>Background</PanelLabel>
+                <PanelColorPicker
+                  value={data.outerContainer.background || "#ffffff"}
+                  onChange={(e) => onChange({ 
+                    ...data, 
+                    outerContainer: { ...(data.outerContainer || {}), background: e.target.value }
+                  })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <PanelLabel>Border Color</PanelLabel>
+                  <PanelColorPicker
+                    value={data.outerContainer.borderColor || "#e5e7eb"}
+                    onChange={(e) => onChange({ 
+                      ...data, 
+                      outerContainer: { ...(data.outerContainer || {}), borderColor: e.target.value }
+                    })}
+                  />
+                </div>
+                <div>
+                  <PanelLabel>Border Width (px)</PanelLabel>
+                  <PanelSlider
+                    value={data.outerContainer.borderWidth || 1}
+                    onChange={(value) => onChange({ 
+                      ...data, 
+                      outerContainer: { ...(data.outerContainer || {}), borderWidth: value }
+                    })}
+                    min={0}
+                    max={20}
+                    label=""
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <PanelLabel>Border Radius (px)</PanelLabel>
+                  <PanelSlider
+                    value={data.outerContainer.borderRadius || 8}
+                    onChange={(value) => onChange({ 
+                      ...data, 
+                      outerContainer: { ...(data.outerContainer || {}), borderRadius: value }
+                    })}
+                    min={0}
+                    max={50}
+                    label=""
+                  />
+                </div>
+                <div>
+                  <PanelLabel>Padding (px)</PanelLabel>
+                  <PanelSlider
+                    value={data.outerContainer.padding || 16}
+                    onChange={(value) => onChange({ 
+                      ...data, 
+                      outerContainer: { ...(data.outerContainer || {}), padding: value }
+                    })}
+                    min={0}
+                    max={100}
+                    label=""
+                  />
+                </div>
+              </div>
+
+              <PanelCheckbox
+                id="enableOuterContainerShadow"
+                checked={data.outerContainer.shadowEnabled || false}
+                onCheckedChange={(checked) => onChange({ 
+                  ...data, 
+                  outerContainer: { ...(data.outerContainer || {}), shadowEnabled: checked }
+                })}
+                label="Enable Shadow"
+              />
+
+              {data.outerContainer.shadowEnabled && (
+                <>
+                  <div>
+                    <PanelLabel>Shadow Color</PanelLabel>
+                    <PanelColorPicker
+                      value={data.outerContainer.shadowColor || "#000000"}
+                      onChange={(e) => onChange({ 
+                        ...data, 
+                        outerContainer: { ...(data.outerContainer || {}), shadowColor: e.target.value }
+                      })}
+                    />
+                  </div>
+
+                  <PanelSlider
+                    value={data.outerContainer.shadowOpacity || 10}
+                    onChange={(value) => onChange({ 
+                      ...data, 
+                      outerContainer: { ...(data.outerContainer || {}), shadowOpacity: value }
+                    })}
+                    min={0}
+                    max={100}
+                    label="Shadow Opacity"
+                  />
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <PanelLabel>Blur (px)</PanelLabel>
+                      <PanelSlider
+                        value={data.outerContainer.shadowBlur || 10}
+                        onChange={(value) => onChange({ 
+                          ...data, 
+                          outerContainer: { ...(data.outerContainer || {}), shadowBlur: value }
+                        })}
+                        min={0}
+                        max={50}
+                        label=""
+                      />
+                    </div>
+                    <div>
+                      <PanelLabel>Offset X</PanelLabel>
+                      <PanelSlider
+                        value={data.outerContainer.shadowOffsetX || 0}
+                        onChange={(value) => onChange({ 
+                          ...data, 
+                          outerContainer: { ...(data.outerContainer || {}), shadowOffsetX: value }
+                        })}
+                        min={-50}
+                        max={50}
+                        label=""
+                      />
+                    </div>
+                    <div>
+                      <PanelLabel>Offset Y</PanelLabel>
+                      <PanelSlider
+                        value={data.outerContainer.shadowOffsetY || 4}
+                        onChange={(value) => onChange({ 
+                          ...data, 
+                          outerContainer: { ...(data.outerContainer || {}), shadowOffsetY: value }
+                        })}
+                        min={-50}
+                        max={50}
+                        label=""
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </SidebarSection>
+
+        {/* Individual Icon Container Styling */}
+        <SidebarSection
+          title="Individual Icon Containers"
+          isOpen={!collapsedSections.iconContainer}
+          onToggle={() => toggleSection("iconContainer")}
+        >
+          <PanelCheckbox
+            id="enableIconContainer"
+            checked={data.iconContainer?.enabled || false}
+            onCheckedChange={(checked) => onChange({ 
+              ...data, 
+              iconContainer: { ...(data.iconContainer || {}), enabled: checked }
+            })}
+            label="Enable Icon Containers"
+          />
+
+          {data.iconContainer?.enabled && (
+            <>
+              <div>
+                <PanelLabel>Background</PanelLabel>
+                <PanelColorPicker
+                  value={data.iconContainer.background || "#ffffff"}
+                  onChange={(e) => onChange({ 
+                    ...data, 
+                    iconContainer: { ...(data.iconContainer || {}), background: e.target.value }
+                  })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <PanelLabel>Border Color</PanelLabel>
+                  <PanelColorPicker
+                    value={data.iconContainer.borderColor || "#e5e7eb"}
+                    onChange={(e) => onChange({ 
+                      ...data, 
+                      iconContainer: { ...(data.iconContainer || {}), borderColor: e.target.value }
+                    })}
+                  />
+                </div>
+                <div>
+                  <PanelLabel>Border Width (px)</PanelLabel>
+                  <PanelSlider
+                    value={data.iconContainer.borderWidth || 1}
+                    onChange={(value) => onChange({ 
+                      ...data, 
+                      iconContainer: { ...(data.iconContainer || {}), borderWidth: value }
+                    })}
+                    min={0}
+                    max={20}
+                    label=""
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <PanelLabel>Border Radius (px)</PanelLabel>
+                  <PanelSlider
+                    value={data.iconContainer.borderRadius || 8}
+                    onChange={(value) => onChange({ 
+                      ...data, 
+                      iconContainer: { ...(data.iconContainer || {}), borderRadius: value }
+                    })}
+                    min={0}
+                    max={50}
+                    label=""
+                  />
+                </div>
+                <div>
+                  <PanelLabel>Padding (px)</PanelLabel>
+                  <PanelSlider
+                    value={data.iconContainer.padding || 16}
+                    onChange={(value) => onChange({ 
+                      ...data, 
+                      iconContainer: { ...(data.iconContainer || {}), padding: value }
+                    })}
+                    min={0}
+                    max={100}
+                    label=""
+                  />
+                </div>
+              </div>
+
+              <PanelCheckbox
+                id="enableIconContainerShadow"
+                checked={data.iconContainer.shadowEnabled || false}
+                onCheckedChange={(checked) => onChange({ 
+                  ...data, 
+                  iconContainer: { ...(data.iconContainer || {}), shadowEnabled: checked }
+                })}
+                label="Enable Shadow"
+              />
+
+              {data.iconContainer.shadowEnabled && (
+                <>
+                  <div>
+                    <PanelLabel>Shadow Color</PanelLabel>
+                    <PanelColorPicker
+                      value={data.iconContainer.shadowColor || "#000000"}
+                      onChange={(e) => onChange({ 
+                        ...data, 
+                        iconContainer: { ...(data.iconContainer || {}), shadowColor: e.target.value }
+                      })}
+                    />
+                  </div>
+
+                  <PanelSlider
+                    value={data.iconContainer.shadowOpacity || 10}
+                    onChange={(value) => onChange({ 
+                      ...data, 
+                      iconContainer: { ...(data.iconContainer || {}), shadowOpacity: value }
+                    })}
+                    min={0}
+                    max={100}
+                    label="Shadow Opacity"
+                  />
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <PanelLabel>Blur (px)</PanelLabel>
+                      <PanelSlider
+                        value={data.iconContainer.shadowBlur || 10}
+                        onChange={(value) => onChange({ 
+                          ...data, 
+                          iconContainer: { ...(data.iconContainer || {}), shadowBlur: value }
+                        })}
+                        min={0}
+                        max={50}
+                        label=""
+                      />
+                    </div>
+                    <div>
+                      <PanelLabel>Offset X</PanelLabel>
+                      <PanelSlider
+                        value={data.iconContainer.shadowOffsetX || 0}
+                        onChange={(value) => onChange({ 
+                          ...data, 
+                          iconContainer: { ...(data.iconContainer || {}), shadowOffsetX: value }
+                        })}
+                        min={-50}
+                        max={50}
+                        label=""
+                      />
+                    </div>
+                    <div>
+                      <PanelLabel>Offset Y</PanelLabel>
+                      <PanelSlider
+                        value={data.iconContainer.shadowOffsetY || 4}
+                        onChange={(value) => onChange({ 
+                          ...data, 
+                          iconContainer: { ...(data.iconContainer || {}), shadowOffsetY: value }
+                        })}
+                        min={-50}
+                        max={50}
+                        label=""
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </SidebarSection>
       </div>
     </PanelWrapper>

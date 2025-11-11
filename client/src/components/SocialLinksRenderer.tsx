@@ -49,22 +49,9 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
     shadowOffsetX = 0,
     shadowOffsetY = 2,
     shadowOpacity = 25,
-    containerBackground = "#ffffff",
-    containerBorderColor = "#e5e7eb",
-    containerBorderWidth = 1,
-    containerBorderRadius = 8,
-    containerPadding = 16,
     gap,
-    enableContainerStyling = false,
-    applyContainerToEachIcon = false,
-    containerWidth = "100%",
-    containerHeight = "auto",
-    enableContainerShadow = false,
-    containerShadowColor = "#000000",
-    containerShadowOpacity = 10,
-    containerShadowBlur = 10,
-    containerShadowOffsetX = 0,
-    containerShadowOffsetY = 4,
+    outerContainer,
+    iconContainer,
   } = data;
 
   // Build styles with useMemo for performance
@@ -109,20 +96,39 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
       color: textColor,
     };
 
-    const containerStyle: React.CSSProperties = enableContainerStyling
+    // Outer Container Style (wraps all icons)
+    const outerContainerStyle: React.CSSProperties = outerContainer?.enabled
       ? {
-          backgroundColor: containerBackground,
-          borderColor: containerBorderColor,
-          borderWidth: `${containerBorderWidth}px`,
-          borderStyle: containerBorderWidth > 0 ? "solid" : "none",
-          borderRadius: `${containerBorderRadius}px`,
-          padding: `${containerPadding}px`,
-          width: containerWidth,
-          height: containerHeight,
-          boxShadow: enableContainerShadow
-            ? `${containerShadowOffsetX}px ${containerShadowOffsetY}px ${containerShadowBlur}px ${hexToRgba(
-                containerShadowColor,
-                containerShadowOpacity / 100
+          backgroundColor: outerContainer.background ?? "#ffffff",
+          borderColor: outerContainer.borderColor ?? "#e5e7eb",
+          borderWidth: `${outerContainer.borderWidth ?? 1}px`,
+          borderStyle: (outerContainer.borderWidth ?? 1) > 0 ? "solid" : "none",
+          borderRadius: `${outerContainer.borderRadius ?? 8}px`,
+          padding: `${outerContainer.padding ?? 16}px`,
+          width: outerContainer.width ?? "100%",
+          height: outerContainer.height ?? "auto",
+          boxShadow: outerContainer.shadowEnabled
+            ? `${outerContainer.shadowOffsetX ?? 0}px ${outerContainer.shadowOffsetY ?? 4}px ${outerContainer.shadowBlur ?? 10}px ${hexToRgba(
+                outerContainer.shadowColor ?? "#000000",
+                (outerContainer.shadowOpacity ?? 10) / 100
+              )}`
+            : "none",
+        }
+      : {};
+
+    // Icon Container Style (each individual icon)
+    const itemContainerStyle: React.CSSProperties = iconContainer?.enabled
+      ? {
+          backgroundColor: iconContainer.background ?? "#ffffff",
+          borderColor: iconContainer.borderColor ?? "#e5e7eb",
+          borderWidth: `${iconContainer.borderWidth ?? 1}px`,
+          borderStyle: (iconContainer.borderWidth ?? 1) > 0 ? "solid" : "none",
+          borderRadius: `${iconContainer.borderRadius ?? 8}px`,
+          padding: `${iconContainer.padding ?? 16}px`,
+          boxShadow: iconContainer.shadowEnabled
+            ? `${iconContainer.shadowOffsetX ?? 0}px ${iconContainer.shadowOffsetY ?? 4}px ${iconContainer.shadowBlur ?? 10}px ${hexToRgba(
+                iconContainer.shadowColor ?? "#000000",
+                (iconContainer.shadowOpacity ?? 10) / 100
               )}`
             : "none",
         }
@@ -134,7 +140,8 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
       iconContainerStyle,
       iconStyle,
       labelStyle,
-      containerStyle,
+      outerContainerStyle,
+      itemContainerStyle,
     };
   }, [
     iconWidth,
@@ -156,20 +163,8 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
     textColor,
     shape,
     alignment,
-    enableContainerStyling,
-    containerBackground,
-    containerBorderColor,
-    containerBorderWidth,
-    containerBorderRadius,
-    containerPadding,
-    containerWidth,
-    containerHeight,
-    enableContainerShadow,
-    containerShadowColor,
-    containerShadowOpacity,
-    containerShadowBlur,
-    containerShadowOffsetX,
-    containerShadowOffsetY,
+    outerContainer,
+    iconContainer,
   ]);
 
   // Filter socials with URLs
@@ -219,19 +214,8 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
     ? "items-center"
     : "items-center";
 
-  // Determine where to apply container styling
-  // When applyContainerToEachIcon is false (default): apply to outer wrapper, give items basic padding for clickability
-  // When applyContainerToEachIcon is true: apply to each icon individually, no outer wrapper styling
-  const outerContainerStyle = enableContainerStyling && !applyContainerToEachIcon ? styles.containerStyle : {};
-  const itemContainerStyle = enableContainerStyling && applyContainerToEachIcon 
-    ? styles.containerStyle 
-    : {}; 
-  
-  // Add minimal padding to items when outer wrapper has container (for clickability)
-  const itemBasePadding = enableContainerStyling && !applyContainerToEachIcon ? { padding: '8px' } : {};
-
   return (
-    <div className="mb-6" style={outerContainerStyle}>
+    <div className="mb-6" style={styles.outerContainerStyle}>
       <div
         className={useGrid ? "" : styles.alignmentClass}
         style={containerLayoutStyle}
@@ -242,8 +226,7 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
             className={`group flex ${itemFlexClass} ${itemAlignClass} cursor-pointer`}
             onClick={() => handleSocialClick(social)}
             style={{
-              ...itemContainerStyle,
-              ...itemBasePadding,
+              ...styles.itemContainerStyle,
               "--icon-hover-color": enableHoverColor ? iconHoverColor : iconColor,
               "--bg-hover-color": enableHoverColor ? bgHoverColor : iconBgColor,
               flexDirection: textPosition === "left" ? "row-reverse" : 
