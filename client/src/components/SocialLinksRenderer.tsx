@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { PageElement } from "@shared/schema";
+import { getSkinStyles } from "@/lib/skin-presets";
 
 // Helper function to convert hex color to rgba
 function hexToRgba(hex: string, alpha: number = 1): string {
@@ -71,10 +72,13 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
       justified: "justify-between",
     };
 
+    // Get skin preset styles
+    const skinStyles = getSkinStyles(skin, iconColor, enableLabelSkin);
+
     const iconContainerStyle: React.CSSProperties = {
       width: `${iconWidth}px`,
       height: `${iconHeight}px`,
-      backgroundColor: iconBgColor,
+      background: skinStyles.icon.background || iconBgColor,
       borderColor: iconBorderColor,
       borderWidth: `${iconBorderSize}px`,
       borderStyle: iconBorderSize > 0 ? "solid" : "none",
@@ -82,11 +86,13 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
         shadowColor,
         shadowOpacity / 100
       )}`,
+      ...skinStyles.icon.border && { border: skinStyles.icon.border },
+      ...skinStyles.icon.borderRight && { borderRight: skinStyles.icon.borderRight },
     };
 
     const iconStyle: React.CSSProperties = {
       fontSize: `${iconSize}px`,
-      color: iconColor,
+      color: skinStyles.icon.color || iconColor,
     };
 
     const labelStyle: React.CSSProperties = {
@@ -94,14 +100,13 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
       fontSize: `${fontSize}px`,
       fontWeight,
       fontStyle,
-      color: textColor,
+      color: enableLabelSkin ? (skinStyles.label.color || textColor) : textColor,
       ...(enableLabelSkin && {
-        borderColor: iconBorderColor,
-        borderWidth: `${iconBorderSize}px`,
-        borderStyle: iconBorderSize > 0 ? "solid" : "none",
-        backgroundColor: iconBgColor,
+        background: skinStyles.label.background,
         padding: "4px 12px",
         display: "inline-block",
+        ...skinStyles.label.border && { border: skinStyles.label.border },
+        ...skinStyles.label.borderBottom && { borderBottom: skinStyles.label.borderBottom },
       }),
     };
 
@@ -153,6 +158,7 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
       itemContainerStyle,
     };
   }, [
+    skin,
     iconWidth,
     iconHeight,
     iconBgColor,
@@ -175,9 +181,6 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
     outerContainer,
     iconContainer,
     enableLabelSkin,
-    iconBorderColor,
-    iconBorderSize,
-    iconBgColor,
   ]);
 
   // Filter socials with URLs
