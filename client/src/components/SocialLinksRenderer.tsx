@@ -52,7 +52,7 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
     gap,
     outerContainer,
     iconContainer,
-    labelBorder,
+    enableLabelSkin = false,
   } = data;
 
   // Build styles with useMemo for performance
@@ -95,12 +95,12 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
       fontWeight,
       fontStyle,
       color: textColor,
-      ...(labelBorder?.enabled && {
-        borderColor: labelBorder.color ?? "#000000",
-        borderWidth: `${labelBorder.width ?? 1}px`,
-        borderStyle: "solid",
-        borderRadius: `${labelBorder.radius ?? 4}px`,
-        padding: "4px 8px",
+      ...(enableLabelSkin && {
+        borderColor: iconBorderColor,
+        borderWidth: `${iconBorderSize}px`,
+        borderStyle: iconBorderSize > 0 ? "solid" : "none",
+        backgroundColor: iconBgColor,
+        padding: "4px 12px",
         display: "inline-block",
       }),
     };
@@ -174,7 +174,10 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
     alignment,
     outerContainer,
     iconContainer,
-    labelBorder,
+    enableLabelSkin,
+    iconBorderColor,
+    iconBorderSize,
+    iconBgColor,
   ]);
 
   // Filter socials with URLs
@@ -263,7 +266,7 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
             {/* Label */}
             {view !== "icon-only" && showLabel && (
               <span 
-                className={`${textPosition === "left" || textPosition === "right" ? "ml-2" : "mt-1"} text-center`}
+                className={`${textPosition === "left" || textPosition === "right" ? "ml-2" : "mt-1"} text-center ${enableLabelSkin ? styles.shapeClass : ""}`}
                 style={styles.labelStyle}
               >
                 {social.label || social.platform}
