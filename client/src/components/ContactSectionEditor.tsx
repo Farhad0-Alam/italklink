@@ -421,6 +421,28 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
               label="Show Label"
             />
 
+            {/* Label Styling */}
+            <div className="mt-2">
+              <SidebarSection
+                title="Label Styling"
+                isOpen={!collapsedSections.labelStyling}
+                onToggle={() => toggleSection("labelStyling")}
+              >
+                <PanelCheckbox
+                  id="enableLabelSkin"
+                  checked={data.enableLabelSkin || false}
+                  onCheckedChange={(checked) => onChange({ 
+                    ...data, 
+                    enableLabelSkin: checked
+                  })}
+                  label="Match Label to Icon Skin"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Apply the same border, background, and shape styling from icons to labels
+                </p>
+              </SidebarSection>
+            </div>
+
             <div>
               <PanelLabel>Skin</PanelLabel>
               <PanelSelect
@@ -975,26 +997,6 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
               )}
             </>
           )}
-        </SidebarSection>
-
-        {/* Label Skin Matching */}
-        <SidebarSection
-          title="Label Styling"
-          isOpen={!collapsedSections.labelStyling}
-          onToggle={() => toggleSection("labelStyling")}
-        >
-          <PanelCheckbox
-            id="enableLabelSkin"
-            checked={data.enableLabelSkin || false}
-            onCheckedChange={(checked) => onChange({ 
-              ...data, 
-              enableLabelSkin: checked
-            })}
-            label="Match Label to Icon Skin"
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Apply the same border, background, and shape styling from icons to labels
-          </p>
         </SidebarSection>
       </div>
     </PanelWrapper>
