@@ -1007,6 +1007,67 @@ export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps
             </>
           )}
         </SidebarSection>
+
+        {/* Label Border Styling */}
+        <SidebarSection
+          title="Label Border"
+          isOpen={!collapsedSections.labelBorder}
+          onToggle={() => toggleSection("labelBorder")}
+        >
+          <PanelCheckbox
+            id="enableLabelBorder"
+            checked={data.labelBorder?.enabled || false}
+            onCheckedChange={(checked) => onChange({ 
+              ...data, 
+              labelBorder: { ...(data.labelBorder || {}), enabled: checked }
+            })}
+            label="Enable Label Border"
+          />
+
+          {data.labelBorder?.enabled && (
+            <>
+              <div>
+                <PanelLabel>Border Color</PanelLabel>
+                <PanelColorPicker
+                  value={data.labelBorder.color || "#000000"}
+                  onChange={(e) => onChange({ 
+                    ...data, 
+                    labelBorder: { ...(data.labelBorder || {}), color: e.target.value }
+                  })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <PanelLabel>Border Width (px)</PanelLabel>
+                  <PanelSlider
+                    value={data.labelBorder.width || 1}
+                    onChange={(value) => onChange({ 
+                      ...data, 
+                      labelBorder: { ...(data.labelBorder || {}), width: value }
+                    })}
+                    min={0}
+                    max={10}
+                    label=""
+                  />
+                </div>
+                <div>
+                  <PanelLabel>Border Radius (px)</PanelLabel>
+                  <PanelSlider
+                    value={data.labelBorder.radius || 4}
+                    onChange={(value) => onChange({ 
+                      ...data, 
+                      labelBorder: { ...(data.labelBorder || {}), radius: value }
+                    })}
+                    min={0}
+                    max={20}
+                    label=""
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </SidebarSection>
       </div>
     </PanelWrapper>
   );
