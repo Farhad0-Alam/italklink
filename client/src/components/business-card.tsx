@@ -310,9 +310,30 @@ export const BusinessCardComponent = forwardRef<
       
       // Get animation colors (use brand color if useBrandColor is true)
       const useBrandColor = styles.useBrandColor !== false; // Default to true
+      
+      // Get gradient configuration
+      const animationGradient = styles.animationGradient || {};
+      const gradientStops = animationGradient.stops || [
+        { color: data.brandColor || "#4ecdc4", stop: 0 },
+        { color: data.accentColor || "#f093fb", stop: 100 }
+      ];
+      const gradientAngle = animationGradient.angle || 90;
+      const gradientType = animationGradient.type || 'linear';
+      
+      // Build gradient CSS string from stops, honoring type in both brand and custom modes
+      const gradientCss = useBrandColor 
+        ? (gradientType === 'linear'
+            ? `linear-gradient(${gradientAngle}deg, ${defaultBorderColor} 0%, ${data.accentColor || defaultBorderColor} 100%)`
+            : `radial-gradient(circle, ${defaultBorderColor} 0%, ${data.accentColor || defaultBorderColor} 100%)`)
+        : (gradientType === 'linear'
+            ? `linear-gradient(${gradientAngle}deg, ${gradientStops.map(s => `${s.color} ${s.stop}%`).join(', ')})`
+            : `radial-gradient(circle, ${gradientStops.map(s => `${s.color} ${s.stop}%`).join(', ')})`);
+      
+      // Fallback to simple colors for non-gradient animations (neon)
+      // Preserve legacy two-color system for backward compatibility
       const animationColors = styles.animationColors || {};
       const primaryAnimColor = useBrandColor ? defaultBorderColor : (animationColors.primary || defaultBorderColor);
-      const secondaryAnimColor = useBrandColor ? (data.accentColor || defaultBorderColor) : (animationColors.secondary || defaultBorderColor);
+      const secondaryAnimColor = useBrandColor ? (data.accentColor || defaultBorderColor) : (animationColors.secondary || data.accentColor || defaultBorderColor);
 
       // Border radius based on shape
       const borderRadius = 
@@ -352,12 +373,15 @@ export const BusinessCardComponent = forwardRef<
 
       // For animated borders, add CSS variables for custom colors
       if (animation !== "none") {
-        wrapperStyles['--profile-anim-color-1' as any] = primaryAnimColor;
-        wrapperStyles['--profile-anim-color-2' as any] = secondaryAnimColor;
+        wrapperStyles['--profile-gradient' as any] = gradientCss;
+        wrapperStyles['--profile-anim-color-1' as any] = primaryAnimColor; // For neon animation
+        wrapperStyles['--profile-anim-color-2' as any] = secondaryAnimColor; // For legacy two-color animations
         wrapperStyles['--profile-border-width' as any] = `${borderWidth}px`;
         
-        // Apply to image for direct animations
+        // Apply to image for direct animations (neon, wave)
+        imageStyles['--profile-gradient' as any] = gradientCss;
         imageStyles['--profile-anim-color-1' as any] = primaryAnimColor;
+        imageStyles['--profile-anim-color-2' as any] = secondaryAnimColor;
         imageStyles['--profile-border-width' as any] = `${borderWidth}px`;
       }
 

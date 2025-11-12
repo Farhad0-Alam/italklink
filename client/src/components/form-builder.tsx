@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
-import { HexColorPicker } from "react-colorful";
+import { GradientBuilder, type GradientConfig } from "@/components/GradientBuilder";
 import { PageBuilder } from "@/modules/form-builder/components/PageBuilder";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -705,8 +705,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Animation Color Controls - Only show when animation is selected */}
                           {(watchedValues.profileImageStyles?.animation && 
                             watchedValues.profileImageStyles?.animation !== "none") && (
-                            <div className="space-y-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-                              <div className="flex items-center justify-between">
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700">
                                 <Label className="text-xs text-slate-300">Use Brand Color</Label>
                                 <input
                                   type="checkbox"
@@ -718,91 +718,65 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                               </div>
 
-                              {/* Only show color pickers if not using brand color */}
-                              {watchedValues.profileImageStyles?.useBrandColor === false && (
-                                <>
-                                  {/* Primary Animation Color */}
-                                  <div>
-                                    <Label className="text-xs text-slate-400 mb-2 block">
-                                      Primary Color
-                                    </Label>
-                                    <div className="space-y-2">
-                                      <HexColorPicker
-                                        color={watchedValues.profileImageStyles?.animationColors?.primary || watchedValues.brandColor || "#4ecdc4"}
-                                        onChange={(color) => {
+                              {/* Gradient Builder for gradient animations */}
+                              {["instagram", "wave", "gradient-slide", "shimmer"].includes(watchedValues.profileImageStyles?.animation) && (
+                                <GradientBuilder
+                                  value={{
+                                    type: watchedValues.profileImageStyles?.animationGradient?.type || 'linear',
+                                    angle: watchedValues.profileImageStyles?.animationGradient?.angle || 90,
+                                    stops: watchedValues.profileImageStyles?.animationGradient?.stops || [
+                                      { color: watchedValues.brandColor || "#4ecdc4", stop: 0 },
+                                      { color: watchedValues.accentColor || "#f093fb", stop: 100 }
+                                    ]
+                                  }}
+                                  onChange={(gradient: GradientConfig) => {
+                                    form.setValue("profileImageStyles.animationGradient", gradient);
+                                  }}
+                                  useBrandColors={watchedValues.profileImageStyles?.useBrandColor !== false}
+                                  brandColor={watchedValues.brandColor}
+                                  accentColor={watchedValues.accentColor}
+                                />
+                              )}
+
+                              {/* Single color picker for non-gradient animations (neon) */}
+                              {watchedValues.profileImageStyles?.animation === "neon" && 
+                               watchedValues.profileImageStyles?.useBrandColor === false && (
+                                <div className="space-y-2 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                                  <Label className="text-xs text-slate-400 mb-2 block">
+                                    Glow Color
+                                  </Label>
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="color"
+                                      value={watchedValues.profileImageStyles?.animationColors?.primary || watchedValues.brandColor || "#4ecdc4"}
+                                      onChange={(e) => {
+                                        const currentColors = watchedValues.profileImageStyles?.animationColors || {};
+                                        form.setValue("profileImageStyles.animationColors", {
+                                          ...currentColors,
+                                          primary: e.target.value
+                                        });
+                                      }}
+                                      className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                                    />
+                                    <Input
+                                      type="text"
+                                      value={(watchedValues.profileImageStyles?.animationColors?.primary || watchedValues.brandColor || "#4ecdc4").replace('#', '')}
+                                      onChange={(e) => {
+                                        const hex = e.target.value.replace(/[^0-9A-Fa-f]/g, '').slice(0, 6);
+                                        if (hex.length === 6) {
                                           const currentColors = watchedValues.profileImageStyles?.animationColors || {};
                                           form.setValue("profileImageStyles.animationColors", {
                                             ...currentColors,
-                                            primary: color
+                                            primary: `#${hex}`
                                           });
-                                        }}
-                                        style={{ width: '100%', height: '150px' }}
-                                      />
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-xs text-slate-500">#</span>
-                                        <Input
-                                          type="text"
-                                          value={(watchedValues.profileImageStyles?.animationColors?.primary || watchedValues.brandColor || "#4ecdc4").replace('#', '')}
-                                          onChange={(e) => {
-                                            const hex = e.target.value.replace(/[^0-9A-Fa-f]/g, '').slice(0, 6);
-                                            if (hex.length === 6) {
-                                              const currentColors = watchedValues.profileImageStyles?.animationColors || {};
-                                              form.setValue("profileImageStyles.animationColors", {
-                                                ...currentColors,
-                                                primary: `#${hex}`
-                                              });
-                                            }
-                                          }}
-                                          className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-xs font-mono uppercase"
-                                          maxLength={6}
-                                          placeholder="004E92"
-                                        />
-                                      </div>
-                                    </div>
+                                        }
+                                      }}
+                                      className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-xs font-mono uppercase"
+                                      maxLength={6}
+                                      placeholder="4ECDC4"
+                                    />
                                   </div>
-
-                                  {/* Secondary Color - Only for gradient animations */}
-                                  {["instagram", "wave", "gradient-slide"].includes(watchedValues.profileImageStyles?.animation) && (
-                                    <div>
-                                      <Label className="text-xs text-slate-400 mb-2 block">
-                                        Secondary Color (Gradient)
-                                      </Label>
-                                      <div className="space-y-2">
-                                        <HexColorPicker
-                                          color={watchedValues.profileImageStyles?.animationColors?.secondary || watchedValues.accentColor || "#f093fb"}
-                                          onChange={(color) => {
-                                            const currentColors = watchedValues.profileImageStyles?.animationColors || {};
-                                            form.setValue("profileImageStyles.animationColors", {
-                                              ...currentColors,
-                                              secondary: color
-                                            });
-                                          }}
-                                          style={{ width: '100%', height: '150px' }}
-                                        />
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-xs text-slate-500">#</span>
-                                          <Input
-                                            type="text"
-                                            value={(watchedValues.profileImageStyles?.animationColors?.secondary || watchedValues.accentColor || "#f093fb").replace('#', '')}
-                                            onChange={(e) => {
-                                              const hex = e.target.value.replace(/[^0-9A-Fa-f]/g, '').slice(0, 6);
-                                              if (hex.length === 6) {
-                                                const currentColors = watchedValues.profileImageStyles?.animationColors || {};
-                                                form.setValue("profileImageStyles.animationColors", {
-                                                  ...currentColors,
-                                                  secondary: `#${hex}`
-                                                });
-                                              }
-                                            }}
-                                            className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-xs font-mono uppercase"
-                                            maxLength={6}
-                                            placeholder="F093FB"
-                                          />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-                                </>
+                                </div>
                               )}
                             </div>
                           )}

@@ -48,8 +48,10 @@ export function GradientBuilder({
   };
 
   const handleStopPositionChange = (index: number, stop: number) => {
+    // Clamp stop position between 0 and 100
+    const clampedStop = Math.max(0, Math.min(100, stop));
     const newStops = [...value.stops];
-    newStops[index] = { ...newStops[index], stop };
+    newStops[index] = { ...newStops[index], stop: clampedStop };
     onChange({ ...value, stops: newStops });
   };
 
@@ -69,9 +71,10 @@ export function GradientBuilder({
     if (expandedStop === index) setExpandedStop(null);
   };
 
-  const gradientPreview = `linear-gradient(${value.angle}deg, ${value.stops
-    .map(s => `${s.color} ${s.stop}%`)
-    .join(', ')})`;
+  // Generate gradient preview based on type
+  const gradientPreview = value.type === 'linear'
+    ? `linear-gradient(${value.angle}deg, ${value.stops.map(s => `${s.color} ${s.stop}%`).join(', ')})`
+    : `radial-gradient(circle, ${value.stops.map(s => `${s.color} ${s.stop}%`).join(', ')})`;
 
   return (
     <div className="space-y-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
@@ -87,35 +90,33 @@ export function GradientBuilder({
 
       {!useBrandColors && (
         <>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-xs text-slate-400 mb-2 block">Type</Label>
-              <select
-                value={value.type}
-                onChange={(e) => handleTypeChange(e.target.value as 'linear' | 'radial')}
-                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-sm"
-              >
-                <option value="linear">Linear</option>
-                <option value="radial">Radial</option>
-              </select>
-            </div>
-
-            {value.type === 'linear' && (
-              <div>
-                <Label className="text-xs text-slate-400 mb-2 block">
-                  Angle: {value.angle}°
-                </Label>
-                <input
-                  type="range"
-                  min={0}
-                  max={360}
-                  value={value.angle}
-                  onChange={(e) => handleAngleChange(parseInt(e.target.value))}
-                  className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
-                />
-              </div>
-            )}
+          <div>
+            <Label className="text-xs text-slate-400 mb-2 block">Type</Label>
+            <select
+              value={value.type}
+              onChange={(e) => handleTypeChange(e.target.value as 'linear' | 'radial')}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-sm"
+            >
+              <option value="linear">Linear</option>
+              <option value="radial">Radial</option>
+            </select>
           </div>
+
+          {value.type === 'linear' && (
+            <div>
+              <Label className="text-xs text-slate-400 mb-2 block">
+                Angle: {value.angle}°
+              </Label>
+              <input
+                type="range"
+                min={0}
+                max={360}
+                value={value.angle}
+                onChange={(e) => handleAngleChange(parseInt(e.target.value))}
+                className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+              />
+            </div>
+          )}
 
           <div>
             <div className="flex items-center justify-between mb-3">

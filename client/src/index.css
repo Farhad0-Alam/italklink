@@ -876,14 +876,7 @@
   content: '';
   position: absolute;
   inset: calc(-1 * var(--profile-border-width, 4px));
-  background: linear-gradient(
-    45deg,
-    var(--profile-anim-color-1, #f09433) 0%,
-    var(--profile-anim-color-2, #e6683c) 25%,
-    var(--profile-anim-color-1, #dc2743) 50%,
-    var(--profile-anim-color-2, #cc2366) 75%,
-    var(--profile-anim-color-1, #bc1888) 100%
-  );
+  background: var(--profile-gradient, linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%));
   background-size: 200% 200%;
   border-radius: inherit;
   animation: instagram-spin 3s linear infinite;
@@ -899,6 +892,7 @@
   animation: color-wave 4s ease-in-out infinite;
   border-width: var(--profile-border-width, 4px);
   border-style: solid;
+  border-color: var(--profile-anim-color-1, #4ecdc4);
 }
 
 .profile-image-shimmer {
@@ -913,15 +907,11 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--profile-anim-color-1, #ffffff) 40%, transparent),
-    transparent
-  );
+  background: var(--profile-gradient, linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent));
   background-size: 200% 100%;
   animation: shimmer 2s linear infinite;
   border-radius: inherit;
+  pointer-events: none;
 }
 
 .profile-image-gradient-slide {
@@ -932,14 +922,7 @@
   content: '';
   position: absolute;
   inset: calc(-1 * var(--profile-border-width, 4px));
-  background: linear-gradient(
-    45deg,
-    var(--profile-anim-color-1, #667eea) 0%,
-    var(--profile-anim-color-2, #764ba2) 25%,
-    var(--profile-anim-color-1, #f093fb) 50%,
-    var(--profile-anim-color-2, #4facfe) 75%,
-    var(--profile-anim-color-1, #667eea) 100%
-  );
+  background: var(--profile-gradient, linear-gradient(45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #667eea 100%));
   background-size: 300% 300%;
   border-radius: inherit;
   animation: gradient-slide 4s ease infinite;
