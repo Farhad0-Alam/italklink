@@ -7,15 +7,18 @@ import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import i18n from "./lib/i18n";
 
-// Eager load only critical pages (Landing, Login, Dashboard)
-import Landing from "./pages/landing";
-import Login from "./pages/login";
-import Register from "./pages/register";
-import Dashboard from "./pages/dashboard";
-import ForgotPassword from "./pages/forgot-password";
-import ResetPassword from "./pages/reset-password";
+// Lazy load Landing to reduce initial bundle size (it imports framer-motion + 30+ icons)
+const Landing = lazy(() => import("./pages/landing"));
+
+// Lazy load auth pages - they're not needed until user navigates to them
+const Login = lazy(() => import("./pages/login"));
+const Register = lazy(() => import("./pages/register"));
+const Dashboard = lazy(() => import("./pages/dashboard"));
+const ForgotPassword = lazy(() => import("./pages/forgot-password"));
+const ResetPassword = lazy(() => import("./pages/reset-password"));
 
 // Lazy load all other pages to improve initial load performance
 const MyLinks = lazy(() => import("./pages/my-links"));
@@ -52,7 +55,7 @@ const LazyCardRoutes = lazy(() => import("@/modules/multi-page").then(module => 
 
 // Loading component for lazy-loaded routes
 const PageSuspense = ({ children }: { children: React.ReactNode }) => (
-  <Suspense fallback={<div className="min-h-screen bg-gray-50"></div>}>
+  <Suspense fallback={<LoadingSkeleton />}>
     {children}
   </Suspense>
 );
@@ -60,14 +63,14 @@ const PageSuspense = ({ children }: { children: React.ReactNode }) => (
 function Router() {
   return (
     <Switch>
-      {/* Critical pages loaded immediately */}
-      <Route path="/" component={Landing} />
-      <Route path="/landing" component={Landing} />
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
-      <Route path="/forgot-password" component={ForgotPassword} />
-      <Route path="/reset-password" component={ResetPassword} />
-      <Route path="/dashboard" component={Dashboard} />
+      {/* All pages lazy loaded for optimal initial bundle size */}
+      <Route path="/">{() => <PageSuspense><Landing /></PageSuspense>}</Route>
+      <Route path="/landing">{() => <PageSuspense><Landing /></PageSuspense>}</Route>
+      <Route path="/login">{() => <PageSuspense><Login /></PageSuspense>}</Route>
+      <Route path="/register">{() => <PageSuspense><Register /></PageSuspense>}</Route>
+      <Route path="/forgot-password">{() => <PageSuspense><ForgotPassword /></PageSuspense>}</Route>
+      <Route path="/reset-password">{() => <PageSuspense><ResetPassword /></PageSuspense>}</Route>
+      <Route path="/dashboard">{() => <PageSuspense><Dashboard /></PageSuspense>}</Route>
       
       {/* Lazy-loaded pages - Fixed to preserve route params */}
       <Route path="/my-links">{() => <PageSuspense><MyLinks /></PageSuspense>}</Route>
