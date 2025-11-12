@@ -80,13 +80,15 @@ export const backgroundSchema = z.object({
 // Shape divider schema
 export const shapeDividerSchema = z.object({
   enabled: z.boolean().default(false),
+  position: z.enum(["top", "bottom"]).default("bottom"),
   preset: shapeDividerPresetSchema.default("valley"),
   customPath: z.string().optional(), // SVG path for custom shapes
   color: z.string().default("#ffffff"),
   height: z.number().default(100),
   width: z.number().default(100), // Width percentage (100-300)
-  flip: z.boolean().default(false), // Vertical flip (invert)
-  flipHorizontal: z.boolean().default(false), // Horizontal flip
+  invert: z.boolean().default(false), // Vertical flip
+  flip: z.boolean().default(false), // Horizontal flip
+  bringToFront: z.boolean().default(false), // Z-index control
   opacity: z.number().min(0).max(1).default(1)
 });
 

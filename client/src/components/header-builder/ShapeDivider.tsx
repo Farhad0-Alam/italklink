@@ -98,17 +98,34 @@ export const ShapeDivider = memo(({
   }
 
   const viewBox = "0 0 1000 100"; // Elementor standard viewBox
-  const width = divider.width || 100; // Width percentage (default 100%)
+  const width = divider.width || 100; // Width percentage (100-300%)
   const heightScale = (divider.height || 100) / 100; // Convert height to scale factor
   
   // Build transform string for SVG
+  // Order matters: auto-flip based on position, then manual flips, then height scaling
   const transforms = [];
-  if (divider.flip) transforms.push("scaleY(-1)");
-  if (divider.flipHorizontal) transforms.push("scaleX(-1)");
-  transforms.push(`scaleY(${heightScale})`); // Apply height scaling
+  
+  // Auto-flip for top position (Elementor behavior: top shapes are upside down)
+  const autoFlip = position === "top";
+  
+  // Manual vertical flip (Invert toggle) - applies on top of auto-flip
+  const manualInvert = divider.invert || false;
+  
+  // Combine flips: if both auto and manual, they cancel out
+  const shouldFlipVertical = autoFlip !== manualInvert; // XOR logic
+  if (shouldFlipVertical) transforms.push("scaleY(-1)");
+  
+  // Horizontal flip (Flip toggle)
+  if (divider.flip) transforms.push("scaleX(-1)");
+  
+  // Apply height scaling - must come after flips
+  if (heightScale !== 1) {
+    transforms.push(`scaleY(${heightScale})`);
+  }
+  
   const transform = transforms.join(" ");
 
-  // Calculate left offset and width to ensure full coverage
+  // Calculate left offset to ensure full coverage when width > 100%
   const leftOffset = width > 100 ? -(width - 100) / 2 : 0;
   
   const style: React.CSSProperties = {
@@ -117,7 +134,7 @@ export const ShapeDivider = memo(({
     left: `${leftOffset}%`,
     width: `${width}%`,
     height: "100px", // Fixed container height, scaling handled by transform
-    zIndex: 1,
+    zIndex: divider.bringToFront ? 10 : 1, // Higher z-index when brought to front
     pointerEvents: "none",
     opacity: divider.opacity,
     overflow: "visible" // Allow shape to extend beyond container
@@ -134,7 +151,7 @@ export const ShapeDivider = memo(({
           style={{ 
             display: "block", 
             transform,
-            transformOrigin: `center ${position}` // Scale from top or bottom edge
+            transformOrigin: `center ${position}` // Scale from edge to keep flush alignment
           }}
         >
           <path
