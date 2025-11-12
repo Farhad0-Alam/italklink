@@ -111,6 +111,7 @@ export function CoverImageSection({
   // Shape divider props
   const shapeDivider = coverImageStyles?.shapeDivider;
   const showShapeDivider = shapeDivider?.enabled && shapeDivider?.preset && SHAPE_PRESETS[shapeDivider.preset];
+  const shapeDividerPosition = shapeDivider?.position || "bottom"; // "top" or "bottom"
 
   return (
     <div className={`${wrapperAnimationClass} ${className}`} style={wrapperStyles}>
@@ -124,10 +125,9 @@ export function CoverImageSection({
         <div
           style={{
             position: "absolute",
-            bottom: 0,
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: `${shapeDivider.width || 100}%`,
+            [shapeDividerPosition]: borderWidth > 0 ? `-${borderWidth}px` : 0, // Overlap border
+            left: 0,
+            width: "100%",
             height: `${shapeDivider.height || 60}px`,
             zIndex: shapeDivider.bringToFront ? 20 : 1,
             pointerEvents: "none",
