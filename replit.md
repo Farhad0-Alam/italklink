@@ -4,10 +4,10 @@
 TalkLink is an enterprise-grade platform offering professional digital business cards integrated with a comprehensive appointment booking and CRM system. It enables users to create customizable business cards, manage scheduling, track leads, and analyze business performance. The platform supports team scheduling, calendar integrations, automated notifications, and revenue analytics, aiming to provide a complete solution for business networking and client management. It also includes an email signature generator and a visitor notification subscription system.
 
 ## Recent Progress (November 12, 2025)
-### ✅ COMPLETE: Elementor Shape Divider Integration with Full Library & Dynamic Width
+### ✅ COMPLETE: Production-Ready Elementor Shape Divider System
 
 **Complete Elementor Shape Library (26 Professional Shapes):**
-- Valley (triangle-negative): Inverted V shape - now default/first option
+- Valley (triangle-negative): Inverted V shape - default/first option
 - Triangle: Classic upward point
 - Triangle Asymmetrical: Off-center triangle
 - Curve: Smooth arc divider
@@ -30,20 +30,48 @@ TalkLink is an enterprise-grade platform offering professional digital business 
 - Book: Open book pages
 - Book Negative: Inverted book
 
+**Advanced Controls (Elementor Pro Features):**
+- **Width Slider**: 100-300% range with centered positioning, extends shapes beyond container edges using negative margins
+- **Height Slider**: 20-200px range with edge-locked scaling (shapes stay flush with section boundaries)
+- **Flip Toggle**: Horizontal flip (left-right mirror) via scaleX transform
+- **Invert Toggle**: Vertical flip with auto-flip logic (top shapes default upside down, bottom shapes straight)
+- **Bring to Front**: Z-index control to layer shapes above or below content
+- **Color Picker**: Custom shape colors independent of section background
+- **Position Toggle**: Top or bottom section placement with automatic orientation
+
+**Auto-Flip Behavior (Matching Elementor):**
+- Top position shapes automatically flip upside down (point into content)
+- Bottom position shapes remain straight (point into content from below)
+- Manual Invert toggle applies additional flip on top of auto-positioning (XOR logic)
+- This ensures shapes always "flow into" the content section properly
+
 **Technical Implementation:**
-- Updated to Elementor's exact viewBox specification (0 0 1000 100) for consistency
-- Replaced all 15+ legacy shapes with 26 official Elementor shapes with exact SVG paths
-- Added dynamic width control (100-300%) with centered positioning
-- Complete shape preview grid rebuilt with simplified SVG previews for all shapes
-- Width property integrated into shapeDividerSchema with default 100%
-- ShapeDivider component now uses `width: ${width}%` with CSS `translateX(-50%)` for proper centering
-- All shapes include descriptive tooltips with proper title formatting
-- Flip/invert toggle works across all shapes for additional variations
+- Elementor's exact viewBox specification (0 0 1000 100) for all shapes
+- Transform order: auto-flip → manual invert → horizontal flip → height scaling
+- Width coverage: Negative left margin `-(width - 100) / 2` for widths >100%
+- Height scaling: `transformOrigin: center ${position}` keeps shapes edge-locked
+- Z-index: 1 (default) or 10 (bring to front)
+- All 26 shapes tested at extreme values (width 100-300%, height 20-200px)
+
+**Schema Fields (shapeDividerSchema):**
+```typescript
+enabled: boolean         // Show/hide shape divider
+position: "top" | "bottom"  // Section position
+preset: shapeDividerPresetSchema  // 26 Elementor shapes + custom
+customPath: string       // SVG path for custom uploads
+color: string           // Fill color
+height: number          // Height in px (20-200)
+width: number           // Width percentage (100-300)
+invert: boolean         // Manual vertical flip
+flip: boolean           // Horizontal flip
+bringToFront: boolean   // Z-index control
+opacity: number         // 0-1 transparency
+```
 
 **Files Modified:**
-- `client/src/lib/header-schema.ts`: Updated shapeDividerPresetSchema enum and SHAPE_PRESETS dictionary
-- `client/src/components/header-builder/ShapeDivider.tsx`: Applied Elementor viewBox and dynamic width
-- `client/src/components/form-builder.tsx`: Rebuilt shape selection grid with all 26 Elementor shapes
+- `client/src/lib/header-schema.ts`: Complete schema with all Elementor controls
+- `client/src/components/header-builder/ShapeDivider.tsx`: Production-ready rendering with edge-locked scaling
+- `client/src/components/form-builder.tsx`: Complete UI with all control toggles and 26-shape preview grid
 
 ### ✅ COMPLETE: Profile Image Styling System with Modern Animations & Custom Colors
 
