@@ -142,7 +142,7 @@ export function CoverImageSection({
             style={{
               display: "block",
               transform: shapeDivider.invert ? "scaleY(-1)" : undefined,
-              transformOrigin: shapeDividerPosition === "bottom" ? "bottom" : "top",
+              transformOrigin: "center",
             }}
           >
             <path
