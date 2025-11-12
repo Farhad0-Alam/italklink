@@ -126,6 +126,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     nameStyling: true,
     titleStyling: true,
     companyStyling: true,
+    profileImageStyling: true,
     // subsections inside Contact Info
     contactIconStyling: true,
     contactHoverColor: true, // Hover Color section collapsed by default
@@ -550,6 +551,193 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           </div>
                         </div>
                       ))}
+                    </div>
+
+                    {/* Profile Image Styling */}
+                    <div className="border border-blue-700/30 rounded-lg p-3 space-y-3 mt-4">
+                      <div
+                        className="flex items-center justify-between cursor-pointer"
+                        onClick={() => toggleSection("profileImageStyling")}
+                      >
+                        <h4 className="text-sm font-medium text-blue-200 flex items-center gap-2">
+                          <i className="fas fa-palette text-blue-300"></i>
+                          Profile Image Styling
+                        </h4>
+                        <i
+                          className={`fas ${
+                            collapsedSections.profileImageStyling
+                              ? "fa-chevron-down"
+                              : "fa-chevron-up"
+                          } text-blue-300 text-xs`}
+                        />
+                      </div>
+
+                      {!collapsedSections.profileImageStyling && (
+                        <>
+                          {/* Visibility Toggle */}
+                          <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
+                            <Label className="text-sm text-slate-300">Show Profile Image</Label>
+                            <input
+                              type="checkbox"
+                              checked={watchedValues.profileImageStyles?.visible !== false}
+                              onChange={(e) =>
+                                form.setValue("profileImageStyles.visible", e.target.checked)
+                              }
+                              className="w-4 h-4 rounded border-slate-600"
+                            />
+                          </div>
+
+                          {/* Size Slider */}
+                          <div>
+                            <Label className="text-xs text-slate-400">
+                              Size: {watchedValues.profileImageStyles?.size || 120}px
+                            </Label>
+                            <input
+                              type="range"
+                              min={60}
+                              max={200}
+                              value={watchedValues.profileImageStyles?.size || 120}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "profileImageStyles.size",
+                                  parseInt(e.target.value)
+                                )
+                              }
+                              className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                            />
+                          </div>
+
+                          {/* Shape Selection */}
+                          <div>
+                            <Label className="text-xs text-slate-400 mb-2 block">Shape</Label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {["circle", "square", "rounded"].map((shape) => (
+                                <button
+                                  key={shape}
+                                  type="button"
+                                  onClick={() =>
+                                    form.setValue("profileImageStyles.shape", shape)
+                                  }
+                                  className={`px-3 py-2 rounded text-xs capitalize transition-colors ${
+                                    (watchedValues.profileImageStyles?.shape || "circle") ===
+                                    shape
+                                      ? "bg-blue-600 text-white"
+                                      : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                                  }`}
+                                >
+                                  {shape}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Border Width */}
+                          <div>
+                            <Label className="text-xs text-slate-400">
+                              Border Width: {watchedValues.profileImageStyles?.borderWidth || 0}px
+                            </Label>
+                            <input
+                              type="range"
+                              min={0}
+                              max={10}
+                              value={watchedValues.profileImageStyles?.borderWidth || 0}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "profileImageStyles.borderWidth",
+                                  parseInt(e.target.value)
+                                )
+                              }
+                              className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                            />
+                          </div>
+
+                          {/* Border Color */}
+                          {(watchedValues.profileImageStyles?.borderWidth || 0) > 0 && (
+                            <div>
+                              <Label className="text-xs text-slate-400 mb-2 block">
+                                Border Color
+                              </Label>
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="color"
+                                  value={watchedValues.profileImageStyles?.borderColor || "#ffffff"}
+                                  onChange={(e) =>
+                                    form.setValue(
+                                      "profileImageStyles.borderColor",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                                />
+                                <span className="text-xs text-slate-400">
+                                  {watchedValues.profileImageStyles?.borderColor || "#ffffff"}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Border Animation */}
+                          <div>
+                            <Label className="text-xs text-slate-400 mb-2 block">
+                              Border Animation
+                            </Label>
+                            <select
+                              value={watchedValues.profileImageStyles?.animation || "none"}
+                              onChange={(e) =>
+                                form.setValue("profileImageStyles.animation", e.target.value)
+                              }
+                              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-sm"
+                            >
+                              <option value="none">None</option>
+                              <option value="instagram">Instagram Gradient Spin</option>
+                              <option value="neon">Neon Glow Pulse</option>
+                              <option value="wave">Color Wave</option>
+                              <option value="shimmer">Shimmer Effect</option>
+                              <option value="gradient-slide">Gradient Slide</option>
+                            </select>
+                          </div>
+
+                          {/* Shadow Effect */}
+                          <div>
+                            <Label className="text-xs text-slate-400">
+                              Shadow: {watchedValues.profileImageStyles?.shadow || 0}px
+                            </Label>
+                            <input
+                              type="range"
+                              min={0}
+                              max={30}
+                              value={watchedValues.profileImageStyles?.shadow || 0}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "profileImageStyles.shadow",
+                                  parseInt(e.target.value)
+                                )
+                              }
+                              className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                            />
+                          </div>
+
+                          {/* Opacity */}
+                          <div>
+                            <Label className="text-xs text-slate-400">
+                              Opacity: {((watchedValues.profileImageStyles?.opacity || 100) / 100).toFixed(2)}
+                            </Label>
+                            <input
+                              type="range"
+                              min={0}
+                              max={100}
+                              value={watchedValues.profileImageStyles?.opacity || 100}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "profileImageStyles.opacity",
+                                  parseInt(e.target.value)
+                                )
+                              }
+                              className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                            />
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     {/* Basic Information fields */}
