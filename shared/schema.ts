@@ -308,8 +308,9 @@ export const businessCards = pgTable("business_cards", {
   
   // Media
   profilePhoto: text("profile_photo"), // base64
-  profileImageStyles: jsonb("profile_image_styles"), // {visible, size, shape, border, animation, shadow, opacity}
+  profileImageStyles: jsonb("profile_image_styles"), // {visible, size, shape, border, animation, shadow, opacity, positionX, positionY}
   logo: text("logo"), // base64
+  coverImageStyles: jsonb("cover_image_styles"), // {height, borderWidth, borderColor, animation, opacity, gradient, shapeDivider: {enabled, preset, position, color, width, height, invert, bringToFront}}
   galleryImages: jsonb("gallery_images"),
   
   // Extended content
