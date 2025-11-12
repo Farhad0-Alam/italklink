@@ -298,11 +298,21 @@ export const BusinessCardComponent = forwardRef<
       const styles = data.profileImageStyles || {};
       const size = styles.size || baseSize;
       const shape = styles.shape || "circle";
-      const borderWidth = styles.borderWidth || 0;
-      const borderColor = styles.borderColor || "#ffffff";
+      const borderWidth = styles.borderWidth !== undefined ? styles.borderWidth : 3; // Default 3px border
+      
+      // Use brand color as default border color
+      const defaultBorderColor = data.brandColor || data.accentColor || "#ffffff";
+      const borderColor = styles.borderColor || defaultBorderColor;
+      
       const shadow = styles.shadow || 0;
       const opacity = styles.opacity !== undefined ? styles.opacity / 100 : 1;
       const animation = styles.animation || "none";
+      
+      // Get animation colors (use brand color if useBrandColor is true)
+      const useBrandColor = styles.useBrandColor !== false; // Default to true
+      const animationColors = styles.animationColors || {};
+      const primaryAnimColor = useBrandColor ? defaultBorderColor : (animationColors.primary || defaultBorderColor);
+      const secondaryAnimColor = useBrandColor ? (data.accentColor || defaultBorderColor) : (animationColors.secondary || defaultBorderColor);
 
       // Border radius based on shape
       const borderRadius = 
@@ -335,9 +345,20 @@ export const BusinessCardComponent = forwardRef<
         wrapperStyles.boxShadow = `0 ${shadow / 2}px ${shadow}px rgba(0, 0, 0, 0.3)`;
       }
 
-      // Add border to image (always, for all animations)
-      if (borderWidth > 0) {
+      // Add border to image ONLY if no animation is active (fixes double border issue)
+      if (borderWidth > 0 && animation === "none") {
         imageStyles.border = `${borderWidth}px solid ${borderColor}`;
+      }
+
+      // For animated borders, add CSS variables for custom colors
+      if (animation !== "none") {
+        wrapperStyles['--profile-anim-color-1' as any] = primaryAnimColor;
+        wrapperStyles['--profile-anim-color-2' as any] = secondaryAnimColor;
+        wrapperStyles['--profile-border-width' as any] = `${borderWidth}px`;
+        
+        // Apply to image for direct animations
+        imageStyles['--profile-anim-color-1' as any] = primaryAnimColor;
+        imageStyles['--profile-border-width' as any] = `${borderWidth}px`;
       }
 
       // Separate animation classes for wrapper vs image

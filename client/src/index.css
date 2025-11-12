@@ -826,28 +826,23 @@
 
 @keyframes neon-glow {
   0%, 100% {
-    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+    box-shadow: 0 0 10px var(--profile-anim-color-1, #4ecdc4), 
+                0 0 20px var(--profile-anim-color-1, #4ecdc4), 
+                0 0 30px var(--profile-anim-color-1, #4ecdc4);
   }
   50% {
-    box-shadow: 0 0 20px currentColor, 0 0 30px currentColor, 0 0 40px currentColor;
+    box-shadow: 0 0 20px var(--profile-anim-color-1, #4ecdc4), 
+                0 0 30px var(--profile-anim-color-1, #4ecdc4), 
+                0 0 40px var(--profile-anim-color-1, #4ecdc4);
   }
 }
 
 @keyframes color-wave {
-  0% {
-    border-color: #ff6b6b;
-  }
-  25% {
-    border-color: #4ecdc4;
+  0%, 100% {
+    border-color: var(--profile-anim-color-1, #ff6b6b);
   }
   50% {
-    border-color: #45b7d1;
-  }
-  75% {
-    border-color: #96ceb4;
-  }
-  100% {
-    border-color: #ff6b6b;
+    border-color: var(--profile-anim-color-2, #4ecdc4);
   }
 }
 
@@ -880,14 +875,14 @@
 .profile-image-instagram::before {
   content: '';
   position: absolute;
-  inset: -4px;
+  inset: calc(-1 * var(--profile-border-width, 4px));
   background: linear-gradient(
     45deg,
-    #f09433 0%,
-    #e6683c 25%,
-    #dc2743 50%,
-    #cc2366 75%,
-    #bc1888 100%
+    var(--profile-anim-color-1, #f09433) 0%,
+    var(--profile-anim-color-2, #e6683c) 25%,
+    var(--profile-anim-color-1, #dc2743) 50%,
+    var(--profile-anim-color-2, #cc2366) 75%,
+    var(--profile-anim-color-1, #bc1888) 100%
   );
   background-size: 200% 200%;
   border-radius: inherit;
@@ -897,10 +892,13 @@
 
 .profile-image-neon {
   animation: neon-glow 2s ease-in-out infinite;
+  border: var(--profile-border-width, 4px) solid var(--profile-anim-color-1, #4ecdc4);
 }
 
 .profile-image-wave {
   animation: color-wave 4s ease-in-out infinite;
+  border-width: var(--profile-border-width, 4px);
+  border-style: solid;
 }
 
 .profile-image-shimmer {
@@ -918,7 +916,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.4),
+    color-mix(in srgb, var(--profile-anim-color-1, #ffffff) 40%, transparent),
     transparent
   );
   background-size: 200% 100%;
@@ -933,14 +931,14 @@
 .profile-image-gradient-slide::before {
   content: '';
   position: absolute;
-  inset: -4px;
+  inset: calc(-1 * var(--profile-border-width, 4px));
   background: linear-gradient(
     45deg,
-    #667eea 0%,
-    #764ba2 25%,
-    #f093fb 50%,
-    #4facfe 75%,
-    #667eea 100%
+    var(--profile-anim-color-1, #667eea) 0%,
+    var(--profile-anim-color-2, #764ba2) 25%,
+    var(--profile-anim-color-1, #f093fb) 50%,
+    var(--profile-anim-color-2, #4facfe) 75%,
+    var(--profile-anim-color-1, #667eea) 100%
   );
   background-size: 300% 300%;
   border-radius: inherit;
