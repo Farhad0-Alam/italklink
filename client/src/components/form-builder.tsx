@@ -109,7 +109,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     refetchOnWindowFocus: false,
   });
 
-  const [builderMode, setBuilderMode] = useState<"card" | "page">("card");
+  const [builderMode, setBuilderMode] = useState<"card" | "page" | "theme" | "seo">("card");
   const [selectedPageId, setSelectedPageId] = useState<string>("home");
 
   const [collapsedSections, setCollapsedSections] = useState<{
@@ -346,6 +346,36 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               >
                 <i className="fas fa-sitemap mr-2"></i>
                 Page
+              </Button>
+              <Button
+                type="button"
+                variant={builderMode === "theme" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBuilderMode("theme")}
+                className={`${
+                  builderMode === "theme"
+                    ? "bg-purple-500 hover:bg-purple-600 text-white"
+                    : "text-gray-300 hover:text-white hover:bg-slate-600"
+                } transition-all duration-200`}
+                data-testid="button-theme-mode"
+              >
+                <i className="fas fa-palette mr-2"></i>
+                Theme
+              </Button>
+              <Button
+                type="button"
+                variant={builderMode === "seo" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBuilderMode("seo")}
+                className={`${
+                  builderMode === "seo"
+                    ? "bg-orange-500 hover:bg-orange-600 text-white"
+                    : "text-gray-300 hover:text-white hover:bg-slate-600"
+                } transition-all duration-200`}
+                data-testid="button-seo-mode"
+              >
+                <i className="fas fa-search mr-2"></i>
+                SEO
               </Button>
             </div>
           </div>
@@ -4382,15 +4412,20 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   </>
                 )}
               </div>
+            </>
+          )}
 
+          {/* Theme Mode - Show only Theme settings */}
+          {builderMode === "theme" && (
+            <>
               {/* Appearance Section */}
-              <div className="hidden bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
+              <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
                 <div
                   className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleSection("appearance")}
                 >
                   <h3 className="text-lg font-semibold text-purple-300">
-                    Customize Theme
+                    Theme
                   </h3>
                   <i
                     className={`fas ${collapsedSections.appearance ? "fa-chevron-down" : "fa-chevron-up"} text-purple-300`}
@@ -5095,15 +5130,20 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   </>
                 )}
               </div>
+            </>
+          )}
 
+          {/* SEO Mode - Show only SEO settings */}
+          {builderMode === "seo" && (
+            <>
               {/* SEO Settings Section */}
-              <div className="hidden bg-orange-900/30 border border-orange-600/30 rounded-lg p-4 space-y-4">
+              <div className="bg-orange-900/30 border border-orange-600/30 rounded-lg p-4 space-y-4">
                 <div
                   className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleSection("seo")}
                 >
                   <h3 className="text-lg font-semibold text-orange-300">
-                    SEO & Meta Settings
+                    SEO
                   </h3>
                   <i
                     className={`fas ${collapsedSections.seo ? "fa-chevron-down" : "fa-chevron-up"} text-orange-300`}

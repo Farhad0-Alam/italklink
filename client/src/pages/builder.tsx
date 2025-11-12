@@ -11,8 +11,6 @@ import { generateShareUrl, copyToClipboard, logEvent } from "@/lib/share";
 import { useToast } from "@/hooks/use-toast";
 import { defaultCardData } from "@/lib/card-data";
 import { WalletButtons } from "@/components/WalletButtons";
-import { ThemePanel } from "@/components/ThemePanel";
-import { SeoPanel } from "@/components/SeoPanel";
 
 export const Builder = () => {
   const { t } = useTranslation();
@@ -108,14 +106,8 @@ export const Builder = () => {
             />
           </div>
 
-          {/* Right Column: Theme, SEO & Live Preview */}
+          {/* Right Column: Live Preview */}
           <div className="space-y-6">
-            {/* Theme Panel */}
-            <ThemePanel cardData={cardData} onDataChange={handleDataChange} />
-
-            {/* SEO Panel */}
-            <SeoPanel cardData={cardData} onDataChange={handleDataChange} />
-
             <Card className="bg-slate-800 border-slate-700 sticky top-24">
               <CardHeader>
                 <CardTitle className="text-2xl font-bold flex items-center text-white">
