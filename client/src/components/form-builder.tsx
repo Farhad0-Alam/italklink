@@ -820,6 +820,348 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
                             />
                           </div>
+
+                          {/* Position Controls */}
+                          <div className="space-y-3 p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+                            <Label className="text-xs text-slate-300 font-medium">Image Position</Label>
+                            
+                            {/* Horizontal Position */}
+                            <div>
+                              <Label className="text-xs text-slate-400">
+                                Horizontal: {watchedValues.profileImageStyles?.positionX || 0}% 
+                                <span className="text-slate-500 ml-1">
+                                  ({(watchedValues.profileImageStyles?.positionX || 0) < 0 ? 'Left' : (watchedValues.profileImageStyles?.positionX || 0) > 0 ? 'Right' : 'Center'})
+                                </span>
+                              </Label>
+                              <input
+                                type="range"
+                                min={-50}
+                                max={50}
+                                value={watchedValues.profileImageStyles?.positionX || 0}
+                                onChange={(e) =>
+                                  form.setValue(
+                                    "profileImageStyles.positionX",
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                                className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                              />
+                            </div>
+
+                            {/* Vertical Position */}
+                            <div>
+                              <Label className="text-xs text-slate-400">
+                                Vertical: {watchedValues.profileImageStyles?.positionY || 0}%
+                                <span className="text-slate-500 ml-1">
+                                  ({(watchedValues.profileImageStyles?.positionY || 0) < 0 ? 'Up' : (watchedValues.profileImageStyles?.positionY || 0) > 0 ? 'Down' : 'Center'})
+                                </span>
+                              </Label>
+                              <input
+                                type="range"
+                                min={-50}
+                                max={50}
+                                value={watchedValues.profileImageStyles?.positionY || 0}
+                                onChange={(e) =>
+                                  form.setValue(
+                                    "profileImageStyles.positionY",
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                                className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Cover Image Styling */}
+                    <div className="border border-purple-700/30 rounded-lg p-3 space-y-3 mt-4">
+                      <div
+                        className="flex items-center justify-between cursor-pointer"
+                        onClick={() => toggleSection("coverImageStyling")}
+                      >
+                        <h4 className="text-sm font-medium text-purple-200 flex items-center gap-2">
+                          <i className="fas fa-image text-purple-300"></i>
+                          Cover Image Styling
+                        </h4>
+                        <i
+                          className={`fas ${
+                            collapsedSections.coverImageStyling
+                              ? "fa-chevron-down"
+                              : "fa-chevron-up"
+                          } text-purple-300 text-xs`}
+                        />
+                      </div>
+
+                      {!collapsedSections.coverImageStyling && (
+                        <>
+                          {/* Cover Height Slider */}
+                          <div>
+                            <Label className="text-xs text-slate-400">
+                              Height: {watchedValues.coverImageStyles?.height || 200}px
+                            </Label>
+                            <input
+                              type="range"
+                              min={100}
+                              max={400}
+                              value={watchedValues.coverImageStyles?.height || 200}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "coverImageStyles.height",
+                                  parseInt(e.target.value)
+                                )
+                              }
+                              className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                            />
+                          </div>
+
+                          {/* Border Width */}
+                          <div>
+                            <Label className="text-xs text-slate-400">
+                              Border Width: {watchedValues.coverImageStyles?.borderWidth || 0}px
+                            </Label>
+                            <input
+                              type="range"
+                              min={0}
+                              max={20}
+                              value={watchedValues.coverImageStyles?.borderWidth || 0}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "coverImageStyles.borderWidth",
+                                  parseInt(e.target.value)
+                                )
+                              }
+                              className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                            />
+                          </div>
+
+                          {/* Border Animation */}
+                          <div>
+                            <Label className="text-xs text-slate-400 mb-2 block">
+                              Border Animation
+                            </Label>
+                            <select
+                              value={watchedValues.coverImageStyles?.animation || "none"}
+                              onChange={(e) =>
+                                form.setValue("coverImageStyles.animation", e.target.value)
+                              }
+                              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-sm"
+                            >
+                              <option value="none">None</option>
+                              <option value="instagram">Instagram Gradient Spin</option>
+                              <option value="neon">Neon Glow Pulse</option>
+                              <option value="wave">Color Wave</option>
+                              <option value="shimmer">Shimmer Effect</option>
+                              <option value="gradient-slide">Gradient Slide</option>
+                            </select>
+                          </div>
+
+                          {/* Animation Color Controls */}
+                          {(watchedValues.coverImageStyles?.animation && 
+                            watchedValues.coverImageStyles?.animation !== "none") && (
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                                <Label className="text-xs text-slate-300">Use Brand Color</Label>
+                                <input
+                                  type="checkbox"
+                                  checked={watchedValues.coverImageStyles?.useBrandColor !== false}
+                                  onChange={(e) =>
+                                    form.setValue("coverImageStyles.useBrandColor", e.target.checked)
+                                  }
+                                  className="w-4 h-4 rounded border-slate-600"
+                                />
+                              </div>
+
+                              {/* Gradient Builder for gradient animations */}
+                              {["instagram", "wave", "gradient-slide", "shimmer"].includes(watchedValues.coverImageStyles?.animation) && (
+                                <GradientBuilder
+                                  value={{
+                                    type: watchedValues.coverImageStyles?.animationGradient?.type || 'linear',
+                                    angle: watchedValues.coverImageStyles?.animationGradient?.angle || 90,
+                                    stops: watchedValues.coverImageStyles?.animationGradient?.stops || [
+                                      { color: watchedValues.brandColor || "#4ecdc4", stop: 0 },
+                                      { color: watchedValues.accentColor || "#f093fb", stop: 100 }
+                                    ]
+                                  }}
+                                  onChange={(gradient: GradientConfig) => {
+                                    form.setValue("coverImageStyles.animationGradient", gradient);
+                                  }}
+                                  useBrandColors={watchedValues.coverImageStyles?.useBrandColor !== false}
+                                  brandColor={watchedValues.brandColor}
+                                  accentColor={watchedValues.accentColor}
+                                />
+                              )}
+
+                              {/* Single color picker for neon */}
+                              {watchedValues.coverImageStyles?.animation === "neon" && 
+                               watchedValues.coverImageStyles?.useBrandColor === false && (
+                                <div className="space-y-2 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                                  <Label className="text-xs text-slate-400 mb-2 block">
+                                    Glow Color
+                                  </Label>
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="color"
+                                      value={watchedValues.coverImageStyles?.animationColors?.primary || watchedValues.brandColor || "#4ecdc4"}
+                                      onChange={(e) => {
+                                        const currentColors = watchedValues.coverImageStyles?.animationColors || {};
+                                        form.setValue("coverImageStyles.animationColors", {
+                                          ...currentColors,
+                                          primary: e.target.value
+                                        });
+                                      }}
+                                      className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                                    />
+                                    <Input
+                                      type="text"
+                                      value={(watchedValues.coverImageStyles?.animationColors?.primary || watchedValues.brandColor || "#4ecdc4").replace('#', '')}
+                                      onChange={(e) => {
+                                        const hex = e.target.value.replace(/[^0-9A-Fa-f]/g, '').slice(0, 6);
+                                        if (hex.length === 6) {
+                                          const currentColors = watchedValues.coverImageStyles?.animationColors || {};
+                                          form.setValue("coverImageStyles.animationColors", {
+                                            ...currentColors,
+                                            primary: `#${hex}`
+                                          });
+                                        }
+                                      }}
+                                      className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-xs font-mono uppercase"
+                                      maxLength={6}
+                                      placeholder="4ECDC4"
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Shape Divider Section */}
+                          <div className="space-y-3 p-3 bg-slate-800/30 rounded-lg border border-slate-700 mt-4">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-xs text-slate-300 font-medium">Shape Divider (Bottom)</Label>
+                              <input
+                                type="checkbox"
+                                checked={watchedValues.coverImageStyles?.shapeDivider?.enabled || false}
+                                onChange={(e) =>
+                                  form.setValue("coverImageStyles.shapeDivider.enabled", e.target.checked)
+                                }
+                                className="w-4 h-4 rounded border-slate-600"
+                              />
+                            </div>
+
+                            {watchedValues.coverImageStyles?.shapeDivider?.enabled && (
+                              <>
+                                {/* Shape Selection Gallery */}
+                                <div>
+                                  <Label className="text-xs text-slate-400 mb-2 block">Shape Type</Label>
+                                  <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/50 rounded">
+                                    {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", "tilt", "curve", "curve-asymmetrical", "drop", "mountain", "book"].map((shape) => (
+                                      <button
+                                        key={shape}
+                                        type="button"
+                                        onClick={() =>
+                                          form.setValue("coverImageStyles.shapeDivider.preset", shape)
+                                        }
+                                        className={`px-2 py-3 rounded text-xs capitalize transition-colors border ${
+                                          (watchedValues.coverImageStyles?.shapeDivider?.preset || "wave") === shape
+                                            ? "bg-purple-600 text-white border-purple-500"
+                                            : "bg-slate-700 text-slate-300 hover:bg-slate-600 border-slate-600"
+                                        }`}
+                                        title={shape.replace('-', ' ')}
+                                      >
+                                        {shape.replace('-', ' ')}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Color Picker */}
+                                <div>
+                                  <Label className="text-xs text-slate-400 mb-2 block">Color</Label>
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="color"
+                                      value={watchedValues.coverImageStyles?.shapeDivider?.color || watchedValues.brandColor || "#ffffff"}
+                                      onChange={(e) =>
+                                        form.setValue("coverImageStyles.shapeDivider.color", e.target.value)
+                                      }
+                                      className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                                    />
+                                    <span className="text-xs text-slate-400">
+                                      {watchedValues.coverImageStyles?.shapeDivider?.color || watchedValues.brandColor || "#ffffff"}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Width Slider (%) */}
+                                <div>
+                                  <Label className="text-xs text-slate-400">
+                                    Width: {watchedValues.coverImageStyles?.shapeDivider?.width || 100}%
+                                  </Label>
+                                  <input
+                                    type="range"
+                                    min={100}
+                                    max={300}
+                                    value={watchedValues.coverImageStyles?.shapeDivider?.width || 100}
+                                    onChange={(e) =>
+                                      form.setValue(
+                                        "coverImageStyles.shapeDivider.width",
+                                        parseInt(e.target.value)
+                                      )
+                                    }
+                                    className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                                  />
+                                </div>
+
+                                {/* Height Slider (px) */}
+                                <div>
+                                  <Label className="text-xs text-slate-400">
+                                    Height: {watchedValues.coverImageStyles?.shapeDivider?.height || 60}px
+                                  </Label>
+                                  <input
+                                    type="range"
+                                    min={20}
+                                    max={200}
+                                    value={watchedValues.coverImageStyles?.shapeDivider?.height || 60}
+                                    onChange={(e) =>
+                                      form.setValue(
+                                        "coverImageStyles.shapeDivider.height",
+                                        parseInt(e.target.value)
+                                      )
+                                    }
+                                    className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                                  />
+                                </div>
+
+                                {/* Invert Toggle */}
+                                <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
+                                  <Label className="text-xs text-slate-300">Invert</Label>
+                                  <input
+                                    type="checkbox"
+                                    checked={watchedValues.coverImageStyles?.shapeDivider?.invert || false}
+                                    onChange={(e) =>
+                                      form.setValue("coverImageStyles.shapeDivider.invert", e.target.checked)
+                                    }
+                                    className="w-4 h-4 rounded border-slate-600"
+                                  />
+                                </div>
+
+                                {/* Bring to Front Toggle */}
+                                <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
+                                  <Label className="text-xs text-slate-300">Bring to Front</Label>
+                                  <input
+                                    type="checkbox"
+                                    checked={watchedValues.coverImageStyles?.shapeDivider?.bringToFront || false}
+                                    onChange={(e) =>
+                                      form.setValue("coverImageStyles.shapeDivider.bringToFront", e.target.checked)
+                                    }
+                                    className="w-4 h-4 rounded border-slate-600"
+                                  />
+                                </div>
+                              </>
+                            )}
+                          </div>
                         </>
                       )}
                     </div>

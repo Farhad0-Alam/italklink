@@ -311,14 +311,76 @@ export const BusinessCardComponent = forwardRef<
       // Get animation colors (use brand color if useBrandColor is true)
       const useBrandColor = styles.useBrandColor !== false; // Default to true
       
-      // Get gradient configuration
+      // Animation-specific default gradients
+      const getDefaultGradient = () => {
+        switch(animation) {
+          case 'instagram':
+            return {
+              stops: [
+                { color: '#f09433', stop: 0 },
+                { color: '#e6683c', stop: 25 },
+                { color: '#dc2743', stop: 50 },
+                { color: '#cc2366', stop: 75 },
+                { color: '#bc1888', stop: 100 }
+              ],
+              angle: 45,
+              type: 'linear' as const
+            };
+          case 'wave':
+            return {
+              stops: [
+                { color: '#1E40AF', stop: 0 },
+                { color: '#06B6D4', stop: 100 }
+              ],
+              angle: 90,
+              type: 'linear' as const
+            };
+          case 'shimmer':
+            return {
+              stops: [
+                { color: 'transparent', stop: 0 },
+                { color: '#E5E7EB', stop: 50 },
+                { color: 'transparent', stop: 100 }
+              ],
+              angle: 90,
+              type: 'linear' as const
+            };
+          case 'gradient-slide':
+            return {
+              stops: [
+                { color: '#8B5CF6', stop: 0 },
+                { color: '#3B82F6', stop: 100 }
+              ],
+              angle: 45,
+              type: 'linear' as const
+            };
+          case 'neon':
+            return {
+              stops: [
+                { color: '#00D9FF', stop: 0 },
+                { color: '#00D9FF', stop: 100 }
+              ],
+              angle: 90,
+              type: 'linear' as const
+            };
+          default:
+            return {
+              stops: [
+                { color: data.brandColor || "#4ecdc4", stop: 0 },
+                { color: data.accentColor || "#f093fb", stop: 100 }
+              ],
+              angle: 90,
+              type: 'linear' as const
+            };
+        }
+      };
+      
+      // Get gradient configuration with animation-specific defaults
       const animationGradient = styles.animationGradient || {};
-      const gradientStops = animationGradient.stops || [
-        { color: data.brandColor || "#4ecdc4", stop: 0 },
-        { color: data.accentColor || "#f093fb", stop: 100 }
-      ];
-      const gradientAngle = animationGradient.angle || 90;
-      const gradientType = animationGradient.type || 'linear';
+      const defaultGradient = getDefaultGradient();
+      const gradientStops = animationGradient.stops || defaultGradient.stops;
+      const gradientAngle = animationGradient.angle !== undefined ? animationGradient.angle : defaultGradient.angle;
+      const gradientType = animationGradient.type || defaultGradient.type;
       
       // Build gradient CSS string from stops, honoring type in both brand and custom modes
       const gradientCss = useBrandColor 
@@ -352,6 +414,10 @@ export const BusinessCardComponent = forwardRef<
         borderRadius,
       };
 
+      // Get position values (-50 to +50)
+      const positionX = styles.positionX || 0;
+      const positionY = styles.positionY || 0;
+      
       // Image styles - appearance properties
       const imageStyles: React.CSSProperties = {
         width: '100%',
@@ -359,6 +425,7 @@ export const BusinessCardComponent = forwardRef<
         borderRadius,
         opacity,
         objectFit: 'cover' as const,
+        objectPosition: `${50 + positionX}% ${50 + positionY}%`, // Center is 50%, range is 0-100%
       };
 
       // Add shadow to wrapper
@@ -405,6 +472,161 @@ export const BusinessCardComponent = forwardRef<
         wrapperAnimationClass,
         imageAnimationClass,
         visible: styles.visible !== false 
+      };
+    };
+
+    // Helper function for cover image styles and animation
+    const getCoverImageStyle = (defaultHeight: number = 200) => {
+      const styles = data.coverImageStyles || {};
+      const height = styles.height || defaultHeight;
+      const borderWidth = styles.borderWidth || 0;
+      const animation = styles.animation || "none";
+      
+      // Get animation colors (use brand color if useBrandColor is true)
+      const useBrandColor = styles.useBrandColor !== false; // Default to true
+      
+      // Animation-specific default gradients (same as profile)
+      const getDefaultGradient = () => {
+        switch(animation) {
+          case 'instagram':
+            return {
+              stops: [
+                { color: '#f09433', stop: 0 },
+                { color: '#e6683c', stop: 25 },
+                { color: '#dc2743', stop: 50 },
+                { color: '#cc2366', stop: 75 },
+                { color: '#bc1888', stop: 100 }
+              ],
+              angle: 45,
+              type: 'linear' as const
+            };
+          case 'wave':
+            return {
+              stops: [
+                { color: '#1E40AF', stop: 0 },
+                { color: '#06B6D4', stop: 100 }
+              ],
+              angle: 90,
+              type: 'linear' as const
+            };
+          case 'shimmer':
+            return {
+              stops: [
+                { color: 'transparent', stop: 0 },
+                { color: '#E5E7EB', stop: 50 },
+                { color: 'transparent', stop: 100 }
+              ],
+              angle: 90,
+              type: 'linear' as const
+            };
+          case 'gradient-slide':
+            return {
+              stops: [
+                { color: '#8B5CF6', stop: 0 },
+                { color: '#3B82F6', stop: 100 }
+              ],
+              angle: 45,
+              type: 'linear' as const
+            };
+          case 'neon':
+            return {
+              stops: [
+                { color: '#00D9FF', stop: 0 },
+                { color: '#00D9FF', stop: 100 }
+              ],
+              angle: 90,
+              type: 'linear' as const
+            };
+          default:
+            return {
+              stops: [
+                { color: data.brandColor || "#4ecdc4", stop: 0 },
+                { color: data.accentColor || "#f093fb", stop: 100 }
+              ],
+              angle: 90,
+              type: 'linear' as const
+            };
+        }
+      };
+      
+      // Get gradient configuration with animation-specific defaults
+      const animationGradient = styles.animationGradient || {};
+      const defaultGradient = getDefaultGradient();
+      const gradientStops = animationGradient.stops || defaultGradient.stops;
+      const gradientAngle = animationGradient.angle !== undefined ? animationGradient.angle : defaultGradient.angle;
+      const gradientType = animationGradient.type || defaultGradient.type;
+      
+      // Use brand color as default
+      const defaultBorderColor = data.brandColor || data.accentColor || "#ffffff";
+      
+      // Build gradient CSS string
+      const gradientCss = useBrandColor 
+        ? (gradientType === 'linear'
+            ? `linear-gradient(${gradientAngle}deg, ${defaultBorderColor} 0%, ${data.accentColor || defaultBorderColor} 100%)`
+            : `radial-gradient(circle, ${defaultBorderColor} 0%, ${data.accentColor || defaultBorderColor} 100%)`)
+        : (gradientType === 'linear'
+            ? `linear-gradient(${gradientAngle}deg, ${gradientStops.map(s => `${s.color} ${s.stop}%`).join(', ')})`
+            : `radial-gradient(circle, ${gradientStops.map(s => `${s.color} ${s.stop}%`).join(', ')})`);
+      
+      // Simple colors for non-gradient animations (neon)
+      const animationColors = styles.animationColors || {};
+      const primaryAnimColor = useBrandColor ? defaultBorderColor : (animationColors.primary || defaultBorderColor);
+      const secondaryAnimColor = useBrandColor ? (data.accentColor || defaultBorderColor) : (animationColors.secondary || data.accentColor || defaultBorderColor);
+
+      // Determine if animation needs pseudo-elements
+      const usePseudoElements = animation === "instagram" || animation === "shimmer" || animation === "gradient-slide";
+      
+      // Wrapper styles - hosts pseudo-element animations
+      const wrapperStyles: React.CSSProperties = {
+        position: 'relative',
+        height: `${height}px`,
+      };
+
+      // Cover styles - background properties
+      const coverStyles: React.CSSProperties = {
+        backgroundImage: data.backgroundImage
+          ? `url(${getOptimizedImageSrc(data.backgroundImage, "large")})`
+          : undefined,
+        backgroundColor: !data.backgroundImage
+          ? data.brandColor || "#22c55e"
+          : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      };
+
+      // Add border if no animation
+      if (borderWidth > 0 && animation === "none") {
+        coverStyles.border = `${borderWidth}px solid ${defaultBorderColor}`;
+      }
+
+      // For animated borders, add CSS variables
+      if (animation !== "none") {
+        wrapperStyles['--cover-gradient' as any] = gradientCss;
+        wrapperStyles['--cover-anim-color-1' as any] = primaryAnimColor;
+        wrapperStyles['--cover-anim-color-2' as any] = secondaryAnimColor;
+        wrapperStyles['--cover-border-width' as any] = `${borderWidth}px`;
+      }
+
+      // Animation classes
+      const wrapperAnimationClass = usePseudoElements ? (
+        animation === "instagram" ? "cover-image-instagram" :
+        animation === "shimmer" ? "cover-image-shimmer" :
+        animation === "gradient-slide" ? "cover-image-gradient-slide" :
+        ""
+      ) : "";
+
+      const coverAnimationClass = !usePseudoElements ? (
+        animation === "neon" ? "cover-image-neon" :
+        animation === "wave" ? "cover-image-wave" :
+        ""
+      ) : "";
+
+      return { 
+        wrapperStyles, 
+        coverStyles, 
+        wrapperAnimationClass,
+        coverAnimationClass,
+        height 
       };
     };
 

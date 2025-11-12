@@ -928,3 +928,65 @@
   animation: gradient-slide 4s ease infinite;
   z-index: -1;
 }
+
+/* Cover Image Animation Classes */
+.cover-image-instagram {
+  position: relative;
+}
+
+.cover-image-instagram::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--cover-border-width, 4px));
+  background: var(--cover-gradient, linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%));
+  background-size: 200% 200%;
+  animation: instagram-spin 3s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.cover-image-neon {
+  animation: neon-glow 2s ease-in-out infinite;
+  border: var(--cover-border-width, 4px) solid var(--cover-anim-color-1, #00D9FF);
+}
+
+.cover-image-wave {
+  animation: color-wave 4s ease-in-out infinite;
+  border-width: var(--cover-border-width, 4px);
+  border-style: solid;
+  border-color: var(--cover-anim-color-1, #1E40AF);
+}
+
+.cover-image-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.cover-image-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--cover-gradient, linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent));
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cover-image-gradient-slide {
+  position: relative;
+}
+
+.cover-image-gradient-slide::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--cover-border-width, 4px));
+  background: var(--cover-gradient, linear-gradient(45deg, #8B5CF6 0%, #3B82F6 50%, #8B5CF6 100%));
+  background-size: 300% 300%;
+  animation: gradient-slide 4s ease infinite;
+  z-index: 1;
+  pointer-events: none;
+}
