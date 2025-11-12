@@ -356,83 +356,51 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           {builderMode === "card" && (
             <>
               {/* Profile */}
-              <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
+              <div className="border border-slate-700/50 rounded-lg p-5 space-y-5">
                 <div
                   className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleSection("profile")}
                 >
-                  <h3 className="text-lg font-semibold text-blue-300">
+                  <h3 className="text-base font-medium text-slate-200">
                     Profile
                   </h3>
                   <i
-                    className={`fas ${collapsedSections.profile ? "fa-chevron-down" : "fa-chevron-up"} text-blue-300`}
+                    className={`fas ${collapsedSections.profile ? "fa-chevron-down" : "fa-chevron-up"} text-slate-400 text-sm`}
                   />
                 </div>
 
                 {!collapsedSections.profile && (
                   <>
-                    <div className="space-y-3">
-                      <Label className="text-white">Header Design</Label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {[
-                          {
-                            v: "cover-logo",
-                            label: "Cover + Logo",
-                            active:
-                              watchedValues.headerDesign === "cover-logo" ||
-                              !watchedValues.headerDesign,
-                          },
-                          {
-                            v: "profile-center",
-                            label: "Profile Center",
-                            active:
-                              watchedValues.headerDesign === "profile-center",
-                          },
-                          {
-                            v: "split-design",
-                            label: "Split Layout",
-                            active:
-                              watchedValues.headerDesign === "split-design",
-                          },
-                          {
-                            v: "advanced",
-                            label: "Advanced Template",
-                            active: watchedValues.advancedHeaderEnabled,
-                          },
-                        ].map(({ v, label, active }) => (
-                          <div
-                            key={v}
-                            className={`border-2 rounded-lg p-3 cursor-pointer transition-colors ${
-                              active
-                                ? "border-talklink-500 bg-talklink-500/10"
-                                : "border-slate-600 bg-slate-700"
-                            }`}
-                            onClick={() => {
-                              if (v === "advanced") {
-                                form.setValue("advancedHeaderEnabled", true);
-                                form.setValue("headerDesign", "cover-logo"); // Keep a fallback
-                              } else {
-                                form.setValue("advancedHeaderEnabled", false);
-                                form.setValue("headerDesign", v as any);
-                              }
-                            }}
-                          >
-                            <div className="text-center">
-                              <div className="h-8 bg-gradient-to-r from-slate-400 to-slate-600 rounded mb-1 relative">
-                                <div className="absolute top-1 left-1 w-2 h-2 bg-white rounded" />
-                              </div>
-                              <div className="w-4 h-4 bg-white rounded-full mx-auto -mt-2" />
-                              <p className="text-xs text-white mt-1">{label}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm text-slate-300 font-normal">Header Design</Label>
+                      <Select
+                        value={watchedValues.advancedHeaderEnabled ? "advanced" : (watchedValues.headerDesign || "cover-logo")}
+                        onValueChange={(value) => {
+                          if (value === "advanced") {
+                            form.setValue("advancedHeaderEnabled", true);
+                            form.setValue("headerDesign", "cover-logo");
+                          } else {
+                            form.setValue("advancedHeaderEnabled", false);
+                            form.setValue("headerDesign", value as any);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white hover:bg-slate-800">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cover-logo">Cover + Logo</SelectItem>
+                          <SelectItem value="profile-center">Profile Center</SelectItem>
+                          <SelectItem value="split-design">Split Layout</SelectItem>
+                          <SelectItem value="advanced">Advanced Template</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     {/* Advanced Header Template Selection */}
                     {watchedValues.advancedHeaderEnabled && (
-                      <div className="space-y-3 p-4 bg-purple-900/20 border border-purple-600/30 rounded-lg">
-                        <Label className="text-purple-300">
+                      <div className="space-y-2 p-4 border border-slate-700/30 rounded-lg bg-slate-800/20">
+                        <Label className="text-sm text-slate-300 font-normal">
                           Select Header Template
                         </Label>
                         <Select
@@ -474,13 +442,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         </Select>
 
                         {watchedValues.headerTemplate && (
-                          <div className="text-sm text-purple-300">
+                          <div className="text-sm text-slate-300">
                             <p>
-                              <strong>Template:</strong>{" "}
+                              <span className="text-slate-400">Template:</span>{" "}
                               {(watchedValues.headerTemplate as any).name}
                             </p>
                             <p>
-                              <strong>Description:</strong>{" "}
+                              <span className="text-slate-400">Description:</span>{" "}
                               {(watchedValues.headerTemplate as any)
                                 .description ||
                                 "Custom header with advanced layouts and SVG shapes"}
@@ -489,8 +457,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         )}
 
                         {headerTemplates.length === 0 && (
-                          <div className="text-sm text-yellow-300 bg-yellow-900/20 border border-yellow-600/30 rounded p-3">
-                            <i className="fas fa-info-circle mr-2"></i>
+                          <div className="text-sm text-slate-300 bg-slate-800/30 border border-slate-700/30 rounded p-3">
+                            <i className="fas fa-info-circle mr-2 text-slate-400"></i>
                             No active header templates found. Contact your
                             administrator to create advanced header templates.
                           </div>
@@ -498,26 +466,26 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       </div>
                     )}
 
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-4">
                       {[
                         {
                           id: "profile-photo-input",
-                          label: "Profile Photo",
+                          label: "Profile Image",
                           field: "profilePhoto",
                         },
                         {
                           id: "background-input",
-                          label: "Cover Photo",
+                          label: "Cover Image",
                           field: "backgroundImage",
                         },
-                        { id: "logo-input", label: "Logo", field: "logo" },
+                        { id: "logo-input", label: "Logo Image", field: "logo" },
                       ].map(({ id, label, field }) => (
-                        <div key={id}>
-                          <Label htmlFor={id} className="text-white text-sm">
+                        <div key={id} className="space-y-1.5">
+                          <Label htmlFor={id} className="text-sm text-slate-300 font-normal">
                             {label}
                           </Label>
-                          <div className="mt-1">
-                            <div className="w-full h-20 rounded-lg overflow-hidden bg-slate-600 flex items-center justify-center mb-2">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-800 border border-slate-700 flex items-center justify-center flex-shrink-0">
                               {(watchedValues as any)[field] ? (
                                 <img
                                   src={(watchedValues as any)[field]}
@@ -525,25 +493,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <div className="text-center">
-                                  <i className="fas fa-image text-slate-400 text-sm" />
-                                  <p className="text-slate-400 text-xs mt-1">
-                                    {label.split(" ")[0]}
-                                  </p>
-                                </div>
+                                <i className="fas fa-image text-slate-500 text-sm" />
                               )}
                             </div>
                             <Button
                               type="button"
                               variant="outline"
                               size="sm"
-                              className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full text-xs py-1"
+                              className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800/50 hover:text-white transition-colors"
                               onClick={() =>
                                 document.getElementById(id)?.click()
                               }
                               disabled={isUploading}
                             >
-                              <i className="fas fa-upload mr-1" /> Upload
+                              <i className="fas fa-cloud-upload-alt mr-2 text-slate-400" />
+                              Upload
                             </Button>
                             <input
                               id={id}
@@ -560,7 +524,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </div>
 
                     {/* Basic Information fields */}
-                    <div className="space-y-4 mt-6 pt-6 border-t border-blue-600/30">
+                    <div className="space-y-4 pt-5 border-t border-slate-700/50">
                       <div>
                         <Label htmlFor="fullName" className="text-white">
                           {t("field.fullName")} *
@@ -612,16 +576,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </div>
 
                     {/* Name Styling (NEW, appears above Title Styling) */}
-                    <div className="bg-slate-800/50 rounded-lg p-3 space-y-3 mt-4">
+                    <div className="border border-slate-700/30 rounded-lg p-3 space-y-3 mt-4">
                       <div
                         className="flex items-center justify-between cursor-pointer"
                         onClick={() => toggleSection("nameStyling")}
                       >
-                        <h5 className="text-xs font-medium text-green-300">
+                        <h5 className="text-xs font-normal text-slate-300">
                           Name Styling
                         </h5>
                         <i
-                          className={`fas fa-chevron-${collapsedSections.nameStyling ? "down" : "up"} text-green-300 text-xs`}
+                          className={`fas fa-chevron-${collapsedSections.nameStyling ? "down" : "up"} text-slate-400 text-xs`}
                         />
                       </div>
 
@@ -800,16 +764,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </div>
 
                     {/* Title Styling */}
-                    <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                    <div className="border border-slate-700/30 rounded-lg p-3 space-y-3">
                       <div
                         className="flex items-center justify-between cursor-pointer"
                         onClick={() => toggleSection("titleStyling")}
                       >
-                        <h5 className="text-xs font-medium text-green-300">
+                        <h5 className="text-xs font-normal text-slate-300">
                           Title Styling
                         </h5>
                         <i
-                          className={`fas fa-chevron-${collapsedSections.titleStyling ? "down" : "up"} text-green-300 text-xs`}
+                          className={`fas fa-chevron-${collapsedSections.titleStyling ? "down" : "up"} text-slate-400 text-xs`}
                         />
                       </div>
 
@@ -988,16 +952,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </div>
 
                     {/* Company Styling */}
-                    <div className="bg-slate-800/50 rounded-lg p-3 space-y-3">
+                    <div className="border border-slate-700/30 rounded-lg p-3 space-y-3">
                       <div
                         className="flex items-center justify-between cursor-pointer"
                         onClick={() => toggleSection("companyStyling")}
                       >
-                        <h5 className="text-xs font-medium text-green-300">
+                        <h5 className="text-xs font-normal text-slate-300">
                           Company Styling
                         </h5>
                         <i
-                          className={`fas fa-chevron-${collapsedSections.companyStyling ? "down" : "up"} text-green-300 text-xs`}
+                          className={`fas fa-chevron-${collapsedSections.companyStyling ? "down" : "up"} text-slate-400 text-xs`}
                         />
                       </div>
 
