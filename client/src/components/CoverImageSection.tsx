@@ -128,8 +128,9 @@ export function CoverImageSection({
           style={{
             position: "absolute",
             top: borderWidth > 0 ? `-${borderWidth}px` : 0, // Overlap border
-            left: 0,
-            width: "100%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: `${shapeDividerTop.width || 100}%`,
             height: `${shapeDividerTop.height || 60}px`,
             zIndex: shapeDividerTop.bringToFront ? 20 : 1,
             pointerEvents: "none",
@@ -160,8 +161,9 @@ export function CoverImageSection({
           style={{
             position: "absolute",
             bottom: borderWidth > 0 ? `-${borderWidth}px` : 0, // Overlap border
-            left: 0,
-            width: "100%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: `${shapeDividerBottom.width || 100}%`,
             height: `${shapeDividerBottom.height || 60}px`,
             zIndex: shapeDividerBottom.bringToFront ? 20 : 1,
             pointerEvents: "none",
