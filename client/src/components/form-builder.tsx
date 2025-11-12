@@ -1197,7 +1197,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <div>
                                     <Label className="text-xs text-slate-400 mb-2 block">Shape Type</Label>
                                     <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto p-2 bg-slate-900/50 rounded">
-                                      {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", "tilt", "curve", "curve-asymmetrical", "drop", "mountain", "book"].map((shape) => {
+                                      {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", "tilt", "tilt-opacity", "fan-opacity", "curve", "curve-asymmetrical", "drop", "mountain", "opacity-fan-alt", "book"].map((shape) => {
                                         const isSelected = (watchedValues.coverImageStyles?.shapeDivider?.preset || "wave") === shape;
                                         const shapeName = shape.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                                         
@@ -1258,6 +1258,25 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                                     )}
                                                     {shape === "book" && (
                                                       <path d="M0,10 Q25,15 50,10 Q75,5 100,10 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "tilt-opacity" && (
+                                                      <>
+                                                        <path d="M0,3 L100,12 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.5" />
+                                                        <path d="M0,8 L100,16 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.7" />
+                                                      </>
+                                                    )}
+                                                    {shape === "fan-opacity" && (
+                                                      <>
+                                                        <path d="M0,20 L25,5 L50,10 L75,3 L100,8 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.3" />
+                                                        <path d="M0,20 L30,10 L60,14 L90,7 L100,12 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.5" />
+                                                        <path d="M0,20 L35,15 L70,17 L100,15 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.7" />
+                                                      </>
+                                                    )}
+                                                    {shape === "opacity-fan-alt" && (
+                                                      <>
+                                                        <path d="M0,15 C20,15 20,5 50,5 C80,5 80,15 100,15 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.4" />
+                                                        <path d="M0,17 C30,17 30,10 50,10 C70,10 70,17 100,17 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.6" />
+                                                      </>
                                                     )}
                                                   </svg>
                                                 </div>
