@@ -794,7 +794,13 @@ export const BusinessCardComponent = forwardRef<
             >
               {/* Logo in top left corner */}
               {data.logo && (
-                <div className="absolute top-4 left-4 z-10">
+                <div 
+                  className="absolute z-10"
+                  style={{
+                    top: data.coverImageStyles?.logoPositionY !== undefined ? `${data.coverImageStyles.logoPositionY}%` : '16px',
+                    left: data.coverImageStyles?.logoPositionX !== undefined ? `${data.coverImageStyles.logoPositionX}%` : '16px',
+                  }}
+                >
                   <img
                     src={data.logo}
                     alt="Logo"
@@ -808,8 +814,18 @@ export const BusinessCardComponent = forwardRef<
               {(() => {
                 const { wrapperStyles, imageStyles, wrapperAnimationClass, imageAnimationClass, visible } = getProfileImageStyle(96);
                 if (!visible) return null;
+                // Profile positioning on cover (default: bottom-center, slightly below cover)
+                const profilePosX = data.coverImageStyles?.profilePositionX ?? 50; // 0-100%, default 50% (center)
+                const profilePosY = data.coverImageStyles?.profilePositionY ?? 100; // 0-100%, default 100% (bottom edge + overflow)
                 return (
-                  <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 z-30">
+                  <div 
+                    className="absolute z-30"
+                    style={{
+                      left: `${profilePosX}%`,
+                      top: `${profilePosY}%`,
+                      transform: 'translate(-50%, -50%)', // Center element at the X,Y point
+                    }}
+                  >
                     <div className={wrapperAnimationClass} style={wrapperStyles}>
                       <img
                         src={profileImageSrc}
@@ -854,7 +870,13 @@ export const BusinessCardComponent = forwardRef<
 
               {/* Logo in top right */}
               {data.logo && (
-                <div className="absolute top-4 right-4 z-10">
+                <div 
+                  className="absolute z-10"
+                  style={{
+                    top: data.coverImageStyles?.logoPositionY !== undefined ? `${data.coverImageStyles.logoPositionY}%` : '16px',
+                    right: data.coverImageStyles?.logoPositionX !== undefined ? `${100 - data.coverImageStyles.logoPositionX}%` : '16px',
+                  }}
+                >
                   <img
                     src={data.logo}
                     alt="Logo"
@@ -881,8 +903,17 @@ export const BusinessCardComponent = forwardRef<
                 {(() => {
                   const { wrapperStyles, imageStyles, wrapperAnimationClass, imageAnimationClass, visible } = getProfileImageStyle(80);
                   if (!visible) return null;
+                  const profilePosX = data.coverImageStyles?.profilePositionX ?? 90; // Default: near right edge
+                  const profilePosY = data.coverImageStyles?.profilePositionY ?? 100;
                   return (
-                    <div className="absolute -bottom-12 right-4 z-30">
+                    <div 
+                      className="absolute z-30"
+                      style={{
+                        left: `${profilePosX}%`,
+                        top: `${profilePosY}%`,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                    >
                       <div className={wrapperAnimationClass} style={wrapperStyles}>
                         <img
                           src={profileImageSrc}
