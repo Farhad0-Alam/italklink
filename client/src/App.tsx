@@ -18,6 +18,7 @@ import ForgotPassword from "./pages/forgot-password";
 import ResetPassword from "./pages/reset-password";
 
 // Lazy load all other pages to improve initial load performance
+const MyLinks = lazy(() => import("./pages/my-links"));
 const Templates = lazy(() => import("./pages/templates"));
 const Appointments = lazy(() => import("./pages/appointments"));
 const Builder = lazy(() => import("./pages/builder").then(module => ({ default: module.Builder })));
@@ -69,6 +70,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       
       {/* Lazy-loaded pages - Fixed to preserve route params */}
+      <Route path="/my-links">{() => <PageSuspense><MyLinks /></PageSuspense>}</Route>
       <Route path="/pricing">{() => <PageSuspense><Pricing /></PageSuspense>}</Route>
       <Route path="/templates">{() => <PageSuspense><Templates /></PageSuspense>}</Route>
       <Route path="/appointments/:rest*">{(params) => <PageSuspense><Appointments {...params} /></PageSuspense>}</Route>

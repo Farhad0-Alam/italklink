@@ -241,7 +241,7 @@ export default function Dashboard() {
     onClick?: () => void;
   }> = [
     { href: "/dashboard", label: "Dashboard", icon: null },
-    { href: "#my-links", label: "My Links", icon: null, onClick: scrollToMyLinks },
+    { href: "/my-links", label: "My Links", icon: null },
     { href: "/templates", label: "Templates", icon: null },
     { href: "/appointments", label: "Appointments", icon: null },
     { href: "/crm", label: "CRM", icon: Users, testId: "link-crm" },
