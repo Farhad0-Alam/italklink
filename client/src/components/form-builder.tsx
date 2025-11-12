@@ -17,6 +17,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
@@ -1162,131 +1164,201 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           )}
 
                           {/* Shape Divider Section */}
-                          <div className="space-y-3 p-3 bg-slate-800/30 rounded-lg border border-slate-700 mt-4">
-                            <div className="flex items-center justify-between">
-                              <Label className="text-xs text-slate-300 font-medium">Shape Divider (Bottom)</Label>
-                              <input
-                                type="checkbox"
-                                checked={watchedValues.coverImageStyles?.shapeDivider?.enabled || false}
-                                onChange={(e) =>
-                                  form.setValue("coverImageStyles.shapeDivider.enabled", e.target.checked)
-                                }
-                                className="w-4 h-4 rounded border-slate-600"
-                              />
-                            </div>
+                          <TooltipProvider>
+                            <div className="space-y-3 p-3 bg-slate-800/30 rounded-lg border border-slate-700 mt-4">
+                              <div className="flex items-center justify-between">
+                                <Label className="text-xs text-slate-300 font-medium">Shape Divider</Label>
+                                <input
+                                  type="checkbox"
+                                  checked={watchedValues.coverImageStyles?.shapeDivider?.enabled || false}
+                                  onChange={(e) =>
+                                    form.setValue("coverImageStyles.shapeDivider.enabled", e.target.checked)
+                                  }
+                                  className="w-4 h-4 rounded border-slate-600"
+                                />
+                              </div>
 
-                            {watchedValues.coverImageStyles?.shapeDivider?.enabled && (
-                              <>
-                                {/* Shape Selection Gallery */}
-                                <div>
-                                  <Label className="text-xs text-slate-400 mb-2 block">Shape Type</Label>
-                                  <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto p-2 bg-slate-900/50 rounded">
-                                    {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", "tilt", "curve", "curve-asymmetrical", "drop", "mountain", "book"].map((shape) => (
-                                      <button
-                                        key={shape}
-                                        type="button"
-                                        onClick={() =>
-                                          form.setValue("coverImageStyles.shapeDivider.preset", shape)
+                              {watchedValues.coverImageStyles?.shapeDivider?.enabled && (
+                                <>
+                                  {/* Position Tabs */}
+                                  <Tabs
+                                    value={watchedValues.coverImageStyles?.shapeDivider?.position || "bottom"}
+                                    onValueChange={(value) =>
+                                      form.setValue("coverImageStyles.shapeDivider.position", value as "top" | "bottom")
+                                    }
+                                  >
+                                    <TabsList className="grid w-full grid-cols-2 bg-slate-700">
+                                      <TabsTrigger value="top" className="text-xs">Top</TabsTrigger>
+                                      <TabsTrigger value="bottom" className="text-xs">Bottom</TabsTrigger>
+                                    </TabsList>
+                                  </Tabs>
+
+                                  {/* Shape Selection Grid with SVG Previews */}
+                                  <div>
+                                    <Label className="text-xs text-slate-400 mb-2 block">Shape Type</Label>
+                                    <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto p-2 bg-slate-900/50 rounded">
+                                      {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", "tilt", "curve", "curve-asymmetrical", "drop", "mountain", "book"].map((shape) => {
+                                        const isSelected = (watchedValues.coverImageStyles?.shapeDivider?.preset || "wave") === shape;
+                                        const shapeName = shape.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                        
+                                        return (
+                                          <Tooltip key={shape}>
+                                            <TooltipTrigger asChild>
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  form.setValue("coverImageStyles.shapeDivider.preset", shape)
+                                                }
+                                                className={`relative h-16 rounded overflow-hidden transition-all border-2 ${
+                                                  isSelected
+                                                    ? "bg-purple-600/20 border-purple-500 ring-2 ring-purple-500"
+                                                    : "bg-slate-700 border-slate-600 hover:bg-slate-600 hover:border-slate-500"
+                                                }`}
+                                              >
+                                                {/* Simple SVG preview */}
+                                                <div className="absolute inset-0 flex items-end justify-center overflow-hidden">
+                                                  <svg
+                                                    viewBox="0 0 100 20"
+                                                    className="w-full h-8"
+                                                    preserveAspectRatio="none"
+                                                    style={{ transform: 'translateY(2px)' }}
+                                                  >
+                                                    {shape === "wave" && (
+                                                      <path d="M0,10 Q25,0 50,10 T100,10 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "waves-brush" && (
+                                                      <path d="M0,8 Q15,2 30,8 T60,8 Q75,2 90,8 L100,8 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "clouds" && (
+                                                      <path d="M0,12 Q10,8 20,12 Q30,8 40,12 Q50,8 60,12 Q70,8 80,12 Q90,8 100,12 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "zigzag" && (
+                                                      <path d="M0,15 L10,5 L20,15 L30,5 L40,15 L50,5 L60,15 L70,5 L80,15 L90,5 L100,15 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "triangle" && (
+                                                      <path d="M0,20 L50,0 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "triangle-asymmetrical" && (
+                                                      <path d="M0,20 L70,0 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "tilt" && (
+                                                      <path d="M0,5 L100,15 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "curve" && (
+                                                      <path d="M0,20 Q50,0 100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "curve-asymmetrical" && (
+                                                      <path d="M0,20 Q30,0 100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "drop" && (
+                                                      <path d="M0,10 C20,10 30,0 50,0 C70,0 80,10 100,10 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "mountain" && (
+                                                      <path d="M0,20 L25,5 L50,12 L75,3 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "book" && (
+                                                      <path d="M0,10 Q25,15 50,10 Q75,5 100,10 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                  </svg>
+                                                </div>
+                                              </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p className="text-xs">{shapeName}</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+
+                                  {/* Color Picker */}
+                                  <div>
+                                    <Label className="text-xs text-slate-400 mb-2 block">Color</Label>
+                                    <div className="flex items-center gap-2">
+                                      <Input
+                                        type="color"
+                                        value={watchedValues.coverImageStyles?.shapeDivider?.color || watchedValues.brandColor || "#ffffff"}
+                                        onChange={(e) =>
+                                          form.setValue("coverImageStyles.shapeDivider.color", e.target.value)
                                         }
-                                        className={`px-2 py-3 rounded text-xs capitalize transition-colors border ${
-                                          (watchedValues.coverImageStyles?.shapeDivider?.preset || "wave") === shape
-                                            ? "bg-purple-600 text-white border-purple-500"
-                                            : "bg-slate-700 text-slate-300 hover:bg-slate-600 border-slate-600"
-                                        }`}
-                                        title={shape.replace('-', ' ')}
-                                      >
-                                        {shape.replace('-', ' ')}
-                                      </button>
-                                    ))}
+                                        className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                                      />
+                                      <span className="text-xs text-slate-400">
+                                        {watchedValues.coverImageStyles?.shapeDivider?.color || watchedValues.brandColor || "#ffffff"}
+                                      </span>
+                                    </div>
                                   </div>
-                                </div>
 
-                                {/* Color Picker */}
-                                <div>
-                                  <Label className="text-xs text-slate-400 mb-2 block">Color</Label>
-                                  <div className="flex items-center gap-2">
-                                    <Input
-                                      type="color"
-                                      value={watchedValues.coverImageStyles?.shapeDivider?.color || watchedValues.brandColor || "#ffffff"}
+                                  {/* Width Slider (%) */}
+                                  <div>
+                                    <Label className="text-xs text-slate-400">
+                                      Width: {watchedValues.coverImageStyles?.shapeDivider?.width || 100}%
+                                    </Label>
+                                    <input
+                                      type="range"
+                                      min={100}
+                                      max={300}
+                                      value={watchedValues.coverImageStyles?.shapeDivider?.width || 100}
                                       onChange={(e) =>
-                                        form.setValue("coverImageStyles.shapeDivider.color", e.target.value)
+                                        form.setValue(
+                                          "coverImageStyles.shapeDivider.width",
+                                          parseInt(e.target.value)
+                                        )
                                       }
-                                      className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                                      className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
                                     />
-                                    <span className="text-xs text-slate-400">
-                                      {watchedValues.coverImageStyles?.shapeDivider?.color || watchedValues.brandColor || "#ffffff"}
-                                    </span>
                                   </div>
-                                </div>
 
-                                {/* Width Slider (%) */}
-                                <div>
-                                  <Label className="text-xs text-slate-400">
-                                    Width: {watchedValues.coverImageStyles?.shapeDivider?.width || 100}%
-                                  </Label>
-                                  <input
-                                    type="range"
-                                    min={100}
-                                    max={300}
-                                    value={watchedValues.coverImageStyles?.shapeDivider?.width || 100}
-                                    onChange={(e) =>
-                                      form.setValue(
-                                        "coverImageStyles.shapeDivider.width",
-                                        parseInt(e.target.value)
-                                      )
-                                    }
-                                    className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
-                                  />
-                                </div>
+                                  {/* Height Slider (px) */}
+                                  <div>
+                                    <Label className="text-xs text-slate-400">
+                                      Height: {watchedValues.coverImageStyles?.shapeDivider?.height || 60}px
+                                    </Label>
+                                    <input
+                                      type="range"
+                                      min={20}
+                                      max={200}
+                                      value={watchedValues.coverImageStyles?.shapeDivider?.height || 60}
+                                      onChange={(e) =>
+                                        form.setValue(
+                                          "coverImageStyles.shapeDivider.height",
+                                          parseInt(e.target.value)
+                                        )
+                                      }
+                                      className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                                    />
+                                  </div>
 
-                                {/* Height Slider (px) */}
-                                <div>
-                                  <Label className="text-xs text-slate-400">
-                                    Height: {watchedValues.coverImageStyles?.shapeDivider?.height || 60}px
-                                  </Label>
-                                  <input
-                                    type="range"
-                                    min={20}
-                                    max={200}
-                                    value={watchedValues.coverImageStyles?.shapeDivider?.height || 60}
-                                    onChange={(e) =>
-                                      form.setValue(
-                                        "coverImageStyles.shapeDivider.height",
-                                        parseInt(e.target.value)
-                                      )
-                                    }
-                                    className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
-                                  />
-                                </div>
+                                  {/* Invert Toggle */}
+                                  <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
+                                    <Label className="text-xs text-slate-300">Invert</Label>
+                                    <input
+                                      type="checkbox"
+                                      checked={watchedValues.coverImageStyles?.shapeDivider?.invert || false}
+                                      onChange={(e) =>
+                                        form.setValue("coverImageStyles.shapeDivider.invert", e.target.checked)
+                                      }
+                                      className="w-4 h-4 rounded border-slate-600"
+                                    />
+                                  </div>
 
-                                {/* Invert Toggle */}
-                                <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
-                                  <Label className="text-xs text-slate-300">Invert</Label>
-                                  <input
-                                    type="checkbox"
-                                    checked={watchedValues.coverImageStyles?.shapeDivider?.invert || false}
-                                    onChange={(e) =>
-                                      form.setValue("coverImageStyles.shapeDivider.invert", e.target.checked)
-                                    }
-                                    className="w-4 h-4 rounded border-slate-600"
-                                  />
-                                </div>
-
-                                {/* Bring to Front Toggle */}
-                                <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
-                                  <Label className="text-xs text-slate-300">Bring to Front</Label>
-                                  <input
-                                    type="checkbox"
-                                    checked={watchedValues.coverImageStyles?.shapeDivider?.bringToFront || false}
-                                    onChange={(e) =>
-                                      form.setValue("coverImageStyles.shapeDivider.bringToFront", e.target.checked)
-                                    }
-                                    className="w-4 h-4 rounded border-slate-600"
-                                  />
-                                </div>
-                              </>
-                            )}
-                          </div>
+                                  {/* Bring to Front Toggle */}
+                                  <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
+                                    <Label className="text-xs text-slate-300">Bring to Front</Label>
+                                    <input
+                                      type="checkbox"
+                                      checked={watchedValues.coverImageStyles?.shapeDivider?.bringToFront || false}
+                                      onChange={(e) =>
+                                        form.setValue("coverImageStyles.shapeDivider.bringToFront", e.target.checked)
+                                      }
+                                      className="w-4 h-4 rounded border-slate-600"
+                                    />
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </TooltipProvider>
                         </>
                       )}
                     </div>
