@@ -956,7 +956,7 @@ export default function EmailSignature() {
                         id="company"
                         value={signatureData.company}
                         onChange={(e) => updateField("company", e.target.value)}
-                        placeholder="2TalkLink Inc."
+                        placeholder="TalkLink Inc."
                         data-testid="input-company"
                       />
                     </div>
@@ -1274,7 +1274,7 @@ export default function EmailSignature() {
                     type="email"
                     value={signatureData.email}
                     onChange={(e) => updateField("email", e.target.value)}
-                    placeholder="john@2talklink.com"
+                    placeholder="john@talkl.ink"
                     data-testid="input-email"
                   />
                 </div>
@@ -1285,7 +1285,7 @@ export default function EmailSignature() {
                     id="website"
                     value={signatureData.website}
                     onChange={(e) => updateField("website", e.target.value)}
-                    placeholder="https://www.2talklink.com"
+                    placeholder="https://www.talkl.ink"
                     data-testid="input-website"
                   />
                 </div>

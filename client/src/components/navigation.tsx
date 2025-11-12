@@ -66,7 +66,7 @@ export const Navigation = () => {
               data-testid="button-get-talklink"
             >
               <a 
-                href="https://2talklink.com" 
+                href="https://talkl.ink" 
                 target="_blank" 
                 rel="noopener noreferrer"
               >

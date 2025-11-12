@@ -167,9 +167,9 @@ function generateAppleWalletPass(card: any): any {
     passTypeIdentifier: 'pass.com.2talklink.businesscard',
     serialNumber: card.id,
     teamIdentifier: 'YOUR_TEAM_ID',
-    organizationName: '2TalkLink',
+    organizationName: 'TalkLink',
     description: `Business Card - ${card.fullName}`,
-    logoText: '2TalkLink',
+    logoText: 'TalkLink',
     foregroundColor: 'rgb(255, 255, 255)',
     backgroundColor: 'rgb(30, 41, 59)',
     labelColor: 'rgb(148, 163, 184)',
@@ -249,7 +249,7 @@ function generateGoogleWalletJWT(card: any): string {
           state: 'active',
           heroImage: {
             sourceUri: {
-              uri: 'https://via.placeholder.com/1032x336/1e293b/ffffff?text=2TalkLink'
+              uri: 'https://via.placeholder.com/1032x336/1e293b/ffffff?text=TalkLink'
             }
           },
           textModulesData: [

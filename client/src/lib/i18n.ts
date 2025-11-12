@@ -7,16 +7,16 @@ const resources = {
       // Navigation
       'nav.home': 'Home',
       'nav.builder': 'Builder',
-      'nav.getTalkLink': 'Get 2TalkLink',
+      'nav.getTalkLink': 'Get TalkLink',
       
       // Home Page
       'home.hero.title': 'Create a Free Digital Business Card Preview in 60 Seconds',
-      'home.hero.subtitle': 'Perfect preview. Save as PNG. Share a link. Upgrade to a full smart card with 2TalkLink.',
+      'home.hero.subtitle': 'Perfect preview. Save as PNG. Share a link. Upgrade to a full smart card with TalkLink.',
       'home.trustBadge.noSignup': 'No Sign-up',
       'home.trustBadge.noCreditCard': 'No Credit Card',
       'home.trustBadge.free': '100% Free',
       'home.cta.create': 'Create Your Card',
-      'home.cta.whatIs': 'What is 2TalkLink?',
+      'home.cta.whatIs': 'What is TalkLink?',
       
       // Features
       'features.title': 'Why Choose Our Preview Tool?',
@@ -54,7 +54,7 @@ const resources = {
       'action.saveSettings': 'Save Settings',
       'action.downloadPNG': 'Download PNG',
       'action.shareLink': 'Share Link',
-      'action.getFullCard': 'Get a Full Smart Card on 2TalkLink →',
+      'action.getFullCard': 'Get a Full Smart Card on TalkLink →',
       
       // Messages
       'message.settingsSaved': 'Settings saved!',
@@ -63,7 +63,7 @@ const resources = {
       
       // Footer
       'footer.privacy': 'Your data lives in your browser. We do not upload files or store personal information.',
-      'footer.poweredBy': 'Powered by 2TalkLink',
+      'footer.poweredBy': 'Powered by TalkLink',
     }
   },
   bn: {

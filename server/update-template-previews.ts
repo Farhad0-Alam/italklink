@@ -1,5 +1,5 @@
 /**
- * Update Template Preview Images with Real 2TalkLink Images
+ * Update Template Preview Images with Real TalkLink Images
  */
 import { db } from './db.js';
 import { globalTemplates } from '../shared/schema.js';
@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm';
 
 async function updateTemplatePreviewImages() {
   try {
-    console.log('🖼️ Updating template preview images with real 2TalkLink images...');
+    console.log('🖼️ Updating template preview images with real TalkLink images...');
 
     // Mapping of template names to their preview images
     const templatePreviewMap = [
@@ -53,7 +53,7 @@ async function updateTemplatePreviewImages() {
     }
 
     console.log('\n🎉 Successfully updated all template preview images!');
-    console.log('🖼️ Templates now show unique, professional preview images from your 2TalkLink project');
+    console.log('🖼️ Templates now show unique, professional preview images from your TalkLink project');
 
   } catch (error) {
     console.error('❌ Failed to update template preview images:', error);

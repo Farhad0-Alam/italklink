@@ -578,7 +578,7 @@ export class GoogleCalendarService {
       description += `\n${settings.customMessage}`;
     }
     
-    description += '\n\nCreated by 2TalkLink';
+    description += '\n\nCreated by TalkLink';
     
     return description;
   }

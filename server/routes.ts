@@ -1139,7 +1139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Send email
         await emailService.sendEmail({
           to: email,
-          subject: 'Reset Your Password - 2TalkLink',
+          subject: 'Reset Your Password - TalkLink',
           html: `
             <!DOCTYPE html>
             <html>
@@ -1168,7 +1168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 </div>
                 <div class="content">
                   <h2>Hello ${user.firstName || 'there'},</h2>
-                  <p>We received a request to reset your password for your 2TalkLink account. If you didn't make this request, you can safely ignore this email.</p>
+                  <p>We received a request to reset your password for your TalkLink account. If you didn't make this request, you can safely ignore this email.</p>
                   <p>To reset your password, click the button below:</p>
                   <center>
                     <a href="${resetUrl}" class="button">Reset Password</a>
@@ -1180,7 +1180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   <p style="word-break: break-all; color: #6b7280; font-size: 14px;">${resetUrl}</p>
                 </div>
                 <div class="footer">
-                  <p><strong>2TalkLink</strong> - Digital Business Cards & Networking</p>
+                  <p><strong>TalkLink</strong> - Digital Business Cards & Networking</p>
                   <p>This is an automated email. Please do not reply.</p>
                 </div>
               </div>

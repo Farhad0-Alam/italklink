@@ -8,7 +8,7 @@ async function seedSuperAdmin() {
     // Check if super admin already exists
     const existingAdmin = await db.select()
       .from(users)
-      .where(eq(users.email, 'admin@2talklink.com'))
+      .where(eq(users.email, 'admin@talkl.ink'))
       .limit(1);
 
     if (existingAdmin.length > 0) {
@@ -20,7 +20,7 @@ async function seedSuperAdmin() {
     const hashedPassword = await bcryptjs.hash('admin123', 12);
     
     const [superAdmin] = await db.insert(users).values({
-      email: 'admin@2talklink.com',
+      email: 'admin@talkl.ink',
       firstName: 'Super',
       lastName: 'Admin',
       password: hashedPassword,
@@ -31,7 +31,7 @@ async function seedSuperAdmin() {
     }).returning();
 
     console.log('Super admin created successfully:', superAdmin.email);
-    console.log('Email: admin@2talklink.com');
+    console.log('Email: admin@talkl.ink');
     console.log('Password: admin123');
     
   } catch (error) {

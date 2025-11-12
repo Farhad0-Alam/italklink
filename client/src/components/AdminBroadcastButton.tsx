@@ -165,7 +165,7 @@ export default function AdminBroadcastButton() {
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://2talklink.com/dashboard"
+              placeholder="https://talkl.ink/dashboard"
               className="mt-1"
               data-testid="input-broadcast-url"
             />

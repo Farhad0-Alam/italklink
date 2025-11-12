@@ -7,6 +7,6 @@ export type { UserManagementProps, UserManagementConfig } from './types';
 export const userManagementModule = {
   name: 'UserManagement',
   version: '1.0.0',
-  description: 'UserManagement module for 2TalkLink',
+  description: 'UserManagement module for TalkLink',
   type: 'feature'
 };

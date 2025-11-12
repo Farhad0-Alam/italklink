@@ -1,13 +1,13 @@
 /**
- * Import 2TalkLink Templates into Database
+ * Import TalkLink Templates into Database
  */
 import { db } from './db.js';
 import { globalTemplates } from '../shared/schema.js';
 import fs from 'fs';
 
-async function import2TalkLinkTemplates() {
+async function importTalkLinkTemplates() {
   try {
-    console.log('🚀 Starting 2TalkLink template import...');
+    console.log('🚀 Starting TalkLink template import...');
 
     // Read the processed template data
     const importData = JSON.parse(fs.readFileSync('template-import-data.json', 'utf8'));
@@ -18,8 +18,8 @@ async function import2TalkLinkTemplates() {
     console.log('🗑️ Clearing existing sample templates...');
     await db.delete(globalTemplates);
 
-    // Insert new 2TalkLink templates
-    console.log('✨ Inserting 2TalkLink templates...');
+    // Insert new TalkLink templates
+    console.log('✨ Inserting TalkLink templates...');
     
     for (const template of importData.templates) {
       const result = await db.insert(globalTemplates).values({
@@ -49,7 +49,7 @@ async function import2TalkLinkTemplates() {
 }
 
 // Run the import
-import2TalkLinkTemplates()
+importTalkLinkTemplates()
   .then(() => {
     console.log('✅ Import completed successfully!');
     process.exit(0);

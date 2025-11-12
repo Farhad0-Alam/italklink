@@ -140,8 +140,8 @@ const pricingTiers = [
 
 const faqs = [
   {
-    question: "What makes 2TalkLink different from other digital business card platforms?",
-    answer: "2TalkLink is a complete business solution, not just a card creator. You get digital business cards PLUS appointment booking, CRM, AI chatbot, automated notifications, and analytics - all in one platform. It's like having a virtual sales team working 24/7."
+    question: "What makes TalkLink different from other digital business card platforms?",
+    answer: "TalkLink is a complete business solution, not just a card creator. You get digital business cards PLUS appointment booking, CRM, AI chatbot, automated notifications, and analytics - all in one platform. It's like having a virtual sales team working 24/7."
   },
   {
     question: "Can I add AI chatbot to my business card?",
@@ -227,7 +227,7 @@ export default function Landing() {
               <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
                 <i className="fas fa-address-card text-white text-sm"></i>
               </div>
-              <span className="text-xl font-bold text-gray-900">2TalkLink</span>
+              <span className="text-xl font-bold text-gray-900">TalkLink</span>
             </motion.div>
             
             <div className="hidden md:flex items-center space-x-8">
@@ -1066,7 +1066,7 @@ export default function Landing() {
               Loved by <span className="text-orange-500">Professionals</span> Worldwide
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Join thousands of professionals growing their business with 2TalkLink
+              Join thousands of professionals growing their business with TalkLink
             </p>
           </motion.div>
           
@@ -1125,7 +1125,7 @@ export default function Landing() {
               Got <span className="text-orange-500">Questions?</span>
             </h2>
             <p className="text-xl text-gray-600">
-              Everything you need to know about 2TalkLink
+              Everything you need to know about TalkLink
             </p>
           </motion.div>
           
@@ -1173,7 +1173,7 @@ export default function Landing() {
               Ready to Transform Your Business?
             </h2>
             <p className="text-xl mb-10 text-orange-100">
-              Join thousands of professionals using 2TalkLink to grow their business.
+              Join thousands of professionals using TalkLink to grow their business.
               <br />
               Create your first card in 60 seconds. No credit card required.
             </p>
@@ -1219,7 +1219,7 @@ export default function Landing() {
                 <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
                   <i className="fas fa-address-card text-white text-sm"></i>
                 </div>
-                <span className="text-xl font-bold">2TalkLink</span>
+                <span className="text-xl font-bold">TalkLink</span>
               </div>
               <p className="text-gray-400 text-sm">
                 The all-in-one platform for digital business cards, appointments, and CRM.
@@ -1261,7 +1261,7 @@ export default function Landing() {
           </div>
           
           <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-            <p>&copy; 2025 2TalkLink. All rights reserved.</p>
+            <p>&copy; 2025 TalkLink. All rights reserved.</p>
           </div>
         </div>
       </footer>

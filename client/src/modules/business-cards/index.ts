@@ -10,6 +10,6 @@ export { BusinessCardComponent as BusinessCards } from './components/BusinessCar
 export const businessCardsModule = {
   name: 'BusinessCards',
   version: '1.0.0',
-  description: 'Business Cards module for 2TalkLink',
+  description: 'Business Cards module for TalkLink',
   type: 'feature'
 };

@@ -51,7 +51,7 @@ export const FeatureDescriptions: Record<Feature, string> = {
   [Feature.ADVANCED_ANALYTICS]: 'View detailed analytics and insights',
   [Feature.TEAM_MANAGEMENT]: 'Manage team members and permissions',
   [Feature.API_ACCESS]: 'Access the API for custom integrations',
-  [Feature.WHITE_LABEL]: 'Remove 2TalkLink branding',
+  [Feature.WHITE_LABEL]: 'Remove TalkLink branding',
   [Feature.PRIORITY_SUPPORT]: 'Get priority customer support',
   [Feature.CUSTOM_DOMAIN]: 'Use your own custom domain',
 };

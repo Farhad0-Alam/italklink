@@ -154,7 +154,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">abdur321</p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        admin@2talklink.com
+                        admin@talkl.ink
                       </p>
                     </div>
                   </DropdownMenuLabel>
@@ -188,7 +188,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                           <span className="text-white font-bold text-sm">2T</span>
                         </div>
                         <span className="text-xl font-semibold text-gray-800 dark:text-white">
-                          2TalkLink
+                          TalkLink
                         </span>
                       </Link>
                     </div>

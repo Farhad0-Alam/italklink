@@ -10,6 +10,6 @@ export { WalletButtons as DigitalWallet } from './components/WalletButtons';
 export const digitalWalletModule = {
   name: 'DigitalWallet',
   version: '1.0.0',
-  description: 'Digital Wallet module for 2TalkLink',
+  description: 'Digital Wallet module for TalkLink',
   type: 'feature'
 };

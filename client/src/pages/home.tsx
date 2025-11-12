@@ -53,7 +53,7 @@ export const Home: React.FC = () => {
             </Button>
             <div>
               <a 
-                href="https://2talklink.com" 
+                href="https://talkl.ink" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-talklink-400 hover:text-talklink-300 underline"
@@ -96,17 +96,17 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Install 2TalkLink App Floating Button */}
+      {/* Install TalkLink App Floating Button */}
       <div className="fixed bottom-6 right-6 z-50">
         <a 
-          href="https://2talklink.com/?utm_source=preview-app&utm_medium=fab&utm_campaign=free-tool" 
+          href="https://talkl.ink/?utm_source=preview-app&utm_medium=fab&utm_campaign=free-tool" 
           target="_blank" 
           rel="noopener noreferrer"
           className="bg-talklink-500 hover:bg-talklink-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 flex items-center space-x-2"
           data-testid="button-install-app"
         >
           <i className="fas fa-mobile-alt"></i>
-          <span className="hidden sm:inline font-medium">Get 2TalkLink</span>
+          <span className="hidden sm:inline font-medium">Get TalkLink</span>
         </a>
       </div>
 
@@ -120,7 +120,7 @@ export const Home: React.FC = () => {
             <a href="#" className="text-slate-400 hover:text-talklink-400">Privacy Policy</a>
             <a href="#" className="text-slate-400 hover:text-talklink-400">Terms</a>
             <a 
-              href="https://2talklink.com" 
+              href="https://talkl.ink" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-talklink-400"

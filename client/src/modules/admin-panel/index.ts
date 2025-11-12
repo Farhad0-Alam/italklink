@@ -7,6 +7,6 @@ export type { AdminPanelProps, AdminPanelConfig } from './types';
 export const adminPanelModule = {
   name: 'AdminPanel',
   version: '1.0.0',
-  description: 'AdminPanel module for 2TalkLink',
+  description: 'AdminPanel module for TalkLink',
   type: 'feature'
 };

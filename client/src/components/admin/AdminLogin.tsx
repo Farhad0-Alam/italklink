@@ -76,7 +76,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
               </div>
             </div>
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
-              2TalkLink Admin
+              TalkLink Admin
             </CardTitle>
             <CardDescription>
               Sign in to access the admin dashboard

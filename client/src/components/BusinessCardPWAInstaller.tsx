@@ -23,7 +23,7 @@ export const BusinessCardPWAInstaller = ({ cardData, className = '' }: BusinessC
     setInstalling(false);
   };
 
-  // Only show if installable and not already installed (like 2TalkLink)
+  // Only show if installable and not already installed (like TalkLink)
   if (!isInstallable || isInstalled) {
     return null;
   }

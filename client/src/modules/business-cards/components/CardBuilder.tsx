@@ -257,7 +257,7 @@ export const Builder = ({ cardId }: BuilderProps) => {
                     data-testid="button-get-full-card"
                   >
                     <a 
-                      href="https://2talklink.com/?utm_source=preview-app&utm_medium=cta&utm_campaign=free-tool" 
+                      href="https://talkl.ink/?utm_source=preview-app&utm_medium=cta&utm_campaign=free-tool" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       onClick={() => logEvent("cta_click_upgrade")}
@@ -276,7 +276,7 @@ export const Builder = ({ cardId }: BuilderProps) => {
       {/* Install App Floating Button */}
       <div className="fixed bottom-6 right-6 z-50">
         <a 
-          href="https://2talklink.com/?utm_source=preview-app&utm_medium=fab&utm_campaign=free-tool" 
+          href="https://talkl.ink/?utm_source=preview-app&utm_medium=fab&utm_campaign=free-tool" 
           target="_blank" 
           rel="noopener noreferrer"
           className="bg-talklink-500 hover:bg-talklink-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 flex items-center space-x-2"

@@ -106,8 +106,8 @@ export default function TemplateBuilder() {
     'education', 'retail', 'finance', 'real-estate', 'consulting'
   ];
 
-  // Convert 2TalkLink template structure to BusinessCard format
-  const convert2TalkLinkToBusinessCard = (talkLinkData: any) => {
+  // Convert TalkLink template structure to BusinessCard format
+  const convertTalkLinkToBusinessCard = (talkLinkData: any) => {
     const profile = talkLinkData.profile || {};
     const templateStyle = talkLinkData.templateStyle || {};
     const socialIcons = talkLinkData.socialIcons || [];
@@ -176,7 +176,7 @@ export default function TemplateBuilder() {
         
         // Convert template data to our BusinessCard format
         if (data.templateData) {
-          // Check if it's our new format or legacy 2TalkLink format
+          // Check if it's our new format or legacy TalkLink format
           if (data.templateData.defaultData) {
             // New format - use the defaultData directly
             const defaultData = data.templateData.defaultData;
@@ -192,8 +192,8 @@ export default function TemplateBuilder() {
               template: 'dark' // Force dark template for Template 2
             }));
           } else {
-            // Legacy 2TalkLink format or other templates
-            const convertedData = convert2TalkLinkToBusinessCard(data.templateData);
+            // Legacy TalkLink format or other templates
+            const convertedData = convertTalkLinkToBusinessCard(data.templateData);
             setBusinessCardData(prev => ({
               ...prev,
               ...convertedData

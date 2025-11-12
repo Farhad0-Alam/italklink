@@ -1,11 +1,11 @@
-// Process 2TalkLink templates and extract icons/colors
+// Process TalkLink templates and extract icons/colors
 import { templateExtractor } from '../client/src/utils/template-extractor';
 import templateData from '../template-import-data.json';
 import fs from 'fs';
 import path from 'path';
 
 function processTemplates() {
-  console.log('🎨 Processing 2TalkLink templates...');
+  console.log('🎨 Processing TalkLink templates...');
   
   // Process all templates
   templateExtractor.processAllTemplates(templateData);

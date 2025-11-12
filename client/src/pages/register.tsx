@@ -66,7 +66,7 @@ export default function Register() {
     onSuccess: () => {
       toast({
         title: 'Account Created Successfully!',
-        description: 'Welcome to 2TalkLink! You can now start creating digital business cards.',
+        description: 'Welcome to TalkLink! You can now start creating digital business cards.',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       setLocation('/dashboard');
@@ -143,7 +143,7 @@ export default function Register() {
                 <span className="text-white text-xl font-bold">2T</span>
               </div>
               <span className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
-                2TalkLink
+                TalkLink
               </span>
             </div>
           </Link>

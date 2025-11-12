@@ -445,7 +445,7 @@ export class ZoomService {
         start_time: appointment.scheduledAt.toISOString(),
         duration: appointment.duration,
         timezone: 'UTC',
-        agenda: appointment.notes || `Meeting scheduled via 2TalkLink`,
+        agenda: appointment.notes || `Meeting scheduled via TalkLink`,
         settings: {
           host_video: true,
           participant_video: true,
@@ -499,7 +499,7 @@ export class ZoomService {
         topic: appointment.title || `Meeting with ${appointment.attendeeName}`,
         start_time: appointment.scheduledAt.toISOString(),
         duration: appointment.duration,
-        agenda: appointment.notes || `Meeting scheduled via 2TalkLink`,
+        agenda: appointment.notes || `Meeting scheduled via TalkLink`,
       };
 
       if (settings) {

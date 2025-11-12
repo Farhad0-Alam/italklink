@@ -424,7 +424,7 @@ export default function Templates() {
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle className="text-xl font-semibold text-gray-700">
-                Create New 2TalkLink
+                Create New TalkLink
               </DialogTitle>
               <Button
                 variant="ghost"
@@ -443,7 +443,7 @@ export default function Templates() {
           <div className="space-y-4">
             <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
               <div className="px-3 py-2 bg-gray-100 text-gray-600 text-sm">
-                https://2talklink.com/
+                https://talkl.ink/
               </div>
               <Input
                 value={customUrl}

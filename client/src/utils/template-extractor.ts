@@ -1,4 +1,4 @@
-// Extract valuable styling and icon data from 2TalkLink templates
+// Extract valuable styling and icon data from TalkLink templates
 // This utility processes the imported templates and extracts reusable components
 
 interface ExtractedIcon {
@@ -41,7 +41,7 @@ export class TemplateExtractor {
   private colorSchemes: Map<string, ExtractedColorScheme> = new Map();
   private styles: Map<string, ExtractedStyle> = new Map();
 
-  // Process a single 2TalkLink template
+  // Process a single TalkLink template
   processTemplate(templateData: any): void {
     if (!templateData) return;
 

@@ -1,4 +1,4 @@
-# 🔍 Complete Debugging Guide for 2TalkLink
+# 🔍 Complete Debugging Guide for TalkLink
 
 ## Table of Contents
 1. [Quick Start](#quick-start)

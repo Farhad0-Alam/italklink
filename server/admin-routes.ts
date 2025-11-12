@@ -129,7 +129,7 @@ router.get('/links', requireOwner, async (req, res) => {
       shareSlug: businessCards.shareSlug,
       viewCount: businessCards.viewCount,
       createdAt: businessCards.createdAt,
-      url: sql`'https://2talklink.com/' || ${businessCards.shareSlug}`.as('url'),
+      url: sql`'https://talkl.ink/' || ${businessCards.shareSlug}`.as('url'),
       userEmail: users.email,
       userFirstName: users.firstName,
       userLastName: users.lastName,
@@ -1631,9 +1631,9 @@ router.get('/settings/:category', requireOwner, async (req, res) => {
     // For now, return mock settings based on category
     const mockSettings = {
       profile: {
-        companyName: '2TalkLink',
+        companyName: 'TalkLink',
         adminEmail: req.user!.email,
-        supportEmail: 'support@2talklink.com'
+        supportEmail: 'support@talkl.ink'
       },
       payment: {
         stripeEnabled: false,
@@ -1641,7 +1641,7 @@ router.get('/settings/:category', requireOwner, async (req, res) => {
       },
       email: {
         smtpConfigured: false,
-        fromAddress: 'noreply@2talklink.com'
+        fromAddress: 'noreply@talkl.ink'
       },
       branding: {
         logoUrl: '',

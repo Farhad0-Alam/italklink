@@ -7,6 +7,6 @@ export type { FormBuilderProps, FormBuilderConfig } from './types';
 export const formBuilderModule = {
   name: 'FormBuilder',
   version: '1.0.0',
-  description: 'Form Builder module for 2TalkLink',
+  description: 'Form Builder module for TalkLink',
   type: 'feature'
 };

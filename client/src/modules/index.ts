@@ -1,12 +1,12 @@
 /**
- * 2TalkLink Modules Index
+ * TalkLink Modules Index
  * Auto-generated module exports
  * 
  * This file allows you to import modules using:
  * import { ModuleName } from '@/modules';
  */
 
-// Main module exports for 2TalkLink
+// Main module exports for TalkLink
 export * from './business-cards';
 export * from './form-builder';
 export * from './digital-wallet';

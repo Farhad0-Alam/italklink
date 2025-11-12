@@ -5430,7 +5430,7 @@ export class DatabaseStorage implements IStorage {
       return {
         id: card.id,
         title: cardTitle,
-        url: `${process.env.VITE_APP_URL || 'https://2talklink.com'}/${card.cardName}`,
+        url: `${process.env.VITE_APP_URL || 'https://talkl.ink'}/${card.cardName}`,
         ownerName,
         visitorCount: card.viewCount || 0,
         clicksCount: card.clickCount || 0,

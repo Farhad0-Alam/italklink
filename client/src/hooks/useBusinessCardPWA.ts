@@ -85,7 +85,7 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
   }, [cardData]);
 
   const installBusinessCard = async () => {
-    // Only trigger native install prompt (like 2TalkLink)
+    // Only trigger native install prompt (like TalkLink)
     if (deferredPrompt) {
       try {
         await deferredPrompt.prompt();
