@@ -56,7 +56,7 @@ export function CoverImageSection({
   const wrapperStyles: React.CSSProperties = {
     height: `${height}px`,
     position: "relative",
-    overflow: "hidden",
+    overflow: "visible",
   };
 
   // Cover image styles
@@ -68,6 +68,7 @@ export function CoverImageSection({
     backgroundSize: "cover",
     backgroundPosition: "center",
     opacity,
+    overflow: "hidden",
   };
 
   // Add border if specified
