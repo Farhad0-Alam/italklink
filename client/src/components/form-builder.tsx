@@ -1369,20 +1369,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     />
                                   </div>
 
-                                  {/* Flip Toggle (Horizontal) */}
-                                  <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
-                                    <Label className="text-xs text-slate-300">Flip</Label>
-                                    <input
-                                      type="checkbox"
-                                      checked={watchedValues.coverImageStyles?.shapeDivider?.flip || false}
-                                      onChange={(e) =>
-                                        form.setValue("coverImageStyles.shapeDivider.flip", e.target.checked)
-                                      }
-                                      className="w-4 h-4 rounded border-slate-600"
-                                    />
-                                  </div>
-
-                                  {/* Invert Toggle (Vertical) */}
+                                  {/* Invert Toggle */}
                                   <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
                                     <Label className="text-xs text-slate-300">Invert</Label>
                                     <input
