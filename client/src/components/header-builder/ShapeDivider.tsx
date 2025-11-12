@@ -98,19 +98,29 @@ export const ShapeDivider = memo(({
   }
 
   const viewBox = "0 0 1000 100"; // Elementor standard viewBox
-  const transform = divider.flip ? "scaleY(-1)" : "";
   const width = divider.width || 100; // Width percentage (default 100%)
+  const heightScale = (divider.height || 100) / 100; // Convert height to scale factor
+  
+  // Build transform string for SVG
+  const transforms = [];
+  if (divider.flip) transforms.push("scaleY(-1)");
+  if (divider.flipHorizontal) transforms.push("scaleX(-1)");
+  transforms.push(`scaleY(${heightScale})`); // Apply height scaling
+  const transform = transforms.join(" ");
 
+  // Calculate left offset and width to ensure full coverage
+  const leftOffset = width > 100 ? -(width - 100) / 2 : 0;
+  
   const style: React.CSSProperties = {
     position: "absolute",
     [position]: 0,
-    left: "50%",
-    transform: "translateX(-50%)",
+    left: `${leftOffset}%`,
     width: `${width}%`,
-    height: `${divider.height}px`,
+    height: "100px", // Fixed container height, scaling handled by transform
     zIndex: 1,
     pointerEvents: "none",
-    opacity: divider.opacity
+    opacity: divider.opacity,
+    overflow: "visible" // Allow shape to extend beyond container
   };
 
   return (
@@ -124,7 +134,7 @@ export const ShapeDivider = memo(({
           style={{ 
             display: "block", 
             transform,
-            transformOrigin: "center" 
+            transformOrigin: `center ${position}` // Scale from top or bottom edge
           }}
         >
           <path

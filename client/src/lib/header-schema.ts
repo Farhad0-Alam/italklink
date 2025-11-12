@@ -84,8 +84,9 @@ export const shapeDividerSchema = z.object({
   customPath: z.string().optional(), // SVG path for custom shapes
   color: z.string().default("#ffffff"),
   height: z.number().default(100),
-  width: z.number().default(100), // Width percentage (0-100)
-  flip: z.boolean().default(false),
+  width: z.number().default(100), // Width percentage (100-300)
+  flip: z.boolean().default(false), // Vertical flip (invert)
+  flipHorizontal: z.boolean().default(false), // Horizontal flip
   opacity: z.number().min(0).max(1).default(1)
 });
 
