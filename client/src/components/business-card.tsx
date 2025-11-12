@@ -10,6 +10,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { generateShareUrl } from "@/lib/share";
 import { PageElementRenderer } from "./page-element";
 import { HeaderPreview } from "./header-builder/HeaderPreview";
+import { CoverImageSection } from "./CoverImageSection";
 import { defaultHeaderPreset } from "@/lib/header-schema";
 import {
   Share2,
@@ -785,18 +786,11 @@ export const BusinessCardComponent = forwardRef<
         <div className="relative">
           {/* Header Design - Cover + Logo */}
           {(data.headerDesign === "cover-logo" || !data.headerDesign) && (
-            <div
-              className="h-40 relative"
-              style={{
-                backgroundImage: data.backgroundImage
-                  ? `url(${getOptimizedImageSrc(data.backgroundImage, "large")})`
-                  : undefined,
-                backgroundColor: !data.backgroundImage
-                  ? data.brandColor || "#22c55e"
-                  : undefined,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
+            <CoverImageSection
+              coverImageUrl={data.backgroundImage ? getOptimizedImageSrc(data.backgroundImage, "large") : undefined}
+              brandColor={data.brandColor || "#22c55e"}
+              coverImageStyles={data.coverImageStyles}
+              defaultHeight={160}
             >
               {/* Logo in top left corner */}
               {data.logo && (
@@ -828,23 +822,16 @@ export const BusinessCardComponent = forwardRef<
                   </div>
                 );
               })()}
-            </div>
+            </CoverImageSection>
           )}
 
           {/* Header Design - Profile Center */}
           {data.headerDesign === "profile-center" && (
-            <div
-              className="h-32 relative"
-              style={{
-                backgroundImage: data.backgroundImage
-                  ? `url(${getOptimizedImageSrc(data.backgroundImage, "large")})`
-                  : undefined,
-                backgroundColor: !data.backgroundImage
-                  ? data.brandColor || "#22c55e"
-                  : undefined,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
+            <CoverImageSection
+              coverImageUrl={data.backgroundImage ? getOptimizedImageSrc(data.backgroundImage, "large") : undefined}
+              brandColor={data.brandColor || "#22c55e"}
+              coverImageStyles={data.coverImageStyles}
+              defaultHeight={128}
             >
               {/* Large Profile Photo */}
               {(() => {
@@ -876,25 +863,19 @@ export const BusinessCardComponent = forwardRef<
                   />
                 </div>
               )}
-            </div>
+            </CoverImageSection>
           )}
 
           {/* Header Design - Split Layout */}
           {data.headerDesign === "split-design" && (
-            <div className="h-40 relative flex">
+            <div className="relative flex" style={{ height: `${data.coverImageStyles?.height || 160}px` }}>
               {/* Left side - Cover */}
-              <div
-                className="flex-1 relative"
-                style={{
-                  backgroundImage: data.backgroundImage
-                    ? `url(${getOptimizedImageSrc(data.backgroundImage, "large")})`
-                    : undefined,
-                  backgroundColor: !data.backgroundImage
-                    ? data.brandColor || "#22c55e"
-                    : undefined,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
+              <CoverImageSection
+                coverImageUrl={data.backgroundImage ? getOptimizedImageSrc(data.backgroundImage, "large") : undefined}
+                brandColor={data.brandColor || "#22c55e"}
+                coverImageStyles={data.coverImageStyles}
+                defaultHeight={160}
+                className="flex-1"
               >
                 {/* Profile Photo on left side */}
                 {(() => {
@@ -914,7 +895,7 @@ export const BusinessCardComponent = forwardRef<
                     </div>
                   );
                 })()}
-              </div>
+              </CoverImageSection>
 
               {/* Right side - Logo space */}
               <div
