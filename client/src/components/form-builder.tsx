@@ -115,15 +115,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const [collapsedSections, setCollapsedSections] = useState<{
     [key: string]: boolean;
   }>({
-    coverLogo: true,
-    basicInfo: true,
+    profile: true,
     contactInfo: true,
     customization: true,
     appearance: true,
     seo: true,
     pages: false, // Pages section expanded by default
     pageBuilder: true,
-    // subsections inside Basic Info
+    // subsections inside Profile
     nameStyling: true,
     titleStyling: true,
     companyStyling: true,
@@ -356,21 +355,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           {/* Show different content based on builder mode */}
           {builderMode === "card" && (
             <>
-              {/* Cover & Logo */}
+              {/* Profile */}
               <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4 space-y-4">
                 <div
                   className="flex items-center justify-between cursor-pointer"
-                  onClick={() => toggleSection("coverLogo")}
+                  onClick={() => toggleSection("profile")}
                 >
                   <h3 className="text-lg font-semibold text-blue-300">
-                    Cover & Logo
+                    Profile
                   </h3>
                   <i
-                    className={`fas ${collapsedSections.coverLogo ? "fa-chevron-down" : "fa-chevron-up"} text-blue-300`}
+                    className={`fas ${collapsedSections.profile ? "fa-chevron-down" : "fa-chevron-up"} text-blue-300`}
                   />
                 </div>
 
-                {!collapsedSections.coverLogo && (
+                {!collapsedSections.profile && (
                   <>
                     <div className="space-y-3">
                       <Label className="text-white">Header Design</Label>
@@ -559,28 +558,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         </div>
                       ))}
                     </div>
-                  </>
-                )}
-              </div>
 
-              {/* Basic Information (with Name/Title/Company styling subsections) */}
-              <div className="bg-green-900/30 border border-green-600/30 rounded-lg p-4 space-y-4">
-                <div
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => toggleSection("basicInfo")}
-                >
-                  <h3 className="text-lg font-semibold text-green-300">
-                    {t("form.basicInfo")}
-                  </h3>
-                  <i
-                    className={`fas ${collapsedSections.basicInfo ? "fa-chevron-down" : "fa-chevron-up"} text-green-300`}
-                  />
-                </div>
-
-                {!collapsedSections.basicInfo && (
-                  <>
-                    {/* basic fields */}
-                    <div className="space-y-4">
+                    {/* Basic Information fields */}
+                    <div className="space-y-4 mt-6 pt-6 border-t border-blue-600/30">
                       <div>
                         <Label htmlFor="fullName" className="text-white">
                           {t("field.fullName")} *
