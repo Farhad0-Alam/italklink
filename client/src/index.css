@@ -813,3 +813,137 @@
 .tl-text-bottom .tl-icon-container {
   margin: 0 auto;
 }
+
+/* Profile Image Border Animations */
+@keyframes instagram-spin {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes neon-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 20px currentColor, 0 0 30px currentColor, 0 0 40px currentColor;
+  }
+}
+
+@keyframes color-wave {
+  0% {
+    border-color: #ff6b6b;
+  }
+  25% {
+    border-color: #4ecdc4;
+  }
+  50% {
+    border-color: #45b7d1;
+  }
+  75% {
+    border-color: #96ceb4;
+  }
+  100% {
+    border-color: #ff6b6b;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes gradient-slide {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+/* Animation Classes */
+.profile-image-instagram {
+  position: relative;
+}
+
+.profile-image-instagram::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  background: linear-gradient(
+    45deg,
+    #f09433 0%,
+    #e6683c 25%,
+    #dc2743 50%,
+    #cc2366 75%,
+    #bc1888 100%
+  );
+  background-size: 200% 200%;
+  border-radius: inherit;
+  animation: instagram-spin 3s linear infinite;
+  z-index: -1;
+}
+
+.profile-image-neon {
+  animation: neon-glow 2s ease-in-out infinite;
+}
+
+.profile-image-wave {
+  animation: color-wave 4s ease-in-out infinite;
+}
+
+.profile-image-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-image-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+  border-radius: inherit;
+}
+
+.profile-image-gradient-slide {
+  position: relative;
+}
+
+.profile-image-gradient-slide::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  background: linear-gradient(
+    45deg,
+    #667eea 0%,
+    #764ba2 25%,
+    #f093fb 50%,
+    #4facfe 75%,
+    #667eea 100%
+  );
+  background-size: 300% 300%;
+  border-radius: inherit;
+  animation: gradient-slide 4s ease infinite;
+  z-index: -1;
+}

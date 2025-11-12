@@ -293,6 +293,76 @@ export const BusinessCardComponent = forwardRef<
       return undefined;
     };
 
+    // Helper function to get profile image styles and animation class
+    const getProfileImageStyle = (baseSize: number = 120) => {
+      const styles = data.profileImageStyles || {};
+      const size = styles.size || baseSize;
+      const shape = styles.shape || "circle";
+      const borderWidth = styles.borderWidth || 0;
+      const borderColor = styles.borderColor || "#ffffff";
+      const shadow = styles.shadow || 0;
+      const opacity = styles.opacity !== undefined ? styles.opacity / 100 : 1;
+      const animation = styles.animation || "none";
+
+      // Border radius based on shape
+      const borderRadius = 
+        shape === "circle" ? "50%" :
+        shape === "square" ? "0" :
+        "16px"; // rounded
+
+      // Determine if animation needs pseudo-elements (wrapper) or can be on image
+      const usePseudoElements = animation === "instagram" || animation === "shimmer" || animation === "gradient-slide";
+      
+      // Wrapper styles - hosts pseudo-element animations and positioning
+      const wrapperStyles: React.CSSProperties = {
+        position: 'relative',
+        width: `${size}px`,
+        height: `${size}px`,
+        borderRadius,
+      };
+
+      // Image styles - appearance properties
+      const imageStyles: React.CSSProperties = {
+        width: '100%',
+        height: '100%',
+        borderRadius,
+        opacity,
+        objectFit: 'cover' as const,
+      };
+
+      // Add shadow to wrapper
+      if (shadow > 0) {
+        wrapperStyles.boxShadow = `0 ${shadow / 2}px ${shadow}px rgba(0, 0, 0, 0.3)`;
+      }
+
+      // Add border to image (always, for all animations)
+      if (borderWidth > 0) {
+        imageStyles.border = `${borderWidth}px solid ${borderColor}`;
+      }
+
+      // Separate animation classes for wrapper vs image
+      const wrapperAnimationClass = usePseudoElements ? (
+        animation === "instagram" ? "profile-image-instagram" :
+        animation === "shimmer" ? "profile-image-shimmer" :
+        animation === "gradient-slide" ? "profile-image-gradient-slide" :
+        ""
+      ) : "";
+
+      const imageAnimationClass = !usePseudoElements ? (
+        animation === "neon" ? "profile-image-neon" :
+        animation === "wave" ? "profile-image-wave" :
+        ""
+      ) : "";
+
+      return { 
+        wrapperStyles, 
+        imageStyles, 
+        wrapperAnimationClass,
+        imageAnimationClass,
+        visible: styles.visible !== false 
+      };
+    };
+
     // Helper functions for enhanced icon styling
     const getSkinClass = (section: "contactInfo" | "socialMedia"): string => {
       const skin = getSectionStyle(section, "skin") || "flat";
@@ -473,17 +543,24 @@ export const BusinessCardComponent = forwardRef<
                 </div>
               )}
 
-              {/* Profile Photo with White Border */}
-              <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 z-30">
-                <div className="w-24 h-24 rounded-full bg-white p-1">
-                  <img
-                    src={profileImageSrc}
-                    alt={data.fullName || "Profile photo"}
-                    className="w-full h-full rounded-full object-cover"
-                    data-testid="img-profile-photo"
-                  />
-                </div>
-              </div>
+              {/* Profile Photo with Styling */}
+              {(() => {
+                const { wrapperStyles, imageStyles, wrapperAnimationClass, imageAnimationClass, visible } = getProfileImageStyle(96);
+                if (!visible) return null;
+                return (
+                  <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 z-30">
+                    <div className={wrapperAnimationClass} style={wrapperStyles}>
+                      <img
+                        src={profileImageSrc}
+                        alt={data.fullName || "Profile photo"}
+                        className={imageAnimationClass}
+                        style={imageStyles}
+                        data-testid="img-profile-photo"
+                      />
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
 
@@ -503,16 +580,23 @@ export const BusinessCardComponent = forwardRef<
               }}
             >
               {/* Large Profile Photo */}
-              <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-20">
-                <div className="w-32 h-32 rounded-full bg-white p-2">
-                  <img
-                    src={profileImageSrc}
-                    alt={data.fullName || "Profile photo"}
-                    className="w-full h-full rounded-full object-cover"
-                    data-testid="img-profile-photo"
-                  />
-                </div>
-              </div>
+              {(() => {
+                const { wrapperStyles, imageStyles, wrapperAnimationClass, imageAnimationClass, visible } = getProfileImageStyle(128);
+                if (!visible) return null;
+                return (
+                  <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 z-20">
+                    <div className={wrapperAnimationClass} style={wrapperStyles}>
+                      <img
+                        src={profileImageSrc}
+                        alt={data.fullName || "Profile photo"}
+                        className={imageAnimationClass}
+                        style={imageStyles}
+                        data-testid="img-profile-photo"
+                      />
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Logo in top right */}
               {data.logo && (
@@ -546,16 +630,23 @@ export const BusinessCardComponent = forwardRef<
                 }}
               >
                 {/* Profile Photo on left side */}
-                <div className="absolute -bottom-12 right-4 z-30">
-                  <div className="w-20 h-20 rounded-full bg-white p-1">
-                    <img
-                      src={profileImageSrc}
-                      alt={data.fullName || "Profile photo"}
-                      className="w-full h-full rounded-full object-cover"
-                      data-testid="img-profile-photo"
-                    />
-                  </div>
-                </div>
+                {(() => {
+                  const { wrapperStyles, imageStyles, wrapperAnimationClass, imageAnimationClass, visible } = getProfileImageStyle(80);
+                  if (!visible) return null;
+                  return (
+                    <div className="absolute -bottom-12 right-4 z-30">
+                      <div className={wrapperAnimationClass} style={wrapperStyles}>
+                        <img
+                          src={profileImageSrc}
+                          alt={data.fullName || "Profile photo"}
+                          className={imageAnimationClass}
+                          style={imageStyles}
+                          data-testid="img-profile-photo"
+                        />
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Right side - Logo space */}
