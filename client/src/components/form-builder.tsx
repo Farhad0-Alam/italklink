@@ -1143,7 +1143,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               </div>
 
               {/* Contact Information */}
-              <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
+              <div className="hidden bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
                 <div
                   className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleSection("contactInfo")}
@@ -2749,7 +2749,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               {/* For brevity, they are left as-is in this full file you paste above. */}
               {/* --- SOCIAL MEDIA BLOCK START --- */}
               <div
-                className="rounded-lg p-4 space-y-4"
+                className="hidden rounded-lg p-4 space-y-4"
                 style={{
                   backgroundColor:
                     watchedValues.sectionStyles?.socialMedia
