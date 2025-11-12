@@ -109,10 +109,11 @@ export function CoverImageSection({
     ""
   ) : "";
 
-  // Shape divider props
-  const shapeDivider = coverImageStyles?.shapeDivider;
-  const showShapeDivider = shapeDivider?.enabled && shapeDivider?.preset && SHAPE_PRESETS[shapeDivider.preset];
-  const shapeDividerPosition = shapeDivider?.position || "bottom"; // "top" or "bottom"
+  // Shape divider props - support both top and bottom
+  const shapeDividerTop = coverImageStyles?.shapeDividerTop;
+  const shapeDividerBottom = coverImageStyles?.shapeDividerBottom;
+  const showTopDivider = shapeDividerTop?.enabled && shapeDividerTop?.preset && SHAPE_PRESETS[shapeDividerTop.preset];
+  const showBottomDivider = shapeDividerBottom?.enabled && shapeDividerBottom?.preset && SHAPE_PRESETS[shapeDividerBottom.preset];
 
   return (
     <div className={`${wrapperAnimationClass} ${className}`} style={wrapperStyles}>
@@ -121,16 +122,16 @@ export function CoverImageSection({
       {/* Children (logo, profile, etc.) */}
       {children}
       
-      {/* Shape Divider */}
-      {showShapeDivider && (
+      {/* Top Shape Divider */}
+      {showTopDivider && (
         <div
           style={{
             position: "absolute",
-            [shapeDividerPosition]: borderWidth > 0 ? `-${borderWidth}px` : 0, // Overlap border
+            top: borderWidth > 0 ? `-${borderWidth}px` : 0, // Overlap border
             left: 0,
             width: "100%",
-            height: `${shapeDivider.height || 60}px`,
-            zIndex: shapeDivider.bringToFront ? 20 : 1,
+            height: `${shapeDividerTop.height || 60}px`,
+            zIndex: shapeDividerTop.bringToFront ? 20 : 1,
             pointerEvents: "none",
           }}
         >
@@ -141,13 +142,45 @@ export function CoverImageSection({
             preserveAspectRatio="none"
             style={{
               display: "block",
-              transform: shapeDivider.invert ? "scaleY(-1)" : undefined,
+              transform: shapeDividerTop.invert ? "scaleY(-1)" : undefined,
               transformOrigin: "center",
             }}
           >
             <path
-              d={SHAPE_PRESETS[shapeDivider.preset]}
-              fill={shapeDivider.color || brandColor}
+              d={SHAPE_PRESETS[shapeDividerTop.preset]}
+              fill={shapeDividerTop.color || brandColor}
+            />
+          </svg>
+        </div>
+      )}
+      
+      {/* Bottom Shape Divider */}
+      {showBottomDivider && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: borderWidth > 0 ? `-${borderWidth}px` : 0, // Overlap border
+            left: 0,
+            width: "100%",
+            height: `${shapeDividerBottom.height || 60}px`,
+            zIndex: shapeDividerBottom.bringToFront ? 20 : 1,
+            pointerEvents: "none",
+          }}
+        >
+          <svg
+            width="100%"
+            height="100%"
+            viewBox="0 0 1440 320"
+            preserveAspectRatio="none"
+            style={{
+              display: "block",
+              transform: shapeDividerBottom.invert ? "scaleY(-1)" : undefined,
+              transformOrigin: "center",
+            }}
+          >
+            <path
+              d={SHAPE_PRESETS[shapeDividerBottom.preset]}
+              fill={shapeDividerBottom.color || brandColor}
             />
           </svg>
         </div>
