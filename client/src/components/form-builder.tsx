@@ -4384,7 +4384,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               </div>
 
               {/* Appearance Section */}
-              <div className="bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
+              <div className="hidden bg-purple-900/30 border border-purple-600/30 rounded-lg p-4 space-y-4">
                 <div
                   className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleSection("appearance")}
@@ -5097,7 +5097,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               </div>
 
               {/* SEO Settings Section */}
-              <div className="bg-orange-900/30 border border-orange-600/30 rounded-lg p-4 space-y-4">
+              <div className="hidden bg-orange-900/30 border border-orange-600/30 rounded-lg p-4 space-y-4">
                 <div
                   className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleSection("seo")}
