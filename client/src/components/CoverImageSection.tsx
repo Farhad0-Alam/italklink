@@ -23,6 +23,7 @@ export function CoverImageSection({
   const borderWidth = coverImageStyles?.borderWidth || 0;
   const animation = coverImageStyles?.animation || "none";
   const opacity = coverImageStyles?.opacity !== undefined ? coverImageStyles.opacity : 1;
+  const borderColor = coverImageStyles?.borderColor || brandColor; // Use custom color or fall back to brand color
   
   // Get animation colors
   const useBrandColor = coverImageStyles?.animationColors?.useBrandColor ?? true;
@@ -73,7 +74,7 @@ export function CoverImageSection({
 
   // Add border if specified
   if (borderWidth > 0 && animation === "none") {
-    coverStyles.border = `${borderWidth}px solid ${color1}`;
+    coverStyles.border = `${borderWidth}px solid ${borderColor}`;
   }
 
   // Animation-specific styles and classes
@@ -89,7 +90,7 @@ export function CoverImageSection({
       coverStyles['--cover-anim-color-1' as any] = color1;
       coverStyles['--cover-anim-color-2' as any] = color2;
       if (borderWidth > 0) {
-        coverStyles.border = `${borderWidth}px solid ${color1}`;
+        coverStyles.border = `${borderWidth}px solid ${borderColor}`;
       }
     }
   }

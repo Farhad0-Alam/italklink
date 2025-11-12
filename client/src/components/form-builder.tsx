@@ -936,6 +936,131 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             />
                           </div>
 
+                          {/* Border Color - only shown when border width > 0 */}
+                          {(watchedValues.coverImageStyles?.borderWidth || 0) > 0 && (
+                            <div className="space-y-2 p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+                              <Label className="text-xs text-slate-300 font-medium">Border Color</Label>
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="color"
+                                  value={watchedValues.coverImageStyles?.borderColor || watchedValues.brandColor || "#22c55e"}
+                                  onChange={(e) =>
+                                    form.setValue("coverImageStyles.borderColor", e.target.value)
+                                  }
+                                  className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                                />
+                                <span className="text-xs text-slate-400 font-mono">
+                                  {watchedValues.coverImageStyles?.borderColor || watchedValues.brandColor || "#22c55e"}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-500 mt-1">
+                                Default: Brand Color
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Profile Position on Cover */}
+                          <div className="space-y-3 p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+                            <Label className="text-xs text-slate-300 font-medium">Profile Image Position on Cover</Label>
+                            
+                            {/* Horizontal Position */}
+                            <div>
+                              <Label className="text-xs text-slate-400">
+                                Horizontal: {watchedValues.coverImageStyles?.profilePositionX ?? 50}%
+                                <span className="text-slate-500 ml-1">
+                                  ({(watchedValues.coverImageStyles?.profilePositionX ?? 50) < 40 ? 'Left' : (watchedValues.coverImageStyles?.profilePositionX ?? 50) > 60 ? 'Right' : 'Center'})
+                                </span>
+                              </Label>
+                              <input
+                                type="range"
+                                min={0}
+                                max={100}
+                                value={watchedValues.coverImageStyles?.profilePositionX ?? 50}
+                                onChange={(e) =>
+                                  form.setValue(
+                                    "coverImageStyles.profilePositionX",
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                                className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                              />
+                            </div>
+
+                            {/* Vertical Position */}
+                            <div>
+                              <Label className="text-xs text-slate-400">
+                                Vertical: {watchedValues.coverImageStyles?.profilePositionY ?? 100}%
+                                <span className="text-slate-500 ml-1">
+                                  ({(watchedValues.coverImageStyles?.profilePositionY ?? 100) < 50 ? 'Top' : (watchedValues.coverImageStyles?.profilePositionY ?? 100) > 70 ? 'Bottom' : 'Middle'})
+                                </span>
+                              </Label>
+                              <input
+                                type="range"
+                                min={0}
+                                max={120}
+                                value={watchedValues.coverImageStyles?.profilePositionY ?? 100}
+                                onChange={(e) =>
+                                  form.setValue(
+                                    "coverImageStyles.profilePositionY",
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                                className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Logo Position on Cover */}
+                          <div className="space-y-3 p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+                            <Label className="text-xs text-slate-300 font-medium">Logo Position on Cover</Label>
+                            
+                            {/* Horizontal Position */}
+                            <div>
+                              <Label className="text-xs text-slate-400">
+                                Horizontal: {watchedValues.coverImageStyles?.logoPositionX ?? 10}%
+                                <span className="text-slate-500 ml-1">
+                                  ({(watchedValues.coverImageStyles?.logoPositionX ?? 10) < 40 ? 'Left' : (watchedValues.coverImageStyles?.logoPositionX ?? 10) > 60 ? 'Right' : 'Center'})
+                                </span>
+                              </Label>
+                              <input
+                                type="range"
+                                min={0}
+                                max={100}
+                                value={watchedValues.coverImageStyles?.logoPositionX ?? 10}
+                                onChange={(e) =>
+                                  form.setValue(
+                                    "coverImageStyles.logoPositionX",
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                                className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                              />
+                            </div>
+
+                            {/* Vertical Position */}
+                            <div>
+                              <Label className="text-xs text-slate-400">
+                                Vertical: {watchedValues.coverImageStyles?.logoPositionY ?? 10}%
+                                <span className="text-slate-500 ml-1">
+                                  ({(watchedValues.coverImageStyles?.logoPositionY ?? 10) < 40 ? 'Top' : (watchedValues.coverImageStyles?.logoPositionY ?? 10) > 60 ? 'Bottom' : 'Middle'})
+                                </span>
+                              </Label>
+                              <input
+                                type="range"
+                                min={0}
+                                max={100}
+                                value={watchedValues.coverImageStyles?.logoPositionY ?? 10}
+                                onChange={(e) =>
+                                  form.setValue(
+                                    "coverImageStyles.logoPositionY",
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                                className="w-full h-1 bg-slate-600 rounded-lg appearance-none slider"
+                              />
+                            </div>
+                          </div>
+
                           {/* Border Animation */}
                           <div>
                             <Label className="text-xs text-slate-400 mb-2 block">
