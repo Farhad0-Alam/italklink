@@ -117,29 +117,36 @@ export const Builder = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Card Preview Container - Professional Mobile Frame */}
-                <div className="flex justify-center">
-                  <div className="relative">
-                    {/* Mobile Frame with Custom Image as Background */}
-                    <div 
-                      className="relative w-[430px] h-[800px] bg-cover bg-center bg-no-repeat shadow-2xl z-99999999"
-                      style={{
-                        backgroundImage: `url(/mobile-frame.png)`,
-                        backgroundSize: 'contain'
-                      }}
-                    >
-                      {/* Screen Content Area */}
-                      <div className="absolute top-[160px] left-[50px] right-[52px] bottom-[165px] overflow-hidden rounded-[50px]">
-                        <div className="h-full overflow-y-auto">
-                          <BusinessCardComponent
-                            ref={cardRef}
-                            data={cardData}
-                            showQR={showQR}
-                            isInteractive={true}
-                            isMobilePreview={true}
-                          />
-                        </div>
+                <div className="flex flex-col items-center space-y-3">
+                  <div className="flex items-center space-x-2 text-sm text-slate-400">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span>Updates in real-time</span>
+                  </div>
+                  
+                  <div className="relative bg-white rounded-[60px] p-4 shadow-2xl" style={{ width: '400px', height: '820px' }}>
+                    {/* iPhone-style frame */}
+                    <div className="absolute inset-0 border-[14px] border-black rounded-[60px] pointer-events-none z-10"></div>
+                    
+                    {/* Top notch */}
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-40 h-7 bg-black rounded-b-3xl z-20"></div>
+                    
+                    {/* Screen Content */}
+                    <div className="relative h-full w-full bg-white rounded-[46px] overflow-hidden">
+                      <div className="h-full overflow-y-auto">
+                        <BusinessCardComponent
+                          ref={cardRef}
+                          data={cardData}
+                          showQR={showQR}
+                          isInteractive={true}
+                          isMobilePreview={true}
+                        />
                       </div>
                     </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full">
+                    <i className="fas fa-mobile-alt text-blue-400 text-sm"></i>
+                    <span className="text-xs text-blue-300 font-medium">Mobile Optimized</span>
                   </div>
                 </div>
 
