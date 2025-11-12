@@ -4,7 +4,7 @@
 TalkLink is an enterprise-grade platform offering professional digital business cards integrated with a comprehensive appointment booking and CRM system. It enables users to create customizable business cards, manage scheduling, track leads, and analyze business performance. The platform supports team scheduling, calendar integrations, automated notifications, and revenue analytics, aiming to provide a complete solution for business networking and client management. It also includes an email signature generator and a visitor notification subscription system.
 
 ## Recent Progress (November 12, 2025)
-### ✅ COMPLETE: Profile Image Styling System with Modern Animations
+### ✅ COMPLETE: Profile Image Styling System with Modern Animations & Custom Colors
 
 **Profile Image Customization:**
 - Complete styling controls for business card profile images
@@ -12,6 +12,7 @@ TalkLink is an enterprise-grade platform offering professional digital business 
 - Size adjustment (slider control)
 - Shape options (circle, square, rounded)
 - Border customization (width, color)
+- Default 3px solid border using brand color
 - Shadow effects (adjustable intensity)
 - Opacity control
 
@@ -22,11 +23,22 @@ TalkLink is an enterprise-grade platform offering professional digital business 
 - Shimmer: Sweeping shimmer overlay effect
 - Gradient Slide: Sliding gradient border animation
 
+**Custom Animation Colors (NEW):**
+- Advanced color picker UI using react-colorful library
+- Hex code input with validation and real-time preview
+- "Use Brand Color" toggle to auto-apply card's brand/accent colors
+- Primary color picker (available for all animations)
+- Secondary color picker (for gradient-based animations: Instagram, Wave, Gradient Slide)
+- CSS custom properties (--profile-anim-color-1, --profile-anim-color-2) for dynamic theming
+- Seamless fallback to brand colors when toggle is enabled
+
 **Technical Implementation:**
-- Added `profileImageStyles` jsonb field to business_cards table
-- CSS keyframe animations in index.css (instagram-spin, neon-glow, color-wave, shimmer, gradient-slide)
-- Helper function `getProfileImageStyle()` in BusinessCard component
+- Added `profileImageStyles` jsonb field to business_cards table with animationColors and useBrandColor support
+- CSS keyframe animations use CSS variables for dynamic color control with proper fallbacks
+- Helper function `getProfileImageStyle()` injects CSS variables at render-time
+- Fixed double-border bug: static border suppressed when animation is active
 - Smart animation routing: pseudo-element animations (instagram, shimmer, gradient-slide) on wrapper div, direct animations (neon, wave) on image element
+- FormBuilder color controls conditionally render based on animation selection
 - Applied across all three header designs (cover-logo, profile-center, logo-side)
 - Fully responsive with proper z-index layering
 
@@ -100,7 +112,7 @@ Preferred communication style: Simple, everyday language.
 
 ## External Dependencies
 
-- **UI & Styling**: Radix UI, Tailwind CSS, Shadcn/ui, Class Variance Authority.
+- **UI & Styling**: Radix UI, Tailwind CSS, Shadcn/ui, Class Variance Authority, react-colorful (color picker).
 - **Data Validation**: Zod.
 - **Date Utilities**: date-fns.
 - **Routing**: Wouter.
