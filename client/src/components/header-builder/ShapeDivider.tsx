@@ -97,14 +97,16 @@ export const ShapeDivider = memo(({
     return null;
   }
 
-  const viewBox = "0 0 1440 320";
+  const viewBox = "0 0 1000 100"; // Elementor standard viewBox
   const transform = divider.flip ? "scaleY(-1)" : "";
+  const width = divider.width || 100; // Width percentage (default 100%)
 
   const style: React.CSSProperties = {
     position: "absolute",
     [position]: 0,
-    left: 0,
-    right: 0,
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: `${width}%`,
     height: `${divider.height}px`,
     zIndex: 1,
     pointerEvents: "none",
