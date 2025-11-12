@@ -500,7 +500,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       {[
                         {
                           id: "profile-photo-input",
-                          label: "Profile Image",
+                          label: "Logo or Profile Image",
                           field: "profilePhoto",
                         },
                         {
