@@ -508,7 +508,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           label: "Cover Image",
                           field: "backgroundImage",
                         },
-                        { id: "logo-input", label: "Logo Image", field: "logo" },
                       ].map(({ id, label, field }) => (
                         <div key={id} className="space-y-1.5">
                           <Label htmlFor={id} className="text-sm text-slate-300 font-normal">
