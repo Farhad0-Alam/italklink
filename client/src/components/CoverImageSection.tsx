@@ -141,7 +141,7 @@ export function CoverImageSection({
             preserveAspectRatio="none"
             style={{
               display: "block",
-              transform: shapeDivider.invert ? "scaleY(-1)" : undefined,
+              transform: shapeDivider.invert ? "scaleY(-1) scaleX(-1)" : undefined,
               transformOrigin: shapeDividerPosition === "bottom" ? "bottom" : "top",
             }}
           >
