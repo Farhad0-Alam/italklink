@@ -3901,7 +3901,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       "uploads", "templates", "appointments", "crm", "availability", "affiliate",
       "profile", "account-settings", "billing", "usage", "automation", "event-types",
       "email-templates", "analytics", "card-analytics", "teams", "help", "booking",
-      "qr-codes", "email-signature"
+      "qr-codes", "email-signature", "my-links"
     ];
     
     // Skip reserved slugs - let them fall through to other handlers
