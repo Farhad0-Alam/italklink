@@ -118,8 +118,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     profile: true,
     contactInfo: true,
     customization: true,
-    appearance: true,
-    seo: true,
+    appearance: false,
+    seo: false,
     pages: false, // Pages section expanded by default
     pageBuilder: true,
     // subsections inside Profile
