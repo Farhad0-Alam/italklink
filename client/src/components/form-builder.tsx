@@ -1197,8 +1197,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <div>
                                     <Label className="text-xs text-slate-400 mb-2 block">Shape Type</Label>
                                     <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto p-2 bg-slate-900/50 rounded">
-                                      {["valley", "triangle", "triangle-asymmetrical", "curve", "curve-asymmetrical", "waves", "wave-brush", "tilt", "opacity-tilt", "arrow", "arrow-negative", "clouds", "clouds-negative", "mountains", "mountains-2", "mountains-3", "split", "split-negative", "pyramids", "pyramids-negative", "drops", "drops-negative", "book", "book-negative"].map((shape) => {
-                                        const isSelected = (watchedValues.coverImageStyles?.shapeDivider?.preset || "valley") === shape;
+                                      {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", "tilt", "tilt-opacity", "fan-opacity", "curve", "curve-asymmetrical", "drop", "mountain", "opacity-fan-alt", "book"].map((shape) => {
+                                        const isSelected = (watchedValues.coverImageStyles?.shapeDivider?.preset || "wave") === shape;
                                         const shapeName = shape.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                                         
                                         return (
@@ -1223,14 +1223,26 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                                     preserveAspectRatio="none"
                                                     style={{ transform: 'translateY(2px)' }}
                                                   >
-                                                    {shape === "valley" && (
-                                                      <path d="M50,19 L0,0 L0,20 L100,20 L100,0 L50,19 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    {shape === "wave" && (
+                                                      <path d="M0,10 Q25,0 50,10 T100,10 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "waves-brush" && (
+                                                      <path d="M0,8 Q15,2 30,8 T60,8 Q75,2 90,8 L100,8 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "clouds" && (
+                                                      <path d="M0,12 Q10,8 20,12 Q30,8 40,12 Q50,8 60,12 Q70,8 80,12 Q90,8 100,12 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "zigzag" && (
+                                                      <path d="M0,15 L10,5 L20,15 L30,5 L40,15 L50,5 L60,15 L70,5 L80,15 L90,5 L100,15 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
                                                     )}
                                                     {shape === "triangle" && (
-                                                      <path d="M50,0 L0,20 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                      <path d="M0,20 L50,0 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
                                                     )}
                                                     {shape === "triangle-asymmetrical" && (
-                                                      <path d="M70,0 L0,20 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                      <path d="M0,20 L70,0 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "tilt" && (
+                                                      <path d="M0,5 L100,15 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
                                                     )}
                                                     {shape === "curve" && (
                                                       <path d="M0,20 Q50,0 100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
@@ -1238,65 +1250,33 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                                     {shape === "curve-asymmetrical" && (
                                                       <path d="M0,20 Q30,0 100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
                                                     )}
-                                                    {shape === "waves" && (
-                                                      <path d="M0,20 L0,8 Q10,4 20,8 Q30,12 40,8 Q50,4 60,8 Q70,12 80,8 Q90,4 100,8 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    {shape === "drop" && (
+                                                      <path d="M0,10 C20,10 30,0 50,0 C70,0 80,10 100,10 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
                                                     )}
-                                                    {shape === "wave-brush" && (
-                                                      <path d="M0,8 Q15,2 30,8 T60,8 Q75,2 90,8 L100,8 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    {shape === "mountain" && (
+                                                      <path d="M0,20 L25,5 L50,12 L75,3 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
                                                     )}
-                                                    {shape === "tilt" && (
-                                                      <path d="M0,2 L100,18 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    {shape === "book" && (
+                                                      <path d="M0,10 Q25,15 50,10 Q75,5 100,10 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
                                                     )}
-                                                    {shape === "opacity-tilt" && (
+                                                    {shape === "tilt-opacity" && (
                                                       <>
                                                         <path d="M0,3 L100,12 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.5" />
                                                         <path d="M0,8 L100,16 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.7" />
                                                       </>
                                                     )}
-                                                    {shape === "arrow" && (
-                                                      <path d="M0,20 L50,5 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    {shape === "fan-opacity" && (
+                                                      <>
+                                                        <path d="M0,20 L25,5 L50,10 L75,3 L100,8 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.3" />
+                                                        <path d="M0,20 L30,10 L60,14 L90,7 L100,12 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.5" />
+                                                        <path d="M0,20 L35,15 L70,17 L100,15 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.7" />
+                                                      </>
                                                     )}
-                                                    {shape === "arrow-negative" && (
-                                                      <path d="M50,15 L0,0 L0,20 L100,20 L100,0 L50,15 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "clouds" && (
-                                                      <path d="M0,12 Q10,8 20,12 Q30,8 40,12 Q50,8 60,12 Q70,8 80,12 Q90,8 100,12 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "clouds-negative" && (
-                                                      <path d="M0,0 L0,8 Q10,12 20,8 Q30,12 40,8 Q50,12 60,8 Q70,12 80,8 Q90,12 100,8 L100,0 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "mountains" && (
-                                                      <path d="M0,20 L20,8 L35,14 L55,5 L70,12 L85,7 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "mountains-2" && (
-                                                      <path d="M0,20 L15,10 L30,16 L50,6 L70,15 L90,8 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "mountains-3" && (
-                                                      <path d="M0,20 L25,12 L40,18 L60,10 L75,16 L95,11 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "split" && (
-                                                      <path d="M0,0 L0,8 L48,8 Q50,12 52,8 L100,8 L100,0 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "split-negative" && (
-                                                      <path d="M0,0 L0,20 L48,20 Q50,16 52,20 L100,20 L100,0 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "pyramids" && (
-                                                      <path d="M0,20 L0,4 L30,8 L50,18 L80,10 L100,4 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "pyramids-negative" && (
-                                                      <path d="M0,0 L0,16 L30,12 L50,2 L80,10 L100,16 L100,0 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "drops" && (
-                                                      <path d="M0,10 C10,8 15,5 20,8 C25,11 25,8 30,8 C35,8 35,12 40,10 C45,8 50,6 55,9 C60,12 60,8 65,8 C70,8 75,11 80,9 C85,7 90,9 95,11 C97,12 100,10 100,10 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "drops-negative" && (
-                                                      <path d="M0,10 C10,12 15,15 20,12 C25,9 25,12 30,12 C35,12 35,8 40,10 C45,12 50,14 55,11 C60,8 60,12 65,12 C70,12 75,9 80,11 C85,13 90,11 95,9 C97,8 100,10 100,10 L100,0 L0,0 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "book" && (
-                                                      <path d="M0,10 Q25,15 50,10 Q75,5 100,10 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
-                                                    )}
-                                                    {shape === "book-negative" && (
-                                                      <path d="M0,10 Q25,5 50,10 Q75,15 100,10 L100,0 L0,0 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    {shape === "opacity-fan-alt" && (
+                                                      <>
+                                                        <path d="M0,15 C20,15 20,5 50,5 C80,5 80,15 100,15 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.4" />
+                                                        <path d="M0,17 C30,17 30,10 50,10 C70,10 70,17 100,17 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} opacity="0.6" />
+                                                      </>
                                                     )}
                                                   </svg>
                                                 </div>
