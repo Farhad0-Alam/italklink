@@ -38,7 +38,7 @@ function generateCutoutMask(
     const scaleX = topWidth / 100;
     const translateX = (1440 - (1440 * scaleX)) / 2;
     
-    svgParts.push(`<g transform="translate(${translateX}, 0) scale(${scaleX}, 1)${topInvert ? ' scale(1, -1) translate(0, -320)' : ''}">`);
+    svgParts.push(`<g transform="translate(${translateX}, 0) scale(${scaleX}, 1)${topInvert ? ` scale(1, -1) translate(0, -${topHeight})` : ''}">`);
     svgParts.push(`<path d="${SHAPE_PRESETS[topDivider.preset]}" fill="black" transform="scale(1, ${topHeight / 320})"/>`);
     svgParts.push(`</g>`);
   }
@@ -52,7 +52,7 @@ function generateCutoutMask(
     const translateX = (1440 - (1440 * scaleX)) / 2;
     const yOffset = height - bottomHeight;
     
-    svgParts.push(`<g transform="translate(${translateX}, ${yOffset}) scale(${scaleX}, 1)${bottomInvert ? ' scale(1, -1) translate(0, -320)' : ''}">`);
+    svgParts.push(`<g transform="translate(${translateX}, ${yOffset}) scale(${scaleX}, 1)${bottomInvert ? ` scale(1, -1) translate(0, -${bottomHeight})` : ''}">`);
     svgParts.push(`<path d="${SHAPE_PRESETS[bottomDivider.preset]}" fill="black" transform="scale(1, ${bottomHeight / 320})"/>`);
     svgParts.push(`</g>`);
   }
