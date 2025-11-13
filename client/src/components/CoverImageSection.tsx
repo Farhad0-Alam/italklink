@@ -158,7 +158,7 @@ export function CoverImageSection({
             preserveAspectRatio="none"
             style={{
               display: "block",
-              transform: shouldInvertTop ? "scaleY(-1)" : undefined,
+              transform: shouldInvertTop ? "rotate(180deg) scaleY(-1)" : "rotate(180deg)",
               transformOrigin: "center",
             }}
           >
