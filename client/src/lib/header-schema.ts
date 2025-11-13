@@ -168,8 +168,8 @@ export const SHAPE_PRESETS: Record<string, string> = {
   // Triangle
   triangle: "M0,320L1440,320L720,64L0,320Z",
   
-  // Triangle Negative - upward pointing triangle (Elementor style)
-  "triangle-negative": "M720,303L0,0v320h1440V0L720,303z",
+  // Triangle Negative - upward pointing triangle (Elementor exact code)
+  "triangle-negative": "M500.2,94.7L0,0v100h1000V0L500.2,94.7z",
   
   // Triangle Asymmetrical
   "triangle-asymmetrical": "M0,320L1440,320L960,32L0,320Z",

@@ -112,8 +112,23 @@ export function CoverImageSection({
   // Shape divider props - support both top and bottom
   const shapeDividerTop = coverImageStyles?.shapeDividerTop;
   const shapeDividerBottom = coverImageStyles?.shapeDividerBottom;
-  const showTopDivider = shapeDividerTop?.enabled && shapeDividerTop?.preset && SHAPE_PRESETS[shapeDividerTop.preset];
-  const showBottomDivider = shapeDividerBottom?.enabled && shapeDividerBottom?.preset && SHAPE_PRESETS[shapeDividerBottom.preset];
+  
+  // Auto-swap triangle/triangle-negative based on invert toggle
+  const getActualPreset = (preset: string, invert: boolean) => {
+    if (preset === "triangle" && invert) return "triangle-negative";
+    if (preset === "triangle-negative" && invert) return "triangle";
+    return preset;
+  };
+  
+  const topPreset = shapeDividerTop?.preset ? getActualPreset(shapeDividerTop.preset, shapeDividerTop.invert || false) : null;
+  const bottomPreset = shapeDividerBottom?.preset ? getActualPreset(shapeDividerBottom.preset, shapeDividerBottom.invert || false) : null;
+  
+  const showTopDivider = shapeDividerTop?.enabled && topPreset && SHAPE_PRESETS[topPreset];
+  const showBottomDivider = shapeDividerBottom?.enabled && bottomPreset && SHAPE_PRESETS[bottomPreset];
+  
+  // Only apply scaleY transform for non-triangle shapes
+  const shouldInvertTop = shapeDividerTop?.invert && shapeDividerTop.preset !== "triangle" && shapeDividerTop.preset !== "triangle-negative";
+  const shouldInvertBottom = shapeDividerBottom?.invert && shapeDividerBottom.preset !== "triangle" && shapeDividerBottom.preset !== "triangle-negative";
 
   return (
     <div className={`${wrapperAnimationClass} ${className}`} style={wrapperStyles}>
@@ -139,16 +154,16 @@ export function CoverImageSection({
           <svg
             width="100%"
             height="100%"
-            viewBox="0 0 1440 320"
+            viewBox={topPreset === "triangle-negative" ? "0 0 1000 100" : "0 0 1440 320"}
             preserveAspectRatio="none"
             style={{
               display: "block",
-              transform: shapeDividerTop.invert ? "scaleY(-1)" : undefined,
+              transform: shouldInvertTop ? "scaleY(-1)" : undefined,
               transformOrigin: "center",
             }}
           >
             <path
-              d={SHAPE_PRESETS[shapeDividerTop.preset]}
+              d={SHAPE_PRESETS[topPreset]}
               fill={shapeDividerTop.color || brandColor}
             />
           </svg>
@@ -172,16 +187,16 @@ export function CoverImageSection({
           <svg
             width="100%"
             height="100%"
-            viewBox="0 0 1440 320"
+            viewBox={bottomPreset === "triangle-negative" ? "0 0 1000 100" : "0 0 1440 320"}
             preserveAspectRatio="none"
             style={{
               display: "block",
-              transform: shapeDividerBottom.invert ? "scaleY(-1)" : undefined,
+              transform: shouldInvertBottom ? "scaleY(-1)" : undefined,
               transformOrigin: "center",
             }}
           >
             <path
-              d={SHAPE_PRESETS[shapeDividerBottom.preset]}
+              d={SHAPE_PRESETS[bottomPreset]}
               fill={shapeDividerBottom.color || brandColor}
             />
           </svg>
