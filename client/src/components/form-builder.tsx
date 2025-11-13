@@ -1225,6 +1225,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                                     {shape === "triangle" && (
                                                       <path d="M0,20 L50,0 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
                                                     )}
+                                                    {shape === "triangle-negative" && (
+                                                      <path d="M0,0 L50,20 L100,0 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
                                                     {shape === "triangle-asymmetrical" && (
                                                       <path d="M0,20 L70,0 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
                                                     )}
@@ -1425,6 +1428,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                                     )}
                                                     {shape === "triangle" && (
                                                       <path d="M0,20 L50,0 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
+                                                    )}
+                                                    {shape === "triangle-negative" && (
+                                                      <path d="M0,0 L50,20 L100,0 L100,20 L0,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
                                                     )}
                                                     {shape === "triangle-asymmetrical" && (
                                                       <path d="M0,20 L70,0 L100,20 Z" fill={isSelected ? "#a855f7" : "#94a3b8"} />
