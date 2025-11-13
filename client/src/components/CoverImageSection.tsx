@@ -11,81 +11,6 @@ interface CoverImageSectionProps {
   className?: string;
 }
 
-// Generate SVG mask for cutout mode using actual SHAPE_PRESETS paths
-function buildCutoutMask(
-  topDivider: any,
-  bottomDivider: any,
-  coverHeight: number
-): string | null {
-  const hasTopCutout = topDivider?.enabled && topDivider?.cutout && topDivider?.preset && SHAPE_PRESETS[topDivider.preset];
-  const hasBottomCutout = bottomDivider?.enabled && bottomDivider?.cutout && bottomDivider?.preset && SHAPE_PRESETS[bottomDivider.preset];
-  
-  if (!hasTopCutout && !hasBottomCutout) return null;
-  
-  const svgParts: string[] = [];
-  
-  // Create SVG with proper mask element using luminance mode
-  svgParts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 ${coverHeight}">`);
-  svgParts.push(`<defs>`);
-  svgParts.push(`<mask id="cutoutMask" mask-type="luminance" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse">`);
-  
-  // White rect makes everything visible by default
-  svgParts.push(`<rect width="1440" height="${coverHeight}" fill="white"/>`);
-  
-  // Add top divider cutout (black = transparent)
-  if (hasTopCutout) {
-    const topHeight = topDivider.height || 60;
-    const topWidth = topDivider.width || 100;
-    const topInvert = topDivider.invert;
-    
-    const scaleX = topWidth / 100;
-    const translateX = (1440 - (1440 * scaleX)) / 2;
-    const scaleY = topHeight / 320;
-    
-    let transform = `translate(${translateX}, 0) scale(${scaleX}, ${scaleY})`;
-    if (topInvert) {
-      transform += ` scale(1, -1) translate(0, -320)`;
-    }
-    
-    svgParts.push(`<g transform="${transform}">`);
-    svgParts.push(`<path d="${SHAPE_PRESETS[topDivider.preset]}" fill="black"/>`);
-    svgParts.push(`</g>`);
-  }
-  
-  // Add bottom divider cutout (black = transparent)
-  if (hasBottomCutout) {
-    const bottomHeight = bottomDivider.height || 60;
-    const bottomWidth = bottomDivider.width || 100;
-    const bottomInvert = bottomDivider.invert;
-    
-    const scaleX = bottomWidth / 100;
-    const translateX = (1440 - (1440 * scaleX)) / 2;
-    const scaleY = bottomHeight / 320;
-    const translateY = coverHeight - bottomHeight;
-    
-    let transform = `translate(${translateX}, ${translateY}) scale(${scaleX}, ${scaleY})`;
-    // Bottom divider: flip when NOT inverted (opposite of top)
-    if (!bottomInvert) {
-      transform += ` scale(1, -1) translate(0, -320)`;
-    }
-    
-    svgParts.push(`<g transform="${transform}">`);
-    svgParts.push(`<path d="${SHAPE_PRESETS[bottomDivider.preset]}" fill="black"/>`);
-    svgParts.push(`</g>`);
-  }
-  
-  svgParts.push(`</mask>`);
-  svgParts.push(`</defs>`);
-  
-  // Apply the mask to a white rect
-  svgParts.push(`<rect width="1440" height="${coverHeight}" fill="white" mask="url(#cutoutMask)"/>`);
-  svgParts.push(`</svg>`);
-  
-  const svgString = svgParts.join('');
-  const encoded = encodeURIComponent(svgString);
-  return `url("data:image/svg+xml,${encoded}")`;
-}
-
 export function CoverImageSection({
   coverImageUrl,
   brandColor = "#22c55e",
@@ -187,21 +112,8 @@ export function CoverImageSection({
   // Shape divider props - support both top and bottom
   const shapeDividerTop = coverImageStyles?.shapeDividerTop;
   const shapeDividerBottom = coverImageStyles?.shapeDividerBottom;
-  
-  // Show shape dividers as overlays only when not in cutout mode
-  const showTopDivider = shapeDividerTop?.enabled && shapeDividerTop?.preset && SHAPE_PRESETS[shapeDividerTop.preset] && !shapeDividerTop?.cutout;
-  const showBottomDivider = shapeDividerBottom?.enabled && shapeDividerBottom?.preset && SHAPE_PRESETS[shapeDividerBottom.preset] && !shapeDividerBottom?.cutout;
-  
-  // Apply mask for cutout mode
-  const cutoutMask = buildCutoutMask(shapeDividerTop, shapeDividerBottom, height);
-  if (cutoutMask) {
-    (coverStyles as any).maskImage = cutoutMask;
-    (coverStyles as any).WebkitMaskImage = cutoutMask;
-    (coverStyles as any).maskSize = '100% 100%';
-    (coverStyles as any).WebkitMaskSize = '100% 100%';
-    (coverStyles as any).maskRepeat = 'no-repeat';
-    (coverStyles as any).WebkitMaskRepeat = 'no-repeat';
-  }
+  const showTopDivider = shapeDividerTop?.enabled && shapeDividerTop?.preset && SHAPE_PRESETS[shapeDividerTop.preset];
+  const showBottomDivider = shapeDividerBottom?.enabled && shapeDividerBottom?.preset && SHAPE_PRESETS[shapeDividerBottom.preset];
 
   return (
     <div className={`${wrapperAnimationClass} ${className}`} style={wrapperStyles}>
@@ -215,7 +127,7 @@ export function CoverImageSection({
         <div
           style={{
             position: "absolute",
-            top: borderWidth > 0 ? `-${borderWidth}px` : 0,
+            top: borderWidth > 0 ? `-${borderWidth}px` : 0, // Overlap border
             left: "50%",
             transform: "translateX(-50%)",
             width: `${shapeDividerTop.width || 100}%`,
@@ -248,7 +160,7 @@ export function CoverImageSection({
         <div
           style={{
             position: "absolute",
-            bottom: borderWidth > 0 ? `-${borderWidth}px` : 0,
+            bottom: borderWidth > 0 ? `-${borderWidth}px` : 0, // Overlap border
             left: "50%",
             transform: "translateX(-50%)",
             width: `${shapeDividerBottom.width || 100}%`,
