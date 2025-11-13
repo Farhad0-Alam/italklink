@@ -10,7 +10,7 @@ export const backgroundTypeSchema = z.enum(["solid", "gradient", "image"]);
 
 // Shape divider presets
 export const shapeDividerPresetSchema = z.enum([
-  "wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", 
+  "wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-negative", "triangle-asymmetrical", 
   "tilt", "tilt-opacity", "fan-opacity", "curve", "curve-asymmetrical", 
   "drop", "mountain", "opacity-fan-alt", "book", "custom"
 ]);
@@ -167,6 +167,9 @@ export const SHAPE_PRESETS: Record<string, string> = {
   
   // Triangle
   triangle: "M0,320L1440,320L720,64L0,320Z",
+  
+  // Triangle Negative - upward pointing triangle (Elementor style)
+  "triangle-negative": "M720,303L0,0v320h1440V0L720,303z",
   
   // Triangle Asymmetrical
   "triangle-asymmetrical": "M0,320L1440,320L960,32L0,320Z",
