@@ -1349,18 +1349,36 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     />
                                   </div>
 
-                                  {/* Bring to Front Toggle */}
+                                  {/* Cutout Mode Toggle */}
                                   <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
-                                    <Label className="text-xs text-slate-300">Bring to Front</Label>
+                                    <div className="flex flex-col">
+                                      <Label className="text-xs text-slate-300">Cutout Mode</Label>
+                                      <span className="text-[10px] text-slate-500">Reveals content below</span>
+                                    </div>
                                     <input
                                       type="checkbox"
-                                      checked={watchedValues.coverImageStyles?.shapeDividerTop?.bringToFront || false}
+                                      checked={watchedValues.coverImageStyles?.shapeDividerTop?.cutout || false}
                                       onChange={(e) =>
-                                        form.setValue("coverImageStyles.shapeDividerTop.bringToFront", e.target.checked)
+                                        form.setValue("coverImageStyles.shapeDividerTop.cutout", e.target.checked)
                                       }
                                       className="w-4 h-4 rounded border-slate-600"
                                     />
                                   </div>
+
+                                  {/* Bring to Front Toggle - Only show when NOT in cutout mode */}
+                                  {!watchedValues.coverImageStyles?.shapeDividerTop?.cutout && (
+                                    <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
+                                      <Label className="text-xs text-slate-300">Bring to Front</Label>
+                                      <input
+                                        type="checkbox"
+                                        checked={watchedValues.coverImageStyles?.shapeDividerTop?.bringToFront || false}
+                                        onChange={(e) =>
+                                          form.setValue("coverImageStyles.shapeDividerTop.bringToFront", e.target.checked)
+                                        }
+                                        className="w-4 h-4 rounded border-slate-600"
+                                      />
+                                    </div>
+                                  )}
                                 </>
                               )}
                             </div>
@@ -1550,18 +1568,36 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     />
                                   </div>
 
-                                  {/* Bring to Front Toggle */}
+                                  {/* Cutout Mode Toggle */}
                                   <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
-                                    <Label className="text-xs text-slate-300">Bring to Front</Label>
+                                    <div className="flex flex-col">
+                                      <Label className="text-xs text-slate-300">Cutout Mode</Label>
+                                      <span className="text-[10px] text-slate-500">Reveals content below</span>
+                                    </div>
                                     <input
                                       type="checkbox"
-                                      checked={watchedValues.coverImageStyles?.shapeDividerBottom?.bringToFront || false}
+                                      checked={watchedValues.coverImageStyles?.shapeDividerBottom?.cutout || false}
                                       onChange={(e) =>
-                                        form.setValue("coverImageStyles.shapeDividerBottom.bringToFront", e.target.checked)
+                                        form.setValue("coverImageStyles.shapeDividerBottom.cutout", e.target.checked)
                                       }
                                       className="w-4 h-4 rounded border-slate-600"
                                     />
                                   </div>
+
+                                  {/* Bring to Front Toggle - Only show when NOT in cutout mode */}
+                                  {!watchedValues.coverImageStyles?.shapeDividerBottom?.cutout && (
+                                    <div className="flex items-center justify-between p-2 bg-slate-800/30 rounded">
+                                      <Label className="text-xs text-slate-300">Bring to Front</Label>
+                                      <input
+                                        type="checkbox"
+                                        checked={watchedValues.coverImageStyles?.shapeDividerBottom?.bringToFront || false}
+                                        onChange={(e) =>
+                                          form.setValue("coverImageStyles.shapeDividerBottom.bringToFront", e.target.checked)
+                                        }
+                                        className="w-4 h-4 rounded border-slate-600"
+                                      />
+                                    </div>
+                                  )}
                                 </>
                               )}
                             </div>
