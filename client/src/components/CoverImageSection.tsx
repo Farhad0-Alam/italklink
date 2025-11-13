@@ -11,6 +11,59 @@ interface CoverImageSectionProps {
   className?: string;
 }
 
+// Helper function to generate SVG mask for cutout mode
+function generateCutoutMask(
+  topDivider: any,
+  bottomDivider: any,
+  height: number
+): string | null {
+  const hasTopCutout = topDivider?.enabled && topDivider?.cutout && topDivider?.preset && SHAPE_PRESETS[topDivider.preset];
+  const hasBottomCutout = bottomDivider?.enabled && bottomDivider?.cutout && bottomDivider?.preset && SHAPE_PRESETS[bottomDivider.preset];
+  
+  if (!hasTopCutout && !hasBottomCutout) return null;
+  
+  const svgParts: string[] = [];
+  
+  // SVG mask: white = visible, black = transparent cutout
+  svgParts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 ${height}" preserveAspectRatio="none">`);
+  
+  // Fill entire area with white (visible by default)
+  svgParts.push(`<rect width="1440" height="${height}" fill="white"/>`);
+  
+  // Add top cutout (black path)
+  if (hasTopCutout) {
+    const topHeight = topDivider.height || 60;
+    const topWidth = topDivider.width || 100;
+    const topInvert = topDivider.invert;
+    const scaleX = topWidth / 100;
+    const translateX = (1440 - (1440 * scaleX)) / 2;
+    
+    svgParts.push(`<g transform="translate(${translateX}, 0) scale(${scaleX}, 1)${topInvert ? ' scale(1, -1) translate(0, -320)' : ''}">`);
+    svgParts.push(`<path d="${SHAPE_PRESETS[topDivider.preset]}" fill="black" transform="scale(1, ${topHeight / 320})"/>`);
+    svgParts.push(`</g>`);
+  }
+  
+  // Add bottom cutout (black path)
+  if (hasBottomCutout) {
+    const bottomHeight = bottomDivider.height || 60;
+    const bottomWidth = bottomDivider.width || 100;
+    const bottomInvert = bottomDivider.invert;
+    const scaleX = bottomWidth / 100;
+    const translateX = (1440 - (1440 * scaleX)) / 2;
+    const yOffset = height - bottomHeight;
+    
+    svgParts.push(`<g transform="translate(${translateX}, ${yOffset}) scale(${scaleX}, 1)${bottomInvert ? ' scale(1, -1) translate(0, -320)' : ''}">`);
+    svgParts.push(`<path d="${SHAPE_PRESETS[bottomDivider.preset]}" fill="black" transform="scale(1, ${bottomHeight / 320})"/>`);
+    svgParts.push(`</g>`);
+  }
+  
+  svgParts.push(`</svg>`);
+  
+  const svgString = svgParts.join('');
+  const encoded = encodeURIComponent(svgString);
+  return `url("data:image/svg+xml,${encoded}")`;
+}
+
 export function CoverImageSection({
   coverImageUrl,
   brandColor = "#22c55e",
@@ -112,8 +165,19 @@ export function CoverImageSection({
   // Shape divider props - support both top and bottom
   const shapeDividerTop = coverImageStyles?.shapeDividerTop;
   const shapeDividerBottom = coverImageStyles?.shapeDividerBottom;
-  const showTopDivider = shapeDividerTop?.enabled && shapeDividerTop?.preset && SHAPE_PRESETS[shapeDividerTop.preset];
-  const showBottomDivider = shapeDividerBottom?.enabled && shapeDividerBottom?.preset && SHAPE_PRESETS[shapeDividerBottom.preset];
+  const showTopDivider = shapeDividerTop?.enabled && shapeDividerTop?.preset && SHAPE_PRESETS[shapeDividerTop.preset] && !shapeDividerTop?.cutout;
+  const showBottomDivider = shapeDividerBottom?.enabled && shapeDividerBottom?.preset && SHAPE_PRESETS[shapeDividerBottom.preset] && !shapeDividerBottom?.cutout;
+
+  // Generate cutout mask if either divider is in cutout mode
+  const cutoutMask = generateCutoutMask(shapeDividerTop, shapeDividerBottom, height);
+  
+  // Apply mask to cover styles if cutout mode is enabled
+  if (cutoutMask) {
+    coverStyles.maskImage = cutoutMask;
+    coverStyles.WebkitMaskImage = cutoutMask;
+    coverStyles.maskSize = 'cover';
+    coverStyles.WebkitMaskSize = 'cover';
+  }
 
   return (
     <div className={`${wrapperAnimationClass} ${className}`} style={wrapperStyles}>
