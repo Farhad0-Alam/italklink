@@ -1184,7 +1184,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <div>
                                     <Label className="text-xs text-slate-400 mb-2 block">Shape Type</Label>
                                     <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto p-2 bg-slate-900/50 rounded">
-                                      {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", "tilt", "tilt-opacity", "fan-opacity", "curve", "curve-asymmetrical", "drop", "mountain", "opacity-fan-alt", "book"].map((shape) => {
+                                      {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-negative", "triangle-asymmetrical", "tilt", "tilt-opacity", "fan-opacity", "curve", "curve-asymmetrical", "drop", "mountain", "opacity-fan-alt", "book"].map((shape) => {
                                         const isSelected = (watchedValues.coverImageStyles?.shapeDividerTop?.preset || "wave") === shape;
                                         const shapeName = shape.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                                         
@@ -1385,7 +1385,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <div>
                                     <Label className="text-xs text-slate-400 mb-2 block">Shape Type</Label>
                                     <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto p-2 bg-slate-900/50 rounded">
-                                      {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", "tilt", "tilt-opacity", "fan-opacity", "curve", "curve-asymmetrical", "drop", "mountain", "opacity-fan-alt", "book"].map((shape) => {
+                                      {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-negative", "triangle-asymmetrical", "tilt", "tilt-opacity", "fan-opacity", "curve", "curve-asymmetrical", "drop", "mountain", "opacity-fan-alt", "book"].map((shape) => {
                                         const isSelected = (watchedValues.coverImageStyles?.shapeDividerBottom?.preset || "wave") === shape;
                                         const shapeName = shape.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                                         
