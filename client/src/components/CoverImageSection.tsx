@@ -25,35 +25,34 @@ function generateCutoutMask(
   const svgParts: string[] = [];
   
   // SVG mask: white = visible, black = transparent cutout
-  svgParts.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 ${height}" preserveAspectRatio="none">`);
+  // Use fixed viewBox that matches standard shape presets
+  svgParts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1440 320" preserveAspectRatio="none">`);
   
   // Fill entire area with white (visible by default)
-  svgParts.push(`<rect width="1440" height="${height}" fill="white"/>`);
+  svgParts.push(`<rect width="1440" height="320" fill="white"/>`);
   
   // Add top cutout (black path)
   if (hasTopCutout) {
-    const topHeight = topDivider.height || 60;
     const topWidth = topDivider.width || 100;
     const topInvert = topDivider.invert;
     const scaleX = topWidth / 100;
     const translateX = (1440 - (1440 * scaleX)) / 2;
     
-    svgParts.push(`<g transform="translate(${translateX}, 0) scale(${scaleX}, 1)${topInvert ? ` scale(1, -1) translate(0, -${topHeight})` : ''}">`);
-    svgParts.push(`<path d="${SHAPE_PRESETS[topDivider.preset]}" fill="black" transform="scale(1, ${topHeight / 320})"/>`);
+    svgParts.push(`<g transform="translate(${translateX}, 0) scale(${scaleX}, 1)${topInvert ? ' scale(1, -1) translate(0, -320)' : ''}">`);
+    svgParts.push(`<path d="${SHAPE_PRESETS[topDivider.preset]}" fill="black"/>`);
     svgParts.push(`</g>`);
   }
   
   // Add bottom cutout (black path)
   if (hasBottomCutout) {
-    const bottomHeight = bottomDivider.height || 60;
     const bottomWidth = bottomDivider.width || 100;
     const bottomInvert = bottomDivider.invert;
     const scaleX = bottomWidth / 100;
     const translateX = (1440 - (1440 * scaleX)) / 2;
-    const yOffset = height - bottomHeight;
     
-    svgParts.push(`<g transform="translate(${translateX}, ${yOffset}) scale(${scaleX}, 1)${bottomInvert ? ` scale(1, -1) translate(0, -${bottomHeight})` : ''}">`);
-    svgParts.push(`<path d="${SHAPE_PRESETS[bottomDivider.preset]}" fill="black" transform="scale(1, ${bottomHeight / 320})"/>`);
+    // Position at bottom (y=0 since invert will flip it)
+    svgParts.push(`<g transform="translate(${translateX}, 0) scale(${scaleX}, 1)${bottomInvert ? '' : ' scale(1, -1) translate(0, -320)'}">`);
+    svgParts.push(`<path d="${SHAPE_PRESETS[bottomDivider.preset]}" fill="black"/>`);
     svgParts.push(`</g>`);
   }
   
@@ -61,7 +60,17 @@ function generateCutoutMask(
   
   const svgString = svgParts.join('');
   const encoded = encodeURIComponent(svgString);
-  return `url("data:image/svg+xml,${encoded}")`;
+  const maskUrl = `url("data:image/svg+xml,${encoded}")`;
+  
+  // Debug logging
+  console.log('Cutout Mask Generated:', {
+    svgString,
+    maskUrl: maskUrl.substring(0, 100) + '...',
+    hasTopCutout,
+    hasBottomCutout
+  });
+  
+  return maskUrl;
 }
 
 export function CoverImageSection({
@@ -173,10 +182,14 @@ export function CoverImageSection({
   
   // Apply mask to cover styles if cutout mode is enabled
   if (cutoutMask) {
-    coverStyles.maskImage = cutoutMask;
-    coverStyles.WebkitMaskImage = cutoutMask;
-    coverStyles.maskSize = 'cover';
-    coverStyles.WebkitMaskSize = 'cover';
+    (coverStyles as any).maskImage = cutoutMask;
+    (coverStyles as any).WebkitMaskImage = cutoutMask;
+    (coverStyles as any).maskSize = 'cover';
+    (coverStyles as any).WebkitMaskSize = 'cover';
+    (coverStyles as any).maskRepeat = 'no-repeat';
+    (coverStyles as any).WebkitMaskRepeat = 'no-repeat';
+    (coverStyles as any).maskPosition = 'center';
+    (coverStyles as any).WebkitMaskPosition = 'center';
   }
 
   return (
