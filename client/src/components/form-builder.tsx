@@ -1907,31 +1907,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               max={50}
                             />
                           </div>
-
-                          {/* Text Alignment */}
-                          <div>
-                            <Label className="text-white text-xs">
-                              Text Alignment
-                            </Label>
-                            <Select
-                              value={watchedValues.sectionStyles?.basicInfo?.titleAlign || "center"}
-                              onValueChange={(v) =>
-                                form.setValue(
-                                  "sectionStyles.basicInfo.titleAlign",
-                                  v as any,
-                                )
-                              }
-                            >
-                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="left">Left</SelectItem>
-                                <SelectItem value="center">Center</SelectItem>
-                                <SelectItem value="right">Right</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
                         </>
                       )}
                     </div>
@@ -2139,31 +2114,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               min={0}
                               max={50}
                             />
-                          </div>
-
-                          {/* Text Alignment */}
-                          <div>
-                            <Label className="text-white text-xs">
-                              Text Alignment
-                            </Label>
-                            <Select
-                              value={watchedValues.sectionStyles?.basicInfo?.companyAlign || "center"}
-                              onValueChange={(v) =>
-                                form.setValue(
-                                  "sectionStyles.basicInfo.companyAlign",
-                                  v as any,
-                                )
-                              }
-                            >
-                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="left">Left</SelectItem>
-                                <SelectItem value="center">Center</SelectItem>
-                                <SelectItem value="right">Right</SelectItem>
-                              </SelectContent>
-                            </Select>
                           </div>
                         </>
                       )}

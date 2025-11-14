@@ -3642,8 +3642,6 @@ export const businessCardSchema = z.object({
       titleSpacing: z.number().optional(),
       companySpacing: z.number().optional(),
       nameAlign: z.enum(['left', 'center', 'right']).optional(),
-      titleAlign: z.enum(['left', 'center', 'right']).optional(),
-      companyAlign: z.enum(['left', 'center', 'right']).optional(),
       textGroupHorizontal: z.number().optional(),
       textGroupVertical: z.number().optional(),
       sectionBackgroundColor: z.string().optional(),
