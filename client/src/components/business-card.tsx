@@ -990,7 +990,7 @@ export const BusinessCardComponent = forwardRef<
                 fontStyle:
                   getSectionStyle("basicInfo", "nameTextStyle") || "normal",
                 marginBottom: `${getSectionStyle("basicInfo", "nameSpacing") ?? 8}px`,
-                textAlign: getSectionStyle("basicInfo", "nameAlign") || "center",
+                textAlign: "center",
               }}
               data-testid="text-name"
             >
