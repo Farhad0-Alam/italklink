@@ -1675,6 +1675,30 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             />
                           </div>
 
+                          {/* Text Alignment */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Text Alignment
+                            </Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.basicInfo?.nameAlign || "center"}
+                              onValueChange={(v) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.nameAlign",
+                                  v as any,
+                                )
+                              }
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="left">Left</SelectItem>
+                                <SelectItem value="center">Center</SelectItem>
+                                <SelectItem value="right">Right</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </>
                       )}
                     </div>
@@ -1884,6 +1908,30 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             />
                           </div>
 
+                          {/* Text Alignment */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Text Alignment
+                            </Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.basicInfo?.titleAlign || "center"}
+                              onValueChange={(v) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.titleAlign",
+                                  v as any,
+                                )
+                              }
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="left">Left</SelectItem>
+                                <SelectItem value="center">Center</SelectItem>
+                                <SelectItem value="right">Right</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </>
                       )}
                     </div>
@@ -2093,6 +2141,30 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             />
                           </div>
 
+                          {/* Text Alignment */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Text Alignment
+                            </Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.basicInfo?.companyAlign || "center"}
+                              onValueChange={(v) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.companyAlign",
+                                  v as any,
+                                )
+                              }
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="left">Left</SelectItem>
+                                <SelectItem value="center">Center</SelectItem>
+                                <SelectItem value="right">Right</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </>
                       )}
                     </div>
@@ -2113,31 +2185,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
                       {!collapsedSections.textGroupPosition && (
                         <>
-                          {/* Group Align */}
-                          <div>
-                            <Label className="text-white text-xs">
-                              Group Align
-                            </Label>
-                            <Select
-                              value={watchedValues.sectionStyles?.basicInfo?.groupAlign || "center"}
-                              onValueChange={(v) =>
-                                form.setValue(
-                                  "sectionStyles.basicInfo.groupAlign",
-                                  v as any,
-                                )
-                              }
-                            >
-                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="left">Left</SelectItem>
-                                <SelectItem value="center">Center</SelectItem>
-                                <SelectItem value="right">Right</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-
                           {/* Horizontal Position */}
                           <div>
                             <Label className="text-white text-xs">
@@ -2153,8 +2200,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 )
                               }
                               className="custom-range w-full"
-                              min={-100}
-                              max={100}
+                              min={-50}
+                              max={50}
                             />
                           </div>
 
@@ -2173,8 +2220,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 )
                               }
                               className="custom-range w-full"
-                              min={-100}
-                              max={100}
+                              min={-50}
+                              max={50}
                             />
                           </div>
                         </>
