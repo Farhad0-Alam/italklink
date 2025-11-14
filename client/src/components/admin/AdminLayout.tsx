@@ -67,16 +67,6 @@ const sidebarNavItems = [
     icon: TrendingUp,
   },
   {
-    title: 'Templates',
-    href: '/admin/templates',
-    icon: FileText,
-  },
-  {
-    title: 'Header Templates',
-    href: '/admin/header-templates',
-    icon: Layout,
-  },
-  {
     title: 'Icon Packs',
     href: '/admin/icon-packs',
     icon: Image,
