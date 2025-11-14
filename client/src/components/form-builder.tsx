@@ -132,6 +132,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     companyStyling: true,
     profileImageStyling: true,
     coverImageStyling: true, // Cover Image Styling collapsed by default
+    textGroupPosition: true, // Text Group Position collapsed by default
     // subsections inside Contact Info
     contactIconStyling: true,
     contactHoverColor: true, // Hover Color section collapsed by default
@@ -1674,17 +1675,17 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             />
                           </div>
 
-                          {/* Display Order */}
+                          {/* Text Alignment */}
                           <div>
                             <Label className="text-white text-xs">
-                              Display Order
+                              Text Alignment
                             </Label>
                             <Select
-                              value={(watchedValues.sectionStyles?.basicInfo?.nameOrder ?? 1).toString()}
+                              value={watchedValues.sectionStyles?.basicInfo?.nameAlign || "center"}
                               onValueChange={(v) =>
                                 form.setValue(
-                                  "sectionStyles.basicInfo.nameOrder",
-                                  parseInt(v),
+                                  "sectionStyles.basicInfo.nameAlign",
+                                  v as any,
                                 )
                               }
                             >
@@ -1692,9 +1693,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="1">1 (First)</SelectItem>
-                                <SelectItem value="2">2 (Second)</SelectItem>
-                                <SelectItem value="3">3 (Third)</SelectItem>
+                                <SelectItem value="left">Left</SelectItem>
+                                <SelectItem value="center">Center</SelectItem>
+                                <SelectItem value="right">Right</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -1907,17 +1908,17 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             />
                           </div>
 
-                          {/* Display Order */}
+                          {/* Text Alignment */}
                           <div>
                             <Label className="text-white text-xs">
-                              Display Order
+                              Text Alignment
                             </Label>
                             <Select
-                              value={(watchedValues.sectionStyles?.basicInfo?.titleOrder ?? 2).toString()}
+                              value={watchedValues.sectionStyles?.basicInfo?.titleAlign || "center"}
                               onValueChange={(v) =>
                                 form.setValue(
-                                  "sectionStyles.basicInfo.titleOrder",
-                                  parseInt(v),
+                                  "sectionStyles.basicInfo.titleAlign",
+                                  v as any,
                                 )
                               }
                             >
@@ -1925,9 +1926,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="1">1 (First)</SelectItem>
-                                <SelectItem value="2">2 (Second)</SelectItem>
-                                <SelectItem value="3">3 (Third)</SelectItem>
+                                <SelectItem value="left">Left</SelectItem>
+                                <SelectItem value="center">Center</SelectItem>
+                                <SelectItem value="right">Right</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -2140,17 +2141,17 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             />
                           </div>
 
-                          {/* Display Order */}
+                          {/* Text Alignment */}
                           <div>
                             <Label className="text-white text-xs">
-                              Display Order
+                              Text Alignment
                             </Label>
                             <Select
-                              value={(watchedValues.sectionStyles?.basicInfo?.companyOrder ?? 3).toString()}
+                              value={watchedValues.sectionStyles?.basicInfo?.companyAlign || "center"}
                               onValueChange={(v) =>
                                 form.setValue(
-                                  "sectionStyles.basicInfo.companyOrder",
-                                  parseInt(v),
+                                  "sectionStyles.basicInfo.companyAlign",
+                                  v as any,
                                 )
                               }
                             >
@@ -2158,11 +2159,70 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="1">1 (First)</SelectItem>
-                                <SelectItem value="2">2 (Second)</SelectItem>
-                                <SelectItem value="3">3 (Third)</SelectItem>
+                                <SelectItem value="left">Left</SelectItem>
+                                <SelectItem value="center">Center</SelectItem>
+                                <SelectItem value="right">Right</SelectItem>
                               </SelectContent>
                             </Select>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Text Group Position */}
+                    <div className="border border-slate-700/30 rounded-lg p-3 space-y-3 mt-4">
+                      <div
+                        className="flex items-center justify-between cursor-pointer"
+                        onClick={() => toggleSection("textGroupPosition")}
+                      >
+                        <h5 className="text-xs font-normal text-slate-300">
+                          Text Group Position
+                        </h5>
+                        <i
+                          className={`fas fa-chevron-${collapsedSections.textGroupPosition ? "down" : "up"} text-slate-400 text-xs`}
+                        />
+                      </div>
+
+                      {!collapsedSections.textGroupPosition && (
+                        <>
+                          {/* Horizontal Position */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Horizontal Position: {watchedValues.sectionStyles?.basicInfo?.textGroupHorizontal ?? 0}px
+                            </Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.basicInfo?.textGroupHorizontal ?? 0}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.textGroupHorizontal",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              min={-50}
+                              max={50}
+                            />
+                          </div>
+
+                          {/* Vertical Position */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Vertical Position: {watchedValues.sectionStyles?.basicInfo?.textGroupVertical ?? 0}px
+                            </Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.basicInfo?.textGroupVertical ?? 0}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.textGroupVertical",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              min={-50}
+                              max={50}
+                            />
                           </div>
                         </>
                       )}
