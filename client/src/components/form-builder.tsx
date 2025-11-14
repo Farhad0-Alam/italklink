@@ -735,19 +735,19 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             {/* Horizontal Position */}
                             <div>
                               <Label className="text-xs text-slate-400">
-                                Horizontal: {watchedValues.profileImageStyles?.positionX || 0}% 
+                                Horizontal: {watchedValues.coverImageStyles?.profilePositionX ?? 50}%
                                 <span className="text-slate-500 ml-1">
-                                  ({(watchedValues.profileImageStyles?.positionX || 0) < 0 ? 'Left' : (watchedValues.profileImageStyles?.positionX || 0) > 0 ? 'Right' : 'Center'})
+                                  ({(watchedValues.coverImageStyles?.profilePositionX ?? 50) < 40 ? 'Left' : (watchedValues.coverImageStyles?.profilePositionX ?? 50) > 60 ? 'Right' : 'Center'})
                                 </span>
                               </Label>
                               <input
                                 type="range"
-                                min={-50}
-                                max={50}
-                                value={watchedValues.profileImageStyles?.positionX || 0}
+                                min={0}
+                                max={100}
+                                value={watchedValues.coverImageStyles?.profilePositionX ?? 50}
                                 onChange={(e) =>
                                   form.setValue(
-                                    "profileImageStyles.positionX",
+                                    "coverImageStyles.profilePositionX",
                                     parseInt(e.target.value)
                                   )
                                 }
@@ -758,19 +758,19 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             {/* Vertical Position */}
                             <div>
                               <Label className="text-xs text-slate-400">
-                                Vertical: {watchedValues.profileImageStyles?.positionY || 0}%
+                                Vertical: {watchedValues.coverImageStyles?.profilePositionY ?? 100}%
                                 <span className="text-slate-500 ml-1">
-                                  ({(watchedValues.profileImageStyles?.positionY || 0) < 0 ? 'Up' : (watchedValues.profileImageStyles?.positionY || 0) > 0 ? 'Down' : 'Center'})
+                                  ({(watchedValues.coverImageStyles?.profilePositionY ?? 100) < 50 ? 'Top' : (watchedValues.coverImageStyles?.profilePositionY ?? 100) > 70 ? 'Bottom' : 'Middle'})
                                 </span>
                               </Label>
                               <input
                                 type="range"
-                                min={-50}
-                                max={50}
-                                value={watchedValues.profileImageStyles?.positionY || 0}
+                                min={0}
+                                max={120}
+                                value={watchedValues.coverImageStyles?.profilePositionY ?? 100}
                                 onChange={(e) =>
                                   form.setValue(
-                                    "profileImageStyles.positionY",
+                                    "coverImageStyles.profilePositionY",
                                     parseInt(e.target.value)
                                   )
                                 }
