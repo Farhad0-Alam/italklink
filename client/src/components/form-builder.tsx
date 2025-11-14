@@ -132,7 +132,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     companyStyling: true,
     profileImageStyling: true,
     coverImageStyling: true, // Cover Image Styling collapsed by default
-    textGroupAlignment: true, // Text Group Alignment collapsed by default
     textGroupPosition: true, // Text Group Position collapsed by default
     // subsections inside Contact Info
     contactIconStyling: true,
@@ -1676,6 +1675,30 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             />
                           </div>
 
+                          {/* Text Alignment */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Text Alignment
+                            </Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.basicInfo?.nameAlign || "center"}
+                              onValueChange={(v) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.nameAlign",
+                                  v as any,
+                                )
+                              }
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="left">Left</SelectItem>
+                                <SelectItem value="center">Center</SelectItem>
+                                <SelectItem value="right">Right</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </>
                       )}
                     </div>
@@ -1885,6 +1908,30 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             />
                           </div>
 
+                          {/* Text Alignment */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Text Alignment
+                            </Label>
+                            <Select
+                              value={watchedValues.sectionStyles?.basicInfo?.titleAlign || "center"}
+                              onValueChange={(v) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.titleAlign",
+                                  v as any,
+                                )
+                              }
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="left">Left</SelectItem>
+                                <SelectItem value="center">Center</SelectItem>
+                                <SelectItem value="right">Right</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </>
                       )}
                     </div>
@@ -2094,36 +2141,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             />
                           </div>
 
-                        </>
-                      )}
-                    </div>
-
-                    {/* Text Group Alignment */}
-                    <div className="border border-slate-700/30 rounded-lg p-3 space-y-3 mt-4">
-                      <div
-                        className="flex items-center justify-between cursor-pointer"
-                        onClick={() => toggleSection("textGroupAlignment")}
-                      >
-                        <h5 className="text-xs font-normal text-slate-300">
-                          Text Group Alignment
-                        </h5>
-                        <i
-                          className={`fas fa-chevron-${collapsedSections.textGroupAlignment ? "down" : "up"} text-slate-400 text-xs`}
-                        />
-                      </div>
-
-                      {!collapsedSections.textGroupAlignment && (
-                        <>
-                          {/* Group Align */}
+                          {/* Text Alignment */}
                           <div>
                             <Label className="text-white text-xs">
-                              Group Align
+                              Text Alignment
                             </Label>
                             <Select
-                              value={watchedValues.sectionStyles?.basicInfo?.groupAlign || "center"}
+                              value={watchedValues.sectionStyles?.basicInfo?.companyAlign || "center"}
                               onValueChange={(v) =>
                                 form.setValue(
-                                  "sectionStyles.basicInfo.groupAlign",
+                                  "sectionStyles.basicInfo.companyAlign",
                                   v as any,
                                 )
                               }
@@ -2173,8 +2200,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 )
                               }
                               className="custom-range w-full"
-                              min={-100}
-                              max={100}
+                              min={-50}
+                              max={50}
                             />
                           </div>
 
@@ -2193,8 +2220,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 )
                               }
                               className="custom-range w-full"
-                              min={-100}
-                              max={100}
+                              min={-50}
+                              max={50}
                             />
                           </div>
                         </>
