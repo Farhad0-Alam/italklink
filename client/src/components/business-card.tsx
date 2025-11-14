@@ -967,106 +967,84 @@ export const BusinessCardComponent = forwardRef<
                   : "pt-16"
           }`}
         >
-          {/* Name, Title, Company */}
-          {(() => {
-            const basicInfoElements = [
-              {
-                order: getSectionStyle("basicInfo", "nameOrder") || 1,
-                type: "name",
-                element: (
-                  <h3
-                    key="name"
-                    className="text-xl font-bold"
-                    style={{
-                      color:
-                        getSectionStyle("basicInfo", "nameColor") ||
-                        data.headingColor ||
-                        "#1f2937",
-                      fontSize: `${getSectionStyle("basicInfo", "nameFontSize") || (data.headingFontSize || 20) + 4}px`,
-                      fontWeight:
-                        getSectionStyle("basicInfo", "nameFontWeight") ||
-                        data.headingFontWeight ||
-                        600,
-                      fontFamily:
-                        getSectionStyle("basicInfo", "nameFont") || "Inter, sans-serif",
-                      fontStyle:
-                        getSectionStyle("basicInfo", "nameTextStyle") || "normal",
-                      marginBottom: `${getSectionStyle("basicInfo", "nameSpacing") ?? 8}px`,
-                    }}
-                    data-testid="text-name"
-                  >
-                    {data.fullName || "Your Name"}
-                  </h3>
-                ),
-              },
-              {
-                order: getSectionStyle("basicInfo", "titleOrder") || 2,
-                type: "title",
-                element: (
-                  <p
-                    key="title"
-                    className="text-sm"
-                    style={{
-                      color:
-                        getSectionStyle("basicInfo", "titleColor") ||
-                        data.paragraphColor ||
-                        "#4b5563",
-                      fontSize: `${getSectionStyle("basicInfo", "titleFontSize") || data.paragraphFontSize || 14}px`,
-                      fontWeight:
-                        getSectionStyle("basicInfo", "titleFontWeight") ||
-                        data.paragraphFontWeight ||
-                        400,
-                      fontFamily:
-                        getSectionStyle("basicInfo", "titleFont") ||
-                        "Inter, sans-serif",
-                      fontStyle:
-                        getSectionStyle("basicInfo", "titleTextStyle") || "normal",
-                      marginBottom: `${getSectionStyle("basicInfo", "titleSpacing") ?? 8}px`,
-                    }}
-                    data-testid="text-title"
-                  >
-                    {data.title || "Your Title"}
-                  </p>
-                ),
-              },
-              ...(data.company
-                ? [
-                    {
-                      order: getSectionStyle("basicInfo", "companyOrder") || 3,
-                      type: "company",
-                      element: (
-                        <p
-                          key="company"
-                          className="text-sm"
-                          style={{
-                            color:
-                              getSectionStyle("basicInfo", "companyColor") || "#6b7280",
-                            fontSize: `${getSectionStyle("basicInfo", "companyFontSize") || data.paragraphFontSize || 14}px`,
-                            fontWeight:
-                              getSectionStyle("basicInfo", "companyFontWeight") ||
-                              data.paragraphFontWeight ||
-                              400,
-                            fontFamily:
-                              getSectionStyle("basicInfo", "companyFont") ||
-                              "Inter, sans-serif",
-                            fontStyle:
-                              getSectionStyle("basicInfo", "companyTextStyle") || "normal",
-                            marginBottom: `${getSectionStyle("basicInfo", "companySpacing") ?? 8}px`,
-                          }}
-                          data-testid="text-company"
-                        >
-                          {data.company}
-                        </p>
-                      ),
-                    },
-                  ]
-                : []),
-            ];
-
-            return basicInfoElements
-              .sort((a, b) => a.order - b.order)
-              .map((item) => item.element);
-          })()}
+          {/* Name, Title, Company with Group Positioning */}
+          <div
+            style={{
+              transform: `translate(${getSectionStyle("basicInfo", "textGroupHorizontal") ?? 0}px, ${getSectionStyle("basicInfo", "textGroupVertical") ?? 0}px)`,
+            }}
+          >
+            <h3
+              className="text-xl font-bold"
+              style={{
+                color:
+                  getSectionStyle("basicInfo", "nameColor") ||
+                  data.headingColor ||
+                  "#1f2937",
+                fontSize: `${getSectionStyle("basicInfo", "nameFontSize") || (data.headingFontSize || 20) + 4}px`,
+                fontWeight:
+                  getSectionStyle("basicInfo", "nameFontWeight") ||
+                  data.headingFontWeight ||
+                  600,
+                fontFamily:
+                  getSectionStyle("basicInfo", "nameFont") || "Inter, sans-serif",
+                fontStyle:
+                  getSectionStyle("basicInfo", "nameTextStyle") || "normal",
+                marginBottom: `${getSectionStyle("basicInfo", "nameSpacing") ?? 8}px`,
+                textAlign: getSectionStyle("basicInfo", "nameAlign") || "center",
+              }}
+              data-testid="text-name"
+            >
+              {data.fullName || "Your Name"}
+            </h3>
+            <p
+              className="text-sm"
+              style={{
+                color:
+                  getSectionStyle("basicInfo", "titleColor") ||
+                  data.paragraphColor ||
+                  "#4b5563",
+                fontSize: `${getSectionStyle("basicInfo", "titleFontSize") || data.paragraphFontSize || 14}px`,
+                fontWeight:
+                  getSectionStyle("basicInfo", "titleFontWeight") ||
+                  data.paragraphFontWeight ||
+                  400,
+                fontFamily:
+                  getSectionStyle("basicInfo", "titleFont") ||
+                  "Inter, sans-serif",
+                fontStyle:
+                  getSectionStyle("basicInfo", "titleTextStyle") || "normal",
+                marginBottom: `${getSectionStyle("basicInfo", "titleSpacing") ?? 8}px`,
+                textAlign: getSectionStyle("basicInfo", "titleAlign") || "center",
+              }}
+              data-testid="text-title"
+            >
+              {data.title || "Your Title"}
+            </p>
+            {data.company && (
+              <p
+                className="text-sm"
+                style={{
+                  color:
+                    getSectionStyle("basicInfo", "companyColor") || "#6b7280",
+                  fontSize: `${getSectionStyle("basicInfo", "companyFontSize") || data.paragraphFontSize || 14}px`,
+                  fontWeight:
+                    getSectionStyle("basicInfo", "companyFontWeight") ||
+                    data.paragraphFontWeight ||
+                    400,
+                  fontFamily:
+                    getSectionStyle("basicInfo", "companyFont") ||
+                    "Inter, sans-serif",
+                  fontStyle:
+                    getSectionStyle("basicInfo", "companyTextStyle") || "normal",
+                  marginBottom: `${getSectionStyle("basicInfo", "companySpacing") ?? 8}px`,
+                  textAlign: getSectionStyle("basicInfo", "companyAlign") || "center",
+                }}
+                data-testid="text-company"
+              >
+                {data.company}
+              </p>
+            )}
+          </div>
 
           {/* New Button Layout - Top 8 Buttons from Contact Information */}
           <div className="mb-6 space-y-2">
