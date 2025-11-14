@@ -101,12 +101,6 @@ function Router() {
       <Route path="/help">{() => <PageSuspense><Help /></PageSuspense>}</Route>
       <Route path="/email-signature">{() => <PageSuspense><EmailSignature /></PageSuspense>}</Route>
       <Route path="/booking/:eventTypeSlug">{(params) => <PageSuspense><BookingPage {...params} /></PageSuspense>}</Route>
-      <Route path="/admin/templates/import">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
-      <Route path="/admin/templates/builder">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
-      <Route path="/admin/templates/header-builder">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
-      <Route path="/admin/header-builder">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
-      <Route path="/admin/header-templates">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
-      <Route path="/admin/templates">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/users">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/plans">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/coupons">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
