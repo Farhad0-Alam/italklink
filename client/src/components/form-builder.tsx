@@ -114,6 +114,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
   const [builderMode, setBuilderMode] = useState<"card" | "page" | "theme" | "seo">("card");
   const [selectedPageId, setSelectedPageId] = useState<string>("home");
+  const [activeDividerPosition, setActiveDividerPosition] = useState<"top" | "bottom">("top");
 
   const [collapsedSections, setCollapsedSections] = useState<{
     [key: string]: boolean;
@@ -966,11 +967,43 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             </div>
                           )}
 
-                          {/* Top Shape Divider Section */}
+                          {/* Shape Divider with Top/Bottom Toggle */}
                           <TooltipProvider>
                             <div className="space-y-3 p-3 bg-slate-800/30 rounded-lg border border-slate-700 mt-4">
-                              <div className="flex items-center justify-between">
-                                <Label className="text-xs text-slate-300 font-medium">Top Shape Divider</Label>
+                              {/* Header with Title */}
+                              <Label className="text-xs text-slate-300 font-medium">Shape Divider</Label>
+                              
+                              {/* Top/Bottom Toggle */}
+                              <div className="flex gap-1 p-1 bg-slate-900/50 rounded-lg border border-orange-500/30">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveDividerPosition("top")}
+                                  className={`flex-1 px-3 py-2 text-xs font-medium rounded transition-all ${
+                                    activeDividerPosition === "top"
+                                      ? "bg-orange-500 text-white shadow-md"
+                                      : "text-slate-400 hover:text-slate-200"
+                                  }`}
+                                >
+                                  Top
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveDividerPosition("bottom")}
+                                  className={`flex-1 px-3 py-2 text-xs font-medium rounded transition-all ${
+                                    activeDividerPosition === "bottom"
+                                      ? "bg-orange-500 text-white shadow-md"
+                                      : "text-slate-400 hover:text-slate-200"
+                                  }`}
+                                >
+                                  Bottom
+                                </button>
+                              </div>
+
+                              {/* Top Shape Divider Controls */}
+                              {activeDividerPosition === "top" && (
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <Label className="text-xs text-slate-400">Enable</Label>
                                 <input
                                   type="checkbox"
                                   checked={watchedValues.coverImageStyles?.shapeDividerTop?.enabled || false}
@@ -986,7 +1019,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   {/* Shape Selection Grid with SVG Previews */}
                                   <div>
                                     <Label className="text-xs text-slate-400 mb-2 block">Shape Type</Label>
-                                    <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto p-2 bg-slate-900/50 rounded">
+                                    <div className="grid grid-cols-2 gap-2 p-2 bg-slate-900/50 rounded">
                                       {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", "tilt", "tilt-opacity", "fan-opacity", "curve", "curve-asymmetrical", "drop", "mountain", "opacity-fan-alt", "book"].map((shape) => {
                                         const isSelected = (watchedValues.coverImageStyles?.shapeDividerTop?.preset || "wave") === shape;
                                         const shapeName = shape.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -999,7 +1032,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                                 onClick={() =>
                                                   form.setValue("coverImageStyles.shapeDividerTop.preset", shape)
                                                 }
-                                                className={`relative h-16 rounded overflow-hidden transition-all border-2 ${
+                                                className={`relative h-10 rounded overflow-hidden transition-all border-2 ${
                                                   isSelected
                                                     ? "bg-purple-600/20 border-purple-500 ring-2 ring-purple-500"
                                                     : "bg-slate-700 border-slate-600 hover:bg-slate-600 hover:border-slate-500"
@@ -1169,13 +1202,15 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   </div>
                                 </>
                               )}
-                            </div>
+                                </div>
+                              )}
 
-                            {/* Bottom Shape Divider Section */}
-                            <div className="space-y-3 p-3 bg-slate-800/30 rounded-lg border border-slate-700 mt-4">
-                              <div className="flex items-center justify-between">
-                                <Label className="text-xs text-slate-300 font-medium">Bottom Shape Divider</Label>
-                                <input
+                              {/* Bottom Shape Divider Controls */}
+                              {activeDividerPosition === "bottom" && (
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <Label className="text-xs text-slate-400">Enable</Label>
+                                    <input
                                   type="checkbox"
                                   checked={watchedValues.coverImageStyles?.shapeDividerBottom?.enabled || false}
                                   onChange={(e) =>
@@ -1190,7 +1225,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   {/* Shape Selection Grid with SVG Previews */}
                                   <div>
                                     <Label className="text-xs text-slate-400 mb-2 block">Shape Type</Label>
-                                    <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto p-2 bg-slate-900/50 rounded">
+                                    <div className="grid grid-cols-2 gap-2 p-2 bg-slate-900/50 rounded">
                                       {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", "tilt", "tilt-opacity", "fan-opacity", "curve", "curve-asymmetrical", "drop", "mountain", "opacity-fan-alt", "book"].map((shape) => {
                                         const isSelected = (watchedValues.coverImageStyles?.shapeDividerBottom?.preset || "wave") === shape;
                                         const shapeName = shape.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -1203,7 +1238,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                                 onClick={() =>
                                                   form.setValue("coverImageStyles.shapeDividerBottom.preset", shape)
                                                 }
-                                                className={`relative h-16 rounded overflow-hidden transition-all border-2 ${
+                                                className={`relative h-10 rounded overflow-hidden transition-all border-2 ${
                                                   isSelected
                                                     ? "bg-purple-600/20 border-purple-500 ring-2 ring-purple-500"
                                                     : "bg-slate-700 border-slate-600 hover:bg-slate-600 hover:border-slate-500"
@@ -1372,6 +1407,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     />
                                   </div>
                                 </>
+                              )}
+                                </div>
                               )}
                             </div>
                           </TooltipProvider>
