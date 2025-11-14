@@ -131,6 +131,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     titleStyling: true,
     companyStyling: true,
     profileImageStyling: true,
+    coverImageStyling: true, // Cover Image Styling collapsed by default
     // subsections inside Contact Info
     contactIconStyling: true,
     contactHoverColor: true, // Hover Color section collapsed by default
@@ -1652,6 +1653,51 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               Italic
                             </Label>
                           </div>
+
+                          {/* Spacing Control */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Spacing (Bottom): {watchedValues.sectionStyles?.basicInfo?.nameSpacing ?? 8}px
+                            </Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.basicInfo?.nameSpacing ?? 8}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.nameSpacing",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              min={0}
+                              max={50}
+                            />
+                          </div>
+
+                          {/* Display Order */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Display Order
+                            </Label>
+                            <Select
+                              value={(watchedValues.sectionStyles?.basicInfo?.nameOrder ?? 1).toString()}
+                              onValueChange={(v) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.nameOrder",
+                                  parseInt(v),
+                                )
+                              }
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 (First)</SelectItem>
+                                <SelectItem value="2">2 (Second)</SelectItem>
+                                <SelectItem value="3">3 (Third)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </>
                       )}
                     </div>
@@ -1840,6 +1886,51 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               Italic
                             </Label>
                           </div>
+
+                          {/* Spacing Control */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Spacing (Bottom): {watchedValues.sectionStyles?.basicInfo?.titleSpacing ?? 8}px
+                            </Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.basicInfo?.titleSpacing ?? 8}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.titleSpacing",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              min={0}
+                              max={50}
+                            />
+                          </div>
+
+                          {/* Display Order */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Display Order
+                            </Label>
+                            <Select
+                              value={(watchedValues.sectionStyles?.basicInfo?.titleOrder ?? 2).toString()}
+                              onValueChange={(v) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.titleOrder",
+                                  parseInt(v),
+                                )
+                              }
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 (First)</SelectItem>
+                                <SelectItem value="2">2 (Second)</SelectItem>
+                                <SelectItem value="3">3 (Third)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </>
                       )}
                     </div>
@@ -2027,6 +2118,51 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             >
                               Italic
                             </Label>
+                          </div>
+
+                          {/* Spacing Control */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Spacing (Bottom): {watchedValues.sectionStyles?.basicInfo?.companySpacing ?? 8}px
+                            </Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.basicInfo?.companySpacing ?? 8}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.companySpacing",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              min={0}
+                              max={50}
+                            />
+                          </div>
+
+                          {/* Display Order */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Display Order
+                            </Label>
+                            <Select
+                              value={(watchedValues.sectionStyles?.basicInfo?.companyOrder ?? 3).toString()}
+                              onValueChange={(v) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.companyOrder",
+                                  parseInt(v),
+                                )
+                              }
+                            >
+                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 (First)</SelectItem>
+                                <SelectItem value="2">2 (Second)</SelectItem>
+                                <SelectItem value="3">3 (Third)</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         </>
                       )}
