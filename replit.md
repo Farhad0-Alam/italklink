@@ -7,17 +7,19 @@ TalkLink is an enterprise-grade platform offering professional digital business 
 ### ✅ COMPLETE: Individual Text Position Controls for Business Cards
 
 **Text Positioning System:**
-- **Name Styling**: Horizontal and Vertical position sliders (-50px to +50px each)
-- **Title Styling**: Horizontal and Vertical position sliders (-50px to +50px each)
-- **Company Styling**: Horizontal and Vertical position sliders (-50px to +50px each)
+- **Name Styling**: Horizontal and Vertical position sliders (-150px to +150px each)
+- **Title Styling**: Horizontal and Vertical position sliders (-150px to +150px each)
+- **Company Styling**: Horizontal and Vertical position sliders (-150px to +150px each)
 - Each text element can be positioned independently with precise control
-- Text Group Position sliders still available to move all three elements together as a unit
+- Text Group Position sliders still available to move all three elements together as a unit (-150px to +150px)
 
 **Position Controls:**
-- **Horizontal Position**: Moves text left/right (-50px to +50px)
-- **Vertical Position**: Moves text up/down (-50px to +50px)
+- **Horizontal Position**: Moves text left/right (-150px to +150px)
+- **Vertical Position**: Moves text up/down (-150px to +150px)
 - All three text elements (Name, Title, Company) have independent positioning
+- Text Group Position sliders also use extended range (-150px to +150px)
 - Text stays centered (textAlign: "center") while position sliders move elements
+- Extended range allows positioning text near card edges
 
 **Technical Implementation:**
 - Removed Text Alignment dropdown from all styling sections
