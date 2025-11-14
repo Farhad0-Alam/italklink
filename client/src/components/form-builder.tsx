@@ -1690,8 +1690,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 )
                               }
                               className="custom-range w-full"
-                              min={-50}
-                              max={50}
+                              min={-150}
+                              max={150}
                             />
                           </div>
 
@@ -1710,8 +1710,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 )
                               }
                               className="custom-range w-full"
-                              min={-50}
-                              max={50}
+                              min={-150}
+                              max={150}
                             />
                           </div>
                         </>
@@ -1938,8 +1938,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 )
                               }
                               className="custom-range w-full"
-                              min={-50}
-                              max={50}
+                              min={-150}
+                              max={150}
                             />
                           </div>
 
@@ -1958,8 +1958,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 )
                               }
                               className="custom-range w-full"
-                              min={-50}
-                              max={50}
+                              min={-150}
+                              max={150}
                             />
                           </div>
                         </>
@@ -2186,8 +2186,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 )
                               }
                               className="custom-range w-full"
-                              min={-50}
-                              max={50}
+                              min={-150}
+                              max={150}
                             />
                           </div>
 
@@ -2206,8 +2206,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 )
                               }
                               className="custom-range w-full"
-                              min={-50}
-                              max={50}
+                              min={-150}
+                              max={150}
                             />
                           </div>
                         </>
@@ -2245,8 +2245,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 )
                               }
                               className="custom-range w-full"
-                              min={-50}
-                              max={50}
+                              min={-150}
+                              max={150}
                             />
                           </div>
 
@@ -2265,8 +2265,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 )
                               }
                               className="custom-range w-full"
-                              min={-50}
-                              max={50}
+                              min={-150}
+                              max={150}
                             />
                           </div>
                         </>
