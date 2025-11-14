@@ -991,6 +991,7 @@ export const BusinessCardComponent = forwardRef<
                   getSectionStyle("basicInfo", "nameTextStyle") || "normal",
                 marginBottom: `${getSectionStyle("basicInfo", "nameSpacing") ?? 8}px`,
                 textAlign: "center",
+                transform: `translate(${getSectionStyle("basicInfo", "namePositionX") ?? 0}px, ${getSectionStyle("basicInfo", "namePositionY") ?? 0}px)`,
               }}
               data-testid="text-name"
             >
@@ -1014,7 +1015,8 @@ export const BusinessCardComponent = forwardRef<
                 fontStyle:
                   getSectionStyle("basicInfo", "titleTextStyle") || "normal",
                 marginBottom: `${getSectionStyle("basicInfo", "titleSpacing") ?? 8}px`,
-                textAlign: getSectionStyle("basicInfo", "nameAlign") || "center",
+                textAlign: "center",
+                transform: `translate(${getSectionStyle("basicInfo", "titlePositionX") ?? 0}px, ${getSectionStyle("basicInfo", "titlePositionY") ?? 0}px)`,
               }}
               data-testid="text-title"
             >
@@ -1037,7 +1039,8 @@ export const BusinessCardComponent = forwardRef<
                   fontStyle:
                     getSectionStyle("basicInfo", "companyTextStyle") || "normal",
                   marginBottom: `${getSectionStyle("basicInfo", "companySpacing") ?? 8}px`,
-                  textAlign: getSectionStyle("basicInfo", "nameAlign") || "center",
+                  textAlign: "center",
+                  transform: `translate(${getSectionStyle("basicInfo", "companyPositionX") ?? 0}px, ${getSectionStyle("basicInfo", "companyPositionY") ?? 0}px)`,
                 }}
                 data-testid="text-company"
               >

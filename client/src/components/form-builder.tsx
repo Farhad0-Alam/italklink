@@ -1675,29 +1675,44 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             />
                           </div>
 
-                          {/* Text Alignment */}
+                          {/* Horizontal Position */}
                           <div>
                             <Label className="text-white text-xs">
-                              Text Alignment
+                              Horizontal Position: {watchedValues.sectionStyles?.basicInfo?.namePositionX ?? 0}px
                             </Label>
-                            <Select
-                              value={watchedValues.sectionStyles?.basicInfo?.nameAlign || "center"}
-                              onValueChange={(v) =>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.basicInfo?.namePositionX ?? 0}
+                              onChange={(e) =>
                                 form.setValue(
-                                  "sectionStyles.basicInfo.nameAlign",
-                                  v as any,
+                                  "sectionStyles.basicInfo.namePositionX",
+                                  parseInt(e.target.value),
                                 )
                               }
-                            >
-                              <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="left">Left</SelectItem>
-                                <SelectItem value="center">Center</SelectItem>
-                                <SelectItem value="right">Right</SelectItem>
-                              </SelectContent>
-                            </Select>
+                              className="custom-range w-full"
+                              min={-50}
+                              max={50}
+                            />
+                          </div>
+
+                          {/* Vertical Position */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Vertical Position: {watchedValues.sectionStyles?.basicInfo?.namePositionY ?? 0}px
+                            </Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.basicInfo?.namePositionY ?? 0}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.namePositionY",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              min={-50}
+                              max={50}
+                            />
                           </div>
                         </>
                       )}
@@ -1907,6 +1922,46 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               max={50}
                             />
                           </div>
+
+                          {/* Horizontal Position */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Horizontal Position: {watchedValues.sectionStyles?.basicInfo?.titlePositionX ?? 0}px
+                            </Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.basicInfo?.titlePositionX ?? 0}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.titlePositionX",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              min={-50}
+                              max={50}
+                            />
+                          </div>
+
+                          {/* Vertical Position */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Vertical Position: {watchedValues.sectionStyles?.basicInfo?.titlePositionY ?? 0}px
+                            </Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.basicInfo?.titlePositionY ?? 0}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.titlePositionY",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              min={-50}
+                              max={50}
+                            />
+                          </div>
                         </>
                       )}
                     </div>
@@ -2112,6 +2167,46 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               }
                               className="custom-range w-full"
                               min={0}
+                              max={50}
+                            />
+                          </div>
+
+                          {/* Horizontal Position */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Horizontal Position: {watchedValues.sectionStyles?.basicInfo?.companyPositionX ?? 0}px
+                            </Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.basicInfo?.companyPositionX ?? 0}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.companyPositionX",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              min={-50}
+                              max={50}
+                            />
+                          </div>
+
+                          {/* Vertical Position */}
+                          <div>
+                            <Label className="text-white text-xs">
+                              Vertical Position: {watchedValues.sectionStyles?.basicInfo?.companyPositionY ?? 0}px
+                            </Label>
+                            <input
+                              type="range"
+                              value={watchedValues.sectionStyles?.basicInfo?.companyPositionY ?? 0}
+                              onChange={(e) =>
+                                form.setValue(
+                                  "sectionStyles.basicInfo.companyPositionY",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              min={-50}
                               max={50}
                             />
                           </div>
