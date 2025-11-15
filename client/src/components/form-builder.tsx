@@ -6199,23 +6199,96 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label className="text-white">Keywords</Label>
+                          <Label className="text-white">OG Title</Label>
                           <Input
-                            value={Array.isArray(form.watch("keywords")) ? (form.watch("keywords") as string[]).join(", ") : ""}
-                            onChange={(e) => {
-                              const keywords = e.target.value
-                                .split(",")
-                                .map(k => k.trim())
-                                .filter(k => k.length > 0);
-                              form.setValue("keywords", keywords);
-                            }}
-                            placeholder="digital business card, contact, professional"
+                            {...form.register("ogTitle")}
+                            placeholder="Custom title for social media sharing"
                             className="bg-slate-700 border-slate-600 text-white"
-                            data-testid="input-keywords"
+                            data-testid="input-og-title"
                           />
                           <p className="text-xs text-gray-400 mt-1">
-                            Separate keywords with commas
+                            Leave empty to use Meta Title
                           </p>
+                        </div>
+
+                        <div>
+                          <Label className="text-white">OG Description</Label>
+                          <Input
+                            {...form.register("ogDescription")}
+                            placeholder="Custom description for social media"
+                            className="bg-slate-700 border-slate-600 text-white"
+                            data-testid="input-og-description"
+                          />
+                          <p className="text-xs text-gray-400 mt-1">
+                            Leave empty to use Meta Description
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-white">Keywords</Label>
+                          <div className="space-y-2">
+                            {/* Tags display */}
+                            {form.watch("keywords") && (form.watch("keywords") as string[]).length > 0 && (
+                              <div className="flex flex-wrap gap-2 p-2 bg-slate-800/50 rounded-md border border-slate-600">
+                                {(form.watch("keywords") as string[]).map((keyword, index) => (
+                                  <div
+                                    key={index}
+                                    className="inline-flex items-center gap-1 px-3 py-1 bg-slate-600 text-white text-sm rounded-full"
+                                  >
+                                    <span>{keyword}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const currentKeywords = form.watch("keywords") as string[];
+                                        const newKeywords = currentKeywords.filter((_, i) => i !== index);
+                                        form.setValue("keywords", newKeywords);
+                                      }}
+                                      className="ml-1 hover:bg-slate-500 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
+                                      data-testid={`button-remove-keyword-${index}`}
+                                    >
+                                      <i className="fas fa-times text-xs"></i>
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            
+                            {/* Input to add new keywords */}
+                            <Input
+                              placeholder="Type a keyword and press Enter or comma"
+                              className="bg-slate-700 border-slate-600 text-white"
+                              data-testid="input-add-keyword"
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === ",") {
+                                  e.preventDefault();
+                                  const input = e.currentTarget;
+                                  const value = input.value.trim();
+                                  if (value) {
+                                    const currentKeywords = form.watch("keywords") as string[] || [];
+                                    if (!currentKeywords.includes(value)) {
+                                      form.setValue("keywords", [...currentKeywords, value]);
+                                    }
+                                    input.value = "";
+                                  }
+                                }
+                              }}
+                              onBlur={(e) => {
+                                const value = e.currentTarget.value.trim();
+                                if (value) {
+                                  const currentKeywords = form.watch("keywords") as string[] || [];
+                                  if (!currentKeywords.includes(value)) {
+                                    form.setValue("keywords", [...currentKeywords, value]);
+                                  }
+                                  e.currentTarget.value = "";
+                                }
+                              }}
+                            />
+                            <p className="text-xs text-gray-400">
+                              Press Enter or comma to add keyword
+                            </p>
+                          </div>
                         </div>
 
                         <div>

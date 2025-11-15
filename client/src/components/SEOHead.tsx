@@ -41,8 +41,8 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ cardData }) => {
     }
     
     // Update meta author
+    let metaAuthor = document.querySelector('meta[name="author"]');
     if (cardData.author) {
-      let metaAuthor = document.querySelector('meta[name="author"]');
       if (metaAuthor) {
         metaAuthor.setAttribute('content', cardData.author);
       } else {
@@ -50,6 +50,11 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ cardData }) => {
         metaAuthor.setAttribute('name', 'author');
         metaAuthor.setAttribute('content', cardData.author);
         document.head.appendChild(metaAuthor);
+      }
+    } else {
+      // Remove author meta tag if no author is set
+      if (metaAuthor) {
+        metaAuthor.remove();
       }
     }
     
