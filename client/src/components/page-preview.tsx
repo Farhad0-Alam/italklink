@@ -13,9 +13,11 @@ interface PagePreviewProps {
 }
 
 export function PagePreview({ pageData, cardData, onNavigatePage }: PagePreviewProps) {
+  const backgroundColor = cardData?.backgroundColor || "#f0f0f0";
+  
   if (!pageData.elements || pageData.elements.length === 0) {
     return (
-      <div className="h-full bg-white flex items-center justify-center">
+      <div className="h-full flex items-center justify-center" style={{ backgroundColor }}>
         <div className="text-center p-8">
           <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
             <i className="fas fa-plus text-gray-400 text-xl"></i>
@@ -29,7 +31,7 @@ export function PagePreview({ pageData, cardData, onNavigatePage }: PagePreviewP
   }
 
   return (
-    <div className="h-full bg-white overflow-y-auto relative">
+    <div className="h-full overflow-y-auto relative" style={{ backgroundColor }}>
       <div className="min-h-full relative">
         {pageData.elements
           .sort((a, b) => a.order - b.order)

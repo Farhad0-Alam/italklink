@@ -2914,6 +2914,7 @@ export const headingElementSchema = baseElementSchema.extend({
     text: z.string(),
     level: z.enum(["h1", "h2", "h3"]).default("h2"),
     alignment: z.enum(["left", "center", "right"]).default("center"),
+    color: z.string().optional(),
   }),
 });
 
@@ -2922,6 +2923,7 @@ export const paragraphElementSchema = baseElementSchema.extend({
   data: z.object({
     text: z.string(),
     alignment: z.enum(["left", "center", "right"]).default("left"),
+    color: z.string().optional(),
   }),
 });
 

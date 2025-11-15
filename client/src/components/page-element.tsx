@@ -565,6 +565,8 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
     switch (element.type) {
       case "heading":
         const HeadingTag = element.data.level as keyof JSX.IntrinsicElements;
+        const headingColor = element.data?.color || cardData?.headingColor || "#0f0f0f";
+        
         return (
           <div className={`text-${element.data.alignment} mb-4`}>
             {isEditing ? (
@@ -595,12 +597,33 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <option value="right">Right</option>
                   </select>
                 </div>
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Text Color</label>
+                  <input
+                    type="color"
+                    value={element.data?.color || cardData?.headingColor || "#0f0f0f"}
+                    onChange={(e) => handleDataUpdate({ color: e.target.value })}
+                    className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                  />
+                  {element.data?.color && (
+                    <button
+                      onClick={() => handleDataUpdate({ color: undefined })}
+                      className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
+                    >
+                      <i className="fas fa-undo mr-1"></i>
+                      Reset to Theme
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
-              <HeadingTag className={`font-bold ${
-                element.data.level === 'h1' ? 'text-2xl' : 
-                element.data.level === 'h2' ? 'text-xl' : 'text-lg'
-              } text-slate-800`}>
+              <HeadingTag 
+                className={`font-bold ${
+                  element.data.level === 'h1' ? 'text-2xl' : 
+                  element.data.level === 'h2' ? 'text-xl' : 'text-lg'
+                }`}
+                style={{ color: headingColor }}
+              >
                 {element.data.text}
               </HeadingTag>
             )}
@@ -608,6 +631,8 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
         );
 
       case "paragraph":
+        const paragraphColor = element.data?.color || cardData?.paragraphColor || "#141414";
+        
         return (
           <div className={`text-${element.data.alignment} mb-4`}>
             {isEditing ? (
@@ -628,9 +653,27 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   <option value="center">Center</option>
                   <option value="right">Right</option>
                 </select>
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Text Color</label>
+                  <input
+                    type="color"
+                    value={element.data?.color || cardData?.paragraphColor || "#141414"}
+                    onChange={(e) => handleDataUpdate({ color: e.target.value })}
+                    className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                  />
+                  {element.data?.color && (
+                    <button
+                      onClick={() => handleDataUpdate({ color: undefined })}
+                      className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
+                    >
+                      <i className="fas fa-undo mr-1"></i>
+                      Reset to Theme
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
-              <p className="text-slate-600 text-sm leading-relaxed">
+              <p className="text-sm leading-relaxed" style={{ color: paragraphColor }}>
                 {element.data.text}
               </p>
             )}
