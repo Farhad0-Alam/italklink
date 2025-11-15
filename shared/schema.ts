@@ -3430,6 +3430,17 @@ export const subscribeElementSchema = baseElementSchema.extend({
   }),
 });
 
+// Action Buttons element (Add to Contacts + Share)
+export const actionButtonsElementSchema = baseElementSchema.extend({
+  type: z.literal("actionButtons"),
+  data: z.object({
+    addToContactsBgColor: z.string().optional(),
+    addToContactsBorderColor: z.string().optional(),
+    shareBgColor: z.string().optional(),
+    shareBorderColor: z.string().optional(),
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   headingElementSchema,
@@ -3457,6 +3468,7 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   htmlElementSchema,
   pdfViewerElementSchema,
   subscribeElementSchema,
+  actionButtonsElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;

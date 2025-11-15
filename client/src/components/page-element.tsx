@@ -1005,17 +1005,82 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
 
         if (isEditing) {
           return (
-            <div className="mb-4 p-4 bg-slate-700 rounded-lg border border-slate-600">
-              <p className="text-white text-sm text-center">
-                <i className="fas fa-hand-pointer mr-2"></i>
-                Save & Share Buttons
-              </p>
-              <p className="text-xs text-gray-400 text-center mt-1">
-                Add to Contacts + Share buttons (no configuration needed)
-              </p>
+            <div className="mb-4 p-4 bg-slate-700 rounded-lg border border-slate-600 space-y-4">
+              <div>
+                <p className="text-white text-sm font-medium mb-1">
+                  <i className="fas fa-hand-pointer mr-2"></i>
+                  Save & Share Buttons
+                </p>
+                <p className="text-xs text-gray-400">
+                  Customize button colors or leave empty for theme defaults
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Add to Contacts Button Colors */}
+                <div className="space-y-3">
+                  <p className="text-xs text-gray-300 font-medium">Add to Contacts</p>
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">Button Color</label>
+                    <input
+                      type="color"
+                      value={element.data?.addToContactsBgColor || ""}
+                      onChange={(e) => handleDataUpdate({ ...element.data, addToContactsBgColor: e.target.value })}
+                      className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">Border Color</label>
+                    <input
+                      type="color"
+                      value={element.data?.addToContactsBorderColor || ""}
+                      onChange={(e) => handleDataUpdate({ ...element.data, addToContactsBorderColor: e.target.value })}
+                      className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Share Button Colors */}
+                <div className="space-y-3">
+                  <p className="text-xs text-gray-300 font-medium">Share Button</p>
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">Button Color</label>
+                    <input
+                      type="color"
+                      value={element.data?.shareBgColor || ""}
+                      onChange={(e) => handleDataUpdate({ ...element.data, shareBgColor: e.target.value })}
+                      className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">Border Color</label>
+                    <input
+                      type="color"
+                      value={element.data?.shareBorderColor || ""}
+                      onChange={(e) => handleDataUpdate({ ...element.data, shareBorderColor: e.target.value })}
+                      className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleDataUpdate({})}
+                  className="text-xs text-gray-400 hover:text-white transition-colors"
+                >
+                  <i className="fas fa-undo mr-1"></i>
+                  Reset to Theme Colors
+                </button>
+              </div>
             </div>
           );
         }
+
+        const addToContactsBg = element.data?.addToContactsBgColor || theme.secondaryColor || "#a855f7";
+        const addToContactsBorder = element.data?.addToContactsBorderColor || theme.brandColor || "#1e40af";
+        const shareBg = element.data?.shareBgColor || theme.brandColor || "#1e40af";
+        const shareBorder = element.data?.shareBorderColor || theme.secondaryColor || "#a855f7";
 
         return (
           <div className="flex gap-3 mb-4">
@@ -1024,9 +1089,9 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
               onClick={handleSaveContact}
               className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors flex-1"
               style={{
-                backgroundColor: theme.brandColor || "#1e40af",
+                backgroundColor: addToContactsBg,
                 color: theme.tertiaryColor || "#ffffff",
-                borderBottom: `4px solid ${theme.accentColor ? adjustColor(theme.accentColor, -20) : "#1e3a8a"}`,
+                borderBottom: `4px solid ${adjustColor(addToContactsBorder, -20)}`,
               }}
             >
               <i className="fas fa-address-book text-lg mr-3"></i>
@@ -1038,9 +1103,9 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
               onClick={handleShare}
               className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
               style={{
-                backgroundColor: theme.accentColor || "#a855f7",
+                backgroundColor: shareBg,
                 color: theme.tertiaryColor || "#ffffff",
-                borderBottom: `4px solid ${theme.secondaryColor ? adjustColor(theme.secondaryColor, -20) : "#7e22ce"}`,
+                borderBottom: `4px solid ${adjustColor(shareBorder, -20)}`,
                 width: "30%",
               }}
             >
