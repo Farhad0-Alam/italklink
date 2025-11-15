@@ -1300,61 +1300,6 @@ export const BusinessCardComponent = forwardRef<
               )}
             </div>
 
-            {/* Action Buttons Row */}
-            <div className="flex gap-3 px-4">
-              {/* Add to Contacts Button */}
-              <button
-                onClick={() => {
-                  const vCard = `BEGIN:VCARD
-VERSION:3.0
-FN:${data.fullName || "Contact"}
-ORG:${data.company || ""}
-TITLE:${data.title || ""}
-TEL:${data.phone || ""}
-EMAIL:${data.email || ""}
-URL:${data.website || ""}
-END:VCARD`;
-
-                  const blob = new Blob([vCard], { type: "text/vcard" });
-                  const url = URL.createObjectURL(blob);
-                  const link = document.createElement("a");
-                  link.href = url;
-                  link.download = `${data.fullName || "contact"}.vcf`;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                  URL.revokeObjectURL(url);
-                }}
-                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
-                style={{
-                  backgroundColor: data.secondaryColor || "#a855f7",
-                  color: data.tertiaryColor || "#ffffff",
-                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : "#1e3a8a"}`,
-                  width: "70%",
-                }}
-                data-testid="button-save-contact"
-              >
-                <i className="fas fa-address-book text-lg mr-3"></i>
-                Add to Contacts
-              </button>
-
-              {/* Share Button */}
-              <button
-                onClick={() => handleShare()}
-                className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
-                style={{
-                  backgroundColor: data.brandColor || "#1e40af",
-                  color: data.tertiaryColor || "#ffffff",
-                  borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : "#7e22ce"}`,
-                  width: "30%",
-                }}
-                data-testid="button-share-main"
-              >
-                <i className="fas fa-share-alt text-lg mr-3"></i>
-                Share
-              </button>
-            </div>
-
             {/* Social Media with Enhanced Icon Styling */}
             {data.customSocials && data.customSocials.length > 0 && (
               <div
