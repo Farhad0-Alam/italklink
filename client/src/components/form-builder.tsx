@@ -1678,11 +1678,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Horizontal Position */}
                           <div>
                             <Label className="text-white text-xs">
-                              Horizontal Position: {watchedValues.sectionStyles?.basicInfo?.namePositionX ?? 0}px
+                              Horizontal Position: {form.watch("sectionStyles.basicInfo.namePositionX") ?? 0}px
                             </Label>
                             <input
                               type="range"
-                              value={watchedValues.sectionStyles?.basicInfo?.namePositionX ?? 0}
+                              value={form.watch("sectionStyles.basicInfo.namePositionX") ?? 0}
                               onChange={(e) =>
                                 form.setValue(
                                   "sectionStyles.basicInfo.namePositionX",
@@ -1698,11 +1698,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Vertical Position */}
                           <div>
                             <Label className="text-white text-xs">
-                              Vertical Position: {watchedValues.sectionStyles?.basicInfo?.namePositionY ?? 0}px
+                              Vertical Position: {form.watch("sectionStyles.basicInfo.namePositionY") ?? 0}px
                             </Label>
                             <input
                               type="range"
-                              value={watchedValues.sectionStyles?.basicInfo?.namePositionY ?? 0}
+                              value={form.watch("sectionStyles.basicInfo.namePositionY") ?? 0}
                               onChange={(e) =>
                                 form.setValue(
                                   "sectionStyles.basicInfo.namePositionY",
@@ -1926,11 +1926,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Horizontal Position */}
                           <div>
                             <Label className="text-white text-xs">
-                              Horizontal Position: {watchedValues.sectionStyles?.basicInfo?.titlePositionX ?? 0}px
+                              Horizontal Position: {form.watch("sectionStyles.basicInfo.titlePositionX") ?? 0}px
                             </Label>
                             <input
                               type="range"
-                              value={watchedValues.sectionStyles?.basicInfo?.titlePositionX ?? 0}
+                              value={form.watch("sectionStyles.basicInfo.titlePositionX") ?? 0}
                               onChange={(e) =>
                                 form.setValue(
                                   "sectionStyles.basicInfo.titlePositionX",
@@ -1946,11 +1946,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Vertical Position */}
                           <div>
                             <Label className="text-white text-xs">
-                              Vertical Position: {watchedValues.sectionStyles?.basicInfo?.titlePositionY ?? 0}px
+                              Vertical Position: {form.watch("sectionStyles.basicInfo.titlePositionY") ?? 0}px
                             </Label>
                             <input
                               type="range"
-                              value={watchedValues.sectionStyles?.basicInfo?.titlePositionY ?? 0}
+                              value={form.watch("sectionStyles.basicInfo.titlePositionY") ?? 0}
                               onChange={(e) =>
                                 form.setValue(
                                   "sectionStyles.basicInfo.titlePositionY",
@@ -2174,11 +2174,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Horizontal Position */}
                           <div>
                             <Label className="text-white text-xs">
-                              Horizontal Position: {watchedValues.sectionStyles?.basicInfo?.companyPositionX ?? 0}px
+                              Horizontal Position: {form.watch("sectionStyles.basicInfo.companyPositionX") ?? 0}px
                             </Label>
                             <input
                               type="range"
-                              value={watchedValues.sectionStyles?.basicInfo?.companyPositionX ?? 0}
+                              value={form.watch("sectionStyles.basicInfo.companyPositionX") ?? 0}
                               onChange={(e) =>
                                 form.setValue(
                                   "sectionStyles.basicInfo.companyPositionX",
@@ -2194,11 +2194,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Vertical Position */}
                           <div>
                             <Label className="text-white text-xs">
-                              Vertical Position: {watchedValues.sectionStyles?.basicInfo?.companyPositionY ?? 0}px
+                              Vertical Position: {form.watch("sectionStyles.basicInfo.companyPositionY") ?? 0}px
                             </Label>
                             <input
                               type="range"
-                              value={watchedValues.sectionStyles?.basicInfo?.companyPositionY ?? 0}
+                              value={form.watch("sectionStyles.basicInfo.companyPositionY") ?? 0}
                               onChange={(e) =>
                                 form.setValue(
                                   "sectionStyles.basicInfo.companyPositionY",
@@ -2233,11 +2233,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Horizontal Position */}
                           <div>
                             <Label className="text-white text-xs">
-                              Horizontal Position: {watchedValues.sectionStyles?.basicInfo?.textGroupHorizontal ?? 0}px
+                              Horizontal Position: {form.watch("sectionStyles.basicInfo.textGroupHorizontal") ?? 0}px
                             </Label>
                             <input
                               type="range"
-                              value={watchedValues.sectionStyles?.basicInfo?.textGroupHorizontal ?? 0}
+                              value={form.watch("sectionStyles.basicInfo.textGroupHorizontal") ?? 0}
                               onChange={(e) =>
                                 form.setValue(
                                   "sectionStyles.basicInfo.textGroupHorizontal",
@@ -2253,11 +2253,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Vertical Position */}
                           <div>
                             <Label className="text-white text-xs">
-                              Vertical Position: {watchedValues.sectionStyles?.basicInfo?.textGroupVertical ?? 0}px
+                              Vertical Position: {form.watch("sectionStyles.basicInfo.textGroupVertical") ?? 0}px
                             </Label>
                             <input
                               type="range"
-                              value={watchedValues.sectionStyles?.basicInfo?.textGroupVertical ?? 0}
+                              value={form.watch("sectionStyles.basicInfo.textGroupVertical") ?? 0}
                               onChange={(e) =>
                                 form.setValue(
                                   "sectionStyles.basicInfo.textGroupVertical",
