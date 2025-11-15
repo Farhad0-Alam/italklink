@@ -7,35 +7,73 @@ interface SEOHeadProps {
 
 export const SEOHead: React.FC<SEOHeadProps> = ({ cardData }) => {
   useEffect(() => {
-    // Update document title
-    document.title = `${cardData.fullName || 'Digital Business Card'} - Professional Digital Contact Card`;
+    // Update document title - use custom metaTitle or generate from name
+    const pageTitle = cardData.metaTitle || `${cardData.fullName || 'Digital Business Card'} - Professional Digital Contact Card`;
+    document.title = pageTitle;
     
-    // Update meta description
+    // Update meta description - use custom metaDescription or generate
+    const descriptionContent = cardData.metaDescription || 
+      `Connect with ${cardData.fullName || 'this professional'} through their digital business card. ${cardData.title ? `${cardData.title} at ${cardData.company || 'their company'}` : 'Professional contact information'}.`;
+    
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 
-        `Connect with ${cardData.fullName || 'this professional'} through their digital business card. ${cardData.title ? `${cardData.title} at ${cardData.company || 'their company'}` : 'Professional contact information'}.`
-      );
+      metaDescription.setAttribute('content', descriptionContent);
     } else {
       const meta = document.createElement('meta');
       meta.name = 'description';
-      meta.content = `Connect with ${cardData.fullName || 'this professional'} through their digital business card. ${cardData.title ? `${cardData.title} at ${cardData.company || 'their company'}` : 'Professional contact information'}.`;
+      meta.content = descriptionContent;
       document.head.appendChild(meta);
     }
     
-    // Update meta keywords
+    // Update meta keywords - use custom keywords or generate from card data
+    const keywordsContent = cardData.keywords && cardData.keywords.length > 0 
+      ? cardData.keywords.join(', ')
+      : `${cardData.fullName}, digital business card, contact, professional, ${cardData.title || ''}, ${cardData.company || ''}`;
+    
     let metaKeywords = document.querySelector('meta[name="keywords"]');
     if (metaKeywords) {
-      metaKeywords.setAttribute('content', 
-        `${cardData.fullName}, digital business card, contact, professional, ${cardData.title || ''}, ${cardData.company || ''}`
-      );
+      metaKeywords.setAttribute('content', keywordsContent);
     } else {
       metaKeywords = document.createElement('meta');
       metaKeywords.setAttribute('name', 'keywords');
-      metaKeywords.setAttribute('content', 
-        `${cardData.fullName}, digital business card, contact, professional, ${cardData.title || ''}, ${cardData.company || ''}`
-      );
+      metaKeywords.setAttribute('content', keywordsContent);
       document.head.appendChild(metaKeywords);
+    }
+    
+    // Update meta author
+    if (cardData.author) {
+      let metaAuthor = document.querySelector('meta[name="author"]');
+      if (metaAuthor) {
+        metaAuthor.setAttribute('content', cardData.author);
+      } else {
+        metaAuthor = document.createElement('meta');
+        metaAuthor.setAttribute('name', 'author');
+        metaAuthor.setAttribute('content', cardData.author);
+        document.head.appendChild(metaAuthor);
+      }
+    }
+    
+    // Update robots meta tag for noIndex/noFollow
+    const robotsDirectives = [];
+    if (cardData.noIndex) robotsDirectives.push('noindex');
+    if (cardData.noFollow) robotsDirectives.push('nofollow');
+    
+    if (robotsDirectives.length > 0) {
+      let metaRobots = document.querySelector('meta[name="robots"]');
+      if (metaRobots) {
+        metaRobots.setAttribute('content', robotsDirectives.join(', '));
+      } else {
+        metaRobots = document.createElement('meta');
+        metaRobots.setAttribute('name', 'robots');
+        metaRobots.setAttribute('content', robotsDirectives.join(', '));
+        document.head.appendChild(metaRobots);
+      }
+    } else {
+      // Remove robots meta tag if no directives
+      const metaRobots = document.querySelector('meta[name="robots"]');
+      if (metaRobots) {
+        metaRobots.remove();
+      }
     }
     
     // Update Open Graph meta tags
