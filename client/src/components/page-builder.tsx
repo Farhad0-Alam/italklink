@@ -62,6 +62,7 @@ function SortableElement({ element, onUpdate, onDelete, cardData, onNavigatePage
       case "qrcode": return "QR Code";
       case "contactSection": return "Contact Section";
       case "socialSection": return "Social Section";
+      case "actionButtons": return "Save & Share Button";
       case "video": return "Video";
       case "contactForm": return element.data.title || "Contact Form";
       case "accordion": return "Accordion";

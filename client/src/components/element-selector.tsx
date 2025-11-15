@@ -41,6 +41,13 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       description: "Add social media links"
     },
     {
+      type: "actionButtons",
+      title: "Save & Share Button",
+      icon: "fas fa-hand-pointer",
+      color: "bg-gradient-to-r from-blue-500 to-purple-500",
+      description: "Add to Contacts & Share buttons"
+    },
+    {
       type: "link",
       title: "Link",
       icon: "fas fa-link",
@@ -255,6 +262,15 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
               }
             ]
           }
+        };
+        break;
+      
+      case "actionButtons":
+        element = {
+          id,
+          type: "actionButtons",
+          order: Date.now(),
+          data: {}
         };
         break;
       

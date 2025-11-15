@@ -952,6 +952,105 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
         return <SocialLinksRenderer data={element.data} />;
       }
 
+      case "actionButtons": {
+        // Safe cardData access with defaults
+        const theme = cardData ?? {};
+        
+        const adjustColor = (hex: string, amount: number): string => {
+          const num = parseInt(hex.replace("#", ""), 16);
+          const r = Math.max(0, Math.min(255, ((num >> 16) & 0xff) + amount));
+          const g = Math.max(0, Math.min(255, ((num >> 8) & 0xff) + amount));
+          const b = Math.max(0, Math.min(255, (num & 0xff) + amount));
+          return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+        };
+
+        const handleSaveContact = () => {
+          const vCard = `BEGIN:VCARD
+VERSION:3.0
+FN:${theme.fullName || 'Contact'}
+${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.company}\n` : ''}${theme.email ? `EMAIL:${theme.email}\n` : ''}${theme.phone ? `TEL:${theme.phone}\n` : ''}${theme.location ? `ADR:;;${theme.location};;;;\n` : ''}${theme.website ? `URL:${theme.website}\n` : ''}END:VCARD`;
+          
+          const blob = new Blob([vCard], { type: "text/vcard" });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `${theme.fullName || 'contact'}.vcf`;
+          link.click();
+        };
+
+        const handleShare = async () => {
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: theme.fullName || 'Business Card',
+                url: window.location.href,
+              });
+            } catch (err) {
+              console.log("Share cancelled");
+            }
+          } else {
+            // Safe clipboard fallback with guard
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              try {
+                await navigator.clipboard.writeText(window.location.href);
+                alert("Link copied to clipboard!");
+              } catch (err) {
+                alert("Unable to copy link. Please copy manually: " + window.location.href);
+              }
+            } else {
+              alert("Share not supported. Copy this link: " + window.location.href);
+            }
+          }
+        };
+
+        if (isEditing) {
+          return (
+            <div className="mb-4 p-4 bg-slate-700 rounded-lg border border-slate-600">
+              <p className="text-white text-sm text-center">
+                <i className="fas fa-hand-pointer mr-2"></i>
+                Save & Share Buttons
+              </p>
+              <p className="text-xs text-gray-400 text-center mt-1">
+                Add to Contacts + Share buttons (no configuration needed)
+              </p>
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex gap-3 mb-4">
+            {/* Add to Contacts Button */}
+            <button
+              onClick={handleSaveContact}
+              className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors flex-1"
+              style={{
+                backgroundColor: theme.brandColor || "#1e40af",
+                color: theme.tertiaryColor || "#ffffff",
+                borderBottom: `4px solid ${theme.accentColor ? adjustColor(theme.accentColor, -20) : "#1e3a8a"}`,
+              }}
+            >
+              <i className="fas fa-address-book text-lg mr-3"></i>
+              Add to Contacts
+            </button>
+
+            {/* Share Button */}
+            <button
+              onClick={handleShare}
+              className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+              style={{
+                backgroundColor: theme.accentColor || "#a855f7",
+                color: theme.tertiaryColor || "#ffffff",
+                borderBottom: `4px solid ${theme.secondaryColor ? adjustColor(theme.secondaryColor, -20) : "#7e22ce"}`,
+                width: "30%",
+              }}
+            >
+              <i className="fas fa-share-alt text-lg"></i>
+              <span className="ml-2">Share</span>
+            </button>
+          </div>
+        );
+      }
+
       case "video":
         return (
           <div className="mb-4">
