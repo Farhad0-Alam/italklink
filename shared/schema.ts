@@ -3436,8 +3436,10 @@ export const actionButtonsElementSchema = baseElementSchema.extend({
   data: z.object({
     addToContactsBgColor: z.string().optional(),
     addToContactsBorderColor: z.string().optional(),
+    addToContactsTextColor: z.string().optional(),
     shareBgColor: z.string().optional(),
     shareBorderColor: z.string().optional(),
+    shareTextColor: z.string().optional(),
   }),
 });
 

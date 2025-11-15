@@ -1038,6 +1038,15 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                     />
                   </div>
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">Text Color</label>
+                    <input
+                      type="color"
+                      value={element.data?.addToContactsTextColor || ""}
+                      onChange={(e) => handleDataUpdate({ ...element.data, addToContactsTextColor: e.target.value })}
+                      className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                    />
+                  </div>
                 </div>
 
                 {/* Share Button Colors */}
@@ -1061,6 +1070,15 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                     />
                   </div>
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">Text Color</label>
+                    <input
+                      type="color"
+                      value={element.data?.shareTextColor || ""}
+                      onChange={(e) => handleDataUpdate({ ...element.data, shareTextColor: e.target.value })}
+                      className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1079,8 +1097,10 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
 
         const addToContactsBg = element.data?.addToContactsBgColor || theme.secondaryColor || "#a855f7";
         const addToContactsBorder = element.data?.addToContactsBorderColor || theme.brandColor || "#1e40af";
+        const addToContactsText = element.data?.addToContactsTextColor || theme.tertiaryColor || "#ffffff";
         const shareBg = element.data?.shareBgColor || theme.brandColor || "#1e40af";
         const shareBorder = element.data?.shareBorderColor || theme.secondaryColor || "#a855f7";
+        const shareText = element.data?.shareTextColor || theme.tertiaryColor || "#ffffff";
 
         return (
           <div className="flex gap-3 mb-4">
@@ -1090,7 +1110,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
               className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors flex-1"
               style={{
                 backgroundColor: addToContactsBg,
-                color: theme.tertiaryColor || "#ffffff",
+                color: addToContactsText,
                 borderBottom: `4px solid ${adjustColor(addToContactsBorder, -20)}`,
               }}
             >
@@ -1104,7 +1124,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
               className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
               style={{
                 backgroundColor: shareBg,
-                color: theme.tertiaryColor || "#ffffff",
+                color: shareText,
                 borderBottom: `4px solid ${adjustColor(shareBorder, -20)}`,
                 width: "30%",
               }}
