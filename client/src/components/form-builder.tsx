@@ -6201,11 +6201,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         <div>
                           <Label className="text-white">Keywords</Label>
                           <Input
-                            {...form.register("keywords")}
+                            value={Array.isArray(form.watch("keywords")) ? (form.watch("keywords") as string[]).join(", ") : ""}
+                            onChange={(e) => {
+                              const keywords = e.target.value
+                                .split(",")
+                                .map(k => k.trim())
+                                .filter(k => k.length > 0);
+                              form.setValue("keywords", keywords);
+                            }}
                             placeholder="digital business card, contact, professional"
                             className="bg-slate-700 border-slate-600 text-white"
                             data-testid="input-keywords"
                           />
+                          <p className="text-xs text-gray-400 mt-1">
+                            Separate keywords with commas
+                          </p>
                         </div>
 
                         <div>
