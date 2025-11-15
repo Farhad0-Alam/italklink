@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { BusinessCard, businessCardSchema, PageElement } from "@shared/schema";
@@ -157,6 +157,31 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     form.reset(cardData);
   }, [cardData, form]);
 
+  // Scoped watchers to prevent infinite re-render loops
+  const sectionStyles = useWatch({ control: form.control, name: "sectionStyles" });
+  const coverImageStyles = useWatch({ control: form.control, name: "coverImageStyles" });
+  const profileImageStyles = useWatch({ control: form.control, name: "profileImageStyles" });
+  const pages = useWatch({ control: form.control, name: "pages" });
+  const brandColor = useWatch({ control: form.control, name: "brandColor" });
+  const accentColor = useWatch({ control: form.control, name: "accentColor" });
+  const headingColor = useWatch({ control: form.control, name: "headingColor" });
+  const paragraphColor = useWatch({ control: form.control, name: "paragraphColor" });
+  const backgroundColor = useWatch({ control: form.control, name: "backgroundColor" });
+  const backgroundType = useWatch({ control: form.control, name: "backgroundType" });
+  const backgroundImage = useWatch({ control: form.control, name: "backgroundImage" });
+  const animationType = useWatch({ control: form.control, name: "animationType" });
+  const headingFont = useWatch({ control: form.control, name: "headingFont" });
+  const headingFontSize = useWatch({ control: form.control, name: "headingFontSize" });
+  const headingFontWeight = useWatch({ control: form.control, name: "headingFontWeight" });
+  const paragraphFont = useWatch({ control: form.control, name: "paragraphFont" });
+  const paragraphFontSize = useWatch({ control: form.control, name: "paragraphFontSize" });
+  const paragraphFontWeight = useWatch({ control: form.control, name: "paragraphFontWeight" });
+  const noFollow = useWatch({ control: form.control, name: "noFollow" });
+  const noIndex = useWatch({ control: form.control, name: "noIndex" });
+  const ogImage = useWatch({ control: form.control, name: "ogImage" });
+  const secondaryColor = useWatch({ control: form.control, name: "secondaryColor" });
+  const tertiaryColor = useWatch({ control: form.control, name: "tertiaryColor" });
+
   const toggleSection = (k: string) =>
     setCollapsedSections((p) => ({ ...p, [k]: !p[k] }));
 
@@ -194,14 +219,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   };
 
   // sync to parent with memoized callback to prevent infinite loops
-  const watchedValues = form.watch();
   const prevDataRef = useRef<string>("");
 
   const memoizedOnDataChange = useCallback(onDataChange, []);
 
   // Helper function to get elements for a specific page
   const getPageElements = (pageId: string) => {
-    const pages = (watchedValues as any).pages || [
+    const pages = (form.watch() as any).pages || [
       {
         id: "home",
         key: "home",
@@ -217,14 +241,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
   // Add preview mode info to card data without triggering infinite loops
   const enhancedCardData = {
-    ...watchedValues,
+    ...form.watch(),
     currentPreviewMode: builderMode,
     currentSelectedPage:
       builderMode === "page" && selectedPageId
         ? {
             id: selectedPageId,
             label:
-              ((watchedValues as any).pages || []).find(
+              ((form.watch() as any).pages || []).find(
                 (p: any) => p.id === selectedPageId,
               )?.label || "Page",
             elements: getPageElements(selectedPageId),
@@ -234,7 +258,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
   // Helper function to update elements for a specific page
   const updatePageElements = (pageId: string, elements: PageElement[]) => {
-    const currentPages = (watchedValues as any).pages || [
+    const currentPages = pages || [
       {
         id: "home",
         key: "home",
@@ -263,7 +287,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   // Auto-select first page when switching to page mode or when pages change
   useEffect(() => {
     if (builderMode === "page") {
-      const availablePages = ((watchedValues as any).pages as any[]) || [];
+      const availablePages = (pages as any[]) || [];
       const nonHomePages = availablePages.filter(
         (page: any) => page.key !== "home",
       );
@@ -275,7 +299,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
         setSelectedPageId(nonHomePages[0].id);
       }
     }
-  }, [builderMode, (watchedValues as any).pages, selectedPageId]);
+  }, [builderMode, pages, selectedPageId]);
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -427,9 +451,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           </Label>
                           <div className="flex items-center gap-3">
                             <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-800 border border-slate-700 flex items-center justify-center flex-shrink-0">
-                              {(watchedValues as any)[field] ? (
+                              {form.watch(field as any) ? (
                                 <img
-                                  src={(watchedValues as any)[field]}
+                                  src={form.watch(field as any)}
                                   alt={label}
                                   className="w-full h-full object-cover"
                                 />
@@ -490,7 +514,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <Label className="text-sm text-slate-300">Show Profile Image</Label>
                             <input
                               type="checkbox"
-                              checked={watchedValues.profileImageStyles?.visible !== false}
+                              checked={profileImageStyles?.visible !== false}
                               onChange={(e) =>
                                 form.setValue("profileImageStyles.visible", e.target.checked)
                               }
@@ -501,13 +525,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Size Slider */}
                           <div>
                             <Label className="text-xs text-slate-400">
-                              Size: {watchedValues.profileImageStyles?.size || 120}px
+                              Size: {profileImageStyles?.size || 120}px
                             </Label>
                             <input
                               type="range"
                               min={60}
                               max={200}
-                              value={watchedValues.profileImageStyles?.size || 120}
+                              value={profileImageStyles?.size || 120}
                               onChange={(e) =>
                                 form.setValue(
                                   "profileImageStyles.size",
@@ -530,7 +554,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     form.setValue("profileImageStyles.shape", shape)
                                   }
                                   className={`px-3 py-2 rounded text-xs capitalize transition-colors ${
-                                    (watchedValues.profileImageStyles?.shape || "circle") ===
+                                    (profileImageStyles?.shape || "circle") ===
                                     shape
                                       ? "bg-blue-600 text-white"
                                       : "bg-slate-700 text-slate-300 hover:bg-slate-600"
@@ -545,13 +569,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Border Width */}
                           <div>
                             <Label className="text-xs text-slate-400">
-                              Border Width: {watchedValues.profileImageStyles?.borderWidth !== undefined ? watchedValues.profileImageStyles?.borderWidth : 3}px
+                              Border Width: {profileImageStyles?.borderWidth !== undefined ? profileImageStyles?.borderWidth : 3}px
                             </Label>
                             <input
                               type="range"
                               min={0}
                               max={10}
-                              value={watchedValues.profileImageStyles?.borderWidth !== undefined ? watchedValues.profileImageStyles?.borderWidth : 3}
+                              value={profileImageStyles?.borderWidth !== undefined ? profileImageStyles?.borderWidth : 3}
                               onChange={(e) =>
                                 form.setValue(
                                   "profileImageStyles.borderWidth",
@@ -563,8 +587,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           </div>
 
                           {/* Border Color - Show when border width > 0 and no animation */}
-                          {(watchedValues.profileImageStyles?.borderWidth !== undefined ? watchedValues.profileImageStyles?.borderWidth : 3) > 0 && 
-                           (!watchedValues.profileImageStyles?.animation || watchedValues.profileImageStyles?.animation === "none") && (
+                          {(profileImageStyles?.borderWidth !== undefined ? profileImageStyles?.borderWidth : 3) > 0 && 
+                           (!profileImageStyles?.animation || profileImageStyles?.animation === "none") && (
                             <div>
                               <Label className="text-xs text-slate-400 mb-2 block">
                                 Border Color
@@ -572,7 +596,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               <div className="flex items-center gap-2">
                                 <Input
                                   type="color"
-                                  value={watchedValues.profileImageStyles?.borderColor || watchedValues.brandColor || "#22c55e"}
+                                  value={profileImageStyles?.borderColor || form.watch("brandColor") || "#22c55e"}
                                   onChange={(e) =>
                                     form.setValue(
                                       "profileImageStyles.borderColor",
@@ -582,7 +606,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
                                 />
                                 <span className="text-xs text-slate-400">
-                                  {watchedValues.profileImageStyles?.borderColor || watchedValues.brandColor || "#22c55e"}
+                                  {profileImageStyles?.borderColor || form.watch("brandColor") || "#22c55e"}
                                 </span>
                               </div>
                               <p className="text-xs text-slate-500 mt-1">
@@ -597,7 +621,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               Border Animation
                             </Label>
                             <select
-                              value={watchedValues.profileImageStyles?.animation || "none"}
+                              value={profileImageStyles?.animation || "none"}
                               onChange={(e) =>
                                 form.setValue("profileImageStyles.animation", e.target.value)
                               }
@@ -613,14 +637,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           </div>
 
                           {/* Animation Color Controls - Only show when animation is selected */}
-                          {(watchedValues.profileImageStyles?.animation && 
-                            watchedValues.profileImageStyles?.animation !== "none") && (
+                          {(profileImageStyles?.animation && 
+                            profileImageStyles?.animation !== "none") && (
                             <div className="space-y-4">
                               <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700">
                                 <Label className="text-xs text-slate-300">Use Brand Color</Label>
                                 <input
                                   type="checkbox"
-                                  checked={watchedValues.profileImageStyles?.useBrandColor !== false}
+                                  checked={profileImageStyles?.useBrandColor !== false}
                                   onChange={(e) =>
                                     form.setValue("profileImageStyles.useBrandColor", e.target.checked)
                                   }
@@ -629,28 +653,28 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               </div>
 
                               {/* Gradient Builder for gradient animations */}
-                              {["instagram", "wave", "gradient-slide", "shimmer"].includes(watchedValues.profileImageStyles?.animation) && (
+                              {["instagram", "wave", "gradient-slide", "shimmer"].includes(profileImageStyles?.animation) && (
                                 <GradientBuilder
                                   value={{
-                                    type: watchedValues.profileImageStyles?.animationGradient?.type || 'linear',
-                                    angle: watchedValues.profileImageStyles?.animationGradient?.angle || 90,
-                                    stops: watchedValues.profileImageStyles?.animationGradient?.stops || [
-                                      { color: watchedValues.brandColor || "#4ecdc4", stop: 0 },
-                                      { color: watchedValues.accentColor || "#f093fb", stop: 100 }
+                                    type: profileImageStyles?.animationGradient?.type || 'linear',
+                                    angle: profileImageStyles?.animationGradient?.angle || 90,
+                                    stops: profileImageStyles?.animationGradient?.stops || [
+                                      { color: form.watch("brandColor") || "#4ecdc4", stop: 0 },
+                                      { color: form.watch("accentColor") || "#f093fb", stop: 100 }
                                     ]
                                   }}
                                   onChange={(gradient: GradientConfig) => {
                                     form.setValue("profileImageStyles.animationGradient", gradient);
                                   }}
-                                  useBrandColors={watchedValues.profileImageStyles?.useBrandColor !== false}
-                                  brandColor={watchedValues.brandColor}
-                                  accentColor={watchedValues.accentColor}
+                                  useBrandColors={profileImageStyles?.useBrandColor !== false}
+                                  brandColor={form.watch("brandColor")}
+                                  accentColor={form.watch("accentColor")}
                                 />
                               )}
 
                               {/* Single color picker for non-gradient animations (neon) */}
-                              {watchedValues.profileImageStyles?.animation === "neon" && 
-                               watchedValues.profileImageStyles?.useBrandColor === false && (
+                              {profileImageStyles?.animation === "neon" && 
+                               profileImageStyles?.useBrandColor === false && (
                                 <div className="space-y-2 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
                                   <Label className="text-xs text-slate-400 mb-2 block">
                                     Glow Color
@@ -658,9 +682,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <div className="flex items-center gap-2">
                                     <Input
                                       type="color"
-                                      value={watchedValues.profileImageStyles?.animationColors?.primary || watchedValues.brandColor || "#4ecdc4"}
+                                      value={profileImageStyles?.animationColors?.primary || form.watch("brandColor") || "#4ecdc4"}
                                       onChange={(e) => {
-                                        const currentColors = watchedValues.profileImageStyles?.animationColors || {};
+                                        const currentColors = profileImageStyles?.animationColors || {};
                                         form.setValue("profileImageStyles.animationColors", {
                                           ...currentColors,
                                           primary: e.target.value
@@ -670,11 +694,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     />
                                     <Input
                                       type="text"
-                                      value={(watchedValues.profileImageStyles?.animationColors?.primary || watchedValues.brandColor || "#4ecdc4").replace('#', '')}
+                                      value={(profileImageStyles?.animationColors?.primary || form.watch("brandColor") || "#4ecdc4").replace('#', '')}
                                       onChange={(e) => {
                                         const hex = e.target.value.replace(/[^0-9A-Fa-f]/g, '').slice(0, 6);
                                         if (hex.length === 6) {
-                                          const currentColors = watchedValues.profileImageStyles?.animationColors || {};
+                                          const currentColors = profileImageStyles?.animationColors || {};
                                           form.setValue("profileImageStyles.animationColors", {
                                             ...currentColors,
                                             primary: `#${hex}`
@@ -694,13 +718,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Shadow Effect */}
                           <div>
                             <Label className="text-xs text-slate-400">
-                              Shadow: {watchedValues.profileImageStyles?.shadow || 0}px
+                              Shadow: {profileImageStyles?.shadow || 0}px
                             </Label>
                             <input
                               type="range"
                               min={0}
                               max={30}
-                              value={watchedValues.profileImageStyles?.shadow || 0}
+                              value={profileImageStyles?.shadow || 0}
                               onChange={(e) =>
                                 form.setValue(
                                   "profileImageStyles.shadow",
@@ -714,13 +738,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Opacity */}
                           <div>
                             <Label className="text-xs text-slate-400">
-                              Opacity: {((watchedValues.profileImageStyles?.opacity || 100) / 100).toFixed(2)}
+                              Opacity: {((profileImageStyles?.opacity || 100) / 100).toFixed(2)}
                             </Label>
                             <input
                               type="range"
                               min={0}
                               max={100}
-                              value={watchedValues.profileImageStyles?.opacity || 100}
+                              value={profileImageStyles?.opacity || 100}
                               onChange={(e) =>
                                 form.setValue(
                                   "profileImageStyles.opacity",
@@ -738,16 +762,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             {/* Horizontal Position */}
                             <div>
                               <Label className="text-xs text-slate-400">
-                                Horizontal: {watchedValues.coverImageStyles?.profilePositionX ?? 50}%
+                                Horizontal: {coverImageStyles?.profilePositionX ?? 50}%
                                 <span className="text-slate-500 ml-1">
-                                  ({(watchedValues.coverImageStyles?.profilePositionX ?? 50) < 40 ? 'Left' : (watchedValues.coverImageStyles?.profilePositionX ?? 50) > 60 ? 'Right' : 'Center'})
+                                  ({(coverImageStyles?.profilePositionX ?? 50) < 40 ? 'Left' : (coverImageStyles?.profilePositionX ?? 50) > 60 ? 'Right' : 'Center'})
                                 </span>
                               </Label>
                               <input
                                 type="range"
                                 min={0}
                                 max={100}
-                                value={watchedValues.coverImageStyles?.profilePositionX ?? 50}
+                                value={coverImageStyles?.profilePositionX ?? 50}
                                 onChange={(e) =>
                                   form.setValue(
                                     "coverImageStyles.profilePositionX",
@@ -761,16 +785,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             {/* Vertical Position */}
                             <div>
                               <Label className="text-xs text-slate-400">
-                                Vertical: {watchedValues.coverImageStyles?.profilePositionY ?? 100}%
+                                Vertical: {coverImageStyles?.profilePositionY ?? 100}%
                                 <span className="text-slate-500 ml-1">
-                                  ({(watchedValues.coverImageStyles?.profilePositionY ?? 100) < 50 ? 'Top' : (watchedValues.coverImageStyles?.profilePositionY ?? 100) > 70 ? 'Bottom' : 'Middle'})
+                                  ({(coverImageStyles?.profilePositionY ?? 100) < 50 ? 'Top' : (coverImageStyles?.profilePositionY ?? 100) > 70 ? 'Bottom' : 'Middle'})
                                 </span>
                               </Label>
                               <input
                                 type="range"
                                 min={0}
                                 max={120}
-                                value={watchedValues.coverImageStyles?.profilePositionY ?? 100}
+                                value={coverImageStyles?.profilePositionY ?? 100}
                                 onChange={(e) =>
                                   form.setValue(
                                     "coverImageStyles.profilePositionY",
@@ -809,13 +833,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Cover Height Slider */}
                           <div>
                             <Label className="text-xs text-slate-400">
-                              Height: {watchedValues.coverImageStyles?.height || 200}px
+                              Height: {coverImageStyles?.height || 200}px
                             </Label>
                             <input
                               type="range"
                               min={100}
                               max={400}
-                              value={watchedValues.coverImageStyles?.height || 200}
+                              value={coverImageStyles?.height || 200}
                               onChange={(e) =>
                                 form.setValue(
                                   "coverImageStyles.height",
@@ -829,13 +853,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Border Width */}
                           <div>
                             <Label className="text-xs text-slate-400">
-                              Border Width: {watchedValues.coverImageStyles?.borderWidth || 0}px
+                              Border Width: {coverImageStyles?.borderWidth || 0}px
                             </Label>
                             <input
                               type="range"
                               min={0}
                               max={20}
-                              value={watchedValues.coverImageStyles?.borderWidth || 0}
+                              value={coverImageStyles?.borderWidth || 0}
                               onChange={(e) =>
                                 form.setValue(
                                   "coverImageStyles.borderWidth",
@@ -847,20 +871,20 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           </div>
 
                           {/* Border Color - only shown when border width > 0 */}
-                          {(watchedValues.coverImageStyles?.borderWidth || 0) > 0 && (
+                          {(coverImageStyles?.borderWidth || 0) > 0 && (
                             <div className="space-y-2 p-3 bg-slate-800/30 rounded-lg border border-slate-700">
                               <Label className="text-xs text-slate-300 font-medium">Border Color</Label>
                               <div className="flex items-center gap-2">
                                 <input
                                   type="color"
-                                  value={watchedValues.coverImageStyles?.borderColor || watchedValues.brandColor || "#22c55e"}
+                                  value={coverImageStyles?.borderColor || form.watch("brandColor") || "#22c55e"}
                                   onChange={(e) =>
                                     form.setValue("coverImageStyles.borderColor", e.target.value)
                                   }
                                   className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
                                 />
                                 <span className="text-xs text-slate-400 font-mono">
-                                  {watchedValues.coverImageStyles?.borderColor || watchedValues.brandColor || "#22c55e"}
+                                  {coverImageStyles?.borderColor || form.watch("brandColor") || "#22c55e"}
                                 </span>
                               </div>
                               <p className="text-xs text-slate-500 mt-1">
@@ -875,7 +899,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               Border Animation
                             </Label>
                             <select
-                              value={watchedValues.coverImageStyles?.animation || "none"}
+                              value={coverImageStyles?.animation || "none"}
                               onChange={(e) =>
                                 form.setValue("coverImageStyles.animation", e.target.value)
                               }
@@ -891,14 +915,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           </div>
 
                           {/* Animation Color Controls */}
-                          {(watchedValues.coverImageStyles?.animation && 
-                            watchedValues.coverImageStyles?.animation !== "none") && (
+                          {(coverImageStyles?.animation && 
+                            coverImageStyles?.animation !== "none") && (
                             <div className="space-y-4">
                               <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700">
                                 <Label className="text-xs text-slate-300">Use Brand Color</Label>
                                 <input
                                   type="checkbox"
-                                  checked={watchedValues.coverImageStyles?.useBrandColor !== false}
+                                  checked={coverImageStyles?.useBrandColor !== false}
                                   onChange={(e) =>
                                     form.setValue("coverImageStyles.useBrandColor", e.target.checked)
                                   }
@@ -907,28 +931,28 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               </div>
 
                               {/* Gradient Builder for gradient animations */}
-                              {["instagram", "wave", "gradient-slide", "shimmer"].includes(watchedValues.coverImageStyles?.animation) && (
+                              {["instagram", "wave", "gradient-slide", "shimmer"].includes(coverImageStyles?.animation) && (
                                 <GradientBuilder
                                   value={{
-                                    type: watchedValues.coverImageStyles?.animationGradient?.type || 'linear',
-                                    angle: watchedValues.coverImageStyles?.animationGradient?.angle || 90,
-                                    stops: watchedValues.coverImageStyles?.animationGradient?.stops || [
-                                      { color: watchedValues.brandColor || "#4ecdc4", stop: 0 },
-                                      { color: watchedValues.accentColor || "#f093fb", stop: 100 }
+                                    type: coverImageStyles?.animationGradient?.type || 'linear',
+                                    angle: coverImageStyles?.animationGradient?.angle || 90,
+                                    stops: coverImageStyles?.animationGradient?.stops || [
+                                      { color: form.watch("brandColor") || "#4ecdc4", stop: 0 },
+                                      { color: form.watch("accentColor") || "#f093fb", stop: 100 }
                                     ]
                                   }}
                                   onChange={(gradient: GradientConfig) => {
                                     form.setValue("coverImageStyles.animationGradient", gradient);
                                   }}
-                                  useBrandColors={watchedValues.coverImageStyles?.useBrandColor !== false}
-                                  brandColor={watchedValues.brandColor}
-                                  accentColor={watchedValues.accentColor}
+                                  useBrandColors={coverImageStyles?.useBrandColor !== false}
+                                  brandColor={form.watch("brandColor")}
+                                  accentColor={form.watch("accentColor")}
                                 />
                               )}
 
                               {/* Single color picker for neon */}
-                              {watchedValues.coverImageStyles?.animation === "neon" && 
-                               watchedValues.coverImageStyles?.useBrandColor === false && (
+                              {coverImageStyles?.animation === "neon" && 
+                               coverImageStyles?.useBrandColor === false && (
                                 <div className="space-y-2 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
                                   <Label className="text-xs text-slate-400 mb-2 block">
                                     Glow Color
@@ -936,9 +960,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <div className="flex items-center gap-2">
                                     <Input
                                       type="color"
-                                      value={watchedValues.coverImageStyles?.animationColors?.primary || watchedValues.brandColor || "#4ecdc4"}
+                                      value={coverImageStyles?.animationColors?.primary || form.watch("brandColor") || "#4ecdc4"}
                                       onChange={(e) => {
-                                        const currentColors = watchedValues.coverImageStyles?.animationColors || {};
+                                        const currentColors = coverImageStyles?.animationColors || {};
                                         form.setValue("coverImageStyles.animationColors", {
                                           ...currentColors,
                                           primary: e.target.value
@@ -948,11 +972,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     />
                                     <Input
                                       type="text"
-                                      value={(watchedValues.coverImageStyles?.animationColors?.primary || watchedValues.brandColor || "#4ecdc4").replace('#', '')}
+                                      value={(coverImageStyles?.animationColors?.primary || form.watch("brandColor") || "#4ecdc4").replace('#', '')}
                                       onChange={(e) => {
                                         const hex = e.target.value.replace(/[^0-9A-Fa-f]/g, '').slice(0, 6);
                                         if (hex.length === 6) {
-                                          const currentColors = watchedValues.coverImageStyles?.animationColors || {};
+                                          const currentColors = coverImageStyles?.animationColors || {};
                                           form.setValue("coverImageStyles.animationColors", {
                                             ...currentColors,
                                             primary: `#${hex}`
@@ -1008,7 +1032,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <Label className="text-xs text-slate-400">Enable</Label>
                                 <input
                                   type="checkbox"
-                                  checked={watchedValues.coverImageStyles?.shapeDividerTop?.enabled || false}
+                                  checked={coverImageStyles?.shapeDividerTop?.enabled || false}
                                   onChange={(e) =>
                                     form.setValue("coverImageStyles.shapeDividerTop.enabled", e.target.checked)
                                   }
@@ -1016,14 +1040,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                               </div>
 
-                              {watchedValues.coverImageStyles?.shapeDividerTop?.enabled && (
+                              {coverImageStyles?.shapeDividerTop?.enabled && (
                                 <>
                                   {/* Shape Selection Grid with SVG Previews */}
                                   <div>
                                     <Label className="text-xs text-slate-400 mb-2 block">Shape Type</Label>
                                     <div className="grid grid-cols-2 gap-2 p-2 bg-slate-900/50 rounded">
                                       {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", "tilt", "tilt-opacity", "fan-opacity", "curve", "curve-asymmetrical", "drop", "mountain", "opacity-fan-alt", "book"].map((shape) => {
-                                        const isSelected = (watchedValues.coverImageStyles?.shapeDividerTop?.preset || "wave") === shape;
+                                        const isSelected = (coverImageStyles?.shapeDividerTop?.preset || "wave") === shape;
                                         const shapeName = shape.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                                         
                                         return (
@@ -1125,14 +1149,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <div className="flex items-center gap-2">
                                       <Input
                                         type="color"
-                                        value={watchedValues.coverImageStyles?.shapeDividerTop?.color || watchedValues.brandColor || "#ffffff"}
+                                        value={coverImageStyles?.shapeDividerTop?.color || form.watch("brandColor") || "#ffffff"}
                                         onChange={(e) =>
                                           form.setValue("coverImageStyles.shapeDividerTop.color", e.target.value)
                                         }
                                         className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
                                       />
                                       <span className="text-xs text-slate-400">
-                                        {watchedValues.coverImageStyles?.shapeDividerTop?.color || watchedValues.brandColor || "#ffffff"}
+                                        {coverImageStyles?.shapeDividerTop?.color || form.watch("brandColor") || "#ffffff"}
                                       </span>
                                     </div>
                                   </div>
@@ -1140,13 +1164,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   {/* Width Slider (%) */}
                                   <div>
                                     <Label className="text-xs text-slate-400">
-                                      Width: {watchedValues.coverImageStyles?.shapeDividerTop?.width || 100}%
+                                      Width: {coverImageStyles?.shapeDividerTop?.width || 100}%
                                     </Label>
                                     <input
                                       type="range"
                                       min={100}
                                       max={300}
-                                      value={watchedValues.coverImageStyles?.shapeDividerTop?.width || 100}
+                                      value={coverImageStyles?.shapeDividerTop?.width || 100}
                                       onChange={(e) =>
                                         form.setValue(
                                           "coverImageStyles.shapeDividerTop.width",
@@ -1160,13 +1184,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   {/* Height Slider (px) */}
                                   <div>
                                     <Label className="text-xs text-slate-400">
-                                      Height: {watchedValues.coverImageStyles?.shapeDividerTop?.height || 60}px
+                                      Height: {coverImageStyles?.shapeDividerTop?.height || 60}px
                                     </Label>
                                     <input
                                       type="range"
                                       min={20}
                                       max={200}
-                                      value={watchedValues.coverImageStyles?.shapeDividerTop?.height || 60}
+                                      value={coverImageStyles?.shapeDividerTop?.height || 60}
                                       onChange={(e) =>
                                         form.setValue(
                                           "coverImageStyles.shapeDividerTop.height",
@@ -1182,7 +1206,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <Label className="text-xs text-slate-300">Invert</Label>
                                     <input
                                       type="checkbox"
-                                      checked={watchedValues.coverImageStyles?.shapeDividerTop?.invert || false}
+                                      checked={coverImageStyles?.shapeDividerTop?.invert || false}
                                       onChange={(e) =>
                                         form.setValue("coverImageStyles.shapeDividerTop.invert", e.target.checked)
                                       }
@@ -1195,7 +1219,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <Label className="text-xs text-slate-300">Bring to Front</Label>
                                     <input
                                       type="checkbox"
-                                      checked={watchedValues.coverImageStyles?.shapeDividerTop?.bringToFront || false}
+                                      checked={coverImageStyles?.shapeDividerTop?.bringToFront || false}
                                       onChange={(e) =>
                                         form.setValue("coverImageStyles.shapeDividerTop.bringToFront", e.target.checked)
                                       }
@@ -1214,7 +1238,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <Label className="text-xs text-slate-400">Enable</Label>
                                     <input
                                   type="checkbox"
-                                  checked={watchedValues.coverImageStyles?.shapeDividerBottom?.enabled || false}
+                                  checked={coverImageStyles?.shapeDividerBottom?.enabled || false}
                                   onChange={(e) =>
                                     form.setValue("coverImageStyles.shapeDividerBottom.enabled", e.target.checked)
                                   }
@@ -1222,14 +1246,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                               </div>
 
-                              {watchedValues.coverImageStyles?.shapeDividerBottom?.enabled && (
+                              {coverImageStyles?.shapeDividerBottom?.enabled && (
                                 <>
                                   {/* Shape Selection Grid with SVG Previews */}
                                   <div>
                                     <Label className="text-xs text-slate-400 mb-2 block">Shape Type</Label>
                                     <div className="grid grid-cols-2 gap-2 p-2 bg-slate-900/50 rounded">
                                       {["wave", "waves-brush", "clouds", "zigzag", "triangle", "triangle-asymmetrical", "tilt", "tilt-opacity", "fan-opacity", "curve", "curve-asymmetrical", "drop", "mountain", "opacity-fan-alt", "book"].map((shape) => {
-                                        const isSelected = (watchedValues.coverImageStyles?.shapeDividerBottom?.preset || "wave") === shape;
+                                        const isSelected = (coverImageStyles?.shapeDividerBottom?.preset || "wave") === shape;
                                         const shapeName = shape.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                                         
                                         return (
@@ -1331,14 +1355,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <div className="flex items-center gap-2">
                                       <Input
                                         type="color"
-                                        value={watchedValues.coverImageStyles?.shapeDividerBottom?.color || watchedValues.brandColor || "#ffffff"}
+                                        value={coverImageStyles?.shapeDividerBottom?.color || form.watch("brandColor") || "#ffffff"}
                                         onChange={(e) =>
                                           form.setValue("coverImageStyles.shapeDividerBottom.color", e.target.value)
                                         }
                                         className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
                                       />
                                       <span className="text-xs text-slate-400">
-                                        {watchedValues.coverImageStyles?.shapeDividerBottom?.color || watchedValues.brandColor || "#ffffff"}
+                                        {coverImageStyles?.shapeDividerBottom?.color || form.watch("brandColor") || "#ffffff"}
                                       </span>
                                     </div>
                                   </div>
@@ -1346,13 +1370,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   {/* Width Slider (%) */}
                                   <div>
                                     <Label className="text-xs text-slate-400">
-                                      Width: {watchedValues.coverImageStyles?.shapeDividerBottom?.width || 100}%
+                                      Width: {coverImageStyles?.shapeDividerBottom?.width || 100}%
                                     </Label>
                                     <input
                                       type="range"
                                       min={100}
                                       max={300}
-                                      value={watchedValues.coverImageStyles?.shapeDividerBottom?.width || 100}
+                                      value={coverImageStyles?.shapeDividerBottom?.width || 100}
                                       onChange={(e) =>
                                         form.setValue(
                                           "coverImageStyles.shapeDividerBottom.width",
@@ -1366,13 +1390,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   {/* Height Slider (px) */}
                                   <div>
                                     <Label className="text-xs text-slate-400">
-                                      Height: {watchedValues.coverImageStyles?.shapeDividerBottom?.height || 60}px
+                                      Height: {coverImageStyles?.shapeDividerBottom?.height || 60}px
                                     </Label>
                                     <input
                                       type="range"
                                       min={20}
                                       max={200}
-                                      value={watchedValues.coverImageStyles?.shapeDividerBottom?.height || 60}
+                                      value={coverImageStyles?.shapeDividerBottom?.height || 60}
                                       onChange={(e) =>
                                         form.setValue(
                                           "coverImageStyles.shapeDividerBottom.height",
@@ -1388,7 +1412,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <Label className="text-xs text-slate-300">Invert</Label>
                                     <input
                                       type="checkbox"
-                                      checked={watchedValues.coverImageStyles?.shapeDividerBottom?.invert || false}
+                                      checked={coverImageStyles?.shapeDividerBottom?.invert || false}
                                       onChange={(e) =>
                                         form.setValue("coverImageStyles.shapeDividerBottom.invert", e.target.checked)
                                       }
@@ -1401,7 +1425,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <Label className="text-xs text-slate-300">Bring to Front</Label>
                                     <input
                                       type="checkbox"
-                                      checked={watchedValues.coverImageStyles?.shapeDividerBottom?.bringToFront || false}
+                                      checked={coverImageStyles?.shapeDividerBottom?.bringToFront || false}
                                       onChange={(e) =>
                                         form.setValue("coverImageStyles.shapeDividerBottom.bringToFront", e.target.checked)
                                       }
@@ -1495,7 +1519,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.basicInfo
+                                    sectionStyles?.basicInfo
                                       ?.nameColor || "#ffffff"
                                   }
                                   onChange={(e) =>
@@ -1508,7 +1532,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.basicInfo
+                                    sectionStyles?.basicInfo
                                       ?.nameColor || "#ffffff"
                                   }
                                   onChange={(e) =>
@@ -1527,7 +1551,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               <Label className="text-white text-xs">Font</Label>
                               <Select
                                 value={
-                                  watchedValues.sectionStyles?.basicInfo
+                                  sectionStyles?.basicInfo
                                     ?.nameFont || ""
                                 }
                                 onValueChange={(v) =>
@@ -1574,14 +1598,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <div>
                               <Label className="text-white text-xs">
                                 Size:{" "}
-                                {watchedValues.sectionStyles?.basicInfo
+                                {sectionStyles?.basicInfo
                                   ?.nameFontSize || 24}
                                 px
                               </Label>
                               <input
                                 type="range"
                                 value={
-                                  watchedValues.sectionStyles?.basicInfo
+                                  sectionStyles?.basicInfo
                                     ?.nameFontSize || 24
                                 }
                                 onChange={(e) =>
@@ -1602,7 +1626,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               </Label>
                               <Select
                                 value={
-                                  watchedValues.sectionStyles?.basicInfo
+                                  sectionStyles?.basicInfo
                                     ?.nameFontWeight || ""
                                 }
                                 onValueChange={(v) =>
@@ -1637,7 +1661,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <Checkbox
                               id="nameItalic"
                               checked={
-                                watchedValues.sectionStyles?.basicInfo
+                                sectionStyles?.basicInfo
                                   ?.nameTextStyle === "italic"
                               }
                               onCheckedChange={(c) =>
@@ -1658,11 +1682,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Spacing Control */}
                           <div>
                             <Label className="text-white text-xs">
-                              Spacing (Bottom): {watchedValues.sectionStyles?.basicInfo?.nameSpacing ?? 8}px
+                              Spacing (Bottom): {sectionStyles?.basicInfo?.nameSpacing ?? 8}px
                             </Label>
                             <input
                               type="range"
-                              value={watchedValues.sectionStyles?.basicInfo?.nameSpacing ?? 8}
+                              value={sectionStyles?.basicInfo?.nameSpacing ?? 8}
                               onChange={(e) =>
                                 form.setValue(
                                   "sectionStyles.basicInfo.nameSpacing",
@@ -1743,7 +1767,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.basicInfo
+                                    sectionStyles?.basicInfo
                                       ?.titleColor || "#4b5563"
                                   }
                                   onChange={(e) =>
@@ -1756,7 +1780,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.basicInfo
+                                    sectionStyles?.basicInfo
                                       ?.titleColor || ""
                                   }
                                   onChange={(e) =>
@@ -1775,7 +1799,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               <Label className="text-white text-xs">Font</Label>
                               <Select
                                 value={
-                                  watchedValues.sectionStyles?.basicInfo
+                                  sectionStyles?.basicInfo
                                     ?.titleFont || ""
                                 }
                                 onValueChange={(v) =>
@@ -1822,14 +1846,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <div>
                               <Label className="text-white text-xs">
                                 Size:{" "}
-                                {watchedValues.sectionStyles?.basicInfo
+                                {sectionStyles?.basicInfo
                                   ?.titleFontSize || 14}
                                 px
                               </Label>
                               <input
                                 type="range"
                                 value={
-                                  watchedValues.sectionStyles?.basicInfo
+                                  sectionStyles?.basicInfo
                                     ?.titleFontSize || 14
                                 }
                                 onChange={(e) =>
@@ -1850,7 +1874,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               </Label>
                               <Select
                                 value={
-                                  watchedValues.sectionStyles?.basicInfo
+                                  sectionStyles?.basicInfo
                                     ?.titleFontWeight || ""
                                 }
                                 onValueChange={(v) =>
@@ -1885,7 +1909,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <Checkbox
                               id="titleItalic"
                               checked={
-                                watchedValues.sectionStyles?.basicInfo
+                                sectionStyles?.basicInfo
                                   ?.titleTextStyle === "italic"
                               }
                               onCheckedChange={(c) =>
@@ -1906,11 +1930,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Spacing Control */}
                           <div>
                             <Label className="text-white text-xs">
-                              Spacing (Bottom): {watchedValues.sectionStyles?.basicInfo?.titleSpacing ?? 8}px
+                              Spacing (Bottom): {sectionStyles?.basicInfo?.titleSpacing ?? 8}px
                             </Label>
                             <input
                               type="range"
-                              value={watchedValues.sectionStyles?.basicInfo?.titleSpacing ?? 8}
+                              value={sectionStyles?.basicInfo?.titleSpacing ?? 8}
                               onChange={(e) =>
                                 form.setValue(
                                   "sectionStyles.basicInfo.titleSpacing",
@@ -1991,7 +2015,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.basicInfo
+                                    sectionStyles?.basicInfo
                                       ?.companyColor || "#6b7280"
                                   }
                                   onChange={(e) =>
@@ -2004,7 +2028,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.basicInfo
+                                    sectionStyles?.basicInfo
                                       ?.companyColor || ""
                                   }
                                   onChange={(e) =>
@@ -2023,7 +2047,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               <Label className="text-white text-xs">Font</Label>
                               <Select
                                 value={
-                                  watchedValues.sectionStyles?.basicInfo
+                                  sectionStyles?.basicInfo
                                     ?.companyFont || ""
                                 }
                                 onValueChange={(v) =>
@@ -2070,14 +2094,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <div>
                               <Label className="text-white text-xs">
                                 Size:{" "}
-                                {watchedValues.sectionStyles?.basicInfo
+                                {sectionStyles?.basicInfo
                                   ?.companyFontSize || 14}
                                 px
                               </Label>
                               <input
                                 type="range"
                                 value={
-                                  watchedValues.sectionStyles?.basicInfo
+                                  sectionStyles?.basicInfo
                                     ?.companyFontSize || 14
                                 }
                                 onChange={(e) =>
@@ -2098,7 +2122,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               </Label>
                               <Select
                                 value={
-                                  watchedValues.sectionStyles?.basicInfo
+                                  sectionStyles?.basicInfo
                                     ?.companyFontWeight || ""
                                 }
                                 onValueChange={(v) =>
@@ -2133,7 +2157,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <Checkbox
                               id="companyItalic"
                               checked={
-                                watchedValues.sectionStyles?.basicInfo
+                                sectionStyles?.basicInfo
                                   ?.companyTextStyle === "italic"
                               }
                               onCheckedChange={(c) =>
@@ -2154,11 +2178,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           {/* Spacing Control */}
                           <div>
                             <Label className="text-white text-xs">
-                              Spacing (Bottom): {watchedValues.sectionStyles?.basicInfo?.companySpacing ?? 8}px
+                              Spacing (Bottom): {sectionStyles?.basicInfo?.companySpacing ?? 8}px
                             </Label>
                             <input
                               type="range"
-                              value={watchedValues.sectionStyles?.basicInfo?.companySpacing ?? 8}
+                              value={sectionStyles?.basicInfo?.companySpacing ?? 8}
                               onChange={(e) =>
                                 form.setValue(
                                   "sectionStyles.basicInfo.companySpacing",
@@ -2457,7 +2481,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.iconColor || "#8b5cf6"
                                   }
                                   onChange={(e) =>
@@ -2471,7 +2495,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.iconColor || "#8b5cf6"
                                   }
                                   onChange={(e) =>
@@ -2495,7 +2519,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.iconBackgroundColor || "#1e293b"
                                   }
                                   onChange={(e) =>
@@ -2509,7 +2533,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.iconBackgroundColor || "#1e293b"
                                   }
                                   onChange={(e) =>
@@ -2533,8 +2557,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
-                                      ?.iconBorderColor ||       watchedValues?.brandColor || "#475569"
+                                    sectionStyles?.contactInfo
+                                      ?.iconBorderColor ||       brandColor || "#475569"
                                   }
                                   onChange={(e) =>
                                     form.setValue(
@@ -2547,7 +2571,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.iconBorderColor || "#475569"
                                   }
                                   onChange={(e) =>
@@ -2566,14 +2590,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <div>
                               <Label className="text-white text-xs">
                                 Border Size:{" "}
-                                {watchedValues.sectionStyles?.contactInfo
+                                {sectionStyles?.contactInfo
                                   ?.borderSize || 1}
                                 px
                               </Label>
                               <input
                                 type="range"
                                 value={
-                                  watchedValues.sectionStyles?.contactInfo
+                                  sectionStyles?.contactInfo
                                     ?.borderSize || 1
                                 }
                                 onChange={(e) =>
@@ -2592,14 +2616,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <div>
                               <Label className="text-white text-xs">
                                 Icon Size:{" "}
-                                {watchedValues.sectionStyles?.contactInfo
+                                {sectionStyles?.contactInfo
                                   ?.iconSize || 18}
                                 px
                               </Label>
                               <input
                                 type="range"
                                 value={
-                                  watchedValues.sectionStyles?.contactInfo
+                                  sectionStyles?.contactInfo
                                     ?.iconSize || 18
                                 }
                                 onChange={(e) =>
@@ -2618,14 +2642,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <div>
                               <Label className="text-white text-xs">
                                 Icon Background Size:{" "}
-                                {watchedValues.sectionStyles?.contactInfo
+                                {sectionStyles?.contactInfo
                                   ?.iconBackgroundSize || 40}
                                 px
                               </Label>
                               <input
                                 type="range"
                                 value={
-                                  watchedValues.sectionStyles?.contactInfo
+                                  sectionStyles?.contactInfo
                                     ?.iconBackgroundSize || 40
                                 }
                                 onChange={(e) =>
@@ -2651,7 +2675,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 </Label>
                                 <Select
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.view || "icon-text"
                                   }
                                   onValueChange={(value) =>
@@ -2683,7 +2707,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 </Label>
                                 <Select
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.skin || "flat"
                                   }
                                   onValueChange={(value) =>
@@ -2728,7 +2752,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 </Label>
                                 <Select
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.shape || "rounded"
                                   }
                                   onValueChange={(value) =>
@@ -2764,7 +2788,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 </Label>
                                 <Select
                                   value={String(
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.columns || "auto",
                                   )}
                                   onValueChange={(value) => {
@@ -2802,7 +2826,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 </Label>
                                 <Select
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.alignment || "left"
                                   }
                                   onValueChange={(value) =>
@@ -2853,7 +2877,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             </div>
 
                             {/* Label Toggle - Only show when View is Icon & Text */}
-                            {watchedValues.sectionStyles?.contactInfo?.view ===
+                            {sectionStyles?.contactInfo?.view ===
                               "icon-text" && (
                               <div className="flex items-center justify-between mt-3 p-2 bg-slate-700/50 rounded">
                                 <div>
@@ -2868,7 +2892,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <Checkbox
                                     id="contactShowLabel"
                                     checked={
-                                      watchedValues.sectionStyles?.contactInfo
+                                      sectionStyles?.contactInfo
                                         ?.showLabel !== false
                                     }
                                     onCheckedChange={(checked) =>
@@ -2899,7 +2923,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <div className="flex items-center gap-2">
                                     <Slider
                                       value={[
-                                        watchedValues.sectionStyles?.contactInfo
+                                        sectionStyles?.contactInfo
                                           ?.iconBackgroundWidth || 48,
                                       ]}
                                       onValueChange={(value) =>
@@ -2915,7 +2939,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                       data-testid="slider-contact-icon-width"
                                     />
                                     <span className="text-white text-xs w-8">
-                                      {watchedValues.sectionStyles?.contactInfo
+                                      {sectionStyles?.contactInfo
                                         ?.iconBackgroundWidth || 48}
                                     </span>
                                   </div>
@@ -2927,7 +2951,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <div className="flex items-center gap-2">
                                     <Slider
                                       value={[
-                                        watchedValues.sectionStyles?.contactInfo
+                                        sectionStyles?.contactInfo
                                           ?.iconBackgroundHeight || 48,
                                       ]}
                                       onValueChange={(value) =>
@@ -2943,7 +2967,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                       data-testid="slider-contact-icon-height"
                                     />
                                     <span className="text-white text-xs w-8">
-                                      {watchedValues.sectionStyles?.contactInfo
+                                      {sectionStyles?.contactInfo
                                         ?.iconBackgroundHeight || 48}
                                     </span>
                                   </div>
@@ -2951,7 +2975,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               </div>
 
                               {/* Text Position - Only show when View includes text */}
-                              {/* {(watchedValues.sectionStyles?.contactInfo?.view === "icon-text" || watchedValues.sectionStyles?.contactInfo?.view === "text") && ( */}
+                              {/* {(sectionStyles?.contactInfo?.view === "icon-text" || sectionStyles?.contactInfo?.view === "text") && ( */}
 
                               <div>
                                 <Label className="text-white text-xs">
@@ -2959,7 +2983,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 </Label>
                                 <Select
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.textPosition || "right"
                                   }
                                   onValueChange={(value) =>
@@ -3039,7 +3063,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <input
                               type="checkbox"
                               checked={
-                                watchedValues.sectionStyles?.contactInfo
+                                sectionStyles?.contactInfo
                                   ?.enableHoverColor || false
                               }
                               onChange={(e) =>
@@ -3062,7 +3086,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.iconHoverColor || "#a855f7"
                                   }
                                   onChange={(e) =>
@@ -3076,7 +3100,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.iconHoverColor || "#a855f7"
                                   }
                                   onChange={(e) =>
@@ -3100,7 +3124,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.iconBackgroundHoverColor || "#374151"
                                   }
                                   onChange={(e) =>
@@ -3114,7 +3138,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.iconBackgroundHoverColor || "#374151"
                                   }
                                   onChange={(e) =>
@@ -3160,7 +3184,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.iconTextColor || "#ffffff"
                                   }
                                   onChange={(e) =>
@@ -3174,7 +3198,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.contactInfo
+                                    sectionStyles?.contactInfo
                                       ?.iconTextColor || "#ffffff"
                                   }
                                   onChange={(e) =>
@@ -3194,7 +3218,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               <Label className="text-white text-xs">Font</Label>
                               <Select
                                 value={
-                                  watchedValues.sectionStyles?.contactInfo
+                                  sectionStyles?.contactInfo
                                     ?.iconTextFont || ""
                                 }
                                 onValueChange={(v) =>
@@ -3242,14 +3266,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <div>
                               <Label className="text-white text-xs">
                                 Font Size:{" "}
-                                {watchedValues.sectionStyles?.contactInfo
+                                {sectionStyles?.contactInfo
                                   ?.iconTextSize || 14}
                                 px
                               </Label>
                               <input
                                 type="range"
                                 value={
-                                  watchedValues.sectionStyles?.contactInfo
+                                  sectionStyles?.contactInfo
                                     ?.iconTextSize || 14
                                 }
                                 onChange={(e) =>
@@ -3271,7 +3295,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               </Label>
                               <Select
                                 value={
-                                  watchedValues.sectionStyles?.contactInfo
+                                  sectionStyles?.contactInfo
                                     ?.iconTextWeight || ""
                                 }
                                 onValueChange={(v) =>
@@ -3327,7 +3351,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <Checkbox
                               id="contactDropShadowEnable"
                               checked={
-                                watchedValues.sectionStyles?.contactInfo
+                                sectionStyles?.contactInfo
                                   ?.dropShadowEnabled || false
                               }
                               onCheckedChange={(c) =>
@@ -3346,7 +3370,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             </Label>
                           </div>
 
-                          {watchedValues.sectionStyles?.contactInfo
+                          {sectionStyles?.contactInfo
                             ?.dropShadowEnabled && (
                             <>
                               <div className="grid grid-cols-2 gap-2">
@@ -3358,7 +3382,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <input
                                       type="color"
                                       value={
-                                        watchedValues.sectionStyles?.contactInfo
+                                        sectionStyles?.contactInfo
                                           ?.dropShadowColor || "#000000"
                                       }
                                       onChange={(e) =>
@@ -3372,7 +3396,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     />
                                     <Input
                                       value={
-                                        watchedValues.sectionStyles?.contactInfo
+                                        sectionStyles?.contactInfo
                                           ?.dropShadowColor || "#000000"
                                       }
                                       onChange={(e) =>
@@ -3392,7 +3416,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <Label className="text-white text-xs">
                                     Shadow Opacity:{" "}
                                     {Math.round(
-                                      (watchedValues.sectionStyles?.contactInfo
+                                      (sectionStyles?.contactInfo
                                         ?.dropShadowOpacity || 0.25) * 100,
                                     )}
                                     %
@@ -3400,7 +3424,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <input
                                     type="range"
                                     value={
-                                      (watchedValues.sectionStyles?.contactInfo
+                                      (sectionStyles?.contactInfo
                                         ?.dropShadowOpacity || 0.25) * 100
                                     }
                                     onChange={(e) =>
@@ -3419,14 +3443,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <div>
                                   <Label className="text-white text-xs">
                                     Blur Radius:{" "}
-                                    {watchedValues.sectionStyles?.contactInfo
+                                    {sectionStyles?.contactInfo
                                       ?.dropShadowBlur || 4}
                                     px
                                   </Label>
                                   <input
                                     type="range"
                                     value={
-                                      watchedValues.sectionStyles?.contactInfo
+                                      sectionStyles?.contactInfo
                                         ?.dropShadowBlur || 4
                                     }
                                     onChange={(e) =>
@@ -3445,14 +3469,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <div>
                                   <Label className="text-white text-xs">
                                     Shadow Offset:{" "}
-                                    {watchedValues.sectionStyles?.contactInfo
+                                    {sectionStyles?.contactInfo
                                       ?.dropShadowOffset || 2}
                                     px
                                   </Label>
                                   <input
                                     type="range"
                                     value={
-                                      watchedValues.sectionStyles?.contactInfo
+                                      sectionStyles?.contactInfo
                                         ?.dropShadowOffset || 2
                                     }
                                     onChange={(e) =>
@@ -3495,7 +3519,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <Checkbox
                               id="contactContainerStylingEnable"
                               checked={
-                                watchedValues.sectionStyles?.contactInfo
+                                sectionStyles?.contactInfo
                                   ?.containerStylingEnabled || false
                               }
                               onCheckedChange={(c) =>
@@ -3514,7 +3538,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             </Label>
                           </div>
 
-                          {watchedValues.sectionStyles?.contactInfo
+                          {sectionStyles?.contactInfo
                             ?.containerStylingEnabled && (
                             <>
                               {/* Container Background & Border */}
@@ -3527,7 +3551,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <input
                                       type="color"
                                       value={
-                                        watchedValues.sectionStyles?.contactInfo
+                                        sectionStyles?.contactInfo
                                           ?.containerBackgroundColor ||
                                         "#1e293b"
                                       }
@@ -3542,7 +3566,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     />
                                     <Input
                                       value={
-                                        watchedValues.sectionStyles?.contactInfo
+                                        sectionStyles?.contactInfo
                                           ?.containerBackgroundColor ||
                                         "#1e293b"
                                       }
@@ -3567,7 +3591,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <input
                                       type="color"
                                       value={
-                                        watchedValues.sectionStyles?.contactInfo
+                                        sectionStyles?.contactInfo
                                           ?.containerBorderColor || "#475569"
                                       }
                                       onChange={(e) =>
@@ -3581,7 +3605,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     />
                                     <Input
                                       value={
-                                        watchedValues.sectionStyles?.contactInfo
+                                        sectionStyles?.contactInfo
                                           ?.containerBorderColor || "#475569"
                                       }
                                       onChange={(e) =>
@@ -3603,14 +3627,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <div>
                                   <Label className="text-white text-xs">
                                     Border Radius:{" "}
-                                    {watchedValues.sectionStyles?.contactInfo
+                                    {sectionStyles?.contactInfo
                                       ?.containerBorderRadius || 8}
                                     px
                                   </Label>
                                   <input
                                     type="range"
                                     value={
-                                      watchedValues.sectionStyles?.contactInfo
+                                      sectionStyles?.contactInfo
                                         ?.containerBorderRadius || 8
                                     }
                                     onChange={(e) =>
@@ -3629,14 +3653,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <div>
                                   <Label className="text-white text-xs">
                                     Container Gap:{" "}
-                                    {watchedValues.sectionStyles?.contactInfo
+                                    {sectionStyles?.contactInfo
                                       ?.containerGap || 8}
                                     px
                                   </Label>
                                   <input
                                     type="range"
                                     value={
-                                      watchedValues.sectionStyles?.contactInfo
+                                      sectionStyles?.contactInfo
                                         ?.containerGap || 8
                                     }
                                     onChange={(e) =>
@@ -3657,14 +3681,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <div>
                                   <Label className="text-white text-xs">
                                     Container Width:{" "}
-                                    {watchedValues.sectionStyles?.contactInfo
+                                    {sectionStyles?.contactInfo
                                       ?.containerWidth || 80}
                                     px
                                   </Label>
                                   <input
                                     type="range"
                                     value={
-                                      watchedValues.sectionStyles?.contactInfo
+                                      sectionStyles?.contactInfo
                                         ?.containerWidth || 80
                                     }
                                     onChange={(e) =>
@@ -3683,14 +3707,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <div>
                                   <Label className="text-white text-xs">
                                     Container Height:{" "}
-                                    {watchedValues.sectionStyles?.contactInfo
+                                    {sectionStyles?.contactInfo
                                       ?.containerHeight || 80}
                                     px
                                   </Label>
                                   <input
                                     type="range"
                                     value={
-                                      watchedValues.sectionStyles?.contactInfo
+                                      sectionStyles?.contactInfo
                                         ?.containerHeight || 80
                                     }
                                     onChange={(e) =>
@@ -3713,7 +3737,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <Checkbox
                                     id="containerDropShadowEnable"
                                     checked={
-                                      watchedValues.sectionStyles?.contactInfo
+                                      sectionStyles?.contactInfo
                                         ?.containerDropShadowEnabled || false
                                     }
                                     onCheckedChange={(c) =>
@@ -3732,7 +3756,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   </Label>
                                 </div>
 
-                                {watchedValues.sectionStyles?.contactInfo
+                                {sectionStyles?.contactInfo
                                   ?.containerDropShadowEnabled && (
                                   <>
                                     <div className="grid grid-cols-2 gap-2">
@@ -3744,7 +3768,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                           <input
                                             type="color"
                                             value={
-                                              watchedValues.sectionStyles
+                                              sectionStyles
                                                 ?.contactInfo
                                                 ?.containerDropShadowColor ||
                                               "#000000"
@@ -3760,7 +3784,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                           />
                                           <Input
                                             value={
-                                              watchedValues.sectionStyles
+                                              sectionStyles
                                                 ?.contactInfo
                                                 ?.containerDropShadowColor ||
                                               "#000000"
@@ -3782,7 +3806,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                         <Label className="text-white text-xs">
                                           Shadow Opacity:{" "}
                                           {Math.round(
-                                            (watchedValues.sectionStyles
+                                            (sectionStyles
                                               ?.contactInfo
                                               ?.containerDropShadowOpacity ||
                                               0.25) * 100,
@@ -3792,7 +3816,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                         <input
                                           type="range"
                                           value={
-                                            (watchedValues.sectionStyles
+                                            (sectionStyles
                                               ?.contactInfo
                                               ?.containerDropShadowOpacity ||
                                               0.25) * 100
@@ -3813,7 +3837,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                       <div>
                                         <Label className="text-white text-xs">
                                           Blur Radius:{" "}
-                                          {watchedValues.sectionStyles
+                                          {sectionStyles
                                             ?.contactInfo
                                             ?.containerDropShadowBlur || 4}
                                           px
@@ -3821,7 +3845,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                         <input
                                           type="range"
                                           value={
-                                            watchedValues.sectionStyles
+                                            sectionStyles
                                               ?.contactInfo
                                               ?.containerDropShadowBlur || 4
                                           }
@@ -3841,7 +3865,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                       <div>
                                         <Label className="text-white text-xs">
                                           Shadow Offset:{" "}
-                                          {watchedValues.sectionStyles
+                                          {sectionStyles
                                             ?.contactInfo
                                             ?.containerDropShadowOffset || 2}
                                           px
@@ -3849,7 +3873,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                         <input
                                           type="range"
                                           value={
-                                            watchedValues.sectionStyles
+                                            sectionStyles
                                               ?.contactInfo
                                               ?.containerDropShadowOffset || 2
                                           }
@@ -3886,10 +3910,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 className="hidden rounded-lg p-4 space-y-4"
                 style={{
                   backgroundColor:
-                    watchedValues.sectionStyles?.socialMedia
+                    sectionStyles?.socialMedia
                       ?.sectionBackgroundColor || "rgba(219, 39, 119, 0.3)",
                   borderColor:
-                    watchedValues.sectionStyles?.socialMedia
+                    sectionStyles?.socialMedia
                       ?.sectionBorderColor || "rgba(219, 39, 119, 0.6)",
                   borderWidth: "1px",
                   borderStyle: "solid",
@@ -4076,7 +4100,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.iconColor || "#3b82f6"
                                   }
                                   onChange={(e) =>
@@ -4090,7 +4114,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.iconColor || "#3b82f6"
                                   }
                                   onChange={(e) =>
@@ -4114,7 +4138,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.iconBackgroundColor || "#16a34a"
                                   }
                                   onChange={(e) =>
@@ -4128,7 +4152,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.iconBackgroundColor || "#16a34a"
                                   }
                                   onChange={(e) =>
@@ -4152,7 +4176,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.iconBorderColor || "#475569"
                                   }
                                   onChange={(e) =>
@@ -4166,7 +4190,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.iconBorderColor || "#475569"
                                   }
                                   onChange={(e) =>
@@ -4185,14 +4209,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <div>
                               <Label className="text-white text-xs">
                                 Border Size:{" "}
-                                {watchedValues.sectionStyles?.socialMedia
+                                {sectionStyles?.socialMedia
                                   ?.borderSize || 1}
                                 px
                               </Label>
                               <input
                                 type="range"
                                 value={
-                                  watchedValues.sectionStyles?.socialMedia
+                                  sectionStyles?.socialMedia
                                     ?.borderSize || 1
                                 }
                                 onChange={(e) =>
@@ -4211,14 +4235,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <div>
                               <Label className="text-white text-xs">
                                 Icon Size:{" "}
-                                {watchedValues.sectionStyles?.socialMedia
+                                {sectionStyles?.socialMedia
                                   ?.iconSize || 18}
                                 px
                               </Label>
                               <input
                                 type="range"
                                 value={
-                                  watchedValues.sectionStyles?.socialMedia
+                                  sectionStyles?.socialMedia
                                     ?.iconSize || 18
                                 }
                                 onChange={(e) =>
@@ -4237,14 +4261,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <div>
                               <Label className="text-white text-xs">
                                 Icon Background Size:{" "}
-                                {watchedValues.sectionStyles?.socialMedia
+                                {sectionStyles?.socialMedia
                                   ?.iconBackgroundSize || 40}
                                 px
                               </Label>
                               <input
                                 type="range"
                                 value={
-                                  watchedValues.sectionStyles?.socialMedia
+                                  sectionStyles?.socialMedia
                                     ?.iconBackgroundSize || 40
                                 }
                                 onChange={(e) =>
@@ -4270,7 +4294,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 </Label>
                                 <Select
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.view || "icon-text"
                                   }
                                   onValueChange={(value) =>
@@ -4302,7 +4326,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 </Label>
                                 <Select
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.skin || "flat"
                                   }
                                   onValueChange={(value) =>
@@ -4347,7 +4371,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 </Label>
                                 <Select
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.shape || "rounded"
                                   }
                                   onValueChange={(value) =>
@@ -4383,7 +4407,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 </Label>
                                 <Select
                                   value={String(
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.columns || "auto",
                                   )}
                                   onValueChange={(value) => {
@@ -4421,7 +4445,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 </Label>
                                 <Select
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.alignment || "left"
                                   }
                                   onValueChange={(value) =>
@@ -4472,7 +4496,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             </div>
 
                             {/* Label Toggle - Only show when View is Icon & Text */}
-                            {watchedValues.sectionStyles?.socialMedia?.view ===
+                            {sectionStyles?.socialMedia?.view ===
                               "icon-text" && (
                               <div className="flex items-center justify-between mt-3 p-2 bg-slate-700/50 rounded">
                                 <div>
@@ -4487,7 +4511,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <Checkbox
                                     id="socialShowLabel"
                                     checked={
-                                      watchedValues.sectionStyles?.socialMedia
+                                      sectionStyles?.socialMedia
                                         ?.showLabel !== false
                                     }
                                     onCheckedChange={(checked) =>
@@ -4518,7 +4542,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <div className="flex items-center gap-2">
                                     <Slider
                                       value={[
-                                        watchedValues.sectionStyles?.socialMedia
+                                        sectionStyles?.socialMedia
                                           ?.iconBackgroundWidth || 48,
                                       ]}
                                       onValueChange={(value) =>
@@ -4534,7 +4558,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                       data-testid="slider-social-icon-width"
                                     />
                                     <span className="text-white text-xs w-8">
-                                      {watchedValues.sectionStyles?.socialMedia
+                                      {sectionStyles?.socialMedia
                                         ?.iconBackgroundWidth || 48}
                                     </span>
                                   </div>
@@ -4546,7 +4570,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <div className="flex items-center gap-2">
                                     <Slider
                                       value={[
-                                        watchedValues.sectionStyles?.socialMedia
+                                        sectionStyles?.socialMedia
                                           ?.iconBackgroundHeight || 48,
                                       ]}
                                       onValueChange={(value) =>
@@ -4562,7 +4586,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                       data-testid="slider-social-icon-height"
                                     />
                                     <span className="text-white text-xs w-8">
-                                      {watchedValues.sectionStyles?.socialMedia
+                                      {sectionStyles?.socialMedia
                                         ?.iconBackgroundHeight || 48}
                                     </span>
                                   </div>
@@ -4570,9 +4594,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               </div>
 
                               {/* Text Position - Only show when View includes text */}
-                              {(watchedValues.sectionStyles?.socialMedia
+                              {(sectionStyles?.socialMedia
                                 ?.view === "icon-text" ||
-                                watchedValues.sectionStyles?.socialMedia
+                                sectionStyles?.socialMedia
                                   ?.view === "text") && (
                                 <div>
                                   <Label className="text-white text-xs">
@@ -4580,7 +4604,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   </Label>
                                   <Select
                                     value={
-                                      watchedValues.sectionStyles?.socialMedia
+                                      sectionStyles?.socialMedia
                                         ?.textPosition || "right"
                                     }
                                     onValueChange={(value) =>
@@ -4660,7 +4684,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <input
                               type="checkbox"
                               checked={
-                                watchedValues.sectionStyles?.socialMedia
+                                sectionStyles?.socialMedia
                                   ?.enableHoverColor || false
                               }
                               onChange={(e) =>
@@ -4683,7 +4707,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.iconHoverColor || "#60a5fa"
                                   }
                                   onChange={(e) =>
@@ -4697,7 +4721,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.iconHoverColor || "#60a5fa"
                                   }
                                   onChange={(e) =>
@@ -4721,7 +4745,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.iconBackgroundHoverColor || "#22c55e"
                                   }
                                   onChange={(e) =>
@@ -4735,7 +4759,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 />
                                 <Input
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.iconBackgroundHoverColor || "#22c55e"
                                   }
                                   onChange={(e) =>
@@ -4781,7 +4805,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="color"
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.iconTextColor || "#000000"
                                   }
                                   onChange={(e) =>
@@ -4795,7 +4819,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <input
                                   type="text"
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.iconTextColor || "#000000"
                                   }
                                   onChange={(e) =>
@@ -4816,7 +4840,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               </Label>
                               <Select
                                 value={
-                                  watchedValues.sectionStyles?.socialMedia
+                                  sectionStyles?.socialMedia
                                     ?.iconTextFont || "inherit"
                                 }
                                 onValueChange={(v) =>
@@ -4860,14 +4884,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <div>
                               <Label className="text-white text-xs">
                                 Font Size:{" "}
-                                {watchedValues.sectionStyles?.socialMedia
+                                {sectionStyles?.socialMedia
                                   ?.iconTextSize || 14}
                                 px
                               </Label>
                               <input
                                 type="range"
                                 value={
-                                  watchedValues.sectionStyles?.socialMedia
+                                  sectionStyles?.socialMedia
                                     ?.iconTextSize || 14
                                 }
                                 onChange={(e) =>
@@ -4889,7 +4913,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               </Label>
                               <Select
                                 value={
-                                  watchedValues.sectionStyles?.socialMedia
+                                  sectionStyles?.socialMedia
                                     ?.iconTextWeight || "400"
                                 }
                                 onValueChange={(v) =>
@@ -4921,7 +4945,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               </Label>
                               <Select
                                 value={
-                                  watchedValues.sectionStyles?.socialMedia
+                                  sectionStyles?.socialMedia
                                     ?.iconTextStyle || "normal"
                                 }
                                 onValueChange={(v) =>
@@ -4966,7 +4990,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <Checkbox
                               id="socialDropShadowEnable"
                               checked={
-                                watchedValues.sectionStyles?.socialMedia
+                                sectionStyles?.socialMedia
                                   ?.dropShadowEnabled || false
                               }
                               onCheckedChange={(checked) =>
@@ -4985,7 +5009,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             </Label>
                           </div>
 
-                          {watchedValues.sectionStyles?.socialMedia
+                          {sectionStyles?.socialMedia
                             ?.dropShadowEnabled && (
                             <>
                               <div className="grid grid-cols-2 gap-2">
@@ -4997,7 +5021,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <input
                                       type="color"
                                       value={
-                                        watchedValues.sectionStyles?.socialMedia
+                                        sectionStyles?.socialMedia
                                           ?.dropShadowColor || "#000000"
                                       }
                                       onChange={(e) =>
@@ -5011,7 +5035,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <input
                                       type="text"
                                       value={
-                                        watchedValues.sectionStyles?.socialMedia
+                                        sectionStyles?.socialMedia
                                           ?.dropShadowColor || "#000000"
                                       }
                                       onChange={(e) =>
@@ -5030,7 +5054,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <Label className="text-white text-xs">
                                     Opacity:{" "}
                                     {Math.round(
-                                      (watchedValues.sectionStyles?.socialMedia
+                                      (sectionStyles?.socialMedia
                                         ?.dropShadowOpacity || 0.25) * 100,
                                     )}
                                     %
@@ -5038,7 +5062,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <input
                                     type="range"
                                     value={
-                                      watchedValues.sectionStyles?.socialMedia
+                                      sectionStyles?.socialMedia
                                         ?.dropShadowOpacity || 0.25
                                     }
                                     onChange={(e) =>
@@ -5060,14 +5084,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <div>
                                   <Label className="text-white text-xs">
                                     Blur:{" "}
-                                    {watchedValues.sectionStyles?.socialMedia
+                                    {sectionStyles?.socialMedia
                                       ?.dropShadowBlur || 4}
                                     px
                                   </Label>
                                   <input
                                     type="range"
                                     value={
-                                      watchedValues.sectionStyles?.socialMedia
+                                      sectionStyles?.socialMedia
                                         ?.dropShadowBlur || 4
                                     }
                                     onChange={(e) =>
@@ -5086,14 +5110,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <div>
                                   <Label className="text-white text-xs">
                                     Offset:{" "}
-                                    {watchedValues.sectionStyles?.socialMedia
+                                    {sectionStyles?.socialMedia
                                       ?.dropShadowOffset || 2}
                                     px
                                   </Label>
                                   <input
                                     type="range"
                                     value={
-                                      watchedValues.sectionStyles?.socialMedia
+                                      sectionStyles?.socialMedia
                                         ?.dropShadowOffset || 2
                                     }
                                     onChange={(e) =>
@@ -5136,7 +5160,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             <Checkbox
                               id="socialContainerStylingEnable"
                               checked={
-                                watchedValues.sectionStyles?.socialMedia
+                                sectionStyles?.socialMedia
                                   ?.containerStylingEnabled || false
                               }
                               onCheckedChange={(checked) =>
@@ -5155,7 +5179,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             </Label>
                           </div>
 
-                          {watchedValues.sectionStyles?.socialMedia
+                          {sectionStyles?.socialMedia
                             ?.containerStylingEnabled && (
                             <>
                               {/* Container Background & Border */}
@@ -5168,7 +5192,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <input
                                       type="color"
                                       value={
-                                        watchedValues.sectionStyles?.socialMedia
+                                        sectionStyles?.socialMedia
                                           ?.containerBackgroundColor ||
                                         "#ffffff"
                                       }
@@ -5183,7 +5207,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <input
                                       type="text"
                                       value={
-                                        watchedValues.sectionStyles?.socialMedia
+                                        sectionStyles?.socialMedia
                                           ?.containerBackgroundColor ||
                                         "#ffffff"
                                       }
@@ -5207,7 +5231,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <input
                                       type="color"
                                       value={
-                                        watchedValues.sectionStyles?.socialMedia
+                                        sectionStyles?.socialMedia
                                           ?.containerBorderColor || "#e5e7eb"
                                       }
                                       onChange={(e) =>
@@ -5221,7 +5245,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     <input
                                       type="text"
                                       value={
-                                        watchedValues.sectionStyles?.socialMedia
+                                        sectionStyles?.socialMedia
                                           ?.containerBorderColor || "#e5e7eb"
                                       }
                                       onChange={(e) =>
@@ -5242,14 +5266,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <div>
                                   <Label className="text-white text-xs">
                                     Border Radius:{" "}
-                                    {watchedValues.sectionStyles?.socialMedia
+                                    {sectionStyles?.socialMedia
                                       ?.containerBorderRadius || 8}
                                     px
                                   </Label>
                                   <input
                                     type="range"
                                     value={
-                                      watchedValues.sectionStyles?.socialMedia
+                                      sectionStyles?.socialMedia
                                         ?.containerBorderRadius || 8
                                     }
                                     onChange={(e) =>
@@ -5268,14 +5292,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <div>
                                   <Label className="text-white text-xs">
                                     Container Width:{" "}
-                                    {watchedValues.sectionStyles?.socialMedia
+                                    {sectionStyles?.socialMedia
                                       ?.containerWidth || 100}
                                     %
                                   </Label>
                                   <input
                                     type="range"
                                     value={
-                                      watchedValues.sectionStyles?.socialMedia
+                                      sectionStyles?.socialMedia
                                         ?.containerWidth || 100
                                     }
                                     onChange={(e) =>
@@ -5294,14 +5318,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 <div>
                                   <Label className="text-white text-xs">
                                     Container Height:{" "}
-                                    {watchedValues.sectionStyles?.socialMedia
+                                    {sectionStyles?.socialMedia
                                       ?.containerHeight || 60}
                                     px
                                   </Label>
                                   <input
                                     type="range"
                                     value={
-                                      watchedValues.sectionStyles?.socialMedia
+                                      sectionStyles?.socialMedia
                                         ?.containerHeight || 60
                                     }
                                     onChange={(e) =>
@@ -5321,14 +5345,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               <div>
                                 <Label className="text-white text-xs">
                                   Container Gap:{" "}
-                                  {watchedValues.sectionStyles?.socialMedia
+                                  {sectionStyles?.socialMedia
                                     ?.containerGap || 12}
                                   px
                                 </Label>
                                 <input
                                   type="range"
                                   value={
-                                    watchedValues.sectionStyles?.socialMedia
+                                    sectionStyles?.socialMedia
                                       ?.containerGap || 12
                                   }
                                   onChange={(e) =>
@@ -5350,7 +5374,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   <Checkbox
                                     id="socialContainerDropShadowEnable"
                                     checked={
-                                      watchedValues.sectionStyles?.socialMedia
+                                      sectionStyles?.socialMedia
                                         ?.containerDropShadowEnabled || false
                                     }
                                     onCheckedChange={(checked) =>
@@ -5369,7 +5393,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   </Label>
                                 </div>
 
-                                {watchedValues.sectionStyles?.socialMedia
+                                {sectionStyles?.socialMedia
                                   ?.containerDropShadowEnabled && (
                                   <>
                                     <div className="grid grid-cols-2 gap-2">
@@ -5381,7 +5405,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                           <input
                                             type="color"
                                             value={
-                                              watchedValues.sectionStyles
+                                              sectionStyles
                                                 ?.socialMedia
                                                 ?.containerDropShadowColor ||
                                               "#000000"
@@ -5397,7 +5421,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                           <input
                                             type="text"
                                             value={
-                                              watchedValues.sectionStyles
+                                              sectionStyles
                                                 ?.socialMedia
                                                 ?.containerDropShadowColor ||
                                               "#000000"
@@ -5418,7 +5442,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                         <Label className="text-white text-xs">
                                           Opacity:{" "}
                                           {Math.round(
-                                            (watchedValues.sectionStyles
+                                            (sectionStyles
                                               ?.socialMedia
                                               ?.containerDropShadowOpacity ||
                                               0.1) * 100,
@@ -5428,7 +5452,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                         <input
                                           type="range"
                                           value={
-                                            watchedValues.sectionStyles
+                                            sectionStyles
                                               ?.socialMedia
                                               ?.containerDropShadowOpacity ||
                                             0.1
@@ -5452,7 +5476,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                       <div>
                                         <Label className="text-white text-xs">
                                           Blur:{" "}
-                                          {watchedValues.sectionStyles
+                                          {sectionStyles
                                             ?.socialMedia
                                             ?.containerDropShadowBlur || 8}
                                           px
@@ -5460,7 +5484,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                         <input
                                           type="range"
                                           value={
-                                            watchedValues.sectionStyles
+                                            sectionStyles
                                               ?.socialMedia
                                               ?.containerDropShadowBlur || 8
                                           }
@@ -5480,7 +5504,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                       <div>
                                         <Label className="text-white text-xs">
                                           Offset:{" "}
-                                          {watchedValues.sectionStyles
+                                          {sectionStyles
                                             ?.socialMedia
                                             ?.containerDropShadowOffset || 2}
                                           px
@@ -5488,7 +5512,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                         <input
                                           type="range"
                                           value={
-                                            watchedValues.sectionStyles
+                                            sectionStyles
                                               ?.socialMedia
                                               ?.containerDropShadowOffset || 2
                                           }
@@ -5558,7 +5582,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 data-testid="input-primary-color"
                               />
                               <span className="text-xs text-gray-400">
-                                {watchedValues.brandColor || "#54C5BC"}
+                                {form.watch("brandColor") || "#54C5BC"}
                               </span>
                             </div>
                           </div>
@@ -5575,7 +5599,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 data-testid="input-secondary-color"
                               />
                               <span className="text-xs text-gray-400">
-                                {watchedValues.secondaryColor || "#999999"}
+                                {secondaryColor || "#999999"}
                               </span>
                             </div>
                           </div>
@@ -5592,7 +5616,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 data-testid="input-tertiary-color"
                               />
                               <span className="text-xs text-gray-400">
-                                {watchedValues.tertiaryColor || "#FFFFFF"}
+                                {tertiaryColor || "#FFFFFF"}
                               </span>
                             </div>
                           </div>
@@ -5621,7 +5645,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               Content
                             </Label>
                             <Select
-                              value={watchedValues.backgroundType || "color"}
+                              value={backgroundType || "color"}
                               onValueChange={(v) =>
                                 form.setValue("backgroundType", v)
                               }
@@ -5651,7 +5675,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 data-testid="input-background-color"
                               />
                               <span className="text-xs text-gray-400">
-                                {watchedValues.backgroundColor || "#FFFFFF"}
+                                {form.watch("backgroundColor") || "#FFFFFF"}
                               </span>
                             </div>
                           </div>
@@ -5727,7 +5751,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 Content
                               </Label>
                               <Select
-                                value={watchedValues.backgroundType || "color"}
+                                value={backgroundType || "color"}
                                 onValueChange={(v) =>
                                   form.setValue("backgroundType", v)
                                 }
@@ -5757,13 +5781,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   data-testid="input-background-color"
                                 />
                                 <span className="text-xs text-gray-400">
-                                  {watchedValues.backgroundColor || "#FFFFFF"}
+                                  {form.watch("backgroundColor") || "#FFFFFF"}
                                 </span>
                               </div>
                             </div>
                           </div>
 
-                          {watchedValues.backgroundType === "image" && (
+                          {backgroundType === "image" && (
                             <div>
                               <Label className="text-white text-sm">
                                 Background Image
@@ -5779,7 +5803,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   className="bg-slate-700 border-slate-600 text-white flex-1"
                                   data-testid="input-background-image"
                                 />
-                                {watchedValues.backgroundImage && (
+                                {backgroundImage && (
                                   <Button
                                     type="button"
                                     variant="outline"
@@ -5793,10 +5817,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                   </Button>
                                 )}
                               </div>
-                              {watchedValues.backgroundImage && (
+                              {backgroundImage && (
                                 <div className="mt-2">
                                   <img
-                                    src={watchedValues.backgroundImage}
+                                    src={backgroundImage}
                                     alt="Background Preview"
                                     className="w-full max-w-xs h-auto rounded border border-slate-600"
                                   />
@@ -5818,7 +5842,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               Animation Type
                             </Label>
                             <Select
-                              value={watchedValues.animationType || "none"}
+                              value={animationType || "none"}
                               onValueChange={(v) =>
                                 form.setValue("animationType", v)
                               }
@@ -5865,7 +5889,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <div>
                             <Label className="text-white text-sm">Font</Label>
                             <Select
-                              value={watchedValues.headingFont || "inter"}
+                              value={headingFont || "inter"}
                               onValueChange={(v) =>
                                 form.setValue("headingFont", v)
                               }
@@ -5982,7 +6006,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <div>
                             <Label className="text-white text-sm">Weight</Label>
                             <Select
-                              value={`${watchedValues.headingFontWeight || 600}`}
+                              value={`${headingFontWeight || 600}`}
                               onValueChange={(v) =>
                                 form.setValue("headingFontWeight", parseInt(v))
                               }
@@ -6008,7 +6032,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 type="range"
                                 min="12"
                                 max="40"
-                                value={watchedValues.headingFontSize || 24}
+                                value={headingFontSize || 24}
                                 onChange={(e) =>
                                   form.setValue(
                                     "headingFontSize",
@@ -6018,7 +6042,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 className="flex-1 h-1 bg-slate-600 rounded-lg appearance-none slider"
                               />
                               <span className="text-xs text-gray-400 w-6">
-                                {watchedValues.headingFontSize || 24}
+                                {headingFontSize || 24}
                               </span>
                             </div>
                           </div>
@@ -6035,7 +6059,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 data-testid="input-heading-color"
                               />
                               <span className="text-xs text-gray-400">
-                                {watchedValues.headingColor || "#000000"}
+                                {form.watch("headingColor") || "#000000"}
                               </span>
                             </div>
                           </div>
@@ -6051,7 +6075,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <div>
                             <Label className="text-white text-sm">Font</Label>
                             <Select
-                              value={watchedValues.paragraphFont || "inter"}
+                              value={paragraphFont || "inter"}
                               onValueChange={(v) =>
                                 form.setValue("paragraphFont", v)
                               }
@@ -6168,7 +6192,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           <div>
                             <Label className="text-white text-sm">Weight</Label>
                             <Select
-                              value={`${watchedValues.paragraphFontWeight || 400}`}
+                              value={`${paragraphFontWeight || 400}`}
                               onValueChange={(v) =>
                                 form.setValue(
                                   "paragraphFontWeight",
@@ -6197,7 +6221,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 type="range"
                                 min="10"
                                 max="24"
-                                value={watchedValues.paragraphFontSize || 14}
+                                value={paragraphFontSize || 14}
                                 onChange={(e) =>
                                   form.setValue(
                                     "paragraphFontSize",
@@ -6207,7 +6231,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 className="flex-1 h-1 bg-slate-600 rounded-lg appearance-none slider"
                               />
                               <span className="text-xs text-gray-400 w-6">
-                                {watchedValues.paragraphFontSize || 14}
+                                {paragraphFontSize || 14}
                               </span>
                             </div>
                           </div>
@@ -6224,7 +6248,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                 data-testid="input-paragraph-color"
                               />
                               <span className="text-xs text-gray-400">
-                                {watchedValues.paragraphColor || "#000000"}
+                                {form.watch("paragraphColor") || "#000000"}
                               </span>
                             </div>
                           </div>
@@ -6317,7 +6341,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             className="bg-slate-700 border-slate-600 text-white flex-1"
                             data-testid="input-og-image"
                           />
-                          {watchedValues.ogImage && (
+                          {ogImage && (
                             <Button
                               type="button"
                               variant="outline"
@@ -6329,10 +6353,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             </Button>
                           )}
                         </div>
-                        {watchedValues.ogImage && (
+                        {ogImage && (
                           <div className="mt-2">
                             <img
-                              src={watchedValues.ogImage}
+                              src={ogImage}
                               alt="OG Preview"
                               className="w-full max-w-xs h-auto rounded border border-slate-600"
                             />
@@ -6347,7 +6371,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             id="noIndex"
-                            checked={watchedValues.noIndex || false}
+                            checked={noIndex || false}
                             onCheckedChange={(checked) =>
                               form.setValue("noIndex", !!checked)
                             }
@@ -6364,7 +6388,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             id="noFollow"
-                            checked={watchedValues.noFollow || false}
+                            checked={noFollow || false}
                             onCheckedChange={(checked) =>
                               form.setValue("noFollow", !!checked)
                             }
@@ -6407,7 +6431,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     type="button"
                     onClick={() => {
                       const newPageId = `page-${Date.now()}`;
-                      const currentPages = (watchedValues as any).pages || [];
+                      const currentPages = pages || [];
                       const pageNumber =
                         currentPages.filter((p: any) => p.key !== "home")
                           .length + 1;
@@ -6433,7 +6457,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
                 {/* Page Toggles/Tabs */}
                 <div className="flex flex-wrap gap-2">
-                  {(((watchedValues as any).pages as any[]) || [])
+                  {((pages as any[]) || [])
                     .filter((page: any) => page.key !== "home")
                     .map((page: any, index: number) => (
                       <div key={page.id} className="relative group">
@@ -6453,7 +6477,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             onChange={(e) => {
                               e.stopPropagation();
                               const currentPages =
-                                ((watchedValues as any).pages as any[]) || [];
+                                (pages as any[]) || [];
                               const updatedPages = currentPages.map((p: any) =>
                                 p.id === page.id
                                   ? { ...p, label: e.target.value }
@@ -6480,7 +6504,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                           onClick={(e) => {
                             e.stopPropagation();
                             const currentPages =
-                              ((watchedValues as any).pages as any[]) || [];
+                              (pages as any[]) || [];
                             const updatedPages = currentPages.filter(
                               (p) => p.id !== page.id,
                             );
@@ -6505,7 +6529,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 </div>
 
                 {/* Current Page Info */}
-                {(((watchedValues as any).pages as any[]) || []).filter(
+                {((pages as any[]) || []).filter(
                   (page: any) => page.key !== "home",
                 ).length === 0 ? (
                   <div className="bg-blue-800/30 p-4 rounded border border-blue-600/50 text-center">
@@ -6520,7 +6544,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                     </div>
                   </div>
                 ) : selectedPageId &&
-                  ((watchedValues as any).pages || []).find(
+                  (pages || []).find(
                     (p: any) => p.id === selectedPageId,
                   ) ? (
                   <div className="bg-blue-800/30 p-3 rounded border border-blue-600/50">
@@ -6529,7 +6553,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                         <i className="fas fa-paint-brush text-blue-300"></i>
                         <div className="text-sm text-blue-200">
                           <strong>Editing:</strong>{" "}
-                          {((watchedValues as any).pages || []).find(
+                          {(pages || []).find(
                             (p: any) => p.id === selectedPageId,
                           )?.label || "Untitled Page"}
                         </div>
@@ -6552,7 +6576,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 onElementsChange={(elements: PageElement[]) => {
                   form.setValue("pageElements", elements);
                 }}
-                cardData={watchedValues}
+                cardData={form.watch()}
                 onNavigatePage={setSelectedPageId}
               />
             </div>
@@ -6560,7 +6584,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
 
           {builderMode === "page" && (
             <div className="bg-teal-900/30 border border-teal-600/30 rounded-lg p-4 space-y-4">
-              {(((watchedValues as any).pages as any[]) || []).filter(
+              {((pages as any[]) || []).filter(
                 (page: any) => page.key !== "home",
               ).length === 0 ? (
                 <div className="text-center py-8">
@@ -6579,7 +6603,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       type="button"
                       onClick={() => {
                         const newPageId = `page-${Date.now()}`;
-                        const currentPages = (watchedValues as any).pages || [];
+                        const currentPages = pages || [];
                         const pageNumber =
                           currentPages.filter((p: any) => p.key !== "home")
                             .length + 1;
@@ -6605,7 +6629,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   </div>
                 </div>
               ) : selectedPageId &&
-                ((watchedValues as any).pages || []).find(
+                (pages || []).find(
                   (p: any) => p.id === selectedPageId,
                 ) ? (
                 <PageBuilder
