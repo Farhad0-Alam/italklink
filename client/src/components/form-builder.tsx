@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
@@ -224,8 +224,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const memoizedOnDataChange = useCallback(onDataChange, []);
 
   // Helper function to get elements for a specific page
-  const getPageElements = (pageId: string) => {
-    const pages = (form.watch() as any).pages || [
+  const getPageElements = useCallback((pageId: string) => {
+    const currentPages = (pages as any[]) || [
       {
         id: "home",
         key: "home",
@@ -235,26 +235,31 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
         elements: [],
       },
     ];
-    const page = pages.find((p: any) => p.id === pageId);
+    const page = currentPages.find((p: any) => p.id === pageId);
     return page?.elements || [];
-  };
+  }, [pages]);
+
+  // Watch all form data to ensure re-renders when values change
+  const allFormData = useWatch({ control: form.control });
 
   // Add preview mode info to card data without triggering infinite loops
-  const enhancedCardData = {
-    ...form.watch(),
-    currentPreviewMode: builderMode,
-    currentSelectedPage:
-      builderMode === "page" && selectedPageId
-        ? {
-            id: selectedPageId,
-            label:
-              ((form.watch() as any).pages || []).find(
-                (p: any) => p.id === selectedPageId,
-              )?.label || "Page",
-            elements: getPageElements(selectedPageId),
-          }
-        : null,
-  };
+  const enhancedCardData = useMemo(() => {
+    return {
+      ...allFormData,
+      currentPreviewMode: builderMode,
+      currentSelectedPage:
+        builderMode === "page" && selectedPageId
+          ? {
+              id: selectedPageId,
+              label:
+                ((pages as any[]) || []).find(
+                  (p: any) => p.id === selectedPageId,
+                )?.label || "Page",
+              elements: getPageElements(selectedPageId),
+            }
+          : null,
+    };
+  }, [allFormData, builderMode, selectedPageId, pages, getPageElements]);
 
   // Helper function to update elements for a specific page
   const updatePageElements = (pageId: string, elements: PageElement[]) => {
