@@ -1745,7 +1745,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                   </h4>
                   
                   {/* Colors */}
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-xs text-gray-400 block mb-1">Title Color</label>
                       <input
@@ -1799,6 +1799,79 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                           Reset
                         </button>
                       )}
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">Background Color</label>
+                      <input
+                        type="color"
+                        value={element.data?.backgroundColor || cardData?.backgroundColor || "#ffffff"}
+                        onChange={(e) => handleDataUpdate({ ...element.data, backgroundColor: e.target.value })}
+                        className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                      />
+                      {element.data?.backgroundColor && (
+                        <button
+                          onClick={() => handleDataUpdate({ ...element.data, backgroundColor: undefined })}
+                          className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
+                        >
+                          <i className="fas fa-undo mr-1"></i>
+                          Reset
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Border Width */}
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">
+                      Border Width: {element.data.borderWidth !== undefined ? element.data.borderWidth : 1}px
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="5"
+                      value={element.data.borderWidth !== undefined ? element.data.borderWidth : 1}
+                      onChange={(e) => handleDataUpdate({ ...element.data, borderWidth: Number(e.target.value) })}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Shape */}
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">Shape</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => handleDataUpdate({ ...element.data, shape: "rounded" })}
+                        className={`px-3 py-2 text-xs rounded transition-colors ${
+                          (element.data?.shape || "rounded") === "rounded" 
+                            ? "bg-talklink-500 text-white" 
+                            : "bg-slate-600 text-gray-300 hover:bg-slate-500"
+                        }`}
+                      >
+                        <i className="fas fa-square mr-1" style={{ borderRadius: "4px" }}></i>
+                        Rounded
+                      </button>
+                      <button
+                        onClick={() => handleDataUpdate({ ...element.data, shape: "square" })}
+                        className={`px-3 py-2 text-xs transition-colors ${
+                          element.data?.shape === "square" 
+                            ? "bg-talklink-500 text-white" 
+                            : "bg-slate-600 text-gray-300 hover:bg-slate-500"
+                        }`}
+                      >
+                        <i className="fas fa-square mr-1"></i>
+                        Square
+                      </button>
+                      <button
+                        onClick={() => handleDataUpdate({ ...element.data, shape: "circle" })}
+                        className={`px-3 py-2 text-xs rounded-full transition-colors ${
+                          element.data?.shape === "circle" 
+                            ? "bg-talklink-500 text-white" 
+                            : "bg-slate-600 text-gray-300 hover:bg-slate-500"
+                        }`}
+                      >
+                        <i className="fas fa-circle mr-1"></i>
+                        Circle
+                      </button>
                     </div>
                   </div>
 
@@ -1854,24 +1927,46 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                   const titleColor = element.data?.titleColor || cardData?.brandColor || "#0f0f0f";
                   const contentColor = element.data?.contentColor || cardData?.secondaryColor || "#525252";
                   const borderColor = element.data?.borderColor || cardData?.tertiaryColor || "#e2e8f0";
+                  const backgroundColor = element.data?.backgroundColor || cardData?.backgroundColor || "#ffffff";
                   const shadowIntensity = element.data?.shadowIntensity ?? 2;
                   const titleFontSize = element.data?.titleFontSize ?? 16;
                   const contentFontSize = element.data?.contentFontSize ?? 14;
+                  const borderWidth = element.data.borderWidth !== undefined ? element.data.borderWidth : 1;
+                  const shape = element.data?.shape || "rounded";
+                  
+                  const getBorderRadius = () => {
+                    switch(shape) {
+                      case "square": return "0px";
+                      case "circle": return "999px";
+                      case "rounded":
+                      default: return "8px";
+                    }
+                  };
                   
                   return (
                     <details 
                       key={item.id} 
-                      className="bg-white rounded-lg"
                       style={{
-                        border: `1px solid ${borderColor}`,
-                        boxShadow: shadowIntensity > 0 ? `0 ${shadowIntensity}px ${shadowIntensity * 2}px rgba(0,0,0,${shadowIntensity * 0.05})` : 'none'
-                      }}
+                        backgroundColor,
+                        border: borderWidth > 0 ? `${borderWidth}px solid ${borderColor}` : 'none',
+                        borderRadius: getBorderRadius(),
+                        boxShadow: shadowIntensity > 0 ? `0 ${shadowIntensity}px ${shadowIntensity * 2}px rgba(0,0,0,${shadowIntensity * 0.05})` : 'none',
+                        outline: 'none',
+                        ...(borderWidth === 0 ? {
+                          borderBlockStart: 'none',
+                          borderBlockEnd: 'none',
+                          borderInlineStart: 'none',
+                          borderInlineEnd: 'none'
+                        } : {})
+                      } as React.CSSProperties}
                     >
                       <summary 
-                        className="cursor-pointer p-3 font-medium hover:bg-slate-50 rounded-lg flex items-center justify-between"
+                        className="cursor-pointer p-3 font-medium hover:opacity-80 flex items-center justify-between"
                         style={{
                           color: titleColor,
-                          fontSize: `${titleFontSize}px`
+                          fontSize: `${titleFontSize}px`,
+                          borderRadius: getBorderRadius(),
+                          borderBottom: borderWidth > 0 ? `${borderWidth}px solid ${borderColor}` : 'none'
                         }}
                       >
                         <span>{item.title}</span>

@@ -2996,9 +2996,12 @@ export const accordionElementSchema = baseElementSchema.extend({
     titleColor: z.string().optional(),
     contentColor: z.string().optional(),
     borderColor: z.string().optional(),
-    shadowIntensity: z.number().optional().default(2),
-    titleFontSize: z.number().optional().default(16),
-    contentFontSize: z.number().optional().default(14),
+    backgroundColor: z.string().optional(),
+    shadowIntensity: z.number().optional(),
+    titleFontSize: z.number().optional(),
+    contentFontSize: z.number().optional(),
+    borderWidth: z.number().optional(),
+    shape: z.enum(["rounded", "square", "circle"]).optional(),
   }),
 });
 
