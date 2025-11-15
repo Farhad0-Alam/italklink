@@ -1677,76 +1677,218 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
         return (
           <div className="mb-4">
             {isEditing ? (
-              <div className="space-y-2">
-                {element.data.items.map((item, index) => (
-                  <div key={item.id} className="bg-slate-600 p-3 rounded">
-                    <Input
-                      value={item.title}
-                      onChange={(e) => {
-                        const newItems = [...element.data.items];
-                        newItems[index] = { ...item, title: e.target.value };
-                        handleDataUpdate({ items: newItems });
-                      }}
-                      className="bg-slate-700 border-slate-600 text-white mb-2"
-                      placeholder="Question title"
-                    />
-                    <Textarea
-                      value={item.content}
-                      onChange={(e) => {
-                        const newItems = [...element.data.items];
-                        newItems[index] = { ...item, content: e.target.value };
-                        handleDataUpdate({ items: newItems });
-                      }}
-                      className="bg-slate-700 border-slate-600 text-white"
-                      placeholder="Answer content"
-                      rows={2}
-                    />
-                    {element.data.items.length > 1 && (
-                      <Button
-                        onClick={() => {
-                          const newItems = element.data.items.filter((_, i) => i !== index);
+              <div className="space-y-4">
+                {/* Items */}
+                <div className="space-y-2">
+                  {element.data.items.map((item, index) => (
+                    <div key={item.id} className="bg-slate-600 p-3 rounded">
+                      <Input
+                        value={item.title}
+                        onChange={(e) => {
+                          const newItems = [...element.data.items];
+                          newItems[index] = { ...item, title: e.target.value };
                           handleDataUpdate({ items: newItems });
                         }}
-                        variant="destructive"
-                        size="sm"
-                        className="mt-2"
-                      >
-                        <i className="fas fa-trash mr-1"></i>
-                        Remove
-                      </Button>
-                    )}
+                        className="bg-slate-700 border-slate-600 text-white mb-2"
+                        placeholder="Question title"
+                      />
+                      <Textarea
+                        value={item.content}
+                        onChange={(e) => {
+                          const newItems = [...element.data.items];
+                          newItems[index] = { ...item, content: e.target.value };
+                          handleDataUpdate({ items: newItems });
+                        }}
+                        className="bg-slate-700 border-slate-600 text-white"
+                        placeholder="Answer content"
+                        rows={2}
+                      />
+                      {element.data.items.length > 1 && (
+                        <Button
+                          onClick={() => {
+                            const newItems = element.data.items.filter((_, i) => i !== index);
+                            handleDataUpdate({ items: newItems });
+                          }}
+                          variant="destructive"
+                          size="sm"
+                          className="mt-2"
+                        >
+                          <i className="fas fa-trash mr-1"></i>
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  <Button
+                    onClick={() => {
+                      const newItem = {
+                        id: Math.random().toString(36).substring(7),
+                        title: "New Question",
+                        content: "New Answer"
+                      };
+                      handleDataUpdate({ items: [...element.data.items, newItem] });
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                  >
+                    <i className="fas fa-plus mr-1"></i>
+                    Add Item
+                  </Button>
+                </div>
+
+                {/* Styling Section */}
+                <div className="bg-slate-700 p-3 rounded space-y-3">
+                  <h4 className="text-white text-sm font-medium flex items-center gap-2">
+                    <i className="fas fa-palette"></i>
+                    Styling
+                  </h4>
+                  
+                  {/* Colors */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">Title Color</label>
+                      <input
+                        type="color"
+                        value={element.data?.titleColor || cardData?.brandColor || "#0f0f0f"}
+                        onChange={(e) => handleDataUpdate({ ...element.data, titleColor: e.target.value })}
+                        className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                      />
+                      {element.data?.titleColor && (
+                        <button
+                          onClick={() => handleDataUpdate({ ...element.data, titleColor: undefined })}
+                          className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
+                        >
+                          <i className="fas fa-undo mr-1"></i>
+                          Reset
+                        </button>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">Content Color</label>
+                      <input
+                        type="color"
+                        value={element.data?.contentColor || cardData?.secondaryColor || "#525252"}
+                        onChange={(e) => handleDataUpdate({ ...element.data, contentColor: e.target.value })}
+                        className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                      />
+                      {element.data?.contentColor && (
+                        <button
+                          onClick={() => handleDataUpdate({ ...element.data, contentColor: undefined })}
+                          className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
+                        >
+                          <i className="fas fa-undo mr-1"></i>
+                          Reset
+                        </button>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">Border Color</label>
+                      <input
+                        type="color"
+                        value={element.data?.borderColor || cardData?.tertiaryColor || "#e2e8f0"}
+                        onChange={(e) => handleDataUpdate({ ...element.data, borderColor: e.target.value })}
+                        className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                      />
+                      {element.data?.borderColor && (
+                        <button
+                          onClick={() => handleDataUpdate({ ...element.data, borderColor: undefined })}
+                          className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
+                        >
+                          <i className="fas fa-undo mr-1"></i>
+                          Reset
+                        </button>
+                      )}
+                    </div>
                   </div>
-                ))}
-                <Button
-                  onClick={() => {
-                    const newItem = {
-                      id: Math.random().toString(36).substring(7),
-                      title: "New Question",
-                      content: "New Answer"
-                    };
-                    handleDataUpdate({ items: [...element.data.items, newItem] });
-                  }}
-                  variant="outline"
-                  size="sm"
-                  className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
-                >
-                  <i className="fas fa-plus mr-1"></i>
-                  Add Item
-                </Button>
+
+                  {/* Shadow Intensity */}
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">
+                      Shadow Intensity: {element.data.shadowIntensity !== undefined ? element.data.shadowIntensity : 2}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="10"
+                      value={element.data.shadowIntensity !== undefined ? element.data.shadowIntensity : 2}
+                      onChange={(e) => handleDataUpdate({ ...element.data, shadowIntensity: Number(e.target.value) })}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Font Sizes */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">
+                        Title Size: {element.data.titleFontSize !== undefined ? element.data.titleFontSize : 16}px
+                      </label>
+                      <input
+                        type="range"
+                        min="12"
+                        max="24"
+                        value={element.data.titleFontSize !== undefined ? element.data.titleFontSize : 16}
+                        onChange={(e) => handleDataUpdate({ ...element.data, titleFontSize: Number(e.target.value) })}
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">
+                        Content Size: {element.data.contentFontSize !== undefined ? element.data.contentFontSize : 14}px
+                      </label>
+                      <input
+                        type="range"
+                        min="10"
+                        max="20"
+                        value={element.data.contentFontSize !== undefined ? element.data.contentFontSize : 14}
+                        onChange={(e) => handleDataUpdate({ ...element.data, contentFontSize: Number(e.target.value) })}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="space-y-2">
-                {element.data.items.map((item) => (
-                  <details key={item.id} className="bg-slate-50 rounded-lg border border-slate-200">
-                    <summary className="cursor-pointer p-3 font-medium text-slate-800 hover:bg-slate-100 rounded-lg flex items-center justify-between">
-                      <span>{item.title}</span>
-                      <i className="fas fa-chevron-down text-xs text-slate-500"></i>
-                    </summary>
-                    <div className="p-3 pt-0 text-slate-600 text-sm leading-relaxed">
-                      {item.content}
-                    </div>
-                  </details>
-                ))}
+                {element.data.items.map((item) => {
+                  const titleColor = element.data?.titleColor || cardData?.brandColor || "#0f0f0f";
+                  const contentColor = element.data?.contentColor || cardData?.secondaryColor || "#525252";
+                  const borderColor = element.data?.borderColor || cardData?.tertiaryColor || "#e2e8f0";
+                  const shadowIntensity = element.data?.shadowIntensity ?? 2;
+                  const titleFontSize = element.data?.titleFontSize ?? 16;
+                  const contentFontSize = element.data?.contentFontSize ?? 14;
+                  
+                  return (
+                    <details 
+                      key={item.id} 
+                      className="bg-white rounded-lg"
+                      style={{
+                        border: `1px solid ${borderColor}`,
+                        boxShadow: shadowIntensity > 0 ? `0 ${shadowIntensity}px ${shadowIntensity * 2}px rgba(0,0,0,${shadowIntensity * 0.05})` : 'none'
+                      }}
+                    >
+                      <summary 
+                        className="cursor-pointer p-3 font-medium hover:bg-slate-50 rounded-lg flex items-center justify-between"
+                        style={{
+                          color: titleColor,
+                          fontSize: `${titleFontSize}px`
+                        }}
+                      >
+                        <span>{item.title}</span>
+                        <i className="fas fa-chevron-down text-xs" style={{ color: titleColor, opacity: 0.6 }}></i>
+                      </summary>
+                      <div 
+                        className="p-3 pt-0 leading-relaxed"
+                        style={{
+                          color: contentColor,
+                          fontSize: `${contentFontSize}px`
+                        }}
+                      >
+                        {item.content}
+                      </div>
+                    </details>
+                  );
+                })}
               </div>
             )}
           </div>

@@ -2993,6 +2993,12 @@ export const accordionElementSchema = baseElementSchema.extend({
       title: z.string(),
       content: z.string(),
     })),
+    titleColor: z.string().optional(),
+    contentColor: z.string().optional(),
+    borderColor: z.string().optional(),
+    shadowIntensity: z.number().optional().default(2),
+    titleFontSize: z.number().optional().default(16),
+    contentFontSize: z.number().optional().default(14),
   }),
 });
 
