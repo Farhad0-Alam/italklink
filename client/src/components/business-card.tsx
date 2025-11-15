@@ -1327,10 +1327,9 @@ END:VCARD`;
                 }}
                 className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{
-                  backgroundColor:
-                    data.secondaryColor || data.accentColor || "#16a34a",
+                  backgroundColor: data.brandColor || "#1e40af",
                   color: data.tertiaryColor || "#ffffff",
-                  borderBottom: `4px solid ${data.brandColor ? adjustColor(data.brandColor, -20) : "#16a34a"}`,
+                  borderBottom: `4px solid ${data.accentColor ? adjustColor(data.accentColor, -20) : "#1e3a8a"}`,
                   width: "70%",
                 }}
                 data-testid="button-save-contact"
@@ -1344,9 +1343,9 @@ END:VCARD`;
                 onClick={() => handleShare()}
                 className="py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                 style={{
-                  backgroundColor: data.brandColor || "#22c55e",
+                  backgroundColor: data.accentColor || "#a855f7",
                   color: data.tertiaryColor || "#ffffff",
-                  borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : data.accentColor ? adjustColor(data.accentColor, -20) : "#16a34a"}`,
+                  borderBottom: `4px solid ${data.secondaryColor ? adjustColor(data.secondaryColor, -20) : "#7e22ce"}`,
                   width: "30%",
                 }}
                 data-testid="button-share-main"
