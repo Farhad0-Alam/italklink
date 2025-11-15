@@ -76,7 +76,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ cardData }) => {
       }
     }
     
-    // Update Open Graph meta tags
+    // Update Open Graph meta tags - use custom OG fields or fall back to generated content
     const updateOGMeta = (property: string, content: string) => {
       let meta = document.querySelector(`meta[property="${property}"]`);
       if (meta) {
@@ -89,13 +89,17 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ cardData }) => {
       }
     };
     
-    updateOGMeta('og:title', `${cardData.fullName || 'Digital Business Card'} - Professional Contact`);
-    updateOGMeta('og:description', `Connect with ${cardData.fullName || 'this professional'} instantly. Professional digital business card with contact information.`);
+    const ogTitleContent = cardData.ogTitle || cardData.metaTitle || `${cardData.fullName || 'Digital Business Card'} - Professional Contact`;
+    const ogDescriptionContent = cardData.ogDescription || cardData.metaDescription || `Connect with ${cardData.fullName || 'this professional'} instantly. Professional digital business card with contact information.`;
+    const ogImageContent = cardData.ogImage || cardData.profileImageUrl || '/icon-512x512.png';
+    
+    updateOGMeta('og:title', ogTitleContent);
+    updateOGMeta('og:description', ogDescriptionContent);
     updateOGMeta('og:type', 'profile');
-    updateOGMeta('og:image', cardData.profileImageUrl || '/icon-512x512.png');
+    updateOGMeta('og:image', ogImageContent);
     updateOGMeta('og:url', window.location.href);
     
-    // Update Twitter Card meta tags
+    // Update Twitter Card meta tags - use OG fields as fallback
     const updateTwitterMeta = (name: string, content: string) => {
       let meta = document.querySelector(`meta[name="${name}"]`);
       if (meta) {
@@ -109,9 +113,9 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ cardData }) => {
     };
     
     updateTwitterMeta('twitter:card', 'summary_large_image');
-    updateTwitterMeta('twitter:title', `${cardData.fullName || 'Digital Business Card'} - Professional Contact`);
-    updateTwitterMeta('twitter:description', `Connect with ${cardData.fullName || 'this professional'} instantly.`);
-    updateTwitterMeta('twitter:image', cardData.profileImageUrl || '/icon-512x512.png');
+    updateTwitterMeta('twitter:title', ogTitleContent);
+    updateTwitterMeta('twitter:description', ogDescriptionContent);
+    updateTwitterMeta('twitter:image', ogImageContent);
     
     // Update structured data
     let structuredData = document.querySelector('script[type="application/ld+json"]#person-schema');
