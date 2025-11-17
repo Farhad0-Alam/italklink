@@ -20,6 +20,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { PageElement } from '@shared/schema';
 import { PageElementRenderer } from '@/components/page-element';
 import { ElementSelector } from '@/components/element-selector';
@@ -158,11 +159,13 @@ interface PageBuilderProps {
   onElementsChange: (elements: PageElement[]) => void;
   elementSpacing?: number;
   onElementSpacingChange?: (spacing: number) => void;
+  individualElementSpacing?: Record<string, number>;
+  onIndividualSpacingChange?: (elementType: string, spacing: number) => void;
   cardData?: any; // Business card data for theme colors
   onNavigatePage?: (pageId: string) => void;
 }
 
-export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, onElementSpacingChange, cardData, onNavigatePage }: PageBuilderProps) {
+export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, onElementSpacingChange, individualElementSpacing, onIndividualSpacingChange, cardData, onNavigatePage }: PageBuilderProps) {
   const [showElementSelector, setShowElementSelector] = useState(false);
   
   const sensors = useSensors(
@@ -287,6 +290,86 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
             <span>Spacious (48px)</span>
           </div>
         </div>
+      )}
+
+      {/* Individual Element Spacing Controls */}
+      {onIndividualSpacingChange && sortedElements.length > 0 && (
+        <Accordion type="single" collapsible className="bg-slate-50 border border-slate-200 rounded-lg">
+          <AccordionItem value="individual-spacing" className="border-none">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-slate-100">
+              <div className="flex items-center gap-2">
+                <i className="fas fa-sliders-h text-slate-600"></i>
+                <span className="text-sm font-medium text-slate-700">Individual Element Spacing</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <div className="space-y-4">
+                <p className="text-xs text-slate-500 mb-3">
+                  Control spacing between consecutive elements of the same type
+                </p>
+                {(() => {
+                  // Get unique element types present in the current page
+                  const uniqueTypes = [...new Set(sortedElements.map(el => el.type))];
+                  const typeLabels: Record<string, string> = {
+                    'link': 'Buttons/Links',
+                    'heading': 'Headings',
+                    'paragraph': 'Paragraphs',
+                    'socialSection': 'Social Links',
+                    'contactSection': 'Contact Sections',
+                    'accordion': 'Accordions',
+                    'subscribeSection': 'Subscribe Sections',
+                    'image': 'Images',
+                    'video': 'Videos',
+                    'divider': 'Dividers',
+                    'spacer': 'Spacers',
+                    'cta': 'Call to Actions',
+                    'form': 'Forms',
+                    'gallery': 'Galleries',
+                    'testimonial': 'Testimonials',
+                    'pricing': 'Pricing Tables',
+                    'faq': 'FAQs',
+                    'countdown': 'Countdowns',
+                    'map': 'Maps',
+                    'newsletter': 'Newsletters',
+                    'team': 'Team Members',
+                    'timeline': 'Timelines',
+                    'progress': 'Progress Bars',
+                    'stats': 'Statistics',
+                    'iframe': 'Embeds',
+                    'audio': 'Audio Players',
+                  };
+
+                  return uniqueTypes.map(type => {
+                    const currentSpacing = individualElementSpacing?.[type] ?? elementSpacing;
+                    const label = typeLabels[type] || type;
+                    const count = sortedElements.filter(el => el.type === type).length;
+
+                    return (
+                      <div key={type} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-medium text-slate-600">
+                            {label} ({count})
+                          </Label>
+                          <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
+                            {currentSpacing}px
+                          </span>
+                        </div>
+                        <Slider
+                          min={0}
+                          max={48}
+                          step={1}
+                          value={[currentSpacing]}
+                          onValueChange={(value) => onIndividualSpacingChange(type, value[0])}
+                          className="cursor-pointer"
+                        />
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       )}
 
       {sortedElements.length === 0 ? (
