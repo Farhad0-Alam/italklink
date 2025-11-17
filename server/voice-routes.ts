@@ -407,4 +407,112 @@ router.post('/call/outbound', requireAuth, async (req, res) => {
   }
 });
 
+// Get call transcript
+router.get('/call/:callId/transcript', requireAuth, async (req, res) => {
+  try {
+    const { callId } = req.params;
+    const userId = (req.user as any).id;
+
+    const [call] = await db
+      .select()
+      .from(voiceCalls)
+      .where(eq(voiceCalls.id, callId));
+
+    if (!call) {
+      return res.status(404).json({ error: 'Call not found' });
+    }
+
+    const agent = await getVoiceAgent(call.voiceAgentId);
+    if (!agent || agent.userId !== userId) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        id: call.id,
+        callSid: call.callSid,
+        transcript: call.transcript,
+        summary: call.summary,
+        duration: call.duration,
+        recordingUrl: call.recordingUrl,
+        startedAt: call.startedAt,
+        endedAt: call.endedAt,
+      },
+    });
+  } catch (error) {
+    console.error('Error getting call transcript:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get analytics for a card
+router.get('/analytics/:cardId', requireAuth, async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    const userId = (req.user as any).id;
+
+    const agent = await getVoiceAgentByCardId(cardId);
+    if (!agent || agent.userId !== userId) {
+      return res.status(404).json({ error: 'Voice agent not found' });
+    }
+
+    const calls = await db
+      .select()
+      .from(voiceCalls)
+      .where(eq(voiceCalls.voiceAgentId, agent.id));
+
+    const totalCalls = calls.length;
+    const completedCalls = calls.filter(c => c.status === 'completed').length;
+    const totalDuration = calls.reduce((sum, c) => sum + (c.duration || 0), 0);
+    const appointmentsBooked = calls.filter(c => c.appointmentBooked).length;
+    const leadsQualified = calls.filter(c => c.outcome === 'qualified').length;
+    const inboundCalls = calls.filter(c => c.direction === 'inbound').length;
+    const outboundCalls = calls.filter(c => c.direction === 'outbound').length;
+    const missedCalls = calls.filter(c => c.status === 'no_answer' || c.status === 'failed').length;
+
+    const avgDuration = totalCalls > 0 ? Math.round(totalDuration / totalCalls) : 0;
+    const appointmentConversionRate = totalCalls > 0 ? Math.round((appointmentsBooked / totalCalls) * 100) : 0;
+    const qualificationRate = totalCalls > 0 ? Math.round((leadsQualified / totalCalls) * 100) : 0;
+    const answerRate = totalCalls > 0 ? Math.round((completedCalls / totalCalls) * 100) : 0;
+
+    res.json({
+      success: true,
+      data: {
+        overview: {
+          totalCalls,
+          completedCalls,
+          totalDuration,
+          avgDuration,
+          appointmentsBooked,
+          leadsQualified,
+        },
+        callTypes: {
+          inbound: inboundCalls,
+          outbound: outboundCalls,
+          missed: missedCalls,
+        },
+        conversionRates: {
+          appointmentConversionRate,
+          qualificationRate,
+          answerRate,
+        },
+        recentCalls: calls.slice(0, 10).map(c => ({
+          id: c.id,
+          callSid: c.callSid,
+          direction: c.direction,
+          status: c.status,
+          callerNumber: c.callerNumber,
+          duration: c.duration,
+          outcome: c.outcome,
+          createdAt: c.createdAt,
+        })),
+      },
+    });
+  } catch (error) {
+    console.error('Error getting analytics:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

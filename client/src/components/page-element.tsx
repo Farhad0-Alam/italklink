@@ -541,6 +541,15 @@ interface PageElementProps {
 export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, isInteractive = true, cardData, onNavigatePage }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [voiceAgentSections, setVoiceAgentSections] = useState({
+    basic: true,
+    voice: false,
+    knowledge: false,
+    scripts: false,
+    integrations: false,
+    callSettings: false,
+    audio: false
+  });
   
   // Define sensors for drag and drop
   const sensors = useSensors(
@@ -561,6 +570,10 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
     if (onUpdate) {
       onUpdate({ ...element, data: { ...(element.data || {}), ...newData } });
     }
+  };
+
+  const toggleVoiceSection = (section: keyof typeof voiceAgentSections) => {
+    setVoiceAgentSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
   const renderElement = () => {
@@ -3022,15 +3035,457 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
       case "voiceAgent":
         return (
           <div className="mb-6">
-            <VoiceAgentElement
-              phoneNumber={element.data.phoneNumber || '+1-555-0000'}
-              agentName={element.data.agentName || 'AI Assistant'}
-              description={element.data.description || 'Call us anytime to speak with our AI assistant'}
-              buttonText={element.data.buttonText || 'Call Now'}
-              primaryColor={element.data.primaryColor || '#22c55e'}
-              showAgentInfo={element.data.showAgentInfo !== false}
-              isEditing={isEditing}
-            />
+            {isEditing ? (
+              <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold text-slate-800 text-lg">AI Voice Agent Settings</h3>
+                  <i className="fas fa-phone-volume text-green-600 text-xl"></i>
+                </div>
+
+                {/* Basic Settings Section */}
+                <Collapsible open={voiceAgentSections.basic}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleVoiceSection('basic')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                    data-testid="toggle-voice-basic-settings"
+                  >
+                    <div className="flex items-center gap-2">
+                      <i className="fas fa-cog text-blue-600"></i>
+                      <span className="font-medium text-slate-700">Basic Settings</span>
+                    </div>
+                    <i className={`fas fa-chevron-${voiceAgentSections.basic ? 'up' : 'down'} text-slate-400`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3 space-y-3">
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Phone Number *</label>
+                      <Input
+                        value={element.data.phoneNumber || ''}
+                        onChange={(e) => handleDataUpdate({ phoneNumber: e.target.value })}
+                        placeholder="+1-555-0000"
+                        className="text-black"
+                        data-testid="input-phone-number"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Agent Name</label>
+                      <Input
+                        value={element.data.agentName || 'AI Assistant'}
+                        onChange={(e) => handleDataUpdate({ agentName: e.target.value })}
+                        placeholder="AI Assistant"
+                        className="text-black"
+                        data-testid="input-agent-name"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                      <label className="text-sm text-slate-700 font-medium">Is Active</label>
+                      <Switch
+                        checked={element.data.isActive !== false}
+                        onCheckedChange={(checked) => handleDataUpdate({ isActive: checked })}
+                        data-testid="switch-is-active"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Agent Mode</label>
+                      <Select
+                        value={element.data.agentMode || 'answering'}
+                        onValueChange={(value) => handleDataUpdate({ agentMode: value })}
+                      >
+                        <SelectTrigger className="text-black" data-testid="select-agent-mode">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="answering">Answering</SelectItem>
+                          <SelectItem value="qualification">Qualification</SelectItem>
+                          <SelectItem value="booking">Booking</SelectItem>
+                          <SelectItem value="custom">Custom</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Voice Customization Section */}
+                <Collapsible open={voiceAgentSections.voice}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleVoiceSection('voice')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                    data-testid="toggle-voice-customization"
+                  >
+                    <div className="flex items-center gap-2">
+                      <i className="fas fa-microphone text-purple-600"></i>
+                      <span className="font-medium text-slate-700">Voice Customization</span>
+                    </div>
+                    <i className={`fas fa-chevron-${voiceAgentSections.voice ? 'up' : 'down'} text-slate-400`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3 space-y-3">
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Voice Provider</label>
+                      <Select
+                        value={element.data.voiceProvider || 'openai'}
+                        onValueChange={(value) => handleDataUpdate({ voiceProvider: value })}
+                      >
+                        <SelectTrigger className="text-black" data-testid="select-voice-provider">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="openai">OpenAI</SelectItem>
+                          <SelectItem value="elevenlabs">ElevenLabs</SelectItem>
+                          <SelectItem value="google">Google</SelectItem>
+                          <SelectItem value="azure">Azure</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Voice Gender</label>
+                      <Select
+                        value={element.data.voiceGender || 'neutral'}
+                        onValueChange={(value) => handleDataUpdate({ voiceGender: value })}
+                      >
+                        <SelectTrigger className="text-black" data-testid="select-voice-gender">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="neutral">Neutral</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Voice Language</label>
+                      <Input
+                        value={element.data.voiceLanguage || 'en'}
+                        onChange={(e) => handleDataUpdate({ voiceLanguage: e.target.value })}
+                        placeholder="en"
+                        className="text-black"
+                        data-testid="input-voice-language"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Voice Tone</label>
+                      <Select
+                        value={element.data.voiceTone || 'professional'}
+                        onValueChange={(value) => handleDataUpdate({ voiceTone: value })}
+                      >
+                        <SelectTrigger className="text-black" data-testid="select-voice-tone">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="professional">Professional</SelectItem>
+                          <SelectItem value="friendly">Friendly</SelectItem>
+                          <SelectItem value="casual">Casual</SelectItem>
+                          <SelectItem value="energetic">Energetic</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-sm text-slate-700 font-medium">Speech Speed</label>
+                        <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
+                          {element.data.speechSpeed || 100}
+                        </span>
+                      </div>
+                      <Slider
+                        min={50}
+                        max={150}
+                        step={1}
+                        value={[element.data.speechSpeed || 100]}
+                        onValueChange={(value) => handleDataUpdate({ speechSpeed: value[0] })}
+                        className="cursor-pointer"
+                        data-testid="slider-speech-speed"
+                      />
+                      <div className="flex justify-between mt-1 text-xs text-slate-400">
+                        <span>Slow (50)</span>
+                        <span>Fast (150)</span>
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Knowledge Base Section */}
+                <Collapsible open={voiceAgentSections.knowledge}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleVoiceSection('knowledge')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                    data-testid="toggle-knowledge-base"
+                  >
+                    <div className="flex items-center gap-2">
+                      <i className="fas fa-brain text-indigo-600"></i>
+                      <span className="font-medium text-slate-700">Knowledge Base</span>
+                    </div>
+                    <i className={`fas fa-chevron-${voiceAgentSections.knowledge ? 'up' : 'down'} text-slate-400`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3 space-y-3">
+                    <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                      <label className="text-sm text-slate-700 font-medium">Use Knowledge Base</label>
+                      <Switch
+                        checked={element.data.useKnowledgeBase !== false}
+                        onCheckedChange={(checked) => handleDataUpdate({ useKnowledgeBase: checked })}
+                        data-testid="switch-use-knowledge-base"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-sm text-slate-700 font-medium">Context Limit</label>
+                        <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
+                          {element.data.contextLimit || 3}
+                        </span>
+                      </div>
+                      <Slider
+                        min={1}
+                        max={10}
+                        step={1}
+                        value={[element.data.contextLimit || 3]}
+                        onValueChange={(value) => handleDataUpdate({ contextLimit: value[0] })}
+                        className="cursor-pointer"
+                        data-testid="slider-context-limit"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-sm text-slate-700 font-medium">Confidence Threshold (%)</label>
+                        <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
+                          {element.data.confidenceThreshold || 70}%
+                        </span>
+                      </div>
+                      <Slider
+                        min={0}
+                        max={100}
+                        step={5}
+                        value={[element.data.confidenceThreshold || 70]}
+                        onValueChange={(value) => handleDataUpdate({ confidenceThreshold: value[0] })}
+                        className="cursor-pointer"
+                        data-testid="slider-confidence-threshold"
+                      />
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Scripts & Messages Section */}
+                <Collapsible open={voiceAgentSections.scripts}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleVoiceSection('scripts')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                    data-testid="toggle-scripts-messages"
+                  >
+                    <div className="flex items-center gap-2">
+                      <i className="fas fa-file-alt text-orange-600"></i>
+                      <span className="font-medium text-slate-700">Scripts & Messages</span>
+                    </div>
+                    <i className={`fas fa-chevron-${voiceAgentSections.scripts ? 'up' : 'down'} text-slate-400`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3 space-y-3">
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Greeting</label>
+                      <Textarea
+                        value={element.data.greeting || ''}
+                        onChange={(e) => handleDataUpdate({ greeting: e.target.value })}
+                        placeholder="Hello! I'm your AI assistant. How can I help you today?"
+                        className="text-black min-h-[80px]"
+                        data-testid="textarea-greeting"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">System Prompt</label>
+                      <Textarea
+                        value={element.data.systemPrompt || ''}
+                        onChange={(e) => handleDataUpdate({ systemPrompt: e.target.value })}
+                        placeholder="You are a helpful AI assistant representing our company..."
+                        className="text-black min-h-[100px]"
+                        data-testid="textarea-system-prompt"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Fallback Message</label>
+                      <Textarea
+                        value={element.data.fallbackMessage || ''}
+                        onChange={(e) => handleDataUpdate({ fallbackMessage: e.target.value })}
+                        placeholder="I'm sorry, I didn't understand that. Could you please rephrase?"
+                        className="text-black min-h-[80px]"
+                        data-testid="textarea-fallback-message"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">End Call Message</label>
+                      <Textarea
+                        value={element.data.endCallMessage || ''}
+                        onChange={(e) => handleDataUpdate({ endCallMessage: e.target.value })}
+                        placeholder="Thank you for calling. Have a great day!"
+                        className="text-black min-h-[80px]"
+                        data-testid="textarea-end-call-message"
+                      />
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Integrations Section */}
+                <Collapsible open={voiceAgentSections.integrations}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleVoiceSection('integrations')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                    data-testid="toggle-integrations"
+                  >
+                    <div className="flex items-center gap-2">
+                      <i className="fas fa-plug text-teal-600"></i>
+                      <span className="font-medium text-slate-700">Integrations</span>
+                    </div>
+                    <i className={`fas fa-chevron-${voiceAgentSections.integrations ? 'up' : 'down'} text-slate-400`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3 space-y-3">
+                    <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                      <label className="text-sm text-slate-700 font-medium">Enable Appointment Booking</label>
+                      <Switch
+                        checked={element.data.enableAppointmentBooking || false}
+                        onCheckedChange={(checked) => handleDataUpdate({ enableAppointmentBooking: checked })}
+                        data-testid="switch-enable-appointment-booking"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                      <label className="text-sm text-slate-700 font-medium">Enable Lead Qualification</label>
+                      <Switch
+                        checked={element.data.enableLeadQualification || false}
+                        onCheckedChange={(checked) => handleDataUpdate({ enableLeadQualification: checked })}
+                        data-testid="switch-enable-lead-qualification"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                      <label className="text-sm text-slate-700 font-medium">Enable CRM Sync</label>
+                      <Switch
+                        checked={element.data.enableCrmSync !== false}
+                        onCheckedChange={(checked) => handleDataUpdate({ enableCrmSync: checked })}
+                        data-testid="switch-enable-crm-sync"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Booking Confirmation Message</label>
+                      <Textarea
+                        value={element.data.bookingConfirmationMessage || ''}
+                        onChange={(e) => handleDataUpdate({ bookingConfirmationMessage: e.target.value })}
+                        placeholder="Your appointment has been confirmed. You'll receive a confirmation email shortly."
+                        className="text-black min-h-[80px]"
+                        data-testid="textarea-booking-confirmation"
+                      />
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Call Settings Section */}
+                <Collapsible open={voiceAgentSections.callSettings}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleVoiceSection('callSettings')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                    data-testid="toggle-call-settings"
+                  >
+                    <div className="flex items-center gap-2">
+                      <i className="fas fa-phone text-green-600"></i>
+                      <span className="font-medium text-slate-700">Call Settings</span>
+                    </div>
+                    <i className={`fas fa-chevron-${voiceAgentSections.callSettings ? 'up' : 'down'} text-slate-400`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3 space-y-3">
+                    <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                      <label className="text-sm text-slate-700 font-medium">Enable Voicemail</label>
+                      <Switch
+                        checked={element.data.enableVoicemail !== false}
+                        onCheckedChange={(checked) => handleDataUpdate({ enableVoicemail: checked })}
+                        data-testid="switch-enable-voicemail"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Voicemail Message</label>
+                      <Textarea
+                        value={element.data.voicemailMessage || ''}
+                        onChange={(e) => handleDataUpdate({ voicemailMessage: e.target.value })}
+                        placeholder="Please leave a message and we'll get back to you shortly."
+                        className="text-black min-h-[80px]"
+                        data-testid="textarea-voicemail-message"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                      <label className="text-sm text-slate-700 font-medium">Enable Call Recording</label>
+                      <Switch
+                        checked={element.data.enableCallRecording || false}
+                        onCheckedChange={(checked) => handleDataUpdate({ enableCallRecording: checked })}
+                        data-testid="switch-enable-call-recording"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Max Call Duration (seconds)</label>
+                      <Input
+                        type="number"
+                        value={element.data.maxCallDuration || 600}
+                        onChange={(e) => handleDataUpdate({ maxCallDuration: parseInt(e.target.value) || 600 })}
+                        placeholder="600"
+                        className="text-black"
+                        data-testid="input-max-call-duration"
+                      />
+                      <p className="text-xs text-slate-500 mt-1">
+                        Default: 600 seconds (10 minutes)
+                      </p>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Audio Quality Section */}
+                <Collapsible open={voiceAgentSections.audio}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleVoiceSection('audio')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                    data-testid="toggle-audio-quality"
+                  >
+                    <div className="flex items-center gap-2">
+                      <i className="fas fa-volume-up text-red-600"></i>
+                      <span className="font-medium text-slate-700">Audio Quality</span>
+                    </div>
+                    <i className={`fas fa-chevron-${voiceAgentSections.audio ? 'up' : 'down'} text-slate-400`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3 space-y-3">
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Audio Quality</label>
+                      <Select
+                        value={element.data.audioQuality || 'high'}
+                        onValueChange={(value) => handleDataUpdate({ audioQuality: value })}
+                      >
+                        <SelectTrigger className="text-black" data-testid="select-audio-quality">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                      <label className="text-sm text-slate-700 font-medium">Noise Cancellation</label>
+                      <Switch
+                        checked={element.data.noiseCancellation !== false}
+                        onCheckedChange={(checked) => handleDataUpdate({ noiseCancellation: checked })}
+                        data-testid="switch-noise-cancellation"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                      <label className="text-sm text-slate-700 font-medium">Echo Cancellation</label>
+                      <Switch
+                        checked={element.data.echoCancellation !== false}
+                        onCheckedChange={(checked) => handleDataUpdate({ echoCancellation: checked })}
+                        data-testid="switch-echo-cancellation"
+                      />
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            ) : (
+              <VoiceAgentElement
+                phoneNumber={element.data.phoneNumber || '+1-555-0000'}
+                agentName={element.data.agentName || 'AI Assistant'}
+                description={element.data.description || 'Call us anytime to speak with our AI assistant'}
+                buttonText={element.data.buttonText || 'Call Now'}
+                primaryColor={element.data.primaryColor || '#22c55e'}
+                showAgentInfo={element.data.showAgentInfo !== false}
+                isEditing={isEditing}
+              />
+            )}
           </div>
         );
 

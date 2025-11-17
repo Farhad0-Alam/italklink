@@ -115,14 +115,35 @@ export async function generateAIResponse(
   }
 }
 
-// Convert text to speech using OpenAI TTS
-export async function textToSpeech(text: string): Promise<Buffer> {
+// Convert text to speech using OpenAI TTS with configured settings
+export async function textToSpeech(
+  text: string,
+  voiceAgent?: typeof voiceAgents.$inferSelect
+): Promise<Buffer> {
   try {
+    let voice = TTS_VOICE;
+    let speed = 1.0;
+
+    if (voiceAgent) {
+      const voiceGender = voiceAgent.voiceGender || 'female';
+      const speechSpeed = voiceAgent.speechSpeed || 100;
+      
+      speed = speechSpeed / 100;
+      
+      if (voiceGender === 'male') {
+        voice = 'onyx';
+      } else if (voiceGender === 'female') {
+        voice = 'nova';
+      } else {
+        voice = 'alloy';
+      }
+    }
+
     const response = await openai.audio.speech.create({
       model: 'tts-1',
-      voice: TTS_VOICE,
+      voice: voice as any,
       input: text,
-      speed: 1.0,
+      speed: Math.max(0.25, Math.min(4.0, speed)),
     });
 
     const buffer = Buffer.from(await response.arrayBuffer());
@@ -133,8 +154,11 @@ export async function textToSpeech(text: string): Promise<Buffer> {
   }
 }
 
-// Transcribe audio to text using Whisper
-export async function transcribeAudio(audioUrl: string): Promise<string> {
+// Transcribe audio to text using Whisper with configured language
+export async function transcribeAudio(
+  audioUrl: string,
+  voiceAgent?: typeof voiceAgents.$inferSelect
+): Promise<string> {
   try {
     // Download audio from Twilio
     const response = await fetch(audioUrl, {
@@ -154,10 +178,12 @@ export async function transcribeAudio(audioUrl: string): Promise<string> {
       lastModified: Date.now(),
     }) as any;
 
+    const language = voiceAgent?.voiceLanguage || 'en';
+
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: 'whisper-1',
-      language: 'en', // Auto-detect or specify language
+      language: language,
     });
 
     return transcription.text;
