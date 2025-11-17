@@ -682,7 +682,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
 
       case "link":
         return (
-          <div className="mb-4">
+          <div className="mb-2">
             {isEditing ? (
               <div className="space-y-3">
                 <Input
@@ -1260,7 +1260,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
         const shareText = element.data?.shareTextColor || theme.tertiaryColor || "#ffffff";
 
         return (
-          <div className="flex gap-3 mb-4">
+          <div className="flex gap-3 mb-2">
             {/* Add to Contacts Button */}
             <button
               onClick={handleSaveContact}
