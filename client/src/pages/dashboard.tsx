@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays, QrCode, Mail, Menu, X } from "lucide-react";
+import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays, QrCode, Mail, Menu, X, Phone } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -246,6 +246,7 @@ export default function Dashboard() {
     { href: "/appointments", label: "Appointments", icon: null },
     { href: "/crm", label: "CRM", icon: Users, testId: "link-crm" },
     { href: "/card-analytics", label: "Analytics", icon: BarChart3, testId: "link-card-analytics" },
+    { href: "/voice-test", label: "Voice Agent", icon: Phone, testId: "link-voice-test" },
     { href: "/availability", label: "Availability", icon: CalendarDays, testId: "link-availability" },
     { href: "/uploads", label: "Uploads", icon: FileText, testId: "link-uploads" },
     { href: "/qr-codes", label: "QR Codes", icon: QrCode, testId: "link-qr-codes" },

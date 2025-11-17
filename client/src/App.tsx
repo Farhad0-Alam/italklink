@@ -46,6 +46,7 @@ const EmailTemplatesPage = lazy(() => import("./pages/EmailTemplatesPage"));
 const Analytics = lazy(() => import("./pages/analytics"));
 const CardAnalytics = lazy(() => import("./pages/card-analytics"));
 const VoiceAnalytics = lazy(() => import("./pages/VoiceAnalytics"));
+const VoiceAgentTest = lazy(() => import("./pages/VoiceAgentTest"));
 const TeamDashboard = lazy(() => import("./pages/TeamDashboard"));
 const Uploads = lazy(() => import("./pages/uploads"));
 const QrCodes = lazy(() => import("./pages/qr-codes"));
@@ -99,6 +100,7 @@ function Router() {
       <Route path="/analytics">{() => <PageSuspense><Analytics /></PageSuspense>}</Route>
       <Route path="/card-analytics">{() => <PageSuspense><CardAnalytics /></PageSuspense>}</Route>
       <Route path="/voice-analytics">{() => <PageSuspense><VoiceAnalytics /></PageSuspense>}</Route>
+      <Route path="/voice-test">{() => <PageSuspense><VoiceAgentTest /></PageSuspense>}</Route>
       <Route path="/teams">{() => <PageSuspense><TeamDashboard /></PageSuspense>}</Route>
       <Route path="/help">{() => <PageSuspense><Help /></PageSuspense>}</Route>
       <Route path="/email-signature">{() => <PageSuspense><EmailSignature /></PageSuspense>}</Route>
