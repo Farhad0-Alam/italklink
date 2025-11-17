@@ -17,6 +17,13 @@ interface PagePreviewProps {
 export function PagePreview({ pageData, cardData, elementSpacing = 16, individualElementSpacing, onNavigatePage }: PagePreviewProps) {
   const backgroundColor = cardData?.backgroundColor || "#f0f0f0";
   
+  // Debug logging
+  console.log('[PagePreview] Props received:', {
+    elementSpacing,
+    individualElementSpacing,
+    pageDataLength: pageData?.elements?.length
+  });
+  
   // Filter out invisible elements
   const visibleElements = (pageData.elements || []).filter(el => el.visible !== false);
   
@@ -52,11 +59,15 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, individua
             // If next element is same type, use individual spacing for this type
             if (nextElement.type === element.type) {
               spacing = individualElementSpacing?.[element.type] ?? elementSpacing;
+              console.log(`[PagePreview] Element ${index} (${element.type}): Next is same type, using individual spacing:`, spacing);
+            } else {
+              console.log(`[PagePreview] Element ${index} (${element.type}): Next is different type (${nextElement.type}), using global spacing:`, spacing);
             }
             // Otherwise use global spacing (already set as default)
           } else {
             // Last element, no spacing needed
             spacing = 0;
+            console.log(`[PagePreview] Element ${index} (${element.type}): Last element, no spacing`);
           }
 
           return (
