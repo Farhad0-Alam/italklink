@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { db } from './db';
 import { voiceAgents, voiceCalls, businessCards } from '@shared/schema';
 import { eq, and, desc } from 'drizzle-orm';
+import twilio from 'twilio';
 import {
   initializeCall,
   getVoiceAgent,
@@ -24,10 +25,49 @@ const router = express.Router();
 // In-memory conversation storage (in production, use Redis or database)
 const conversations = new Map<string, ConversationMessage[]>();
 
+// Twilio webhook signature validation middleware
+const validateTwilioRequest = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  // Skip validation if auth token is not configured (development)
+  if (!process.env.TWILIO_AUTH_TOKEN) {
+    console.warn('Twilio webhook validation skipped: TWILIO_AUTH_TOKEN not configured');
+    return next();
+  }
+
+  const twilioSignature = req.headers['x-twilio-signature'] as string;
+  
+  // Construct the full public URL that Twilio called
+  // Use REPLIT_DEV_DOMAIN or construct from forwarded headers (handles proxies)
+  let url: string;
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    url = `${process.env.REPLIT_DEV_DOMAIN}${req.originalUrl}`;
+  } else {
+    const protocol = req.get('x-forwarded-proto') || req.protocol;
+    const host = req.get('x-forwarded-host') || req.get('host');
+    url = `${protocol}://${host}${req.originalUrl}`;
+  }
+  
+  console.log('Validating Twilio request for URL:', url);
+  
+  // Validate signature using Twilio's validation
+  const isValid = twilio.validateRequest(
+    process.env.TWILIO_AUTH_TOKEN,
+    twilioSignature,
+    url,
+    req.body
+  );
+
+  if (!isValid) {
+    console.error('Invalid Twilio signature', { url, signature: twilioSignature });
+    return res.status(403).send('Forbidden');
+  }
+
+  next();
+};
+
 // ===== TWILIO WEBHOOKS =====
 
 // Handle incoming calls
-router.post('/webhook/inbound', async (req, res) => {
+router.post('/webhook/inbound', validateTwilioRequest, async (req, res) => {
   try {
     const { CallSid, From, To, Called } = req.body;
     
@@ -79,7 +119,7 @@ router.post('/webhook/inbound', async (req, res) => {
 });
 
 // Process speech input
-router.post('/webhook/process-speech', async (req, res) => {
+router.post('/webhook/process-speech', validateTwilioRequest, async (req, res) => {
   try {
     const { CallSid, SpeechResult, RecordingUrl } = req.body;
     
@@ -117,18 +157,18 @@ router.post('/webhook/process-speech', async (req, res) => {
     history.push({ role: 'user', content: userMessage });
 
     // Generate AI response
-    const aiResponse = await generateAIResponse(userMessage, agent, history);
+    let aiResponse = await generateAIResponse(userMessage, agent, history);
     
-    // Add assistant message to history
-    history.push({ role: 'assistant', content: aiResponse });
-    conversations.set(CallSid, history);
-
     // Check if this is a booking or qualification request
     let shouldEndCall = false;
     if (agent.enableAppointmentBooking && aiResponse.toLowerCase().includes('appointment')) {
       // Handle appointment booking
       aiResponse += ' Let me help you schedule that.';
     }
+
+    // Add assistant message to history
+    history.push({ role: 'assistant', content: aiResponse });
+    conversations.set(CallSid, history);
 
     // Generate TwiML response
     const twiml = generateTwiMLResponse(aiResponse, !shouldEndCall);
@@ -141,7 +181,7 @@ router.post('/webhook/process-speech', async (req, res) => {
 });
 
 // Handle call status updates
-router.post('/webhook/status', async (req, res) => {
+router.post('/webhook/status', validateTwilioRequest, async (req, res) => {
   try {
     const { CallSid, CallStatus, CallDuration, RecordingUrl } = req.body;
     
@@ -209,7 +249,7 @@ router.post('/webhook/status', async (req, res) => {
 });
 
 // Handle outbound call
-router.post('/webhook/outbound-handler', async (req, res) => {
+router.post('/webhook/outbound-handler', validateTwilioRequest, async (req, res) => {
   try {
     const { CallSid } = req.body;
     

@@ -125,6 +125,13 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       description: "Advanced URL knowledge ingestion with vector search"
     },
     {
+      type: "voiceAgent",
+      title: "AI Voice Agent",
+      icon: "fas fa-phone-volume",
+      color: "bg-gradient-to-r from-green-500 to-emerald-600",
+      description: "AI-powered phone calls with ChatGPT integration"
+    },
+    {
       type: "digitalWallet",
       title: "Digital Wallet",
       icon: "fas fa-wallet",
@@ -457,6 +464,27 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             showIngestForm: true,
             showChatBox: true,
             primaryColor: "#22c55e",
+          }
+        };
+        break;
+      
+      case "voiceAgent":
+        element = {
+          id,
+          type: "voiceAgent",
+          order: Date.now(),
+          data: {
+            phoneNumber: "+1-555-0000",
+            agentName: "AI Voice Assistant",
+            description: "Call us anytime to speak with our AI assistant",
+            buttonText: "Call Now",
+            primaryColor: "#22c55e",
+            showAgentInfo: true,
+            greeting: "Hello! You've reached our AI assistant. How can I help you today?",
+            useKnowledgeBase: true,
+            enableAppointmentBooking: true,
+            enableLeadQualification: true,
+            enableCrmSync: true,
           }
         };
         break;

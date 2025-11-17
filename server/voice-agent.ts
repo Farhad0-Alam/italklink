@@ -144,7 +144,15 @@ export async function transcribeAudio(audioUrl: string): Promise<string> {
     });
     
     const audioBuffer = await response.arrayBuffer();
-    const audioFile = new File([audioBuffer], 'audio.mp3', { type: 'audio/mpeg' });
+    
+    // Create a Blob from the buffer (Node.js compatible)
+    const audioBlob = new Blob([audioBuffer], { type: 'audio/mpeg' });
+    
+    // Create a File-like object for OpenAI SDK
+    const audioFile = Object.assign(audioBlob, {
+      name: 'audio.mp3',
+      lastModified: Date.now(),
+    }) as any;
 
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
