@@ -497,6 +497,7 @@ END:VCARD`;
                       <PagePreview 
                         pageData={getCurrentPageData()}
                         cardData={cardData}
+                        elementSpacing={(cardData as any).elementSpacing || 16}
                         onNavigatePage={handleNavigatePage}
                       />
                     ) : (

@@ -263,6 +263,7 @@ export const businessCards = pgTable("business_cards", {
   customContacts: jsonb("custom_contacts"),
   customSocials: jsonb("custom_socials"),
   pageElements: jsonb("page_elements"),
+  elementSpacing: integer("element_spacing").default(16),
   
   // Branding
   brandColor: varchar("brand_color").default('#22c55e'),
@@ -2905,6 +2906,7 @@ export type TeamSettings = z.infer<typeof teamSettingsSchema>;
 export const baseElementSchema = z.object({
   id: z.string(),
   order: z.number(),
+  visible: z.boolean().default(true),
 });
 
 // Different element types
@@ -3532,6 +3534,7 @@ export const businessCardSchema = z.object({
   
   // New drag-and-drop page elements system
   pageElements: z.array(pageElementSchema).default([]),
+  elementSpacing: z.number().min(0).max(48).default(16),
   
   // Branding & Colors
   brandColor: z.string().default("#22c55e"),

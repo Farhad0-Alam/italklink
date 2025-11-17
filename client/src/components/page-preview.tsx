@@ -9,13 +9,17 @@ interface PagePreviewProps {
     elements: PageElement[];
   };
   cardData: BusinessCard;
+  elementSpacing?: number;
   onNavigatePage?: (pageId: string) => void;
 }
 
-export function PagePreview({ pageData, cardData, onNavigatePage }: PagePreviewProps) {
+export function PagePreview({ pageData, cardData, elementSpacing = 16, onNavigatePage }: PagePreviewProps) {
   const backgroundColor = cardData?.backgroundColor || "#f0f0f0";
   
-  if (!pageData.elements || pageData.elements.length === 0) {
+  // Filter out invisible elements
+  const visibleElements = (pageData.elements || []).filter(el => el.visible !== false);
+  
+  if (!visibleElements || visibleElements.length === 0) {
     return (
       <div className="h-full flex items-center justify-center" style={{ backgroundColor }}>
         <div className="text-center p-8">
@@ -33,10 +37,10 @@ export function PagePreview({ pageData, cardData, onNavigatePage }: PagePreviewP
   return (
     <div className="h-full overflow-y-auto relative" style={{ backgroundColor }}>
       <div className="min-h-full relative">
-        {pageData.elements
+        {visibleElements
           .sort((a, b) => a.order - b.order)
           .map((element) => (
-            <div key={element.id} className="mb-4">
+            <div key={element.id} style={{ marginBottom: `${elementSpacing}px` }}>
               <PageElementRenderer
                 element={element}
                 isEditing={false}

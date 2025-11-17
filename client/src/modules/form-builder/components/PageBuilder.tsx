@@ -23,15 +23,20 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { PageElement } from '@shared/schema';
 import { PageElementRenderer } from '@/components/page-element';
 import { ElementSelector } from '@/components/element-selector';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
 
 interface SortableElementProps {
   element: PageElement;
   onUpdate: (element: PageElement) => void;
   onDelete: (elementId: string) => void;
+  onClone: (elementId: string) => void;
+  onToggleVisibility: (elementId: string) => void;
   cardData?: any;
 }
 
-function SortableElement({ element, onUpdate, onDelete, cardData }: SortableElementProps) {
+function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibility, cardData }: SortableElementProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const {
     attributes,
@@ -98,6 +103,38 @@ function SortableElement({ element, onUpdate, onDelete, cardData }: SortableElem
               </div>
               <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-xs text-slate-500`}></i>
             </CollapsibleTrigger>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClone(element.id);
+              }}
+              className="ml-2 px-2 py-1 text-xs text-slate-600 hover:text-talklink-600 hover:bg-slate-200 rounded transition-colors"
+              title="Clone element"
+              data-testid={`btn-clone-${element.type}-${element.id}`}
+            >
+              <i className="fas fa-clone"></i>
+            </button>
+            <Switch
+              checked={element.visible !== false}
+              onCheckedChange={(e) => {
+                e.stopPropagation?.();
+                onToggleVisibility(element.id);
+              }}
+              className="ml-2"
+              title={element.visible !== false ? "Hide element" : "Show element"}
+              data-testid={`switch-visibility-${element.type}-${element.id}`}
+            />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(element.id);
+              }}
+              className="ml-2 px-2 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+              title="Delete element"
+              data-testid={`btn-delete-${element.type}-${element.id}`}
+            >
+              <i className="fas fa-trash"></i>
+            </button>
           </div>
           <CollapsibleContent>
             <div className="p-3">
@@ -119,11 +156,13 @@ function SortableElement({ element, onUpdate, onDelete, cardData }: SortableElem
 interface PageBuilderProps {
   elements: PageElement[];
   onElementsChange: (elements: PageElement[]) => void;
+  elementSpacing?: number;
+  onElementSpacingChange?: (spacing: number) => void;
   cardData?: any; // Business card data for theme colors
   onNavigatePage?: (pageId: string) => void;
 }
 
-export function PageBuilder({ elements, onElementsChange, cardData, onNavigatePage }: PageBuilderProps) {
+export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, onElementSpacingChange, cardData, onNavigatePage }: PageBuilderProps) {
   const [showElementSelector, setShowElementSelector] = useState(false);
   
   const sensors = useSensors(
@@ -172,6 +211,35 @@ export function PageBuilder({ elements, onElementsChange, cardData, onNavigatePa
     onElementsChange(newElements);
   };
 
+  const handleCloneElement = (elementId: string) => {
+    const elementToClone = elements.find(el => el.id === elementId);
+    if (!elementToClone) return;
+
+    // Deep clone the element to avoid shared references
+    const clonedElement: PageElement = {
+      ...structuredClone(elementToClone),
+      id: `${elementToClone.type}-${crypto.randomUUID()}`,
+      order: elements.length,
+    };
+
+    const newElements = [...elements, clonedElement];
+    
+    // Recompute order indices to keep sorting stable
+    const updatedElements = newElements.map((el, index) => ({
+      ...el,
+      order: index
+    }));
+    
+    onElementsChange(updatedElements);
+  };
+
+  const handleToggleVisibility = (elementId: string) => {
+    const newElements = elements.map(el => 
+      el.id === elementId ? { ...el, visible: el.visible !== false ? false : true } : el
+    );
+    onElementsChange(newElements);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -185,6 +253,33 @@ export function PageBuilder({ elements, onElementsChange, cardData, onNavigatePa
           Add Element
         </Button>
       </div>
+
+      {/* Element Spacing Control */}
+      {onElementSpacingChange && (
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <Label htmlFor="element-spacing" className="text-sm font-medium text-slate-700">
+              Element Spacing
+            </Label>
+            <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
+              {elementSpacing}px
+            </span>
+          </div>
+          <Slider
+            id="element-spacing"
+            min={0}
+            max={48}
+            step={1}
+            value={[elementSpacing]}
+            onValueChange={(value) => onElementSpacingChange(value[0])}
+            className="cursor-pointer"
+          />
+          <div className="flex justify-between mt-2 text-xs text-slate-400">
+            <span>Tight (0px)</span>
+            <span>Spacious (48px)</span>
+          </div>
+        </div>
+      )}
 
       {sortedElements.length === 0 ? (
         <div className="text-center py-8 text-slate-500">
@@ -208,6 +303,8 @@ export function PageBuilder({ elements, onElementsChange, cardData, onNavigatePa
                   element={element}
                   onUpdate={handleUpdateElement}
                   onDelete={handleDeleteElement}
+                  onClone={handleCloneElement}
+                  onToggleVisibility={handleToggleVisibility}
                   cardData={cardData}
                 />
               ))}

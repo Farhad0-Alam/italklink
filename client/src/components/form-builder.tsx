@@ -6548,6 +6548,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 onElementsChange={(elements: PageElement[]) => {
                   form.setValue("pageElements", elements);
                 }}
+                elementSpacing={form.watch("elementSpacing") || 16}
+                onElementSpacingChange={(spacing: number) => {
+                  form.setValue("elementSpacing", spacing);
+                }}
                 cardData={form.watch()}
                 onNavigatePage={setSelectedPageId}
               />
@@ -6608,6 +6612,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   elements={getPageElements(selectedPageId)}
                   onElementsChange={(elements: PageElement[]) => {
                     updatePageElements(selectedPageId, elements);
+                  }}
+                  elementSpacing={form.watch("elementSpacing") || 16}
+                  onElementSpacingChange={(spacing: number) => {
+                    form.setValue("elementSpacing", spacing);
                   }}
                   cardData={enhancedCardData}
                   onNavigatePage={setSelectedPageId}
