@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import { headerPresetSchema } from "../client/src/lib/header-schema";
 import {
   boolean,
+  customType,
   index,
   integer,
   jsonb,
@@ -15,6 +16,21 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
+
+// Custom vector type for pgvector embeddings
+const vector = customType<{ data: number[] | null; driverData: string | null }>({
+  dataType() {
+    return 'vector(1536)';
+  },
+  toDriver(value: number[] | null): string | null {
+    if (!value) return null;
+    return `[${value.join(',')}]`;
+  },
+  fromDriver(value: string | null): number[] | null {
+    if (!value) return null;
+    return value.slice(1, -1).split(',').map(Number);
+  },
+});
 
 // Database Enums
 export const subscriptionStatusEnum = pgEnum('subscription_status', ['active', 'canceled', 'past_due', 'incomplete']);
@@ -1581,7 +1597,7 @@ export type CreateBookingForm = z.infer<typeof createBookingFormSchema>;
 export type AppointmentFilters = z.infer<typeof appointmentFiltersSchema>;
 export type AppointmentAnalyticsQuery = z.infer<typeof appointmentAnalyticsSchema>;
 
-// Knowledge base documents table (vector column handled via raw SQL)
+// Knowledge base documents table with vector embeddings
 export const kbDocs = pgTable("kb_docs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   url: text("url").notNull(),
@@ -1589,6 +1605,7 @@ export const kbDocs = pgTable("kb_docs", {
   content: text("content").notNull(),
   contentTokens: integer("content_tokens"),
   meta: jsonb("meta"),
+  embedding: vector("embedding"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
