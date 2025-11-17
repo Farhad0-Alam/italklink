@@ -6579,10 +6579,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 individualElementSpacing={individualElementSpacing || {}}
                 onIndividualSpacingChange={(elementType: string, spacing: number) => {
                   const currentSpacing = individualElementSpacing || {};
-                  form.setValue("individualElementSpacing", {
+                  const newSpacing = {
                     ...currentSpacing,
                     [elementType]: spacing
-                  }, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
+                  };
+                  console.log('[FormBuilder] Setting individual spacing:', {
+                    elementType,
+                    spacing,
+                    newSpacing
+                  });
+                  form.setValue("individualElementSpacing", newSpacing, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
                 }}
                 cardData={enhancedCardData}
                 onNavigatePage={setSelectedPageId}
@@ -6652,10 +6658,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   individualElementSpacing={individualElementSpacing || {}}
                   onIndividualSpacingChange={(elementType: string, spacing: number) => {
                     const currentSpacing = individualElementSpacing || {};
-                    form.setValue("individualElementSpacing", {
+                    const newSpacing = {
                       ...currentSpacing,
                       [elementType]: spacing
-                    }, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
+                    };
+                    console.log('[FormBuilder Page Mode] Setting individual spacing:', {
+                      elementType,
+                      spacing,
+                      newSpacing
+                    });
+                    form.setValue("individualElementSpacing", newSpacing, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
                   }}
                   cardData={enhancedCardData}
                   onNavigatePage={setSelectedPageId}

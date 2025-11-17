@@ -405,7 +405,13 @@ END:VCARD`;
           <div>
             <FormBuilder
               cardData={cardData}
-              onDataChange={(data) => setCardData(data)}
+              onDataChange={(data) => {
+                console.log('[CardEditor] Received data from FormBuilder:', {
+                  elementSpacing: data.elementSpacing,
+                  individualElementSpacing: data.individualElementSpacing
+                });
+                setCardData(data);
+              }}
               onGenerateQR={() => {}}
               onNavigationChange={handleNavigatePage}
             />
