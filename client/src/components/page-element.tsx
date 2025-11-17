@@ -13,6 +13,7 @@ import { IngestForm } from "@/components/IngestForm";
 import { URLManager } from "@/components/URLManager";
 import { DocumentManager, DocumentItem } from "@/components/DocumentManager";
 import { RAGChatBox } from "@/components/RAGChatBox";
+import { VoiceAgentElement } from "@/components/VoiceAgentElement";
 import { MessageCircle } from "lucide-react";
 import { MenuPageElement } from "@/modules/multi-page/components/MenuPageElement";
 import ARPreviewMindAR from "@/elements/ARPreviewMindAR";
@@ -3015,6 +3016,21 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 )}
               </div>
             )}
+          </div>
+        );
+
+      case "voiceAgent":
+        return (
+          <div className="mb-6">
+            <VoiceAgentElement
+              phoneNumber={element.data.phoneNumber || '+1-555-0000'}
+              agentName={element.data.agentName || 'AI Assistant'}
+              description={element.data.description || 'Call us anytime to speak with our AI assistant'}
+              buttonText={element.data.buttonText || 'Call Now'}
+              primaryColor={element.data.primaryColor || '#22c55e'}
+              showAgentInfo={element.data.showAgentInfo !== false}
+              isEditing={isEditing}
+            />
           </div>
         );
 

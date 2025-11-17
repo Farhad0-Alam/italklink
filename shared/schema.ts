@@ -3294,6 +3294,23 @@ export const ragKnowledgeElementSchema = baseElementSchema.extend({
   }),
 });
 
+export const voiceAgentElementSchema = baseElementSchema.extend({
+  type: z.literal("voiceAgent"),
+  data: z.object({
+    phoneNumber: z.string().default("+1-555-0000"),
+    agentName: z.string().default("AI Voice Assistant"),
+    description: z.string().default("Call us anytime to speak with our AI assistant"),
+    buttonText: z.string().default("Call Now"),
+    primaryColor: z.string().default("#22c55e"),
+    showAgentInfo: z.boolean().default(true),
+    greeting: z.string().default("Hello! You've reached our AI assistant. How can I help you today?"),
+    useKnowledgeBase: z.boolean().default(true),
+    enableAppointmentBooking: z.boolean().default(true),
+    enableLeadQualification: z.boolean().default(true),
+    enableCrmSync: z.boolean().default(true),
+  }),
+});
+
 export const appleWalletElementSchema = baseElementSchema.extend({
   type: z.literal("appleWallet"),
   data: z.object({
@@ -3502,6 +3519,7 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   googleMapsElementSchema,
   aiChatbotElementSchema,
   ragKnowledgeElementSchema,
+  voiceAgentElementSchema,
   appleWalletElementSchema,
   googleWalletElementSchema,
   digitalWalletElementSchema,
