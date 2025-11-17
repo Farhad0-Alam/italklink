@@ -16,6 +16,7 @@ import { URLManager } from "@/components/URLManager";
 import { DocumentManager, DocumentItem } from "@/components/DocumentManager";
 import { RAGChatBox } from "@/components/RAGChatBox";
 import { VoiceAgentElement } from "@/components/VoiceAgentElement";
+import { VoiceAssistantCard } from "@/components/VoiceAssistantCard";
 import { MessageCircle } from "lucide-react";
 import { MenuPageElement } from "@/modules/multi-page/components/MenuPageElement";
 import ARPreviewMindAR from "@/elements/ARPreviewMindAR";
@@ -3593,6 +3594,151 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 primaryColor={element.data.primaryColor || '#22c55e'}
                 showAgentInfo={element.data.showAgentInfo !== false}
                 isEditing={isEditing}
+              />
+            )}
+          </div>
+        );
+
+      case "voiceAssistant":
+        return (
+          <div className="mb-4">
+            {isEditing ? (
+              <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold text-slate-800 text-lg">
+                    <i className="fas fa-microphone-alt text-purple-600 mr-2"></i>
+                    Voice Assistant Settings
+                  </h3>
+                  <Button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <i className={`fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-slate-600`}></i>
+                  </Button>
+                </div>
+
+                {isExpanded && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Business Name</label>
+                      <Input
+                        value={element.data.businessName || ''}
+                        onChange={(e) => handleDataUpdate({ businessName: e.target.value })}
+                        placeholder="Your Business Name"
+                        className="text-black"
+                        data-testid="input-business-name"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Assistant Name</label>
+                      <Input
+                        value={element.data.assistantName || 'AI Assistant'}
+                        onChange={(e) => handleDataUpdate({ assistantName: e.target.value })}
+                        placeholder="AI Assistant"
+                        className="text-black"
+                        data-testid="input-assistant-name"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-1 block">Primary Color</label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="color"
+                          value={element.data.primaryColor || '#8b5cf6'}
+                          onChange={(e) => handleDataUpdate({ primaryColor: e.target.value })}
+                          className="w-20 h-10"
+                        />
+                        <Input
+                          type="text"
+                          value={element.data.primaryColor || '#8b5cf6'}
+                          onChange={(e) => handleDataUpdate({ primaryColor: e.target.value })}
+                          placeholder="#8b5cf6"
+                          className="flex-1 text-black"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-2 block">Knowledge Base</label>
+                      <Textarea
+                        value={element.data.knowledgeBase?.textContent || ''}
+                        onChange={(e) => handleDataUpdate({ 
+                          knowledgeBase: { 
+                            ...element.data.knowledgeBase, 
+                            textContent: e.target.value 
+                          } 
+                        })}
+                        placeholder="Enter information about your business, services, FAQ, pricing, etc..."
+                        rows={6}
+                        className="w-full text-black"
+                        data-testid="textarea-knowledge-base"
+                      />
+                      <p className="text-xs text-slate-500 mt-1">
+                        This information will be used to train your AI assistant about your business
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-2 block">System Prompt</label>
+                      <Textarea
+                        value={element.data.knowledgeBase?.systemPrompt || ''}
+                        onChange={(e) => handleDataUpdate({ 
+                          knowledgeBase: { 
+                            ...element.data.knowledgeBase, 
+                            systemPrompt: e.target.value 
+                          } 
+                        })}
+                        placeholder="You are a helpful AI assistant for [Business Name]. Be professional and friendly..."
+                        rows={3}
+                        className="w-full text-black"
+                        data-testid="textarea-system-prompt"
+                      />
+                    </div>
+                    
+                    {/* Document Upload */}
+                    <div>
+                      <DocumentManager
+                        title="📄 Upload Business Documents"
+                        description="Upload PDFs, brochures, and documents about your business"
+                        documents={element.data.knowledgeBase?.documents?.map((doc: any) => ({
+                          id: doc.id || generateFieldId(),
+                          name: doc.name,
+                          content: doc.content,
+                          size: doc.size,
+                          status: 'success' as const
+                        })) || []}
+                        onDocumentsChange={(documents: DocumentItem[]) => {
+                          handleDataUpdate({
+                            knowledgeBase: {
+                              ...element.data.knowledgeBase,
+                              documents: documents.map(doc => ({
+                                id: doc.id,
+                                name: doc.name,
+                                content: doc.content,
+                                size: doc.size
+                              }))
+                            }
+                          });
+                        }}
+                        maxDocuments={10}
+                        acceptedTypes={['.pdf', '.doc', '.docx', '.txt', '.md']}
+                        className="bg-white border-slate-200"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <VoiceAssistantCard
+                businessName={element.data.businessName || cardData?.businessName || 'Our Business'}
+                agentName={element.data.assistantName || 'AI Assistant'}
+                primaryColor={element.data.primaryColor || '#8b5cf6'}
+                knowledgeBase={element.data.knowledgeBase}
+                isEditing={isEditing}
+                cardId={cardData?.id}
               />
             )}
           </div>

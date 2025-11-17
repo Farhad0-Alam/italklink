@@ -19,6 +19,12 @@ import {
 } from './voice-agent';
 import { requireAuth } from './auth';
 import { insertVoiceAgentSchema } from '@shared/schema';
+import OpenAI from 'openai';
+import fs from 'fs';
+import path from 'path';
+
+// the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const router = express.Router();
 
@@ -569,6 +575,149 @@ router.post('/test/simulate', async (req, res) => {
   } catch (error) {
     console.error('Error in voice test simulation:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Voice processing endpoint for business card voice assistants
+router.post('/process', requireAuth, async (req, res) => {
+  try {
+    const { audio, cardId, knowledgeBase, messages } = req.body;
+    
+    if (!audio) {
+      return res.status(400).json({ error: 'Audio data is required' });
+    }
+    
+    // Convert base64 audio to buffer
+    const base64Data = audio.split(',')[1];
+    const audioBuffer = Buffer.from(base64Data, 'base64');
+    
+    // Save temporarily for processing
+    const tempPath = path.join('/tmp', `audio_${Date.now()}.webm`);
+    fs.writeFileSync(tempPath, audioBuffer);
+    
+    try {
+      // Transcribe audio using OpenAI Whisper
+      const audioFile = fs.createReadStream(tempPath);
+      const transcription = await openai.audio.transcriptions.create({
+        file: audioFile,
+        model: 'whisper-1',
+      });
+      
+      const userText = transcription.text;
+      
+      // Generate AI response based on knowledge base and context
+      const systemPrompt = knowledgeBase?.systemPrompt || 
+        `You are a helpful AI assistant for a business. Be professional, friendly, and concise.`;
+      
+      const knowledgeContext = knowledgeBase?.textContent || '';
+      
+      const response = await openai.chat.completions.create({
+        model: 'gpt-5',
+        messages: [
+          {
+            role: 'system',
+            content: `${systemPrompt}\n\nBusiness Knowledge:\n${knowledgeContext}`
+          },
+          ...messages,
+          {
+            role: 'user',
+            content: userText
+          }
+        ],
+        max_completion_tokens: 500,
+      });
+      
+      const aiResponse = response.choices[0].message.content;
+      
+      // Generate audio response using TTS
+      const audioResponse = await openai.audio.speech.create({
+        model: 'tts-1',
+        voice: 'alloy',
+        input: aiResponse,
+      });
+      
+      // Convert audio stream to base64
+      const audioArrayBuffer = await audioResponse.arrayBuffer();
+      const audioBase64 = Buffer.from(audioArrayBuffer).toString('base64');
+      const audioDataUri = `data:audio/mpeg;base64,${audioBase64}`;
+      
+      res.json({
+        transcript: userText,
+        response: aiResponse,
+        audioUrl: audioDataUri
+      });
+      
+    } finally {
+      // Clean up temp file
+      if (fs.existsSync(tempPath)) {
+        fs.unlinkSync(tempPath);
+      }
+    }
+  } catch (error: any) {
+    console.error('Voice processing error:', error);
+    res.status(500).json({ 
+      error: 'Voice processing failed', 
+      details: error.message 
+    });
+  }
+});
+
+// Text chat endpoint for business card voice assistants
+router.post('/chat', requireAuth, async (req, res) => {
+  try {
+    const { message, cardId, knowledgeBase, messages } = req.body;
+    
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+    
+    // Generate AI response based on knowledge base and context
+    const systemPrompt = knowledgeBase?.systemPrompt || 
+      `You are a helpful AI assistant for a business. Be professional, friendly, and concise.`;
+    
+    const knowledgeContext = knowledgeBase?.textContent || '';
+    
+    const response = await openai.chat.completions.create({
+      model: 'gpt-5',
+      messages: [
+        {
+          role: 'system',
+          content: `${systemPrompt}\n\nBusiness Knowledge:\n${knowledgeContext}`
+        },
+        ...messages,
+        {
+          role: 'user',
+          content: message
+        }
+      ],
+      max_completion_tokens: 500,
+    });
+    
+    const aiResponse = response.choices[0].message.content;
+    
+    // Generate audio response using TTS
+    const audioResponse = await openai.audio.speech.create({
+      model: 'tts-1',
+      voice: 'alloy',
+      input: aiResponse,
+    });
+    
+    // Convert audio stream to base64
+    const audioArrayBuffer = await audioResponse.arrayBuffer();
+    const audioBase64 = Buffer.from(audioArrayBuffer).toString('base64');
+    const audioDataUri = `data:audio/mpeg;base64,${audioBase64}`;
+    
+    res.json({
+      response: aiResponse,
+      audioUrl: audioDataUri
+    });
+    
+  } catch (error: any) {
+    console.error('Chat error:', error);
+    res.status(500).json({ 
+      error: 'Chat failed', 
+      details: error.message 
+    });
   }
 });
 
