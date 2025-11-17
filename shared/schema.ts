@@ -4399,25 +4399,44 @@ export const voiceAgents = pgTable("voice_agents", {
   // Voice settings
   voiceProvider: voiceProviderEnum("voice_provider").default('openai'),
   voiceId: varchar("voice_id"),
+  voiceLanguage: varchar("voice_language").default('en'),
+  voiceGender: varchar("voice_gender").default('female'),
+  voiceTone: varchar("voice_tone").default('professional'),
+  speechSpeed: integer("speech_speed").default(100),
   voiceSettings: jsonb("voice_settings"),
   
   // Knowledge base connection
   useKnowledgeBase: boolean("use_knowledge_base").default(true),
+  knowledgeContextLimit: integer("knowledge_context_limit").default(3),
+  confidenceThreshold: integer("confidence_threshold").default(70),
   industryType: varchar("industry_type"),
   
   // Scripts and prompts
   greeting: text("greeting"),
   systemPrompt: text("system_prompt"),
+  responseTemplates: jsonb("response_templates"),
+  fallbackMessage: text("fallback_message"),
+  endCallMessage: text("end_call_message"),
   qualificationQuestions: jsonb("qualification_questions"),
   
   // Integration settings
   enableAppointmentBooking: boolean("enable_appointment_booking").default(false),
   enableLeadQualification: boolean("enable_lead_qualification").default(false),
   enableCrmSync: boolean("enable_crm_sync").default(true),
+  bookingConfirmationMessage: text("booking_confirmation_message"),
   
-  // Business hours
+  // Business hours and call settings
   businessHours: jsonb("business_hours"),
   timezone: varchar("timezone").default('UTC'),
+  enableVoicemail: boolean("enable_voicemail").default(true),
+  voicemailMessage: text("voicemail_message"),
+  enableCallRecording: boolean("enable_call_recording").default(false),
+  maxCallDuration: integer("max_call_duration").default(600),
+  
+  // Audio quality settings
+  audioQuality: varchar("audio_quality").default('high'),
+  noiseCancellation: boolean("noise_cancellation").default(true),
+  echoCancellation: boolean("echo_cancellation").default(true),
   
   // Analytics
   totalCalls: integer("total_calls").default(0),
