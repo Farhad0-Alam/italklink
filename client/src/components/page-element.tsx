@@ -1260,7 +1260,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
         const shareText = element.data?.shareTextColor || theme.tertiaryColor || "#ffffff";
 
         return (
-          <div className="flex gap-3 mb-2">
+          <div className="flex gap-1 mb-1">
             {/* Add to Contacts Button */}
             <button
               onClick={handleSaveContact}
