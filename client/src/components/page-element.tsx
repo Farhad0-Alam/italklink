@@ -684,7 +684,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
         return (
           <div className="mb-4">
             {isEditing ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Input
                   value={element.data?.text || ''}
                   onChange={(e) => handleDataUpdate({ text: e.target.value })}
@@ -705,15 +705,129 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   <option value="button">Button</option>
                   <option value="text">Text Link</option>
                 </select>
+
+                {element.data?.style === 'button' && (
+                  (() => {
+                    // Compute theme-based fallback colors for the color pickers
+                    const theme = cardData?.theme || { brandColor: "#1e40af", secondaryColor: "#a855f7", tertiaryColor: "#ffffff" };
+                    const defaultBgColor = theme.brandColor || "#1e40af";
+                    const defaultTextColor = theme.tertiaryColor || "#ffffff";
+                    const defaultBorderColor = theme.secondaryColor || "#a855f7";
+
+                    return (
+                      <div className="space-y-3 pt-2 border-t border-slate-600">
+                        <p className="text-xs text-gray-300 font-medium">Button Styling</p>
+                        
+                        {/* Icon Input */}
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-1">Icon (Optional)</label>
+                          <Input
+                            value={element.data?.buttonIcon || ''}
+                            onChange={(e) => handleDataUpdate({ buttonIcon: e.target.value })}
+                            className="bg-slate-600 border-slate-500 text-white"
+                            placeholder="fas fa-link (FontAwesome class)"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">Example: fas fa-external-link-alt</p>
+                        </div>
+
+                        {/* Background Color */}
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-1">Background Color</label>
+                          <input
+                            type="color"
+                            value={element.data?.buttonBgColor || defaultBgColor}
+                            onChange={(e) => handleDataUpdate({ buttonBgColor: e.target.value })}
+                            className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                          />
+                          {element.data?.buttonBgColor && (
+                            <button
+                              onClick={() => handleDataUpdate({ buttonBgColor: undefined })}
+                              className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
+                            >
+                              <i className="fas fa-undo mr-1"></i>
+                              Reset to Theme
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Text Color */}
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-1">Text Color</label>
+                          <input
+                            type="color"
+                            value={element.data?.buttonTextColor || defaultTextColor}
+                            onChange={(e) => handleDataUpdate({ buttonTextColor: e.target.value })}
+                            className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                          />
+                          {element.data?.buttonTextColor && (
+                            <button
+                              onClick={() => handleDataUpdate({ buttonTextColor: undefined })}
+                              className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
+                            >
+                              <i className="fas fa-undo mr-1"></i>
+                              Reset to Theme
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Border Color */}
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-1">Border Color</label>
+                          <input
+                            type="color"
+                            value={element.data?.buttonBorderColor || defaultBorderColor}
+                            onChange={(e) => handleDataUpdate({ buttonBorderColor: e.target.value })}
+                            className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                          />
+                          {element.data?.buttonBorderColor && (
+                            <button
+                              onClick={() => handleDataUpdate({ buttonBorderColor: undefined })}
+                              className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
+                            >
+                              <i className="fas fa-undo mr-1"></i>
+                              Reset to Theme
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()
+                )}
               </div>
             ) : (
               element.data.style === "button" ? (
-                <Button
-                  onClick={() => window.open(element.data.url, '_blank')}
-                  className="w-full bg-talklink-500 hover:bg-talklink-600 text-white"
-                >
-                  {element.data.text}
-                </Button>
+                (() => {
+                  // Helper function to adjust color brightness
+                  const adjustColor = (hex: string, amount: number): string => {
+                    const num = parseInt(hex.replace("#", ""), 16);
+                    const r = Math.max(0, Math.min(255, ((num >> 16) & 0xff) + amount));
+                    const g = Math.max(0, Math.min(255, ((num >> 8) & 0xff) + amount));
+                    const b = Math.max(0, Math.min(255, (num & 0xff) + amount));
+                    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+                  };
+
+                  const theme = cardData?.theme || { brandColor: "#1e40af", secondaryColor: "#a855f7", tertiaryColor: "#ffffff" };
+                  const buttonBg = element.data?.buttonBgColor || theme.brandColor || "#1e40af";
+                  const buttonText = element.data?.buttonTextColor || theme.tertiaryColor || "#ffffff";
+                  const buttonBorder = element.data?.buttonBorderColor || theme.secondaryColor || "#a855f7";
+
+                  return (
+                    <button
+                      onClick={() => window.open(element.data.url, '_blank')}
+                      className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
+                      style={{
+                        backgroundColor: buttonBg,
+                        color: buttonText,
+                        borderBottom: `4px solid ${adjustColor(buttonBorder, -20)}`,
+                      }}
+                    >
+                      {element.data?.buttonIcon && (
+                        <i className={`${element.data.buttonIcon} text-lg mr-3`}></i>
+                      )}
+                      {element.data.text}
+                    </button>
+                  );
+                })()
               ) : (
                 <a
                   href={element.data.url}

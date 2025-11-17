@@ -2933,6 +2933,10 @@ export const linkElementSchema = baseElementSchema.extend({
     text: z.string(),
     url: z.string(),
     style: z.enum(["button", "text"]).default("button"),
+    buttonBgColor: z.string().optional(),
+    buttonTextColor: z.string().optional(),
+    buttonBorderColor: z.string().optional(),
+    buttonIcon: z.string().optional(),
   }),
 });
 
