@@ -84,6 +84,7 @@ import billingRoutes from './billing-routes';
 import { templateCollectionsRoutes } from './template-collections-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 import ragRoutes from './rag-routes';
+import voiceRoutes from './voice-routes';
 import { pwaRouter } from './routes/pwa';
 import emailNotificationRoutes from './email-notification-routes';
 import { notificationScheduler } from './notification-scheduler';
@@ -123,6 +124,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup RAG routes
   app.use('/api', ragRoutes);
+  
+  // Setup AI Voice Agent routes
+  app.use('/api/voice', voiceRoutes);
   
   // Setup admin routes
   app.use('/api/admin', adminRoutes);
