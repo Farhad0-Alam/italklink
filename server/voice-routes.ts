@@ -515,4 +515,61 @@ router.get('/analytics/:cardId', requireAuth, async (req, res) => {
   }
 });
 
+// Voice testing endpoint for demo/testing purposes (public for demo)
+router.post('/test/simulate', async (req, res) => {
+  try {
+    const { action, message } = req.body;
+
+    if (action === 'start') {
+      // Simulate AI greeting
+      const responses = [
+        "Hello! I'm your AI voice assistant. How can I help you today?",
+        "Hi there! Thanks for calling. I'm here to assist you with appointments, questions, or any information you need.",
+        "Welcome! I'm an AI assistant ready to help. What would you like to know?",
+      ];
+      
+      const greeting = responses[Math.floor(Math.random() * responses.length)];
+      
+      res.json({
+        success: true,
+        transcript: greeting,
+        status: 'active',
+      });
+    } else if (action === 'speak' && message) {
+      // Simulate AI response to user input
+      const userMessage = message.toLowerCase();
+      let aiResponse = '';
+      
+      if (userMessage.includes('appointment') || userMessage.includes('book')) {
+        aiResponse = "I'd be happy to help you schedule an appointment! What date and time works best for you?";
+      } else if (userMessage.includes('hour') || userMessage.includes('time')) {
+        aiResponse = "We're open Monday through Friday, 9 AM to 6 PM, and Saturday 10 AM to 4 PM. Would you like to schedule something during these hours?";
+      } else if (userMessage.includes('emergency') || userMessage.includes('urgent')) {
+        aiResponse = "For emergency situations, please call our emergency hotline at 1-800-EMERGENCY. I can also connect you directly to our on-call staff if needed.";
+      } else if (userMessage.includes('price') || userMessage.includes('cost')) {
+        aiResponse = "Our pricing varies depending on the service you need. I can provide you with a detailed quote. What specific service are you interested in?";
+      } else {
+        aiResponse = "I understand. Let me help you with that. Could you provide more details so I can assist you better?";
+      }
+      
+      res.json({
+        success: true,
+        transcript: `You: ${message}\n\nAI: ${aiResponse}`,
+        status: 'active',
+      });
+    } else if (action === 'stop') {
+      res.json({
+        success: true,
+        transcript: "Call ended. Thank you for testing the voice agent!",
+        status: 'completed',
+      });
+    } else {
+      res.status(400).json({ error: 'Invalid action' });
+    }
+  } catch (error) {
+    console.error('Error in voice test simulation:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

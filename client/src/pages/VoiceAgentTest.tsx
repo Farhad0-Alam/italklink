@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Phone, Calendar, Mail, Plug, Globe, Users, Check, Shield, Mic, Square } from "lucide-react";
+import { Phone, Calendar, Mail, Plug, Globe, Users, Check, Shield, Mic, Square, Send } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 const features = [
   {
@@ -92,19 +95,101 @@ export default function VoiceAgentTest() {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [selectedUseCase, setSelectedUseCase] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userMessage, setUserMessage] = useState("");
+  const { toast } = useToast();
 
-  const handleStartVoice = () => {
-    setIsRecording(true);
-    setTranscript("Listening...");
-    // Simulate conversation
-    setTimeout(() => {
-      setTranscript("AI: Hello! I'm your AI voice assistant. How can I help you today?");
-    }, 1000);
+  const handleStartVoice = async () => {
+    try {
+      setIsRecording(true);
+      setIsLoading(true);
+      setTranscript("Connecting to AI voice agent...\n\n");
+      
+      const response = await apiRequest<{ success: boolean; transcript: string; status: string }>(
+        'POST', 
+        '/api/voice/test/simulate', 
+        { action: 'start' }
+      );
+      
+      if (response.success) {
+        setTranscript((prev) => `${prev}AI: ${response.transcript}`);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Connection Error",
+        description: error.message || "Failed to connect to voice agent",
+        variant: "destructive",
+      });
+      setIsRecording(false);
+      setTranscript("");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleStopVoice = () => {
-    setIsRecording(false);
-    setTranscript("");
+  const handleSendMessage = async () => {
+    if (!userMessage.trim() || !isRecording || isLoading) return;
+
+    const message = userMessage.trim();
+    
+    try {
+      setIsLoading(true);
+      setUserMessage("");
+      
+      setTranscript((prev) => `${prev}\n\nYou: ${message}\n\n`);
+      
+      const response = await apiRequest<{ success: boolean; transcript: string; status: string }>(
+        'POST',
+        '/api/voice/test/simulate',
+        { action: 'speak', message }
+      );
+      
+      if (response.success) {
+        // Extract just the AI response part (the backend returns "You: X\n\nAI: Y")
+        const aiResponse = response.transcript.split('\n\nAI: ')[1] || response.transcript;
+        setTranscript((prev) => `${prev}AI: ${aiResponse}`);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send message",
+        variant: "destructive",
+      });
+      // Restore message on error so user can retry
+      setUserMessage(message);
+      setTranscript((prev) => prev + `AI: Sorry, I encountered an error. Please try again.`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStopVoice = async () => {
+    try {
+      setIsLoading(true);
+      
+      const response = await apiRequest<{ success: boolean; transcript: string; status: string }>(
+        'POST',
+        '/api/voice/test/simulate',
+        { action: 'stop' }
+      );
+      
+      if (response.success) {
+        setTranscript((prev) => prev + `\n\n${response.transcript}`);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to end call",
+        variant: "destructive",
+      });
+      // Still add a message to transcript on error
+      setTranscript((prev) => prev + `\n\nCall ended (with error)`);
+    } finally {
+      // Always reset states in finally block
+      setIsRecording(false);
+      setIsLoading(false);
+      setUserMessage("");
+    }
   };
 
   return (
@@ -177,21 +262,23 @@ export default function VoiceAgentTest() {
                   {!isRecording ? (
                     <Button
                       onClick={handleStartVoice}
-                      className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-6 text-lg rounded-full shadow-lg"
+                      disabled={isLoading}
+                      className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-6 text-lg rounded-full shadow-lg disabled:opacity-50"
                       data-testid="button-start-voice"
                     >
                       <Mic className="w-5 h-5 mr-2" />
-                      Start Voice
+                      {isLoading ? "Connecting..." : "Start Voice"}
                     </Button>
                   ) : (
                     <Button
                       onClick={handleStopVoice}
+                      disabled={isLoading}
                       variant="destructive"
-                      className="px-8 py-6 text-lg rounded-full shadow-lg"
+                      className="px-8 py-6 text-lg rounded-full shadow-lg disabled:opacity-50"
                       data-testid="button-stop-voice"
                     >
                       <Square className="w-5 h-5 mr-2" />
-                      Stop
+                      {isLoading ? "Stopping..." : "Stop"}
                     </Button>
                   )}
                 </div>
@@ -199,10 +286,39 @@ export default function VoiceAgentTest() {
                 {transcript && (
                   <div className="w-full">
                     <h4 className="font-semibold mb-2 text-slate-900 dark:text-white">Transcript:</h4>
-                    <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-                      <p className="text-slate-700 dark:text-slate-300" data-testid="text-transcript">
+                    <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 max-h-64 overflow-y-auto">
+                      <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap" data-testid="text-transcript">
                         {transcript}
                       </p>
+                    </div>
+                  </div>
+                )}
+
+                {isRecording && (
+                  <div className="w-full">
+                    <h4 className="font-semibold mb-2 text-slate-900 dark:text-white">Send Message:</h4>
+                    <div className="flex gap-2">
+                      <Input
+                        value={userMessage}
+                        onChange={(e) => setUserMessage(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !isLoading) {
+                            handleSendMessage();
+                          }
+                        }}
+                        placeholder="Type your message..."
+                        disabled={isLoading || !isRecording}
+                        className="flex-1"
+                        data-testid="input-user-message"
+                      />
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={isLoading || !userMessage.trim()}
+                        className="bg-blue-600 hover:bg-blue-700"
+                        data-testid="button-send-message"
+                      >
+                        <Send className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                 )}
