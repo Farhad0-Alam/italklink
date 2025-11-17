@@ -760,8 +760,64 @@ export const BusinessCardComponent = forwardRef<
       return contacts;
     };
 
-    // Simple gradient style for basic background support
-    const gradientStyle = {};
+    // Build background style based on backgroundType
+    const getBackgroundStyle = (): React.CSSProperties => {
+      if (isMobilePreview) {
+        return { backgroundColor: "transparent" };
+      }
+
+      const backgroundType = data.backgroundType || "color";
+      const backgroundColor = data.backgroundColor || "#ffffff";
+      const backgroundImage = data.backgroundImage;
+      const backgroundGradient = data.backgroundGradient;
+      
+      const baseStyle: React.CSSProperties = {
+        maxWidth: "430px",
+        fontFamily: data.font ? `var(--font-${data.font})` : "var(--font-inter)",
+        color: data.textColor || "#000000",
+        minHeight: "auto",
+      };
+      
+      if (backgroundType === "color") {
+        return { ...baseStyle, backgroundColor };
+      } else if (backgroundType === "gradient" && backgroundGradient) {
+        const { type, angle, colors } = backgroundGradient;
+        const gradientColors = colors
+          .sort((a: any, b: any) => a.position - b.position)
+          .map((c: any) => `${c.color} ${c.position}%`)
+          .join(', ');
+        
+        if (type === "linear") {
+          return { 
+            ...baseStyle, 
+            background: `linear-gradient(${angle}deg, ${gradientColors})` 
+          };
+        } else if (type === "radial") {
+          return { 
+            ...baseStyle, 
+            background: `radial-gradient(circle, ${gradientColors})` 
+          };
+        }
+      } else if (backgroundType === "image" && backgroundImage) {
+        return {
+          ...baseStyle,
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        };
+      } else if (backgroundType?.startsWith("animation-")) {
+        // Background animations will use CSS classes
+        return { ...baseStyle, backgroundColor };
+      }
+      
+      // Fallback to color
+      return { ...baseStyle, backgroundColor };
+    };
+    
+    const backgroundAnimationClass = data.backgroundType?.startsWith("animation-") 
+      ? `bg-${data.backgroundType}` 
+      : '';
 
     return (
       <div
@@ -770,18 +826,8 @@ export const BusinessCardComponent = forwardRef<
           isMobilePreview
             ? "rounded-none shadow-none min-h-full"
             : "rounded-none md:rounded-2xl shadow-none md:shadow-2xl card-shadow"
-        }`}
-        style={{
-          maxWidth: isMobilePreview ? "100%" : "430px",
-          backgroundColor: isMobilePreview
-            ? "transparent"
-            : data.backgroundColor || "#ffffff",
-          fontFamily: data.font
-            ? `var(--font-${data.font})`
-            : "var(--font-inter)",
-          color: data.textColor || "#000000",
-          minHeight: isMobilePreview ? "100%" : "auto",
-        }}
+        } ${backgroundAnimationClass}`}
+        style={getBackgroundStyle()}
       >
         <div className="relative">
           {/* Header Design - Cover + Logo */}
