@@ -264,6 +264,7 @@ export const businessCards = pgTable("business_cards", {
   customSocials: jsonb("custom_socials"),
   pageElements: jsonb("page_elements"),
   elementSpacing: integer("element_spacing").default(16),
+  individualElementSpacing: jsonb("individual_element_spacing"),
   
   // Branding
   brandColor: varchar("brand_color").default('#22c55e'),
