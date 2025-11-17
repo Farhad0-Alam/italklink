@@ -3260,6 +3260,113 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         data-testid="slider-confidence-threshold"
                       />
                     </div>
+                    
+                    {/* Text Content Input */}
+                    <div>
+                      <label className="text-sm text-slate-700 font-medium mb-2 block">Knowledge Base Content</label>
+                      <Textarea
+                        value={element.data.knowledgeBase?.textContent || ''}
+                        onChange={(e) => handleDataUpdate({ 
+                          knowledgeBase: { 
+                            ...element.data.knowledgeBase, 
+                            textContent: e.target.value 
+                          } 
+                        })}
+                        placeholder="Enter knowledge base content directly..."
+                        rows={4}
+                        className="w-full text-black"
+                        data-testid="textarea-knowledge-content"
+                      />
+                      {element.data.knowledgeBase?.textContent && (
+                        <Button
+                          onClick={async () => {
+                            const textContent = element.data.knowledgeBase?.textContent;
+                            if (!textContent || textContent.trim().length < 10) {
+                              alert('Please enter at least 10 characters of text');
+                              return;
+                            }
+                            
+                            try {
+                              const response = await fetch('/api/ingest-text', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  text: textContent,
+                                  title: element.data.agentName || 'Voice Agent Knowledge Base'
+                                })
+                              });
+                              
+                              const result = await response.json();
+                              
+                              if (result.success) {
+                                alert('Knowledge base content saved successfully!');
+                              } else {
+                                alert('Failed to save: ' + (result.error || 'Unknown error'));
+                              }
+                            } catch (error) {
+                              console.error('Error saving knowledge base:', error);
+                              alert('Failed to save knowledge base content');
+                            }
+                          }}
+                          className="mt-2 bg-green-600 hover:bg-green-700 text-white"
+                          data-testid="button-save-knowledge"
+                        >
+                          <i className="fas fa-save mr-2"></i>
+                          Save to Knowledge Base
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {/* Document Upload */}
+                    <div>
+                      <DocumentManager
+                        title="📄 Upload Documents"
+                        description="Upload PDFs, Word docs, and text files"
+                        documents={element.data.knowledgeBase?.pdfFiles?.map((pdf: any) => ({
+                          id: pdf.id || generateFieldId(),
+                          name: pdf.name,
+                          content: pdf.content,
+                          size: pdf.size,
+                          status: 'success' as const
+                        })) || []}
+                        onDocumentsChange={(documents: DocumentItem[]) => {
+                          handleDataUpdate({
+                            knowledgeBase: {
+                              ...element.data.knowledgeBase,
+                              pdfFiles: documents.map(doc => ({
+                                id: doc.id,
+                                name: doc.name,
+                                content: doc.content,
+                                size: doc.size
+                              }))
+                            }
+                          });
+                        }}
+                        maxDocuments={50}
+                        acceptedTypes={['.pdf', '.doc', '.docx', '.txt', '.md', '.rtf']}
+                        className="bg-white border-slate-200"
+                      />
+                    </div>
+                    
+                    {/* URL Manager */}
+                    <div>
+                      <URLManager
+                        title="🌐 Add Website URLs"
+                        description="Extract knowledge from websites"
+                        onIngest={async (urls) => {
+                          // URLs are automatically ingested through the URLManager component
+                          console.log('URLs ingested:', urls);
+                          handleDataUpdate({
+                            knowledgeBase: {
+                              ...element.data.knowledgeBase,
+                              urls: urls
+                            }
+                          });
+                        }}
+                        maxUrls={100}
+                        className="bg-white border-slate-200"
+                      />
+                    </div>
                   </CollapsibleContent>
                 </Collapsible>
 
