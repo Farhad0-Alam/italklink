@@ -3512,18 +3512,6 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       </label>
                     </div>
                   </div>
-
-                  {onDelete && (
-                    <Button
-                      onClick={() => onDelete(element.id)}
-                      variant="ghost"
-                      size="sm"
-                      className="text-slate-500 hover:text-red-500"
-                    >
-                      <i className="fas fa-times mr-2"></i>
-                      Remove Element
-                    </Button>
-                  )}
                 </div>
               </div>
             )}
@@ -3944,18 +3932,6 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     </Button>
                   </div>
                 </div>
-
-                {/* Delete Button */}
-                <div className="pt-4 border-t">
-                  <Button
-                    onClick={() => onDelete && onDelete(element.id)}
-                    variant="destructive"
-                    size="sm"
-                    className="w-full"
-                  >
-                    Delete AR Element
-                  </Button>
-                </div>
               </div>
             ) : (
               <ARPreviewMindAR
@@ -3977,15 +3953,8 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
           <div className="mb-4">
             {isEditing ? (
               <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="mb-4">
                   <h4 className="text-md font-semibold text-slate-800">Book Appointment Element</h4>
-                  <Button
-                    onClick={() => onDelete && onDelete(element.id)}
-                    variant="destructive"
-                    size="sm"
-                  >
-                    <i className="fas fa-trash text-xs"></i>
-                  </Button>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -4140,15 +4109,8 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
           <div className="mb-4">
             {isEditing ? (
               <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="mb-4">
                   <h4 className="text-md font-semibold text-slate-800">Schedule Call Element</h4>
-                  <Button
-                    onClick={() => onDelete && onDelete(element.id)}
-                    variant="destructive"
-                    size="sm"
-                  >
-                    <i className="fas fa-trash text-xs"></i>
-                  </Button>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -4308,15 +4270,8 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
           <div className="mb-4">
             {isEditing ? (
               <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="mb-4">
                   <h4 className="text-md font-semibold text-slate-800">Meeting Request Element</h4>
-                  <Button
-                    onClick={() => onDelete && onDelete(element.id)}
-                    variant="destructive"
-                    size="sm"
-                  >
-                    <i className="fas fa-trash text-xs"></i>
-                  </Button>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -4497,15 +4452,8 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
           <div className="mb-4">
             {isEditing ? (
               <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="mb-4">
                   <h4 className="text-md font-semibold text-slate-800">Availability Display Element</h4>
-                  <Button
-                    onClick={() => onDelete && onDelete(element.id)}
-                    variant="destructive"
-                    size="sm"
-                  >
-                    <i className="fas fa-trash text-xs"></i>
-                  </Button>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -4653,16 +4601,8 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
           <div className="mb-4">
             {isEditing ? (
               <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="mb-4">
                   <h4 className="text-md font-semibold text-slate-800">Subscribe Form Element</h4>
-                  <Button
-                    onClick={() => onDelete && onDelete(element.id)}
-                    variant="destructive"
-                    size="sm"
-                    data-testid="button-delete"
-                  >
-                    <i className="fas fa-trash text-xs"></i>
-                  </Button>
                 </div>
                 
                 <div className="space-y-4">
@@ -4800,15 +4740,8 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
           <div className="w-full max-w-[430px] mx-auto">
             {isEditing ? (
               <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="mb-4">
                   <h4 className="text-md font-semibold text-slate-800">Custom HTML Element</h4>
-                  <Button
-                    onClick={() => onDelete && onDelete(element.id)}
-                    variant="destructive"
-                    size="sm"
-                  >
-                    <i className="fas fa-trash text-xs"></i>
-                  </Button>
                 </div>
                 <div className="space-y-4">
                   <div>
@@ -4899,15 +4832,8 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
           <div className="w-full max-w-[430px] mx-auto">
             {isEditing ? (
               <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="mb-4">
                   <h4 className="text-md font-semibold text-slate-800">PDF Viewer</h4>
-                  <Button
-                    onClick={() => onDelete && onDelete(element.id)}
-                    variant="destructive"
-                    size="sm"
-                  >
-                    <i className="fas fa-trash text-xs"></i>
-                  </Button>
                 </div>
                 <div className="space-y-4">
                   <div>
@@ -5033,16 +4959,6 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
   return (
     <div className="relative group">
       {renderElement()}
-      {isEditing && onDelete && (
-        <Button
-          onClick={() => onDelete(element.id)}
-          variant="destructive"
-          size="sm"
-          className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <i className="fas fa-trash text-xs"></i>
-        </Button>
-      )}
     </div>
   );
 }
