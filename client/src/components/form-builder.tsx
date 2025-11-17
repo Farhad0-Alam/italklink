@@ -5678,6 +5678,30 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                                     Gradient
                                   </SelectItem>
                                   <SelectItem value="image">Image</SelectItem>
+                                  <SelectItem value="animation-gradient-wave">
+                                    🌊 Gradient Wave
+                                  </SelectItem>
+                                  <SelectItem value="animation-aurora">
+                                    ✨ Aurora
+                                  </SelectItem>
+                                  <SelectItem value="animation-mesh">
+                                    🎨 Mesh Gradient
+                                  </SelectItem>
+                                  <SelectItem value="animation-floating-shapes">
+                                    🔷 Floating Shapes
+                                  </SelectItem>
+                                  <SelectItem value="animation-particles">
+                                    ⚡ Particles
+                                  </SelectItem>
+                                  <SelectItem value="animation-pulse">
+                                    💫 Pulse Glow
+                                  </SelectItem>
+                                  <SelectItem value="animation-stripes">
+                                    📐 Diagonal Stripes
+                                  </SelectItem>
+                                  <SelectItem value="animation-grid">
+                                    🔲 Grid Matrix
+                                  </SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>

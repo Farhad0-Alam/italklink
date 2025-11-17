@@ -15,8 +15,6 @@ interface PagePreviewProps {
 }
 
 export function PagePreview({ pageData, cardData, elementSpacing = 16, individualElementSpacing, onNavigatePage }: PagePreviewProps) {
-  const backgroundColor = cardData?.backgroundColor || "#f0f0f0";
-  
   // Debug logging
   console.log('[PagePreview] Props received:', {
     elementSpacing,
@@ -24,12 +22,69 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, individua
     pageDataLength: pageData?.elements?.length
   });
   
+  // Get background settings from cardData
+  const backgroundType = cardData?.backgroundType || "color";
+  const backgroundColor = cardData?.backgroundColor || "#f0f0f0";
+  const backgroundImage = cardData?.backgroundImage;
+  const backgroundGradient = cardData?.backgroundGradient;
+  
+  // Build background style based on type
+  const getBackgroundStyle = (): React.CSSProperties => {
+    const baseStyle: React.CSSProperties = {
+      position: 'relative',
+    };
+    
+    if (backgroundType === "color") {
+      return { ...baseStyle, backgroundColor };
+    } else if (backgroundType === "gradient" && backgroundGradient) {
+      const { type, angle, colors } = backgroundGradient;
+      const gradientColors = colors
+        .sort((a: any, b: any) => a.position - b.position)
+        .map((c: any) => `${c.color} ${c.position}%`)
+        .join(', ');
+      
+      if (type === "linear") {
+        return { 
+          ...baseStyle, 
+          background: `linear-gradient(${angle}deg, ${gradientColors})` 
+        };
+      } else if (type === "radial") {
+        return { 
+          ...baseStyle, 
+          background: `radial-gradient(circle, ${gradientColors})` 
+        };
+      }
+    } else if (backgroundType === "image" && backgroundImage) {
+      return {
+        ...baseStyle,
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      };
+    } else if (backgroundType?.startsWith("animation-")) {
+      // Background animations will use CSS classes
+      return { ...baseStyle, backgroundColor };
+    }
+    
+    // Fallback to color
+    return { ...baseStyle, backgroundColor };
+  };
+  
+  const backgroundStyle = getBackgroundStyle();
+  const backgroundAnimationClass = backgroundType?.startsWith("animation-") 
+    ? `bg-${backgroundType}` 
+    : '';
+  
   // Filter out invisible elements
   const visibleElements = (pageData.elements || []).filter(el => el.visible !== false);
   
   if (!visibleElements || visibleElements.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center" style={{ backgroundColor }}>
+      <div 
+        className={`h-full flex items-center justify-center ${backgroundAnimationClass}`} 
+        style={backgroundStyle}
+      >
         <div className="text-center p-8">
           <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
             <i className="fas fa-plus text-gray-400 text-xl"></i>
@@ -46,7 +101,10 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, individua
   const sortedElements = visibleElements.sort((a, b) => a.order - b.order);
 
   return (
-    <div className="h-full overflow-y-auto relative" style={{ backgroundColor }}>
+    <div 
+      className={`h-full overflow-y-auto relative ${backgroundAnimationClass}`} 
+      style={backgroundStyle}
+    >
       <div className="min-h-full relative">
         {sortedElements.map((element, index) => {
           // Calculate spacing for this element
