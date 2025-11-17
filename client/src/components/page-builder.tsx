@@ -28,11 +28,12 @@ interface SortableElementProps {
   element: PageElement;
   onUpdate: (element: PageElement) => void;
   onDelete: (elementId: string) => void;
+  onClone: (elementId: string) => void;
   cardData?: any;
   onNavigatePage?: (pageId: string) => void;
 }
 
-function SortableElement({ element, onUpdate, onDelete, cardData, onNavigatePage }: SortableElementProps) {
+function SortableElement({ element, onUpdate, onDelete, onClone, cardData, onNavigatePage }: SortableElementProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const {
     attributes,
@@ -101,6 +102,16 @@ function SortableElement({ element, onUpdate, onDelete, cardData, onNavigatePage
               </div>
               <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-xs text-slate-500`}></i>
             </CollapsibleTrigger>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClone(element.id);
+              }}
+              className="ml-2 px-2 py-1 text-xs text-slate-600 hover:text-talklink-600 hover:bg-slate-200 rounded transition-colors"
+              title="Clone element"
+            >
+              <i className="fas fa-clone"></i>
+            </button>
           </div>
           <CollapsibleContent>
             <div className="p-3">
@@ -176,6 +187,21 @@ export function PageBuilder({ elements, onElementsChange, cardData, onNavigatePa
     onElementsChange(newElements);
   };
 
+  const handleCloneElement = (elementId: string) => {
+    const elementToClone = elements.find(el => el.id === elementId);
+    if (!elementToClone) return;
+
+    // Deep clone the element to avoid shared references
+    const clonedElement: PageElement = {
+      ...structuredClone(elementToClone),
+      id: `${elementToClone.type}-${Date.now()}`,
+      order: elements.length,
+    };
+
+    const newElements = [...elements, clonedElement];
+    onElementsChange(newElements);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -212,6 +238,7 @@ export function PageBuilder({ elements, onElementsChange, cardData, onNavigatePa
                   element={element}
                   onUpdate={handleUpdateElement}
                   onDelete={handleDeleteElement}
+                  onClone={handleCloneElement}
                   cardData={cardData}
                   onNavigatePage={onNavigatePage}
                 />

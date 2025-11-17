@@ -47,6 +47,7 @@ import {
   schemaToEditorSocial,
   editorToSchemaSocial,
 } from '@/lib/element-adapters';
+import { IconPicker } from '@/components/icon-picker';
 
 // Helper function to convert hex color to rgba
 function hexToRgba(hex: string, alpha: number = 1): string {
@@ -682,7 +683,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
 
       case "link":
         return (
-          <div className="mb-2">
+          <div className="mb-1">
             {isEditing ? (
               <div className="space-y-3">
                 <Input
@@ -721,13 +722,11 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         {/* Icon Input */}
                         <div>
                           <label className="text-xs text-gray-400 block mb-1">Icon (Optional)</label>
-                          <Input
+                          <IconPicker
                             value={element.data?.buttonIcon || ''}
-                            onChange={(e) => handleDataUpdate({ buttonIcon: e.target.value })}
-                            className="bg-slate-600 border-slate-500 text-white"
-                            placeholder="fas fa-link (FontAwesome class)"
+                            onChange={(icon) => handleDataUpdate({ buttonIcon: icon })}
                           />
-                          <p className="text-xs text-gray-500 mt-1">Example: fas fa-external-link-alt</p>
+                          <p className="text-xs text-gray-500 mt-1">Browse to select from FontAwesome icons</p>
                         </div>
 
                         {/* Background Color */}
