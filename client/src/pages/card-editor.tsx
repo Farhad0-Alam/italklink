@@ -64,6 +64,8 @@ export default function CardEditor() {
     brandColor: "#22c55e",
     accentColor: "#16a34a",
     font: "inter",
+    elementSpacing: 16,
+    individualElementSpacing: {},
   });
 
   const [shareUrl, setShareUrl] = useState("");

@@ -3536,6 +3536,7 @@ export const businessCardSchema = z.object({
   // New drag-and-drop page elements system
   pageElements: z.array(pageElementSchema).default([]),
   elementSpacing: z.number().min(0).max(48).default(16),
+  individualElementSpacing: z.record(z.string(), z.number().min(0).max(48)).default({}),
   
   // Branding & Colors
   brandColor: z.string().default("#22c55e"),
