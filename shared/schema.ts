@@ -96,6 +96,13 @@ export const syncDirectionEnum = pgEnum('sync_direction', ['one_way_to_external'
 export const deviceTypeEnum = pgEnum('device_type', ['mobile', 'desktop', 'tablet', 'bot']);
 export const logoShapeEnum = pgEnum('logo_shape', ['circle', 'rectangle']);
 
+// AI Voice Agent system enums
+export const callStatusEnum = pgEnum('call_status', ['queued', 'ringing', 'in_progress', 'completed', 'failed', 'busy', 'no_answer', 'cancelled']);
+export const callDirectionEnum = pgEnum('call_direction', ['inbound', 'outbound']);
+export const callOutcomeEnum = pgEnum('call_outcome', ['qualified', 'not_qualified', 'appointment_booked', 'follow_up', 'no_answer', 'voicemail', 'not_interested']);
+export const voiceProviderEnum = pgEnum('voice_provider', ['openai', 'elevenlabs', 'google', 'azure']);
+export const agentModeEnum = pgEnum('agent_mode', ['answering', 'qualification', 'booking', 'custom']);
+
 // Database Tables
 
 // Session storage table
@@ -4354,6 +4361,153 @@ export const qrEvents = pgTable("qr_events", {
   index("idx_qr_events_ts").on(table.ts),
 ]);
 
+// ===== AI VOICE AGENT SYSTEM =====
+
+// Voice agents configuration table - one per business card
+export const voiceAgents = pgTable("voice_agents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cardId: varchar("card_id").references(() => businessCards.id, { onDelete: 'cascade' }).notNull().unique(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Phone number
+  phoneNumber: varchar("phone_number").notNull(),
+  twilioPhoneSid: varchar("twilio_phone_sid"),
+  
+  // Agent configuration
+  agentName: varchar("agent_name").notNull().default('AI Assistant'),
+  agentMode: agentModeEnum("agent_mode").default('answering'),
+  isActive: boolean("is_active").default(true),
+  
+  // Voice settings
+  voiceProvider: voiceProviderEnum("voice_provider").default('openai'),
+  voiceId: varchar("voice_id"),
+  voiceSettings: jsonb("voice_settings"),
+  
+  // Knowledge base connection
+  useKnowledgeBase: boolean("use_knowledge_base").default(true),
+  industryType: varchar("industry_type"),
+  
+  // Scripts and prompts
+  greeting: text("greeting"),
+  systemPrompt: text("system_prompt"),
+  qualificationQuestions: jsonb("qualification_questions"),
+  
+  // Integration settings
+  enableAppointmentBooking: boolean("enable_appointment_booking").default(false),
+  enableLeadQualification: boolean("enable_lead_qualification").default(false),
+  enableCrmSync: boolean("enable_crm_sync").default(true),
+  
+  // Business hours
+  businessHours: jsonb("business_hours"),
+  timezone: varchar("timezone").default('UTC'),
+  
+  // Analytics
+  totalCalls: integer("total_calls").default(0),
+  totalDuration: integer("total_duration").default(0),
+  appointmentsBooked: integer("appointments_booked").default(0),
+  leadsQualified: integer("leads_qualified").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_voice_agents_card").on(table.cardId),
+  index("idx_voice_agents_user").on(table.userId),
+  index("idx_voice_agents_phone").on(table.phoneNumber),
+  index("idx_voice_agents_active").on(table.isActive),
+]);
+
+// Voice calls table - log of all calls
+export const voiceCalls = pgTable("voice_calls", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  voiceAgentId: varchar("voice_agent_id").references(() => voiceAgents.id, { onDelete: 'cascade' }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Call details
+  callSid: varchar("call_sid").unique(),
+  direction: callDirectionEnum("direction").notNull(),
+  status: callStatusEnum("status").default('queued'),
+  
+  // Caller information
+  callerNumber: varchar("caller_number"),
+  callerName: varchar("caller_name"),
+  callerLocation: jsonb("caller_location"),
+  
+  // Call metrics
+  duration: integer("duration").default(0),
+  startedAt: timestamp("started_at"),
+  endedAt: timestamp("ended_at"),
+  
+  // Conversation data
+  transcript: text("transcript"),
+  summary: text("summary"),
+  recordingUrl: text("recording_url"),
+  
+  // Call outcome
+  outcome: callOutcomeEnum("outcome"),
+  leadScore: integer("lead_score"),
+  qualificationData: jsonb("qualification_data"),
+  
+  // Actions taken
+  appointmentBooked: boolean("appointment_booked").default(false),
+  appointmentId: varchar("appointment_id").references(() => appointments.id),
+  crmContactId: varchar("crm_contact_id").references(() => crmContacts.id),
+  
+  // Metadata
+  metadata: jsonb("metadata"),
+  errorMessage: text("error_message"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_voice_calls_agent").on(table.voiceAgentId),
+  index("idx_voice_calls_user").on(table.userId),
+  index("idx_voice_calls_status").on(table.status),
+  index("idx_voice_calls_direction").on(table.direction),
+  index("idx_voice_calls_outcome").on(table.outcome),
+  index("idx_voice_calls_created").on(table.createdAt),
+  index("idx_voice_calls_caller").on(table.callerNumber),
+]);
+
+// Voice call analytics table - aggregated metrics
+export const voiceCallAnalytics = pgTable("voice_call_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  voiceAgentId: varchar("voice_agent_id").references(() => voiceAgents.id, { onDelete: 'cascade' }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Time period
+  date: timestamp("date").notNull(),
+  period: varchar("period").notNull(),
+  
+  // Call metrics
+  totalCalls: integer("total_calls").default(0),
+  inboundCalls: integer("inbound_calls").default(0),
+  outboundCalls: integer("outbound_calls").default(0),
+  completedCalls: integer("completed_calls").default(0),
+  failedCalls: integer("failed_calls").default(0),
+  missedCalls: integer("missed_calls").default(0),
+  
+  // Duration metrics (in seconds)
+  totalDuration: integer("total_duration").default(0),
+  avgDuration: integer("avg_duration").default(0),
+  
+  // Outcome metrics
+  appointmentsBooked: integer("appointments_booked").default(0),
+  leadsQualified: integer("leads_qualified").default(0),
+  leadsNotQualified: integer("leads_not_qualified").default(0),
+  
+  // Conversion rates (percentage * 100)
+  appointmentConversionRate: integer("appointment_conversion_rate").default(0),
+  qualificationRate: integer("qualification_rate").default(0),
+  answerRate: integer("answer_rate").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_voice_analytics_agent").on(table.voiceAgentId),
+  index("idx_voice_analytics_user").on(table.userId),
+  index("idx_voice_analytics_date").on(table.date),
+  index("idx_voice_analytics_period").on(table.period),
+]);
+
 // ===== TEAM SCHEDULING TYPE DEFINITIONS =====
 
 // TypeScript types for team scheduling tables
@@ -4395,6 +4549,16 @@ export type InsertQrEvent = typeof qrEvents.$inferInsert;
 // Media variants types
 export type MediaVariant = typeof mediaVariants.$inferSelect;
 export type InsertMediaVariant = typeof mediaVariants.$inferInsert;
+
+// AI Voice Agent types
+export type VoiceAgent = typeof voiceAgents.$inferSelect;
+export type InsertVoiceAgent = typeof voiceAgents.$inferInsert;
+
+export type VoiceCall = typeof voiceCalls.$inferSelect;
+export type InsertVoiceCall = typeof voiceCalls.$inferInsert;
+
+export type VoiceCallAnalytics = typeof voiceCallAnalytics.$inferSelect;
+export type InsertVoiceCallAnalytics = typeof voiceCallAnalytics.$inferInsert;
 
 // ===== VALIDATION SCHEMAS FOR TEAM SCHEDULING =====
 
@@ -4561,3 +4725,36 @@ export const staticQrSchema = z.object({
 });
 
 export type StaticQrForm = z.infer<typeof staticQrSchema>;
+
+// ===== AI VOICE AGENT VALIDATION SCHEMAS =====
+
+// Voice Agent validation schema
+export const insertVoiceAgentSchema = createInsertSchema(voiceAgents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  totalCalls: true,
+  totalDuration: true,
+  appointmentsBooked: true,
+  leadsQualified: true,
+}).extend({
+  phoneNumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Phone number must be in E.164 format'),
+  agentName: z.string().min(1).max(100),
+  greeting: z.string().max(500).optional(),
+  systemPrompt: z.string().max(2000).optional(),
+});
+
+export type VoiceAgentForm = z.infer<typeof insertVoiceAgentSchema>;
+
+// Voice Call validation schema
+export const insertVoiceCallSchema = createInsertSchema(voiceCalls).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Voice Call Analytics validation schema
+export const insertVoiceCallAnalyticsSchema = createInsertSchema(voiceCallAnalytics).omit({
+  id: true,
+  createdAt: true,
+});
