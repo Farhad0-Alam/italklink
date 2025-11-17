@@ -215,17 +215,25 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
     const elementToClone = elements.find(el => el.id === elementId);
     if (!elementToClone) return;
 
+    // Sort elements by order to get the correct position
+    const sortedElements = [...elements].sort((a, b) => a.order - b.order);
+    
+    // Find the index of the original element in the sorted array
+    const originalIndex = sortedElements.findIndex(el => el.id === elementId);
+    if (originalIndex === -1) return;
+
     // Deep clone the element to avoid shared references
     const clonedElement: PageElement = {
       ...structuredClone(elementToClone),
       id: `${elementToClone.type}-${crypto.randomUUID()}`,
-      order: elements.length,
+      order: 0, // Will be reindexed below
     };
 
-    const newElements = [...elements, clonedElement];
+    // Insert the cloned element right after the original
+    sortedElements.splice(originalIndex + 1, 0, clonedElement);
     
     // Recompute order indices to keep sorting stable
-    const updatedElements = newElements.map((el, index) => ({
+    const updatedElements = sortedElements.map((el, index) => ({
       ...el,
       order: index
     }));
