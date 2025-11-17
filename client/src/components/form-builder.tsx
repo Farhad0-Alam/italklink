@@ -221,9 +221,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   };
 
   // sync to parent with memoized callback to prevent infinite loops
-  const prevDataRef = useRef<{ snapshot: string; elementSpacing: number | undefined }>({ 
+  const prevDataRef = useRef<{ 
+    snapshot: string; 
+    elementSpacing: number | undefined;
+    individualElementSpacing: Record<string, number> | undefined;
+  }>({ 
     snapshot: "", 
-    elementSpacing: undefined 
+    elementSpacing: undefined,
+    individualElementSpacing: undefined
   });
 
   const memoizedOnDataChange = useCallback(onDataChange, []);
@@ -252,6 +257,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     return {
       ...allFormData,
       elementSpacing: elementSpacing ?? 16,
+      individualElementSpacing: individualElementSpacing || {},
       currentPreviewMode: builderMode,
       currentSelectedPage:
         builderMode === "page" && selectedPageId
@@ -265,7 +271,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             }
           : null,
     };
-  }, [allFormData, elementSpacing, builderMode, selectedPageId, pages, getPageElements]);
+  }, [allFormData, elementSpacing, individualElementSpacing, builderMode, selectedPageId, pages, getPageElements]);
 
   // Helper function to update elements for a specific page
   const updatePageElements = (pageId: string, elements: PageElement[]) => {
@@ -290,19 +296,22 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   useEffect(() => {
     const currentSnapshot = JSON.stringify(enhancedCardData);
     const currentSpacing = elementSpacing ?? 16;
+    const currentIndividualSpacing = individualElementSpacing || {};
     
-    // Always trigger update if elementSpacing changed, or if full snapshot changed
+    // Always trigger update if spacing changed, or if full snapshot changed
     const spacingChanged = prevDataRef.current.elementSpacing !== currentSpacing;
+    const individualSpacingChanged = JSON.stringify(prevDataRef.current.individualElementSpacing) !== JSON.stringify(currentIndividualSpacing);
     const dataChanged = currentSnapshot !== prevDataRef.current.snapshot;
     
-    if (spacingChanged || dataChanged) {
+    if (spacingChanged || individualSpacingChanged || dataChanged) {
       prevDataRef.current = {
         snapshot: currentSnapshot,
-        elementSpacing: currentSpacing
+        elementSpacing: currentSpacing,
+        individualElementSpacing: currentIndividualSpacing
       };
       memoizedOnDataChange(enhancedCardData);
     }
-  }, [enhancedCardData, elementSpacing, memoizedOnDataChange]);
+  }, [enhancedCardData, elementSpacing, individualElementSpacing, memoizedOnDataChange]);
 
   // Auto-select first page when switching to page mode or when pages change
   useEffect(() => {
