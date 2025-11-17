@@ -304,7 +304,7 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
             items={sortedElements.map(el => el.id)}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: `${elementSpacing}px` }}>
               {sortedElements.map((element) => (
                 <SortableElement
                   key={element.id}
