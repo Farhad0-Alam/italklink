@@ -132,6 +132,13 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
       description: "AI-powered phone calls with ChatGPT integration"
     },
     {
+      type: "voiceAssistant",
+      title: "Voice Chat Assistant",
+      icon: "fas fa-microphone-alt",
+      color: "bg-gradient-to-r from-purple-500 to-violet-600",
+      description: "Embedded voice & text chat with knowledge base"
+    },
+    {
       type: "digitalWallet",
       title: "Digital Wallet",
       icon: "fas fa-wallet",
