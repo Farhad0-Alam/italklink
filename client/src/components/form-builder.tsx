@@ -181,6 +181,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const ogImage = useWatch({ control: form.control, name: "ogImage" });
   const secondaryColor = useWatch({ control: form.control, name: "secondaryColor" });
   const tertiaryColor = useWatch({ control: form.control, name: "tertiaryColor" });
+  const elementSpacing = useWatch({ control: form.control, name: "elementSpacing" });
 
   const toggleSection = (k: string) =>
     setCollapsedSections((p) => ({ ...p, [k]: !p[k] }));
@@ -219,7 +220,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   };
 
   // sync to parent with memoized callback to prevent infinite loops
-  const prevDataRef = useRef<string>("");
+  const prevDataRef = useRef<{ snapshot: string; elementSpacing: number | undefined }>({ 
+    snapshot: "", 
+    elementSpacing: undefined 
+  });
 
   const memoizedOnDataChange = useCallback(onDataChange, []);
 
@@ -246,6 +250,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const enhancedCardData = useMemo(() => {
     return {
       ...allFormData,
+      elementSpacing: elementSpacing ?? 16,
       currentPreviewMode: builderMode,
       currentSelectedPage:
         builderMode === "page" && selectedPageId
@@ -259,7 +264,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             }
           : null,
     };
-  }, [allFormData, builderMode, selectedPageId, pages, getPageElements]);
+  }, [allFormData, elementSpacing, builderMode, selectedPageId, pages, getPageElements]);
 
   // Helper function to update elements for a specific page
   const updatePageElements = (pageId: string, elements: PageElement[]) => {
@@ -282,12 +287,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   };
 
   useEffect(() => {
-    const s = JSON.stringify(enhancedCardData);
-    if (s !== prevDataRef.current) {
-      prevDataRef.current = s;
+    const currentSnapshot = JSON.stringify(enhancedCardData);
+    const currentSpacing = elementSpacing ?? 16;
+    
+    // Always trigger update if elementSpacing changed, or if full snapshot changed
+    const spacingChanged = prevDataRef.current.elementSpacing !== currentSpacing;
+    const dataChanged = currentSnapshot !== prevDataRef.current.snapshot;
+    
+    if (spacingChanged || dataChanged) {
+      prevDataRef.current = {
+        snapshot: currentSnapshot,
+        elementSpacing: currentSpacing
+      };
       memoizedOnDataChange(enhancedCardData);
     }
-  }, [enhancedCardData, memoizedOnDataChange]);
+  }, [enhancedCardData, elementSpacing, memoizedOnDataChange]);
 
   // Auto-select first page when switching to page mode or when pages change
   useEffect(() => {
@@ -6548,11 +6562,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 onElementsChange={(elements: PageElement[]) => {
                   form.setValue("pageElements", elements);
                 }}
-                elementSpacing={form.watch("elementSpacing") || 16}
+                elementSpacing={elementSpacing ?? 16}
                 onElementSpacingChange={(spacing: number) => {
-                  form.setValue("elementSpacing", spacing);
+                  form.setValue("elementSpacing", spacing, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
                 }}
-                cardData={form.watch()}
+                cardData={enhancedCardData}
                 onNavigatePage={setSelectedPageId}
               />
             </div>
@@ -6613,9 +6627,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   onElementsChange={(elements: PageElement[]) => {
                     updatePageElements(selectedPageId, elements);
                   }}
-                  elementSpacing={form.watch("elementSpacing") || 16}
+                  elementSpacing={elementSpacing ?? 16}
                   onElementSpacingChange={(spacing: number) => {
-                    form.setValue("elementSpacing", spacing);
+                    form.setValue("elementSpacing", spacing, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
                   }}
                   cardData={enhancedCardData}
                   onNavigatePage={setSelectedPageId}
