@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Phone, PhoneCall, Bot, CheckCircle2, X } from 'lucide-react';
+import { Phone, PhoneCall, Bot, CheckCircle2, X, TestTube2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 
 interface VoiceAgentElementProps {
   phoneNumber: string;
@@ -25,6 +26,7 @@ export function VoiceAgentElement({
 }: VoiceAgentElementProps) {
   const [showCallDialog, setShowCallDialog] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const handleCallClick = () => {
     if (isEditing) {
@@ -122,6 +124,17 @@ export function VoiceAgentElement({
         >
           <PhoneCall className="w-5 h-5 mr-2" />
           {buttonText}
+        </Button>
+        
+        {/* Test Voice Agent Button */}
+        <Button
+          onClick={() => setLocation('/voice-test')}
+          variant="outline"
+          className="w-full mt-2 font-semibold"
+          data-testid="button-test-voice-agent"
+        >
+          <TestTube2 className="w-5 h-5 mr-2" />
+          Test Voice Agent
         </Button>
 
         {/* Features List */}
