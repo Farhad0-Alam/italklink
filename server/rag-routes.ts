@@ -1,7 +1,7 @@
 import express from 'express';
 import OpenAI from 'openai';
 import { z } from 'zod';
-import { ingestUrl, retrieveSimilarContent } from './ingest';
+import { ingestUrl, ingestText, retrieveSimilarContent } from './ingest';
 
 const router = express.Router();
 
@@ -14,6 +14,11 @@ const CHAT_MODEL = process.env.CHAT_MODEL || 'gpt-4o';
 // Request schemas
 const ingestRequestSchema = z.object({
   url: z.string().url('Valid URL required'),
+});
+
+const ingestTextRequestSchema = z.object({
+  text: z.string().min(10, 'Text must be at least 10 characters'),
+  title: z.string().optional().default('Manual Text Entry'),
 });
 
 const chatRequestSchema = z.object({
@@ -43,6 +48,35 @@ router.post('/ingest', async (req, res) => {
     }
   } catch (error) {
     console.error('Ingest error:', error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Invalid request', details: error.errors });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/ingest-text - Ingest raw text content
+router.post('/ingest-text', async (req, res) => {
+  try {
+    const { text, title } = ingestTextRequestSchema.parse(req.body);
+    
+    console.log('Ingesting text:', title);
+    const result = await ingestText(text, title);
+    
+    if (result.ok) {
+      res.json({
+        ok: true,
+        url: result.url,
+        title: result.title,
+        chunks: result.chunks,
+      });
+    } else {
+      res.status(422).json({
+        error: result.error || 'Failed to ingest text',
+      });
+    }
+  } catch (error) {
+    console.error('Ingest text error:', error);
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Invalid request', details: error.errors });
     }

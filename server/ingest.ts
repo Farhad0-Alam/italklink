@@ -283,6 +283,104 @@ export async function contentExists(url: string, contentHash: string): Promise<b
   }
 }
 
+// Ingest raw text into knowledge base
+export async function ingestText(text: string, title: string = 'Manual Text Entry'): Promise<IngestResult> {
+  try {
+    if (!text || text.trim().length < 10) {
+      return {
+        ok: false,
+        url: 'text://manual',
+        title,
+        chunks: 0,
+        error: 'Text too short. Please provide at least 10 characters.',
+      };
+    }
+
+    const content = text.trim();
+    const contentHash = computeContentHash(content);
+    const identifier = `text://${contentHash.substring(0, 12)}`;
+
+    // 1. Check for duplicates
+    if (await contentExists(identifier, contentHash)) {
+      console.log('Text content already exists, skipping ingestion');
+      const existingChunks = await pool.query(
+        `SELECT COUNT(*) as count FROM kb_docs WHERE url = $1`,
+        [identifier]
+      );
+      const count = Number(existingChunks.rows[0]?.count || 0);
+      
+      return {
+        ok: true,
+        url: identifier,
+        title,
+        chunks: count,
+      };
+    }
+
+    // 2. Delete existing chunks for this identifier (refresh)
+    await pool.query(`DELETE FROM kb_docs WHERE url = $1`, [identifier]);
+
+    // 3. Split into chunks
+    let chunks = chunkText(content);
+    console.log('Split text into', chunks.length, 'chunks');
+    
+    // Limit chunks to prevent memory issues
+    if (chunks.length > MAX_CHUNKS_PER_URL) {
+      console.log(`Too many chunks (${chunks.length}), limiting to ${MAX_CHUNKS_PER_URL} to prevent memory issues`);
+      chunks = chunks.slice(0, MAX_CHUNKS_PER_URL);
+    }
+
+    // 4. Generate embeddings
+    const embeddings = await generateEmbeddings(chunks);
+
+    // 5. Insert chunks with embeddings
+    for (let i = 0; i < chunks.length; i++) {
+      const chunkData: Omit<InsertKbDoc, 'id' | 'createdAt'> = {
+        url: identifier,
+        title,
+        content: chunks[i],
+        contentTokens: Math.ceil(chunks[i].length / 4),
+        meta: {
+          chunkIndex: i,
+          hash: contentHash,
+          sourceType: 'manual_text',
+        },
+      };
+
+      await pool.query(
+        `INSERT INTO kb_docs (url, title, content, content_tokens, meta, embedding) 
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          chunkData.url,
+          chunkData.title,
+          chunkData.content,
+          chunkData.contentTokens,
+          JSON.stringify(chunkData.meta),
+          embeddingToVector(embeddings[i]),
+        ]
+      );
+    }
+
+    console.log('Successfully ingested', chunks.length, 'text chunks');
+
+    return {
+      ok: true,
+      url: identifier,
+      title,
+      chunks: chunks.length,
+    };
+  } catch (error) {
+    console.error('Error ingesting text:', error);
+    return {
+      ok: false,
+      url: 'text://manual',
+      title,
+      chunks: 0,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
 // Ingest URL content into knowledge base
 export async function ingestUrl(url: string): Promise<IngestResult> {
   try {

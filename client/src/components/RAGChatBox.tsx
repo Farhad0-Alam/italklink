@@ -33,9 +33,10 @@ interface RAGChatBoxProps {
   isOpen: boolean;
   onClose: () => void;
   primaryColor?: string;
+  isEditing?: boolean;
 }
 
-export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e' }: RAGChatBoxProps) {
+export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditing = false }: RAGChatBoxProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -173,12 +174,12 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e' }: RAGCha
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0">
-        <DialogHeader className="px-6 py-4 border-b" style={{ borderColor: primaryColor + '20' }}>
+      <DialogContent className="max-w-4xl sm:max-w-xl md:max-w-2xl lg:max-w-4xl h-[85vh] sm:h-[80vh] flex flex-col p-0">
+        <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b" style={{ borderColor: primaryColor + '20' }}>
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Bot className="h-5 w-5" style={{ color: primaryColor }} />
-              <span>Knowledge Assistant</span>
+              <Bot className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: primaryColor }} />
+              <span className="text-sm sm:text-base">Knowledge Assistant</span>
             </div>
             <Button variant="ghost" size="sm" onClick={onClose} data-testid="button-close-chat">
               <X className="h-4 w-4" />
@@ -186,71 +187,73 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e' }: RAGCha
           </DialogTitle>
         </DialogHeader>
 
-        {/* URL Knowledge Configuration */}
-        <Collapsible open={showKnowledgeConfig} onOpenChange={setShowKnowledgeConfig}>
-          <CollapsibleTrigger asChild>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-between px-6 py-3 h-auto border-b hover:bg-gray-50"
-              data-testid="button-toggle-url-config"
-            >
-              <div className="flex items-center gap-2">
-                <Settings className="h-4 w-4" style={{ color: primaryColor }} />
-                <span className="font-medium text-sm">+ Add Website URLs</span>
-                <Badge variant="outline" className="text-xs">Unlimited</Badge>
-              </div>
-              {showKnowledgeConfig ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="px-6 py-4 border-b bg-gray-50/50">
-            <URLManager
-              title="RAG Knowledge Base URLs"
-              description="Add unlimited website URLs to build comprehensive knowledge base for intelligent Q&A"
-              onIngest={async (urls) => {
-                toast({
-                  title: 'URLs Added',
-                  description: `Successfully added ${urls.length} URLs to RAG knowledge base`,
-                });
-                // Clear messages to encourage users to ask new questions
-                setMessages([]);
-              }}
-              maxUrls={100}
-              className="border-none shadow-none bg-transparent"
-            />
-          </CollapsibleContent>
-        </Collapsible>
+        {/* URL Knowledge Configuration - Only show in editing mode */}
+        {isEditing && (
+          <Collapsible open={showKnowledgeConfig} onOpenChange={setShowKnowledgeConfig}>
+            <CollapsibleTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-between px-4 sm:px-6 py-3 h-auto border-b hover:bg-gray-50"
+                data-testid="button-toggle-url-config"
+              >
+                <div className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" style={{ color: primaryColor }} />
+                  <span className="font-medium text-xs sm:text-sm">+ Add Website URLs</span>
+                  <Badge variant="outline" className="text-xs">Unlimited</Badge>
+                </div>
+                {showKnowledgeConfig ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 sm:px-6 py-4 border-b bg-gray-50/50">
+              <URLManager
+                title="RAG Knowledge Base URLs"
+                description="Add unlimited website URLs to build comprehensive knowledge base for intelligent Q&A"
+                onIngest={async (urls) => {
+                  toast({
+                    title: 'URLs Added',
+                    description: `Successfully added ${urls.length} URLs to RAG knowledge base`,
+                  });
+                  // Clear messages to encourage users to ask new questions
+                  setMessages([]);
+                }}
+                maxUrls={100}
+                className="border-none shadow-none bg-transparent"
+              />
+            </CollapsibleContent>
+          </Collapsible>
+        )}
 
         <div className="flex-1 flex flex-col">
           {/* Messages */}
-          <ScrollArea className="flex-1 px-6">
-            <div className="space-y-4 py-4" data-testid="chat-messages">
+          <ScrollArea className="flex-1 px-3 sm:px-6">
+            <div className="space-y-3 sm:space-y-4 py-3 sm:py-4" data-testid="chat-messages">
               {messages.length === 0 ? (
-                <div className="text-center text-muted-foreground py-12">
-                  <Bot className="h-16 w-16 mx-auto mb-4 opacity-30" style={{ color: primaryColor }} />
-                  <p className="text-lg font-medium mb-2">Knowledge Assistant</p>
-                  <p className="text-sm">Ask me anything about the ingested content!</p>
-                  <p className="text-xs mt-2 opacity-75">I can help you find information from the knowledge base.</p>
+                <div className="text-center text-muted-foreground py-8 sm:py-12">
+                  <Bot className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3 sm:mb-4 opacity-30" style={{ color: primaryColor }} />
+                  <p className="text-base sm:text-lg font-medium mb-1 sm:mb-2">Knowledge Assistant</p>
+                  <p className="text-xs sm:text-sm px-4">Ask me anything about the ingested content!</p>
+                  <p className="text-xs mt-1 sm:mt-2 opacity-75 px-4">I can help you find information from the knowledge base.</p>
                 </div>
               ) : (
                 messages.map(renderMessage)
               )}
               
               {isLoading && (
-                <div className="flex gap-3 justify-start">
+                <div className="flex gap-2 sm:gap-3 justify-start">
                   <div 
-                    className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0"
                     style={{ backgroundColor: primaryColor + '20' }}
                   >
-                    <Bot className="h-4 w-4" style={{ color: primaryColor }} />
+                    <Bot className="h-3.5 w-3.5 sm:h-4 sm:w-4" style={{ color: primaryColor }} />
                   </div>
-                  <div className="bg-muted p-3 rounded-lg">
+                  <div className="bg-muted p-2 sm:p-3 rounded-lg">
                     <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" style={{ color: primaryColor }} />
-                      <span className="text-sm">Searching knowledge base...</span>
+                      <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" style={{ color: primaryColor }} />
+                      <span className="text-xs sm:text-sm">Searching knowledge base...</span>
                     </div>
                   </div>
                 </div>
@@ -261,14 +264,14 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e' }: RAGCha
           </ScrollArea>
 
           {/* Input */}
-          <div className="border-t px-6 py-4">
-            <form onSubmit={handleSubmit} className="flex gap-3">
+          <div className="border-t px-3 sm:px-6 py-3 sm:py-4">
+            <form onSubmit={handleSubmit} className="flex gap-2 sm:gap-3">
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask me anything about the content..."
+                placeholder="Ask me anything..."
                 disabled={isLoading}
-                className="flex-1"
+                className="flex-1 text-sm sm:text-base"
                 data-testid="input-chat"
               />
               <Button 
@@ -276,7 +279,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e' }: RAGCha
                 disabled={isLoading || !input.trim()}
                 size="icon"
                 style={{ backgroundColor: primaryColor }}
-                className="text-white hover:opacity-90"
+                className="text-white hover:opacity-90 flex-shrink-0"
                 data-testid="button-send"
               >
                 <Send className="h-4 w-4" />

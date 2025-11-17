@@ -2847,18 +2847,43 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     rows={4}
                     className="bg-slate-700 border-slate-600 text-white"
                   />
+                  <Button
+                    onClick={async () => {
+                      const textContent = element.data.knowledgeBase?.textContent;
+                      if (!textContent || textContent.trim().length < 10) {
+                        alert('Please enter at least 10 characters of text');
+                        return;
+                      }
+                      
+                      try {
+                        const response = await fetch('/api/ingest-text', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            text: textContent,
+                            title: element.data.title || 'Knowledge Base Content'
+                          })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (response.ok && result.ok) {
+                          alert(`Success! ${result.chunks} chunks added to knowledge base.`);
+                        } else {
+                          alert(`Error: ${result.error || 'Failed to save to knowledge base'}`);
+                        }
+                      } catch (error) {
+                        console.error('Error saving to knowledge base:', error);
+                        alert('Failed to save to knowledge base. Please try again.');
+                      }
+                    }}
+                    className="w-full"
+                    style={{ backgroundColor: element.data.primaryColor || '#22c55e' }}
+                    data-testid="button-save-kb-text"
+                  >
+                    💾 Save to Knowledge Base
+                  </Button>
                 </div>
-                <Input
-                  value={element.data.knowledgeBase?.websiteUrl || ''}
-                  onChange={(e) => handleDataUpdate({ 
-                    knowledgeBase: { 
-                      ...element.data.knowledgeBase, 
-                      websiteUrl: e.target.value 
-                    } 
-                  })}
-                  placeholder="Website URL for knowledge extraction"
-                  className="bg-slate-700 border-slate-600 text-white"
-                />
                 {/* Enhanced URL Manager - unlimited URLs */}
                 <div className="mt-2">
                   <URLManager
@@ -2931,21 +2956,46 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
-                {/* Chat Button for End Users */}
-                {element.data.showChatBox && (
-                  <div className="text-center">
+              <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                {/* AI Assistant Card - Similar to AI Chatbot */}
+                <div className="flex items-start gap-4 mb-4">
+                  <div 
+                    className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: element.data.primaryColor || '#22c55e' }}
+                  >
+                    <MessageCircle className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                      {element.data.title || 'AI Assistant'}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {element.data.description || 'AI Assistant'}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Welcome Message */}
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4">
+                  <p className="text-center text-gray-700 dark:text-gray-300">
+                    Hi! How can I help you today?
+                  </p>
+                </div>
+                
+                {/* Knowledge Base Label and Start Chat Button */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Knowledge Base:</span>
+                  {element.data.showChatBox && (
                     <Button
                       onClick={() => setIsChatOpen(true)}
-                      className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg shadow-lg"
+                      className="text-white px-6 py-2 rounded-lg shadow-md hover:opacity-90 transition-opacity"
                       style={{ backgroundColor: element.data.primaryColor || '#22c55e' }}
-                      data-testid="button-open-knowledge-chat"
+                      data-testid="button-start-chat"
                     >
-                      <MessageCircle className="h-5 w-5 mr-2" />
-                      Ask Knowledge Assistant
+                      Start Chat
                     </Button>
-                  </div>
-                )}
+                  )}
+                </div>
                 
                 {/* RAG Chat Dialog */}
                 {element.type === "ragKnowledge" && (
@@ -2953,6 +3003,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     isOpen={isChatOpen}
                     onClose={() => setIsChatOpen(false)}
                     primaryColor={element.data.primaryColor}
+                    isEditing={isEditing}
                   />
                 )}
                 
