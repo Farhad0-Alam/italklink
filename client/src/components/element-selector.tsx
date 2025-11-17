@@ -49,10 +49,10 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
     },
     {
       type: "link",
-      title: "Link",
+      title: "3D Button",
       icon: "fas fa-link",
       color: "bg-purple-100",
-      description: "Add a clickable link"
+      description: "Add a 3D button"
     },
     {
       type: "image",
