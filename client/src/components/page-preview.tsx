@@ -10,10 +10,11 @@ interface PagePreviewProps {
   };
   cardData: BusinessCard;
   elementSpacing?: number;
+  individualElementSpacing?: Record<string, number>;
   onNavigatePage?: (pageId: string) => void;
 }
 
-export function PagePreview({ pageData, cardData, elementSpacing = 16, onNavigatePage }: PagePreviewProps) {
+export function PagePreview({ pageData, cardData, elementSpacing = 16, individualElementSpacing, onNavigatePage }: PagePreviewProps) {
   const backgroundColor = cardData?.backgroundColor || "#f0f0f0";
   
   // Filter out invisible elements
@@ -34,13 +35,32 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, onNavigat
     );
   }
 
+  // Sort elements by order
+  const sortedElements = visibleElements.sort((a, b) => a.order - b.order);
+
   return (
     <div className="h-full overflow-y-auto relative" style={{ backgroundColor }}>
       <div className="min-h-full relative">
-        {visibleElements
-          .sort((a, b) => a.order - b.order)
-          .map((element) => (
-            <div key={element.id} style={{ marginBottom: `${elementSpacing}px` }}>
+        {sortedElements.map((element, index) => {
+          // Calculate spacing for this element
+          let spacing = elementSpacing; // Default global spacing
+          
+          // Check if next element exists and is the same type
+          if (index < sortedElements.length - 1) {
+            const nextElement = sortedElements[index + 1];
+            
+            // If next element is same type, use individual spacing for this type
+            if (nextElement.type === element.type) {
+              spacing = individualElementSpacing?.[element.type] ?? elementSpacing;
+            }
+            // Otherwise use global spacing (already set as default)
+          } else {
+            // Last element, no spacing needed
+            spacing = 0;
+          }
+
+          return (
+            <div key={element.id} style={{ marginBottom: `${spacing}px` }}>
               <PageElementRenderer
                 element={element}
                 isEditing={false}
@@ -50,7 +70,8 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, onNavigat
                 onNavigatePage={onNavigatePage}
               />
             </div>
-          ))}
+          );
+        })}
       </div>
     </div>
   );

@@ -498,6 +498,7 @@ END:VCARD`;
                         pageData={getCurrentPageData()}
                         cardData={cardData}
                         elementSpacing={(cardData as any).elementSpacing || 16}
+                        individualElementSpacing={(cardData as any).individualElementSpacing || {}}
                         onNavigatePage={handleNavigatePage}
                       />
                     ) : (
