@@ -182,6 +182,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const secondaryColor = useWatch({ control: form.control, name: "secondaryColor" });
   const tertiaryColor = useWatch({ control: form.control, name: "tertiaryColor" });
   const elementSpacing = useWatch({ control: form.control, name: "elementSpacing" });
+  const individualElementSpacing = useWatch({ control: form.control, name: "individualElementSpacing" });
 
   const toggleSection = (k: string) =>
     setCollapsedSections((p) => ({ ...p, [k]: !p[k] }));
@@ -6566,6 +6567,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 onElementSpacingChange={(spacing: number) => {
                   form.setValue("elementSpacing", spacing, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
                 }}
+                individualElementSpacing={individualElementSpacing || {}}
+                onIndividualSpacingChange={(elementType: string, spacing: number) => {
+                  const currentSpacing = individualElementSpacing || {};
+                  form.setValue("individualElementSpacing", {
+                    ...currentSpacing,
+                    [elementType]: spacing
+                  }, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
+                }}
                 cardData={enhancedCardData}
                 onNavigatePage={setSelectedPageId}
               />
@@ -6630,6 +6639,14 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   elementSpacing={elementSpacing ?? 16}
                   onElementSpacingChange={(spacing: number) => {
                     form.setValue("elementSpacing", spacing, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
+                  }}
+                  individualElementSpacing={individualElementSpacing || {}}
+                  onIndividualSpacingChange={(elementType: string, spacing: number) => {
+                    const currentSpacing = individualElementSpacing || {};
+                    form.setValue("individualElementSpacing", {
+                      ...currentSpacing,
+                      [elementType]: spacing
+                    }, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
                   }}
                   cardData={enhancedCardData}
                   onNavigatePage={setSelectedPageId}
