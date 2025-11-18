@@ -223,6 +223,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const mediaRoutes = (await import('./routes/media')).default;
   app.use('/api/media', mediaRoutes);
 
+  // Setup object storage routes for serving uploaded files
+  // Referenced from blueprint:javascript_object_storage
+  const { ObjectStorageService, ObjectNotFoundError } = await import('./objectStorage.js');
+  const { ObjectPermission } = await import('./objectAcl.js');
+
+  // Serve protected uploaded files (requires authentication and ACL check)
+  app.get('/objects/:objectPath(*)', requireAuth, async (req, res) => {
+    const userId = req.user?.id;
+    const objectStorageService = new ObjectStorageService();
+    try {
+      // Use the full path including /objects/ prefix
+      const fullPath = `/objects/${req.params.objectPath}`;
+      const objectFile = await objectStorageService.getObjectEntityFile(fullPath);
+      const canAccess = await objectStorageService.canAccessObjectEntity({
+        objectFile,
+        userId: userId,
+        requestedPermission: ObjectPermission.READ,
+      });
+      if (!canAccess) {
+        return res.sendStatus(401);
+      }
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error('Error checking object access:', error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  // Get upload URL for object storage (used by frontend upload components)
+  app.post('/api/objects/upload', requireAuth, async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error('Error getting upload URL:', error);
+      res.status(500).json({ error: 'Failed to get upload URL' });
+    }
+  });
+
   // === ENHANCED API ENDPOINTS ===
   
   // Advanced User Management APIs
