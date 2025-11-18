@@ -76,6 +76,24 @@ export function VoiceAgentElement({
   };
 
   const startListening = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast({
+        title: 'Microphone Not Supported',
+        description: 'Your browser does not support microphone access.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      toast({
+        title: 'Secure Connection Required',
+        description: 'Microphone access requires HTTPS. Please use a secure connection.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
@@ -95,11 +113,26 @@ export function VoiceAgentElement({
       mediaRecorder.current.start();
       setIsListening(true);
       setTranscript('Connecting to AI voice agent...');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Microphone access error:', error);
+      
+      let errorTitle = 'Microphone Error';
+      let errorDescription = 'Unable to access microphone.';
+      
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        errorTitle = 'Permission Denied';
+        errorDescription = 'Please allow microphone access in your browser settings and try again.';
+      } else if (error.name === 'NotFoundError') {
+        errorTitle = 'No Microphone Found';
+        errorDescription = 'Please connect a microphone and try again.';
+      } else if (error.name === 'NotReadableError') {
+        errorTitle = 'Microphone In Use';
+        errorDescription = 'Your microphone is being used by another application.';
+      }
+      
       toast({
-        title: 'Microphone Error',
-        description: 'Unable to access microphone. Please check permissions.',
+        title: errorTitle,
+        description: errorDescription,
         variant: 'destructive'
       });
     }
@@ -176,34 +209,26 @@ export function VoiceAgentElement({
 
         {/* Call Card Tab */}
         <TabsContent value="card" className="mt-0">
-          <div 
-            className="rounded-lg border border-gray-200 bg-white dark:bg-gray-800 p-6 shadow-sm"
-            style={{ borderColor: `${primaryColor}20` }}
-          >
-            {showAgentInfo && (
-              <div className="flex items-start gap-4 mb-4">
+          <div className="w-full px-4 py-12 bg-gradient-to-br from-slate-50 to-white rounded-2xl shadow-lg">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="flex items-center justify-center gap-2 mb-3">
                 <div 
-                  className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: `${primaryColor}15` }}
+                  className="w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: `${primaryColor}20` }}
                 >
-                  <Bot className="w-6 h-6" style={{ color: primaryColor }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {agentName}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {description}
-                  </p>
+                  <Phone className="w-6 h-6" style={{ color: primaryColor }} />
                 </div>
               </div>
-            )}
-
-            <div className="flex items-center gap-3 mb-4">
-              <Phone className="w-5 h-5 text-gray-500" />
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                {agentName}
+              </h2>
+              <p className="text-gray-600 text-sm md:text-base max-w-2xl mx-auto mb-4">
+                {description}
+              </p>
               <a 
                 href={`tel:${phoneNumber}`}
-                className="text-lg font-medium hover:underline"
+                className="text-lg font-semibold hover:underline inline-block"
                 style={{ color: primaryColor }}
                 onClick={(e) => {
                   if (isEditing) {
@@ -220,31 +245,64 @@ export function VoiceAgentElement({
               </a>
             </div>
 
-            <Button
-              onClick={handleCallClick}
-              className="w-full text-white font-semibold shadow-md hover:shadow-lg transition-all"
-              style={{ 
-                backgroundColor: primaryColor,
-                borderColor: primaryColor,
-              }}
-              data-testid="button-call-now"
-            >
-              <PhoneCall className="w-5 h-5 mr-2" />
-              {buttonText}
-            </Button>
+            {/* Phone Button */}
+            <div className="flex flex-col items-center gap-6 mb-8">
+              <button
+                onClick={handleCallClick}
+                className="w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 shadow-2xl"
+                style={{
+                  background: `linear-gradient(135deg, ${primaryColor}, #a78bfa)`,
+                }}
+              >
+                <svg
+                  className="w-14 h-14 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                  />
+                </svg>
+              </button>
 
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <CheckCircle2 className="w-4 h-4" style={{ color: primaryColor }} />
-                <span>24/7 AI-powered support</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <CheckCircle2 className="w-4 h-4" style={{ color: primaryColor }} />
-                <span>Instant answers to your questions</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <CheckCircle2 className="w-4 h-4" style={{ color: primaryColor }} />
-                <span>Book appointments over the phone</span>
+              <Button
+                onClick={handleCallClick}
+                className="px-6 py-2 text-base font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                style={{
+                  background: `linear-gradient(135deg, ${primaryColor}, #a78bfa)`,
+                  color: 'white',
+                  border: 'none'
+                }}
+                data-testid="button-call-now"
+              >
+                <PhoneCall className="w-4 h-4 mr-2 inline-block" />
+                {buttonText}
+              </Button>
+            </div>
+
+            {/* Features List */}
+            <div className="mt-6 bg-white rounded-lg p-5 border border-gray-200 shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: primaryColor }}></span>
+                What you get:
+              </h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: primaryColor }} />
+                  <span>24/7 AI-powered support</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: primaryColor }} />
+                  <span>Instant answers to your questions</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: primaryColor }} />
+                  <span>Book appointments over the phone</span>
+                </div>
               </div>
             </div>
           </div>
