@@ -3594,6 +3594,8 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 primaryColor={element.data.primaryColor || '#22c55e'}
                 showAgentInfo={element.data.showAgentInfo !== false}
                 isEditing={isEditing}
+                knowledgeBase={element.data.knowledgeBase}
+                cardId={cardData?.id}
               />
             )}
           </div>
