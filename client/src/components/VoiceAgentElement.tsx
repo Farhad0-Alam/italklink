@@ -1,8 +1,23 @@
+'use client';
+
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Phone, PhoneCall, Bot, CheckCircle2, X, Mic, Loader2, AlertCircle, Settings, Check } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import {
+  Phone,
+  PhoneCall,
+  CheckCircle2,
+  X,
+  Mic,
+  Loader2,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
@@ -19,6 +34,8 @@ interface VoiceAgentElementProps {
   cardId?: string;
 }
 
+type ChatMessage = { role: 'user' | 'assistant'; content: string };
+
 export function VoiceAgentElement({
   phoneNumber,
   agentName = 'AI Assistant',
@@ -28,50 +45,55 @@ export function VoiceAgentElement({
   showAgentInfo = true,
   isEditing = false,
   knowledgeBase,
-  cardId
+  cardId,
 }: VoiceAgentElementProps) {
   const [showCallDialog, setShowCallDialog] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [messages, setMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
-  const [permissionStatus, setPermissionStatus] = useState<'granted' | 'denied' | 'prompt' | 'checking'>('checking');
-  const [showPermissionHelp, setShowPermissionHelp] = useState(false);
-  
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  
+
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const isMountedRef = useRef(true);
 
-  // Check microphone permission status
+  // ---- helpers ----
+
+  const blobToBase64 = (blob: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (!reader.result) {
+          reject(new Error('Failed to read audio data.'));
+        } else {
+          resolve(reader.result as string);
+        }
+      };
+      reader.onerror = () => reject(reader.error || new Error('FileReader error'));
+      reader.readAsDataURL(blob);
+    });
+
+  // cleanup on unmount
   useEffect(() => {
-    checkMicrophonePermission();
-  }, []);
+    isMountedRef.current = true;
 
-  const checkMicrophonePermission = async () => {
-    try {
-      // Check if permissions API is available
-      if ('permissions' in navigator) {
-        const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-        setPermissionStatus(permission.state);
-        
-        // Listen for permission changes
-        permission.addEventListener('change', () => {
-          setPermissionStatus(permission.state);
-          if (permission.state === 'granted') {
-            setShowPermissionHelp(false);
-          }
-        });
-      } else {
-        // If permissions API not available, we'll check when user tries to use mic
-        setPermissionStatus('prompt');
+    return () => {
+      isMountedRef.current = false;
+
+      if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
+        mediaRecorder.current.stop();
       }
-    } catch (error) {
-      // Permissions API might not support 'microphone' query in some browsers
-      setPermissionStatus('prompt');
-    }
-  };
+
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+    };
+  }, []);
 
   const handleCallClick = () => {
     if (isEditing) {
@@ -82,14 +104,13 @@ export function VoiceAgentElement({
       });
       return;
     }
-
     setShowCallDialog(true);
   };
 
   const handleInitiateCall = () => {
     window.location.href = `tel:${phoneNumber}`;
     setShowCallDialog(false);
-    
+
     toast({
       title: 'Initiating Call',
       description: `Calling ${phoneNumber}...`,
@@ -106,34 +127,15 @@ export function VoiceAgentElement({
     return phone;
   };
 
-  const requestMicrophonePermission = async () => {
-    try {
-      // This will trigger the permission popup
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Permission granted - stop the stream immediately as we're just checking
-      stream.getTracks().forEach(track => track.stop());
-      setPermissionStatus('granted');
-      setShowPermissionHelp(false);
-      toast({
-        title: 'Permission Granted',
-        description: 'Microphone access has been granted. You can now use voice chat!',
-      });
-      // After permission is granted, automatically start listening
-      setTimeout(() => startListening(), 500);
-    } catch (error: any) {
-      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        setPermissionStatus('denied');
-        setShowPermissionHelp(true);
-      }
-    }
-  };
-
   const startListening = async () => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (typeof window === 'undefined') return;
+
+    // basic support checks
+    if (!navigator.mediaDevices?.getUserMedia) {
       toast({
         title: 'Microphone Not Supported',
         description: 'Your browser does not support microphone access.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return;
     }
@@ -142,68 +144,82 @@ export function VoiceAgentElement({
       toast({
         title: 'Secure Connection Required',
         description: 'Microphone access requires HTTPS. Please use a secure connection.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return;
     }
 
-    // Check permission status first
-    if (permissionStatus === 'denied') {
-      setShowPermissionHelp(true);
-      return;
-    }
-
-    if (permissionStatus === 'prompt') {
-      // If permission hasn't been granted yet, request it explicitly
-      await requestMicrophonePermission();
+    if (typeof (window as any).MediaRecorder === 'undefined') {
+      toast({
+        title: 'Recording Not Supported',
+        description: 'Your browser does not support audio recording (MediaRecorder).',
+        variant: 'destructive',
+      });
       return;
     }
 
     try {
+      // This line triggers the browser permission popup if not yet granted
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
-      // Update permission status if successful
-      setPermissionStatus('granted');
-      
-      mediaRecorder.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      streamRef.current = stream;
+
+      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorder.current = recorder;
       audioChunks.current = [];
-      
-      mediaRecorder.current.ondataavailable = (event) => {
-        audioChunks.current.push(event.data);
+
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunks.current.push(event.data);
+        }
       };
-      
-      mediaRecorder.current.onstop = async () => {
-        const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
-        await processAudio(audioBlob);
-        stream.getTracks().forEach(track => track.stop());
+
+      recorder.onerror = (event: any) => {
+        console.error('MediaRecorder error:', event);
+        toast({
+          title: 'Recording Error',
+          description: 'There was a problem recording audio. Please try again.',
+          variant: 'destructive',
+        });
+        setIsListening(false);
       };
-      
-      mediaRecorder.current.start();
+
+      recorder.onstop = async () => {
+        try {
+          const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+          await processAudio(audioBlob);
+        } finally {
+          if (streamRef.current) {
+            streamRef.current.getTracks().forEach((t) => t.stop());
+            streamRef.current = null;
+          }
+        }
+      };
+
+      recorder.start();
       setIsListening(true);
       setTranscript('Connecting to AI voice agent...');
     } catch (error: any) {
       console.error('Microphone access error:', error);
-      
-      let errorTitle = 'Microphone Error';
-      let errorDescription = 'Unable to access microphone.';
-      
+
+      let title = 'Microphone Error';
+      let description = 'Unable to access microphone.';
+
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        setPermissionStatus('denied');
-        setShowPermissionHelp(true);
-        errorTitle = 'Permission Denied';
-        errorDescription = 'Microphone access was blocked. Click the "Enable Microphone" button for help.';
+        title = 'Permission Denied';
+        description =
+          'Microphone access was blocked. Please allow microphone access in your browser settings and try again.';
       } else if (error.name === 'NotFoundError') {
-        errorTitle = 'No Microphone Found';
-        errorDescription = 'Please connect a microphone and try again.';
+        title = 'No Microphone Found';
+        description = 'Please connect a microphone and try again.';
       } else if (error.name === 'NotReadableError') {
-        errorTitle = 'Microphone In Use';
-        errorDescription = 'Your microphone is being used by another application.';
+        title = 'Microphone In Use';
+        description = 'Your microphone is being used by another application.';
       }
-      
+
       toast({
-        title: errorTitle,
-        description: errorDescription,
-        variant: 'destructive'
+        title,
+        description,
+        variant: 'destructive',
       });
     }
   };
@@ -216,56 +232,67 @@ export function VoiceAgentElement({
   };
 
   const processAudio = async (audioBlob: Blob) => {
+    if (!isMountedRef.current) return;
+
     setIsProcessing(true);
-    
+
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(audioBlob);
-      
-      reader.onloadend = async () => {
-        const base64Audio = reader.result as string;
-        
-        const response = await apiRequest<{
-          transcript: string;
-          response: string;
-          audioUrl?: string;
-        }>('POST', '/api/voice/process', {
-          audio: base64Audio,
-          cardId,
-          knowledgeBase,
-          messages
+      const base64Audio = await blobToBase64(audioBlob);
+
+      const response = await apiRequest<{
+        transcript: string;
+        response: string;
+        audioUrl?: string;
+      }>('POST', '/api/voice/process', {
+        audio: base64Audio,
+        cardId,
+        knowledgeBase,
+        messages,
+      });
+
+      if (response?.transcript) {
+        const userText = response.transcript;
+        const aiText = response.response;
+
+        setMessages((prev) => [
+          ...prev,
+          { role: 'user', content: userText },
+          { role: 'assistant', content: aiText },
+        ]);
+
+        setTranscript((prev) => {
+          const initial = prev === 'Connecting to AI voice agent...' ? '' : prev;
+          const userLine = `You: ${userText}`;
+          const aiLine = `AI: ${aiText}`;
+          return [initial, userLine, aiLine].filter(Boolean).join('\n\n').trim();
         });
-        
-        if (response.transcript) {
-          const userMsg = `You: ${response.transcript}`;
-          const aiMsg = `AI: ${response.response}`;
-          
-          setMessages(prev => [
-            ...prev,
-            { role: 'user', content: response.transcript },
-            { role: 'assistant', content: response.response }
-          ]);
-          
-          setTranscript(prev => {
-            const current = prev === 'Connecting to AI voice agent...' ? '' : prev;
-            return `${current}\n\n${userMsg}\n\n${aiMsg}`.trim();
-          });
-          
-          if (response.audioUrl) {
+
+        if (response.audioUrl) {
+          try {
             const audio = new Audio(response.audioUrl);
             await audio.play();
+          } catch (playError) {
+            console.error('Audio playback error:', playError);
           }
         }
-      };
+      } else {
+        toast({
+          title: 'No Response',
+          description: 'The AI did not return a response. Please try again.',
+          variant: 'destructive',
+        });
+      }
     } catch (error) {
       console.error('Audio processing error:', error);
       toast({
         title: 'Processing Error',
         description: 'Failed to process audio. Please try again.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } finally {
-      setIsProcessing(false);
+      if (isMountedRef.current) {
+        setIsProcessing(false);
+      }
     }
   };
 
@@ -283,7 +310,7 @@ export function VoiceAgentElement({
             {/* Header */}
             <div className="text-center mb-8">
               <div className="flex items-center justify-center gap-2 mb-3">
-                <div 
+                <div
                   className="w-12 h-12 rounded-full flex items-center justify-center"
                   style={{ backgroundColor: `${primaryColor}20` }}
                 >
@@ -296,7 +323,7 @@ export function VoiceAgentElement({
               <p className="text-gray-600 text-sm md:text-base max-w-2xl mx-auto mb-4">
                 {description}
               </p>
-              <a 
+              <a
                 href={`tel:${phoneNumber}`}
                 className="text-lg font-semibold hover:underline inline-block"
                 style={{ color: primaryColor }}
@@ -345,7 +372,7 @@ export function VoiceAgentElement({
                 style={{
                   background: `linear-gradient(135deg, ${primaryColor}, #a78bfa)`,
                   color: 'white',
-                  border: 'none'
+                  border: 'none',
                 }}
                 data-testid="button-call-now"
               >
@@ -357,20 +384,32 @@ export function VoiceAgentElement({
             {/* Features List */}
             <div className="mt-6 bg-white rounded-lg p-5 border border-gray-200 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: primaryColor }}></span>
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: primaryColor }}
+                ></span>
                 What you get:
               </h3>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: primaryColor }} />
+                  <CheckCircle2
+                    className="w-4 h-4 flex-shrink-0"
+                    style={{ color: primaryColor }}
+                  />
                   <span>24/7 AI-powered support</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: primaryColor }} />
+                  <CheckCircle2
+                    className="w-4 h-4 flex-shrink-0"
+                    style={{ color: primaryColor }}
+                  />
                   <span>Instant answers to your questions</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: primaryColor }} />
+                  <CheckCircle2
+                    className="w-4 h-4 flex-shrink-0"
+                    style={{ color: primaryColor }}
+                  />
                   <span>Book appointments over the phone</span>
                 </div>
               </div>
@@ -384,7 +423,7 @@ export function VoiceAgentElement({
             {/* Header */}
             <div className="text-center mb-8">
               <div className="flex items-center justify-center gap-2 mb-3">
-                <div 
+                <div
                   className="w-12 h-12 rounded-full flex items-center justify-center"
                   style={{ backgroundColor: `${primaryColor}20` }}
                 >
@@ -395,96 +434,21 @@ export function VoiceAgentElement({
                 Talk to our voice assistant
               </h2>
               <p className="text-gray-600 text-sm md:text-base max-w-2xl mx-auto">
-                Click 'Start' and speak directly with our AI agent
+                Click &apos;Start Voice&apos; and your browser will ask for microphone
+                permission.
               </p>
             </div>
 
-            {/* Permission Status Indicator */}
-            {permissionStatus !== 'checking' && (
-              <div className="flex justify-center mb-6">
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
-                  permissionStatus === 'granted' 
-                    ? 'bg-green-100 text-green-700' 
-                    : permissionStatus === 'denied'
-                    ? 'bg-red-100 text-red-700'
-                    : 'bg-yellow-100 text-yellow-700'
-                }`}>
-                  {permissionStatus === 'granted' ? (
-                    <>
-                      <Check className="w-4 h-4" />
-                      Microphone Ready
-                    </>
-                  ) : permissionStatus === 'denied' ? (
-                    <>
-                      <X className="w-4 h-4" />
-                      Microphone Blocked
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="w-4 h-4" />
-                      Permission Required
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Permission Help Section */}
-            {showPermissionHelp && (
-              <div className="max-w-2xl mx-auto mb-8 p-6 bg-amber-50 border border-amber-200 rounded-lg">
-                <h3 className="text-lg font-semibold text-amber-900 mb-3 flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5" />
-                  Enable Microphone Access
-                </h3>
-                <p className="text-sm text-amber-800 mb-4">
-                  To use voice chat, you need to grant microphone permission. Follow these steps:
-                </p>
-                <ol className="text-sm text-amber-700 space-y-2 mb-4">
-                  <li className="flex items-start gap-2">
-                    <span className="font-semibold">1.</span>
-                    Look for the microphone icon in your browser's address bar (usually on the right side)
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-semibold">2.</span>
-                    Click on it and select "Allow" or "Always allow"
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-semibold">3.</span>
-                    Refresh the page after granting permission
-                  </li>
-                </ol>
-                <div className="flex gap-3">
-                  <Button
-                    onClick={requestMicrophonePermission}
-                    className="flex-1"
-                    style={{
-                      backgroundColor: primaryColor,
-                      color: 'white'
-                    }}
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Try Again
-                  </Button>
-                  <Button
-                    onClick={() => setShowPermissionHelp(false)}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    Close
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Microphone Button */}
+            {/* Microphone Button + Controls */}
             <div className="flex flex-col items-center gap-6 mb-8">
+              {/* Big mic button */}
               <button
                 onClick={isListening ? stopListening : startListening}
-                disabled={isProcessing || permissionStatus === 'checking'}
+                disabled={isProcessing}
                 className="w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl"
                 style={{
-                  background: isListening 
-                    ? 'linear-gradient(135deg, #ef4444, #dc2626)' 
+                  background: isListening
+                    ? 'linear-gradient(135deg, #ef4444, #dc2626)'
                     : `linear-gradient(135deg, ${primaryColor}, #a78bfa)`,
                 }}
               >
@@ -503,40 +467,27 @@ export function VoiceAgentElement({
                 </svg>
               </button>
 
-              {/* Control Buttons */}
+              {/* Secondary Start/Stop button */}
               {!isListening ? (
-                <>
-                  {permissionStatus === 'denied' ? (
-                    <Button
-                      onClick={() => setShowPermissionHelp(true)}
-                      className="px-6 py-2 text-base font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-                      style={{
-                        background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                        color: 'white',
-                        border: 'none'
-                      }}
-                    >
-                      <Settings className="w-4 h-4 mr-2 inline-block" />
-                      Enable Microphone
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={startListening}
-                      disabled={isProcessing || permissionStatus === 'checking'}
-                      className="px-6 py-2 text-base font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-                      style={{
-                        background: `linear-gradient(135deg, ${primaryColor}, #a78bfa)`,
-                        color: 'white',
-                        border: 'none'
-                      }}
-                    >
-                      <svg className="w-4 h-4 mr-2 inline-block" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                      </svg>
-                      {permissionStatus === 'prompt' ? 'Grant Permission & Start' : 'Start Voice'}
-                    </Button>
-                  )}
-                </>
+                <Button
+                  onClick={startListening}
+                  disabled={isProcessing}
+                  className="px-6 py-2 text-base font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor}, #a78bfa)`,
+                    color: 'white',
+                    border: 'none',
+                  }}
+                >
+                  <svg
+                    className="w-4 h-4 mr-2 inline-block"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                  </svg>
+                  Start Voice
+                </Button>
               ) : (
                 <Button
                   onClick={stopListening}
@@ -544,10 +495,14 @@ export function VoiceAgentElement({
                   style={{
                     background: 'linear-gradient(135deg, #ef4444, #dc2626)',
                     color: 'white',
-                    border: 'none'
+                    border: 'none',
                   }}
                 >
-                  <svg className="w-4 h-4 mr-2 inline-block" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-4 h-4 mr-2 inline-block"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <rect x="6" y="6" width="8" height="8" rx="1" />
                   </svg>
                   Stop
@@ -568,11 +523,11 @@ export function VoiceAgentElement({
                 <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
                 Transcript:
               </h3>
-              <div 
+              <div
                 className="bg-white rounded-lg p-5 min-h-[180px] border border-gray-200 shadow-sm"
                 style={{
                   maxHeight: '350px',
-                  overflowY: 'auto'
+                  overflowY: 'auto',
                 }}
               >
                 {transcript ? (
@@ -581,14 +536,16 @@ export function VoiceAgentElement({
                       if (!line.trim()) return null;
                       const isUser = line.startsWith('You:');
                       const isAI = line.startsWith('AI:');
-                      
+
                       return (
-                        <p 
-                          key={idx} 
+                        <p
+                          key={idx}
                           className={`text-sm leading-relaxed ${
-                            isUser ? 'text-gray-900 font-medium' : 
-                            isAI ? 'text-gray-700' : 
-                            'text-gray-600'
+                            isUser
+                              ? 'text-gray-900 font-medium'
+                              : isAI
+                              ? 'text-gray-700'
+                              : 'text-gray-600'
                           }`}
                         >
                           {line}
@@ -597,9 +554,7 @@ export function VoiceAgentElement({
                     })}
                   </div>
                 ) : (
-                  <p className="text-gray-400 text-sm italic">
-                    [Awaiting...]
-                  </p>
+                  <p className="text-gray-400 text-sm italic">[Awaiting...]</p>
                 )}
               </div>
             </div>
@@ -616,10 +571,10 @@ export function VoiceAgentElement({
               Call {agentName}
             </DialogTitle>
             <DialogDescription>
-              You're about to call our AI assistant at {formatPhoneNumber(phoneNumber)}
+              You&apos;re about to call our AI assistant at {formatPhoneNumber(phoneNumber)}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="rounded-lg bg-blue-50 dark:bg-blue-950 p-4 border border-blue-200 dark:border-blue-800">
               <p className="text-sm text-blue-900 dark:text-blue-100">
@@ -637,7 +592,7 @@ export function VoiceAgentElement({
               <Button
                 onClick={handleInitiateCall}
                 className="flex-1 text-white font-semibold"
-                style={{ 
+                style={{
                   backgroundColor: primaryColor,
                   borderColor: primaryColor,
                 }}
