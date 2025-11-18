@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Phone, PhoneCall, Bot, CheckCircle2, X, Mic, Loader2 } from 'lucide-react';
+import { Phone, PhoneCall, Bot, CheckCircle2, X, Mic, Loader2, AlertCircle, Settings, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
@@ -35,12 +35,43 @@ export function VoiceAgentElement({
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [messages, setMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
+  const [permissionStatus, setPermissionStatus] = useState<'granted' | 'denied' | 'prompt' | 'checking'>('checking');
+  const [showPermissionHelp, setShowPermissionHelp] = useState(false);
   
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
+
+  // Check microphone permission status
+  useEffect(() => {
+    checkMicrophonePermission();
+  }, []);
+
+  const checkMicrophonePermission = async () => {
+    try {
+      // Check if permissions API is available
+      if ('permissions' in navigator) {
+        const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+        setPermissionStatus(permission.state);
+        
+        // Listen for permission changes
+        permission.addEventListener('change', () => {
+          setPermissionStatus(permission.state);
+          if (permission.state === 'granted') {
+            setShowPermissionHelp(false);
+          }
+        });
+      } else {
+        // If permissions API not available, we'll check when user tries to use mic
+        setPermissionStatus('prompt');
+      }
+    } catch (error) {
+      // Permissions API might not support 'microphone' query in some browsers
+      setPermissionStatus('prompt');
+    }
+  };
 
   const handleCallClick = () => {
     if (isEditing) {
@@ -75,6 +106,28 @@ export function VoiceAgentElement({
     return phone;
   };
 
+  const requestMicrophonePermission = async () => {
+    try {
+      // This will trigger the permission popup
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Permission granted - stop the stream immediately as we're just checking
+      stream.getTracks().forEach(track => track.stop());
+      setPermissionStatus('granted');
+      setShowPermissionHelp(false);
+      toast({
+        title: 'Permission Granted',
+        description: 'Microphone access has been granted. You can now use voice chat!',
+      });
+      // After permission is granted, automatically start listening
+      setTimeout(() => startListening(), 500);
+    } catch (error: any) {
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        setPermissionStatus('denied');
+        setShowPermissionHelp(true);
+      }
+    }
+  };
+
   const startListening = async () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       toast({
@@ -94,8 +147,23 @@ export function VoiceAgentElement({
       return;
     }
 
+    // Check permission status first
+    if (permissionStatus === 'denied') {
+      setShowPermissionHelp(true);
+      return;
+    }
+
+    if (permissionStatus === 'prompt') {
+      // If permission hasn't been granted yet, request it explicitly
+      await requestMicrophonePermission();
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // Update permission status if successful
+      setPermissionStatus('granted');
       
       mediaRecorder.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
       audioChunks.current = [];
@@ -120,8 +188,10 @@ export function VoiceAgentElement({
       let errorDescription = 'Unable to access microphone.';
       
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        setPermissionStatus('denied');
+        setShowPermissionHelp(true);
         errorTitle = 'Permission Denied';
-        errorDescription = 'Please allow microphone access in your browser settings and try again.';
+        errorDescription = 'Microphone access was blocked. Click the "Enable Microphone" button for help.';
       } else if (error.name === 'NotFoundError') {
         errorTitle = 'No Microphone Found';
         errorDescription = 'Please connect a microphone and try again.';
@@ -329,11 +399,88 @@ export function VoiceAgentElement({
               </p>
             </div>
 
+            {/* Permission Status Indicator */}
+            {permissionStatus !== 'checking' && (
+              <div className="flex justify-center mb-6">
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
+                  permissionStatus === 'granted' 
+                    ? 'bg-green-100 text-green-700' 
+                    : permissionStatus === 'denied'
+                    ? 'bg-red-100 text-red-700'
+                    : 'bg-yellow-100 text-yellow-700'
+                }`}>
+                  {permissionStatus === 'granted' ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Microphone Ready
+                    </>
+                  ) : permissionStatus === 'denied' ? (
+                    <>
+                      <X className="w-4 h-4" />
+                      Microphone Blocked
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-4 h-4" />
+                      Permission Required
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Permission Help Section */}
+            {showPermissionHelp && (
+              <div className="max-w-2xl mx-auto mb-8 p-6 bg-amber-50 border border-amber-200 rounded-lg">
+                <h3 className="text-lg font-semibold text-amber-900 mb-3 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5" />
+                  Enable Microphone Access
+                </h3>
+                <p className="text-sm text-amber-800 mb-4">
+                  To use voice chat, you need to grant microphone permission. Follow these steps:
+                </p>
+                <ol className="text-sm text-amber-700 space-y-2 mb-4">
+                  <li className="flex items-start gap-2">
+                    <span className="font-semibold">1.</span>
+                    Look for the microphone icon in your browser's address bar (usually on the right side)
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="font-semibold">2.</span>
+                    Click on it and select "Allow" or "Always allow"
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="font-semibold">3.</span>
+                    Refresh the page after granting permission
+                  </li>
+                </ol>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={requestMicrophonePermission}
+                    className="flex-1"
+                    style={{
+                      backgroundColor: primaryColor,
+                      color: 'white'
+                    }}
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Try Again
+                  </Button>
+                  <Button
+                    onClick={() => setShowPermissionHelp(false)}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Microphone Button */}
             <div className="flex flex-col items-center gap-6 mb-8">
               <button
                 onClick={isListening ? stopListening : startListening}
-                disabled={isProcessing}
+                disabled={isProcessing || permissionStatus === 'checking'}
                 className="w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl"
                 style={{
                   background: isListening 
@@ -358,21 +505,38 @@ export function VoiceAgentElement({
 
               {/* Control Buttons */}
               {!isListening ? (
-                <Button
-                  onClick={startListening}
-                  disabled={isProcessing}
-                  className="px-6 py-2 text-base font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-                  style={{
-                    background: `linear-gradient(135deg, ${primaryColor}, #a78bfa)`,
-                    color: 'white',
-                    border: 'none'
-                  }}
-                >
-                  <svg className="w-4 h-4 mr-2 inline-block" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                  </svg>
-                  Start Voice
-                </Button>
+                <>
+                  {permissionStatus === 'denied' ? (
+                    <Button
+                      onClick={() => setShowPermissionHelp(true)}
+                      className="px-6 py-2 text-base font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                      style={{
+                        background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                        color: 'white',
+                        border: 'none'
+                      }}
+                    >
+                      <Settings className="w-4 h-4 mr-2 inline-block" />
+                      Enable Microphone
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={startListening}
+                      disabled={isProcessing || permissionStatus === 'checking'}
+                      className="px-6 py-2 text-base font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor}, #a78bfa)`,
+                        color: 'white',
+                        border: 'none'
+                      }}
+                    >
+                      <svg className="w-4 h-4 mr-2 inline-block" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                      </svg>
+                      {permissionStatus === 'prompt' ? 'Grant Permission & Start' : 'Start Voice'}
+                    </Button>
+                  )}
+                </>
               ) : (
                 <Button
                   onClick={stopListening}
