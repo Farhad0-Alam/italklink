@@ -472,19 +472,24 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                   />
                 </div>
 
-                {/* Voice Button with Tooltip */}
+                {/* Cyan Recording Indicator */}
+                {isListening && (
+                  <div className="flex-shrink-0 w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+                )}
+
+                {/* Voice Button - Stop when Listening, Mic when not */}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
                       type="button"
                       onClick={isListening ? stopListening : startListening}
-                      disabled={isProcessing || isLoading || (isListening && (isLoading || isProcessing))}
+                      disabled={isProcessing || isLoading}
                       className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
                         isListening
                           ? 'bg-red-600 hover:bg-red-700 text-white'
+                          : isLoading || isProcessing
+                          ? 'text-gray-600 opacity-50 cursor-not-allowed'
                           : 'hover:bg-gray-800 text-gray-400 hover:text-white'
-                      } ${
-                        isLoading || isProcessing ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                       data-testid="button-voice"
                     >
@@ -496,22 +501,24 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="bg-gray-800 text-white text-xs px-2 py-1 rounded">
-                    Use voice mode
+                    {isListening ? 'Stop recording' : 'Use voice mode'}
                   </TooltipContent>
                 </Tooltip>
 
-                {/* Waveform Button */}
+                {/* Waveform Button - Active when listening */}
                 <button
                   type="button"
                   disabled={isLoading || isProcessing}
                   className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
-                    isLoading || isProcessing
+                    isListening
+                      ? 'bg-gray-700 text-cyan-400'
+                      : isLoading || isProcessing
                       ? 'text-gray-600 opacity-50 cursor-not-allowed'
                       : 'hover:bg-gray-800 text-gray-400 hover:text-white'
                   }`}
                   data-testid="button-waveform"
                 >
-                  <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className={`h-4 w-4 sm:h-5 sm:w-5 ${isListening ? 'animate-pulse' : ''}`} fill="currentColor" viewBox="0 0 24 24">
                     <rect x="3" y="13" width="2" height="8" />
                     <rect x="7" y="9" width="2" height="12" />
                     <rect x="11" y="5" width="2" height="16" />
