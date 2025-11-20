@@ -329,47 +329,30 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   };
 
   const renderMessage = (message: ChatMessage) => (
-    <div key={message.id} className={`flex gap-3 py-4 w-full ${message.type === 'user' ? 'flex-row-reverse justify-start' : 'justify-start'}`}>
+    <div key={message.id} className={`flex gap-3 py-4 w-full ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
       {message.type === 'assistant' && (
         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
           <Bot className="h-4 w-4 text-white" />
         </div>
       )}
       
-      <div className={`${message.type === 'user' ? 'max-w-[80%] ml-auto' : ''} ${message.type === 'user' ? 'rounded-lg px-4 py-3' : ''}`} style={message.type === 'user' ? { backgroundColor: '#1f2937' } : {}}>
-        <p className="text-white text-sm leading-relaxed text-left">
-          {message.isStreaming ? (
-            <StreamingText content={message.content} speed={20} />
-          ) : (
-            message.content
-          )}
-        </p>
+      <div className={`flex items-end gap-2 ${message.type === 'user' ? 'max-w-[80%]' : ''}`}>
+        <div className={`${message.type === 'user' ? 'rounded-lg px-4 py-3' : ''}`} style={message.type === 'user' ? { backgroundColor: '#1f2937' } : {}}>
+          <p className="text-white text-sm leading-relaxed text-left">
+            {message.isStreaming ? (
+              <StreamingText content={message.content} speed={20} />
+            ) : (
+              message.content
+            )}
+          </p>
+        </div>
         
-        {message.sources && message.sources.length > 0 && (
-          <div className="mt-3 space-y-2">
-            <p className="text-xs text-gray-400">Sources:</p>
-            <div className="flex flex-wrap gap-2">
-              {message.sources.map((source) => (
-                <button
-                  key={source.id}
-                  onClick={() => window.open(source.url, '_blank')}
-                  className="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded cursor-pointer transition-colors flex items-center gap-1"
-                  data-testid={`source-${source.id}`}
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  {source.title}
-                </button>
-              ))}
-            </div>
+        {message.type === 'user' && (
+          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+            <User className="h-4 w-4 text-white" />
           </div>
         )}
       </div>
-      
-      {message.type === 'user' && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-          <User className="h-4 w-4 text-white" />
-        </div>
-      )}
     </div>
   );
 
