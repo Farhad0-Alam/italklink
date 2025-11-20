@@ -607,40 +607,52 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         </div>
       </div>
 
-      {/* Audio Playback Modal with Waveform Animation */}
+      {/* Audio Playback Modal - Voice Conversation Mode */}
       {isPlayingAudio && (
-        <div className="fixed inset-0 z-[51] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={stopAudio}></div>
-          <div className="relative z-10 flex flex-col items-center gap-6">
+        <div className="fixed inset-0 z-[51] bg-black/20 backdrop-blur-sm flex items-center justify-center">
+          <div className="relative w-96 max-w-[90vw] bg-gray-950 rounded-lg p-6 sm:p-8 shadow-2xl flex flex-col items-center gap-6">
+            {/* Title */}
+            <div className="absolute top-4 right-4">
+              <button
+                onClick={stopAudio}
+                className="text-gray-400 hover:text-white transition-colors"
+                data-testid="button-close-voice"
+              >
+                <X className="h-5 w-5 sm:h-6 sm:w-6" />
+              </button>
+            </div>
+
+            <h2 className="text-white text-lg sm:text-xl font-semibold text-center mt-2">Voice Conversation Mode</h2>
+
             {/* Blue Circular Waveform Animation */}
-            <div className="relative w-32 h-32 sm:w-48 sm:h-48">
+            <div className="relative w-48 h-48 sm:w-64 sm:h-64">
               <div className="absolute inset-0 rounded-full animate-waveform-gradient bg-gradient-to-b from-blue-300 to-blue-600"></div>
               <div className="absolute inset-0 rounded-full bg-gradient-to-b from-blue-200/30 to-blue-500/50 animate-waveform-pulse"></div>
               
               {/* Waveform Lines */}
-              <div className="absolute inset-0 flex items-center justify-center gap-1 opacity-60">
-                <div className="w-1 bg-white/80 rounded-full animate-wave" style={{ height: '60%', animationDelay: '0s' }}></div>
-                <div className="w-1 bg-white/80 rounded-full animate-wave" style={{ height: '40%', animationDelay: '0.1s' }}></div>
-                <div className="w-1 bg-white/80 rounded-full animate-wave" style={{ height: '80%', animationDelay: '0.2s' }}></div>
-                <div className="w-1 bg-white/80 rounded-full animate-wave" style={{ height: '50%', animationDelay: '0.3s' }}></div>
-                <div className="w-1 bg-white/80 rounded-full animate-wave" style={{ height: '70%', animationDelay: '0.4s' }}></div>
+              <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-60">
+                <div className="w-2 bg-white/80 rounded-full animate-wave" style={{ height: '60%', animationDelay: '0s' }}></div>
+                <div className="w-2 bg-white/80 rounded-full animate-wave" style={{ height: '40%', animationDelay: '0.1s' }}></div>
+                <div className="w-2 bg-white/80 rounded-full animate-wave" style={{ height: '80%', animationDelay: '0.2s' }}></div>
+                <div className="w-2 bg-white/80 rounded-full animate-wave" style={{ height: '50%', animationDelay: '0.3s' }}></div>
+                <div className="w-2 bg-white/80 rounded-full animate-wave" style={{ height: '70%', animationDelay: '0.4s' }}></div>
               </div>
             </div>
 
             {/* Control Buttons */}
-            <div className="flex gap-4">
+            <div className="flex gap-6">
               {/* Mic Icon (Decorative) */}
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-700 flex items-center justify-center text-white opacity-60">
-                <Mic className="h-6 w-6 sm:h-8 sm:w-8" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-800 flex items-center justify-center text-gray-500 opacity-40">
+                <Mic className="h-7 w-7 sm:h-8 sm:w-8" />
               </div>
 
               {/* Stop Button */}
               <button
                 onClick={stopAudio}
-                className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center text-white transition-colors"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-white transition-colors"
                 data-testid="button-stop-audio"
               >
-                <X className="h-6 w-6 sm:h-8 sm:w-8" />
+                <X className="h-7 w-7 sm:h-8 sm:w-8" />
               </button>
             </div>
           </div>
