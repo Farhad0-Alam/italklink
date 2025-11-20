@@ -13,6 +13,20 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
+// Typing animation component
+function TypingIndicator() {
+  return (
+    <div className="flex items-center gap-1">
+      <span className="text-gray-400">Thinking</span>
+      <span className="flex items-center gap-0.5">
+        <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+        <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+        <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+      </span>
+    </div>
+  );
+}
+
 interface Source {
   id: string;
   url: string;
@@ -286,20 +300,15 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   };
 
   const renderMessage = (message: ChatMessage) => (
-    <div key={message.id} className="flex gap-3 py-4">
+    <div key={message.id} className={`flex gap-3 py-4 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
       {message.type === 'assistant' && (
         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
           <Bot className="h-4 w-4 text-white" />
         </div>
       )}
-      {message.type === 'user' && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-          <User className="h-4 w-4 text-white" />
-        </div>
-      )}
       
-      <div className="flex-1">
-        <p className="text-white text-sm leading-relaxed">{message.content}</p>
+      <div className={`flex-1 ${message.type === 'user' ? 'max-w-[80%]' : ''}`}>
+        <p className="text-white text-sm leading-relaxed text-left">{message.content}</p>
         
         {message.sources && message.sources.length > 0 && (
           <div className="mt-3 space-y-2">
@@ -320,6 +329,12 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
           </div>
         )}
       </div>
+      
+      {message.type === 'user' && (
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+          <User className="h-4 w-4 text-white" />
+        </div>
+      )}
     </div>
   );
 
@@ -395,9 +410,8 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
                         <Bot className="h-4 w-4 text-white" />
                       </div>
-                      <div className="flex items-center gap-2 text-gray-400">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="text-sm">Processing...</span>
+                      <div className="flex items-center text-gray-400 text-sm">
+                        <TypingIndicator />
                       </div>
                     </div>
                   )}
