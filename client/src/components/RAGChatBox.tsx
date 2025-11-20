@@ -291,10 +291,11 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       if (response?.transcript) {
         const userText = response.transcript;
 
+        // Add user transcript message with label
         const userMessage: ChatMessage = {
           id: Date.now().toString(),
           type: 'user',
-          content: userText,
+          content: `Transcript: ${userText}`,
           timestamp: new Date(),
         };
 
@@ -308,13 +309,28 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
 
         setMessages(prev => [...prev, userMessage, assistantMessage]);
 
-        if (response.audioUrl) {
-          try {
-            const audio = new Audio(response.audioUrl);
-            await audio.play();
-          } catch (playError) {
-            console.error('Audio playback error:', playError);
+        // Auto-convert AI response to speech
+        try {
+          const ttsResponse = await apiRequest<{ audioUrl: string }>('POST', '/api/voice/tts', {
+            text: response.response,
+          });
+
+          if (ttsResponse?.audioUrl && isMountedRef.current) {
+            setIsPlayingAudio(true);
+            setIsVoiceModalOpen(true);
+            if (audioRef.current) {
+              audioRef.current.src = ttsResponse.audioUrl;
+              audioRef.current.onended = () => {
+                if (isMountedRef.current) {
+                  setIsPlayingAudio(false);
+                  setIsVoiceModalOpen(false);
+                }
+              };
+              await audioRef.current.play();
+            }
           }
+        } catch (ttsError) {
+          console.error('TTS conversion error:', ttsError);
         }
       }
     } catch (error) {
