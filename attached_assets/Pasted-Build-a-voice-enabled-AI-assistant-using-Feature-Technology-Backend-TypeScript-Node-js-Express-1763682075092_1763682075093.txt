@@ -1,0 +1,158 @@
+Build a voice-enabled AI assistant using:
+
+Feature	Technology
+Backend	TypeScript + Node.js + Express
+Database	PostgreSQL (Replit) with pgvector
+Knowledge Storage	Vector embeddings (OpenAI text-embedding-3-small)
+AI Model	GPT-4o
+Speech-to-Text	OpenAI Whisper-1
+Text-to-Speech	TTS-1 (gpt-4o-mini-tts)
+Use Case	Voice lead generation + voice Q&A + knowledge memory
+📦 Required Packages
+
+Install in Replit shell:
+
+npm install express typescript ts-node pg dotenv cors openai
+npm install --save-dev @types/express @types/cors
+
+🗄 Create PostgreSQL Table (with vector extension)
+
+Open Replit PostgreSQL Console
+
+Run:
+
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE IF NOT EXISTS kbDocs (
+  id SERIAL PRIMARY KEY,
+  content TEXT NOT NULL,
+  embedding vector(1536) NOT NULL,
+  source TEXT DEFAULT 'auto',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS leads (
+  id SERIAL PRIMARY KEY,
+  full_name TEXT,
+  email TEXT,
+  phone TEXT,
+  interested_service TEXT,
+  budget_range TEXT,
+  timeline TEXT,
+  extra_notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+🔐 Add Environment Secrets in Replit
+
+Open Tools → Secrets and add:
+
+DATABASE_URL=YOUR_REPLIT_POSTGRES_URL
+OPENAI_KEY=YOUR_OPENAI_API_KEY
+
+📜 System Prompt for Lead Generation
+
+Use in GPT-4o whenever responding:
+
+You are a voice-based lead generation assistant.
+
+GOAL:
+Ask short, clear questions ONE by ONE.
+Collect these fields:
+full_name, email, phone, interested_service, budget_range, timeline, extra_notes.
+
+RULES:
+- Speak like a friendly human.
+- Ask one simple question at a time.
+- Do not repeat a question if already answered.
+- If unsure, ask for clarification.
+
+FORMAT (ALWAYS RETURN JSON):
+{
+  "reply": "string (what you will speak)",
+  "lead_state": {
+     "full_name": string | null,
+     "email": string | null,
+     "phone": string | null,
+     "interested_service": string | null,
+     "budget_range": string | null,
+     "timeline": string | null,
+     "extra_notes": string | null
+  }
+}
+
+🧠 Backend Logic Summary
+
+The Express server must:
+
+Step	Action
+1	Receive voice from frontend
+2	Convert audio → text using Whisper-1
+3	Send chat history → GPT-4o prompt
+4	Extract "reply" + "lead_state" JSON
+5	Save "lead_state" → PostgreSQL
+6	Convert "reply" → speech using TTS-1
+7	Return text + base64 audio back to frontend
+🧩 Vector Knowledge Base Logic
+
+The assistant must also support answering knowledge questions:
+
+Feature	How it Works
+Store Documents	Convert text → embeddings → save into kbDocs
+Query	Find nearest embeddings using <-> cosine similarity
+Answer	GPT-4o uses the returned docs as context
+Auto-Learn	If no match found, store the new answer
+🧠 Embedding Model to Use
+
+Use:
+
+text-embedding-3-small
+
+
+Vector dimension = 1536
+
+📌 Vector SQL Search Example
+SELECT content, embedding <-> $1 AS distance
+FROM kbDocs
+ORDER BY distance ASC
+LIMIT 5;
+
+🧩 Backend Code Requirement
+
+Backend must include these routes:
+
+Route	Purpose
+POST /voice-lead	Voice → Transcription → GPT-4o Lead Question → TTS
+POST /tts	Convert text → speech
+POST /ask-kb	Retrieve knowledge with pgvector
+POST /learn-kb	Save new answers to KB
+🎧 Frontend Requirements
+
+Accept microphone input
+
+Send audio as base64 to /voice-lead
+
+Keep a conversationHistory array
+
+Play back audioBase64 returned from server
+
+Display extracted lead data in UI
+
+🚀 Final Result (Expect This Behavior)
+User Action	AI Response
+Speaks through microphone	AI converts speech to text
+Provides information	AI saves lead info to PostgreSQL
+AI needs more info	AI asks new voice question
+User asks general question	AI searches pgvector and answers
+No answer found	AI learns & stores the answer
+💡 Optional Upgrades
+
+You can ask ChatGPT to generate:
+
+📎 PDF, DOC, TXT Knowledge Upload → Embedding + Store
+
+📊 Admin Dashboard (React + API)
+
+📞 Voice Calling Integration (Twilio + AI agent)
+
+🧠 Personalized memory per user session

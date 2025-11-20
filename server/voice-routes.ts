@@ -18,7 +18,7 @@ import {
   type ConversationMessage
 } from './voice-agent';
 import { requireAuth } from './auth';
-import { insertVoiceAgentSchema } from '@shared/schema';
+import { insertVoiceAgentSchema, insertVoiceLeadsSchema, insertKbDocsSchema, voiceLeads } from '@shared/schema';
 import OpenAI from 'openai';
 import fs from 'fs';
 import path from 'path';
@@ -767,6 +767,179 @@ router.post('/chat', requireAuth, async (req, res) => {
       error: 'Chat failed', 
       details: error.message 
     });
+  }
+});
+
+// Voice-based lead generation endpoint
+router.post('/voice-lead', requireAuth, async (req, res) => {
+  try {
+    const { audio, conversationHistory = [], leadState = {} } = req.body;
+    
+    if (!audio) {
+      return res.status(400).json({ error: 'Audio data is required' });
+    }
+    
+    // Convert base64 audio to buffer
+    const base64Data = audio.split(',')[1];
+    const audioBuffer = Buffer.from(base64Data, 'base64');
+    
+    // Save temporarily for processing
+    const tempPath = path.join('/tmp', `lead_audio_${Date.now()}.webm`);
+    fs.writeFileSync(tempPath, audioBuffer);
+    
+    try {
+      // Transcribe audio
+      const audioFile = fs.createReadStream(tempPath);
+      const transcription = await openai.audio.transcriptions.create({
+        file: audioFile,
+        model: 'whisper-1',
+      });
+      
+      const userText = transcription.text;
+      
+      // Lead generation system prompt
+      const systemPrompt = `You are a voice-based lead generation assistant.
+
+GOAL: Ask short, clear questions ONE BY ONE to collect:
+- full_name
+- email
+- phone
+- interested_service
+- budget_range
+- timeline
+- extra_notes
+
+RULES:
+- Speak like a friendly human
+- Ask one simple question at a time
+- Do not repeat a question if already answered
+- If unsure, ask for clarification
+
+ALWAYS RETURN VALID JSON with exactly this format:
+{
+  "reply": "Your spoken response here",
+  "lead_state": {
+    "full_name": null or string,
+    "email": null or string,
+    "phone": null or string,
+    "interested_service": null or string,
+    "budget_range": null or string,
+    "timeline": null or string,
+    "extra_notes": null or string
+  }
+}`;
+
+      // Query knowledge base if user asks questions
+      const kbContext = await queryKnowledgeBase(userText, 3);
+      
+      // Generate AI response
+      const messages = [
+        ...conversationHistory,
+        { role: 'user' as const, content: userText }
+      ];
+      
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: kbContext 
+              ? `${systemPrompt}\n\nKnowledge Base:\n${kbContext}`
+              : systemPrompt
+          },
+          ...messages
+        ],
+        max_tokens: 500,
+        response_format: { type: 'json_object' }
+      });
+      
+      const aiMessage = response.choices[0].message.content;
+      const parsedResponse = JSON.parse(aiMessage);
+      
+      // Update lead state
+      const updatedLeadState = {
+        ...leadState,
+        ...Object.fromEntries(
+          Object.entries(parsedResponse.lead_state).filter(([, v]) => v !== null)
+        )
+      };
+      
+      // Save to database if we have enough info
+      if (updatedLeadState.fullName || updatedLeadState.email || updatedLeadState.phone) {
+        await db.insert(voiceLeads).values({
+          fullName: updatedLeadState.fullName,
+          email: updatedLeadState.email,
+          phone: updatedLeadState.phone,
+          interestedService: updatedLeadState.interestedService,
+          budgetRange: updatedLeadState.budgetRange,
+          timeline: updatedLeadState.timeline,
+          extraNotes: updatedLeadState.extraNotes,
+          conversationHistory: [...conversationHistory, { role: 'user', content: userText }, { role: 'assistant', content: aiMessage }]
+        });
+      }
+      
+      // Generate TTS for reply
+      const audioResponse = await openai.audio.speech.create({
+        model: 'tts-1',
+        voice: 'alloy',
+        input: parsedResponse.reply,
+      });
+      
+      const audioArrayBuffer = await audioResponse.arrayBuffer();
+      const audioBase64 = Buffer.from(audioArrayBuffer).toString('base64');
+      const audioDataUri = `data:audio/mpeg;base64,${audioBase64}`;
+      
+      res.json({
+        transcript: userText,
+        reply: parsedResponse.reply,
+        lead_state: updatedLeadState,
+        audioUrl: audioDataUri,
+        conversationHistory: [...conversationHistory, { role: 'user', content: userText }, { role: 'assistant', content: aiMessage }]
+      });
+      
+    } finally {
+      if (fs.existsSync(tempPath)) {
+        fs.unlinkSync(tempPath);
+      }
+    }
+  } catch (error: any) {
+    console.error('Voice lead error:', error);
+    res.status(500).json({ 
+      error: 'Voice lead processing failed', 
+      details: error.message 
+    });
+  }
+});
+
+// Learn KB - Save new knowledge to vector database
+router.post('/learn-kb', requireAuth, async (req, res) => {
+  try {
+    const { content, title = 'Auto-learned', url = 'auto' } = req.body;
+    
+    if (!content) {
+      return res.status(400).json({ error: 'Content is required' });
+    }
+    
+    // Generate embedding
+    const embedding = await openai.embeddings.create({
+      model: 'text-embedding-3-small',
+      input: content,
+    });
+    
+    const vector = embedding.data[0].embedding;
+    
+    // Save to knowledge base
+    await db.insert(kbDocs).values({
+      content,
+      title,
+      url,
+      embedding: vector,
+    });
+    
+    res.json({ success: true, message: 'Knowledge saved successfully' });
+  } catch (error: any) {
+    console.error('Learn KB error:', error);
+    res.status(500).json({ error: 'Failed to save knowledge', details: error.message });
   }
 });
 

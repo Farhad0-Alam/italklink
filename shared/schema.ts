@@ -1616,6 +1616,36 @@ export const kbDocs = pgTable("kb_docs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Voice leads table for capturing lead generation data
+export const voiceLeads = pgTable("voice_leads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fullName: text("full_name"),
+  email: text("email"),
+  phone: text("phone"),
+  interestedService: text("interested_service"),
+  budgetRange: text("budget_range"),
+  timeline: text("timeline"),
+  extraNotes: text("extra_notes"),
+  conversationHistory: jsonb("conversation_history").default('[]'),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert schemas for RAG and lead generation - MUST be AFTER table definitions
+export const insertKbDocsSchema = createInsertSchema(kbDocs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertVoiceLeadsSchema = createInsertSchema(voiceLeads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertVoiceLead = z.infer<typeof insertVoiceLeadsSchema>;
+export type VoiceLead = typeof voiceLeads.$inferSelect;
+
 // Header templates table for advanced header designs
 export const headerTemplates = pgTable("header_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
