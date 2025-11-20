@@ -6,6 +6,12 @@ import { Loader2, Bot, User, ExternalLink, X, Settings, ChevronDown, ChevronUp, 
 import { URLManager } from '@/components/URLManager';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface Source {
   id: string;
@@ -403,63 +409,72 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
 
           {/* Input Area - ChatGPT Style */}
           <div className="border-t border-gray-700 px-6 py-4 bg-gray-900">
-            <form onSubmit={handleSubmit} className="flex gap-3 items-end">
-              {/* Add Button */}
-              <button
-                type="button"
-                className="flex-shrink-0 w-10 h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
-                data-testid="button-add"
-              >
-                <Plus className="h-5 w-5" />
-              </button>
+            <TooltipProvider>
+              <form onSubmit={handleSubmit} className="flex gap-3 items-end">
+                {/* Add Button */}
+                <button
+                  type="button"
+                  className="flex-shrink-0 w-10 h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                  data-testid="button-add"
+                >
+                  <Plus className="h-5 w-5" />
+                </button>
 
-              {/* Input Field */}
-              <div className="flex-1 bg-gray-800 rounded-full px-4 py-3 flex items-center gap-2">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask for presentation tips"
-                  disabled={isLoading || isProcessing || isListening}
-                  className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none text-sm"
-                  data-testid="input-chat"
-                />
-              </div>
+                {/* Input Field */}
+                <div className="flex-1 bg-gray-800 rounded-full px-4 py-3 flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask for presentation tips"
+                    disabled={isLoading || isProcessing || isListening}
+                    className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none text-sm"
+                    data-testid="input-chat"
+                  />
+                </div>
 
-              {/* Voice Button */}
-              <button
-                type="button"
-                onClick={isListening ? stopListening : startListening}
-                disabled={isProcessing || isLoading}
-                className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                  isListening
-                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                    : 'hover:bg-gray-800 text-gray-400 hover:text-white'
-                }`}
-                data-testid="button-voice"
-              >
-                {isListening ? (
-                  <Square className="h-5 w-5" />
-                ) : (
-                  <Mic className="h-5 w-5" />
-                )}
-              </button>
+                {/* Voice Button with Tooltip */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={isListening ? stopListening : startListening}
+                      disabled={isProcessing || isLoading}
+                      className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                        isListening
+                          ? 'bg-red-600 hover:bg-red-700 text-white'
+                          : 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                      }`}
+                      data-testid="button-voice"
+                    >
+                      {isListening ? (
+                        <Square className="h-5 w-5" />
+                      ) : (
+                        <Mic className="h-5 w-5" />
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="bg-gray-800 text-white text-xs px-2 py-1 rounded">
+                    Use voice mode
+                  </TooltipContent>
+                </Tooltip>
 
-              {/* Waveform Button */}
-              <button
-                type="button"
-                className="flex-shrink-0 w-10 h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
-                data-testid="button-waveform"
-              >
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                  <rect x="3" y="13" width="2" height="8" />
-                  <rect x="7" y="9" width="2" height="12" />
-                  <rect x="11" y="5" width="2" height="16" />
-                  <rect x="15" y="9" width="2" height="12" />
-                  <rect x="19" y="13" width="2" height="8" />
-                </svg>
-              </button>
-            </form>
+                {/* Waveform Button */}
+                <button
+                  type="button"
+                  className="flex-shrink-0 w-10 h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                  data-testid="button-waveform"
+                >
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="13" width="2" height="8" />
+                    <rect x="7" y="9" width="2" height="12" />
+                    <rect x="11" y="5" width="2" height="16" />
+                    <rect x="15" y="9" width="2" height="12" />
+                    <rect x="19" y="13" width="2" height="8" />
+                  </svg>
+                </button>
+              </form>
+            </TooltipProvider>
 
             {isListening && (
               <div className="mt-2 text-xs text-gray-400 text-center animate-pulse">
