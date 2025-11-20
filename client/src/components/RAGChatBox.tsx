@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Loader2, Bot, User, ExternalLink, X, Settings, ChevronDown, ChevronUp, Mic, Square, Plus } from 'lucide-react';
+import { Loader2, Bot, User, ExternalLink, X, Settings, ChevronDown, ChevronUp, Mic, Square, Plus, Volume2 } from 'lucide-react';
 import { URLManager } from '@/components/URLManager';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -89,12 +89,15 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isTTSLoading, setIsTTSLoading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const isMountedRef = useRef(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
   const scrollToBottom = () => {
@@ -115,6 +118,10 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
       }
     };
   }, []);
@@ -328,6 +335,57 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     handleSend();
   };
 
+  const convertToSpeech = async () => {
+    const lastAssistantMessage = [...messages].reverse().find(msg => msg.type === 'assistant');
+    if (!lastAssistantMessage) {
+      toast({
+        title: 'No Response',
+        description: 'There is no AI response to convert to speech.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsTTSLoading(true);
+    try {
+      const response = await apiRequest<{ audioUrl: string }>('POST', '/api/voice/tts', {
+        text: lastAssistantMessage.content,
+      });
+
+      if (response?.audioUrl) {
+        setIsPlayingAudio(true);
+        if (audioRef.current) {
+          audioRef.current.src = response.audioUrl;
+          audioRef.current.onended = () => {
+            if (isMountedRef.current) {
+              setIsPlayingAudio(false);
+            }
+          };
+          await audioRef.current.play();
+        }
+      }
+    } catch (error) {
+      console.error('TTS error:', error);
+      toast({
+        title: 'Speech Error',
+        description: 'Failed to convert text to speech.',
+        variant: 'destructive',
+      });
+    } finally {
+      if (isMountedRef.current) {
+        setIsTTSLoading(false);
+      }
+    }
+  };
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setIsPlayingAudio(false);
+  };
+
   const renderMessage = (message: ChatMessage) => (
     <div key={message.id} className={`flex gap-3 py-4 w-full ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
       {message.type === 'assistant' && (
@@ -498,28 +556,33 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                   )}
                 </button>
 
-                {/* Waveform Button - Active when listening with Tooltip */}
+                {/* Waveform Button - TTS Mode with Tooltip */}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
                       type="button"
-                      disabled={isLoading || isProcessing}
+                      onClick={convertToSpeech}
+                      disabled={isLoading || isProcessing || isTTSLoading}
                       className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
-                        isListening
+                        isPlayingAudio
                           ? 'bg-gray-700 text-cyan-400'
-                          : isLoading || isProcessing
+                          : isLoading || isProcessing || isTTSLoading
                           ? 'text-gray-600 opacity-50 cursor-not-allowed'
                           : 'hover:bg-gray-800 text-gray-400 hover:text-white'
                       }`}
                       data-testid="button-waveform"
                     >
-                      <svg className={`h-4 w-4 sm:h-5 sm:w-5 ${isListening ? 'animate-pulse' : ''}`} fill="currentColor" viewBox="0 0 24 24">
-                        <rect x="3" y="13" width="2" height="8" />
-                        <rect x="7" y="9" width="2" height="12" />
-                        <rect x="11" y="5" width="2" height="16" />
-                        <rect x="15" y="9" width="2" height="12" />
-                        <rect x="19" y="13" width="2" height="8" />
-                      </svg>
+                      {isPlayingAudio ? (
+                        <svg className="h-4 w-4 sm:h-5 sm:w-5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                          <rect x="3" y="13" width="2" height="8" />
+                          <rect x="7" y="9" width="2" height="12" />
+                          <rect x="11" y="5" width="2" height="16" />
+                          <rect x="15" y="9" width="2" height="12" />
+                          <rect x="19" y="13" width="2" height="8" />
+                        </svg>
+                      ) : (
+                        <Volume2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                      )}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="bg-gray-800 text-white text-xs px-2 py-1 rounded">
@@ -537,6 +600,49 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
           </div>
         </div>
       </div>
+
+      {/* Audio Playback Modal with Waveform Animation */}
+      {isPlayingAudio && (
+        <div className="fixed inset-0 z-[51] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={stopAudio}></div>
+          <div className="relative z-10 flex flex-col items-center gap-6">
+            {/* Blue Circular Waveform Animation */}
+            <div className="relative w-32 h-32 sm:w-48 sm:h-48">
+              <div className="absolute inset-0 rounded-full animate-waveform-gradient bg-gradient-to-b from-blue-300 to-blue-600"></div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-b from-blue-200/30 to-blue-500/50 animate-waveform-pulse"></div>
+              
+              {/* Waveform Lines */}
+              <div className="absolute inset-0 flex items-center justify-center gap-1 opacity-60">
+                <div className="w-1 bg-white/80 rounded-full animate-wave" style={{ height: '60%', animationDelay: '0s' }}></div>
+                <div className="w-1 bg-white/80 rounded-full animate-wave" style={{ height: '40%', animationDelay: '0.1s' }}></div>
+                <div className="w-1 bg-white/80 rounded-full animate-wave" style={{ height: '80%', animationDelay: '0.2s' }}></div>
+                <div className="w-1 bg-white/80 rounded-full animate-wave" style={{ height: '50%', animationDelay: '0.3s' }}></div>
+                <div className="w-1 bg-white/80 rounded-full animate-wave" style={{ height: '70%', animationDelay: '0.4s' }}></div>
+              </div>
+            </div>
+
+            {/* Control Buttons */}
+            <div className="flex gap-4">
+              {/* Mic Icon (Decorative) */}
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-700 flex items-center justify-center text-white opacity-60">
+                <Mic className="h-6 w-6 sm:h-8 sm:w-8" />
+              </div>
+
+              {/* Stop Button */}
+              <button
+                onClick={stopAudio}
+                className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center text-white transition-colors"
+                data-testid="button-stop-audio"
+              >
+                <X className="h-6 w-6 sm:h-8 sm:w-8" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden Audio Element */}
+      <audio ref={audioRef} />
     </div>
   );
 }
