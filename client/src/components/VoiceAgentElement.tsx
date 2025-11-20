@@ -19,7 +19,6 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 
 interface VoiceAgentElementProps {
@@ -42,7 +41,7 @@ export function VoiceAgentElement({
   description = 'Call us anytime to speak with our AI assistant',
   buttonText = 'Call Now',
   primaryColor = '#22c55e',
-  showAgentInfo = true,
+  showAgentInfo = true, // currently unused, but kept for API compatibility
   isEditing = false,
   knowledgeBase,
   cardId,
@@ -54,14 +53,13 @@ export function VoiceAgentElement({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
 
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const isMountedRef = useRef(true);
 
-  // ---- helpers ----
+  // ---------- helpers ----------
 
   const blobToBase64 = (blob: Blob): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -159,7 +157,7 @@ export function VoiceAgentElement({
     }
 
     try {
-      // This line triggers the browser permission popup if not yet granted
+      // This triggers the browser permission popup (if not already decided)
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
@@ -201,13 +199,24 @@ export function VoiceAgentElement({
     } catch (error: any) {
       console.error('Microphone access error:', error);
 
+      const isInIframe =
+        typeof window !== 'undefined' && window.self !== window.top;
+
       let title = 'Microphone Error';
       let description = 'Unable to access microphone.';
 
-      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+      if (
+        isInIframe &&
+        (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError')
+      ) {
+        // Specific helpful message for Replit / iframe preview
+        title = 'Not Available in Preview';
+        description =
+          'This preview is running inside an iframe that cannot use the microphone. Click “Open in new tab” (external link icon in Replit) and try from that URL.';
+      } else if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         title = 'Permission Denied';
         description =
-          'Microphone access was blocked. Please allow microphone access in your browser settings and try again.';
+          'Microphone access was blocked. Please allow microphone access for this site in your browser settings and try again.';
       } else if (error.name === 'NotFoundError') {
         title = 'No Microphone Found';
         description = 'Please connect a microphone and try again.';
