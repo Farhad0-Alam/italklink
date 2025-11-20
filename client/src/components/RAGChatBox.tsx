@@ -351,7 +351,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         
         textToConvert = defaultGreeting;
         
-        // Add the greeting to messages
+        // Add the greeting to messages (preserving existing messages)
         const assistantMessage: ChatMessage = {
           id: (Date.now()).toString(),
           type: 'assistant',
@@ -359,7 +359,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
           timestamp: new Date(),
           isStreaming: false,
         };
-        setMessages([assistantMessage]);
+        setMessages(prev => [...prev, assistantMessage]);
       } else {
         textToConvert = lastAssistantMessage.content;
       }
