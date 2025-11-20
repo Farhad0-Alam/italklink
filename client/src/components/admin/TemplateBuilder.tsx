@@ -303,19 +303,33 @@ export default function TemplateBuilder() {
     }
   };
 
-  const applyTemplateStyle = (templateStyle: any) => {
-    if (!templateStyle) return;
+  const applyTemplateStyle = (templateData: any) => {
+    if (!templateData) return;
     
-    const parsedStyle = typeof templateStyle === 'string' ? JSON.parse(templateStyle) : templateStyle;
-    
-    setBusinessCardData(prev => ({
-      ...prev,
-      template: parsedStyle.template || 'minimal',
-      backgroundColor: parsedStyle.backgroundColor || prev.backgroundColor,
-      textColor: parsedStyle.textColor || prev.textColor,
-      accentColor: parsedStyle.accentColor || prev.accentColor,
-      iconColor: parsedStyle.accentColor || prev.iconColor
-    }));
+    try {
+      const parsed = typeof templateData === 'string' ? JSON.parse(templateData) : templateData;
+      
+      setBusinessCardData(prev => ({
+        ...prev,
+        // Apply template type/style
+        template: (parsed.template || 'minimal') as any,
+        // Apply colors
+        backgroundColor: parsed.backgroundColor || '#ffffff',
+        textColor: parsed.textColor || '#000000',
+        accentColor: parsed.accentColor || '#3b82f6',
+        iconColor: parsed.accentColor || '#3b82f6',
+        // Keep user's content but update styling
+        fullName: prev.fullName || 'John Doe',
+        title: prev.title || 'Professional Title',
+        company: prev.company || 'Company Name',
+        email: prev.email || 'email@example.com',
+        phone: prev.phone || '+1 (555) 123-4567',
+        website: prev.website || 'www.example.com',
+        bio: prev.bio || 'Professional bio',
+      }));
+    } catch (error) {
+      console.error('Error applying template style:', error);
+    }
   };
 
   return (
@@ -367,10 +381,7 @@ export default function TemplateBuilder() {
                       <SelectItem value="">-- None --</SelectItem>
                       {availableTemplates.map(t => (
                         <SelectItem key={t.id} value={t.id}>
-                          <div className="flex items-center">
-                            <Zap className="h-3 w-3 mr-1" />
-                            {t.name}
-                          </div>
+                          ✨ {t.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
