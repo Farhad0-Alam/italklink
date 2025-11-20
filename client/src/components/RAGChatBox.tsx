@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-// Typing animation component
+// Typing animation component for loading state
 function TypingIndicator() {
   return (
     <div className="flex items-center gap-1">
@@ -25,6 +25,32 @@ function TypingIndicator() {
       </span>
     </div>
   );
+}
+
+// Streaming text component - types out text character by character
+interface StreamingTextProps {
+  content: string;
+  speed?: number;
+}
+
+function StreamingText({ content, speed = 20 }: StreamingTextProps) {
+  const [displayedText, setDisplayedText] = useState('');
+
+  useEffect(() => {
+    let index = 0;
+    const interval = setInterval(() => {
+      if (index < content.length) {
+        setDisplayedText(content.substring(0, index + 1));
+        index++;
+      } else {
+        clearInterval(interval);
+      }
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [content, speed]);
+
+  return <>{displayedText}</>;
 }
 
 interface Source {
@@ -40,6 +66,7 @@ interface ChatMessage {
   content: string;
   sources?: Source[];
   timestamp: Date;
+  isStreaming?: boolean;
 }
 
 interface RAGResponse {
@@ -141,6 +168,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
           content: result.answer,
           sources: result.sources,
           timestamp: new Date(),
+          isStreaming: true,
         };
 
         setMessages(prev => [...prev, assistantMessage]);
@@ -267,6 +295,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
           type: 'assistant',
           content: response.response,
           timestamp: new Date(),
+          isStreaming: true,
         };
 
         setMessages(prev => [...prev, userMessage, assistantMessage]);
@@ -308,7 +337,13 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       )}
       
       <div className={`flex-1 ${message.type === 'user' ? 'max-w-[80%]' : ''}`}>
-        <p className="text-white text-sm leading-relaxed text-left">{message.content}</p>
+        <p className="text-white text-sm leading-relaxed text-left">
+          {message.isStreaming ? (
+            <StreamingText content={message.content} speed={20} />
+          ) : (
+            message.content
+          )}
+        </p>
         
         {message.sources && message.sources.length > 0 && (
           <div className="mt-3 space-y-2">
