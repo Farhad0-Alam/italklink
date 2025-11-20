@@ -19,7 +19,13 @@ import {
   Twitter,
   Linkedin,
   MessageCircle,
+  Instagram,
+  Youtube,
+  Github,
+  Mail,
+  Globe,
 } from "lucide-react";
+import { FaInstagram, FaTiktok, FaPinterest, FaSnapchat, FaWhatsapp, FaTelegram, FaBehance, FaDribbble } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
 import { useButtonTracking } from "@/modules/automation/useButtonTracking";
 
@@ -709,20 +715,20 @@ export const BusinessCardComponent = forwardRef<
     const convertSocialLinksToCustomSocials = () => {
       if (!data.socialLinks) return [];
 
-      const socialIconMap: Record<string, { icon: string; label: string }> = {
-        linkedin: { icon: "fab fa-linkedin", label: "LinkedIn" },
-        twitter: { icon: "fab fa-twitter", label: "Twitter" },
-        facebook: { icon: "fab fa-facebook", label: "Facebook" },
-        instagram: { icon: "fab fa-instagram", label: "Instagram" },
-        youtube: { icon: "fab fa-youtube", label: "YouTube" },
-        tiktok: { icon: "fab fa-tiktok", label: "TikTok" },
-        pinterest: { icon: "fab fa-pinterest", label: "Pinterest" },
-        snapchat: { icon: "fab fa-snapchat", label: "Snapchat" },
-        whatsapp: { icon: "fab fa-whatsapp", label: "WhatsApp" },
-        telegram: { icon: "fab fa-telegram", label: "Telegram" },
-        github: { icon: "fab fa-github", label: "GitHub" },
-        behance: { icon: "fab fa-behance", label: "Behance" },
-        dribbble: { icon: "fab fa-dribbble", label: "Dribbble" },
+      const socialIconMap: Record<string, { icon: string; iconType: string; label: string }> = {
+        linkedin: { icon: "linkedin", iconType: "lucide", label: "LinkedIn" },
+        twitter: { icon: "twitter", iconType: "lucide", label: "Twitter" },
+        facebook: { icon: "facebook", iconType: "lucide", label: "Facebook" },
+        instagram: { icon: "instagram", iconType: "lucide", label: "Instagram" },
+        youtube: { icon: "youtube", iconType: "lucide", label: "YouTube" },
+        tiktok: { icon: "tiktok", iconType: "react-icons", label: "TikTok" },
+        pinterest: { icon: "pinterest", iconType: "react-icons", label: "Pinterest" },
+        snapchat: { icon: "snapchat", iconType: "react-icons", label: "Snapchat" },
+        whatsapp: { icon: "whatsapp", iconType: "react-icons", label: "WhatsApp" },
+        telegram: { icon: "telegram", iconType: "react-icons", label: "Telegram" },
+        github: { icon: "github", iconType: "lucide", label: "GitHub" },
+        behance: { icon: "behance", iconType: "react-icons", label: "Behance" },
+        dribbble: { icon: "dribbble", iconType: "react-icons", label: "Dribbble" },
       };
 
       const socials = [];
@@ -730,13 +736,14 @@ export const BusinessCardComponent = forwardRef<
 
       Object.entries(data.socialLinks).forEach(([platform, value]) => {
         if (value && typeof value === "string" && value.trim()) {
-          const mapping = socialIconMap[platform.toLowerCase()] || { icon: "fab fa-link", label: platform };
+          const mapping = socialIconMap[platform.toLowerCase()] || { icon: "link", iconType: "lucide", label: platform };
           socials.push({
             id: `social-${platform}-${idCounter}`,
             platform: platform.toLowerCase(),
             value: value.trim(),
             label: mapping.label,
             icon: mapping.icon,
+            iconType: mapping.iconType,
             type: "social",
           });
           idCounter++;
@@ -744,6 +751,41 @@ export const BusinessCardComponent = forwardRef<
       });
 
       return socials;
+    };
+
+    // Helper to render social icon
+    const renderSocialIcon = (social: any, iconSize: number = 18) => {
+      if (social.iconType === "react-icons") {
+        const iconProps = { size: iconSize, style: { fontSize: `${iconSize}px` } };
+        switch (social.icon) {
+          case "instagram":
+            return <FaInstagram {...iconProps} />;
+          case "tiktok":
+            return <FaTiktok {...iconProps} />;
+          case "pinterest":
+            return <FaPinterest {...iconProps} />;
+          case "snapchat":
+            return <FaSnapchat {...iconProps} />;
+          case "whatsapp":
+            return <FaWhatsapp {...iconProps} />;
+          case "telegram":
+            return <FaTelegram {...iconProps} />;
+          case "behance":
+            return <FaBehance {...iconProps} />;
+          case "dribbble":
+            return <FaDribbble {...iconProps} />;
+          default:
+            return <div style={{ width: iconSize, height: iconSize }} />;
+        }
+      } else {
+        // Fallback to FontAwesome for lucide icons (will show text if not available)
+        return (
+          <i
+            className={`fab fa-${social.icon}`}
+            style={{ fontSize: `${iconSize}px` }}
+          />
+        );
+      }
     };
 
     // Generate primary contact buttons
@@ -1595,12 +1637,15 @@ export const BusinessCardComponent = forwardRef<
                         data-testid={`button-custom-social-${social.id}`}
                       >
                         {shouldShowIcons && (
-                          <i
-                            className={`${social.icon} tl-icon-symbol`}
+                          <span
+                            className="tl-icon-symbol flex items-center justify-center"
                             style={{
                               fontSize: `${parseNumeric(getSectionStyle("socialMedia", "iconSize"), 18)}px`,
+                              lineHeight: 1,
                             }}
-                          ></i>
+                          >
+                            {renderSocialIcon(social, parseNumeric(getSectionStyle("socialMedia", "iconSize"), 18))}
+                          </span>
                         )}
                         {shouldShowText && showLabel && (
                           <span className="tl-icon-text">
