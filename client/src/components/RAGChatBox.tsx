@@ -336,7 +336,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         </div>
       )}
       
-      <div className={`flex-1 ${message.type === 'user' ? 'max-w-[80%]' : ''}`}>
+      <div className={`flex-1 ${message.type === 'user' ? 'max-w-[80%]' : ''} ${message.type === 'user' ? 'bg-gray-800 rounded-lg px-4 py-3' : ''}`} style={message.type === 'user' ? { backgroundColor: '#1f2937' } : {}}>
         <p className="text-white text-sm leading-relaxed text-left">
           {message.isStreaming ? (
             <StreamingText content={message.content} speed={20} />
