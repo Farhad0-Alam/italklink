@@ -337,21 +337,16 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   };
 
   const convertToSpeech = async () => {
-    const lastAssistantMessage = [...messages].reverse().find(msg => msg.type === 'assistant');
-    if (!lastAssistantMessage) {
-      toast({
-        title: 'No Response',
-        description: 'There is no AI response to convert to speech.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     // Open the modal immediately
     setIsVoiceModalOpen(true);
     setIsTTSLoading(true);
     
     try {
+      const lastAssistantMessage = [...messages].reverse().find(msg => msg.type === 'assistant');
+      if (!lastAssistantMessage) {
+        throw new Error('No AI response available');
+      }
+
       const response = await apiRequest<{ audioUrl: string }>('POST', '/api/voice/tts', {
         text: lastAssistantMessage.content,
       });
@@ -372,9 +367,10 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       console.error('TTS error:', error);
       toast({
         title: 'Speech Error',
-        description: 'Failed to convert text to speech.',
+        description: error instanceof Error ? error.message : 'Failed to convert text to speech.',
         variant: 'destructive',
       });
+      setIsVoiceModalOpen(false);
     } finally {
       if (isMountedRef.current) {
         setIsTTSLoading(false);
