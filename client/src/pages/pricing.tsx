@@ -276,17 +276,28 @@ export default function Pricing() {
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       <Navigation />
       
-      <div className="container mx-auto px-4 pt-6">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => setLocation('/dashboard')}
-          className="flex items-center space-x-2 hover:bg-gray-100"
-          data-testid="button-back-dashboard"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to Dashboard</span>
-        </Button>
+      {/* TalkLink Branded Header */}
+      <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
+                <i className="fas fa-address-card text-orange-500 text-lg"></i>
+              </div>
+              <h1 className="text-3xl font-bold">TalkLink</h1>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setLocation('/dashboard')}
+              className="text-white hover:bg-orange-400 transition-colors"
+              data-testid="button-back-dashboard"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </div>
+        </div>
       </div>
       
       <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700">
