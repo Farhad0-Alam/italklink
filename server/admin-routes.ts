@@ -987,6 +987,42 @@ router.get('/coupons/:id/usage', requireOwner, async (req, res) => {
 
 // === TEMPLATES MANAGEMENT ENDPOINTS ===
 
+// Seed 15 creative templates
+router.post('/templates/seed/create-defaults', requireOwner, async (req, res) => {
+  try {
+    const defaultTemplates = [
+      { name: 'Professional Blue', description: 'Clean professional template with blue accent', category: 'professional', templateData: JSON.stringify({ template: 'minimal', backgroundColor: '#ffffff', textColor: '#1a202c', accentColor: '#2563eb' }), isActive: true },
+      { name: 'Modern Dark', description: 'Dark modern template with neon accents', category: 'modern', templateData: JSON.stringify({ template: 'dark', backgroundColor: '#0f172a', textColor: '#f1f5f9', accentColor: '#06b6d4' }), isActive: true },
+      { name: 'Creative Gradient', description: 'Bold gradient template for creative professionals', category: 'creative', templateData: JSON.stringify({ template: 'bold', backgroundColor: '#fef2f2', textColor: '#1f2937', accentColor: '#dc2626' }), isActive: true },
+      { name: 'Tech Startup', description: 'Modern tech startup template', category: 'tech', templateData: JSON.stringify({ template: 'minimal', backgroundColor: '#ffffff', textColor: '#111827', accentColor: '#7c3aed' }), isActive: true },
+      { name: 'Luxury Gold', description: 'Elegant luxury template with gold accents', category: 'elegant', templateData: JSON.stringify({ template: 'photo', backgroundColor: '#faf7f2', textColor: '#2d2424', accentColor: '#d97706' }), isActive: true },
+      { name: 'Healthcare Green', description: 'Healthcare professional template', category: 'healthcare', templateData: JSON.stringify({ template: 'minimal', backgroundColor: '#ffffff', textColor: '#164e63', accentColor: '#059669' }), isActive: true },
+      { name: 'Finance Corporate', description: 'Corporate finance template', category: 'finance', templateData: JSON.stringify({ template: 'bold', backgroundColor: '#f8fafc', textColor: '#0f172a', accentColor: '#1e40af' }), isActive: true },
+      { name: 'Creative Agency', description: 'Vibrant creative agency template', category: 'creative', templateData: JSON.stringify({ template: 'photo', backgroundColor: '#fef3c7', textColor: '#78350f', accentColor: '#f59e0b' }), isActive: true },
+      { name: 'Education Blue', description: 'Education sector template', category: 'education', templateData: JSON.stringify({ template: 'minimal', backgroundColor: '#ffffff', textColor: '#1e3a8a', accentColor: '#3b82f6' }), isActive: true },
+      { name: 'Retail Fashion', description: 'Fashion retail template', category: 'retail', templateData: JSON.stringify({ template: 'photo', backgroundColor: '#fce7f3', textColor: '#831843', accentColor: '#ec4899' }), isActive: true },
+      { name: 'Real Estate Chic', description: 'Real estate professional template', category: 'real-estate', templateData: JSON.stringify({ template: 'bold', backgroundColor: '#fef5f1', textColor: '#7c2d12', accentColor: '#ea580c' }), isActive: true },
+      { name: 'Consulting Premium', description: 'Consulting firm template', category: 'consulting', templateData: JSON.stringify({ template: 'minimal', backgroundColor: '#ffffff', textColor: '#1a1a1a', accentColor: '#6366f1' }), isActive: true },
+      { name: 'Minimal Monochrome', description: 'Minimalist monochrome template', category: 'minimal', templateData: JSON.stringify({ template: 'minimal', backgroundColor: '#ffffff', textColor: '#374151', accentColor: '#6b7280' }), isActive: true },
+      { name: 'Vibrant Tech', description: 'Vibrant tech company template', category: 'tech', templateData: JSON.stringify({ template: 'bold', backgroundColor: '#f0f9ff', textColor: '#0c4a6e', accentColor: '#0284c7' }), isActive: true },
+      { name: 'Classic Serif', description: 'Classic elegant serif template', category: 'classic', templateData: JSON.stringify({ template: 'photo', backgroundColor: '#faf9f7', textColor: '#3f3f46', accentColor: '#71717a' }), isActive: true }
+    ];
+
+    const createdTemplates = await db.insert(globalTemplates).values(
+      defaultTemplates.map(t => ({
+        ...t,
+        createdBy: req.user!.id
+      }))
+    ).returning();
+
+    await logAdminAction(req.user!.id, 'seed', 'templates', undefined, { count: createdTemplates.length });
+    res.json({ message: `${createdTemplates.length} templates created successfully`, templates: createdTemplates });
+  } catch (error) {
+    console.error('Failed to seed templates:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Get templates (temporarily no auth for testing) 
 router.get('/templates', async (req, res) => {
   try {

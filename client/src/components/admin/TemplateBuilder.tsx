@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,7 +25,8 @@ import {
   Image as ImageIcon,
   Share2,
   X,
-  Sparkles
+  Sparkles,
+  Zap
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { BusinessCard } from '@shared/schema';
@@ -45,6 +47,14 @@ interface TemplateData {
   thumbnailUrl?: string;
 }
 
+interface AvailableTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  category: string;
+  templateData: any;
+}
+
 export default function TemplateBuilder() {
   const [location, navigate] = useLocation();
   const [template, setTemplate] = useState<TemplateData>({
@@ -59,9 +69,24 @@ export default function TemplateBuilder() {
   const [templateId, setTemplateId] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
   const [isGeneratingThumb, setIsGeneratingThumb] = useState(false);
+  const [selectedTemplateStyle, setSelectedTemplateStyle] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const [showHeaderBuilder, setShowHeaderBuilder] = useState(false);
   const [previewCollapsed, setPreviewCollapsed] = useState(false);
+  
+  // Fetch available templates
+  const { data: availableTemplates = [], isLoading: templatesLoading } = useQuery<AvailableTemplate[]>({
+    queryKey: ['/api/admin/templates'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/templates', { credentials: 'include' });
+      if (!res.ok) return [];
+      const result = await res.json();
+      return result.data || result;
+    },
+    staleTime: 0,
+    retry: false
+  });
+
   const [businessCardData, setBusinessCardData] = useState<BusinessCard>({
     id: 'template-preview',
     fullName: 'John Doe',
@@ -278,6 +303,21 @@ export default function TemplateBuilder() {
     }
   };
 
+  const applyTemplateStyle = (templateStyle: any) => {
+    if (!templateStyle) return;
+    
+    const parsedStyle = typeof templateStyle === 'string' ? JSON.parse(templateStyle) : templateStyle;
+    
+    setBusinessCardData(prev => ({
+      ...prev,
+      template: parsedStyle.template || 'minimal',
+      backgroundColor: parsedStyle.backgroundColor || prev.backgroundColor,
+      textColor: parsedStyle.textColor || prev.textColor,
+      accentColor: parsedStyle.accentColor || prev.accentColor,
+      iconColor: parsedStyle.accentColor || prev.iconColor
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
@@ -311,6 +351,30 @@ export default function TemplateBuilder() {
                     className="w-48 mt-1"
                     placeholder="Template name"
                   />
+                </div>
+                
+                <div>
+                  <Label className="font-medium text-gray-700 dark:text-gray-300">Use Style:</Label>
+                  <Select value={selectedTemplateStyle || ''} onValueChange={(val) => {
+                    setSelectedTemplateStyle(val);
+                    const selected = availableTemplates.find(t => t.id === val);
+                    if (selected) applyTemplateStyle(selected.templateData);
+                  }}>
+                    <SelectTrigger className="w-56 mt-1">
+                      <SelectValue placeholder="Choose a template style..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">-- None --</SelectItem>
+                      {availableTemplates.map(t => (
+                        <SelectItem key={t.id} value={t.id}>
+                          <div className="flex items-center">
+                            <Zap className="h-3 w-3 mr-1" />
+                            {t.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div>
