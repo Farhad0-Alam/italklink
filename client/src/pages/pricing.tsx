@@ -368,7 +368,7 @@ export default function Pricing() {
                       isSelected 
                         ? 'border-orange-500 shadow-lg ring-2 ring-orange-200' 
                         : 'border-gray-200 dark:border-gray-700'
-                    } bg-white dark:bg-slate-800 h-full flex flex-col`}
+                    } bg-white dark:bg-slate-800 h-full flex flex-col text-gray-900 dark:text-gray-100`}
                     data-testid={`plan-card-${plan.planType}`}
                     >
                       <CardHeader className="pb-4">
@@ -504,9 +504,9 @@ export default function Pricing() {
                         </div>
                       </CardHeader>
                       
-                      <CardContent className="pt-0 flex-1">
+                      <CardContent className="pt-0 flex-1 text-gray-900 dark:text-gray-100">
                         <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-                          <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Includes:</h4>
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Includes:</h4>
                           <div className="space-y-3">
                             {/* Business Cards - Always show first */}
                             <div className="flex items-start space-x-2">
