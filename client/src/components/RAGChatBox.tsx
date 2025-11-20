@@ -562,11 +562,11 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                     <button
                       type="button"
                       onClick={convertToSpeech}
-                      disabled={isLoading || isProcessing || isTTSLoading}
+                      disabled={isLoading || isProcessing || isTTSLoading || !messages.some(msg => msg.type === 'assistant')}
                       className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
                         isPlayingAudio
                           ? 'bg-gray-700 text-cyan-400'
-                          : isLoading || isProcessing || isTTSLoading
+                          : isLoading || isProcessing || isTTSLoading || !messages.some(msg => msg.type === 'assistant')
                           ? 'text-gray-600 opacity-50 cursor-not-allowed'
                           : 'hover:bg-gray-800 text-gray-400 hover:text-white'
                       }`}
