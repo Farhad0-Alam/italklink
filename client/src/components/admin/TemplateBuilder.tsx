@@ -368,17 +368,18 @@ export default function TemplateBuilder() {
                 </div>
                 
                 <div>
-                  <Label className="font-medium text-gray-700 dark:text-gray-300">Use Style:</Label>
-                  <Select value={selectedTemplateStyle || ''} onValueChange={(val) => {
-                    setSelectedTemplateStyle(val);
-                    const selected = availableTemplates.find(t => t.id === val);
-                    if (selected) applyTemplateStyle(selected.templateData);
+                  <Label className="font-medium text-gray-700 dark:text-gray-300">Apply Style:</Label>
+                  <Select value={selectedTemplateStyle || 'none'} onValueChange={(val) => {
+                    if (val !== 'none') {
+                      setSelectedTemplateStyle(val);
+                      const selected = availableTemplates.find(t => t.id === val);
+                      if (selected) applyTemplateStyle(selected.templateData);
+                    }
                   }}>
                     <SelectTrigger className="w-56 mt-1">
                       <SelectValue placeholder="Choose a template style..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">-- None --</SelectItem>
                       {availableTemplates.map(t => (
                         <SelectItem key={t.id} value={t.id}>
                           ✨ {t.name}
