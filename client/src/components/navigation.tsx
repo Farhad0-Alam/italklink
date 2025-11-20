@@ -16,24 +16,24 @@ export const Navigation = () => {
   };
 
   return (
-    <nav className="bg-slate-800/50 backdrop-blur-lg border-b border-slate-700 sticky top-0 z-50">
+    <nav className="bg-gradient-to-r from-orange-500 to-orange-600 backdrop-blur-lg border-b border-orange-700 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center space-x-2" data-testid="nav-logo">
-            <div className="w-8 h-8 bg-talklink-500 rounded-lg flex items-center justify-center">
-              <i className="fas fa-id-card text-white text-sm"></i>
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg">
+              <i className="fas fa-address-card text-orange-500 text-sm"></i>
             </div>
-            <span className="text-xl font-bold text-white">CardPreview</span>
+            <span className="text-xl font-bold text-white">TalkLink</span>
           </Link>
           
           <div className="hidden md:flex items-center space-x-6">
             <Link href="/affiliate" data-testid="nav-affiliate">
-              <span className="text-white hover:text-talklink-300 transition-colors font-medium">
+              <span className="text-white hover:text-orange-100 transition-colors font-medium">
                 Affiliate
               </span>
             </Link>
             <Link href="/pricing" data-testid="nav-pricing">
-              <span className="text-white hover:text-talklink-300 transition-colors font-medium">
+              <span className="text-white hover:text-orange-100 transition-colors font-medium">
                 Pricing
               </span>
             </Link>
@@ -45,7 +45,7 @@ export const Navigation = () => {
               size="sm"
               onClick={toggleLanguage}
               data-testid="button-language-toggle"
-              className="bg-slate-700 hover:bg-slate-600 border-slate-600 text-white"
+              className="bg-orange-400 hover:bg-orange-300 border-orange-300 text-white"
             >
               {i18n.language === "en" ? "EN" : "বাং"}
             </Button>
@@ -55,14 +55,14 @@ export const Navigation = () => {
               size="sm"
               onClick={toggleTheme}
               data-testid="button-theme-toggle"
-              className="bg-slate-700 hover:bg-slate-600 border-slate-600 text-white"
+              className="bg-orange-400 hover:bg-orange-300 border-orange-300 text-white"
             >
               <i className={`fas ${theme === "dark" ? "fa-sun" : "fa-moon"}`}></i>
             </Button>
             
             <Button
               asChild
-              className="bg-talklink-500 hover:bg-talklink-600 text-white"
+              className="bg-green-500 hover:bg-green-600 text-white"
               data-testid="button-get-talklink"
             >
               <a 
