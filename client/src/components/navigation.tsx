@@ -50,15 +50,17 @@ export const Navigation = () => {
               {i18n.language === "en" ? "EN" : "বাং"}
             </Button>
             
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleTheme}
-              data-testid="button-theme-toggle"
-              className="bg-orange-400 hover:bg-orange-300 border-orange-300 text-white"
-            >
-              <i className={`fas ${theme === "dark" ? "fa-sun" : "fa-moon"}`}></i>
-            </Button>
+            {location !== "/pricing" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleTheme}
+                data-testid="button-theme-toggle"
+                className="bg-orange-400 hover:bg-orange-300 border-orange-300 text-white"
+              >
+                <i className={`fas ${theme === "dark" ? "fa-sun" : "fa-moon"}`}></i>
+              </Button>
+            )}
             
             <Button
               asChild

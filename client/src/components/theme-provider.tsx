@@ -24,27 +24,25 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    return storage.loadTheme() as Theme;
-  });
+  const [theme, setThemeState] = useState<Theme>("light");
 
   const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
-    storage.saveTheme(newTheme);
+    setThemeState("light");
+    storage.saveTheme("light");
   };
 
   const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+    setTheme("light");
   };
 
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove("light", "dark");
-    root.classList.add(theme);
-  }, [theme]);
+    root.classList.add("light");
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme: "light", setTheme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
