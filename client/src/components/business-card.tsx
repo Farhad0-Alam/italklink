@@ -705,6 +705,47 @@ export const BusinessCardComponent = forwardRef<
       return `rgba(${r}, ${g}, ${b}, ${opacity})`;
     };
 
+    // Convert socialLinks object to customSocials array with proper icon mapping
+    const convertSocialLinksToCustomSocials = () => {
+      if (!data.socialLinks) return [];
+
+      const socialIconMap: Record<string, { icon: string; label: string }> = {
+        linkedin: { icon: "fab fa-linkedin", label: "LinkedIn" },
+        twitter: { icon: "fab fa-twitter", label: "Twitter" },
+        facebook: { icon: "fab fa-facebook", label: "Facebook" },
+        instagram: { icon: "fab fa-instagram", label: "Instagram" },
+        youtube: { icon: "fab fa-youtube", label: "YouTube" },
+        tiktok: { icon: "fab fa-tiktok", label: "TikTok" },
+        pinterest: { icon: "fab fa-pinterest", label: "Pinterest" },
+        snapchat: { icon: "fab fa-snapchat", label: "Snapchat" },
+        whatsapp: { icon: "fab fa-whatsapp", label: "WhatsApp" },
+        telegram: { icon: "fab fa-telegram", label: "Telegram" },
+        github: { icon: "fab fa-github", label: "GitHub" },
+        behance: { icon: "fab fa-behance", label: "Behance" },
+        dribbble: { icon: "fab fa-dribbble", label: "Dribbble" },
+      };
+
+      const socials = [];
+      let idCounter = 0;
+
+      Object.entries(data.socialLinks).forEach(([platform, value]) => {
+        if (value && typeof value === "string" && value.trim()) {
+          const mapping = socialIconMap[platform.toLowerCase()] || { icon: "fab fa-link", label: platform };
+          socials.push({
+            id: `social-${platform}-${idCounter}`,
+            platform: platform.toLowerCase(),
+            value: value.trim(),
+            label: mapping.label,
+            icon: mapping.icon,
+            type: "social",
+          });
+          idCounter++;
+        }
+      });
+
+      return socials;
+    };
+
     // Generate primary contact buttons
     const getPrimaryContacts = () => {
       const contacts = [];
@@ -810,6 +851,10 @@ export const BusinessCardComponent = forwardRef<
     const backgroundAnimationClass = data.backgroundType?.startsWith("animation-") 
       ? `bg-${data.backgroundType}` 
       : '';
+
+    // Convert socialLinks to customSocials if needed (for template data compatibility)
+    const socialLinksConverted = convertSocialLinksToCustomSocials();
+    const customSocialsForDisplay = data.customSocials && data.customSocials.length > 0 ? data.customSocials : socialLinksConverted;
 
     return (
       <div
@@ -1339,7 +1384,7 @@ export const BusinessCardComponent = forwardRef<
             </div>
 
             {/* Social Media with Enhanced Icon Styling */}
-            {data.customSocials && data.customSocials.length > 0 && (
+            {customSocialsForDisplay && customSocialsForDisplay.length > 0 && (
               <div
                 className={`px-4 ${getColumnClass("socialMedia")} ${getAlignmentClass("socialMedia")}`}
                 style={{
@@ -1400,7 +1445,7 @@ export const BusinessCardComponent = forwardRef<
                 }}
                 data-testid="container-social-media"
               >
-                {data.customSocials
+                {customSocialsForDisplay
                   ?.filter((social) => social.value)
                   .map((social) => {
                     const viewType = getViewType("socialMedia");
