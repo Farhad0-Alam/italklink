@@ -363,15 +363,15 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       onClick={onClose}
     >
       <div
-        className="absolute inset-0 flex items-center justify-center p-4"
+        className="absolute inset-0 flex items-center justify-center p-2 sm:p-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-full max-w-2xl h-[85vh] bg-gray-900 rounded-lg shadow-2xl flex flex-col">
+        <div className="w-full h-full sm:h-[85vh] sm:max-w-4xl lg:max-w-5xl bg-gray-900 rounded-lg sm:rounded-lg shadow-2xl flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700">
-            <h2 className="text-white font-semibold">Knowledge Assistant</h2>
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-700">
+            <h2 className="text-white font-semibold text-lg sm:text-xl">Knowledge Assistant</h2>
             <Button variant="ghost" size="sm" onClick={onClose} data-testid="button-close-chat">
-              <X className="h-4 w-4 text-gray-400" />
+              <X className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
             </Button>
           </div>
 
@@ -381,12 +381,12 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
               <CollapsibleTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="w-full justify-between px-6 py-3 h-auto border-b border-gray-700 hover:bg-gray-800 text-gray-300"
+                  className="w-full justify-between px-4 sm:px-6 py-3 h-auto border-b border-gray-700 hover:bg-gray-800 text-gray-300 text-sm sm:text-base"
                   data-testid="button-toggle-url-config"
                 >
                   <div className="flex items-center gap-2">
                     <Settings className="h-4 w-4" />
-                    <span className="text-sm">+ Add Website URLs</span>
+                    <span>+ Add Website URLs</span>
                   </div>
                   {showKnowledgeConfig ? (
                     <ChevronUp className="h-4 w-4" />
@@ -395,7 +395,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                   )}
                 </Button>
               </CollapsibleTrigger>
-              <CollapsibleContent className="px-6 py-4 border-b border-gray-700 bg-gray-800/50">
+              <CollapsibleContent className="px-4 sm:px-6 py-4 border-b border-gray-700 bg-gray-800/50">
                 <URLManager
                   title="RAG Knowledge Base URLs"
                   description="Add website URLs to build knowledge base"
@@ -415,10 +415,10 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
 
           {/* Messages Area */}
           <ScrollArea className="flex-1">
-            <div className="px-6 py-4">
+            <div className="px-3 sm:px-6 py-4">
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full py-16 text-center">
-                  <h3 className="text-4xl font-light text-white mb-8">What are you working on?</h3>
+                <div className="flex flex-col items-center justify-center h-full py-12 sm:py-16 text-center px-4">
+                  <h3 className="text-2xl sm:text-3xl lg:text-4xl font-light text-white mb-4 sm:mb-8">What are you working on?</h3>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -440,27 +440,27 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
           </ScrollArea>
 
           {/* Input Area - ChatGPT Style */}
-          <div className="border-t border-gray-700 px-6 py-4 bg-gray-900">
+          <div className="border-t border-gray-700 px-3 sm:px-6 py-3 sm:py-4 bg-gray-900">
             <TooltipProvider>
-              <form onSubmit={handleSubmit} className="flex gap-3 items-end">
+              <form onSubmit={handleSubmit} className="flex gap-2 sm:gap-3 items-end">
                 {/* Add Button */}
                 <button
                   type="button"
-                  className="flex-shrink-0 w-10 h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                  className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                   data-testid="button-add"
                 >
-                  <Plus className="h-5 w-5" />
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
 
                 {/* Input Field */}
-                <div className="flex-1 bg-gray-800 rounded-full px-4 py-3 flex items-center gap-2">
+                <div className="flex-1 bg-gray-800 rounded-full px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2">
                   <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask for presentation tips"
                     disabled={isLoading || isProcessing || isListening}
-                    className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none text-sm"
+                    className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none text-sm sm:text-base"
                     data-testid="input-chat"
                   />
                 </div>
@@ -472,7 +472,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                       type="button"
                       onClick={isListening ? stopListening : startListening}
                       disabled={isProcessing || isLoading}
-                      className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                      className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
                         isListening
                           ? 'bg-red-600 hover:bg-red-700 text-white'
                           : 'hover:bg-gray-800 text-gray-400 hover:text-white'
@@ -480,9 +480,9 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                       data-testid="button-voice"
                     >
                       {isListening ? (
-                        <Square className="h-5 w-5" />
+                        <Square className="h-4 w-4 sm:h-5 sm:w-5" />
                       ) : (
-                        <Mic className="h-5 w-5" />
+                        <Mic className="h-4 w-4 sm:h-5 sm:w-5" />
                       )}
                     </button>
                   </TooltipTrigger>
@@ -494,10 +494,10 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                 {/* Waveform Button */}
                 <button
                   type="button"
-                  className="flex-shrink-0 w-10 h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                  className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                   data-testid="button-waveform"
                 >
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
                     <rect x="3" y="13" width="2" height="8" />
                     <rect x="7" y="9" width="2" height="12" />
                     <rect x="11" y="5" width="2" height="16" />
@@ -509,7 +509,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
             </TooltipProvider>
 
             {isListening && (
-              <div className="mt-2 text-xs text-gray-400 text-center animate-pulse">
+              <div className="mt-2 text-xs sm:text-sm text-gray-400 text-center animate-pulse">
                 🎙️ Recording...
               </div>
             )}
