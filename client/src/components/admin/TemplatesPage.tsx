@@ -156,6 +156,10 @@ export default function TemplatesPage() {
     }
   };
 
+  const handleViewTemplate = (templateId: string) => {
+    window.open(`/template-preview/${templateId}`, '_blank', 'width=1000,height=1200,scrollbars=yes');
+  };
+
   const templateCategories = [
     'business', 'creative', 'minimal', 'corporate', 'modern', 
     'elegant', 'professional', 'classic', 'tech', 'healthcare',
@@ -312,7 +316,7 @@ export default function TemplatesPage() {
                     <Button 
                       size="sm" 
                       variant="secondary"
-                      onClick={() => setSelectedTemplate(template)}
+                      onClick={() => handleViewTemplate(template.id)}
                       className="h-8 w-8 p-0"
                     >
                       <Eye className="h-4 w-4" />
