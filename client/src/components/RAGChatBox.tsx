@@ -91,6 +91,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   const [transcript, setTranscript] = useState('');
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
@@ -346,7 +347,10 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       return;
     }
 
+    // Open the modal immediately
+    setIsVoiceModalOpen(true);
     setIsTTSLoading(true);
+    
     try {
       const response = await apiRequest<{ audioUrl: string }>('POST', '/api/voice/tts', {
         text: lastAssistantMessage.content,
@@ -384,6 +388,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       audioRef.current.currentTime = 0;
     }
     setIsPlayingAudio(false);
+    setIsVoiceModalOpen(false);
   };
 
   const renderMessage = (message: ChatMessage) => (
@@ -591,7 +596,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       </div>
 
       {/* Audio Playback Modal - Voice Conversation Mode */}
-      {isPlayingAudio && (
+      {isVoiceModalOpen && (
         <div className="fixed inset-0 z-[51] bg-black/20 backdrop-blur-sm flex items-center justify-center">
           <div className="relative w-96 max-w-[90vw] bg-gray-950 rounded-lg p-6 sm:p-8 shadow-2xl flex flex-col items-center gap-6">
             {/* Title */}
@@ -621,6 +626,11 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                 <div className="w-2 bg-white/80 rounded-full animate-wave" style={{ height: '70%', animationDelay: '0.4s' }}></div>
               </div>
             </div>
+
+            {/* Loading or Playing Indicator */}
+            {isTTSLoading && (
+              <div className="text-gray-400 text-sm">Loading audio...</div>
+            )}
 
             {/* Control Buttons */}
             <div className="flex gap-6">
