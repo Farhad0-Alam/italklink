@@ -721,4 +721,38 @@ router.post('/chat', requireAuth, async (req, res) => {
   }
 });
 
+// Text-to-Speech endpoint
+router.post('/tts', requireAuth, async (req, res) => {
+  try {
+    const { text } = req.body;
+    
+    if (!text || typeof text !== 'string') {
+      return res.status(400).json({ error: 'Text is required' });
+    }
+
+    // Generate audio using OpenAI TTS
+    const audioResponse = await openai.audio.speech.create({
+      model: 'tts-1',
+      voice: 'alloy',
+      input: text,
+    });
+    
+    // Convert audio stream to base64
+    const audioArrayBuffer = await audioResponse.arrayBuffer();
+    const audioBase64 = Buffer.from(audioArrayBuffer).toString('base64');
+    const audioDataUri = `data:audio/mpeg;base64,${audioBase64}`;
+    
+    res.json({
+      audioUrl: audioDataUri
+    });
+    
+  } catch (error: any) {
+    console.error('TTS error:', error);
+    res.status(500).json({ 
+      error: 'TTS failed', 
+      details: error.message 
+    });
+  }
+});
+
 export default router;
