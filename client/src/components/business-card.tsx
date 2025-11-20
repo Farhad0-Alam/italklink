@@ -759,7 +759,10 @@ export const BusinessCardComponent = forwardRef<
     const renderSocialIcon = (social: any, iconSize: number = 18) => {
       const iconProps = { size: iconSize, style: { fontSize: `${iconSize}px` } };
       
-      switch (social.platform?.toLowerCase() || social.icon?.toLowerCase()) {
+      const platformKey = social.platform?.toLowerCase() || social.icon?.toLowerCase();
+      console.log('Rendering social icon:', { platformKey, social });
+      
+      switch (platformKey) {
         case "instagram":
           return <FaInstagram {...iconProps} />;
         case "tiktok":
@@ -779,6 +782,7 @@ export const BusinessCardComponent = forwardRef<
         case "linkedin":
           return <FaLinkedin {...iconProps} />;
         case "twitter":
+        case "x":
           return <FaTwitter {...iconProps} />;
         case "facebook":
           return <FaFacebook {...iconProps} />;
@@ -787,6 +791,7 @@ export const BusinessCardComponent = forwardRef<
         case "github":
           return <FaGithub {...iconProps} />;
         default:
+          console.error('No icon found for platform:', platformKey, social);
           // Fallback: render label if icon not found
           return <span style={{ fontSize: `${iconSize - 4}px`, fontWeight: "bold" }}>●</span>;
       }
@@ -1492,7 +1497,7 @@ export const BusinessCardComponent = forwardRef<
                 data-testid="container-social-media"
               >
                 {customSocialsForDisplay
-                  ?.filter((social) => social.value)
+                  ?.filter((social) => social.value || social.url)
                   .map((social) => {
                     const viewType = getViewType("socialMedia");
                     const shouldShowIcons =
@@ -1507,7 +1512,7 @@ export const BusinessCardComponent = forwardRef<
                         <button
                           key={social.id}
                           onClick={() =>
-                            handleContactAction(social.platform, social.value)
+                            handleContactAction(social.platform, social.value || social.url)
                           }
                           className={`text-left p-2 rounded transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 ${getSkinClass("socialMedia")} ${getShapeClass("socialMedia")}`}
                           style={{
@@ -1536,7 +1541,7 @@ export const BusinessCardComponent = forwardRef<
                       <button
                         key={social.id}
                         onClick={() =>
-                          handleContactAction(social.platform, social.value)
+                          handleContactAction(social.platform, social.value || social.url)
                         }
                         className={`tl-social-button ${getSkinClass("socialMedia")} ${getShapeClass("socialMedia")} ${getSectionStyle("socialMedia", "enableHoverColor") === "true" ? "tl-icon-hover" : ""} ${viewType === "icon-text" ? `w-full ${getTextPositionClass("socialMedia")}` : "w-auto"}`}
                         data-platform={social.platform}
