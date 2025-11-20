@@ -342,13 +342,41 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     setIsTTSLoading(true);
     
     try {
-      const lastAssistantMessage = [...messages].reverse().find(msg => msg.type === 'assistant');
+      let textToConvert: string = '';
+      let lastAssistantMessage = [...messages].reverse().find(msg => msg.type === 'assistant');
+      
+      // If no assistant message exists, generate initial greeting from knowledge base
       if (!lastAssistantMessage) {
-        throw new Error('No AI response available');
+        // Generate initial greeting
+        setIsLoading(true);
+        const result = await apiRequest<RAGResponse>('POST', '/api/rag/query', {
+          query: 'greeting introduction welcome hello',
+          knowledgeBase: {},
+          messages: [],
+        });
+
+        if (!result?.answer) {
+          throw new Error('Failed to generate greeting');
+        }
+
+        textToConvert = result.answer;
+        
+        // Add the generated greeting to messages
+        const assistantMessage: ChatMessage = {
+          id: (Date.now()).toString(),
+          type: 'assistant',
+          content: result.answer,
+          sources: result.sources,
+          timestamp: new Date(),
+          isStreaming: false,
+        };
+        setMessages([assistantMessage]);
+      } else {
+        textToConvert = lastAssistantMessage.content;
       }
 
       const response = await apiRequest<{ audioUrl: string }>('POST', '/api/voice/tts', {
-        text: lastAssistantMessage.content,
+        text: textToConvert,
       });
 
       if (response?.audioUrl) {
@@ -374,6 +402,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     } finally {
       if (isMountedRef.current) {
         setIsTTSLoading(false);
+        setIsLoading(false);
       }
     }
   };
