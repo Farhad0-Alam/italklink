@@ -165,6 +165,22 @@ export const enhancedCORS = (req: Request, res: Response, next: NextFunction) =>
     'https://localhost:5000'
   ];
 
+  // Add environment-specific domains
+  if (process.env.FRONTEND_URL) {
+    allowedOrigins.push(process.env.FRONTEND_URL);
+  }
+  if (process.env.PUBLIC_APP_URL) {
+    allowedOrigins.push(process.env.PUBLIC_APP_URL);
+  }
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    allowedOrigins.push(`https://${process.env.REPLIT_DEV_DOMAIN}`);
+  }
+  
+  // Add custom CORS origins from environment
+  if (process.env.CORS_ORIGINS) {
+    allowedOrigins.push(...process.env.CORS_ORIGINS.split(',').map(o => o.trim()));
+  }
+
   const origin = req.headers.origin;
   
   // For development on Replit or other platforms, allow same-origin requests
@@ -181,7 +197,7 @@ export const enhancedCORS = (req: Request, res: Response, next: NextFunction) =>
   // For credentialed requests, be strict about origins but allow development environments
   if (req.headers.cookie || req.headers.authorization) {
     if (!isAllowedOrigin) {
-      console.log(`CORS blocked: ${origin} not in allowed origins for credentialed request`);
+      console.error(`[CORS BLOCKED] Origin: ${origin}, Allowed: ${allowedOrigins.join(', ')}, User-Agent: ${req.headers['user-agent']}`);
       return res.status(403).json({
         error: 'Forbidden',
         code: 'INVALID_ORIGIN_FOR_CREDENTIALED_REQUEST',
