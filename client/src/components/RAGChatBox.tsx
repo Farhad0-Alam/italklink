@@ -478,54 +478,54 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                 )}
 
                 {/* Voice Button - Stop when Listening, Mic when not */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={isListening ? stopListening : startListening}
-                      disabled={isProcessing || isLoading}
-                      className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
-                        isListening
-                          ? 'bg-red-600 hover:bg-red-700 text-white'
-                          : isLoading || isProcessing
-                          ? 'text-gray-600 opacity-50 cursor-not-allowed'
-                          : 'hover:bg-gray-800 text-gray-400 hover:text-white'
-                      }`}
-                      data-testid="button-voice"
-                    >
-                      {isListening ? (
-                        <Square className="h-4 w-4 sm:h-5 sm:w-5" />
-                      ) : (
-                        <Mic className="h-4 w-4 sm:h-5 sm:w-5" />
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="bg-gray-800 text-white text-xs px-2 py-1 rounded">
-                    {isListening ? 'Stop recording' : 'Use voice mode'}
-                  </TooltipContent>
-                </Tooltip>
-
-                {/* Waveform Button - Active when listening */}
                 <button
                   type="button"
-                  disabled={isLoading || isProcessing}
+                  onClick={isListening ? stopListening : startListening}
+                  disabled={isProcessing || isLoading}
                   className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
                     isListening
-                      ? 'bg-gray-700 text-cyan-400'
+                      ? 'bg-red-600 hover:bg-red-700 text-white'
                       : isLoading || isProcessing
                       ? 'text-gray-600 opacity-50 cursor-not-allowed'
                       : 'hover:bg-gray-800 text-gray-400 hover:text-white'
                   }`}
-                  data-testid="button-waveform"
+                  data-testid="button-voice"
                 >
-                  <svg className={`h-4 w-4 sm:h-5 sm:w-5 ${isListening ? 'animate-pulse' : ''}`} fill="currentColor" viewBox="0 0 24 24">
-                    <rect x="3" y="13" width="2" height="8" />
-                    <rect x="7" y="9" width="2" height="12" />
-                    <rect x="11" y="5" width="2" height="16" />
-                    <rect x="15" y="9" width="2" height="12" />
-                    <rect x="19" y="13" width="2" height="8" />
-                  </svg>
+                  {isListening ? (
+                    <Square className="h-4 w-4 sm:h-5 sm:w-5" />
+                  ) : (
+                    <Mic className="h-4 w-4 sm:h-5 sm:w-5" />
+                  )}
                 </button>
+
+                {/* Waveform Button - Active when listening with Tooltip */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      disabled={isLoading || isProcessing}
+                      className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
+                        isListening
+                          ? 'bg-gray-700 text-cyan-400'
+                          : isLoading || isProcessing
+                          ? 'text-gray-600 opacity-50 cursor-not-allowed'
+                          : 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                      }`}
+                      data-testid="button-waveform"
+                    >
+                      <svg className={`h-4 w-4 sm:h-5 sm:w-5 ${isListening ? 'animate-pulse' : ''}`} fill="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="13" width="2" height="8" />
+                        <rect x="7" y="9" width="2" height="12" />
+                        <rect x="11" y="5" width="2" height="16" />
+                        <rect x="15" y="9" width="2" height="12" />
+                        <rect x="19" y="13" width="2" height="8" />
+                      </svg>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="bg-gray-800 text-white text-xs px-2 py-1 rounded">
+                    Use voice mode
+                  </TooltipContent>
+                </Tooltip>
               </form>
             </TooltipProvider>
 
