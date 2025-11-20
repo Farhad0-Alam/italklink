@@ -1,8 +1,8 @@
 import express from 'express';
 import { z } from 'zod';
 import { db } from './db';
-import { voiceAgents, voiceCalls, businessCards } from '@shared/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { voiceAgents, voiceCalls, businessCards, kbDocs } from '@shared/schema';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import twilio from 'twilio';
 import {
   initializeCall,
@@ -27,6 +27,45 @@ import path from 'path';
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const router = express.Router();
+
+// Helper function to query knowledge base with RAG
+async function queryKnowledgeBase(query: string, topK: number = 5): Promise<string> {
+  try {
+    // Generate embedding for the query
+    const embedding = await openai.embeddings.create({
+      model: 'text-embedding-3-small',
+      input: query,
+    });
+
+    const queryVector = embedding.data[0].embedding;
+
+    // Query similar documents using vector similarity
+    const similarDocs = await db
+      .select({
+        title: kbDocs.title,
+        content: kbDocs.content,
+        url: kbDocs.url,
+      })
+      .from(kbDocs)
+      .where(sql`embedding IS NOT NULL`)
+      .orderBy(sql`embedding <-> ${JSON.stringify(queryVector)}`)
+      .limit(topK);
+
+    if (similarDocs.length === 0) {
+      return '';
+    }
+
+    // Format retrieved documents as context
+    const context = similarDocs
+      .map((doc) => `Title: ${doc.title || 'Untitled'}\nContent: ${doc.content}`)
+      .join('\n\n---\n\n');
+
+    return context;
+  } catch (error) {
+    console.error('Knowledge base query error:', error);
+    return '';
+  }
+}
 
 // In-memory conversation storage (in production, use Redis or database)
 const conversations = new Map<string, ConversationMessage[]>();
@@ -578,7 +617,7 @@ router.post('/test/simulate', async (req, res) => {
   }
 });
 
-// Voice processing endpoint for business card voice assistants
+// Voice processing endpoint for business card voice assistants - WITH RAG
 router.post('/process', requireAuth, async (req, res) => {
   try {
     const { audio, cardId, knowledgeBase, messages } = req.body;
@@ -605,18 +644,23 @@ router.post('/process', requireAuth, async (req, res) => {
       
       const userText = transcription.text;
       
+      // Query knowledge base for relevant context
+      const kbContext = await queryKnowledgeBase(userText, 5);
+      
       // Generate AI response based on knowledge base and context
       const systemPrompt = knowledgeBase?.systemPrompt || 
         `You are a helpful AI assistant for a business. Be professional, friendly, and concise.`;
       
-      const knowledgeContext = knowledgeBase?.textContent || '';
+      const systemContent = kbContext
+        ? `${systemPrompt}\n\nRelevant Knowledge Base Information:\n${kbContext}\n\nUse the provided knowledge base to answer questions accurately.`
+        : systemPrompt;
       
       const response = await openai.chat.completions.create({
-        model: 'gpt-5',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: `${systemPrompt}\n\nBusiness Knowledge:\n${knowledgeContext}`
+            content: systemContent
           },
           ...messages,
           {
@@ -624,7 +668,7 @@ router.post('/process', requireAuth, async (req, res) => {
             content: userText
           }
         ],
-        max_completion_tokens: 500,
+        max_tokens: 500,
       });
       
       const aiResponse = response.choices[0].message.content;
@@ -662,7 +706,7 @@ router.post('/process', requireAuth, async (req, res) => {
   }
 });
 
-// Text chat endpoint for business card voice assistants
+// Text chat endpoint for business card voice assistants - WITH RAG
 router.post('/chat', requireAuth, async (req, res) => {
   try {
     const { message, cardId, knowledgeBase, messages } = req.body;
@@ -671,18 +715,23 @@ router.post('/chat', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Message is required' });
     }
     
+    // Query knowledge base for relevant context
+    const kbContext = await queryKnowledgeBase(message, 5);
+    
     // Generate AI response based on knowledge base and context
     const systemPrompt = knowledgeBase?.systemPrompt || 
       `You are a helpful AI assistant for a business. Be professional, friendly, and concise.`;
     
-    const knowledgeContext = knowledgeBase?.textContent || '';
+    const systemContent = kbContext
+      ? `${systemPrompt}\n\nRelevant Knowledge Base Information:\n${kbContext}\n\nUse the provided knowledge base to answer questions accurately.`
+      : systemPrompt;
     
     const response = await openai.chat.completions.create({
-      model: 'gpt-5',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
-          content: `${systemPrompt}\n\nBusiness Knowledge:\n${knowledgeContext}`
+          content: systemContent
         },
         ...messages,
         {
@@ -690,7 +739,7 @@ router.post('/chat', requireAuth, async (req, res) => {
           content: message
         }
       ],
-      max_completion_tokens: 500,
+      max_tokens: 500,
     });
     
     const aiResponse = response.choices[0].message.content;
