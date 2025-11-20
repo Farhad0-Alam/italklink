@@ -4316,7 +4316,7 @@ export const mediaVariants = pgTable("media_variants", {
   
   // Variant details
   variantType: varchar("variant_type").notNull(), // 'thumb_200', 'card_430', 'large_1200', 'original'
-  storagePath: text("storage_path").notNull(), // Path in Supabase storage
+  storagePath: text("storage_path").notNull(), // Path in Replit App Storage
   publicUrl: text("public_url").notNull(), // Full public URL
   
   // Image metadata

@@ -35,30 +35,22 @@ const getOptimizedImageSrc = (
     return originalSrc;
   }
 
-  // If it's a Supabase storage URL, try to get WebP variant
-  if (originalSrc.includes("supabase") && originalSrc.includes("storage")) {
-    // Extract the path and try to construct WebP variant URL
-    const pathMatch = originalSrc.match(
-      /\/storage\/v1\/object\/public\/[^\/]+\/(.+)$/,
-    );
-    if (pathMatch) {
-      const storagePath = pathMatch[1];
-      // Remove file extension and add WebP variant suffix
-      const basePath = storagePath.replace(/\.[^.]+$/, "");
-      const webpVariant =
-        variant === "thumb"
-          ? "thumb_200.webp"
-          : variant === "card"
-            ? "card_430.webp"
-            : "large_1200.webp";
+  // If it's a Replit App Storage URL, try to get WebP variant
+  if (originalSrc.startsWith("/objects/")) {
+    // Extract the path after /objects/
+    const objectPath = originalSrc.replace(/^\/objects\//, "");
+    // Remove file extension and add WebP variant suffix
+    const basePath = objectPath.replace(/\.[^.]+$/, "");
+    const webpVariant =
+      variant === "thumb"
+        ? "thumb_200.webp"
+        : variant === "card"
+          ? "card_430.webp"
+          : "large_1200.webp";
 
-      // Construct optimized URL
-      const optimizedUrl = originalSrc.replace(
-        storagePath,
-        `${basePath}_${webpVariant}`,
-      );
-      return optimizedUrl;
-    }
+    // Construct optimized URL
+    const optimizedUrl = `/objects/${basePath}_${webpVariant}`;
+    return optimizedUrl;
   }
 
   // Fallback to original URL

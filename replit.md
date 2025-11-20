@@ -3,7 +3,34 @@
 ## Overview
 TalkLink is an enterprise-grade platform offering professional digital business cards integrated with a comprehensive appointment booking and CRM system. It enables users to create customizable business cards, manage scheduling, track leads, and analyze business performance. The platform supports team scheduling, calendar integrations, automated notifications, and revenue analytics, aiming to provide a complete solution for business networking and client management. It also includes an email signature generator and a visitor notification subscription system.
 
-## Recent Progress (November 15, 2025)
+## Recent Progress (November 20, 2025)
+### ✅ COMPLETE: Supabase to Replit App Storage Migration (November 20, 2025)
+
+**Complete Infrastructure Migration:**
+- Migrated all media storage from Supabase Storage to Replit App Storage
+- Replaced `server/lib/supabase.ts` with Replit-only implementation
+- Completely rewrote `server/routes/media.ts` to use Replit App Storage with ACL policies
+- Added protected file download route at `/objects/:objectPath` with authentication and access control
+- Fixed all critical migration bugs: download route path handling, upload bucket parsing, ACL metadata structure
+
+**File Upload Flow:**
+- Multer memory storage → Sharp image processing (WebP variants) → Replit App Storage upload with ACL → Database metadata storage
+- Path structure: Files stored at `user_{userId}/{YYYY}/{MM}/{DD}/{basename}/` in Replit App Storage
+- Download URL format: `/objects/{objectPath}` served through protected route with requireAuth middleware
+- ACL policy: Files set as "public" visibility within authenticated context (route protected by requireAuth)
+
+**Code Updates:**
+- Updated `client/src/components/business-card.tsx` to use Replit URLs (`/objects/...`) instead of Supabase URLs
+- Updated schema comments to reflect Replit App Storage
+- Removed all Supabase references from codebase
+- No Supabase packages installed - 100% Replit infrastructure
+
+**Technical Implementation:**
+- Uses `@google-cloud/storage` for Replit App Storage access
+- ACL policies use owner (userId) and visibility ("public") structure
+- WebP variants generated for all image uploads (thumb_200, card_430, large_1200)
+- Protected download route validates authentication before serving files
+
 ### ✅ COMPLETE: Final Performance Optimization - Zero Infinite Loop Errors (November 15, 2025)
 
 **Complete Elimination of watchedValues Pattern:**
