@@ -1,11 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Loader2, Send, Bot, User, ExternalLink, MessageCircle, X, Settings, ChevronDown, ChevronUp, Mic, Square } from 'lucide-react';
+import { Loader2, Bot, User, ExternalLink, X, Settings, ChevronDown, ChevronUp, Mic, Square, Plus } from 'lucide-react';
 import { URLManager } from '@/components/URLManager';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -42,7 +39,6 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showKnowledgeConfig, setShowKnowledgeConfig] = useState(false);
-  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -167,16 +163,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
       toast({
         title: 'Secure Connection Required',
-        description: 'Microphone access requires HTTPS. Please use a secure connection.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (typeof (window as any).MediaRecorder === 'undefined') {
-      toast({
-        title: 'Recording Not Supported',
-        description: 'Your browser does not support audio recording.',
+        description: 'Microphone access requires HTTPS.',
         variant: 'destructive',
       });
       return;
@@ -196,16 +183,6 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         }
       };
 
-      recorder.onerror = (event: any) => {
-        console.error('MediaRecorder error:', event);
-        toast({
-          title: 'Recording Error',
-          description: 'There was a problem recording audio. Please try again.',
-          variant: 'destructive',
-        });
-        setIsListening(false);
-      };
-
       recorder.onstop = async () => {
         try {
           const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
@@ -220,12 +197,11 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
 
       recorder.start();
       setIsListening(true);
-      setTranscript('Listening...');
     } catch (error: any) {
       console.error('Microphone access error:', error);
       toast({
         title: 'Microphone Error',
-        description: 'Unable to access microphone. Please check permissions.',
+        description: 'Unable to access microphone.',
         variant: 'destructive',
       });
     }
@@ -259,7 +235,6 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       if (response?.transcript) {
         const userText = response.transcript;
 
-        // Add user message
         const userMessage: ChatMessage = {
           id: Date.now().toString(),
           type: 'user',
@@ -267,7 +242,6 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
           timestamp: new Date(),
         };
 
-        // Add assistant message
         const assistantMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
           type: 'assistant',
@@ -276,7 +250,6 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         };
 
         setMessages(prev => [...prev, userMessage, assistantMessage]);
-        setTranscript('');
 
         if (response.audioUrl) {
           try {
@@ -286,18 +259,12 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
             console.error('Audio playback error:', playError);
           }
         }
-      } else {
-        toast({
-          title: 'No Response',
-          description: 'Failed to process voice. Please try again.',
-          variant: 'destructive',
-        });
       }
     } catch (error) {
       console.error('Audio processing error:', error);
       toast({
         title: 'Processing Error',
-        description: 'Failed to process audio. Please try again.',
+        description: 'Failed to process audio.',
         variant: 'destructive',
       });
     } finally {
@@ -313,259 +280,195 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   };
 
   const renderMessage = (message: ChatMessage) => (
-    <div
-      key={message.id}
-      className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-    >
+    <div key={message.id} className="flex gap-3 py-4">
       {message.type === 'assistant' && (
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <Bot className="h-4 w-4" />
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
+          <Bot className="h-4 w-4 text-white" />
+        </div>
+      )}
+      {message.type === 'user' && (
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+          <User className="h-4 w-4 text-white" />
         </div>
       )}
       
-      <div className={`max-w-[85%] space-y-2 ${message.type === 'user' ? 'order-1' : ''}`}>
-        <div
-          className={`p-3 rounded-lg ${
-            message.type === 'user'
-              ? 'text-white'
-              : 'bg-muted'
-          }`}
-          style={{ backgroundColor: message.type === 'user' ? '#22c55e' : undefined }}
-          data-testid={`message-${message.type}`}
-        >
-          <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-        </div>
+      <div className="flex-1">
+        <p className="text-white text-sm leading-relaxed">{message.content}</p>
         
         {message.sources && message.sources.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">Sources:</p>
+          <div className="mt-3 space-y-2">
+            <p className="text-xs text-gray-400">Sources:</p>
             <div className="flex flex-wrap gap-2">
               {message.sources.map((source) => (
-                <Badge
+                <button
                   key={source.id}
-                  variant="secondary"
-                  className="text-xs cursor-pointer hover:bg-secondary/80"
                   onClick={() => window.open(source.url, '_blank')}
+                  className="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded cursor-pointer transition-colors flex items-center gap-1"
                   data-testid={`source-${source.id}`}
                 >
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  {source.id} {source.title} ({Math.round(source.score * 100)}%)
-                </Badge>
+                  <ExternalLink className="h-3 w-3" />
+                  {source.title}
+                </button>
               ))}
             </div>
           </div>
         )}
       </div>
-      
-      {message.type === 'user' && (
-        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-          <User className="h-4 w-4" />
-        </div>
-      )}
     </div>
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl sm:max-w-xl md:max-w-2xl lg:max-w-4xl h-[85vh] sm:h-[80vh] flex flex-col p-0">
-        <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b" style={{ borderColor: primaryColor + '20' }}>
-          <DialogTitle className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Bot className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: primaryColor }} />
-              <span className="text-sm sm:text-base">Knowledge Assistant</span>
-            </div>
+    <div
+      className={`fixed inset-0 z-50 ${isOpen ? '' : 'hidden'}`}
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+      onClick={onClose}
+    >
+      <div
+        className="absolute inset-0 flex items-center justify-center p-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-full max-w-2xl h-[85vh] bg-gray-900 rounded-lg shadow-2xl flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700">
+            <h2 className="text-white font-semibold">Knowledge Assistant</h2>
             <Button variant="ghost" size="sm" onClick={onClose} data-testid="button-close-chat">
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4 text-gray-400" />
             </Button>
-          </DialogTitle>
-        </DialogHeader>
+          </div>
 
-        {/* URL Knowledge Configuration - Only show in editing mode */}
-        {isEditing && (
-          <Collapsible open={showKnowledgeConfig} onOpenChange={setShowKnowledgeConfig}>
-            <CollapsibleTrigger asChild>
-              <Button 
-                variant="ghost" 
-                className="w-full justify-between px-4 sm:px-6 py-3 h-auto border-b hover:bg-gray-50"
-                data-testid="button-toggle-url-config"
-              >
-                <div className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" style={{ color: primaryColor }} />
-                  <span className="font-medium text-xs sm:text-sm">+ Add Website URLs</span>
-                  <Badge variant="outline" className="text-xs">Unlimited</Badge>
-                </div>
-                {showKnowledgeConfig ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 sm:px-6 py-4 border-b bg-gray-50/50">
-              <URLManager
-                title="RAG Knowledge Base URLs"
-                description="Add unlimited website URLs to build comprehensive knowledge base for intelligent Q&A"
-                onIngest={async (urls) => {
-                  toast({
-                    title: 'URLs Added',
-                    description: `Successfully added ${urls.length} URLs to RAG knowledge base`,
-                  });
-                  setMessages([]);
-                }}
-                maxUrls={100}
-                className="border-none shadow-none bg-transparent"
-              />
-            </CollapsibleContent>
-          </Collapsible>
-        )}
+          {/* URL Configuration - Editing only */}
+          {isEditing && (
+            <Collapsible open={showKnowledgeConfig} onOpenChange={setShowKnowledgeConfig}>
+              <CollapsibleTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-between px-6 py-3 h-auto border-b border-gray-700 hover:bg-gray-800 text-gray-300"
+                  data-testid="button-toggle-url-config"
+                >
+                  <div className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    <span className="text-sm">+ Add Website URLs</span>
+                  </div>
+                  {showKnowledgeConfig ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="px-6 py-4 border-b border-gray-700 bg-gray-800/50">
+                <URLManager
+                  title="RAG Knowledge Base URLs"
+                  description="Add website URLs to build knowledge base"
+                  onIngest={async (urls) => {
+                    toast({
+                      title: 'URLs Added',
+                      description: `Successfully added ${urls.length} URLs`,
+                    });
+                    setMessages([]);
+                  }}
+                  maxUrls={100}
+                  className="border-none shadow-none bg-transparent"
+                />
+              </CollapsibleContent>
+            </Collapsible>
+          )}
 
-        <div className="flex-1 flex flex-col">
-          {/* Messages */}
-          <ScrollArea className="flex-1 px-3 sm:px-6">
-            <div className="space-y-3 sm:space-y-4 py-3 sm:py-4" data-testid="chat-messages">
+          {/* Messages Area */}
+          <ScrollArea className="flex-1">
+            <div className="px-6 py-4">
               {messages.length === 0 ? (
-                <div className="text-center text-muted-foreground py-8 sm:py-12">
-                  <Bot className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3 sm:mb-4 opacity-30" style={{ color: primaryColor }} />
-                  <p className="text-base sm:text-lg font-medium mb-1 sm:mb-2">Knowledge Assistant</p>
-                  <p className="text-xs sm:text-sm px-4">Ask me anything about the ingested content!</p>
-                  <p className="text-xs mt-1 sm:mt-2 opacity-75 px-4">You can use text or voice input.</p>
+                <div className="flex flex-col items-center justify-center h-full py-16 text-center">
+                  <h3 className="text-4xl font-light text-white mb-8">What are you working on?</h3>
                 </div>
               ) : (
-                messages.map(renderMessage)
-              )}
-              
-              {isLoading && (
-                <div className="flex gap-2 sm:gap-3 justify-start">
-                  <div 
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: primaryColor + '20' }}
-                  >
-                    <Bot className="h-3.5 w-3.5 sm:h-4 sm:w-4" style={{ color: primaryColor }} />
-                  </div>
-                  <div className="bg-muted p-2 sm:p-3 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" style={{ color: primaryColor }} />
-                      <span className="text-xs sm:text-sm">Searching knowledge base...</span>
+                <div className="space-y-4">
+                  {messages.map(renderMessage)}
+                  {(isLoading || isProcessing) && (
+                    <div className="flex gap-3 py-4">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
+                        <Bot className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm">Processing...</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
-
-              {isProcessing && (
-                <div className="flex gap-2 sm:gap-3 justify-start">
-                  <div 
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: primaryColor + '20' }}
-                  >
-                    <Mic className="h-3.5 w-3.5 sm:h-4 sm:w-4" style={{ color: primaryColor }} />
-                  </div>
-                  <div className="bg-muted p-2 sm:p-3 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" style={{ color: primaryColor }} />
-                      <span className="text-xs sm:text-sm">Processing voice...</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
               <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
 
-          {/* Input Section - ChatGPT Style */}
-          <div className="border-t px-3 sm:px-6 py-3 sm:py-4 bg-white">
-            {/* Mode Toggle */}
-            <div className="flex gap-2 mb-3">
-              <Button
-                variant={inputMode === 'text' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setInputMode('text')}
-                className="text-xs"
-                data-testid="button-text-mode"
+          {/* Input Area - ChatGPT Style */}
+          <div className="border-t border-gray-700 px-6 py-4 bg-gray-900">
+            <form onSubmit={handleSubmit} className="flex gap-3 items-end">
+              {/* Add Button */}
+              <button
+                type="button"
+                className="flex-shrink-0 w-10 h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                data-testid="button-add"
               >
-                Text
-              </Button>
-              <Button
-                variant={inputMode === 'voice' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setInputMode('voice')}
-                className="text-xs"
-                data-testid="button-voice-mode"
-              >
-                Voice
-              </Button>
-            </div>
+                <Plus className="h-5 w-5" />
+              </button>
 
-            {/* Text Input Mode */}
-            {inputMode === 'text' && (
-              <form onSubmit={handleSubmit} className="flex gap-2 sm:gap-3">
-                <Input
+              {/* Input Field */}
+              <div className="flex-1 bg-gray-800 rounded-full px-4 py-3 flex items-center gap-2">
+                <input
+                  type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask me anything..."
-                  disabled={isLoading}
-                  className="flex-1 text-sm sm:text-base"
+                  placeholder="Ask for presentation tips"
+                  disabled={isLoading || isProcessing || isListening}
+                  className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none text-sm"
                   data-testid="input-chat"
                 />
-                <Button 
-                  type="submit" 
-                  disabled={isLoading || !input.trim()}
-                  size="icon"
-                  style={{ backgroundColor: primaryColor }}
-                  className="text-white hover:opacity-90 flex-shrink-0"
-                  data-testid="button-send"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </form>
-            )}
+              </div>
 
-            {/* Voice Input Mode */}
-            {inputMode === 'voice' && (
-              <div className="flex flex-col gap-3">
-                {/* Voice Transcript Display */}
-                {transcript && (
-                  <div className="bg-muted p-3 rounded-lg min-h-[50px]">
-                    <p className="text-sm text-muted-foreground italic">{transcript}</p>
-                  </div>
+              {/* Voice Button */}
+              <button
+                type="button"
+                onClick={isListening ? stopListening : startListening}
+                disabled={isProcessing || isLoading}
+                className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  isListening
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                }`}
+                data-testid="button-voice"
+              >
+                {isListening ? (
+                  <Square className="h-5 w-5" />
+                ) : (
+                  <Mic className="h-5 w-5" />
                 )}
+              </button>
 
-                {/* Voice Controls */}
-                <div className="flex gap-2 items-center justify-center">
-                  {!isListening ? (
-                    <Button 
-                      onClick={startListening}
-                      disabled={isProcessing || isLoading}
-                      className="flex-1 flex items-center justify-center gap-2"
-                      style={{ backgroundColor: primaryColor }}
-                      data-testid="button-start-voice"
-                    >
-                      <Mic className="h-4 w-4" />
-                      Click to speak
-                    </Button>
-                  ) : (
-                    <Button 
-                      onClick={stopListening}
-                      className="flex-1 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600"
-                      data-testid="button-stop-voice"
-                    >
-                      <Square className="h-4 w-4" />
-                      Stop listening
-                    </Button>
-                  )}
-                </div>
+              {/* Waveform Button */}
+              <button
+                type="button"
+                className="flex-shrink-0 w-10 h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                data-testid="button-waveform"
+              >
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="13" width="2" height="8" />
+                  <rect x="7" y="9" width="2" height="12" />
+                  <rect x="11" y="5" width="2" height="16" />
+                  <rect x="15" y="9" width="2" height="12" />
+                  <rect x="19" y="13" width="2" height="8" />
+                </svg>
+              </button>
+            </form>
 
-                {isListening && (
-                  <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                    Recording...
-                  </div>
-                )}
+            {isListening && (
+              <div className="mt-2 text-xs text-gray-400 text-center animate-pulse">
+                🎙️ Recording...
               </div>
             )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
