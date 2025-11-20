@@ -556,45 +556,28 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                   )}
                 </button>
 
-                {/* Speaker Icon Button */}
+                {/* Waveform Button - TTS Mode */}
                 <button
                   type="button"
-                  disabled={true}
-                  className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-gray-400"
-                  data-testid="button-speaker"
+                  onClick={convertToSpeech}
+                  disabled={isLoading || isProcessing || isTTSLoading}
+                  className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
+                    isPlayingAudio
+                      ? 'bg-gray-700 text-cyan-400'
+                      : isLoading || isProcessing || isTTSLoading
+                      ? 'text-gray-600 opacity-50 cursor-not-allowed'
+                      : 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                  }`}
+                  data-testid="button-waveform"
                 >
-                  <Volume2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="13" width="2" height="8" />
+                    <rect x="7" y="9" width="2" height="12" />
+                    <rect x="11" y="5" width="2" height="16" />
+                    <rect x="15" y="9" width="2" height="12" />
+                    <rect x="19" y="13" width="2" height="8" />
+                  </svg>
                 </button>
-
-                {/* Waveform Button - TTS Mode with Tooltip */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={convertToSpeech}
-                      disabled={isLoading || isProcessing || isTTSLoading || !messages.some(msg => msg.type === 'assistant')}
-                      className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
-                        isPlayingAudio
-                          ? 'bg-gray-700 text-cyan-400'
-                          : isLoading || isProcessing || isTTSLoading || !messages.some(msg => msg.type === 'assistant')
-                          ? 'text-gray-600 opacity-50 cursor-not-allowed'
-                          : 'hover:bg-gray-800 text-gray-400 hover:text-white'
-                      }`}
-                      data-testid="button-waveform"
-                    >
-                      <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
-                        <rect x="3" y="13" width="2" height="8" />
-                        <rect x="7" y="9" width="2" height="12" />
-                        <rect x="11" y="5" width="2" height="16" />
-                        <rect x="15" y="9" width="2" height="12" />
-                        <rect x="19" y="13" width="2" height="8" />
-                      </svg>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="bg-gray-800 text-white text-xs px-2 py-1 rounded">
-                    Use voice mode
-                  </TooltipContent>
-                </Tooltip>
               </form>
             </TooltipProvider>
 
