@@ -65,10 +65,10 @@ export const storage = {
 
   loadTheme: (): string => {
     try {
-      return localStorage.getItem(THEME_KEY) || "dark";
+      return localStorage.getItem(THEME_KEY) || "light";
     } catch (error) {
       console.warn("Failed to load theme:", error);
-      return "dark";
+      return "light";
     }
   },
 };
