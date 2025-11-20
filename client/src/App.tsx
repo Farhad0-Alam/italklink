@@ -29,6 +29,7 @@ const Share = lazy(() => import("./pages/share").then(module => ({ default: modu
 const TemplatePreview = lazy(() => import("./pages/template-preview"));
 const CardEditor = lazy(() => import("./pages/card-editor"));
 const Admin = lazy(() => import("./pages/admin"));
+const TemplateBuilderPage = lazy(() => import("./components/admin/TemplateBuilder"));
 const Pricing = lazy(() => import("./pages/pricing"));
 const Affiliate = lazy(() => import("./pages/affiliate"));
 const Profile = lazy(() => import("./pages/profile"));
@@ -105,6 +106,7 @@ function Router() {
       <Route path="/help">{() => <PageSuspense><Help /></PageSuspense>}</Route>
       <Route path="/email-signature">{() => <PageSuspense><EmailSignature /></PageSuspense>}</Route>
       <Route path="/booking/:eventTypeSlug">{(params) => <PageSuspense><BookingPage {...params} /></PageSuspense>}</Route>
+      <Route path="/admin/templates/builder">{() => <PageSuspense><TemplateBuilderPage /></PageSuspense>}</Route>
       <Route path="/admin/users">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/plans">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/coupons">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
