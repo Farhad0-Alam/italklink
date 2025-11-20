@@ -345,28 +345,17 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       let textToConvert: string = '';
       let lastAssistantMessage = [...messages].reverse().find(msg => msg.type === 'assistant');
       
-      // If no assistant message exists, generate initial greeting from knowledge base
+      // If no assistant message exists, use a default greeting
       if (!lastAssistantMessage) {
-        // Generate initial greeting
-        setIsLoading(true);
-        const result = await apiRequest<RAGResponse>('POST', '/api/rag/query', {
-          query: 'greeting introduction welcome hello',
-          knowledgeBase: {},
-          messages: [],
-        });
-
-        if (!result?.answer) {
-          throw new Error('Failed to generate greeting');
-        }
-
-        textToConvert = result.answer;
+        const defaultGreeting = 'Hello! Welcome to the Knowledge Assistant. I\'m here to help answer your questions. Feel free to ask me anything about our services and products.';
         
-        // Add the generated greeting to messages
+        textToConvert = defaultGreeting;
+        
+        // Add the greeting to messages
         const assistantMessage: ChatMessage = {
           id: (Date.now()).toString(),
           type: 'assistant',
-          content: result.answer,
-          sources: result.sources,
+          content: defaultGreeting,
           timestamp: new Date(),
           isStreaming: false,
         };
