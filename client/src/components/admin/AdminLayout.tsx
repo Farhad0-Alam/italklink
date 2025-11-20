@@ -57,6 +57,11 @@ const sidebarNavItems = [
     icon: Ticket,
   },
   {
+    title: 'Templates',
+    href: '/admin/templates',
+    icon: Layout,
+  },
+  {
     title: 'Affiliates',
     href: '/admin/affiliates',
     icon: UserPlus,
