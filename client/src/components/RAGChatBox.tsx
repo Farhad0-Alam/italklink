@@ -366,7 +366,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         className="absolute inset-0 flex items-center justify-center p-2 sm:p-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-full h-full sm:h-[85vh] sm:max-w-4xl lg:max-w-5xl bg-gray-900 rounded-lg sm:rounded-lg shadow-2xl flex flex-col">
+        <div className="w-full h-full sm:max-w-4xl lg:max-w-5xl bg-gray-900 rounded-lg sm:rounded-lg shadow-2xl flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-700">
             <h2 className="text-white font-semibold text-lg sm:text-xl">Knowledge Assistant</h2>
@@ -446,21 +446,28 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                 {/* Add Button */}
                 <button
                   type="button"
-                  className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                  disabled={isLoading || isProcessing}
+                  className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
+                    isLoading || isProcessing
+                      ? 'text-gray-600 cursor-not-allowed'
+                      : 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                  }`}
                   data-testid="button-add"
                 >
                   <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
 
                 {/* Input Field */}
-                <div className="flex-1 bg-gray-800 rounded-full px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2">
+                <div className={`flex-1 bg-gray-800 rounded-full px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 ${
+                  isLoading || isProcessing ? 'opacity-60' : ''
+                }`}>
                   <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask for presentation tips"
                     disabled={isLoading || isProcessing || isListening}
-                    className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none text-sm sm:text-base"
+                    className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none text-sm sm:text-base disabled:cursor-not-allowed"
                     data-testid="input-chat"
                   />
                 </div>
@@ -471,11 +478,13 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                     <button
                       type="button"
                       onClick={isListening ? stopListening : startListening}
-                      disabled={isProcessing || isLoading}
+                      disabled={isProcessing || isLoading || (isListening && (isLoading || isProcessing))}
                       className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
                         isListening
                           ? 'bg-red-600 hover:bg-red-700 text-white'
                           : 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                      } ${
+                        isLoading || isProcessing ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                       data-testid="button-voice"
                     >
@@ -494,7 +503,12 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                 {/* Waveform Button */}
                 <button
                   type="button"
-                  className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                  disabled={isLoading || isProcessing}
+                  className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
+                    isLoading || isProcessing
+                      ? 'text-gray-600 opacity-50 cursor-not-allowed'
+                      : 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                  }`}
                   data-testid="button-waveform"
                 >
                   <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
