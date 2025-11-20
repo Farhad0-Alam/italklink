@@ -265,33 +265,6 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
         </Button>
       </div>
 
-      {/* Element Spacing Control */}
-      {onElementSpacingChange && (
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-          <div className="flex items-center justify-between mb-3">
-            <Label htmlFor="element-spacing" className="text-sm font-medium text-slate-700">
-              Element Spacing
-            </Label>
-            <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
-              {elementSpacing}px
-            </span>
-          </div>
-          <Slider
-            id="element-spacing"
-            min={0}
-            max={48}
-            step={1}
-            value={[elementSpacing]}
-            onValueChange={(value) => onElementSpacingChange(value[0])}
-            className="cursor-pointer"
-          />
-          <div className="flex justify-between mt-2 text-xs text-slate-400">
-            <span>Tight (0px)</span>
-            <span>Spacious (48px)</span>
-          </div>
-        </div>
-      )}
-
       {/* Individual Element Spacing Controls */}
       {onIndividualSpacingChange && sortedElements.length > 0 && (
         <Accordion type="single" collapsible className="bg-slate-50 border border-slate-200 rounded-lg">
