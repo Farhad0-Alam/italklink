@@ -108,6 +108,7 @@ function Router() {
       <Route path="/admin/users">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/plans">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/coupons">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
+      <Route path="/admin/templates">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/affiliates">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/conversions">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/icon-packs">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
