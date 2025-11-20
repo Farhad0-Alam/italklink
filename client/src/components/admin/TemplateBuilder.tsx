@@ -311,21 +311,44 @@ export default function TemplateBuilder() {
       
       setBusinessCardData(prev => ({
         ...prev,
-        // Apply template type/style
+        // Apply ALL template data from database
+        // Template type/style
         template: (parsed.template || 'minimal') as any,
-        // Apply colors
+        // Colors and styling
         backgroundColor: parsed.backgroundColor || '#ffffff',
         textColor: parsed.textColor || '#000000',
         accentColor: parsed.accentColor || '#3b82f6',
-        iconColor: parsed.accentColor || '#3b82f6',
-        // Keep user's content but update styling
-        fullName: prev.fullName || 'John Doe',
-        title: prev.title || 'Professional Title',
-        company: prev.company || 'Company Name',
-        email: prev.email || 'email@example.com',
-        phone: prev.phone || '+1 (555) 123-4567',
-        website: prev.website || 'www.example.com',
-        bio: prev.bio || 'Professional bio',
+        iconColor: parsed.iconColor || parsed.accentColor || '#3b82f6',
+        // User profile data
+        fullName: parsed.fullName || prev.fullName || 'John Doe',
+        title: parsed.title || prev.title || 'Professional Title',
+        company: parsed.company || prev.company || 'Company Name',
+        email: parsed.email || prev.email || 'email@example.com',
+        phone: parsed.phone || prev.phone || '+1 (555) 123-4567',
+        website: parsed.website || prev.website || 'www.example.com',
+        linkedin: parsed.linkedin || prev.linkedin || '',
+        bio: parsed.bio || prev.bio || 'Professional bio',
+        profileImageUrl: parsed.profileImageUrl || prev.profileImageUrl || '',
+        // Social links
+        socialLinks: parsed.socialLinks ? {
+          twitter: parsed.socialLinks.twitter || '',
+          facebook: parsed.socialLinks.facebook || '',
+          instagram: parsed.socialLinks.instagram || '',
+          linkedin: parsed.socialLinks.linkedin || '',
+          youtube: parsed.socialLinks.youtube || '',
+          tiktok: parsed.socialLinks.tiktok || '',
+          pinterest: parsed.socialLinks.pinterest || '',
+          snapchat: parsed.socialLinks.snapchat || '',
+          whatsapp: parsed.socialLinks.whatsapp || '',
+          telegram: parsed.socialLinks.telegram || '',
+          github: parsed.socialLinks.github || '',
+          behance: parsed.socialLinks.behance || '',
+          dribbble: parsed.socialLinks.dribbble || ''
+        } : prev.socialLinks,
+        // Page elements
+        pageElements: parsed.pageElements || prev.pageElements || [],
+        // Preserve other fields
+        customContacts: parsed.customContacts || prev.customContacts || [],
       }));
     } catch (error) {
       console.error('Error applying template style:', error);
