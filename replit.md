@@ -4,6 +4,32 @@
 TalkLink is an enterprise-grade platform offering professional digital business cards integrated with a comprehensive appointment booking and CRM system. It enables users to create customizable business cards, manage scheduling, track leads, and analyze business performance. The platform supports team scheduling, calendar integrations, automated notifications, and revenue analytics, aiming to provide a complete solution for business networking and client management. It also includes an email signature generator and a visitor notification subscription system.
 
 ## Recent Progress (November 20, 2025)
+### ✅ COMPLETE: Production CORS Configuration (November 20, 2025)
+
+**Enhanced CORS Middleware for Custom Domains:**
+- Added environment variable support for production domains
+- Environment variables: `FRONTEND_URL`, `PUBLIC_APP_URL`, `REPLIT_DEV_DOMAIN`, `CORS_ORIGINS`
+- Enhanced error logging to debug blocked origins with full details
+- Maintains strict origin checking for credentialed requests (cookies/auth)
+
+**Configuration for Production:**
+To deploy with a custom domain, set one or more of these environment variables:
+- `FRONTEND_URL`: Your exact frontend URL (e.g., `https://talkl.ink`) - no trailing slash
+- `PUBLIC_APP_URL`: Your public app URL if different from frontend
+- `CORS_ORIGINS`: Comma-separated list of additional allowed origins
+- `REPLIT_DEV_DOMAIN`: Your Replit dev domain (automatically used if present)
+
+**Built-in Domain Support:**
+The CORS middleware automatically allows:
+- All `.repl.co`, `.replit.dev`, `.replit.app`, `.pike.replit.dev` domains
+- Localhost variants for development
+- Same-origin requests (no Origin header)
+
+**Security:**
+- Credentialed requests (with cookies or Authorization header) require exact origin match
+- Enhanced logging shows blocked origins with full diagnostic information
+- No security regressions - maintains strict CSRF protection
+
 ### ✅ COMPLETE: Supabase to Replit App Storage Migration (November 20, 2025)
 
 **Complete Infrastructure Migration:**
