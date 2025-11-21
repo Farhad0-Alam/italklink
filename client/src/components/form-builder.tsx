@@ -112,6 +112,12 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     refetchOnWindowFocus: false,
   });
 
+  // Fetch icon packs for custom icon selection
+  const { data: iconPacksData = [] } = useQuery({
+    queryKey: ["/api/admin/icon-packs"],
+    staleTime: 300000,
+  });
+
   const [builderMode, setBuilderMode] = useState<"card" | "page" | "theme" | "seo">("card");
   const [selectedPageId, setSelectedPageId] = useState<string>("home");
   const [activeDividerPosition, setActiveDividerPosition] = useState<"top" | "bottom">("top");
@@ -2484,6 +2490,35 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       </Button>
                     </div>
 
+                    {/* Custom Icon Pack Selection */}
+                    <div className="bg-slate-800/50 rounded-lg p-3 space-y-3 mt-4">
+                      <div>
+                        <Label className="text-white text-xs">Custom Icon Pack (Optional)</Label>
+                        <p className="text-xs text-slate-400 mb-2">Select a custom icon pack to replace default icons</p>
+                        <Select
+                          value={sectionStyles?.contactInfo?.iconPackId || ""}
+                          onValueChange={(value) =>
+                            form.setValue(
+                              "sectionStyles.contactInfo.iconPackId",
+                              value || undefined,
+                            )
+                          }
+                        >
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                            <SelectValue placeholder="Choose icon pack..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">None (Use default icons)</SelectItem>
+                            {iconPacksData?.map((pack: any) => (
+                              <SelectItem key={pack.id} value={pack.id}>
+                                {pack.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
                     {/* Icon Styling */}
                     <div className="bg-slate-800/50 rounded-lg p-3 space-y-3 mt-4">
                       <div
@@ -4101,6 +4136,35 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                       >
                         <i className="fas fa-plus mr-2" /> Add Social Platform
                       </Button>
+                    </div>
+
+                    {/* Custom Icon Pack Selection */}
+                    <div className="bg-slate-800/50 rounded-lg p-3 space-y-3 mt-4">
+                      <div>
+                        <Label className="text-white text-xs">Custom Icon Pack (Optional)</Label>
+                        <p className="text-xs text-slate-400 mb-2">Select a custom icon pack to replace default social icons</p>
+                        <Select
+                          value={sectionStyles?.socialMedia?.iconPackId || ""}
+                          onValueChange={(value) =>
+                            form.setValue(
+                              "sectionStyles.socialMedia.iconPackId",
+                              value || undefined,
+                            )
+                          }
+                        >
+                          <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                            <SelectValue placeholder="Choose icon pack..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">None (Use default icons)</SelectItem>
+                            {iconPacksData?.map((pack: any) => (
+                              <SelectItem key={pack.id} value={pack.id}>
+                                {pack.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
                     {/* Icon Styling */}
