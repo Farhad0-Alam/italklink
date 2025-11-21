@@ -159,6 +159,10 @@ const AVAILABLE_FEATURES = [
   { key: 'video', label: 'Video', category: 'Page Elements' },
   { key: 'html', label: 'Custom HTML', category: 'Page Elements' },
   
+  // Contact & Social
+  { key: 'contactSection', label: 'Contact Section', category: 'Contact' },
+  { key: 'socialLinks', label: 'Social Links', category: 'Contact' },
+  
   // Forms
   { key: 'contactForm', label: 'Contact Form', category: 'Forms' },
   { key: 'subscribeForm', label: 'Subscribe Form', category: 'Forms' },
@@ -175,6 +179,10 @@ const AVAILABLE_FEATURES = [
   { key: 'digitalWallet', label: 'Digital Wallet (Apple/Google)', category: 'Advanced' },
   { key: 'arPreview', label: 'AR Preview', category: 'Advanced' },
   { key: 'qrcode', label: 'QR Code Generator', category: 'Advanced' },
+  
+  // Content Management
+  { key: 'documentManager', label: 'Document Manager', category: 'Content' },
+  { key: 'urlManager', label: 'URL Manager', category: 'Content' },
   
   // AI Features
   { key: 'aiChatbot', label: 'AI Chatbot', category: 'AI Features' },
