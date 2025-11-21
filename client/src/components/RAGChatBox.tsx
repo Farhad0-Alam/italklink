@@ -695,15 +695,32 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
 
             {/* Control Buttons */}
             <div className="flex gap-6">
-              {/* Mic Icon (Decorative) */}
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-800 flex items-center justify-center text-gray-500 opacity-40">
-                <Mic className="h-7 w-7 sm:h-8 sm:w-8" />
-              </div>
+              {/* Microphone Button - Record Voice */}
+              <button
+                type="button"
+                onClick={isListening ? stopListening : startListening}
+                disabled={isProcessing || isLoading || isTTSLoading}
+                className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center transition-all transform ${
+                  isListening
+                    ? 'bg-red-600 hover:bg-red-700 text-white scale-110 shadow-lg shadow-red-600/50'
+                    : isProcessing || isLoading || isTTSLoading
+                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    : 'bg-gray-800 hover:bg-gray-700 text-white hover:scale-105'
+                }`}
+                data-testid="button-mic-modal"
+              >
+                {isListening ? (
+                  <Square className="h-7 w-7 sm:h-8 sm:w-8" />
+                ) : (
+                  <Mic className="h-7 w-7 sm:h-8 sm:w-8" />
+                )}
+              </button>
 
               {/* Stop Button */}
               <button
                 onClick={stopAudio}
-                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-white transition-colors"
+                disabled={isTTSLoading}
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-white transition-colors disabled:opacity-50"
                 data-testid="button-stop-audio"
               >
                 <X className="h-7 w-7 sm:h-8 sm:w-8" />
