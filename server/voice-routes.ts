@@ -813,6 +813,8 @@ router.post('/process', requireAuth, async (req, res) => {
   const requestId = `voice_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   console.log(`[${requestId}] POST /api/voice/process - Request received`);
   
+  let tempPath: string | null = null;
+  
   try {
     const { audio, cardId, knowledgeBase, messages } = req.body;
     
@@ -841,12 +843,13 @@ router.post('/process', requireAuth, async (req, res) => {
     }
     
     // Save temporarily for processing
-    const tempPath = path.join('/tmp', `audio_${Date.now()}.webm`);
+    tempPath = path.join('/tmp', `audio_${Date.now()}.webm`);
     fs.writeFileSync(tempPath, audioBuffer);
     console.log(`[${requestId}] Audio saved to temp file: ${tempPath}`);
     
+    // Step 1: Transcribe audio using OpenAI Whisper
+    let userText: string;
     try {
-      // Transcribe audio using OpenAI Whisper
       console.log(`[${requestId}] Starting Whisper transcription...`);
       const audioFile = fs.createReadStream(tempPath);
       const transcription = await openai.audio.transcriptions.create({
@@ -854,17 +857,48 @@ router.post('/process', requireAuth, async (req, res) => {
         model: 'whisper-1',
       });
       
-      const userText = transcription.text;
+      userText = transcription.text;
       console.log(`[${requestId}] ✅ Transcription complete: "${userText}"`);
       
-      // Query knowledge base for relevant context
-      console.log(`[${requestId}] Querying knowledge base...`);
-      const kbContext = await queryKnowledgeBase(userText, 5);
-      console.log(`[${requestId}] Knowledge base context retrieved, size: ${kbContext.length} characters`);
+      if (!userText || userText.trim().length === 0) {
+        console.error(`[${requestId}] ❌ Empty transcription result`);
+        return res.status(400).json({ 
+          error: 'Could not transcribe audio',
+          details: 'The audio transcription was empty. Please try recording again with clearer audio.'
+        });
+      }
+    } catch (transcriptionError: any) {
+      console.error(`[${requestId}] ❌ Whisper transcription error:`, {
+        name: transcriptionError?.name,
+        message: transcriptionError?.message,
+        status: transcriptionError?.status,
+        code: transcriptionError?.code,
+        type: transcriptionError?.type,
+      });
       
-      // Generate AI response based on knowledge base and context
+      return res.status(500).json({ 
+        error: 'Audio transcription failed', 
+        details: transcriptionError?.message || 'Failed to convert speech to text. Please try again.',
+        requestId,
+      });
+    }
+    
+    // Step 2: Query knowledge base for relevant context
+    let kbContext: string = '';
+    try {
+      console.log(`[${requestId}] Querying knowledge base...`);
+      kbContext = await queryKnowledgeBase(userText, 5);
+      console.log(`[${requestId}] Knowledge base context retrieved, size: ${kbContext.length} characters`);
+    } catch (kbError: any) {
+      console.error(`[${requestId}] ⚠️ Knowledge base query failed (continuing without context):`, kbError?.message);
+      // Continue without KB context - not a fatal error
+    }
+    
+    // Step 3: Generate AI response based on knowledge base and context
+    let aiResponse: string | null;
+    try {
       const systemPrompt = knowledgeBase?.systemPrompt || 
-        `You are a helpful AI assistant for a business. Be professional, friendly, and concise.`;
+        `You are a helpful AI assistant for TalkLink. Be professional, friendly, and concise. Answer questions about our services.`;
       
       const systemContent = kbContext
         ? `${systemPrompt}\n\nRelevant Knowledge Base Information:\n${kbContext}\n\nUse the provided knowledge base to answer questions accurately.`
@@ -878,19 +912,41 @@ router.post('/process', requireAuth, async (req, res) => {
             role: 'system',
             content: systemContent
           },
-          ...messages,
+          ...(messages || []),
           {
             role: 'user',
             content: userText
           }
         ],
         max_tokens: 500,
+        temperature: 0.7,
       });
       
-      const aiResponse = response.choices[0].message.content;
+      aiResponse = response.choices[0].message.content;
       console.log(`[${requestId}] ✅ AI response generated: "${aiResponse?.substring(0, 50)}..."`);
       
-      // Generate audio response using TTS
+      if (!aiResponse) {
+        aiResponse = "I'm here to help! Could you please rephrase your question?";
+      }
+    } catch (gptError: any) {
+      console.error(`[${requestId}] ❌ GPT-4o response generation error:`, {
+        name: gptError?.name,
+        message: gptError?.message,
+        status: gptError?.status,
+        code: gptError?.code,
+        type: gptError?.type,
+      });
+      
+      return res.status(500).json({ 
+        error: 'AI response generation failed', 
+        details: gptError?.message || 'Failed to generate AI response. Please try again.',
+        requestId,
+      });
+    }
+    
+    // Step 4: Generate audio response using TTS
+    let audioDataUri: string | undefined;
+    try {
       console.log(`[${requestId}] Generating TTS audio...`);
       const audioResponse = await openai.audio.speech.create({
         model: 'tts-1',
@@ -901,35 +957,44 @@ router.post('/process', requireAuth, async (req, res) => {
       // Convert audio stream to base64
       const audioArrayBuffer = await audioResponse.arrayBuffer();
       const audioBase64 = Buffer.from(audioArrayBuffer).toString('base64');
-      const audioDataUri = `data:audio/mpeg;base64,${audioBase64}`;
+      audioDataUri = `data:audio/mpeg;base64,${audioBase64}`;
       console.log(`[${requestId}] ✅ TTS audio generated, size: ${audioBase64.length} characters`);
-      
-      console.log(`[${requestId}] ✅ Sending response to frontend`);
-      res.json({
-        transcript: userText,
-        response: aiResponse,
-        audioUrl: audioDataUri
-      });
-      
-    } finally {
-      // Clean up temp file
-      if (fs.existsSync(tempPath)) {
-        fs.unlinkSync(tempPath);
-        console.log(`[${requestId}] Cleaned up temp file`);
-      }
+    } catch (ttsError: any) {
+      console.error(`[${requestId}] ⚠️ TTS generation failed (continuing without audio):`, ttsError?.message);
+      // Continue without audio - not a fatal error, user can still read the response
     }
+    
+    console.log(`[${requestId}] ✅ Sending response to frontend`);
+    res.json({
+      transcript: userText,
+      response: aiResponse,
+      audioUrl: audioDataUri
+    });
+    
   } catch (error: any) {
-    console.error(`[${requestId}] ❌ Voice processing error:`, {
+    console.error(`[${requestId}] ❌ Unexpected voice processing error:`, {
       name: error?.name,
       message: error?.message,
-      stack: error?.stack?.substring(0, 200),
+      stack: error?.stack,
       code: error?.code,
+      fullError: JSON.stringify(error, null, 2),
     });
+    
     res.status(500).json({ 
       error: 'Voice processing failed', 
-      details: error?.message || 'Unknown error',
+      details: error?.message || 'An unexpected error occurred. Please try again.',
       requestId,
     });
+  } finally {
+    // Clean up temp file
+    if (tempPath && fs.existsSync(tempPath)) {
+      try {
+        fs.unlinkSync(tempPath);
+        console.log(`[${requestId}] Cleaned up temp file`);
+      } catch (cleanupError) {
+        console.error(`[${requestId}] ⚠️ Failed to clean up temp file:`, cleanupError);
+      }
+    }
   }
 });
 

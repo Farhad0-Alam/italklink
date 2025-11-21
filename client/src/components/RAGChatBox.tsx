@@ -483,11 +483,19 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         console.error('[Audio Processing] API Request failed:', {
           name: apiError?.name,
           message: apiError?.message,
+          details: apiError?.details,
+          error: apiError?.error,
           status: apiError?.status,
           code: apiError?.code,
+          requestId: apiError?.requestId,
           stack: apiError?.stack?.substring(0, 200),
         });
-        throw apiError;
+        
+        // Create a more helpful error message from API response
+        const errorMessage = apiError?.details || apiError?.error || apiError?.message || 'Unknown error occurred';
+        const enhancedError = new Error(errorMessage);
+        (enhancedError as any).requestId = apiError?.requestId;
+        throw enhancedError;
       }
 
       if (response?.transcript) {
@@ -542,16 +550,29 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       console.error('[Audio Processing Error] Complete Error:', {
         name: error?.name,
         message: error?.message,
+        details: error?.details,
+        requestId: error?.requestId,
         stack: error?.stack,
       });
       
-      let errorDescription = 'Failed to process audio.';
+      let errorTitle = 'Processing Error';
+      let errorDescription = 'Failed to process audio. Please try again.';
+      
       if (error?.message) {
         errorDescription = error.message;
+        
+        // Customize title based on error type
+        if (error.message.includes('transcription') || error.message.includes('transcribe')) {
+          errorTitle = 'Audio Transcription Failed';
+        } else if (error.message.includes('response generation') || error.message.includes('AI response')) {
+          errorTitle = 'AI Response Failed';
+        } else if (error.message.includes('TTS') || error.message.includes('text-to-speech')) {
+          errorTitle = 'Text-to-Speech Failed';
+        }
       }
 
       toast({
-        title: 'Processing Error',
+        title: errorTitle,
         description: errorDescription,
         variant: 'destructive',
       });
