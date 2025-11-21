@@ -577,16 +577,8 @@ export default function QrCodes() {
           </div>
         </motion.div>
 
-        <Tabs defaultValue="dynamic" className="space-y-8">
+        <Tabs defaultValue="static" className="space-y-8">
           <TabsList className="grid w-full grid-cols-2 bg-white dark:bg-slate-800 p-1 rounded-2xl shadow-lg border border-orange-200 dark:border-orange-900">
-            <TabsTrigger 
-              value="dynamic" 
-              className="rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
-              data-testid="tab-dynamic"
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              Dynamic QR Codes
-            </TabsTrigger>
             <TabsTrigger 
               value="static" 
               className="rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
@@ -594,6 +586,14 @@ export default function QrCodes() {
             >
               <Zap className="w-4 h-4 mr-2" />
               Quick Generator
+            </TabsTrigger>
+            <TabsTrigger 
+              value="dynamic" 
+              className="rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+              data-testid="tab-dynamic"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Dynamic QR Codes
             </TabsTrigger>
           </TabsList>
 
