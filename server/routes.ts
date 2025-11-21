@@ -2931,6 +2931,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userId = req.user!.id;
     const { country, website, sourceInfo } = req.body;
     
+    if (!country) {
+      throw validationError('Country is required');
+    }
+
     const affiliate = await storage.createAffiliate({
       userId,
       country,
@@ -2939,7 +2943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       status: 'pending' as const,
     });
 
-    res.json({ success: true, data: affiliate, message: 'Affiliate application submitted successfully' });
+    successResponse(res, affiliate, 'Affiliate application submitted successfully');
   }));
 
   app.get('/api/affiliate/analytics', requireAuth, asyncHandler(async (req, res) => {
@@ -2947,11 +2951,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const affiliate = await storage.getAffiliateByUserId(userId);
     
     if (!affiliate) {
-      return res.status(404).json({ success: false, message: 'Affiliate not found' });
+      throw notFoundError('Affiliate profile', userId);
     }
 
     const analytics = await storage.getAffiliateAnalytics(affiliate.id);
-    res.json({ success: true, data: analytics });
+    successResponse(res, analytics, 'Analytics retrieved successfully');
   }));
 
   app.get('/api/affiliate/conversions', requireAuth, asyncHandler(async (req, res) => {
@@ -2959,16 +2963,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const affiliate = await storage.getAffiliateByUserId(userId);
     
     if (!affiliate) {
-      return res.status(404).json({ success: false, message: 'Affiliate not found' });
+      throw notFoundError('Affiliate profile', userId);
     }
 
     const conversions = await storage.getAffiliateConversions(affiliate.id);
-    res.json({ success: true, data: conversions });
+    successResponse(res, conversions, 'Conversions retrieved successfully');
   }));
 
   app.get('/api/affiliate/marketing-assets', requireAuth, asyncHandler(async (req, res) => {
     const assets = await storage.getMarketingAssets();
-    res.json({ success: true, data: assets });
+    successResponse(res, assets, 'Marketing assets retrieved successfully');
+  }));
+
+  // Get affiliate payouts
+  app.get('/api/affiliate/payouts', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const affiliate = await storage.getAffiliateByUserId(userId);
+    
+    if (!affiliate) {
+      throw notFoundError('Affiliate profile', userId);
+    }
+
+    const payouts = await storage.getAffiliatePayouts(affiliate.id);
+    successResponse(res, payouts, 'Payouts retrieved successfully');
+  }));
+
+  // Request payout
+  app.post('/api/affiliate/payout-request', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const { amount, method } = req.body;
+
+    if (!amount || !method) {
+      throw validationError('Amount and payment method are required');
+    }
+
+    const affiliate = await storage.getAffiliateByUserId(userId);
+    if (!affiliate) {
+      throw notFoundError('Affiliate profile', userId);
+    }
+
+    const stats = await storage.getAffiliateStats(affiliate.id);
+    if (amount > stats.pendingEarnings) {
+      throw businessLogicError('Requested amount exceeds pending earnings');
+    }
+
+    const payout = await storage.createAffiliatePayout({
+      affiliateId: affiliate.id,
+      amount,
+      method,
+      status: 'draft' as const,
+    });
+
+    successResponse(res, payout, 'Payout request created successfully');
   }));
 
   // ===== BILLING API ENDPOINTS =====

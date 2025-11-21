@@ -120,38 +120,48 @@ export default function Affiliate() {
   const queryClient = useQueryClient();
 
   // Fetch affiliate profile
-  const { data: affiliate, isLoading: affiliateLoading } = useQuery<AffiliateProfile>({
+  const { data: affiliateResponse, isLoading: affiliateLoading } = useQuery({
     queryKey: ['/api/affiliate/me'],
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+  const affiliate = affiliateResponse?.data || null;
+
   // Fetch analytics
-  const { data: analytics } = useQuery<AffiliateAnalytics>({
+  const { data: analyticsResponse } = useQuery({
     queryKey: ['/api/affiliate/analytics'],
     enabled: !!affiliate && affiliate.status === 'approved',
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
+  const analytics = analyticsResponse?.data || null;
+
   // Fetch conversions
-  const { data: conversions = [] } = useQuery<Conversion[]>({
+  const { data: conversionsResponse } = useQuery({
     queryKey: ['/api/affiliate/conversions'],
     enabled: !!affiliate && affiliate.status === 'approved',
     staleTime: 1000 * 60 * 2,
   });
 
+  const conversions = conversionsResponse?.data || [];
+
   // Fetch marketing assets
-  const { data: assets = [] } = useQuery<MarketingAsset[]>({
-    queryKey: ['/api/affiliate/assets'],
+  const { data: assetsResponse } = useQuery({
+    queryKey: ['/api/affiliate/marketing-assets'],
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 
+  const assets = assetsResponse?.data || [];
+
   // Fetch payouts
-  const { data: payouts = [] } = useQuery<Payout[]>({
+  const { data: payoutsResponse } = useQuery({
     queryKey: ['/api/affiliate/payouts'],
     enabled: !!affiliate && affiliate.status === 'approved',
     staleTime: 1000 * 60 * 2,
   });
+
+  const payouts = payoutsResponse?.data || [];
 
   // Payout request state
   const [payoutAmount, setPayoutAmount] = useState('');
