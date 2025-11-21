@@ -851,11 +851,18 @@ router.post('/process', requireAuth, async (req, res) => {
     let userText: string;
     try {
       console.log(`[${requestId}] Starting Whisper transcription...`);
+      console.log(`[${requestId}] Temp file exists:`, fs.existsSync(tempPath));
+      console.log(`[${requestId}] OpenAI API Key present:`, !!process.env.OPENAI_API_KEY);
+      
+      if (!fs.existsSync(tempPath)) {
+        throw new Error('Temp audio file does not exist');
+      }
+      
       const audioFile = fs.createReadStream(tempPath);
       const transcription = await openai.audio.transcriptions.create({
         file: audioFile,
         model: 'whisper-1',
-      });
+      } as any);
       
       userText = transcription.text;
       console.log(`[${requestId}] ✅ Transcription complete: "${userText}"`);
