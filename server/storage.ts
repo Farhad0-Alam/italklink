@@ -5623,6 +5623,51 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // CRM STATS - DASHBOARD OVERVIEW
+  async getCRMStats(userId: string): Promise<any> {
+    const [contacts, deals, tasks, activities] = await Promise.all([
+      db.select({ count: sql<number>`COUNT(*)::integer` })
+        .from(crmContacts)
+        .where(eq(crmContacts.ownerUserId, userId)),
+      db.select({
+        total: sql<number>`COUNT(*)::integer`,
+        totalValue: sql<number>`COALESCE(SUM(${crmDeals.value}), 0)::integer`,
+        won: sql<number>`SUM(CASE WHEN ${crmDeals.status} = 'won' THEN 1 ELSE 0 END)::integer`,
+        wonValue: sql<number>`COALESCE(SUM(CASE WHEN ${crmDeals.status} = 'won' THEN ${crmDeals.value} ELSE 0 END), 0)::integer`,
+        lost: sql<number>`SUM(CASE WHEN ${crmDeals.status} = 'lost' THEN 1 ELSE 0 END)::integer`
+      })
+        .from(crmDeals)
+        .where(eq(crmDeals.ownerUserId, userId)),
+      db.select({
+        total: sql<number>`COUNT(*)::integer`,
+        completed: sql<number>`SUM(CASE WHEN ${crmTasks.status} = 'done' THEN 1 ELSE 0 END)::integer`,
+        overdue: sql<number>`SUM(CASE WHEN ${crmTasks.dueAt} < NOW() AND ${crmTasks.status} != 'done' THEN 1 ELSE 0 END)::integer`
+      })
+        .from(crmTasks)
+        .where(eq(crmTasks.assignedTo, userId)),
+      db.select({ count: sql<number>`COUNT(*)::integer` })
+        .from(crmActivities)
+        .where(eq(crmActivities.userId, userId))
+    ]);
+
+    const totalDeals = deals[0]?.total || 0;
+    const wonDeals = deals[0]?.won || 0;
+
+    return {
+      totalContacts: contacts[0]?.count || 0,
+      totalDeals: totalDeals,
+      totalDealValue: deals[0]?.totalValue || 0,
+      wonDeals: wonDeals,
+      wonDealValue: deals[0]?.wonValue || 0,
+      lostDeals: deals[0]?.lost || 0,
+      averageDealSize: totalDeals > 0 ? Math.round((deals[0]?.totalValue || 0) / totalDeals) : 0,
+      conversionRate: totalDeals > 0 ? Number(((wonDeals / totalDeals) * 100).toFixed(2)) : 0,
+      activeTasks: (tasks[0]?.total || 0) - (tasks[0]?.completed || 0),
+      overdueTasks: tasks[0]?.overdue || 0,
+      recentActivities: activities[0]?.count || 0
+    };
+  }
+
   // FUNNEL ANALYTICS - COMPLETE CONVERSION TRACKING
   async getBookingTrends(userId: string, period: string = '30d', granularity: string = 'day'): Promise<any[]> {
     const startDate = this.getPeriodStartDate(period);

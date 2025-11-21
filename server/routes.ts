@@ -1887,33 +1887,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact Management Endpoints
   
   // Get all contacts for the authenticated user with search and filtering
-  app.get('/api/crm/contacts', requireAuth, async (req, res) => {
-    try {
-      const user = req.user as User;
-      const { search, tags, lifecycleStage, limit = '50', offset = '0' } = req.query;
-      
-      const filters: any = {};
-      if (search) filters.search = search as string;
-      if (tags) filters.tags = (tags as string).split(',');
-      if (lifecycleStage) filters.lifecycleStage = lifecycleStage as string;
-      
-      const contacts = await storage.getContactsByUser(user.id, filters);
-      
-      // Apply pagination
-      const startIndex = parseInt(offset as string);
-      const pageSize = Math.min(parseInt(limit as string), 100); // Max 100 per page
-      const paginatedContacts = contacts.slice(startIndex, startIndex + pageSize);
-      
-      res.json({
-        contacts: paginatedContacts,
-        total: contacts.length,
-        hasMore: startIndex + pageSize < contacts.length
-      });
-    } catch (error) {
-      console.error('Error fetching contacts:', error);
-      res.status(500).json({ message: 'Failed to fetch contacts' });
-    }
-  });
+  // CRM Stats endpoint
+  app.get('/api/crm/stats', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const stats = await storage.getCRMStats(userId);
+    successResponse(res, stats, 'CRM stats retrieved successfully');
+  }));
+
+  app.get('/api/crm/contacts', requireAuth, asyncHandler(async (req, res) => {
+    const user = req.user as User;
+    const { search, tags, lifecycleStage, limit = '50', offset = '0' } = req.query;
+    
+    const filters: any = {};
+    if (search) filters.search = search as string;
+    if (tags) filters.tags = (tags as string).split(',');
+    if (lifecycleStage) filters.lifecycleStage = lifecycleStage as string;
+    
+    const contacts = await storage.getContactsByUser(user.id, filters);
+    
+    // Apply pagination
+    const startIndex = parseInt(offset as string);
+    const pageSize = Math.min(parseInt(limit as string), 100);
+    const paginatedContacts = contacts.slice(startIndex, startIndex + pageSize);
+    
+    successResponse(res, { contacts: paginatedContacts, total: contacts.length }, 'Contacts retrieved successfully');
+  }));
 
   // Get single contact with activity timeline
   app.get('/api/crm/contacts/:id', requireAuth, async (req, res) => {
