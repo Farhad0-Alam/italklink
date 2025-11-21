@@ -402,16 +402,19 @@ router.get('/conversions/stats', requireAdmin, async (req, res) => {
       : 0;
 
     res.json({
-      totalConversions: totalConversions.count,
-      pendingConversions: pendingConversions.count,
-      approvedConversions: approvedConversions.count,
-      totalCommissions: totalCommissions.total || 0,
-      pendingCommissions: pendingCommissions.total || 0,
-      monthlyGrowth
+      success: true,
+      data: {
+        totalConversions: totalConversions.count,
+        pendingConversions: pendingConversions.count,
+        approvedConversions: approvedConversions.count,
+        totalCommissions: totalCommissions.total || 0,
+        pendingCommissions: pendingCommissions.total || 0,
+        monthlyGrowth
+      }
     });
   } catch (error) {
     console.error('Failed to get conversion stats:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -431,7 +434,7 @@ router.post('/conversions/:id/approve', requireAdmin, async (req, res) => {
       .returning();
 
     if (!updatedConversion) {
-      return res.status(404).json({ message: 'Conversion not found' });
+      return res.status(404).json({ success: false, message: 'Conversion not found' });
     }
 
     // Update affiliate balance

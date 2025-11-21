@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 interface Conversion {
   id: string;
@@ -72,21 +73,26 @@ interface Conversion {
 }
 
 export default function AffiliateConversionsPage() {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedConversion, setSelectedConversion] = useState<Conversion | null>(null);
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<'approve' | 'reverse'>('approve');
   const [reason, setReason] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
+  const [page, setPage] = useState(1);
   
   const queryClient = useQueryClient();
 
   // Fetch conversions
-  const { data: conversions = [], isLoading } = useQuery<Conversion[]>({
-    queryKey: ['/api/admin/conversions', statusFilter],
+  const { data: conversionsResponse, isLoading } = useQuery<{ success: boolean; data: Conversion[] }>({
+    queryKey: ['/api/admin/conversions', statusFilter, page],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (statusFilter !== 'all') params.append('status', statusFilter);
+      params.append('page', page.toString());
+      params.append('limit', '50');
       
       const url = `/api/admin/conversions${params.toString() ? '?' + params.toString() : ''}`;
       const res = await fetch(url, { credentials: 'include' });
@@ -99,26 +105,32 @@ export default function AffiliateConversionsPage() {
         throw new Error(`Failed to fetch conversions: ${res.statusText}`);
       }
       
-      const result = await res.json();
-      return result.data || result;
+      return res.json();
     },
     retry: false,
     staleTime: 0,
     refetchOnWindowFocus: true
   });
 
+  const conversions = conversionsResponse?.data || [];
+
   // Fetch conversion stats
-  const { data: stats } = useQuery<{
-    totalConversions: number;
-    pendingConversions: number;
-    approvedConversions: number;
-    totalCommissions: number;
-    pendingCommissions: number;
-    monthlyGrowth: number;
+  const { data: statsResponse } = useQuery<{
+    success: boolean;
+    data: {
+      totalConversions: number;
+      pendingConversions: number;
+      approvedConversions: number;
+      totalCommissions: number;
+      pendingCommissions: number;
+      monthlyGrowth: number;
+    };
   }>({
     queryKey: ['/api/admin/conversions/stats'],
     staleTime: 1000 * 60 * 5,
   });
+
+  const stats = statsResponse?.data || statsResponse;
 
   // Filter conversions
   const filteredConversions = conversions.filter(conversion => {
@@ -135,6 +147,16 @@ export default function AffiliateConversionsPage() {
   const handleAction = async () => {
     if (!selectedConversion) return;
 
+    if (actionType === 'reverse' && !reason.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please provide a reason for reversing this conversion',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setActionLoading(true);
     try {
       const endpoint = actionType === 'approve' 
         ? `/api/admin/conversions/${selectedConversion.id}/approve`
@@ -147,19 +169,34 @@ export default function AffiliateConversionsPage() {
         body: JSON.stringify({ reason })
       });
 
+      const result = await response.json();
+
       if (response.ok) {
+        toast({
+          title: 'Success',
+          description: `Conversion ${actionType}d successfully`
+        });
         queryClient.invalidateQueries({ queryKey: ['/api/admin/conversions'] });
         queryClient.invalidateQueries({ queryKey: ['/api/admin/conversions/stats'] });
         setActionDialogOpen(false);
         setSelectedConversion(null);
         setReason('');
       } else {
-        const error = await response.json();
-        alert(`Failed to ${actionType} conversion: ${error.message}`);
+        toast({
+          title: 'Error',
+          description: result.message || `Failed to ${actionType} conversion`,
+          variant: 'destructive'
+        });
       }
     } catch (error) {
       console.error(`Failed to ${actionType} conversion:`, error);
-      alert(`Failed to ${actionType} conversion`);
+      toast({
+        title: 'Error',
+        description: `Failed to ${actionType} conversion`,
+        variant: 'destructive'
+      });
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -445,6 +482,28 @@ export default function AffiliateConversionsPage() {
         </CardContent>
       </Card>
 
+      {/* Pagination */}
+      <div className="flex justify-center items-center gap-4">
+        <Button
+          variant="outline"
+          disabled={page === 1}
+          onClick={() => setPage(p => Math.max(1, p - 1))}
+          data-testid="button-prev-page"
+        >
+          Previous
+        </Button>
+        <span className="text-sm text-muted-foreground">
+          Page {page}
+        </span>
+        <Button
+          variant="outline"
+          onClick={() => setPage(p => p + 1)}
+          data-testid="button-next-page"
+        >
+          Next
+        </Button>
+      </div>
+
       {/* Action Dialog */}
       <Dialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
         <DialogContent>
@@ -489,15 +548,20 @@ export default function AffiliateConversionsPage() {
           )}
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setActionDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setActionDialogOpen(false)}
+              disabled={actionLoading}
+            >
               Cancel
             </Button>
             <Button 
               onClick={handleAction}
               variant={actionType === 'approve' ? 'default' : 'destructive'}
-              disabled={actionType === 'reverse' && !reason.trim()}
+              disabled={actionLoading || (actionType === 'reverse' && !reason.trim())}
+              data-testid={`button-${actionType}-conversion`}
             >
-              {actionType === 'approve' ? 'Approve Conversion' : 'Reverse Conversion'}
+              {actionLoading ? `${actionType === 'approve' ? 'Approving' : 'Reversing'}...` : (actionType === 'approve' ? 'Approve Conversion' : 'Reverse Conversion')}
             </Button>
           </DialogFooter>
         </DialogContent>
