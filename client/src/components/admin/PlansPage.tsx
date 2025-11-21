@@ -498,6 +498,9 @@ export default function PlansPage() {
       }
     }
     
+    // Extract feature IDs from plan.features if it's an array
+    const planFeatures = Array.isArray(plan.features) ? plan.features : [];
+    
     setFormData({
       name: `${plan.name} (Copy)`,
       planType: normalizePlanType(plan.planType),
@@ -509,12 +512,12 @@ export default function PlansPage() {
       cardLabel: plan.cardLabel || '',
       trialDays: plan.trialDays,
       customDurationDays: plan.customDurationDays,
-      features: [], // Will be populated from API
+      features: planFeatures,
       templates: [], // Will be populated from API
       isActive: true,
       stripePriceId: '',
       pricingFeatures: (plan as any).pricingFeatures || [],
-      templateLimit: plan.features?.templateLimit || -1,
+      templateLimit: (plan.features as any)?.templateLimit || -1,
       description: (plan as any).description || ''
     });
     setAddPlanOpen(true);
@@ -546,6 +549,9 @@ export default function PlansPage() {
       }
     }
     
+    // Extract feature IDs from plan.features if it's an array
+    const planFeatures = Array.isArray(plan.features) ? plan.features : [];
+    
     setFormData({
       name: plan.name,
       planType: normalizePlanType(plan.planType),
@@ -557,12 +563,12 @@ export default function PlansPage() {
       cardLabel: plan.cardLabel || '',
       trialDays: plan.trialDays,
       customDurationDays: plan.customDurationDays,
-      features: [], // Will be populated from API
+      features: planFeatures,
       templates: [], // Will be populated from API
       isActive: plan.isActive,
       stripePriceId: plan.stripePriceId || '',
       pricingFeatures: (plan as any).pricingFeatures || [],
-      templateLimit: plan.features?.templateLimit || -1,
+      templateLimit: (plan.features as any)?.templateLimit || -1,
       description: (plan as any).description || ''
     });
     setEditPlanOpen(true);
