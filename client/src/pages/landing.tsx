@@ -232,7 +232,6 @@ export default function Landing() {
             
             <div className="hidden md:flex items-center space-x-8 overflow-x-auto">
               {[
-                { label: "About", hash: "about" },
                 { label: "Features", hash: "features" },
                 { label: "Appointments", hash: "appointments" },
                 { label: "Email Signature", hash: "email-signatures" },
@@ -241,8 +240,7 @@ export default function Landing() {
                 { label: "Analytics", hash: "analytics" },
                 { label: "Integrations", hash: "integrations" },
                 { label: "FAQ", hash: "faq" },
-                { label: "Contact", hash: "contact" },
-                { label: "Others", hash: "others" }
+                { label: "Contact", hash: "contact" }
               ].map((item) => (
                 <a 
                   key={item.hash}
