@@ -230,15 +230,27 @@ export default function Landing() {
               <span className="text-xl font-bold text-gray-900">TalkLink</span>
             </motion.div>
             
-            <div className="hidden md:flex items-center space-x-8">
-              {["About", "Features", "Integrations", "FAQ", "Contact", "Others"].map((item) => (
+            <div className="hidden md:flex items-center space-x-8 overflow-x-auto">
+              {[
+                { label: "About", hash: "about" },
+                { label: "Features", hash: "features" },
+                { label: "Appointments", hash: "appointments" },
+                { label: "Email Signature", hash: "email-signatures" },
+                { label: "QR Code", hash: "qr-codes" },
+                { label: "Automation", hash: "automation" },
+                { label: "Analytics", hash: "analytics" },
+                { label: "Integrations", hash: "integrations" },
+                { label: "FAQ", hash: "faq" },
+                { label: "Contact", hash: "contact" },
+                { label: "Others", hash: "others" }
+              ].map((item) => (
                 <a 
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  className="text-gray-600 hover:text-orange-500 transition-colors font-medium"
-                  data-testid={`link-nav-${item.toLowerCase()}`}
+                  key={item.hash}
+                  href={`#${item.hash}`}
+                  className="text-gray-600 hover:text-orange-500 transition-colors font-medium whitespace-nowrap"
+                  data-testid={`link-nav-${item.hash}`}
                 >
-                  {item}
+                  {item.label}
                 </a>
               ))}
             </div>
