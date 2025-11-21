@@ -153,13 +153,13 @@ router.post('/apply', async (req, res) => {
     });
 
     res.json({ 
+      success: true,
       message: 'Affiliate application submitted successfully', 
-      affiliate: newAffiliate,
-      code: newAffiliate.code
+      data: { affiliate: newAffiliate, code: newAffiliate.code }
     });
   } catch (error) {
     console.error('Failed to create affiliate:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -198,19 +198,28 @@ router.get('/me', requireAuth, async (req, res) => {
         eq(conversions.status, 'pending')
       ));
 
+    // Get available balance for payout
+    const [balanceResult] = await db.select({ balance: sum(balances.delta) })
+      .from(balances)
+      .where(eq(balances.affiliateId, affiliate.id));
+
     res.json({
-      ...affiliate,
-      stats: {
-        totalClicks: clicksResult.count || 0,
-        totalConversions: conversionsResult.count || 0,
-        totalEarnings: conversionsResult.totalEarnings || 0,
-        pendingEarnings: pendingEarnings.amount || 0,
-        pendingConversions: pendingEarnings.count || 0
+      success: true,
+      data: {
+        ...affiliate,
+        availableBalance: (balanceResult?.balance || 0),
+        stats: {
+          totalClicks: clicksResult.count || 0,
+          totalConversions: conversionsResult.count || 0,
+          totalEarnings: conversionsResult.totalEarnings || 0,
+          pendingEarnings: pendingEarnings.amount || 0,
+          pendingConversions: pendingEarnings.count || 0
+        }
       }
     });
   } catch (error) {
     console.error('Failed to get affiliate profile:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -231,10 +240,10 @@ router.patch('/me', requireAffiliate, async (req, res) => {
       .where(eq(affiliates.id, affiliate.id))
       .returning();
 
-    res.json({ message: 'Profile updated successfully', affiliate: updatedAffiliate });
+    res.json({ success: true, message: 'Profile updated successfully', data: updatedAffiliate });
   } catch (error) {
     console.error('Failed to update affiliate profile:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -263,10 +272,10 @@ router.post('/kyc', requireAffiliate, async (req, res) => {
       }
     });
 
-    res.json({ message: 'KYC documents submitted for review' });
+    res.json({ success: true, message: 'KYC documents submitted for review' });
   } catch (error) {
     console.error('Failed to submit KYC:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -500,12 +509,13 @@ router.post('/track/conversion', async (req, res) => {
     });
 
     res.json({ 
+      success: true,
       message: 'Conversion tracked successfully', 
-      conversion: newConversion 
+      data: newConversion 
     });
   } catch (error) {
     console.error('Failed to track conversion:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -571,13 +581,16 @@ router.get('/analytics', requireAffiliate, async (req, res) => {
       .limit(10);
 
     res.json({
-      clickAnalytics,
-      conversionAnalytics,
-      topSources
+      success: true,
+      data: {
+        clickAnalytics,
+        conversionAnalytics,
+        topSources
+      }
     });
   } catch (error) {
     console.error('Failed to get analytics:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -615,17 +628,20 @@ router.get('/conversions', requireAffiliate, async (req, res) => {
       .where(whereClause);
 
     res.json({
-      conversions: userConversions,
-      pagination: {
-        page: parseInt(page as string),
-        limit: parseInt(limit as string),
-        total: totalCount.count,
-        pages: Math.ceil(totalCount.count / parseInt(limit as string))
+      success: true,
+      data: {
+        conversions: userConversions,
+        pagination: {
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
+          total: totalCount.count,
+          pages: Math.ceil(totalCount.count / parseInt(limit as string))
+        }
       }
     });
   } catch (error) {
     console.error('Failed to get conversions:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -648,17 +664,20 @@ router.get('/payouts', requireAffiliate, async (req, res) => {
       .where(eq(payouts.affiliateId, affiliate.id));
 
     res.json({
-      payouts: affiliatePayouts,
-      pagination: {
-        page: parseInt(page as string),
-        limit: parseInt(limit as string),
-        total: totalCount.count,
-        pages: Math.ceil(totalCount.count / parseInt(limit as string))
+      success: true,
+      data: {
+        payouts: affiliatePayouts,
+        pagination: {
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
+          total: totalCount.count,
+          pages: Math.ceil(totalCount.count / parseInt(limit as string))
+        }
       }
     });
   } catch (error) {
     console.error('Failed to get payouts:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -713,10 +732,10 @@ router.post('/disputes', requireAffiliate, async (req, res) => {
       }
     });
 
-    res.json({ message: 'Dispute submitted successfully', dispute: newDispute });
+    res.json({ success: true, message: 'Dispute submitted successfully', data: newDispute });
   } catch (error) {
     console.error('Failed to create dispute:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -743,17 +762,114 @@ router.get('/assets', async (req, res) => {
       .where(whereClause);
 
     res.json({
-      assets,
-      pagination: {
-        page: parseInt(page as string),
-        limit: parseInt(limit as string),
-        total: totalCount.count,
-        pages: Math.ceil(totalCount.count / parseInt(limit as string))
+      success: true,
+      data: {
+        assets,
+        pagination: {
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
+          total: totalCount.count,
+          pages: Math.ceil(totalCount.count / parseInt(limit as string))
+        }
       }
     });
   } catch (error) {
     console.error('Failed to get marketing assets:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// REQUEST PAYOUT
+router.post('/payout-request', requireAffiliate, async (req, res) => {
+  try {
+    const affiliate = req.affiliate;
+    const { amount } = req.body;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, message: 'Amount must be greater than 0' });
+    }
+
+    // SECURITY: Check minimum payout threshold
+    if (amount < affiliate.minPayoutThreshold) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Minimum payout amount is $${(affiliate.minPayoutThreshold / 100).toFixed(2)}` 
+      });
+    }
+
+    // SECURITY: Verify payout method is configured
+    if (!affiliate.payoutMethod || !affiliate.payoutDetails) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Payout method not configured. Please update your profile.' 
+      });
+    }
+
+    // SECURITY: Check affiliate KYC is approved
+    if (affiliate.kycStatus !== 'approved') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'KYC must be approved before requesting payout' 
+      });
+    }
+
+    // Get current available balance
+    const [balanceResult] = await db.select({ balance: sum(balances.delta) })
+      .from(balances)
+      .where(eq(balances.affiliateId, affiliate.id));
+
+    const availableBalance = balanceResult?.balance || 0;
+
+    if (availableBalance < amount) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Insufficient balance. Available: $${(availableBalance / 100).toFixed(2)}` 
+      });
+    }
+
+    // Create payout request (draft status - awaiting admin approval)
+    const [payout] = await db.insert(payouts).values({
+      affiliateId: affiliate.id,
+      amount,
+      currency: 'USD',
+      method: affiliate.payoutMethod,
+      status: 'draft',
+      periodStart: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+      periodEnd: new Date(),
+      makerUserId: req.user.id
+    }).returning();
+
+    // Create balance entry for payout request (pending)
+    await db.insert(balances).values({
+      affiliateId: affiliate.id,
+      delta: -amount, // Negative = debit
+      currency: 'USD',
+      kind: 'debit',
+      refType: 'payout',
+      refId: payout.id,
+      description: `Payout request #${payout.id.substring(0, 8)} (pending approval)`,
+      runningBalance: availableBalance - amount
+    });
+
+    // Queue payout notification
+    await db.insert(eventsOutbox).values({
+      eventType: 'payout.requested',
+      payload: {
+        payoutId: payout.id,
+        affiliateId: affiliate.id,
+        userId: req.user.id,
+        amount
+      }
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Payout request submitted successfully', 
+      data: payout 
+    });
+  } catch (error) {
+    console.error('Failed to create payout request:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
