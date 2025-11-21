@@ -11,6 +11,8 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -134,6 +136,29 @@ export default function EmailSignature() {
   const [templateVariant, setTemplateVariant] = useState<
     "minimal" | "standard" | "full"
   >("standard");
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  
+  const templates = [
+    { id: "minimal", name: "Minimal", description: "Clean & Simple Design" },
+    { id: "standard", name: "Standard", description: "Balanced Professional Look" },
+    { id: "full", name: "Full Featured", description: "Complete with All Options" },
+  ];
+  
+  const nextTemplate = () => {
+    setCarouselIndex((prev) => (prev + 1) % templates.length);
+    setTemplateVariant(templates[(carouselIndex + 1) % templates.length].id as "minimal" | "standard" | "full");
+  };
+  
+  const prevTemplate = () => {
+    setCarouselIndex((prev) => (prev - 1 + templates.length) % templates.length);
+    setTemplateVariant(templates[(carouselIndex - 1 + templates.length) % templates.length].id as "minimal" | "standard" | "full");
+  };
+  
+  const selectTemplate = (index: number) => {
+    setCarouselIndex(index);
+    setTemplateVariant(templates[index].id as "minimal" | "standard" | "full");
+  };
+  
   const [collapsedSections, setCollapsedSections] = useState<{
     [key: string]: boolean;
   }>({
@@ -751,31 +776,81 @@ export default function EmailSignature() {
           </div>
         </div>
 
-        <div className="mb-6 flex items-center gap-4">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Premium Templates</h2>
-            <div className="flex gap-2">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Choose Signature Template</h2>
+          
+          <div className="relative">
+            <div className="flex items-center gap-4">
               <Button
-                variant={templateVariant === "minimal" ? "default" : "outline"}
-                onClick={() => setTemplateVariant("minimal")}
-                data-testid="btn-template-minimal"
+                variant="ghost"
+                size="icon"
+                onClick={prevTemplate}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-lg"
+                data-testid="btn-carousel-prev"
               >
-                Minimal
+                <ChevronLeft className="w-6 h-6 text-slate-900 dark:text-white" />
               </Button>
+
+              <div className="flex-1 flex gap-4 overflow-hidden px-12">
+                {templates.map((template, index) => (
+                  <div
+                    key={template.id}
+                    onClick={() => selectTemplate(index)}
+                    className={`flex-shrink-0 w-1/3 cursor-pointer transition-all ${
+                      index === carouselIndex ? "scale-100 opacity-100" : "scale-90 opacity-60"
+                    }`}
+                    data-testid={`template-card-${template.id}`}
+                  >
+                    <div
+                      className={`border-4 rounded-lg overflow-hidden shadow-md transition-all ${
+                        index === carouselIndex
+                          ? "border-blue-500 dark:border-blue-400 shadow-xl"
+                          : "border-slate-300 dark:border-slate-600"
+                      }`}
+                    >
+                      <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center p-4">
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-slate-600 dark:text-slate-300 mb-2">
+                            {template.name}
+                          </div>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                            {template.description}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-center mt-3">
+                      <h3 className="font-semibold text-slate-900 dark:text-white">{template.name}</h3>
+                      <p className="text-xs text-slate-600 dark:text-slate-400">{template.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               <Button
-                variant={templateVariant === "standard" ? "default" : "outline"}
-                onClick={() => setTemplateVariant("standard")}
-                data-testid="btn-template-standard"
+                variant="ghost"
+                size="icon"
+                onClick={nextTemplate}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-lg"
+                data-testid="btn-carousel-next"
               >
-                Standard
+                <ChevronRight className="w-6 h-6 text-slate-900 dark:text-white" />
               </Button>
-              <Button
-                variant={templateVariant === "full" ? "default" : "outline"}
-                onClick={() => setTemplateVariant("full")}
-                data-testid="btn-template-full"
-              >
-                Full Featured
-              </Button>
+            </div>
+
+            <div className="flex justify-center gap-2 mt-6">
+              {templates.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => selectTemplate(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === carouselIndex
+                      ? "bg-blue-500 dark:bg-blue-400 w-6"
+                      : "bg-slate-300 dark:bg-slate-600"
+                  }`}
+                  data-testid={`carousel-dot-${index}`}
+                />
+              ))}
             </div>
           </div>
         </div>
