@@ -28,6 +28,29 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const router = express.Router();
 
+// Detect language from text using GPT
+async function detectLanguageFromText(text: string): Promise<string> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'user',
+          content: `Detect the language of this text and respond with ONLY the language code (e.g., 'en', 'bn', 'es', 'fr', 'de', etc.). Text: "${text}"`
+        }
+      ],
+      max_tokens: 10,
+      temperature: 0,
+    });
+
+    const languageCode = response.choices[0].message.content?.toLowerCase().trim() || 'en';
+    return languageCode;
+  } catch (error) {
+    console.error('Language detection error:', error);
+    return 'en'; // Default to English
+  }
+}
+
 // Language detection and response mapping
 const languageMap: Record<string, { name: string; ttsVoice: string }> = {
   'en': { name: 'English', ttsVoice: 'alloy' },
@@ -929,16 +952,17 @@ router.post('/voice-lead', requireAuth, async (req, res) => {
     fs.writeFileSync(tempPath, audioBuffer);
     
     try {
-      // Transcribe audio with language detection
+      // Transcribe audio
       const audioFile = fs.createReadStream(tempPath);
       const transcription = await openai.audio.transcriptions.create({
         file: audioFile,
         model: 'whisper-1',
-        language: undefined // Auto-detect language
-      }) as any;
+      });
       
       const userText = transcription.text;
-      const detectedLanguage = transcription.language || 'en'; // Language code from Whisper
+      
+      // Detect language from transcribed text
+      const detectedLanguage = await detectLanguageFromText(userText);
       
       // Get system prompt and TTS voice for detected language
       const systemPrompt = getLeadGenerationPromptForLanguage(detectedLanguage);
