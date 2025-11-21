@@ -2709,6 +2709,105 @@ export class DatabaseStorage implements IStorage {
     return this.updateAppointmentEventType(id, { isActive });
   }
 
+  // Get appointment statistics for dashboard
+  async getAppointmentStats(userId: string): Promise<{
+    totalAppointments: number;
+    confirmedAppointments: number;
+    pendingAppointments: number;
+    cancelledAppointments: number;
+    upcomingAppointments: number;
+    completedAppointments: number;
+    totalRevenue: number;
+    averageBookingValue: number;
+    mostPopularEventType: string;
+    busyDay: string;
+  }> {
+    const now = new Date();
+    
+    // Total appointments by status
+    const [totalStats] = await db.select({
+      total: count(),
+      confirmed: count(sql`CASE WHEN ${appointments.status} = 'confirmed' THEN 1 END`),
+      pending: count(sql`CASE WHEN ${appointments.status} = 'pending' THEN 1 END`),
+      cancelled: count(sql`CASE WHEN ${appointments.status} = 'cancelled' THEN 1 END`),
+    }).from(appointments).where(eq(appointments.hostUserId, userId));
+
+    // Upcoming appointments
+    const upcomingResult = await db.select({ count: count() })
+      .from(appointments)
+      .where(and(
+        eq(appointments.hostUserId, userId),
+        gte(appointments.startTime, now),
+        eq(appointments.status, 'confirmed')
+      ));
+
+    // Completed appointments
+    const completedResult = await db.select({ count: count() })
+      .from(appointments)
+      .where(and(
+        eq(appointments.hostUserId, userId),
+        lt(appointments.endTime, now),
+        eq(appointments.status, 'confirmed')
+      ));
+
+    // Revenue from paid appointments
+    const revenueResult = await db.select({
+      totalRevenue: sql<number>`COALESCE(SUM(${appointmentEventTypes.price}), 0)::float`
+    })
+      .from(appointments)
+      .leftJoin(appointmentEventTypes, eq(appointments.eventTypeId, appointmentEventTypes.id))
+      .where(and(
+        eq(appointments.hostUserId, userId),
+        eq(appointments.status, 'confirmed')
+      ));
+
+    // Most popular event type
+    const popularEventResult = await db.select({
+      name: appointmentEventTypes.name,
+      count: count(),
+    })
+      .from(appointments)
+      .leftJoin(appointmentEventTypes, eq(appointments.eventTypeId, appointmentEventTypes.id))
+      .where(and(
+        eq(appointments.hostUserId, userId),
+        eq(appointments.status, 'confirmed')
+      ))
+      .groupBy(appointmentEventTypes.id, appointmentEventTypes.name)
+      .orderBy(desc(count()))
+      .limit(1);
+
+    // Busiest day
+    const busyDayResult = await db.select({
+      day: sql<string>`DATE(${appointments.startTime})`,
+      count: count(),
+    })
+      .from(appointments)
+      .where(and(
+        eq(appointments.hostUserId, userId),
+        eq(appointments.status, 'confirmed')
+      ))
+      .groupBy(sql`DATE(${appointments.startTime})`)
+      .orderBy(desc(count()))
+      .limit(1);
+
+    const totalRevenue = parseFloat(revenueResult?.[0]?.totalRevenue?.toString() || '0');
+    const totalCount = totalStats?.total || 0;
+    const averageBookingValue = totalCount > 0 ? totalRevenue / totalCount : 0;
+
+    return {
+      totalAppointments: totalStats?.total || 0,
+      confirmedAppointments: totalStats?.confirmed || 0,
+      pendingAppointments: totalStats?.pending || 0,
+      cancelledAppointments: totalStats?.cancelled || 0,
+      upcomingAppointments: upcomingResult[0]?.count || 0,
+      completedAppointments: completedResult[0]?.count || 0,
+      totalRevenue: Math.round(totalRevenue * 100) / 100,
+      averageBookingValue: Math.round(averageBookingValue * 100) / 100,
+      mostPopularEventType: popularEventResult[0]?.name || 'N/A',
+      busyDay: busyDayResult[0]?.day ? new Date(busyDayResult[0].day).toLocaleDateString() : 'N/A',
+    };
+  }
+
   async getEventTypeTemplates(): Promise<AppointmentEventType[]> {
     // Return pre-built event type templates
     const templates: AppointmentEventType[] = [

@@ -370,20 +370,16 @@ export function setupAppointmentRoutes(app: Express) {
     try {
       const user = req.user as any;
       
-      // Get basic appointment stats
-      const stats = {
-        totalAppointments: 0,
-        confirmedAppointments: 0,
-        pendingAppointments: 0,
-        cancelledAppointments: 0,
-        upcomingAppointments: 0,
-        completedAppointments: 0,
-      };
+      // Get real stats from database
+      const stats = await storage.getAppointmentStats(user.id);
       
-      res.json(stats);
+      res.json({
+        success: true,
+        data: stats
+      });
     } catch (error) {
       console.error('Error fetching appointment stats:', error);
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ success: false, message: 'Internal server error' });
     }
   });
 
