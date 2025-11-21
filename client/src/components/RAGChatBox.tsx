@@ -129,15 +129,51 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
 
   const blobToBase64 = (blob: Blob): Promise<string> =>
     new Promise((resolve, reject) => {
+      console.log('[blobToBase64] Starting conversion:', {
+        blobSize: blob.size,
+        blobType: blob.type,
+      });
+      
       const reader = new FileReader();
+      
+      reader.onloadstart = () => {
+        console.log('[blobToBase64] FileReader loading started');
+      };
+      
+      reader.onprogress = (event) => {
+        console.log('[blobToBase64] Progress:', {
+          loaded: event.loaded,
+          total: event.total,
+          percent: ((event.loaded / event.total) * 100).toFixed(2) + '%',
+        });
+      };
+      
       reader.onloadend = () => {
         if (!reader.result) {
+          console.error('[blobToBase64] Result is empty!');
           reject(new Error('Failed to read audio data.'));
         } else {
-          resolve(reader.result as string);
+          const dataUrl = reader.result as string;
+          console.log('[blobToBase64] Conversion success:', {
+            resultLength: dataUrl.length,
+            resultPrefix: dataUrl.substring(0, 50),
+            isDataUrl: dataUrl.startsWith('data:'),
+          });
+          resolve(dataUrl);
         }
       };
-      reader.onerror = () => reject(reader.error || new Error('FileReader error'));
+      
+      reader.onerror = () => {
+        console.error('[blobToBase64] FileReader error:', reader.error);
+        reject(reader.error || new Error('FileReader error'));
+      };
+      
+      reader.onabort = () => {
+        console.error('[blobToBase64] FileReader aborted');
+        reject(new Error('FileReader aborted'));
+      };
+      
+      console.log('[blobToBase64] Calling readAsDataURL');
       reader.readAsDataURL(blob);
     });
 
@@ -337,22 +373,46 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         hasDataUrl: base64Audio.startsWith('data:'),
       });
 
-      console.log('[Audio Processing] Sending to backend /api/voice/process...');
-      
-      const response = await apiRequest<{
-        transcript: string;
-        response: string;
-        audioUrl?: string;
-      }>('POST', '/api/voice/process', {
-        audio: base64Audio,
-        knowledgeBase: {},
-        messages,
+      console.log('[Audio Processing] Preparing API request...', {
+        endpoint: '/api/voice/process',
+        method: 'POST',
+        audioLength: base64Audio.length,
+        messagesCount: messages.length,
       });
 
-      console.log('[Audio Processing] Backend response received:', {
-        hasTranscript: !!response?.transcript,
-        hasResponse: !!response?.response,
-      });
+      try {
+        console.log('[Audio Processing] Sending to backend /api/voice/process...');
+        
+        const requestPayload = {
+          audio: base64Audio,
+          knowledgeBase: {},
+          messages,
+        };
+        
+        console.log('[Audio Processing] Request payload size:', JSON.stringify(requestPayload).length, 'bytes');
+        
+        const response = await apiRequest<{
+          transcript: string;
+          response: string;
+          audioUrl?: string;
+        }>('POST', '/api/voice/process', requestPayload);
+
+        console.log('[Audio Processing] Backend response received:', {
+          hasTranscript: !!response?.transcript,
+          hasResponse: !!response?.response,
+          transcriptLength: response?.transcript?.length || 0,
+          responseLength: response?.response?.length || 0,
+        });
+      } catch (apiError: any) {
+        console.error('[Audio Processing] API Request failed:', {
+          name: apiError?.name,
+          message: apiError?.message,
+          status: apiError?.status,
+          code: apiError?.code,
+          stack: apiError?.stack?.substring(0, 200),
+        });
+        throw apiError;
+      }
 
       if (response?.transcript) {
         const userText = response.transcript;
