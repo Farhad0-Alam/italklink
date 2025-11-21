@@ -1897,32 +1897,34 @@ export default function EmailSignature() {
                   Preview
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+              <CardContent className="p-3">
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">
                   This is how your signature will look
                 </p>
                 <div
-                  className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 bg-white min-h-[300px]"
+                  className="border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-white min-h-[160px] overflow-y-auto"
                   dangerouslySetInnerHTML={{ __html: generateSignatureHTML() }}
                   data-testid="signature-preview"
                 />
 
-                <div className="flex gap-2 mt-4">
+                <div className="flex gap-1.5 mt-2">
                   <Button
                     onClick={copyToClipboard}
-                    className="flex-1 gap-2"
+                    className="flex-1 gap-1 h-8 text-xs"
+                    size="sm"
                     data-testid="button-copy"
                   >
-                    <Copy className="w-4 h-4" />
+                    <Copy className="w-3 h-3" />
                     Copy HTML
                   </Button>
                   <Button
                     onClick={downloadHTML}
                     variant="outline"
-                    className="flex-1 gap-2"
+                    className="flex-1 gap-1 h-8 text-xs"
+                    size="sm"
                     data-testid="button-download"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-3 h-3" />
                     Download
                   </Button>
                 </div>
@@ -1930,28 +1932,26 @@ export default function EmailSignature() {
                 <Button
                   onClick={previewInEmail}
                   variant="secondary"
-                  className="w-full mt-2 gap-2"
+                  className="w-full mt-1.5 gap-1 h-8 text-xs"
+                  size="sm"
                   data-testid="button-preview-email"
                 >
-                  <Mail className="w-4 h-4" />
+                  <Mail className="w-3 h-3" />
                   Preview in Email
                 </Button>
 
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-4">
-                  <div className="flex items-start gap-2">
-                    <Info className="w-4 h-4 text-blue-900 dark:text-blue-300 mt-0.5" />
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2 mt-2">
+                  <div className="flex items-start gap-1.5">
+                    <Info className="w-3 h-3 text-blue-900 dark:text-blue-300 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">
-                        How to use HTML Email Signature
+                      <h3 className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-1">
+                        How to use
                       </h3>
-                      <ol className="text-xs text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
-                        <li>Click "Copy HTML" button above</li>
-                        <li>
-                          Open your email client settings (Gmail, Outlook, etc.)
-                        </li>
-                        <li>Find the signature section</li>
-                        <li>Paste the HTML code</li>
-                        <li>Save your settings</li>
+                      <ol className="text-xs text-blue-800 dark:text-blue-200 space-y-0.5 list-decimal list-inside">
+                        <li>Click "Copy HTML"</li>
+                        <li>Open your email settings</li>
+                        <li>Find signature section</li>
+                        <li>Paste the code</li>
                       </ol>
                     </div>
                   </div>
