@@ -548,6 +548,16 @@ export interface IStorage {
   incrementVcardDownloads(cardId: string, userId: string): Promise<void>;
   deleteAnalytics(id: string): Promise<void>;
 
+  // Availability operations
+  getUserAvailability(userId: string): Promise<{
+    businessHours: Array<{ weekday: string; startTime: string; endTime: string; enabled: boolean; timezone: string }>;
+    bufferTimes: Array<{ eventTypeId: string; bufferTimeBefore: number; bufferTimeAfter: number }>;
+    blackoutDates: Array<{ id: string; startDate: string; endDate: string; title: string; description?: string; isAllDay: boolean; isRecurring: boolean; type: string }>;
+    recurringSchedules: Array<{ id: string; name: string; pattern: string; startDate: string; endDate?: string }>;
+  }>;
+  createUserAvailability(data: any): Promise<any>;
+  updateUserAvailability(userId: string, data: any): Promise<any>;
+
   // Dashboard metrics
   getDashboardMetrics(): Promise<{
     weeklyClicks: number;
@@ -2806,6 +2816,152 @@ export class DatabaseStorage implements IStorage {
       mostPopularEventType: popularEventResult[0]?.name || 'N/A',
       busyDay: busyDayResult[0]?.day ? new Date(busyDayResult[0].day).toLocaleDateString() : 'N/A',
     };
+  }
+
+  // Availability operations
+  async getUserAvailability(userId: string): Promise<{
+    businessHours: Array<{ weekday: string; startTime: string; endTime: string; enabled: boolean; timezone: string }>;
+    bufferTimes: Array<{ eventTypeId: string; bufferTimeBefore: number; bufferTimeAfter: number }>;
+    blackoutDates: Array<{ id: string; startDate: string; endDate: string; title: string; description?: string; isAllDay: boolean; isRecurring: boolean; type: string }>;
+    recurringSchedules: Array<{ id: string; name: string; pattern: string; startDate: string; endDate?: string }>;
+  }> {
+    const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+    // Get business hours from teamMemberAvailability
+    const availability = await db.select().from(teamMemberAvailability).where(
+      eq(teamMemberAvailability.teamMemberId, userId)
+    );
+
+    const businessHours = availability.map(av => ({
+      weekday: weekdays[av.dayOfWeek] || 'monday',
+      startTime: av.startTime,
+      endTime: av.endTime,
+      enabled: av.isAvailable,
+      timezone: av.timezone || 'UTC'
+    }));
+
+    // Get blackout dates
+    const blackouts = await db.select().from(blackoutDates).where(
+      eq(blackoutDates.userId, userId)
+    );
+
+    const blackoutDatesFormatted = blackouts.map(bd => ({
+      id: bd.id,
+      startDate: bd.startDate.toISOString(),
+      endDate: bd.endDate.toISOString(),
+      title: bd.title,
+      description: bd.description,
+      isAllDay: bd.isAllDay,
+      isRecurring: bd.isRecurring,
+      type: bd.type || 'time_off'
+    }));
+
+    // Get event types for buffer times
+    const eventTypes = await db.select().from(appointmentEventTypes).where(
+      eq(appointmentEventTypes.userId, userId)
+    );
+
+    const bufferTimes = eventTypes.map(et => ({
+      eventTypeId: et.id,
+      bufferTimeBefore: et.bufferTimeBefore || 0,
+      bufferTimeAfter: et.bufferTimeAfter || 0
+    }));
+
+    return {
+      businessHours: businessHours.length > 0 ? businessHours : this.getDefaultBusinessHours(),
+      bufferTimes,
+      blackoutDates: blackoutDatesFormatted,
+      recurringSchedules: []
+    };
+  }
+
+  async createUserAvailability(data: any): Promise<any> {
+    const { userId, businessHours = [] } = data;
+    
+    // Clear existing availability for this user
+    await db.delete(teamMemberAvailability).where(eq(teamMemberAvailability.teamMemberId, userId));
+    
+    // Create new availability records
+    const weekdayMap: Record<string, number> = {
+      'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
+      'thursday': 4, 'friday': 5, 'saturday': 6
+    };
+
+    for (const bh of businessHours) {
+      await db.insert(teamMemberAvailability).values({
+        id: `avail_${userId}_${bh.weekday}_${Date.now()}`,
+        teamMemberId: userId,
+        dayOfWeek: weekdayMap[bh.weekday] || 1,
+        startTime: bh.startTime,
+        endTime: bh.endTime,
+        isAvailable: bh.enabled !== false,
+        timezone: bh.timezone || 'UTC'
+      });
+    }
+
+    return this.getUserAvailability(userId);
+  }
+
+  async updateUserAvailability(userId: string, data: any): Promise<any> {
+    const { businessHours = [], blackoutDates = [] } = data;
+
+    // Update business hours
+    if (businessHours.length > 0) {
+      await db.delete(teamMemberAvailability).where(eq(teamMemberAvailability.teamMemberId, userId));
+      
+      const weekdayMap: Record<string, number> = {
+        'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
+        'thursday': 4, 'friday': 5, 'saturday': 6
+      };
+
+      for (const bh of businessHours) {
+        await db.insert(teamMemberAvailability).values({
+          id: `avail_${userId}_${bh.weekday}_${Date.now()}`,
+          teamMemberId: userId,
+          dayOfWeek: weekdayMap[bh.weekday] || 1,
+          startTime: bh.startTime,
+          endTime: bh.endTime,
+          isAvailable: bh.enabled !== false,
+          timezone: bh.timezone || 'UTC'
+        });
+      }
+    }
+
+    // Update blackout dates if provided
+    if (blackoutDates.length > 0) {
+      await db.delete(blackoutDates).where(eq(blackoutDates.userId, userId));
+      
+      for (const bd of blackoutDates) {
+        if (!bd.id || !bd.id.startsWith('temp')) {
+          await db.insert(blackoutDates).values({
+            id: bd.id || `blackout_${userId}_${Date.now()}`,
+            userId,
+            startDate: new Date(bd.startDate),
+            endDate: new Date(bd.endDate),
+            title: bd.title,
+            description: bd.description,
+            isAllDay: bd.isAllDay,
+            type: bd.type || 'time_off',
+            isRecurring: bd.isRecurring,
+            recurringPattern: 'none'
+          });
+        }
+      }
+    }
+
+    return this.getUserAvailability(userId);
+  }
+
+  private getDefaultBusinessHours() {
+    return [
+      { weekday: 'monday', startTime: '09:00', endTime: '17:00', enabled: true, timezone: 'UTC' },
+      { weekday: 'tuesday', startTime: '09:00', endTime: '17:00', enabled: true, timezone: 'UTC' },
+      { weekday: 'wednesday', startTime: '09:00', endTime: '17:00', enabled: true, timezone: 'UTC' },
+      { weekday: 'thursday', startTime: '09:00', endTime: '17:00', enabled: true, timezone: 'UTC' },
+      { weekday: 'friday', startTime: '09:00', endTime: '17:00', enabled: true, timezone: 'UTC' },
+      { weekday: 'saturday', startTime: '10:00', endTime: '14:00', enabled: false, timezone: 'UTC' },
+      { weekday: 'sunday', startTime: '10:00', endTime: '14:00', enabled: false, timezone: 'UTC' }
+    ];
   }
 
   async getEventTypeTemplates(): Promise<AppointmentEventType[]> {

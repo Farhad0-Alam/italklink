@@ -68,7 +68,8 @@ export default function AvailabilityManagement() {
   // Fetch user's availability settings
   const { data: availabilitySettings, isLoading: settingsLoading, error: settingsError } = useQuery<AvailabilitySettings>({
     queryKey: ['/api/availability/settings'],
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   // Fetch user's event types for buffer time configuration

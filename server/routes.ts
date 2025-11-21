@@ -3011,23 +3011,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // ===== AVAILABILITY API ENDPOINTS =====
-  app.get('/api/user/availability', requireAuth, asyncHandler(async (req, res) => {
+  app.get('/api/availability/settings', requireAuth, asyncHandler(async (req, res) => {
     const userId = req.user!.id;
     const availability = await storage.getUserAvailability(userId);
     res.json({ success: true, data: availability });
   }));
 
-  app.post('/api/user/availability', requireAuth, asyncHandler(async (req, res) => {
+  app.put('/api/availability/settings', requireAuth, asyncHandler(async (req, res) => {
     const userId = req.user!.id;
     const availabilityData = { ...req.body, userId };
-    const availability = await storage.createUserAvailability(availabilityData);
+    const availability = await storage.updateUserAvailability(userId, availabilityData);
     res.json({ success: true, data: availability, message: 'Availability settings saved successfully' });
-  }));
-
-  app.patch('/api/user/availability/:id', requireAuth, asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const availability = await storage.updateUserAvailability(id, req.body);
-    res.json({ success: true, data: availability, message: 'Availability settings updated successfully' });
   }));
 
   // ===== EMAIL SIGNATURE API ENDPOINTS =====
