@@ -640,7 +640,7 @@ export default function PlansPage() {
             {plan.planType.toUpperCase()}
           </Badge>
           <Badge variant="outline" className="text-xs">
-            {plan.features.length} features
+            {Array.isArray(plan.features) ? plan.features.length : 0} features
           </Badge>
         </div>
 
@@ -1220,7 +1220,7 @@ export default function PlansPage() {
                       <TableCell>
                         {plan.businessCardsLimit === -1 ? 'Unlimited' : plan.businessCardsLimit}
                       </TableCell>
-                      <TableCell>{plan.features.length}</TableCell>
+                      <TableCell>{Array.isArray(plan.features) ? plan.features.length : 0}</TableCell>
                       <TableCell>
                         <Badge variant={plan.isActive ? 'default' : 'secondary'}>
                           {plan.isActive ? (
