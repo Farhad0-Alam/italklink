@@ -602,7 +602,7 @@ export default function Landing() {
       </section>
 
       {/* Appointment Booking Section */}
-      <section className="py-24 bg-gradient-to-br from-blue-50 to-white">
+      <section id="appointments" className="py-24 bg-gradient-to-br from-blue-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16"
@@ -689,7 +689,7 @@ export default function Landing() {
       </section>
 
       {/* HTML Email Signature Generator Section */}
-      <section className="py-24 bg-gradient-to-br from-orange-50 to-white">
+      <section id="email-signatures" className="py-24 bg-gradient-to-br from-orange-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16"
@@ -736,7 +736,7 @@ export default function Landing() {
       </section>
 
       {/* QR Code Feature Section */}
-      <section className="py-24 bg-white">
+      <section id="qr-codes" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16"
@@ -783,7 +783,7 @@ export default function Landing() {
       </section>
 
       {/* CRM Section */}
-      <section className="py-24 bg-white">
+      <section id="crm" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -862,7 +862,7 @@ export default function Landing() {
       </section>
 
       {/* Automation Section */}
-      <section className="py-24 bg-gradient-to-br from-green-50 to-white">
+      <section id="automation" className="py-24 bg-gradient-to-br from-green-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16"
@@ -908,7 +908,7 @@ export default function Landing() {
       </section>
 
       {/* Analytics Section */}
-      <section className="py-24 bg-white">
+      <section id="analytics" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -1050,7 +1050,7 @@ export default function Landing() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 bg-gradient-to-br from-orange-50 to-white">
+      <section id="testimonials" className="py-24 bg-gradient-to-br from-orange-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16"
