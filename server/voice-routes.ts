@@ -126,14 +126,17 @@ function getLeadGenerationPromptForLanguage(language: string): string {
 
 // Initialize knowledge base with sample Bengali TalkLink content
 async function initializeKnowledgeBase() {
+  console.log('[KB Init] Starting knowledge base initialization...');
   try {
     const existingDocs = await db.select().from(kbDocs).limit(1);
+    console.log('[KB Init] Checking for existing docs:', existingDocs.length);
     
     if (existingDocs.length > 0) {
-      console.log('Knowledge base already initialized');
+      console.log('[KB Init] ✅ Knowledge base already initialized with', existingDocs.length, 'documents');
       return;
     }
 
+    console.log('[KB Init] Creating sample Bengali TalkLink content...');
     const sampleDocuments = [
       {
         title: 'TalkLink পরিষেবা সম্পর্কে',
@@ -142,7 +145,7 @@ async function initializeKnowledgeBase() {
       },
       {
         title: 'অ্যাপয়েন্টমেন্ট বুকিং সিস্টেম',
-        content: 'আমাদের অ্যাপয়েন্টমেন্ট বুকিং সিস্টেম আপনাকে আপনার সময় পরিচালনা করতে এবং স্বয়ংক্রিয় শিডিউলিং সরবরাহ করে। এটি Google ক্যালেন্ডার, Zoom এবং Microsoft Teams এর সাথে সংযুক্ত হয়। আপনি একাধিক ইভেন্ট টাইপ তৈরি করতে পারেন এবং স্বয়ংক্রিয় বিজ্ঞপ্তি পাঠাতে পারেন।',
+        content: 'আমাদের অ্যাপয়েন্টমেন্ট বুকিং সিস্টেম আপনাকে আপনার সময় পরিচালনা করতে এবং স্বয়ংক্রিয় শিডিউলিং সরবরাহ করে। এটি Google ক্যালেন্ডার, Zoom এবং Microsoft Teams এর সাথে সংযুক্ত হয়। আপনি একাধিক ইভেন্ট টাইপ তৌরি করতে পারেন এবং স্বয়ংক্রিয় বিজ্ঞপ্তি পাঠাতে পারেন।',
         url: 'https://talkl.ink',
       },
       {
@@ -167,33 +170,46 @@ async function initializeKnowledgeBase() {
       },
     ];
 
+    console.log('[KB Init] Saving', sampleDocuments.length, 'documents with embeddings...');
+    let savedCount = 0;
     for (const doc of sampleDocuments) {
       try {
+        console.log(`[KB Init] Generating embedding for: ${doc.title}`);
         const embedding = await openai.embeddings.create({
           model: 'text-embedding-3-small',
           input: doc.content,
         });
 
+        console.log(`[KB Init] Embedding generated, vector size: ${embedding.data[0].embedding.length}`);
         await db.insert(kbDocs).values({
           ...doc,
           embedding: embedding.data[0].embedding,
         });
 
-        console.log(`Saved document: ${doc.title}`);
+        savedCount++;
+        console.log(`[KB Init] ✅ Saved: ${doc.title}`);
       } catch (err) {
-        console.error(`Failed to save document ${doc.title}:`, err);
+        console.error(`[KB Init] ❌ Failed to save ${doc.title}:`, {
+          error: err instanceof Error ? err.message : String(err),
+          stack: err instanceof Error ? err.stack?.substring(0, 100) : undefined,
+        });
       }
     }
 
-    console.log('Knowledge base initialized with Bengali content');
+    console.log(`[KB Init] ✅ Knowledge base initialization complete! Saved ${savedCount}/${sampleDocuments.length} documents`);
   } catch (error) {
-    console.error('Knowledge base initialization error:', error);
+    console.error('[KB Init] ❌ Knowledge base initialization error:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack?.substring(0, 200) : undefined,
+    });
   }
 }
 
 // Helper function to query knowledge base with RAG
 async function queryKnowledgeBase(query: string, topK: number = 5): Promise<string> {
   try {
+    console.log('[RAG Query] Starting query:', query.substring(0, 50) + '...');
+    
     // Generate embedding for the query
     const embedding = await openai.embeddings.create({
       model: 'text-embedding-3-small',
@@ -201,8 +217,12 @@ async function queryKnowledgeBase(query: string, topK: number = 5): Promise<stri
     });
 
     const queryVector = embedding.data[0].embedding;
+    console.log('[RAG Query] Generated query vector, size:', queryVector.length);
 
-    // Query similar documents using vector similarity
+    // Query similar documents using vector similarity - FIXED pgvector format
+    const vectorString = JSON.stringify(queryVector);
+    console.log('[RAG Query] Vector string length:', vectorString.length);
+    
     const similarDocs = await db
       .select({
         title: kbDocs.title,
@@ -211,10 +231,13 @@ async function queryKnowledgeBase(query: string, topK: number = 5): Promise<stri
       })
       .from(kbDocs)
       .where(sql`embedding IS NOT NULL`)
-      .orderBy(sql`embedding <-> ${JSON.stringify(queryVector)}`)
+      .orderBy(sql`embedding <-> ${vectorString}::vector`)
       .limit(topK);
 
+    console.log('[RAG Query] Retrieved', similarDocs.length, 'similar documents');
+
     if (similarDocs.length === 0) {
+      console.log('[RAG Query] No similar documents found, returning empty context');
       return '';
     }
 
@@ -223,9 +246,14 @@ async function queryKnowledgeBase(query: string, topK: number = 5): Promise<stri
       .map((doc) => `${doc.title}: ${doc.content}`)
       .join('\n\n');
 
+    console.log('[RAG Query] ✅ Context prepared, size:', context.length, 'characters');
     return context;
   } catch (error) {
-    console.error('Knowledge base query error:', error);
+    console.error('[RAG Query] ❌ Knowledge base query error:', {
+      error: error instanceof Error ? error.message : String(error),
+      query: query.substring(0, 50),
+      stack: error instanceof Error ? error.stack?.substring(0, 150) : undefined,
+    });
     return '';
   }
 }
@@ -782,23 +810,44 @@ router.post('/test/simulate', async (req, res) => {
 
 // Voice processing endpoint for business card voice assistants - WITH RAG
 router.post('/process', requireAuth, async (req, res) => {
+  const requestId = `voice_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  console.log(`[${requestId}] POST /api/voice/process - Request received`);
+  
   try {
     const { audio, cardId, knowledgeBase, messages } = req.body;
     
+    console.log(`[${requestId}] Request body check:`, {
+      hasAudio: !!audio,
+      audioLength: audio ? audio.length : 0,
+      audioPrefix: audio ? audio.substring(0, 30) : 'N/A',
+      cardId,
+      messagesCount: messages ? messages.length : 0,
+    });
+    
     if (!audio) {
+      console.error(`[${requestId}] ❌ No audio data provided`);
       return res.status(400).json({ error: 'Audio data is required' });
     }
     
+    console.log(`[${requestId}] Converting base64 audio to buffer...`);
     // Convert base64 audio to buffer
-    const base64Data = audio.split(',')[1];
+    const base64Data = audio.split(',')[1] || audio;
     const audioBuffer = Buffer.from(base64Data, 'base64');
+    console.log(`[${requestId}] Audio buffer created, size: ${audioBuffer.length} bytes`);
+    
+    if (audioBuffer.length === 0) {
+      console.error(`[${requestId}] ❌ Audio buffer is empty`);
+      return res.status(400).json({ error: 'Audio buffer is empty' });
+    }
     
     // Save temporarily for processing
     const tempPath = path.join('/tmp', `audio_${Date.now()}.webm`);
     fs.writeFileSync(tempPath, audioBuffer);
+    console.log(`[${requestId}] Audio saved to temp file: ${tempPath}`);
     
     try {
       // Transcribe audio using OpenAI Whisper
+      console.log(`[${requestId}] Starting Whisper transcription...`);
       const audioFile = fs.createReadStream(tempPath);
       const transcription = await openai.audio.transcriptions.create({
         file: audioFile,
@@ -806,9 +855,12 @@ router.post('/process', requireAuth, async (req, res) => {
       });
       
       const userText = transcription.text;
+      console.log(`[${requestId}] ✅ Transcription complete: "${userText}"`);
       
       // Query knowledge base for relevant context
+      console.log(`[${requestId}] Querying knowledge base...`);
       const kbContext = await queryKnowledgeBase(userText, 5);
+      console.log(`[${requestId}] Knowledge base context retrieved, size: ${kbContext.length} characters`);
       
       // Generate AI response based on knowledge base and context
       const systemPrompt = knowledgeBase?.systemPrompt || 
@@ -818,6 +870,7 @@ router.post('/process', requireAuth, async (req, res) => {
         ? `${systemPrompt}\n\nRelevant Knowledge Base Information:\n${kbContext}\n\nUse the provided knowledge base to answer questions accurately.`
         : systemPrompt;
       
+      console.log(`[${requestId}] Calling GPT-4o for response generation...`);
       const response = await openai.chat.completions.create({
         model: 'gpt-4o',
         messages: [
@@ -835,19 +888,23 @@ router.post('/process', requireAuth, async (req, res) => {
       });
       
       const aiResponse = response.choices[0].message.content;
+      console.log(`[${requestId}] ✅ AI response generated: "${aiResponse?.substring(0, 50)}..."`);
       
       // Generate audio response using TTS
+      console.log(`[${requestId}] Generating TTS audio...`);
       const audioResponse = await openai.audio.speech.create({
         model: 'tts-1',
         voice: 'alloy',
-        input: aiResponse,
+        input: aiResponse || 'I could not generate a response.',
       });
       
       // Convert audio stream to base64
       const audioArrayBuffer = await audioResponse.arrayBuffer();
       const audioBase64 = Buffer.from(audioArrayBuffer).toString('base64');
       const audioDataUri = `data:audio/mpeg;base64,${audioBase64}`;
+      console.log(`[${requestId}] ✅ TTS audio generated, size: ${audioBase64.length} characters`);
       
+      console.log(`[${requestId}] ✅ Sending response to frontend`);
       res.json({
         transcript: userText,
         response: aiResponse,
@@ -858,13 +915,20 @@ router.post('/process', requireAuth, async (req, res) => {
       // Clean up temp file
       if (fs.existsSync(tempPath)) {
         fs.unlinkSync(tempPath);
+        console.log(`[${requestId}] Cleaned up temp file`);
       }
     }
   } catch (error: any) {
-    console.error('Voice processing error:', error);
+    console.error(`[${requestId}] ❌ Voice processing error:`, {
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack?.substring(0, 200),
+      code: error?.code,
+    });
     res.status(500).json({ 
       error: 'Voice processing failed', 
-      details: error.message 
+      details: error?.message || 'Unknown error',
+      requestId,
     });
   }
 });
@@ -1118,6 +1182,12 @@ router.post('/tts', requireAuth, async (req, res) => {
       details: error.message 
     });
   }
+});
+
+// Initialize knowledge base when router is loaded
+console.log('[KB Router] Initializing knowledge base on startup...');
+initializeKnowledgeBase().catch(err => {
+  console.error('[KB Router] Failed to initialize KB:', err);
 });
 
 export default router;
