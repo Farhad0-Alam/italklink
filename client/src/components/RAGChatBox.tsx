@@ -273,8 +273,17 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   const startListening = async () => {
     if (typeof window === 'undefined') return;
 
+    console.log('[startListening] Starting microphone request...');
+    console.log('[startListening] Window location:', {
+      protocol: window.location.protocol,
+      hostname: window.location.hostname,
+      href: window.location.href,
+    });
+    console.log('[startListening] isSecureContext:', window.isSecureContext);
+
     // Check if browser supports mediaDevices
     if (!navigator.mediaDevices?.getUserMedia) {
+      console.error('[startListening] getUserMedia not supported');
       toast({
         title: 'Microphone Not Supported',
         description: 'Your browser does not support microphone access.',
@@ -285,6 +294,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
 
     // Check if running on insecure context (not HTTPS)
     if ('isSecureContext' in window && !window.isSecureContext) {
+      console.error('[startListening] Not secure context');
       toast({
         title: 'Secure Connection Required',
         description: 'Microphone access requires HTTPS. Please access via a secure connection.',
@@ -295,6 +305,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
 
     // Additional check for non-HTTPS in non-localhost
     if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      console.error('[startListening] Not HTTPS connection');
       toast({
         title: 'Secure Connection Required',
         description: 'Microphone access requires HTTPS. Please use a secure connection.',
@@ -304,52 +315,87 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('[startListening] Calling navigator.mediaDevices.getUserMedia...');
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        }
+      });
+      
+      console.log('[startListening] ✅ Stream obtained successfully:', {
+        audioTracks: stream.getAudioTracks().length,
+        videoTracks: stream.getVideoTracks().length,
+      });
+      
       streamRef.current = stream;
 
       const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
       mediaRecorder.current = recorder;
       audioChunks.current = [];
 
+      console.log('[startListening] MediaRecorder created:', { mimeType: 'audio/webm' });
+
       recorder.ondataavailable = (event) => {
+        console.log('[MediaRecorder] ondataavailable:', { dataSize: event.data.size });
         if (event.data && event.data.size > 0) {
           audioChunks.current.push(event.data);
         }
       };
 
       recorder.onstop = async () => {
+        console.log('[MediaRecorder] onstop - processing audio chunks');
         try {
           const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+          console.log('[MediaRecorder] Audio blob created:', { size: audioBlob.size, type: audioBlob.type });
           await processAudio(audioBlob);
         } finally {
           if (streamRef.current) {
-            streamRef.current.getTracks().forEach((t) => t.stop());
+            streamRef.current.getTracks().forEach((t) => {
+              console.log('[MediaRecorder] Stopping track:', t.kind);
+              t.stop();
+            });
             streamRef.current = null;
           }
         }
       };
 
+      console.log('[startListening] Starting recorder...');
       recorder.start();
       setIsListening(true);
+      console.log('[startListening] ✅ Recording started');
     } catch (error: any) {
-      console.error('Microphone access error:', error);
+      console.error('[startListening] ❌ DETAILED ERROR INFO:', {
+        errorType: typeof error,
+        errorString: String(error),
+        errorName: error?.name,
+        errorMessage: error?.message,
+        errorCode: error?.code,
+        errorStack: error?.stack,
+        errorKeys: error ? Object.keys(error) : [],
+        fullError: error,
+      });
       
       // Detailed error handling
       let errorTitle = 'Microphone Error';
       let errorDescription = 'Unable to access microphone.';
 
-      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+      if (error?.name === 'NotAllowedError' || error?.name === 'PermissionDeniedError') {
         errorTitle = 'Microphone Permission Denied';
-        errorDescription = 'Please allow microphone access in your browser settings and try again.';
-      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        errorDescription = 'Permission was denied. Please check browser permissions or reload the page and try again.';
+      } else if (error?.name === 'NotFoundError' || error?.name === 'DevicesNotFoundError') {
         errorTitle = 'No Microphone Found';
-        errorDescription = 'No microphone device was detected. Please connect a microphone.';
-      } else if (error.name === 'NotSupportedError') {
+        errorDescription = 'No microphone device was detected. Please check your hardware.';
+      } else if (error?.name === 'NotSupportedError') {
         errorTitle = 'Not Supported';
         errorDescription = 'Your browser does not support microphone access.';
-      } else if (error.name === 'SecurityError') {
-        errorTitle = 'Security Error';
-        errorDescription = 'Microphone access requires a secure (HTTPS) connection.';
+      } else if (error?.name === 'SecurityError') {
+        errorTitle = 'Security Error - Permissions Policy';
+        errorDescription = 'Microphone access is blocked by browser security policy. This may require HTTPS or site permissions.';
+      } else {
+        errorTitle = 'Microphone Error: ' + (error?.name || 'Unknown');
+        errorDescription = error?.message || 'Unable to access microphone. Please try reloading the page.';
       }
 
       toast({
