@@ -231,12 +231,12 @@ export default function Landing() {
             </motion.div>
             
             <div className="hidden md:flex items-center space-x-8">
-              {["About", "Features", "Builder Elements", "Integrations", "FAQ", "Contact", "Others"].map((item) => (
+              {["About", "Features", "Integrations", "FAQ", "Contact", "Others"].map((item) => (
                 <a 
                   key={item}
-                  href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
+                  href={`#${item.toLowerCase()}`}
                   className="text-gray-600 hover:text-orange-500 transition-colors font-medium"
-                  data-testid={`link-nav-${item.toLowerCase().replace(/\s+/g, '-')}`}
+                  data-testid={`link-nav-${item.toLowerCase()}`}
                 >
                   {item}
                 </a>
