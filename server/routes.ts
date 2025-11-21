@@ -2863,13 +2863,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Advanced Analytics & Reporting APIs
   app.get('/api/analytics/dashboard', enhancedAuth, asyncHandler(async (req, res) => {
     const userId = (req.user as any).id;
-    const { dateFrom, dateTo } = validateRequest(z.object({
-      dateFrom: z.string().datetime().optional(),
-      dateTo: z.string().datetime().optional(),
-    }), 'query');
+    const { period = '30d' } = req.query;
     
-    const analytics = await storage.getDashboardAnalytics(userId, { dateFrom, dateTo });
-    successResponse(res, analytics, 'Analytics retrieved successfully');
+    const [appointments, revenue] = await Promise.all([
+      storage.getAppointmentAnalytics(userId, { period: period as string }),
+      storage.getRevenueAnalytics(userId, { period: period as string })
+    ]);
+
+    const dashboard = {
+      overview: {
+        totalBookings: appointments?.totalAppointments || 0,
+        confirmedBookings: appointments?.confirmedAppointments || 0,
+        noShowBookings: appointments?.noShowAppointments || 0,
+      },
+      rates: {
+        conversionRate: appointments?.conversionRate || 0,
+        noShowRate: appointments?.noShowRate || 0,
+        confirmationRate: appointments?.confirmationRate || 0,
+      },
+      revenue: {
+        totalRevenue: revenue?.totalRevenue || 0,
+        paidBookings: revenue?.paidBookings || 0,
+        averageBookingValue: revenue?.averageValue || 0,
+      },
+      recentActivity: appointments?.recentActivity || [],
+      popularTimes: appointments?.popularTimes || [],
+    };
+
+    successResponse(res, dashboard, 'Dashboard analytics retrieved successfully');
   }));
   
   app.get('/api/analytics/appointments', enhancedAuth, asyncHandler(async (req, res) => {
@@ -2896,22 +2917,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/analytics/booking-trends', requireAuth, asyncHandler(async (req, res) => {
     const userId = req.user!.id;
-    res.json({ success: true, data: { trends: [], period: '30d' } });
+    const { period = '30d', granularity = 'day' } = req.query;
+    const trends = await storage.getBookingTrends(userId, period as string, granularity as string);
+    successResponse(res, trends, 'Booking trends retrieved successfully');
   }));
 
   app.get('/api/analytics/popular-times', requireAuth, asyncHandler(async (req, res) => {
     const userId = req.user!.id;
-    res.json({ success: true, data: { popularTimes: [] } });
+    const { period = '30d' } = req.query;
+    const popularTimes = await storage.getPopularTimes(userId, period as string);
+    successResponse(res, popularTimes, 'Popular times retrieved successfully');
   }));
 
   app.get('/api/analytics/conversion-rates', requireAuth, asyncHandler(async (req, res) => {
     const userId = req.user!.id;
-    res.json({ success: true, data: { conversionRate: 0, totalVisits: 0, totalBookings: 0 } });
+    const { period = '30d' } = req.query;
+    const conversionData = await storage.getConversionRates(userId, period as string);
+    successResponse(res, conversionData, 'Conversion rates retrieved successfully');
   }));
 
   app.get('/api/analytics/no-shows', requireAuth, asyncHandler(async (req, res) => {
     const userId = req.user!.id;
-    res.json({ success: true, data: { noShowRate: 0, totalNoShows: 0 } });
+    const { period = '30d' } = req.query;
+    const noShowData = await storage.getNoShowAnalytics(userId, period as string);
+    successResponse(res, noShowData, 'No-show analytics retrieved successfully');
+  }));
+
+  app.get('/api/analytics/customers', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const { period = '30d' } = req.query;
+    const customerData = await storage.getCustomerAnalytics(userId, period as string);
+    successResponse(res, customerData, 'Customer analytics retrieved successfully');
+  }));
+
+  app.get('/api/analytics/export', requireAuth, asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const { type = 'bookings', format = 'json', period = '30d' } = req.query;
+    
+    let data: any = {};
+    
+    if (type === 'bookings') {
+      data = await storage.getBookingTrends(userId, period as string);
+    } else if (type === 'revenue') {
+      data = await storage.getRevenueAnalytics(userId, { period: period as string });
+    } else if (type === 'customers') {
+      data = await storage.getCustomerAnalytics(userId, period as string);
+    }
+
+    if (format === 'csv') {
+      // Simple CSV conversion for array data
+      const lines: string[] = [];
+      if (Array.isArray(data)) {
+        if (data.length > 0) {
+          lines.push(Object.keys(data[0]).join(','));
+          data.forEach((row: any) => {
+            lines.push(Object.values(row).join(','));
+          });
+        }
+      }
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="analytics-${type}-${Date.now()}.csv"`);
+      res.send(lines.join('\n'));
+    } else {
+      successResponse(res, data, 'Analytics exported successfully');
+    }
   }));
 
   // ===== AFFILIATE API ENDPOINTS =====
