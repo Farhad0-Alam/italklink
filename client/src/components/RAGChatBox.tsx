@@ -127,72 +127,21 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     };
   }, []);
 
-  // Auto-request microphone permission when Voice Modal opens
+  // Auto-start microphone after 2 seconds when Voice Modal opens (ChatGPT-style)
   useEffect(() => {
     if (!isVoiceModalOpen) return;
 
-    const requestMicrophonePermission = async () => {
-      try {
-        console.log('[Voice Modal] Modal opened - requesting microphone permission...');
-        
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-          } 
-        });
-
-        console.log('[Voice Modal] Microphone permission granted successfully');
-        console.log('[Voice Modal] Audio tracks:', stream.getAudioTracks().length);
-        
-        // Stop the stream since we only need permission
-        stream.getTracks().forEach((track) => {
-          console.log('[Voice Modal] Stopping permission test stream:', track.kind);
-          track.stop();
-        });
-
-        toast({
-          title: 'Microphone Ready',
-          description: 'Microphone permission granted. Click the microphone button to start recording.',
-        });
-      } catch (error: any) {
-        console.error('[Voice Modal] Microphone permission error:', {
-          name: error?.name,
-          message: error?.message,
-          code: error?.code,
-        });
-
-        let errorTitle = 'Microphone Error';
-        let errorDescription = 'Unable to access microphone.';
-
-        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-          errorTitle = 'Microphone Permission Denied';
-          errorDescription = 'Please allow microphone access in your browser settings to use voice features.';
-        } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-          errorTitle = 'No Microphone Found';
-          errorDescription = 'No microphone device detected. Please check your hardware.';
-        } else if (error.name === 'NotSupportedError') {
-          errorTitle = 'Not Supported';
-          errorDescription = 'Your browser does not support microphone access.';
-        } else if (error.name === 'SecurityError') {
-          errorTitle = 'Security Error';
-          errorDescription = 'Microphone access requires a secure HTTPS connection.';
-        }
-
-        toast({
-          title: errorTitle,
-          description: errorDescription,
-          variant: 'destructive',
-        });
-
-        // Close the modal if permission is denied
-        setIsVoiceModalOpen(false);
+    console.log('[Voice Modal] Opening - will auto-start microphone in 2 seconds...');
+    
+    const timeoutId = setTimeout(() => {
+      if (isMountedRef.current && isVoiceModalOpen) {
+        console.log('[Voice Modal] Auto-starting microphone after 2 second delay...');
+        startListening();
       }
-    };
+    }, 2000);
 
-    requestMicrophonePermission();
-  }, [isVoiceModalOpen, toast]);
+    return () => clearTimeout(timeoutId);
+  }, [isVoiceModalOpen]);
 
   const blobToBase64 = (blob: Blob): Promise<string> =>
     new Promise((resolve, reject) => {
