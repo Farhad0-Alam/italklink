@@ -308,20 +308,37 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
 
     try {
       // Validate audio blob
-      if (!audioBlob || audioBlob.size === 0) {
-        throw new Error('Audio recording is empty. Please try again.');
+      if (!audioBlob) {
+        throw new Error('No audio data. Please try recording again.');
+      }
+      
+      if (audioBlob.size === 0) {
+        throw new Error('Audio recording is empty. Please try recording for a few seconds.');
       }
 
-      console.log('[Audio Processing] Starting with blob size:', audioBlob.size, 'bytes');
+      console.log('[Audio Processing] Starting with blob:', {
+        size: audioBlob.size,
+        type: audioBlob.type,
+        bytes: audioBlob.size,
+      });
 
       const base64Audio = await blobToBase64(audioBlob);
       
       if (!base64Audio) {
-        throw new Error('Failed to convert audio to base64.');
+        throw new Error('Failed to convert audio to base64. Please try again.');
       }
 
-      console.log('[Audio Processing] Base64 conversion successful, size:', base64Audio.length);
+      if (base64Audio.length < 100) {
+        throw new Error('Audio data too small. Please try recording again.');
+      }
 
+      console.log('[Audio Processing] Base64 conversion successful', {
+        dataSize: base64Audio.length,
+        hasDataUrl: base64Audio.startsWith('data:'),
+      });
+
+      console.log('[Audio Processing] Sending to backend /api/voice/process...');
+      
       const response = await apiRequest<{
         transcript: string;
         response: string;
@@ -332,9 +349,14 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         messages,
       });
 
+      console.log('[Audio Processing] Backend response received:', {
+        hasTranscript: !!response?.transcript,
+        hasResponse: !!response?.response,
+      });
+
       if (response?.transcript) {
         const userText = response.transcript;
-        console.log('[Audio Processing] Got transcript:', userText);
+        console.log('[Audio Processing] Transcript:', userText);
 
         // Add user transcript message with label
         const userMessage: ChatMessage = {
@@ -347,7 +369,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         const assistantMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
           type: 'assistant',
-          content: response.response,
+          content: response.response || 'No response received.',
           timestamp: new Date(),
           isStreaming: true,
         };
@@ -377,9 +399,15 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         } catch (ttsError) {
           console.error('[TTS Error]:', ttsError);
         }
+      } else {
+        throw new Error('No transcript received from server. Please try again.');
       }
     } catch (error: any) {
-      console.error('[Audio Processing Error]:', error);
+      console.error('[Audio Processing Error] Complete Error:', {
+        name: error?.name,
+        message: error?.message,
+        stack: error?.stack,
+      });
       
       let errorDescription = 'Failed to process audio.';
       if (error?.message) {
