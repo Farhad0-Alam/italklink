@@ -895,32 +895,6 @@ export default function EmailSignature() {
         {/* Step 3 & Preview: Form and Live Preview */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-4">
-            {/* Step 3: Enter Signature Details */}
-            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-lg text-slate-900 dark:text-white">3. Enter signature details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {[
-                  { label: "Personal Data", key: "personalData" },
-                  { label: "Company Data", key: "companyData" },
-                  { label: "Graphics", key: "graphics" },
-                  { label: "Style", key: "style" },
-                  { label: "Social Media Links", key: "socialLinks" },
-                ].map((section) => (
-                  <button
-                    key={section.key}
-                    onClick={() => toggleSection(section.key)}
-                    className="w-full text-left px-4 py-3 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-between"
-                    data-testid={`btn-section-${section.key}`}
-                  >
-                    <span className="font-medium text-slate-900 dark:text-white">{section.label}</span>
-                    <ChevronDown className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                  </button>
-                ))}
-              </CardContent>
-            </Card>
-
             {/* CARD 1: Signature (Handwritten Style) */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader
