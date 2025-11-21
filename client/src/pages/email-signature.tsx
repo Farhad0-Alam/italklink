@@ -197,6 +197,9 @@ export default function EmailSignature() {
     contactColor: true,
     iconSize: true,
     iconColor: true,
+    imagesSection: false,
+    socialLinksSection: false,
+    optionalFeaturesSection: false,
   });
   const [signatureData, setSignatureData] = useState<SignatureData>({
     signatureName: "John Doe",
@@ -1645,14 +1648,27 @@ export default function EmailSignature() {
 
             {/* Images */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-slate-900 dark:text-white">
-                  Images
-                </CardTitle>
+              <CardHeader
+                className="cursor-pointer py-2 px-3"
+                onClick={() => toggleSection("imagesSection")}
+                data-testid="toggle-images-section"
+              >
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Images
+                  </CardTitle>
+                  {collapsedSections.imagesSection ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4" />
+                  )}
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="profilePhoto">Profile Photo</Label>
+              <CardContent className="p-3 space-y-2">
+                {!collapsedSections.imagesSection && (
+                  <>
+                <div className="space-y-1">
+                  <Label htmlFor="profilePhoto" className="text-xs">Profile Photo</Label>
                   <Input
                     id="profilePhoto"
                     type="file"
@@ -1665,8 +1681,8 @@ export default function EmailSignature() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="companyLogo">Company Logo</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="companyLogo" className="text-xs">Company Logo</Label>
                   <Input
                     id="companyLogo"
                     type="file"
@@ -1678,30 +1694,43 @@ export default function EmailSignature() {
                     data-testid="input-company-logo"
                   />
                 </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
             {/* Social Links */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <CardHeader>
+              <CardHeader
+                className="cursor-pointer py-2 px-3"
+                onClick={() => toggleSection("socialLinksSection")}
+                data-testid="toggle-social-links-section"
+              >
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-slate-900 dark:text-white">
+                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
                     Social Links
                   </CardTitle>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={addSocialLink}
-                    className="gap-1"
-                    data-testid="button-add-social-link"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Link
-                  </Button>
+                  {collapsedSections.socialLinksSection ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4" />
+                  )}
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="p-3 space-y-2">
+                {!collapsedSections.socialLinksSection && (
+                  <>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={addSocialLink}
+                  className="gap-1 mb-2"
+                  data-testid="button-add-social-link"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Link
+                </Button>
                 {signatureData.socialLinks.map((link, index) => (
                   <div key={index} className="flex gap-2">
                     <Select
@@ -1748,21 +1777,35 @@ export default function EmailSignature() {
                   </div>
                 ))}
                 {signatureData.socialLinks.length === 0 && (
-                  <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-2">
                     No social links added yet
                   </p>
+                )}
+                  </>
                 )}
               </CardContent>
             </Card>
 
             {/* Optional Features */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-slate-900 dark:text-white">
-                  Optional Features
-                </CardTitle>
+              <CardHeader
+                className="cursor-pointer py-2 px-3"
+                onClick={() => toggleSection("optionalFeaturesSection")}
+                data-testid="toggle-optional-features-section"
+              >
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Optional Features
+                  </CardTitle>
+                  {collapsedSections.optionalFeaturesSection ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4" />
+                  )}
+                </div>
               </CardHeader>
-                <CardContent className="space-y-4">
+              {!collapsedSections.optionalFeaturesSection && (
+                <CardContent className="p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="showCTA">Call-to-Action Button</Label>
                     <Switch
@@ -1843,6 +1886,7 @@ export default function EmailSignature() {
                     </div>
                   )}
                 </CardContent>
+              )}
             </Card>
           </div>
 
