@@ -131,8 +131,20 @@ const socialPlatforms = [
   { value: "github", label: "GitHub", icon: SiGithub },
 ];
 
+const emailPlatforms = [
+  { id: "outlook", name: "Outlook", icon: "📧" },
+  { id: "new-outlook", name: "New Outlook", icon: "📧" },
+  { id: "outlook-365", name: "Outlook 365", icon: "🔵" },
+  { id: "apple-mail", name: "Apple Mail", icon: "🍎" },
+  { id: "gmail", name: "Gmail", icon: "📨" },
+  { id: "thunderbird", name: "Thunderbird", icon: "🦅" },
+  { id: "exchange", name: "Exchange Server", icon: "🔄" },
+  { id: "microsoft-365", name: "Microsoft 365", icon: "🪟" },
+];
+
 export default function EmailSignature() {
   const { toast } = useToast();
+  const [selectedPlatform, setSelectedPlatform] = useState<string>("outlook");
   const [templateVariant, setTemplateVariant] = useState<
     "minimal" | "standard" | "full"
   >("standard");
@@ -776,87 +788,139 @@ export default function EmailSignature() {
           </div>
         </div>
 
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Choose Signature Template</h2>
-          
-          <div className="relative">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={prevTemplate}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-lg"
-                data-testid="btn-carousel-prev"
-              >
-                <ChevronLeft className="w-6 h-6 text-slate-900 dark:text-white" />
-              </Button>
-
-              <div className="flex-1 flex gap-4 overflow-hidden px-12">
-                {templates.map((template, index) => (
-                  <div
-                    key={template.id}
-                    onClick={() => selectTemplate(index)}
-                    className={`flex-shrink-0 w-1/3 cursor-pointer transition-all ${
-                      index === carouselIndex ? "scale-100 opacity-100" : "scale-90 opacity-60"
+        {/* Step 1 & 2: Platform Selection and Template Carousel */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Step 1: Email Platform Selection */}
+          <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-lg text-slate-900 dark:text-white">1. Choose email platform</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-4 gap-3">
+                {emailPlatforms.map((platform) => (
+                  <button
+                    key={platform.id}
+                    onClick={() => setSelectedPlatform(platform.id)}
+                    className={`flex flex-col items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                      selectedPlatform === platform.id
+                        ? "border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                        : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
                     }`}
-                    data-testid={`template-card-${template.id}`}
+                    data-testid={`btn-platform-${platform.id}`}
                   >
-                    <div
-                      className={`border-4 rounded-lg overflow-hidden shadow-md transition-all ${
-                        index === carouselIndex
-                          ? "border-blue-500 dark:border-blue-400 shadow-xl"
-                          : "border-slate-300 dark:border-slate-600"
-                      }`}
-                    >
-                      <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center p-4">
-                        <div className="text-center">
-                          <div className="text-3xl font-bold text-slate-600 dark:text-slate-300 mb-2">
-                            {template.name}
-                          </div>
-                          <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {template.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-center mt-3">
-                      <h3 className="font-semibold text-slate-900 dark:text-white">{template.name}</h3>
-                      <p className="text-xs text-slate-600 dark:text-slate-400">{template.description}</p>
-                    </div>
-                  </div>
+                    <span className="text-2xl">{platform.icon}</span>
+                    <span className="text-xs font-medium text-center text-slate-900 dark:text-white">{platform.name}</span>
+                  </button>
                 ))}
               </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">
+                Looking for another email platform?{" "}
+                <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
+                  Check out the supported platforms here
+                </a>
+              </p>
+            </CardContent>
+          </Card>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={nextTemplate}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-lg"
-                data-testid="btn-carousel-next"
-              >
-                <ChevronRight className="w-6 h-6 text-slate-900 dark:text-white" />
-              </Button>
-            </div>
+          {/* Step 2: Template Carousel */}
+          <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-lg text-slate-900 dark:text-white">2. Choose signature template</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="relative">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={prevTemplate}
+                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
+                    data-testid="btn-carousel-prev"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
 
-            <div className="flex justify-center gap-2 mt-6">
-              {templates.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => selectTemplate(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === carouselIndex
-                      ? "bg-blue-500 dark:bg-blue-400 w-6"
-                      : "bg-slate-300 dark:bg-slate-600"
-                  }`}
-                  data-testid={`carousel-dot-${index}`}
-                />
-              ))}
-            </div>
-          </div>
+                  <div className="flex-1 flex gap-3 overflow-hidden">
+                    {templates.map((template, index) => (
+                      <div
+                        key={template.id}
+                        onClick={() => selectTemplate(index)}
+                        className={`flex-shrink-0 w-1/3 cursor-pointer transition-all ${
+                          index === carouselIndex ? "scale-100" : "scale-75 opacity-50"
+                        }`}
+                        data-testid={`template-card-${template.id}`}
+                      >
+                        <div
+                          className={`border-3 rounded-lg overflow-hidden shadow-md transition-all ${
+                            index === carouselIndex
+                              ? "border-blue-500 dark:border-blue-400"
+                              : "border-slate-300 dark:border-slate-600"
+                          }`}
+                        >
+                          <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center p-2">
+                            <div className="text-center text-xs">
+                              <div className="font-bold text-slate-600 dark:text-slate-300">
+                                {template.name}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={nextTemplate}
+                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
+                    data-testid="btn-carousel-next"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                <div className="text-center mt-3">
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
+                      More templates
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
+        {/* Step 3 & Preview: Form and Live Preview */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-4">
+            {/* Step 3: Enter Signature Details */}
+            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-lg text-slate-900 dark:text-white">3. Enter signature details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {[
+                  { label: "Personal Data", key: "personalData" },
+                  { label: "Company Data", key: "companyData" },
+                  { label: "Graphics", key: "graphics" },
+                  { label: "Style", key: "style" },
+                  { label: "Social Media Links", key: "socialLinks" },
+                ].map((section) => (
+                  <button
+                    key={section.key}
+                    onClick={() => toggleSection(section.key)}
+                    className="w-full text-left px-4 py-3 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-between"
+                    data-testid={`btn-section-${section.key}`}
+                  >
+                    <span className="font-medium text-slate-900 dark:text-white">{section.label}</span>
+                    <ChevronDown className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  </button>
+                ))}
+              </CardContent>
+            </Card>
+
             {/* CARD 1: Signature (Handwritten Style) */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader
