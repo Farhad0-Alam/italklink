@@ -207,6 +207,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   const startListening = async () => {
     if (typeof window === 'undefined') return;
 
+    // Check if browser supports mediaDevices
     if (!navigator.mediaDevices?.getUserMedia) {
       toast({
         title: 'Microphone Not Supported',
@@ -216,10 +217,21 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       return;
     }
 
-    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+    // Check if running on insecure context (not HTTPS)
+    if ('isSecureContext' in window && !window.isSecureContext) {
       toast({
         title: 'Secure Connection Required',
-        description: 'Microphone access requires HTTPS.',
+        description: 'Microphone access requires HTTPS. Please access via a secure connection.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Additional check for non-HTTPS in non-localhost
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      toast({
+        title: 'Secure Connection Required',
+        description: 'Microphone access requires HTTPS. Please use a secure connection.',
         variant: 'destructive',
       });
       return;
@@ -255,9 +267,28 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       setIsListening(true);
     } catch (error: any) {
       console.error('Microphone access error:', error);
+      
+      // Detailed error handling
+      let errorTitle = 'Microphone Error';
+      let errorDescription = 'Unable to access microphone.';
+
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        errorTitle = 'Microphone Permission Denied';
+        errorDescription = 'Please allow microphone access in your browser settings and try again.';
+      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        errorTitle = 'No Microphone Found';
+        errorDescription = 'No microphone device was detected. Please connect a microphone.';
+      } else if (error.name === 'NotSupportedError') {
+        errorTitle = 'Not Supported';
+        errorDescription = 'Your browser does not support microphone access.';
+      } else if (error.name === 'SecurityError') {
+        errorTitle = 'Security Error';
+        errorDescription = 'Microphone access requires a secure (HTTPS) connection.';
+      }
+
       toast({
-        title: 'Microphone Error',
-        description: 'Unable to access microphone.',
+        title: errorTitle,
+        description: errorDescription,
         variant: 'destructive',
       });
     }
