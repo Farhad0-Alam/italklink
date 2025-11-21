@@ -4747,13 +4747,12 @@ export const emailSignatures = pgTable("email_signatures", {
   userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
   
   // Signature metadata
-  name: varchar("name").notNull(),
+  signatureName: varchar("signature_name").notNull(),
   platform: varchar("platform").default('outlook'),
-  templateVariant: varchar("template_variant").default('standard'), // minimal, standard, full, advanced, professional, minimal_modern, corporate, creative, minimal_clean
+  templateVariant: varchar("template_variant").default('standard'),
   
   // Basic information
-  signatureName: varchar("signature_name"),
-  name: varchar("full_name"),
+  fullName: varchar("full_name"),
   title: varchar("title"),
   company: varchar("company"),
   
