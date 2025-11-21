@@ -17,6 +17,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 
+// Import emailSignatures at the end to avoid circular dependencies
+
 // Custom vector type for pgvector embeddings
 const vector = customType<{ data: number[] | null; driverData: string | null }>({
   dataType() {
@@ -4738,6 +4740,93 @@ export const mediaUploadResponseSchema = z.object({
 });
 
 export type MediaUploadResponse = z.infer<typeof mediaUploadResponseSchema>;
+
+// ===== EMAIL SIGNATURE TABLE =====
+export const emailSignatures = pgTable("email_signatures", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Signature metadata
+  name: varchar("name").notNull(),
+  platform: varchar("platform").default('outlook'),
+  templateVariant: varchar("template_variant").default('standard'), // minimal, standard, full, advanced, professional, minimal_modern, corporate, creative, minimal_clean
+  
+  // Basic information
+  signatureName: varchar("signature_name"),
+  name: varchar("full_name"),
+  title: varchar("title"),
+  company: varchar("company"),
+  
+  // Contact information
+  cellPhone: varchar("cell_phone"),
+  officePhone: varchar("office_phone"),
+  email: varchar("email"),
+  website: varchar("website"),
+  address: text("address"),
+  
+  // Images
+  profilePhoto: text("profile_photo"),
+  companyLogo: text("company_logo"),
+  
+  // Colors
+  primaryColor: varchar("primary_color").default("#FF6A00"),
+  secondaryColor: varchar("secondary_color").default("#333333"),
+  
+  // Typography
+  signatureFont: varchar("signature_font").default("Alex Brush"),
+  signatureSize: integer("signature_size").default(32),
+  signatureColor: varchar("signature_color").default("#333333"),
+  
+  nameSize: integer("name_size").default(24),
+  nameColor: varchar("name_color").default("#333333"),
+  titleSize: integer("title_size").default(16),
+  titleColor: varchar("title_color").default("#666666"),
+  companySize: integer("company_size").default(16),
+  companyColor: varchar("company_color").default("#666666"),
+  
+  headerFont: varchar("header_font").default("Arial"),
+  headerSize: integer("header_size").default(18),
+  headerColor: varchar("header_color").default("#FF6A00"),
+  
+  contactFont: varchar("contact_font").default("Arial"),
+  contactInfoSize: integer("contact_info_size").default(20),
+  contactInfoColor: varchar("contact_info_color").default("#333333"),
+  contactIconSize: integer("contact_icon_size").default(16),
+  contactIconColor: varchar("contact_icon_color").default("#FF6A00"),
+  
+  // Custom fields and social links
+  customFields: jsonb("custom_fields").default('[]'),
+  socialLinks: jsonb("social_links").default('[]'),
+  
+  // Optional features
+  showCTA: boolean("show_cta").default(false),
+  ctaText: varchar("cta_text").default("Book a Consultation"),
+  ctaUrl: text("cta_url"),
+  
+  showBanner: boolean("show_banner").default(false),
+  bannerText: text("banner_text").default("Get in touch today!"),
+  
+  showDisclaimer: boolean("show_disclaimer").default(false),
+  disclaimerText: text("disclaimer_text"),
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_email_signatures_user").on(table.userId),
+  index("idx_email_signatures_active").on(table.isActive),
+]);
+
+export type EmailSignature = typeof emailSignatures.$inferSelect;
+export type InsertEmailSignature = typeof emailSignatures.$inferInsert;
+
+export const insertEmailSignatureSchema = createInsertSchema(emailSignatures).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 // ===== QR CODE VALIDATION SCHEMAS =====
 

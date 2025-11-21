@@ -1,7 +1,7 @@
 import { db } from './db';
 import { 
   users, businessCards, teams, teamMembers, bulkGenerationJobs, subscriptionPlans, globalTemplates, walletPasses,
-  crmContacts, crmActivities, crmTasks, crmPipelines, crmStages, crmDeals, crmSequences, emailTemplates,
+  crmContacts, crmActivities, crmTasks, crmPipelines, crmStages, crmDeals, crmSequences, emailTemplates, emailSignatures,
   automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability, appointmentNotifications, appointmentPayments,
   calendarConnections, videoMeetingProviders, externalCalendarEvents, meetingLinks, integrationLogs,
   teamAssignments, roundRobinState, leadRoutingRules, teamMemberSkills, teamMemberCapacity, teamAvailabilityPatterns, assignmentAnalytics, routingAnalytics,
@@ -15,6 +15,7 @@ import {
   type CrmTask, type InsertCrmTask, type CrmPipeline, type InsertCrmPipeline,
   type CrmStage, type InsertCrmStage, type CrmDeal, type InsertCrmDeal,
   type CrmSequence, type InsertCrmSequence, type EmailTemplate, type InsertEmailTemplate,
+  type EmailSignature, type InsertEmailSignature,
   type Automation, type InsertAutomation, type AutomationRun, type InsertAutomationRun,
   type AppointmentEventType, type InsertAppointmentEventType, type Appointment, type InsertAppointment,
   type AppointmentNotification, type InsertAppointmentNotification,
@@ -333,6 +334,13 @@ export interface IStorage {
   deleteEmailTemplate(id: string, userId?: string): Promise<void>;
   getDefaultEmailTemplates(): Promise<EmailTemplate[]>;
   ensureDefaultTemplatesExist(userId: string): Promise<void>;
+
+  // Email Signature operations
+  createEmailSignature(signatureData: InsertEmailSignature): Promise<EmailSignature>;
+  getEmailSignature(id: string): Promise<EmailSignature | undefined>;
+  getUserEmailSignatures(userId: string): Promise<EmailSignature[]>;
+  updateEmailSignature(id: string, signatureData: Partial<InsertEmailSignature>): Promise<EmailSignature>;
+  deleteEmailSignature(id: string): Promise<void>;
 
   // Appointment Notification operations
   createNotification(notificationData: InsertAppointmentNotification): Promise<AppointmentNotification>;
