@@ -92,6 +92,14 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const [autoMicrophoneEnabled, setAutoMicrophoneEnabled] = useState(() => {
+    // Load from localStorage on mount
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('voiceAutoMicrophoneEnabled');
+      return saved !== null ? saved === 'true' : true; // Default to true
+    }
+    return true;
+  });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
@@ -127,21 +135,27 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     };
   }, []);
 
+  // Save auto-microphone preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('voiceAutoMicrophoneEnabled', String(autoMicrophoneEnabled));
+    console.log('[Voice Modal] Auto-microphone setting saved:', autoMicrophoneEnabled);
+  }, [autoMicrophoneEnabled]);
+
   // Auto-start microphone after 2 seconds when Voice Modal opens (ChatGPT-style)
   useEffect(() => {
-    if (!isVoiceModalOpen) return;
+    if (!isVoiceModalOpen || !autoMicrophoneEnabled) return;
 
     console.log('[Voice Modal] Opening - will auto-start microphone in 2 seconds...');
     
     const timeoutId = setTimeout(() => {
-      if (isMountedRef.current && isVoiceModalOpen) {
+      if (isMountedRef.current && isVoiceModalOpen && autoMicrophoneEnabled) {
         console.log('[Voice Modal] Auto-starting microphone after 2 second delay...');
         startListening();
       }
     }, 2000);
 
     return () => clearTimeout(timeoutId);
-  }, [isVoiceModalOpen]);
+  }, [isVoiceModalOpen, autoMicrophoneEnabled]);
 
   const blobToBase64 = (blob: Blob): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -817,30 +831,38 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
               <div className="text-gray-400 text-sm">Loading audio...</div>
             )}
 
+            {/* Auto-Microphone Toggle Label */}
+            <div className="text-center">
+              <p className="text-white text-sm sm:text-base font-medium">
+                {autoMicrophoneEnabled ? 'Turn off microphone' : 'Turn on microphone'}
+              </p>
+              <p className="text-gray-400 text-xs sm:text-sm">Microphone Array (Realtek High Definition Audio(SST))</p>
+            </div>
+
             {/* Control Buttons */}
             <div className="flex gap-6">
-              {/* Microphone Button - Record Voice */}
+              {/* Auto-Microphone Toggle Button */}
               <button
                 type="button"
-                onClick={isListening ? stopListening : startListening}
+                onClick={() => setAutoMicrophoneEnabled(!autoMicrophoneEnabled)}
                 disabled={isProcessing || isLoading || isTTSLoading}
                 className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center transition-all transform ${
-                  isListening
-                    ? 'bg-red-600 hover:bg-red-700 text-white scale-110 shadow-lg shadow-red-600/50'
-                    : isProcessing || isLoading || isTTSLoading
-                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                    : 'bg-gray-800 hover:bg-gray-700 text-white hover:scale-105'
+                  autoMicrophoneEnabled
+                    ? 'bg-gray-800 hover:bg-gray-700 text-white'
+                    : 'bg-red-900/50 hover:bg-red-900 text-red-400'
                 }`}
-                data-testid="button-mic-modal"
+                data-testid="button-toggle-auto-mic"
               >
-                {isListening ? (
-                  <Square className="h-7 w-7 sm:h-8 sm:w-8" />
-                ) : (
+                {autoMicrophoneEnabled ? (
                   <Mic className="h-7 w-7 sm:h-8 sm:w-8" />
+                ) : (
+                  <svg className="h-7 w-7 sm:h-8 sm:w-8" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 13h-3v3h-2v-3h-3v-2h3V8h2v3h3v2z" />
+                  </svg>
                 )}
               </button>
 
-              {/* Stop Button */}
+              {/* Stop/Close Button */}
               <button
                 onClick={stopAudio}
                 disabled={isTTSLoading}
