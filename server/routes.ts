@@ -3000,13 +3000,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== UPLOADS API ENDPOINTS =====
   app.get('/api/uploads', requireAuth, asyncHandler(async (req, res) => {
     const userId = req.user!.id;
-    const uploads = await storage.getUserUploads(userId);
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const uploads = await storage.getUserPublicUploads(userId, limit, offset);
     res.json({ success: true, data: uploads });
   }));
 
   app.delete('/api/uploads/:id', requireAuth, asyncHandler(async (req, res) => {
     const { id } = req.params;
-    await storage.deleteUpload(id);
+    await storage.deletePublicUpload(id);
     res.json({ success: true, message: 'Upload deleted successfully' });
   }));
 
