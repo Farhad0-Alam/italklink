@@ -174,9 +174,9 @@ export default function EmailSignature() {
   const [collapsedSections, setCollapsedSections] = useState<{
     [key: string]: boolean;
   }>({
-    signatureSection: false,
+    signatureSection: true,
     signatureStyle: true,
-    nameSection: false,
+    nameSection: true,
     nameStyle: true,
     titleStyle: true,
     companyStyle: true,
@@ -189,7 +189,7 @@ export default function EmailSignature() {
     companyFont: true,
     companySize: true,
     companyColor: true,
-    contactSection: false,
+    contactSection: true,
     contactInfoStyle: true,
     contactIconStyle: true,
     contactFont: true,
@@ -197,9 +197,9 @@ export default function EmailSignature() {
     contactColor: true,
     iconSize: true,
     iconColor: true,
-    imagesSection: false,
-    socialLinksSection: false,
-    optionalFeaturesSection: false,
+    imagesSection: true,
+    socialLinksSection: true,
+    optionalFeaturesSection: true,
   });
   const [signatureData, setSignatureData] = useState<SignatureData>({
     signatureName: "John Doe",
