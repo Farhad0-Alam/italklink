@@ -1251,20 +1251,18 @@ export default function EmailSignature() {
                           data-testid="input-cell-phone"
                         />
                       </div>
-                      {templateType !== "simple" && (
-                        <div className="space-y-2">
-                          <Label htmlFor="officePhone">Office Phone</Label>
-                          <Input
-                            id="officePhone"
-                            value={signatureData.officePhone}
-                            onChange={(e) =>
-                              updateField("officePhone", e.target.value)
-                            }
-                            placeholder="+1 (555) 987-6543"
-                            data-testid="input-office-phone"
-                          />
-                        </div>
-                      )}
+                      <div className="space-y-2">
+                        <Label htmlFor="officePhone">Office Phone</Label>
+                        <Input
+                          id="officePhone"
+                          value={signatureData.officePhone}
+                          onChange={(e) =>
+                            updateField("officePhone", e.target.value)
+                          }
+                          placeholder="+1 (555) 987-6543"
+                          data-testid="input-office-phone"
+                        />
+                      </div>
                     </div>
 
                     <div className="space-y-2">
@@ -1290,18 +1288,16 @@ export default function EmailSignature() {
                   />
                 </div>
 
-                {templateType !== "simple" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Address</Label>
-                    <Input
-                      id="address"
-                      value={signatureData.address}
-                      onChange={(e) => updateField("address", e.target.value)}
-                      placeholder="123 Main St, City, State 12345"
-                      data-testid="input-address"
-                    />
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    id="address"
+                    value={signatureData.address}
+                    onChange={(e) => updateField("address", e.target.value)}
+                    placeholder="123 Main St, City, State 12345"
+                    data-testid="input-address"
+                  />
+                </div>
 
                 <div className="space-y-3 pt-4 border-t">
                   <div className="flex items-center justify-between">
@@ -1556,21 +1552,19 @@ export default function EmailSignature() {
                   />
                 </div>
 
-                {templateType !== "simple" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="companyLogo">Company Logo</Label>
-                    <Input
-                      id="companyLogo"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) =>
-                        e.target.files?.[0] &&
-                        handleImageUpload("companyLogo", e.target.files[0])
-                      }
-                      data-testid="input-company-logo"
-                    />
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="companyLogo">Company Logo</Label>
+                  <Input
+                    id="companyLogo"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      e.target.files?.[0] &&
+                      handleImageUpload("companyLogo", e.target.files[0])
+                    }
+                    data-testid="input-company-logo"
+                  />
+                </div>
               </CardContent>
             </Card>
 
@@ -1649,13 +1643,12 @@ export default function EmailSignature() {
             </Card>
 
             {/* Optional Features */}
-            {templateType !== "simple" && (
-              <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-slate-900 dark:text-white">
-                    Optional Features
-                  </CardTitle>
-                </CardHeader>
+            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-slate-900 dark:text-white">
+                  Optional Features
+                </CardTitle>
+              </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="showCTA">Call-to-Action Button</Label>
@@ -1686,33 +1679,29 @@ export default function EmailSignature() {
                     </div>
                   )}
 
-                  {templateType === "premium" && (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="showBanner">Banner</Label>
-                        <Switch
-                          id="showBanner"
-                          checked={signatureData.showBanner}
-                          onCheckedChange={(checked) =>
-                            updateField("showBanner", checked)
-                          }
-                          data-testid="switch-show-banner"
-                        />
-                      </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="showBanner">Banner</Label>
+                    <Switch
+                      id="showBanner"
+                      checked={signatureData.showBanner}
+                      onCheckedChange={(checked) =>
+                        updateField("showBanner", checked)
+                      }
+                      data-testid="switch-show-banner"
+                    />
+                  </div>
 
-                      {signatureData.showBanner && (
-                        <div className="pl-6">
-                          <Input
-                            value={signatureData.bannerText}
-                            onChange={(e) =>
-                              updateField("bannerText", e.target.value)
-                            }
-                            placeholder="Banner Text"
-                            data-testid="input-banner-text"
-                          />
-                        </div>
-                      )}
-                    </>
+                  {signatureData.showBanner && (
+                    <div className="pl-6">
+                      <Input
+                        value={signatureData.bannerText}
+                        onChange={(e) =>
+                          updateField("bannerText", e.target.value)
+                        }
+                        placeholder="Banner Text"
+                        data-testid="input-banner-text"
+                      />
+                    </div>
                   )}
 
                   <div className="flex items-center justify-between">
@@ -1741,8 +1730,7 @@ export default function EmailSignature() {
                     </div>
                   )}
                 </CardContent>
-              </Card>
-            )}
+            </Card>
           </div>
 
           <div className="space-y-4">
