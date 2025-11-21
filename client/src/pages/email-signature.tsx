@@ -131,9 +131,9 @@ const socialPlatforms = [
 
 export default function EmailSignature() {
   const { toast } = useToast();
-  const [templateType, setTemplateType] = useState<
-    "simple" | "advanced" | "premium"
-  >("simple");
+  const [templateVariant, setTemplateVariant] = useState<
+    "minimal" | "standard" | "full"
+  >("standard");
   const [collapsedSections, setCollapsedSections] = useState<{
     [key: string]: boolean;
   }>({
@@ -681,14 +681,7 @@ export default function EmailSignature() {
   };
 
   const generateSignatureHTML = (): string => {
-    switch (templateType) {
-      case "advanced":
-        return generateAdvancedSignature();
-      case "premium":
-        return generatePremiumSignature();
-      default:
-        return generateSimpleSignature();
-    }
+    return generatePremiumSignature();
   };
 
   const copyToClipboard = async () => {
@@ -758,28 +751,34 @@ export default function EmailSignature() {
           </div>
         </div>
 
-        <Tabs
-          value={templateType}
-          onValueChange={(v) =>
-            setTemplateType(v as "simple" | "advanced" | "premium")
-          }
-          className="mb-6"
-        >
-          <TabsList
-            className="grid w-full grid-cols-3 max-w-md"
-            data-testid="tabs-template-type"
-          >
-            <TabsTrigger value="simple" data-testid="tab-simple">
-              Simple
-            </TabsTrigger>
-            <TabsTrigger value="advanced" data-testid="tab-advanced">
-              Advanced
-            </TabsTrigger>
-            <TabsTrigger value="premium" data-testid="tab-premium">
-              Premium
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="mb-6 flex items-center gap-4">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Premium Templates</h2>
+            <div className="flex gap-2">
+              <Button
+                variant={templateVariant === "minimal" ? "default" : "outline"}
+                onClick={() => setTemplateVariant("minimal")}
+                data-testid="btn-template-minimal"
+              >
+                Minimal
+              </Button>
+              <Button
+                variant={templateVariant === "standard" ? "default" : "outline"}
+                onClick={() => setTemplateVariant("standard")}
+                data-testid="btn-template-standard"
+              >
+                Standard
+              </Button>
+              <Button
+                variant={templateVariant === "full" ? "default" : "outline"}
+                onClick={() => setTemplateVariant("full")}
+                data-testid="btn-template-full"
+              >
+                Full Featured
+              </Button>
+            </div>
+          </div>
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
           <div className="space-y-4">
@@ -805,7 +804,7 @@ export default function EmailSignature() {
                 {!collapsedSections.signatureSection && (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="signatureName">Signature Name</Label>
+                      <Label htmlFor="signatureName">Signature Name (Optional)</Label>
                       <Input
                         id="signatureName"
                         value={signatureData.signatureName}
@@ -815,6 +814,7 @@ export default function EmailSignature() {
                         placeholder="John Doe"
                         data-testid="input-signature-name"
                       />
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Handwritten-style name shown at the top of signature</p>
                     </div>
 
                     <div className="space-y-3 pt-3">
@@ -929,7 +929,7 @@ export default function EmailSignature() {
                 {!collapsedSections.nameSection && (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="name">Name</Label>
+                      <Label htmlFor="name">Name *</Label>
                       <Input
                         id="name"
                         value={signatureData.name}
