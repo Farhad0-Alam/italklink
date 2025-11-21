@@ -28,6 +28,79 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const router = express.Router();
 
+// Language detection and response mapping
+const languageMap: Record<string, { name: string; ttsVoice: string }> = {
+  'en': { name: 'English', ttsVoice: 'alloy' },
+  'bn': { name: 'Bengali', ttsVoice: 'nova' },
+  'es': { name: 'Spanish', ttsVoice: 'nova' },
+  'fr': { name: 'French', ttsVoice: 'nova' },
+  'de': { name: 'German', ttsVoice: 'nova' },
+  'it': { name: 'Italian', ttsVoice: 'nova' },
+  'pt': { name: 'Portuguese', ttsVoice: 'nova' },
+  'ru': { name: 'Russian', ttsVoice: 'nova' },
+  'ja': { name: 'Japanese', ttsVoice: 'nova' },
+  'zh': { name: 'Chinese', ttsVoice: 'nova' },
+  'ko': { name: 'Korean', ttsVoice: 'nova' },
+  'ar': { name: 'Arabic', ttsVoice: 'nova' },
+  'hi': { name: 'Hindi', ttsVoice: 'nova' },
+  'th': { name: 'Thai', ttsVoice: 'nova' },
+  'vi': { name: 'Vietnamese', ttsVoice: 'nova' },
+  'tr': { name: 'Turkish', ttsVoice: 'nova' },
+  'pl': { name: 'Polish', ttsVoice: 'nova' },
+  'nl': { name: 'Dutch', ttsVoice: 'nova' },
+  'sv': { name: 'Swedish', ttsVoice: 'nova' },
+  'id': { name: 'Indonesian', ttsVoice: 'nova' },
+};
+
+function getSystemPromptForLanguage(language: string): string {
+  const lang = language || 'en';
+  const langName = languageMap[lang]?.name || 'English';
+  
+  const prompts: Record<string, string> = {
+    'en': `You are a helpful TalkLink AI assistant. Respond in English. Be professional, friendly, and concise. Answer questions about our services.`,
+    'bn': `আপনি TalkLink এর একজন সহায়ক AI। বাংলায় উত্তর দিন। বন্ধুত্বপূর্ণ এবং পেশাদার হন। আমাদের সেবা সম্পর্কে প্রশ্নের উত্তর দিন।`,
+    'es': `Eres un asistente de IA de TalkLink. Responde en español. Sé profesional, amable y conciso.`,
+    'fr': `Vous êtes un assistant IA TalkLink. Répondez en français. Soyez professionnel, amical et concis.`,
+    'de': `Du bist ein TalkLink KI-Assistent. Antworte auf Deutsch. Sei professionell, freundlich und prägnant.`,
+    'it': `Sei un assistente IA di TalkLink. Rispondi in italiano. Sii professionale, amichevole e conciso.`,
+    'pt': `Você é um assistente de IA do TalkLink. Responda em português. Seja profissional, amável e conciso.`,
+    'ru': `Вы помощник ИИ TalkLink. Отвечайте на русском языке. Будьте профессиональны, дружелюбны и лаконичны.`,
+    'ja': `あなたはTalkLinkのAIアシスタントです。日本語で答えてください。専門的で親切で簡潔に。`,
+    'zh': `你是TalkLink的AI助手。用中文回答。专业、友好和简洁。`,
+    'ko': `당신은 TalkLink의 AI 어시스턴트입니다. 한국어로 답변하세요. 전문적이고 친절하며 간결하게.`,
+    'ar': `أنت مساعد ذكاء اصطناعي TalkLink. أجب باللغة العربية. كن محترفًا ودودًا وموجزًا.`,
+    'hi': `आप TalkLink के AI सहायक हैं। हिंदी में उत्तर दें। पेशेवर, मित्रवत और संक्षिप्त बनें।`,
+    'th': `คุณเป็นผู้ช่วย AI ของ TalkLink ตอบเป็นภาษาไทย เป็นมืออาชีพ เป็นมิตร และกระชับ`,
+    'vi': `Bạn là trợ lý AI của TalkLink. Trả lời bằng tiếng Việt. Hãy chuyên nghiệp, thân thiện và ngắn gọn.`,
+  };
+  
+  return prompts[lang] || prompts['en'];
+}
+
+function getLeadGenerationPromptForLanguage(language: string): string {
+  const lang = language || 'en';
+  
+  const prompts: Record<string, string> = {
+    'en': `You are a lead generation assistant. Ask one question at a time to collect: name, email, phone, interested service, budget range, timeline, and notes. Always respond in English with a friendly tone. Return JSON with "reply" and "lead_state".`,
+    'bn': `আপনি একজন লিড জেনারেশন সহায়ক। একবারে একটি প্রশ্ন করুন। নাম, ইমেইল, ফোন, সেবা, বাজেট, সময়সীমা সংগ্রহ করুন। সবসময় বাংলায় বন্ধুত্বপূর্ণভাবে উত্তর দিন। JSON ফরম্যাটে "reply" এবং "lead_state" রিটার্ন করুন।`,
+    'es': `Eres un asistente de generación de clientes. Haz una pregunta a la vez. Recopila: nombre, correo, teléfono, servicio, presupuesto, cronograma. Siempre responde en español. Devuelve JSON con "reply" y "lead_state".`,
+    'fr': `Vous êtes un assistant de génération de leads. Posez une question à la fois. Collectez: nom, email, téléphone, service, budget, délai. Répondez toujours en français. Retournez JSON avec "reply" et "lead_state".`,
+    'de': `Du bist ein Lead-Generation-Assistent. Stelle eine Frage nach der anderen. Sammle: Name, E-Mail, Telefon, Service, Budget, Zeitplan. Antworte immer auf Deutsch. Geben Sie JSON mit "reply" und "lead_state" zurück.`,
+    'it': `Sei un assistente di generazione di lead. Poni una domanda alla volta. Raccogli: nome, email, telefono, servizio, budget, timeline. Rispondi sempre in italiano. Restituisci JSON con "reply" e "lead_state".`,
+    'pt': `Você é um assistente de geração de leads. Faça uma pergunta por vez. Colete: nome, email, telefone, serviço, orçamento, cronograma. Sempre responda em português. Retorne JSON com "reply" e "lead_state".`,
+    'ru': `Вы помощник по генерации лидов. Задавайте по одному вопросу. Собирайте: имя, электронную почту, телефон, услугу, бюджет, график. Всегда отвечайте по-русски. Возвращайте JSON с "reply" и "lead_state".`,
+    'ja': `あなたはリード生成アシスタントです。一度に1つの質問をしてください。名前、メール、電話、サービス、予算、スケジュールを収集します。常に日本語で答えてください。"reply"と"lead_state"でJSONを返します。`,
+    'zh': `你是线索生成助手。一次提一个问题。收集：名称、电子邮件、电话、服务、预算、时间表。始终用中文回答。使用"reply"和"lead_state"返回JSON。`,
+    'ko': `당신은 리드 생성 어시스턴트입니다. 한 번에 한 가지 질문을 하세요. 수집: 이름, 이메일, 전화, 서비스, 예산, 일정. 항상 한국어로 답변하세요. "reply"와 "lead_state"가 포함된 JSON을 반환하세요.`,
+    'ar': `أنت مساعد توليد العملاء المحتملين. اطرح سؤالاً واحداً في كل مرة. اجمع: الاسم والبريد الإلكتروني والهاتف والخدمة والميزانية والجدول الزمني. أجب دائماً بالعربية. أعد JSON مع "reply" و"lead_state".`,
+    'hi': `आप लीड जेनरेशन सहायक हैं। एक बार में एक प्रश्न पूछें। नाम, ईमेल, फोन, सेवा, बजट, समयसीमा एकत्र करें। हमेशा हिंदी में उत्तर दें। "reply" और "lead_state" के साथ JSON लौटाएं।`,
+    'th': `คุณเป็นผู้ช่วยสร้างลีด ถามคำถามทีละข้อ รวบรวม: ชื่อ อีเมล โทรศัพท์ บริการ งบประมาณ ตารางเวลา ตอบเป็นภาษาไทยเสมอ ส่งกลับ JSON ด้วย "reply" และ "lead_state"`,
+    'vi': `Bạn là trợ lý tạo ra khách hàng tiềm năng. Hỏi một câu hỏi một lần. Thu thập: tên, email, điện thoại, dịch vụ, ngân sách, lịch trình. Luôn trả lời bằng tiếng Việt. Trả về JSON với "reply" và "lead_state".`,
+  };
+  
+  return prompts[lang] || prompts['en'];
+}
+
 // Initialize knowledge base with sample Bengali TalkLink content
 async function initializeKnowledgeBase() {
   try {
@@ -856,46 +929,21 @@ router.post('/voice-lead', requireAuth, async (req, res) => {
     fs.writeFileSync(tempPath, audioBuffer);
     
     try {
-      // Transcribe audio
+      // Transcribe audio with language detection
       const audioFile = fs.createReadStream(tempPath);
       const transcription = await openai.audio.transcriptions.create({
         file: audioFile,
         model: 'whisper-1',
-      });
+        language: undefined // Auto-detect language
+      }) as any;
       
       const userText = transcription.text;
+      const detectedLanguage = transcription.language || 'en'; // Language code from Whisper
       
-      // Lead generation system prompt in Bengali
-      const systemPrompt = `আপনি একজন লিড জেনারেশন সহায়ক। বাংলায় কথা বলুন।
-
-লক্ষ্য: এক এক করে প্রশ্ন জিজ্ঞাসা করুন এবং সংগ্রহ করুন:
-- নাম
-- ইমেইল
-- ফোন
-- আগ্রহের সেবা
-- বাজেট
-- সময়সীমা
-- অতিরিক্ত বিবরণ
-
-নিয়ম:
-- বন্ধুত্বপূর্ণভাবে কথা বলুন
-- একবারে একটি প্রশ্ন করুন
-- সবসময় বাংলায় উত্তর দিন
-
-ALWAYS RETURN VALID JSON with exactly this format:
-{
-  "reply": "আপনার বাংলা উত্তর এখানে",
-  "lead_state": {
-    "full_name": null or string,
-    "email": null or string,
-    "phone": null or string,
-    "interested_service": null or string,
-    "budget_range": null or string,
-    "timeline": null or string,
-    "extra_notes": null or string
-  }
-}`;
-
+      // Get system prompt and TTS voice for detected language
+      const systemPrompt = getLeadGenerationPromptForLanguage(detectedLanguage);
+      const ttsVoice = languageMap[detectedLanguage]?.ttsVoice || 'nova';
+      
       // Query knowledge base if user asks questions
       const kbContext = await queryKnowledgeBase(userText, 3);
       
@@ -914,7 +962,11 @@ ALWAYS RETURN VALID JSON with exactly this format:
               ? `${systemPrompt}\n\nKnowledge Base:\n${kbContext}`
               : systemPrompt
           },
-          ...messages
+          ...messages,
+          {
+            role: 'user',
+            content: userText
+          }
         ],
         max_tokens: 500,
         response_format: { type: 'json_object' }
@@ -945,10 +997,10 @@ ALWAYS RETURN VALID JSON with exactly this format:
         });
       }
       
-      // Generate TTS for reply in Bengali
+      // Generate TTS for reply in detected language
       const audioResponse = await openai.audio.speech.create({
         model: 'tts-1',
-        voice: 'nova', // Better for Bengali
+        voice: ttsVoice as any,
         input: parsedResponse.reply,
       });
       
