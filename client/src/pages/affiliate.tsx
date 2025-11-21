@@ -47,7 +47,9 @@ import {
   UserPlus,
   Link as LinkIcon,
   Calendar,
-  ArrowLeft
+  ArrowLeft,
+  Wallet,
+  Send
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -96,6 +98,16 @@ interface MarketingAsset {
   dimensions?: string;
 }
 
+interface Payout {
+  id: string;
+  amount: number;
+  currency: string;
+  method: string;
+  status: 'draft' | 'maker_approved' | 'checker_approved' | 'paid' | 'cancelled';
+  createdAt: string;
+  processedAt?: string;
+}
+
 export default function Affiliate() {
   const [, setLocation] = useLocation();
   const [applicationForm, setApplicationForm] = useState({
@@ -133,6 +145,18 @@ export default function Affiliate() {
     queryKey: ['/api/affiliate/assets'],
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
+
+  // Fetch payouts
+  const { data: payouts = [] } = useQuery<Payout[]>({
+    queryKey: ['/api/affiliate/payouts'],
+    enabled: !!affiliate && affiliate.status === 'approved',
+    staleTime: 1000 * 60 * 2,
+  });
+
+  // Payout request state
+  const [payoutAmount, setPayoutAmount] = useState('');
+  const [payoutMethod, setPayoutMethod] = useState('');
+  const [requestingPayout, setRequestingPayout] = useState(false);
 
   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,6 +233,69 @@ export default function Affiliate() {
     });
     
     return url.toString();
+  };
+
+  const handlePayoutRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!payoutAmount || !payoutMethod) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in all fields',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const amount = parseInt(payoutAmount) * 100;
+    if (amount <= 0) {
+      toast({
+        title: 'Error',
+        description: 'Payout amount must be greater than 0',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setRequestingPayout(true);
+    try {
+      const response = await fetch('/api/affiliate/payout-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          amount,
+          method: payoutMethod
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        toast({
+          title: 'Success',
+          description: 'Payout request submitted successfully',
+        });
+        setPayoutAmount('');
+        setPayoutMethod('');
+        queryClient.invalidateQueries({ queryKey: ['/api/affiliate/payouts'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/affiliate/me'] });
+      } else {
+        const error = await response.json();
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to request payout',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to request payout',
+        variant: 'destructive'
+      });
+    } finally {
+      setRequestingPayout(false);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -505,9 +592,10 @@ export default function Affiliate() {
           </div>
 
           <Tabs defaultValue="links" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="links">Affiliate Links</TabsTrigger>
               <TabsTrigger value="conversions">Conversions</TabsTrigger>
+              <TabsTrigger value="payouts">Payouts</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="assets">Marketing</TabsTrigger>
             </TabsList>
@@ -635,6 +723,109 @@ export default function Affiliate() {
                       )}
                     </TableBody>
                   </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="payouts" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5" />
+                    Payout Management
+                  </CardTitle>
+                  <p className="text-muted-foreground mt-2">
+                    Request payouts for your earned commissions
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-900">
+                      <strong>Available Balance:</strong> ${(affiliate.stats.totalEarnings / 100).toFixed(2)}
+                    </p>
+                    <p className="text-sm text-blue-800 mt-1">
+                      Pending Earnings: ${(affiliate.stats.pendingEarnings / 100).toFixed(2)} (locked for 30 days after approval)
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold mb-4">Request a Payout</h3>
+                    <form onSubmit={handlePayoutRequest} className="space-y-4">
+                      <div>
+                        <Label htmlFor="payout-amount">Amount (USD) *</Label>
+                        <Input
+                          id="payout-amount"
+                          type="number"
+                          placeholder="Enter amount"
+                          value={payoutAmount}
+                          onChange={(e) => setPayoutAmount(e.target.value)}
+                          disabled={requestingPayout}
+                          data-testid="input-payout-amount"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="payout-method">Payout Method *</Label>
+                        <Select value={payoutMethod} onValueChange={setPayoutMethod} disabled={requestingPayout}>
+                          <SelectTrigger id="payout-method" data-testid="select-payout-method">
+                            <SelectValue placeholder="Select payout method" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                            <SelectItem value="paypal">PayPal</SelectItem>
+                            <SelectItem value="stripe">Stripe</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <Button type="submit" disabled={requestingPayout} className="w-full" data-testid="button-request-payout">
+                        <Send className="h-4 w-4 mr-2" />
+                        {requestingPayout ? 'Requesting...' : 'Request Payout'}
+                      </Button>
+                    </form>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <h3 className="font-semibold mb-4">Payout History</h3>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Method</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {payouts.length > 0 ? (
+                          payouts.slice(0, 10).map((payout) => (
+                            <TableRow key={payout.id}>
+                              <TableCell className="font-medium">${(payout.amount / 100).toFixed(2)}</TableCell>
+                              <TableCell className="capitalize">{payout.method.replace('_', ' ')}</TableCell>
+                              <TableCell>
+                                <Badge className={
+                                  payout.status === 'paid' ? 'bg-green-100 text-green-800 border-green-200' :
+                                  payout.status === 'draft' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                                  payout.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' :
+                                  'bg-blue-100 text-blue-800 border-blue-200'
+                                }>
+                                  {payout.status.replace('_', ' ')}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{format(new Date(payout.createdAt), 'MMM dd, yyyy')}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={4} className="text-center py-8">
+                              <Wallet className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                              <p className="text-muted-foreground">No payouts yet</p>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
