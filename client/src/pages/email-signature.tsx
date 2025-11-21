@@ -337,7 +337,7 @@ export default function EmailSignature() {
               <CardContent className="p-4">
                 <div className="grid grid-cols-4 gap-3">
                   {emailPlatforms.map((p) => (
-                    <button key={p.id} onClick={() => updateField("platform", p.id)} className={`p-3 rounded-lg border-2 text-center text-xs font-medium transition ${selectedPlatform === p.id ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20" : "border-slate-200 dark:border-slate-600"}`} data-testid={`button-platform-${p.id}`}>
+                    <button key={p.id} onClick={() => updateField("platform", p.id)} className={`p-3 rounded-lg border-2 text-center text-xs font-medium transition ${signatureData.platform === p.id ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20" : "border-slate-200 dark:border-slate-600"}`} data-testid={`button-platform-${p.id}`}>
                       <span className="text-lg block mb-1">{p.icon}</span>
                       {p.name}
                     </button>
