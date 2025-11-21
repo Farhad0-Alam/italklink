@@ -5623,6 +5623,193 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  // FUNNEL ANALYTICS - COMPLETE CONVERSION TRACKING
+  async getBookingTrends(userId: string, period: string = '30d', granularity: string = 'day'): Promise<any[]> {
+    const startDate = this.getPeriodStartDate(period);
+    const appointments = await db
+      .select({
+        date: sql<string>`DATE(${appointments.createdAt})`,
+        bookings: sql<number>`COUNT(*)::integer`,
+        confirmed: sql<number>`SUM(CASE WHEN ${appointments.status} = 'confirmed' THEN 1 ELSE 0 END)::integer`,
+        completed: sql<number>`SUM(CASE WHEN ${appointments.status} = 'completed' THEN 1 ELSE 0 END)::integer`,
+        noShow: sql<number>`SUM(CASE WHEN ${appointments.status} = 'no_show' THEN 1 ELSE 0 END)::integer`
+      })
+      .from(appointments)
+      .where(and(
+        eq(appointments.userId, userId),
+        gte(appointments.createdAt, startDate)
+      ))
+      .groupBy(sql`DATE(${appointments.createdAt})`)
+      .orderBy(sql`DATE(${appointments.createdAt})`);
+
+    return appointments.map(a => ({
+      date: a.date,
+      bookings: a.bookings || 0,
+      confirmed: a.confirmed || 0,
+      completed: a.completed || 0,
+      noShow: a.noShow || 0
+    }));
+  }
+
+  async getPopularTimes(userId: string, period: string = '30d'): Promise<any[]> {
+    const startDate = this.getPeriodStartDate(period);
+    const times = await db
+      .select({
+        hour: sql<number>`EXTRACT(HOUR FROM ${appointments.startTime})::integer`,
+        dayOfWeek: sql<number>`EXTRACT(DOW FROM ${appointments.startTime})::integer`,
+        count: sql<number>`COUNT(*)::integer`,
+        confirmed: sql<number>`SUM(CASE WHEN ${appointments.status} = 'confirmed' THEN 1 ELSE 0 END)::integer`
+      })
+      .from(appointments)
+      .where(and(
+        eq(appointments.userId, userId),
+        gte(appointments.startTime, startDate)
+      ))
+      .groupBy(sql`EXTRACT(HOUR FROM ${appointments.startTime})`, sql`EXTRACT(DOW FROM ${appointments.startTime})`)
+      .orderBy(sql`COUNT(*) DESC`)
+      .limit(10);
+
+    return times.map(t => ({
+      time: `${t.hour}:00`,
+      count: t.count || 0,
+      confirmed: t.confirmed || 0
+    }));
+  }
+
+  async getConversionRates(userId: string, period: string = '30d'): Promise<any> {
+    const startDate = this.getPeriodStartDate(period);
+    
+    // Get card views (funnel top)
+    const cardViews = await db
+      .select({ count: sql<number>`COUNT(*)::integer` })
+      .from(analytics)
+      .where(and(
+        eq(analytics.userId, userId),
+        gte(analytics.createdAt, startDate),
+        eq(analytics.periodType, 'daily')
+      ));
+
+    // Get total appointments created (funnel middle)
+    const totalBookings = await db
+      .select({ count: sql<number>`COUNT(*)::integer` })
+      .from(appointments)
+      .where(and(
+        eq(appointments.userId, userId),
+        gte(appointments.createdAt, startDate)
+      ));
+
+    // Get completed appointments (funnel bottom)
+    const completedBookings = await db
+      .select({ count: sql<number>`COUNT(*)::integer` })
+      .from(appointments)
+      .where(and(
+        eq(appointments.userId, userId),
+        eq(appointments.status, 'completed'),
+        gte(appointments.completedAt, startDate)
+      ));
+
+    const views = cardViews[0]?.count || 1;
+    const bookings = totalBookings[0]?.count || 0;
+    const completed = completedBookings[0]?.count || 0;
+
+    return {
+      conversionRate: views > 0 ? Number(((bookings / views) * 100).toFixed(2)) : 0,
+      completionRate: bookings > 0 ? Number(((completed / bookings) * 100).toFixed(2)) : 0,
+      totalVisits: views,
+      totalBookings: bookings,
+      completedBookings: completed,
+      funnel: {
+        visits: views,
+        bookings: bookings,
+        completed: completed,
+        visitToBooking: views > 0 ? Number(((bookings / views) * 100).toFixed(2)) : 0,
+        bookingToCompletion: bookings > 0 ? Number(((completed / bookings) * 100).toFixed(2)) : 0
+      }
+    };
+  }
+
+  async getNoShowAnalytics(userId: string, period: string = '30d'): Promise<any> {
+    const startDate = this.getPeriodStartDate(period);
+    
+    const stats = await db
+      .select({
+        total: sql<number>`COUNT(*)::integer`,
+        noShows: sql<number>`SUM(CASE WHEN ${appointments.status} = 'no_show' THEN 1 ELSE 0 END)::integer`,
+        completed: sql<number>`SUM(CASE WHEN ${appointments.status} = 'completed' THEN 1 ELSE 0 END)::integer`,
+        confirmed: sql<number>`SUM(CASE WHEN ${appointments.status} = 'confirmed' THEN 1 ELSE 0 END)::integer`
+      })
+      .from(appointments)
+      .where(and(
+        eq(appointments.userId, userId),
+        gte(appointments.createdAt, startDate)
+      ));
+
+    const total = stats[0]?.total || 0;
+    const noShows = stats[0]?.noShows || 0;
+    const completed = stats[0]?.completed || 0;
+    const confirmed = stats[0]?.confirmed || 0;
+
+    return {
+      noShowRate: total > 0 ? Number(((noShows / total) * 100).toFixed(2)) : 0,
+      totalNoShows: noShows,
+      totalAppointments: total,
+      completedAppointments: completed,
+      confirmedAppointments: confirmed,
+      cancellationImpact: `${noShows} no-shows out of ${total} total appointments`
+    };
+  }
+
+  async getCustomerAnalytics(userId: string, period: string = '30d'): Promise<any> {
+    const startDate = this.getPeriodStartDate(period);
+    
+    // Total unique customers
+    const uniqueCustomers = await db
+      .selectDistinct({ email: appointments.customerEmail })
+      .from(appointments)
+      .where(and(
+        eq(appointments.userId, userId),
+        gte(appointments.createdAt, startDate)
+      ));
+
+    // Repeat customers
+    const repeatCustomers = await db
+      .select({
+        email: appointments.customerEmail,
+        bookingCount: sql<number>`COUNT(*)::integer`
+      })
+      .from(appointments)
+      .where(and(
+        eq(appointments.userId, userId),
+        gte(appointments.createdAt, startDate)
+      ))
+      .groupBy(appointments.customerEmail)
+      .having(sql`COUNT(*) > 1`);
+
+    const total = uniqueCustomers.length;
+    const repeat = repeatCustomers.length;
+    const newCustomers = total - repeat;
+
+    return {
+      totalCustomers: total,
+      newCustomers: newCustomers,
+      repeatCustomers: repeat,
+      repeatRate: total > 0 ? Number(((repeat / total) * 100).toFixed(2)) : 0,
+      customerLifetimeValue: 'Tracked per customer'
+    };
+  }
+
+  private getPeriodStartDate(period: string): Date {
+    const now = new Date();
+    switch (period) {
+      case '7d': return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      case '30d': return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      case '90d': return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      case '1y': return new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      case '6m': return new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+      default: return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+  }
+
   async getAdminLinks(): Promise<{
     id: string;
     title: string;
