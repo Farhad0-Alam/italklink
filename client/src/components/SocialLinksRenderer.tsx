@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { PageElement } from "@shared/schema";
 import { getSkinStyles } from "@/lib/skin-presets";
 
@@ -18,9 +18,14 @@ interface SocialLinksRendererProps {
   data: SocialData;
 }
 
+interface CustomIcon {
+  [key: string]: string; // key: icon name, value: SVG
+}
+
 export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
   const {
     socials = [],
+    iconPackId,
     iconColor = "#9333ea",
     iconSize = 20,
     iconBgColor = "transparent",
@@ -55,6 +60,27 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
     iconContainer,
     enableLabelSkin = false,
   } = data;
+
+  // State for custom icons from selected icon pack
+  const [customIcons, setCustomIcons] = useState<CustomIcon>({});
+
+  // Fetch custom icons if iconPackId is provided
+  useEffect(() => {
+    if (iconPackId) {
+      fetch(`/api/admin/icon-packs/${iconPackId}/icons`)
+        .then(res => res.json())
+        .then(response => {
+          if (response.success && response.data) {
+            const iconMap: CustomIcon = {};
+            response.data.forEach((icon: any) => {
+              iconMap[icon.name] = icon.svg;
+            });
+            setCustomIcons(iconMap);
+          }
+        })
+        .catch(() => setCustomIcons({}));
+    }
+  }, [iconPackId]);
 
   // Build styles with useMemo for performance
   const styles = useMemo(() => {
@@ -262,12 +288,27 @@ export function SocialLinksRenderer({ data }: SocialLinksRendererProps) {
                 }`}
                 style={styles.iconContainerStyle}
               >
-                <i
-                  className={`${social.icon} transition-colors duration-200 ${
-                    enableHoverColor ? "group-hover:text-[var(--icon-hover-color)]" : ""
-                  }`}
-                  style={styles.iconStyle}
-                ></i>
+                {customIcons[social.platform] ? (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: customIcons[social.platform] }}
+                    className="transition-colors duration-200 flex items-center justify-center"
+                    style={{
+                      width: `${iconSize}px`,
+                      height: `${iconSize}px`,
+                      color: styles.iconStyle.color,
+                      ...(enableHoverColor && { 
+                        "--icon-hover-color": iconHoverColor 
+                      } as React.CSSProperties)
+                    }}
+                  />
+                ) : (
+                  <i
+                    className={`${social.icon} transition-colors duration-200 ${
+                      enableHoverColor ? "group-hover:text-[var(--icon-hover-color)]" : ""
+                    }`}
+                    style={styles.iconStyle}
+                  ></i>
+                )}
               </div>
             )}
 

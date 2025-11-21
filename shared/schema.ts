@@ -3759,6 +3759,7 @@ export const businessCardSchema = z.object({
       sectionBorderColor: z.string().optional(),
     }).default({}),
     contactInfo: z.object({
+      iconPackId: z.string().optional(), // Custom icon pack selection
       iconColor: z.string().optional(),
       iconHoverColor: z.string().optional(),
       iconSize: z.number().optional(),
@@ -3807,6 +3808,7 @@ export const businessCardSchema = z.object({
       textPosition: z.enum(['left', 'right', 'top', 'bottom']).optional(),
     }).default({}),
     socialMedia: z.object({
+      iconPackId: z.string().optional(), // Custom icon pack selection
       iconColor: z.string().optional(),
       iconHoverColor: z.string().optional(),
       iconSize: z.number().optional(),
