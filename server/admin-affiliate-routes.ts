@@ -122,7 +122,7 @@ router.get('/affiliates', requireAdmin, async (req, res) => {
       );
     }
 
-    res.json(filteredAffiliates);
+    res.json({ success: true, data: filteredAffiliates });
   } catch (error) {
     console.error('Failed to get affiliates:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -172,15 +172,18 @@ router.get('/affiliates/stats', requireAdmin, async (req, res) => {
       : 0;
 
     res.json({
-      totalAffiliates: totalAffiliates.count,
-      pendingAffiliates: pendingAffiliates.count,
-      activeAffiliates: activeAffiliates.count,
-      totalCommissions: totalCommissions.total || 0,
-      monthlyGrowth
+      success: true,
+      data: {
+        totalAffiliates: totalAffiliates.count,
+        pendingAffiliates: pendingAffiliates.count,
+        activeAffiliates: activeAffiliates.count,
+        totalCommissions: totalCommissions.total || 0,
+        monthlyGrowth
+      }
     });
   } catch (error) {
     console.error('Failed to get affiliate stats:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -215,10 +218,10 @@ router.post('/affiliates/:id/approve', requireAdmin, async (req, res) => {
       }
     });
 
-    res.json({ message: 'Affiliate approved successfully', affiliate: updatedAffiliate });
+    res.json({ success: true, message: 'Affiliate approved successfully', data: updatedAffiliate });
   } catch (error) {
     console.error('Failed to approve affiliate:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -252,10 +255,10 @@ router.post('/affiliates/:id/suspend', requireAdmin, async (req, res) => {
       }
     });
 
-    res.json({ message: 'Affiliate suspended successfully', affiliate: updatedAffiliate });
+    res.json({ success: true, message: 'Affiliate suspended successfully', data: updatedAffiliate });
   } catch (error) {
     console.error('Failed to suspend affiliate:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -342,10 +345,10 @@ router.get('/conversions', requireAdmin, async (req, res) => {
       } : null
     }));
 
-    res.json(formattedConversions);
+    res.json({ success: true, data: formattedConversions });
   } catch (error) {
     console.error('Failed to get conversions:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
