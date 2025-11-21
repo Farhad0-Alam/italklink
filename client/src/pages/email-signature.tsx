@@ -174,9 +174,9 @@ export default function EmailSignature() {
   const [collapsedSections, setCollapsedSections] = useState<{
     [key: string]: boolean;
   }>({
-    signatureSection: true,
+    signatureSection: false,
     signatureStyle: true,
-    nameSection: true,
+    nameSection: false,
     nameStyle: true,
     titleStyle: true,
     companyStyle: true,
@@ -189,7 +189,7 @@ export default function EmailSignature() {
     companyFont: true,
     companySize: true,
     companyColor: true,
-    contactSection: true,
+    contactSection: false,
     contactInfoStyle: true,
     contactIconStyle: true,
     contactFont: true,
@@ -764,9 +764,9 @@ export default function EmailSignature() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-3 md:p-4">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-3 mb-3">
           <Link href="/dashboard">
             <Button
               variant="ghost"
@@ -779,41 +779,41 @@ export default function EmailSignature() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
               Email Signature Generator
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-xs text-slate-600 dark:text-slate-400">
               Create professional email signatures in minutes
             </p>
           </div>
         </div>
 
         {/* Step 1 & 2: Platform Selection and Template Carousel */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           {/* Step 1: Email Platform Selection */}
           <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-900 dark:text-white">1. Choose email platform</CardTitle>
+            <CardHeader className="py-2 px-3">
+              <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">1. Choose email platform</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-4 gap-3">
+            <CardContent className="p-3">
+              <div className="grid grid-cols-4 gap-2">
                 {emailPlatforms.map((platform) => (
                   <button
                     key={platform.id}
                     onClick={() => setSelectedPlatform(platform.id)}
-                    className={`flex flex-col items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                    className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-all ${
                       selectedPlatform === platform.id
                         ? "border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
                         : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
                     }`}
                     data-testid={`btn-platform-${platform.id}`}
                   >
-                    <span className="text-2xl">{platform.icon}</span>
+                    <span className="text-lg">{platform.icon}</span>
                     <span className="text-xs font-medium text-center text-slate-900 dark:text-white">{platform.name}</span>
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
                 Looking for another email platform?{" "}
                 <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
                   Check out the supported platforms here
@@ -824,23 +824,23 @@ export default function EmailSignature() {
 
           {/* Step 2: Template Carousel */}
           <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-lg text-slate-900 dark:text-white">2. Choose signature template</CardTitle>
+            <CardHeader className="py-2 px-3">
+              <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">2. Choose signature template</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-3">
               <div className="relative">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={prevTemplate}
-                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
+                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 w-8 h-8"
                     data-testid="btn-carousel-prev"
                   >
-                    <ChevronLeft className="w-5 h-5" />
+                    <ChevronLeft className="w-4 h-4" />
                   </Button>
 
-                  <div className="flex-1 flex gap-3 overflow-hidden">
+                  <div className="flex-1 flex gap-2 overflow-hidden">
                     {templates.map((template, index) => (
                       <div
                         key={template.id}
@@ -851,15 +851,15 @@ export default function EmailSignature() {
                         data-testid={`template-card-${template.id}`}
                       >
                         <div
-                          className={`border-3 rounded-lg overflow-hidden shadow-md transition-all ${
+                          className={`border-2 rounded-lg overflow-hidden shadow-md transition-all ${
                             index === carouselIndex
                               ? "border-blue-500 dark:border-blue-400"
                               : "border-slate-300 dark:border-slate-600"
                           }`}
                         >
-                          <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center p-2">
+                          <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center p-1">
                             <div className="text-center text-xs">
-                              <div className="font-bold text-slate-600 dark:text-slate-300">
+                              <div className="font-bold text-slate-600 dark:text-slate-300 text-xs">
                                 {template.name}
                               </div>
                             </div>
@@ -873,14 +873,14 @@ export default function EmailSignature() {
                     variant="ghost"
                     size="icon"
                     onClick={nextTemplate}
-                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
+                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 w-8 h-8"
                     data-testid="btn-carousel-next"
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
 
-                <div className="text-center mt-3">
+                <div className="text-center mt-2">
                   <p className="text-xs text-slate-600 dark:text-slate-400">
                     <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
                       More templates
@@ -893,31 +893,31 @@ export default function EmailSignature() {
         </div>
 
         {/* Step 3 & Preview: Form and Live Preview */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="space-y-2">
             {/* CARD 1: Signature (Handwritten Style) */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader
-                className="cursor-pointer"
+                className="cursor-pointer py-2 px-3"
                 onClick={() => toggleSection("signatureSection")}
                 data-testid="toggle-signature-section"
               >
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-slate-900 dark:text-white">
+                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
                     Signature (Handwritten Style)
                   </CardTitle>
                   {collapsedSections.signatureSection ? (
-                    <ChevronDown className="w-5 h-5" />
+                    <ChevronDown className="w-4 h-4" />
                   ) : (
-                    <ChevronUp className="w-5 h-5" />
+                    <ChevronUp className="w-4 h-4" />
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-3 space-y-2">
                 {!collapsedSections.signatureSection && (
                   <>
-                    <div className="space-y-2">
-                      <Label htmlFor="signatureName">Signature Name (Optional)</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="signatureName" className="text-xs">Signature Name (Optional)</Label>
                       <Input
                         id="signatureName"
                         value={signatureData.signatureName}
