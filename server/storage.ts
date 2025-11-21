@@ -1003,30 +1003,31 @@ export class DatabaseStorage implements IStorage {
       return { valid: false, message: 'Invalid coupon code' };
     }
 
-    if (!coupon.isActive) {
+    if (!coupon.isActive || coupon.status === 'inactive') {
       return { valid: false, message: 'This coupon is no longer active' };
     }
 
     const now = new Date();
-    if (coupon.validFrom && new Date(coupon.validFrom) > now) {
+    if (coupon.startsAt && new Date(coupon.startsAt) > now) {
       return { valid: false, message: 'This coupon is not yet valid' };
     }
 
-    if (coupon.validUntil && new Date(coupon.validUntil) < now) {
+    if (coupon.expiresAt && new Date(coupon.expiresAt) < now) {
       return { valid: false, message: 'This coupon has expired' };
     }
 
-    if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
+    if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
       return { valid: false, message: 'This coupon has reached its usage limit' };
     }
 
-    if (coupon.applicablePlans && coupon.applicablePlans.length > 0 && !coupon.applicablePlans.includes(planId)) {
+    const applicablePlans = Array.isArray(coupon.applicablePlans) ? coupon.applicablePlans : [];
+    if (applicablePlans.length > 0 && !applicablePlans.includes(planId)) {
       return { valid: false, message: 'This coupon is not valid for the selected plan' };
     }
 
     return {
       valid: true,
-      discount: coupon.type === 'percentage' ? coupon.discountValue : coupon.discountValue
+      discount: coupon.discountType === 'percentage' ? coupon.discountValue : coupon.discountValue
     };
   }
 
