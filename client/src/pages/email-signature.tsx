@@ -197,9 +197,6 @@ export default function EmailSignature() {
     contactColor: true,
     iconSize: true,
     iconColor: true,
-    imagesSection: false,
-    socialLinksSection: false,
-    optionalFeaturesSection: false,
   });
   const [signatureData, setSignatureData] = useState<SignatureData>({
     signatureName: "John Doe",
@@ -1026,12 +1023,12 @@ export default function EmailSignature() {
             {/* CARD 2: Name/Title/Company */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader
-                className="cursor-pointer py-2 px-3"
+                className="cursor-pointer"
                 onClick={() => toggleSection("nameSection")}
                 data-testid="toggle-name-section"
               >
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
+                  <CardTitle className="text-slate-900 dark:text-white">
                     Name/Title/Company
                   </CardTitle>
                   {collapsedSections.nameSection ? (
@@ -1338,12 +1335,12 @@ export default function EmailSignature() {
             {/* CARD 3: Contact Info */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader
-                className="cursor-pointer py-2 px-3"
+                className="cursor-pointer"
                 onClick={() => toggleSection("contactSection")}
                 data-testid="toggle-contact-section"
               >
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
+                  <CardTitle className="text-slate-900 dark:text-white">
                     Contact Info
                   </CardTitle>
                   {collapsedSections.contactSection ? (
@@ -1648,46 +1645,33 @@ export default function EmailSignature() {
 
             {/* Images */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <CardHeader
-                className="cursor-pointer py-2 px-3"
-                onClick={() => toggleSection("imagesSection")}
-                data-testid="toggle-images-section"
-              >
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
-                    Images
-                  </CardTitle>
-                  {collapsedSections.imagesSection ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronUp className="w-4 h-4" />
-                  )}
-                </div>
+              <CardHeader>
+                <CardTitle className="text-slate-900 dark:text-white">
+                  Images
+                </CardTitle>
               </CardHeader>
-              <CardContent className="p-3 space-y-2">
-                {!collapsedSections.imagesSection && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="profilePhoto" className="text-xs">Profile Photo</Label>
-                      <Input
-                        id="profilePhoto"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          e.target.files?.[0] &&
-                          handleImageUpload("profilePhoto", e.target.files[0])
-                        }
-                        data-testid="input-profile-photo"
-                      />
-                    </div>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="profilePhoto">Profile Photo</Label>
+                  <Input
+                    id="profilePhoto"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      e.target.files?.[0] &&
+                      handleImageUpload("profilePhoto", e.target.files[0])
+                    }
+                    data-testid="input-profile-photo"
+                  />
+                </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="companyLogo" className="text-xs">Company Logo</Label>
-                      <Input
-                        id="companyLogo"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
+                <div className="space-y-2">
+                  <Label htmlFor="companyLogo">Company Logo</Label>
+                  <Input
+                    id="companyLogo"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
                       e.target.files?.[0] &&
                       handleImageUpload("companyLogo", e.target.files[0])
                     }
@@ -1695,7 +1679,7 @@ export default function EmailSignature() {
                   />
                 </div>
               </CardContent>
-      </Card>
+            </Card>
 
             {/* Social Links */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
