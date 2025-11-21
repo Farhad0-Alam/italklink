@@ -465,10 +465,10 @@ router.post('/conversions/:id/approve', requireAdmin, async (req, res) => {
       }
     });
 
-    res.json({ message: 'Conversion approved successfully', conversion: updatedConversion });
+    res.json({ success: true, message: 'Conversion approved successfully', data: updatedConversion });
   } catch (error) {
     console.error('Failed to approve conversion:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -530,10 +530,10 @@ router.post('/conversions/:id/reverse', requireAdmin, async (req, res) => {
       }
     });
 
-    res.json({ message: 'Conversion reversed successfully', conversion: updatedConversion });
+    res.json({ success: true, message: 'Conversion reversed successfully', data: updatedConversion });
   } catch (error) {
     console.error('Failed to reverse conversion:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -541,10 +541,10 @@ router.post('/conversions/:id/reverse', requireAdmin, async (req, res) => {
 router.get('/commission-rules', requireAdmin, async (req, res) => {
   try {
     const rules = await db.select().from(commissionRules).orderBy(desc(commissionRules.priority), desc(commissionRules.createdAt));
-    res.json(rules);
+    res.json({ success: true, data: rules });
   } catch (error) {
     console.error('Failed to get commission rules:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -567,10 +567,10 @@ router.post('/commission-rules', requireAdmin, async (req, res) => {
       isActive: true
     }).returning();
 
-    res.json({ message: 'Commission rule created successfully', rule: newRule });
+    res.json({ success: true, message: 'Commission rule created successfully', data: newRule });
   } catch (error) {
     console.error('Failed to create commission rule:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -589,10 +589,287 @@ router.patch('/commission-rules/:id', requireAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Commission rule not found' });
     }
 
-    res.json({ message: 'Commission rule updated successfully', rule: updatedRule });
+    res.json({ success: true, message: 'Commission rule updated successfully', data: updatedRule });
   } catch (error) {
     console.error('Failed to update commission rule:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET ALL PAYOUTS (Admin can view and process all payouts)
+router.get('/payouts', requireAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 50, status } = req.query;
+    const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
+
+    let whereClause: any = undefined;
+    if (status && status !== 'all') {
+      whereClause = eq(payouts.status, status as any);
+    }
+
+    const allPayouts = await db.select({
+      id: payouts.id,
+      affiliateId: payouts.affiliateId,
+      amount: payouts.amount,
+      currency: payouts.currency,
+      method: payouts.method,
+      status: payouts.status,
+      periodStart: payouts.periodStart,
+      periodEnd: payouts.periodEnd,
+      processedAt: payouts.processedAt,
+      failureReason: payouts.failureReason,
+      transactionRef: payouts.transactionRef,
+      createdAt: payouts.createdAt,
+      affiliateCode: affiliates.code,
+      affiliateFirstName: users.firstName,
+      affiliateLastName: users.lastName,
+      affiliateEmail: users.email
+    })
+      .from(payouts)
+      .innerJoin(affiliates, eq(payouts.affiliateId, affiliates.id))
+      .innerJoin(users, eq(affiliates.userId, users.id))
+      .where(whereClause)
+      .orderBy(desc(payouts.createdAt))
+      .limit(parseInt(limit as string))
+      .offset(offset);
+
+    const [totalCount] = await db.select({ count: count() })
+      .from(payouts)
+      .where(whereClause);
+
+    res.json({
+      success: true,
+      data: {
+        payouts: allPayouts,
+        pagination: {
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
+          total: totalCount.count,
+          pages: Math.ceil(totalCount.count / parseInt(limit as string))
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Failed to get payouts:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// APPROVE PAYOUT (Maker approval - first level)
+router.post('/payouts/:id/approve', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { notes } = req.body;
+
+    // Get current payout
+    const [currentPayout] = await db.select().from(payouts).where(eq(payouts.id, id));
+    
+    if (!currentPayout) {
+      return res.status(404).json({ success: false, message: 'Payout not found' });
+    }
+
+    if (currentPayout.status !== 'draft') {
+      return res.status(400).json({ success: false, message: 'Can only approve draft payouts' });
+    }
+
+    // Update to maker_approved
+    const [updatedPayout] = await db.update(payouts)
+      .set({
+        status: 'maker_approved',
+        makerUserId: req.user.id,
+        notes: notes || currentPayout.notes,
+        updatedAt: new Date()
+      })
+      .where(eq(payouts.id, id))
+      .returning();
+
+    // Queue approval notification
+    await db.insert(eventsOutbox).values({
+      eventType: 'payout.maker_approved',
+      payload: {
+        payoutId: id,
+        affiliateId: currentPayout.affiliateId,
+        amount: currentPayout.amount,
+        approvedBy: req.user.id
+      }
+    });
+
+    res.json({ success: true, message: 'Payout approved by maker', data: updatedPayout });
+  } catch (error) {
+    console.error('Failed to approve payout:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// VERIFY PAYOUT (Checker approval - second level)
+router.post('/payouts/:id/verify', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { notes } = req.body;
+
+    const [currentPayout] = await db.select().from(payouts).where(eq(payouts.id, id));
+    
+    if (!currentPayout) {
+      return res.status(404).json({ success: false, message: 'Payout not found' });
+    }
+
+    if (currentPayout.status !== 'maker_approved') {
+      return res.status(400).json({ success: false, message: 'Payout must be maker-approved first' });
+    }
+
+    // Update to checker_approved
+    const [updatedPayout] = await db.update(payouts)
+      .set({
+        status: 'checker_approved',
+        checkerUserId: req.user.id,
+        notes: notes || currentPayout.notes,
+        updatedAt: new Date()
+      })
+      .where(eq(payouts.id, id))
+      .returning();
+
+    // Queue verification notification
+    await db.insert(eventsOutbox).values({
+      eventType: 'payout.checker_approved',
+      payload: {
+        payoutId: id,
+        affiliateId: currentPayout.affiliateId,
+        amount: currentPayout.amount,
+        verifiedBy: req.user.id
+      }
+    });
+
+    res.json({ success: true, message: 'Payout verified by checker', data: updatedPayout });
+  } catch (error) {
+    console.error('Failed to verify payout:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// PROCESS PAYOUT (Final processing - execute payment)
+router.post('/payouts/:id/process', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { transactionRef, notes } = req.body;
+
+    const [currentPayout] = await db.select().from(payouts).where(eq(payouts.id, id));
+    
+    if (!currentPayout) {
+      return res.status(404).json({ success: false, message: 'Payout not found' });
+    }
+
+    if (currentPayout.status !== 'checker_approved') {
+      return res.status(400).json({ success: false, message: 'Payout must be checker-approved first' });
+    }
+
+    // Get affiliate to verify payout method
+    const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.id, currentPayout.affiliateId));
+    
+    if (!affiliate || !affiliate.payoutDetails) {
+      return res.status(400).json({ success: false, message: 'Affiliate payout details not configured' });
+    }
+
+    // SECURITY: Update payout to paid status
+    const [updatedPayout] = await db.update(payouts)
+      .set({
+        status: 'paid',
+        transactionRef: transactionRef || null,
+        processedAt: new Date(),
+        notes: notes || currentPayout.notes,
+        updatedAt: new Date()
+      })
+      .where(eq(payouts.id, id))
+      .returning();
+
+    // Add final balance entry (payout processed)
+    await db.insert(balances).values({
+      affiliateId: currentPayout.affiliateId,
+      delta: 0, // Already debited when payout was requested
+      currency: 'USD',
+      kind: 'debit',
+      refType: 'payout',
+      refId: id,
+      description: `Payout processed #${id.substring(0, 8)} - ${currentPayout.method} - Transaction: ${transactionRef || 'N/A'}`,
+      runningBalance: 0 // Will be calculated
+    });
+
+    // Queue payout processed notification
+    await db.insert(eventsOutbox).values({
+      eventType: 'payout.processed',
+      payload: {
+        payoutId: id,
+        affiliateId: currentPayout.affiliateId,
+        amount: currentPayout.amount,
+        method: currentPayout.method,
+        transactionRef
+      }
+    });
+
+    res.json({ success: true, message: 'Payout processed successfully', data: updatedPayout });
+  } catch (error) {
+    console.error('Failed to process payout:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// REJECT/CANCEL PAYOUT
+router.post('/payouts/:id/cancel', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    if (!reason) {
+      return res.status(400).json({ success: false, message: 'Cancellation reason is required' });
+    }
+
+    const [currentPayout] = await db.select().from(payouts).where(eq(payouts.id, id));
+    
+    if (!currentPayout) {
+      return res.status(404).json({ success: false, message: 'Payout not found' });
+    }
+
+    if (currentPayout.status === 'paid') {
+      return res.status(400).json({ success: false, message: 'Cannot cancel paid payouts' });
+    }
+
+    // Cancel payout
+    const [cancelledPayout] = await db.update(payouts)
+      .set({
+        status: 'cancelled',
+        failureReason: reason,
+        updatedAt: new Date()
+      })
+      .where(eq(payouts.id, id))
+      .returning();
+
+    // Reverse the balance entry (credit back the amount)
+    await db.insert(balances).values({
+      affiliateId: currentPayout.affiliateId,
+      delta: currentPayout.amount, // Positive = credit back
+      currency: 'USD',
+      kind: 'credit',
+      refType: 'payout',
+      refId: id,
+      description: `Payout cancelled #${id.substring(0, 8)} - Reason: ${reason}`,
+      runningBalance: 0 // Will be calculated
+    });
+
+    // Queue cancellation notification
+    await db.insert(eventsOutbox).values({
+      eventType: 'payout.cancelled',
+      payload: {
+        payoutId: id,
+        affiliateId: currentPayout.affiliateId,
+        amount: currentPayout.amount,
+        reason,
+        cancelledBy: req.user.id
+      }
+    });
+
+    res.json({ success: true, message: 'Payout cancelled successfully', data: cancelledPayout });
+  } catch (error) {
+    console.error('Failed to cancel payout:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
