@@ -28,6 +28,73 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const router = express.Router();
 
+// Initialize knowledge base with sample Bengali TalkLink content
+async function initializeKnowledgeBase() {
+  try {
+    const existingDocs = await db.select().from(kbDocs).limit(1);
+    
+    if (existingDocs.length > 0) {
+      console.log('Knowledge base already initialized');
+      return;
+    }
+
+    const sampleDocuments = [
+      {
+        title: 'TalkLink পরিষেবা সম্পর্কে',
+        content: 'TalkLink একটি ডিজিটাল বিজনেস কার্ড প্ল্যাটফর্ম যা আপনাকে পেশাদার ব্যবসায়িক কার্ড তৈরি করতে সাহায্য করে। এটি অ্যাপয়েন্টমেন্ট বুকিং, CRM সিস্টেম এবং বিশ্লেষণ সরঞ্জাম প্রদান করে।',
+        url: 'https://talkl.ink',
+      },
+      {
+        title: 'অ্যাপয়েন্টমেন্ট বুকিং সিস্টেম',
+        content: 'আমাদের অ্যাপয়েন্টমেন্ট বুকিং সিস্টেম আপনাকে আপনার সময় পরিচালনা করতে এবং স্বয়ংক্রিয় শিডিউলিং সরবরাহ করে। এটি Google ক্যালেন্ডার, Zoom এবং Microsoft Teams এর সাথে সংযুক্ত হয়। আপনি একাধিক ইভেন্ট টাইপ তৈরি করতে পারেন এবং স্বয়ংক্রিয় বিজ্ঞপ্তি পাঠাতে পারেন।',
+        url: 'https://talkl.ink',
+      },
+      {
+        title: 'বিজনেস কার্ড কাস্টমাইজেশন',
+        content: 'আপনার বিজনেস কার্ডকে সম্পূর্ণরূপে কাস্টমাইজ করুন। রং, ফন্ট, লোগো এবং লেআউট পরিবর্তন করুন। একাধিক টেমপ্লেট থেকে বেছে নিন বা নিজের ডিজাইন তৈরি করুন। QR কোড সহ শেয়ারযোগ্য লিঙ্ক পান।',
+        url: 'https://talkl.ink',
+      },
+      {
+        title: 'CRM এবং লিড ম্যানেজমেন্ট',
+        content: 'আমাদের CRM সিস্টেম স্বয়ংক্রিয়ভাবে লিড ক্যাপচার করে এবং সংগঠিত করে। যোগাযোগ তথ্য, ডিল পাইপলাইন এবং কার্যক্রম ট্র্যাক করুন। আপনার দলের সাথে সহযোগিতা করুন এবং বিক্রয় প্রক্রিয়া অপ্টিমাইজ করুন।',
+        url: 'https://talkl.ink',
+      },
+      {
+        title: 'বিশ্লেষণ এবং রিপোর্টিং',
+        content: 'বিস্তারিত বিশ্লেষণ এবং রিপোর্ট পান। বুকিং ট্রেন্ড, রূপান্তর হার এবং জনপ্রিয় সময় দেখুন। আপনার ব্যবসায়িক কর্মক্ষমতা ট্র্যাক করুন এবং ডেটা-চালিত সিদ্ধান্ত নিন।',
+        url: 'https://talkl.ink',
+      },
+      {
+        title: 'ইমেল স্বাক্ষর জেনারেটর',
+        content: 'পেশাদার ইমেল স্বাক্ষর তৈরি করুন। আপনার যোগাযোগের বিবরণ, সোশ্যাল মিডিয়া লিঙ্ক এবং লোগো যোগ করুন। HTML কোড সরাসরি আপনার ইমেল ক্লায়েন্টে কপি করুন।',
+        url: 'https://talkl.ink',
+      },
+    ];
+
+    for (const doc of sampleDocuments) {
+      try {
+        const embedding = await openai.embeddings.create({
+          model: 'text-embedding-3-small',
+          input: doc.content,
+        });
+
+        await db.insert(kbDocs).values({
+          ...doc,
+          embedding: embedding.data[0].embedding,
+        });
+
+        console.log(`Saved document: ${doc.title}`);
+      } catch (err) {
+        console.error(`Failed to save document ${doc.title}:`, err);
+      }
+    }
+
+    console.log('Knowledge base initialized with Bengali content');
+  } catch (error) {
+    console.error('Knowledge base initialization error:', error);
+  }
+}
+
 // Helper function to query knowledge base with RAG
 async function queryKnowledgeBase(query: string, topK: number = 5): Promise<string> {
   try {
@@ -57,8 +124,8 @@ async function queryKnowledgeBase(query: string, topK: number = 5): Promise<stri
 
     // Format retrieved documents as context
     const context = similarDocs
-      .map((doc) => `Title: ${doc.title || 'Untitled'}\nContent: ${doc.content}`)
-      .join('\n\n---\n\n');
+      .map((doc) => `${doc.title}: ${doc.content}`)
+      .join('\n\n');
 
     return context;
   } catch (error) {
@@ -706,10 +773,10 @@ router.post('/process', requireAuth, async (req, res) => {
   }
 });
 
-// Text chat endpoint for business card voice assistants - WITH RAG
+// Text chat endpoint for business card voice assistants - WITH RAG & BENGALI SUPPORT
 router.post('/chat', requireAuth, async (req, res) => {
   try {
-    const { message, cardId, knowledgeBase, messages } = req.body;
+    const { message, cardId, knowledgeBase, messages = [] } = req.body;
     
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
@@ -718,12 +785,12 @@ router.post('/chat', requireAuth, async (req, res) => {
     // Query knowledge base for relevant context
     const kbContext = await queryKnowledgeBase(message, 5);
     
-    // Generate AI response based on knowledge base and context
+    // System prompt in Bengali for better responses
     const systemPrompt = knowledgeBase?.systemPrompt || 
-      `You are a helpful AI assistant for a business. Be professional, friendly, and concise.`;
+      `আপনি TalkLink এর একজন সহায়ক AI। বাংলায় বন্ধুত্বপূর্ণ এবং পেশাদার উত্তর প্রদান করুন। সংক্ষিপ্ত এবং স্পষ্ট হন।`;
     
     const systemContent = kbContext
-      ? `${systemPrompt}\n\nRelevant Knowledge Base Information:\n${kbContext}\n\nUse the provided knowledge base to answer questions accurately.`
+      ? `${systemPrompt}\n\nজ্ঞান ভিত্তি তথ্য:\n${kbContext}\n\nএই তথ্য ব্যবহার করে প্রশ্নের উত্তর দিন।`
       : systemPrompt;
     
     const response = await openai.chat.completions.create({
@@ -744,10 +811,10 @@ router.post('/chat', requireAuth, async (req, res) => {
     
     const aiResponse = response.choices[0].message.content;
     
-    // Generate audio response using TTS
+    // Generate audio response using TTS with Bengali-friendly voice
     const audioResponse = await openai.audio.speech.create({
       model: 'tts-1',
-      voice: 'alloy',
+      voice: 'nova', // Better for multilingual including Bengali
       input: aiResponse,
     });
     
@@ -758,7 +825,8 @@ router.post('/chat', requireAuth, async (req, res) => {
     
     res.json({
       response: aiResponse,
-      audioUrl: audioDataUri
+      audioUrl: audioDataUri,
+      transcript: message
     });
     
   } catch (error: any) {
@@ -797,27 +865,26 @@ router.post('/voice-lead', requireAuth, async (req, res) => {
       
       const userText = transcription.text;
       
-      // Lead generation system prompt
-      const systemPrompt = `You are a voice-based lead generation assistant.
+      // Lead generation system prompt in Bengali
+      const systemPrompt = `আপনি একজন লিড জেনারেশন সহায়ক। বাংলায় কথা বলুন।
 
-GOAL: Ask short, clear questions ONE BY ONE to collect:
-- full_name
-- email
-- phone
-- interested_service
-- budget_range
-- timeline
-- extra_notes
+লক্ষ্য: এক এক করে প্রশ্ন জিজ্ঞাসা করুন এবং সংগ্রহ করুন:
+- নাম
+- ইমেইল
+- ফোন
+- আগ্রহের সেবা
+- বাজেট
+- সময়সীমা
+- অতিরিক্ত বিবরণ
 
-RULES:
-- Speak like a friendly human
-- Ask one simple question at a time
-- Do not repeat a question if already answered
-- If unsure, ask for clarification
+নিয়ম:
+- বন্ধুত্বপূর্ণভাবে কথা বলুন
+- একবারে একটি প্রশ্ন করুন
+- সবসময় বাংলায় উত্তর দিন
 
 ALWAYS RETURN VALID JSON with exactly this format:
 {
-  "reply": "Your spoken response here",
+  "reply": "আপনার বাংলা উত্তর এখানে",
   "lead_state": {
     "full_name": null or string,
     "email": null or string,
@@ -878,10 +945,10 @@ ALWAYS RETURN VALID JSON with exactly this format:
         });
       }
       
-      // Generate TTS for reply
+      // Generate TTS for reply in Bengali
       const audioResponse = await openai.audio.speech.create({
         model: 'tts-1',
-        voice: 'alloy',
+        voice: 'nova', // Better for Bengali
         input: parsedResponse.reply,
       });
       
