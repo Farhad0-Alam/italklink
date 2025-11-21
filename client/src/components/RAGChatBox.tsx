@@ -307,7 +307,20 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     setIsProcessing(true);
 
     try {
+      // Validate audio blob
+      if (!audioBlob || audioBlob.size === 0) {
+        throw new Error('Audio recording is empty. Please try again.');
+      }
+
+      console.log('[Audio Processing] Starting with blob size:', audioBlob.size, 'bytes');
+
       const base64Audio = await blobToBase64(audioBlob);
+      
+      if (!base64Audio) {
+        throw new Error('Failed to convert audio to base64.');
+      }
+
+      console.log('[Audio Processing] Base64 conversion successful, size:', base64Audio.length);
 
       const response = await apiRequest<{
         transcript: string;
@@ -321,6 +334,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
 
       if (response?.transcript) {
         const userText = response.transcript;
+        console.log('[Audio Processing] Got transcript:', userText);
 
         // Add user transcript message with label
         const userMessage: ChatMessage = {
@@ -361,14 +375,20 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
             }
           }
         } catch (ttsError) {
-          console.error('TTS conversion error:', ttsError);
+          console.error('[TTS Error]:', ttsError);
         }
       }
-    } catch (error) {
-      console.error('Audio processing error:', error);
+    } catch (error: any) {
+      console.error('[Audio Processing Error]:', error);
+      
+      let errorDescription = 'Failed to process audio.';
+      if (error?.message) {
+        errorDescription = error.message;
+      }
+
       toast({
         title: 'Processing Error',
-        description: 'Failed to process audio.',
+        description: errorDescription,
         variant: 'destructive',
       });
     } finally {
