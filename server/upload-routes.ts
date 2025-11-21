@@ -22,6 +22,25 @@ import {
 
 const router = Router();
 
+// Upload limits by plan type
+const UPLOAD_LIMITS: Record<string, { maxUploads: number; maxFileSize: number; maxStorageBytes: number }> = {
+  free: { 
+    maxUploads: 5, 
+    maxFileSize: 2 * 1024 * 1024, // 2MB
+    maxStorageBytes: 10 * 1024 * 1024 // 10MB total
+  },
+  pro: { 
+    maxUploads: 50, 
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    maxStorageBytes: 500 * 1024 * 1024 // 500MB total
+  },
+  enterprise: { 
+    maxUploads: Infinity, 
+    maxFileSize: 100 * 1024 * 1024, // 100MB
+    maxStorageBytes: Infinity
+  }
+};
+
 // Reserved slugs that cannot be used for custom URLs
 const RESERVED_SLUGS = [
   "", "api", "auth", "admin", "builder", "dashboard", "login", "register",
@@ -118,6 +137,39 @@ router.post('/', requireAuth, upload.single('file'), asyncHandler(async (req, re
   const userId = (req.user as any).id;
   const { slug: providedSlug, title } = req.body;
 
+  // Get user info and plan type
+  const user = await storage.getUserById(userId);
+  if (!user) {
+    throw validationError('User not found');
+  }
+
+  const planType = (user.planType || 'free') as keyof typeof UPLOAD_LIMITS;
+  const limits = UPLOAD_LIMITS[planType] || UPLOAD_LIMITS['free'];
+
+  // Check file size limit
+  if (req.file.size > limits.maxFileSize) {
+    const maxSizeMB = Math.ceil(limits.maxFileSize / (1024 * 1024));
+    throw businessLogicError(`File size exceeds limit of ${maxSizeMB}MB for ${planType} plan. Please upgrade your plan for larger files.`);
+  }
+
+  // Check upload count limit
+  if (limits.maxUploads !== Infinity) {
+    const uploadCount = await storage.countUserPublicUploads(userId);
+    if (uploadCount >= limits.maxUploads) {
+      throw businessLogicError(`You have reached the upload limit of ${limits.maxUploads} files for your ${planType} plan. Please upgrade to upload more files.`);
+    }
+  }
+
+  // Check total storage limit
+  if (limits.maxStorageBytes !== Infinity) {
+    const userUploads = await storage.getUserPublicUploads(userId, 1000, 0);
+    const totalStorageUsed = userUploads.reduce((sum, upload) => sum + (upload.fileSize || 0), 0);
+    if (totalStorageUsed + req.file.size > limits.maxStorageBytes) {
+      const maxStorageMB = Math.ceil(limits.maxStorageBytes / (1024 * 1024));
+      throw businessLogicError(`Total storage limit of ${maxStorageMB}MB exceeded for ${planType} plan. Please delete some files or upgrade your plan.`);
+    }
+  }
+
   // Generate or validate slug
   let slug = providedSlug || slugify(path.parse(req.file.originalname).name);
   
@@ -171,6 +223,10 @@ router.post('/', requireAuth, upload.single('file'), asyncHandler(async (req, re
   // Store metadata in database
   const upload = await storage.createPublicUpload(uploadData);
 
+  // Calculate remaining uploads for user
+  const currentUploadCount = await storage.countUserPublicUploads(userId);
+  const remaining = limits.maxUploads === Infinity ? null : Math.max(0, limits.maxUploads - currentUploadCount);
+
   successResponse(res, {
     id: upload.id,
     slug: upload.slug,
@@ -179,6 +235,8 @@ router.post('/', requireAuth, upload.single('file'), asyncHandler(async (req, re
     mimeType: upload.mimeType,
     fileSize: upload.fileSize,
     createdAt: upload.createdAt,
+    planType: planType,
+    uploadsRemaining: remaining,
   }, 'File uploaded successfully');
 }));
 
@@ -189,8 +247,17 @@ router.get('/', requireAuth, asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit as string) || 20;
   const offset = (page - 1) * limit;
 
+  // Get user plan type
+  const user = await storage.getUserById(userId);
+  const planType = (user?.planType || 'free') as keyof typeof UPLOAD_LIMITS;
+  const planLimits = UPLOAD_LIMITS[planType] || UPLOAD_LIMITS['free'];
+
   const uploads = await storage.getUserPublicUploads(userId, limit, offset);
   const total = await storage.countUserPublicUploads(userId);
+
+  // Calculate storage usage
+  const allUploads = await storage.getUserPublicUploads(userId, 10000, 0);
+  const totalStorageUsed = allUploads.reduce((sum, upload) => sum + (upload.fileSize || 0), 0);
 
   const uploadsWithUrls = uploads.map(upload => ({
     ...upload,
@@ -202,6 +269,15 @@ router.get('/', requireAuth, asyncHandler(async (req, res) => {
     limit,
     total,
     totalPages: Math.ceil(total / limit),
+    planInfo: {
+      plan: planType,
+      maxUploads: planLimits.maxUploads === Infinity ? null : planLimits.maxUploads,
+      uploadsUsed: total,
+      uploadsRemaining: planLimits.maxUploads === Infinity ? null : Math.max(0, planLimits.maxUploads - total),
+      maxStorageBytes: planLimits.maxStorageBytes === Infinity ? null : planLimits.maxStorageBytes,
+      storageUsedBytes: totalStorageUsed,
+      storageRemainingBytes: planLimits.maxStorageBytes === Infinity ? null : Math.max(0, planLimits.maxStorageBytes - totalStorageUsed),
+    }
   }, 'Uploads retrieved successfully');
 }));
 
