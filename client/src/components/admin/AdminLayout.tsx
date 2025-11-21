@@ -71,11 +71,6 @@ const sidebarNavItems = [
     href: '/admin/conversions',
     icon: TrendingUp,
   },
-  {
-    title: 'Icon Packs',
-    href: '/admin/icon-packs',
-    icon: Image,
-  },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

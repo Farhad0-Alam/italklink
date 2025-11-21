@@ -6,7 +6,6 @@ import DashboardPage from '@/components/admin/DashboardPage';
 import UsersPage from '@/components/admin/UsersPage';
 import PlansPage from '@/components/admin/PlansPage';
 import CouponsPage from '@/components/admin/CouponsPage';
-import IconPacksPage from '@/components/admin/IconPacksPage';
 import AffiliatesPage from '@/components/admin/AffiliatesPage';
 import AffiliateConversionsPage from '@/components/admin/AffiliateConversionsPage';
 import AffiliatePayoutsPage from '@/components/admin/AffiliatePayoutsPage';
@@ -73,8 +72,6 @@ export default function Admin() {
         return <CouponsPage />;
       case '/admin/templates':
         return <TemplatesPage />;
-      case '/admin/icon-packs':
-        return <IconPacksPage />;
       case '/admin/affiliates':
         return <AffiliatesPage />;
       case '/admin/conversions':
