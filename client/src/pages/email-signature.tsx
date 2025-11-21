@@ -1026,22 +1026,22 @@ export default function EmailSignature() {
             {/* CARD 2: Name/Title/Company */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader
-                className="cursor-pointer"
+                className="cursor-pointer py-2 px-3"
                 onClick={() => toggleSection("nameSection")}
                 data-testid="toggle-name-section"
               >
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-slate-900 dark:text-white">
+                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
                     Name/Title/Company
                   </CardTitle>
                   {collapsedSections.nameSection ? (
-                    <ChevronDown className="w-5 h-5" />
+                    <ChevronDown className="w-4 h-4" />
                   ) : (
-                    <ChevronUp className="w-5 h-5" />
+                    <ChevronUp className="w-4 h-4" />
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-3 space-y-2">
                 {!collapsedSections.nameSection && (
                   <>
                     <div className="space-y-2">
@@ -1338,22 +1338,22 @@ export default function EmailSignature() {
             {/* CARD 3: Contact Info */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader
-                className="cursor-pointer"
+                className="cursor-pointer py-2 px-3"
                 onClick={() => toggleSection("contactSection")}
                 data-testid="toggle-contact-section"
               >
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-slate-900 dark:text-white">
+                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
                     Contact Info
                   </CardTitle>
                   {collapsedSections.contactSection ? (
-                    <ChevronDown className="w-5 h-5" />
+                    <ChevronDown className="w-4 h-4" />
                   ) : (
-                    <ChevronUp className="w-5 h-5" />
+                    <ChevronUp className="w-4 h-4" />
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-3 space-y-2">
                 {!collapsedSections.contactSection && (
                   <>
                     <div className="grid grid-cols-2 gap-4">
