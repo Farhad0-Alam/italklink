@@ -162,7 +162,7 @@ router.get('/links', requireOwner, async (req, res) => {
 // Get users with search, filters, pagination
 router.get('/users', requireOwner, async (req, res) => {
   try {
-    const { search, status, planId, page = 1, size = 50 } = req.query;
+    const { search, status, plan, page = 1, size = 50 } = req.query;
     const offset = (Number(page) - 1) * Number(size);
     
     let query = db.select({
@@ -203,8 +203,8 @@ router.get('/users', requireOwner, async (req, res) => {
       }
     }
     
-    if (planId) {
-      conditions.push(eq(users.planType, planId as any));
+    if (plan && plan !== 'all') {
+      conditions.push(eq(users.planType, plan as any));
     }
     
     if (conditions.length > 0) {
@@ -231,10 +231,10 @@ router.get('/users', requireOwner, async (req, res) => {
       status: !user.subscriptionEndsAt || user.subscriptionEndsAt > new Date() ? 'active' : 'inactive'
     }));
 
-    res.json(formattedUsers);
+    res.json({ success: true, data: formattedUsers });
   } catch (error) {
     console.error('Failed to get users:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -283,7 +283,7 @@ router.post('/users', requireOwner, async (req, res) => {
     
     await logAdminAction(req.user!.id, 'create', 'user', newUser.id, { email, planId, planType, businessCardsLimit });
     
-    res.json({ message: 'User created successfully', user: newUser });
+    res.json({ success: true, message: 'User created successfully', data: newUser });
   } catch (error) {
     console.error('Failed to create user:', error);
     
@@ -422,10 +422,10 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
       note 
     });
     
-    res.json({ message: 'Plan assigned successfully' });
+    res.json({ success: true, message: 'Plan assigned successfully', data: { userId: id, planId, planType: selectedPlan.planType } });
   } catch (error) {
     console.error('Failed to assign plan:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
