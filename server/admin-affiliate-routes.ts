@@ -482,12 +482,12 @@ router.post('/conversions/:id/reverse', requireAdmin, async (req, res) => {
     const { reason } = req.body;
 
     if (!reason) {
-      return res.status(400).json({ message: 'Reason is required for reversal' });
+      return res.status(400).json({ success: false, message: 'Reason is required for reversal' });
     }
 
     const [existingConversion] = await db.select().from(conversions).where(eq(conversions.id, id)).limit(1);
     if (!existingConversion) {
-      return res.status(404).json({ message: 'Conversion not found' });
+      return res.status(404).json({ success: false, message: 'Conversion not found' });
     }
 
     const [updatedConversion] = await db.update(conversions)
