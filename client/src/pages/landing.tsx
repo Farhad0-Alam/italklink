@@ -1185,7 +1185,7 @@ export default function Landing() {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-6 h-auto font-bold" asChild data-testid="button-cta-view-pricing">
+              <Button size="lg" variant="outline" className="border-2 border-white text-orange-400 hover:bg-white/10 text-lg px-8 py-6 h-auto font-bold" asChild data-testid="button-cta-view-pricing">
                 <Link href="/pricing">
                   View Pricing
                 </Link>
