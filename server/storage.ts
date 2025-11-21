@@ -1998,6 +1998,43 @@ export class DatabaseStorage implements IStorage {
     // It will create default templates if they don't exist
   }
 
+  // ===== EMAIL SIGNATURE OPERATIONS =====
+  async createEmailSignature(signatureData: InsertEmailSignature): Promise<EmailSignature> {
+    const [signature] = await db.insert(emailSignatures).values(signatureData).returning();
+    return signature;
+  }
+
+  async getEmailSignature(id: string): Promise<EmailSignature | undefined> {
+    const [signature] = await db.select().from(emailSignatures).where(eq(emailSignatures.id, id));
+    return signature;
+  }
+
+  async getUserEmailSignatures(userId: string): Promise<EmailSignature[]> {
+    return await db
+      .select()
+      .from(emailSignatures)
+      .where(eq(emailSignatures.userId, userId))
+      .orderBy(desc(emailSignatures.createdAt));
+  }
+
+  async updateEmailSignature(id: string, signatureData: Partial<InsertEmailSignature>): Promise<EmailSignature> {
+    const [signature] = await db
+      .update(emailSignatures)
+      .set({ ...signatureData, updatedAt: new Date() })
+      .where(eq(emailSignatures.id, id))
+      .returning();
+
+    if (!signature) {
+      throw new Error('Email signature not found');
+    }
+
+    return signature;
+  }
+
+  async deleteEmailSignature(id: string): Promise<void> {
+    await db.delete(emailSignatures).where(eq(emailSignatures.id, id));
+  }
+
   // ===== APPOINTMENT NOTIFICATION OPERATIONS =====
   async createNotification(notificationData: InsertAppointmentNotification): Promise<AppointmentNotification> {
     const result = await db.insert(appointmentNotifications)
