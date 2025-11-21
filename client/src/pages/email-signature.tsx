@@ -1695,7 +1695,7 @@ export default function EmailSignature() {
                   />
                 </div>
               </CardContent>
-            </Card>
+      </Card>
 
             {/* Social Links */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
