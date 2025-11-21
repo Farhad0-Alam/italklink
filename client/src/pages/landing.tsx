@@ -231,7 +231,7 @@ export default function Landing() {
             </motion.div>
             
             <div className="hidden md:flex items-center space-x-8">
-              {["About", "Features", "Integrations", "Pricing", "FAQ", "Contact"].map((item) => (
+              {["About", "Features", "Integrations", "FAQ", "Contact", "Others"].map((item) => (
                 <a 
                   key={item}
                   href={`#${item.toLowerCase()}`}
@@ -1229,7 +1229,6 @@ export default function Landing() {
             <div>
               <h4 className="font-bold mb-4">Product</h4>
               <ul className="space-y-2 text-gray-400 text-sm">
-                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
                 <li><Link href="/dashboard" className="hover:text-white transition-colors">Features</Link></li>
                 <li><Link href="/templates" className="hover:text-white transition-colors">Templates</Link></li>
                 <li><Link href="/register" className="hover:text-white transition-colors">Get Started</Link></li>
