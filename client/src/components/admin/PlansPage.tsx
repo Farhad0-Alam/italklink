@@ -351,6 +351,11 @@ export default function PlansPage() {
       return;
     }
 
+    if (formData.features.length === 0) {
+      alert('Please select at least one feature for this plan');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // Calculate final price in cents based on frequency
@@ -364,7 +369,8 @@ export default function PlansPage() {
       
       const dataToSend = {
         ...formData,
-        price: finalPriceCents
+        price: finalPriceCents,
+        features: formData.features
       };
       
       const response = await fetch('/api/billing/admin/plans', {
@@ -398,6 +404,11 @@ export default function PlansPage() {
       return;
     }
 
+    if (formData.features.length === 0) {
+      alert('Please select at least one feature for this plan');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // Calculate final price in cents based on frequency
@@ -411,7 +422,8 @@ export default function PlansPage() {
       
       const dataToSend = {
         ...formData,
-        price: finalPriceCents
+        price: finalPriceCents,
+        features: formData.features
       };
       
       const response = await fetch(`/api/billing/admin/plans/${selectedPlan.id}`, {
