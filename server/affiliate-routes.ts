@@ -96,7 +96,16 @@ router.post('/apply', async (req, res) => {
     // Check if user is already an affiliate
     const existingAffiliate = await db.select().from(affiliates).where(eq(affiliates.userId, req.user.id)).limit(1);
     if (existingAffiliate.length > 0) {
-      return res.status(400).json({ message: 'User is already an affiliate' });
+      const affiliate = existingAffiliate[0];
+      // Prevent reapplication from rejected affiliates within 30 days
+      if (affiliate.status === 'rejected' && affiliate.updatedAt) {
+        const daysSinceRejection = (Date.now() - affiliate.updatedAt.getTime()) / (1000 * 60 * 60 * 24);
+        if (daysSinceRejection < 30) {
+          return res.status(400).json({ message: 'You must wait 30 days after rejection to reapply' });
+        }
+      } else if (affiliate.status !== 'rejected') {
+        return res.status(400).json({ message: 'User is already an affiliate' });
+      }
     }
 
     // Generate unique affiliate code
@@ -331,10 +340,15 @@ router.get('/r/:code', async (req, res) => {
 // Track conversion (for webhook/API integration)
 router.post('/track/conversion', async (req, res) => {
   try {
-    const { orderId, amount, currency = 'USD', planId, customerId, affiliateCode } = req.body;
+    const { orderId, amount, currency = 'USD', planId, customerId, affiliateCode, userId } = req.body;
 
     if (!orderId || !amount) {
       return res.status(400).json({ message: 'Order ID and amount are required' });
+    }
+
+    // Validate amount is positive
+    if (amount <= 0) {
+      return res.status(400).json({ message: 'Amount must be positive' });
     }
 
     // Check if conversion already exists (idempotency)
@@ -347,6 +361,7 @@ router.post('/track/conversion', async (req, res) => {
     }
 
     let affiliateId: string | null = null;
+    let affiliateUserId: string | null = null;
 
     // Try to find affiliate from provided code or tracking cookie
     if (affiliateCode) {
@@ -358,11 +373,49 @@ router.post('/track/conversion', async (req, res) => {
         .limit(1);
       if (affiliate.length) {
         affiliateId = affiliate[0].id;
+        affiliateUserId = affiliate[0].userId;
+        
+        // SECURITY: Prevent self-referral (user can't earn commission for their own purchase)
+        if (userId && affiliateUserId === userId) {
+          return res.status(400).json({ message: 'Self-referral not permitted' });
+        }
+        
+        // SECURITY: Check affiliate KYC status - only approved affiliates can earn commissions
+        if (affiliate[0].kycStatus !== 'approved') {
+          return res.status(400).json({ message: 'Affiliate KYC not approved for commission' });
+        }
+        
+        // SECURITY: Check affiliate is not suspended
+        if (affiliate[0].suspendedAt) {
+          return res.status(400).json({ message: 'Affiliate account suspended' });
+        }
       }
     }
 
     if (!affiliateId) {
       return res.status(400).json({ message: 'No valid affiliate found for conversion' });
+    }
+
+    // SECURITY: Prevent duplicate conversions from same user within 24 hours (fraud detection)
+    if (customerId) {
+      const recentConversion = await db.select().from(conversions)
+        .where(and(
+          eq(conversions.affiliateId, affiliateId),
+          eq(conversions.customerId, customerId),
+          gte(conversions.createdAt, new Date(Date.now() - 24 * 60 * 60 * 1000))
+        ))
+        .limit(1);
+      
+      if (recentConversion.length > 0) {
+        // Flag as suspicious activity
+        await db.insert(riskFlags).values({
+          affiliateId,
+          flagType: 'duplicate_customer',
+          severity: 'medium',
+          description: `Duplicate conversion from customer ${customerId} within 24 hours`,
+          details: { orderId, customerId, previousOrderId: recentConversion[0].orderId }
+        });
+      }
     }
 
     // Get commission rules (simplified - use global default)
@@ -381,12 +434,22 @@ router.post('/track/conversion', async (req, res) => {
       const rule = commissionRule[0];
       commissionAmount = calculateCommission(amount, rule.value, rule.type);
       commissionRate = rule.value;
+      
+      // SECURITY: Validate commission rate is within reasonable bounds (0-50%)
+      const ratePercentage = parseFloat(rule.value);
+      if (ratePercentage < 0 || ratePercentage > 0.5) {
+        console.error(`Invalid commission rate: ${rule.value}`);
+        return res.status(500).json({ message: 'Invalid commission configuration' });
+      }
     }
 
     // Convert currency if needed (simplified - assume USD)
     const homeAmount = amount; // In real implementation, use FX rates
 
-    // Create conversion
+    // SECURITY: Create conversion with lock period - commission not available until lock expires
+    // This prevents fraud where affiliate creates fake conversion then immediately requests payout
+    const lockUntilDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 day lock period
+    
     const [newConversion] = await db.insert(conversions).values({
       affiliateId,
       orderId,
@@ -399,27 +462,28 @@ router.post('/track/conversion', async (req, res) => {
       commissionAmount,
       commissionRate,
       planId: planId ? parseInt(planId) : null,
-      status: 'pending',
-      lockUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 day lock period
+      status: 'pending', // SECURITY: All conversions start in 'pending' status
+      lockUntil: lockUntilDate // SECURITY: Commission locked until this date
     }).returning();
 
-    // Create balance entry
+    // SECURITY: Create balance entry ONLY after lock period expires (will be processed by background job)
+    // Do NOT credit balance until lockUntil date - this prevents premature payouts
     const currentBalance = await db.select({ balance: balances.runningBalance })
       .from(balances)
       .where(eq(balances.affiliateId, affiliateId))
       .orderBy(desc(balances.createdAt))
       .limit(1);
 
-    const newRunningBalance = (currentBalance[0]?.balance || 0) + commissionAmount;
+    const newRunningBalance = (currentBalance[0]?.balance || 0); // Don't add to balance yet
 
     await db.insert(balances).values({
       affiliateId,
-      delta: commissionAmount,
+      delta: 0, // SECURITY: Delta is 0 until lock period expires
       currency: 'USD',
       kind: 'credit',
-      refType: 'conversion',
+      refType: 'conversion_pending',
       refId: newConversion.id,
-      description: `Commission for order ${orderId}`,
+      description: `Commission pending for order ${orderId} (locked until ${lockUntilDate.toISOString()})`,
       runningBalance: newRunningBalance
     });
 
