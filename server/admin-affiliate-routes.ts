@@ -25,7 +25,7 @@ const router = express.Router();
 // Admin middleware (reuse from admin-routes.ts)
 const requireAdmin = (req: any, res: any, next: any) => {
   if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'owner')) {
-    return res.status(403).json({ message: 'Admin access required' });
+    return res.status(403).json({ success: false, message: 'Admin access required' });
   }
   next();
 };
@@ -125,7 +125,7 @@ router.get('/affiliates', requireAdmin, async (req, res) => {
     res.json({ success: true, data: filteredAffiliates });
   } catch (error) {
     console.error('Failed to get affiliates:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -205,7 +205,7 @@ router.post('/affiliates/:id/approve', requireAdmin, async (req, res) => {
       .returning();
 
     if (!updatedAffiliate) {
-      return res.status(404).json({ message: 'Affiliate not found' });
+      return res.status(404).json({ success: false, message: 'Affiliate not found' });
     }
 
     // Queue approval notification
@@ -242,7 +242,7 @@ router.post('/affiliates/:id/suspend', requireAdmin, async (req, res) => {
       .returning();
 
     if (!updatedAffiliate) {
-      return res.status(404).json({ message: 'Affiliate not found' });
+      return res.status(404).json({ success: false, message: 'Affiliate not found' });
     }
 
     // Queue suspension notification
@@ -589,7 +589,7 @@ router.patch('/commission-rules/:id', requireAdmin, async (req, res) => {
       .returning();
 
     if (!updatedRule) {
-      return res.status(404).json({ message: 'Commission rule not found' });
+      return res.status(404).json({ success: false, message: 'Commission rule not found' });
     }
 
     res.json({ success: true, message: 'Commission rule updated successfully', data: updatedRule });
