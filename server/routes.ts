@@ -4789,6 +4789,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== CARD SUBSCRIPTION ROUTES =====
 
   // Subscribe to card notifications (public endpoint)
+  // ECARD LEAD CAPTURE ENDPOINT - Captures visitor info as CRM lead + subscription
+  app.post('/api/cards/:cardId/capture-lead', asyncHandler(async (req, res) => {
+    const { cardId } = req.params;
+    const { firstName, lastName, email, phone, company, jobTitle, message } = req.body;
+
+    // Validate email
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ success: false, message: 'Valid email is required' });
+    }
+
+    const result = await storage.captureLeadFromCard(cardId, {
+      firstName,
+      lastName,
+      email,
+      phone,
+      company,
+      jobTitle,
+      message
+    });
+
+    successResponse(res, result, 'Lead captured and added to CRM successfully');
+  }));
+
   app.post('/api/cards/:cardId/subscribe', async (req, res) => {
     try {
       const { cardId } = req.params;

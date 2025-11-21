@@ -5855,6 +5855,94 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // ECARD TO CRM LEAD CAPTURE
+  async captureLeadFromCard(cardId: string, leadData: {
+    firstName?: string;
+    lastName?: string;
+    email: string;
+    phone?: string;
+    company?: string;
+    jobTitle?: string;
+    message?: string;
+  }): Promise<{
+    contact: any;
+    subscription: any;
+    leadCaptured: boolean;
+  }> {
+    // Get card and owner
+    const card = await db.query.businessCards.findFirst({
+      where: eq(businessCards.id, cardId)
+    });
+
+    if (!card) throw new Error('Card not found');
+
+    // Check if contact already exists with this email
+    let contact = await db.query.crmContacts.findFirst({
+      where: and(
+        eq(crmContacts.ownerUserId, card.userId),
+        eq(crmContacts.email, leadData.email)
+      )
+    });
+
+    // Create new contact if doesn't exist
+    if (!contact) {
+      const [newContact] = await db.insert(crmContacts).values({
+        ownerUserId: card.userId,
+        firstName: leadData.firstName || 'Unknown',
+        lastName: leadData.lastName || '',
+        email: leadData.email,
+        phone: leadData.phone,
+        company: leadData.company,
+        jobTitle: leadData.jobTitle,
+        source: 'ecard',
+        lifecycleStage: 'lead' as any,
+        leadScore: 25,
+        leadPriority: 'medium' as any,
+        notes: leadData.message ? `Message from eCard: ${leadData.message}` : undefined,
+        tags: ['ecard_capture', `card_${cardId}`],
+        createdAt: new Date()
+      }).returning();
+
+      contact = newContact;
+    }
+
+    // Create card subscription for email capture
+    const crypto = await import('crypto');
+    const unsubscribeToken = crypto.randomBytes(32).toString('hex');
+    
+    const [subscription] = await db.insert(cardSubscriptions).values({
+      cardId,
+      email: leadData.email.toLowerCase().trim(),
+      name: leadData.firstName && leadData.lastName 
+        ? `${leadData.firstName} ${leadData.lastName}`
+        : leadData.firstName || leadData.email,
+      unsubscribeToken,
+      isActive: true,
+      createdAt: new Date()
+    }).returning();
+
+    // Log activity in CRM
+    await db.insert(crmActivities).values({
+      contactId: contact.id,
+      userId: card.userId,
+      type: 'lead_capture',
+      description: `Lead captured from eCard: ${card.name || card.cardName}`,
+      metadata: {
+        cardId,
+        cardName: card.cardName,
+        source: 'ecard',
+        timestamp: new Date().toISOString()
+      },
+      createdAt: new Date()
+    });
+
+    return {
+      contact,
+      subscription,
+      leadCaptured: true
+    };
+  }
+
   async getAdminLinks(): Promise<{
     id: string;
     title: string;
