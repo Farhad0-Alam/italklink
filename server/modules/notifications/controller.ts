@@ -322,22 +322,109 @@ export async function notifyAllCardSubscribers(req: AuthenticatedRequest, res: R
       });
     }
 
-    // TODO: Get user's business cards from database
-    // const userCards = await getUserBusinessCards(userId);
-    // if (!userCards || userCards.length === 0) {
-    //   return res.status(404).json({
-    //     ok: false,
-    //     error: 'No business cards found',
-    //   });
-    // }
+    // Check if Web Push is configured
+    if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+      return res.status(503).json({
+        ok: false,
+        error: 'Web Push not configured - VAPID keys missing',
+      });
+    }
 
-    // For now, simulate with owner_user_id tag
-    const result = await oneSignalService.sendToAllUserCards(
-      String(userId),
-      String(title).slice(0, 100),
-      String(message).slice(0, 300),
-      url ? String(url) : undefined
-    );
+    // Get user's business cards from database
+    const userCards = await storage.getBusinessCardsByUser(userId);
+    if (!userCards || userCards.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        error: 'No business cards found',
+      });
+    }
+
+    console.log(`[Notifications] Found ${userCards.length} cards for user ${userId}`);
+
+    let totalSubscribers = 0;
+    let successCount = 0;
+    let failureCount = 0;
+
+    // Iterate through all user's cards and send notifications to their subscribers
+    for (const card of userCards) {
+      try {
+        // Get active subscribers for this card from database
+        const subscribers = await storage.getCardSubscriptions(card.id, true);
+        totalSubscribers += subscribers.length;
+
+        console.log(`[Notifications] Sending to ${subscribers.length} subscribers of card ${card.id}`);
+
+        // Send Web Push notifications to each subscriber
+        for (const subscriber of subscribers) {
+          if (subscriber.pushSubscription) {
+            try {
+              // Parse the push subscription
+              const pushSub = typeof subscriber.pushSubscription === 'string' 
+                ? JSON.parse(subscriber.pushSubscription) 
+                : subscriber.pushSubscription;
+
+              // Prepare the notification payload with proper URL
+              let notificationUrl = url;
+              if (!notificationUrl) {
+                const baseUrl = process.env.APP_URL || 
+                               (process.env.REPL_SLUG && process.env.REPL_OWNER 
+                                ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`
+                                : null);
+                
+                if (baseUrl && card?.slug) {
+                  notificationUrl = `${baseUrl}/share/${card.slug}`;
+                } else if (baseUrl) {
+                  notificationUrl = baseUrl;
+                }
+              }
+              
+              const payload = JSON.stringify({
+                title,
+                body: message,
+                url: notificationUrl,
+                icon: '/icon-192x192.png',
+                badge: '/icon-192x192.png',
+              });
+
+              // Send the push notification
+              await webpush.sendNotification(pushSub, payload);
+              
+              console.log(`[Notifications] Web Push sent to ${subscriber.email} for bulk notification`);
+              successCount++;
+            } catch (error: any) {
+              console.error(`[Notifications] Failed to send Web Push to ${subscriber.email}:`, error?.message || error);
+              failureCount++;
+              
+              // If the subscription is no longer valid (410 Gone), remove it
+              if (error?.statusCode === 410) {
+                try {
+                  await storage.updateCardSubscription(subscriber.id, {
+                    pushSubscription: null,
+                  });
+                } catch (updateError) {
+                  console.error(`[Notifications] Failed to update subscription:`, updateError);
+                }
+              }
+            }
+          }
+        }
+      } catch (cardError) {
+        console.error(`[Notifications] Error processing card ${card.id}:`, cardError);
+      }
+    }
+
+    // Also send via OneSignal as fallback
+    try {
+      const oneSignalResult = await oneSignalService.sendToAllUserCards(
+        String(userId),
+        String(title).slice(0, 100),
+        String(message).slice(0, 300),
+        url ? String(url) : undefined
+      );
+      console.log(`[Notifications] OneSignal bulk result:`, oneSignalResult);
+    } catch (error) {
+      console.error('[Notifications] OneSignal bulk error:', error);
+    }
 
     // Record rate limit usage
     rateLimiter.recordUsage(rateLimitKey);
@@ -345,9 +432,11 @@ export async function notifyAllCardSubscribers(req: AuthenticatedRequest, res: R
     res.json({
       ok: true,
       data: {
-        notificationId: result.id,
-        recipients: result.recipients,
-        userId,
+        totalCards: userCards.length,
+        totalSubscribers,
+        webPushSent: successCount,
+        webPushFailed: failureCount,
+        recipients: successCount,
         targetType: 'all_user_cards',
       },
     });
