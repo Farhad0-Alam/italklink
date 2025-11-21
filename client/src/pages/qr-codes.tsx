@@ -134,10 +134,12 @@ export default function QrCodes() {
   }, [user, setLocation]);
 
   // Fetch QR links
-  const { data: qrLinksData, isLoading: linksLoading } = useQuery({
+  const { data: qrLinksResponse, isLoading: linksLoading } = useQuery({
     queryKey: ['/api/qr/links'],
     enabled: !!user,
   });
+
+  const qrLinksData = qrLinksResponse?.data || { links: [], total: 0 };
 
   // Create QR link mutation
   const createQrLinkMutation = useMutation({

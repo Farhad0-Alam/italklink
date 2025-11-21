@@ -4233,190 +4233,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
   
   // Get user's QR links
-  app.get('/api/qr/links', requireAuth, async (req, res) => {
-    try {
-      const user = req.user as User;
-      const { limit = '20', offset = '0' } = req.query;
-      
-      const [links, total] = await Promise.all([
-        storage.getUserQrLinks(user.id, parseInt(limit as string), parseInt(offset as string)),
-        storage.countUserQrLinks(user.id)
-      ]);
-      
-      res.json({ links, total });
-    } catch (error) {
-      console.error('Error fetching QR links:', error);
-      res.status(500).json({ message: 'Failed to fetch QR links' });
-    }
-  });
+  app.get('/api/qr/links', requireAuth, asyncHandler(async (req, res) => {
+    const user = req.user as User;
+    const { limit = '20', offset = '0' } = req.query;
+    
+    const [links, total] = await Promise.all([
+      storage.getUserQrLinks(user.id, parseInt(limit as string), parseInt(offset as string)),
+      storage.countUserQrLinks(user.id)
+    ]);
+    
+    successResponse(res, { links, total, total: total }, 'QR links retrieved successfully');
+  }));
   
   // Create new QR link with URL validation
-  app.post('/api/qr/links', requireAuth, async (req, res) => {
-    try {
-      const user = req.user as User;
-      
-      // Rate limiting check
-      const rateLimitCheck = checkRateLimit(user.id);
-      if (!rateLimitCheck.allowed) {
-        const resetDate = new Date(rateLimitCheck.resetTime!);
-        return res.status(429).json({
-          message: 'Rate limit exceeded. Try again later.',
-          resetTime: resetDate.toISOString(),
-          maxRequests: QR_RATE_LIMIT.requests
-        });
-      }
-      
-      // Validate and sanitize target URL
-      const { targetUrl, name, rules, utm, shortId, darkColor, lightColor, logoUrl, logoShape, logoSize } = req.body;
-      
-      if (!targetUrl) {
-        return res.status(400).json({ message: 'Target URL is required' });
-      }
-      
-      const urlValidation = validateUrl(targetUrl);
-      if (!urlValidation.valid) {
-        return res.status(400).json({
-          message: `Invalid URL: ${urlValidation.reason}`,
-          code: 'INVALID_URL'
-        });
-      }
-      
-      // Sanitize name to prevent XSS
-      const sanitizedName = name ? name.replace(/<[^>]*>/g, '').substring(0, 200) : undefined;
-      
-      // Use custom shortId or generate one (preprocess empty string to undefined)
-      const processedShortId = shortId === '' ? undefined : shortId;
-      let finalShortId = processedShortId || nanoid(8);
-      
-      // Check if custom shortId is already taken
-      if (processedShortId) {
-        const existing = await storage.getQrLinkByShortId(processedShortId);
-        if (existing) {
-          return res.status(400).json({ 
-            message: 'This custom URL is already taken. Please choose another.',
-            code: 'SHORT_ID_EXISTS'
-          });
-        }
-      }
-      
-      // Preprocess logoUrl: empty string to null
-      const processedLogoUrl = logoUrl === '' ? null : logoUrl;
-      
-      const linkData = insertQrLinkSchema.parse({
-        name: sanitizedName,
-        targetUrl,
-        rules: rules || {},
-        utm: utm || {},
-        userId: user.id,
-        shortId: finalShortId,
-        darkColor: darkColor || '#000000',
-        lightColor: lightColor || '#FFFFFF',
-        logoUrl: processedLogoUrl,
-        logoShape: logoShape || 'circle',
-        logoSize: logoSize || 20
-      });
-      
-      const qrLink = await storage.createQrLink(linkData);
-      res.json(qrLink);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
-      }
-      console.error('Error creating QR link:', error);
-      res.status(500).json({ message: 'Failed to create QR link' });
+  app.post('/api/qr/links', requireAuth, asyncHandler(async (req, res) => {
+    const user = req.user as User;
+    
+    // Rate limiting check
+    const rateLimitCheck = checkRateLimit(user.id);
+    if (!rateLimitCheck.allowed) {
+      const resetDate = new Date(rateLimitCheck.resetTime!);
+      throw businessLogicError(`Rate limit exceeded. Try again later. Reset at ${resetDate.toISOString()}`);
     }
-  });
+    
+    // Validate and sanitize target URL
+    const { targetUrl, name, rules, utm, shortId, darkColor, lightColor, logoUrl, logoShape, logoSize } = req.body;
+    
+    if (!targetUrl) {
+      throw validationError('Target URL is required');
+    }
+    
+    const urlValidation = validateUrl(targetUrl);
+    if (!urlValidation.valid) {
+      throw validationError(`Invalid URL: ${urlValidation.reason}`);
+    }
+    
+    // Sanitize name to prevent XSS
+    const sanitizedName = name ? name.replace(/<[^>]*>/g, '').substring(0, 200) : undefined;
+    
+    // Use custom shortId or generate one (preprocess empty string to undefined)
+    const processedShortId = shortId === '' ? undefined : shortId;
+    let finalShortId = processedShortId || nanoid(8);
+    
+    // Check if custom shortId is already taken
+    if (processedShortId) {
+      const existing = await storage.getQrLinkByShortId(processedShortId);
+      if (existing) {
+        throw businessLogicError('This custom URL is already taken. Please choose another.');
+      }
+    }
+    
+    // Preprocess logoUrl: empty string to null
+    const processedLogoUrl = logoUrl === '' ? null : logoUrl;
+    
+    const linkData = insertQrLinkSchema.parse({
+      name: sanitizedName,
+      targetUrl,
+      rules: rules || {},
+      utm: utm || {},
+      userId: user.id,
+      shortId: finalShortId,
+      darkColor: darkColor || '#000000',
+      lightColor: lightColor || '#FFFFFF',
+      logoUrl: processedLogoUrl,
+      logoShape: logoShape || 'circle',
+      logoSize: logoSize || 20
+    });
+    
+    const qrLink = await storage.createQrLink(linkData);
+    successResponse(res, qrLink, 'QR link created successfully');
+  }));
   
   // Get single QR link with analytics
-  app.get('/api/qr/links/:id', requireAuth, async (req, res) => {
-    try {
-      const user = req.user as User;
-      const qrLink = await storage.getQrLink(req.params.id);
-      
-      if (!qrLink || qrLink.userId !== user.id) {
-        return res.status(404).json({ message: 'QR link not found' });
-      }
-      
-      // Get analytics for the past 30 days
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 30);
-      
-      const analytics = await storage.getQrAnalytics(qrLink.id, startDate, endDate);
-      
-      res.json({ ...qrLink, analytics });
-    } catch (error) {
-      console.error('Error fetching QR link:', error);
-      res.status(500).json({ message: 'Failed to fetch QR link' });
+  app.get('/api/qr/links/:id', requireAuth, asyncHandler(async (req, res) => {
+    const user = req.user as User;
+    const qrLink = await storage.getQrLink(req.params.id);
+    
+    if (!qrLink || qrLink.userId !== user.id) {
+      throw notFoundError('QR link', req.params.id);
     }
-  });
+    
+    // Get analytics for the past 30 days
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    
+    const analytics = await storage.getQrAnalytics(qrLink.id, startDate, endDate);
+    
+    successResponse(res, { ...qrLink, analytics }, 'QR link retrieved successfully');
+  }));
   
   // Update QR link with validation
-  app.put('/api/qr/links/:id', requireAuth, async (req, res) => {
-    try {
-      const user = req.user as User;
-      const qrLink = await storage.getQrLink(req.params.id);
-      
-      if (!qrLink || qrLink.userId !== user.id) {
-        return res.status(404).json({ message: 'QR link not found' });
-      }
-      
-      const { targetUrl, name, ...otherData } = req.body;
-      
-      // Validate target URL if it's being updated
-      if (targetUrl) {
-        const urlValidation = validateUrl(targetUrl);
-        if (!urlValidation.valid) {
-          return res.status(400).json({
-            message: `Invalid URL: ${urlValidation.reason}`,
-            code: 'INVALID_URL'
-          });
-        }
-      }
-      
-      // Sanitize name to prevent XSS
-      const sanitizedName = name ? name.replace(/<[^>]*>/g, '').substring(0, 200) : undefined;
-      
-      // Preprocess optional fields: convert empty strings to undefined
-      const preprocessedData = {
-        ...otherData,
-        targetUrl,
-        name: sanitizedName,
-        shortId: otherData.shortId === '' ? undefined : otherData.shortId,
-        logoUrl: otherData.logoUrl === '' ? undefined : otherData.logoUrl,
-      };
-      
-      const updateData = insertQrLinkSchema.partial().parse(preprocessedData);
-      
-      const updatedLink = await storage.updateQrLink(req.params.id, updateData);
-      
-      res.json(updatedLink);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({ message: 'Invalid data', errors: error.errors });
-      }
-      console.error('Error updating QR link:', error);
-      res.status(500).json({ message: 'Failed to update QR link' });
+  app.put('/api/qr/links/:id', requireAuth, asyncHandler(async (req, res) => {
+    const user = req.user as User;
+    const qrLink = await storage.getQrLink(req.params.id);
+    
+    if (!qrLink || qrLink.userId !== user.id) {
+      throw notFoundError('QR link', req.params.id);
     }
-  });
+    
+    const { targetUrl, name, ...otherData } = req.body;
+    
+    // Validate target URL if it's being updated
+    if (targetUrl) {
+      const urlValidation = validateUrl(targetUrl);
+      if (!urlValidation.valid) {
+        throw validationError(`Invalid URL: ${urlValidation.reason}`);
+      }
+    }
+    
+    // Sanitize name to prevent XSS
+    const sanitizedName = name ? name.replace(/<[^>]*>/g, '').substring(0, 200) : undefined;
+    
+    // Preprocess optional fields: convert empty strings to undefined
+    const preprocessedData = {
+      ...otherData,
+      targetUrl,
+      name: sanitizedName,
+      shortId: otherData.shortId === '' ? undefined : otherData.shortId,
+      logoUrl: otherData.logoUrl === '' ? undefined : otherData.logoUrl,
+    };
+    
+    const updateData = insertQrLinkSchema.partial().parse(preprocessedData);
+    
+    const updatedLink = await storage.updateQrLink(req.params.id, updateData);
+    
+    successResponse(res, updatedLink, 'QR link updated successfully');
+  }));
   
   // Delete QR link
-  app.delete('/api/qr/links/:id', requireAuth, async (req, res) => {
-    try {
-      const user = req.user as User;
-      const qrLink = await storage.getQrLink(req.params.id);
-      
-      if (!qrLink || qrLink.userId !== user.id) {
-        return res.status(404).json({ message: 'QR link not found' });
-      }
-      
-      await storage.deleteQrLink(req.params.id);
-      res.json({ message: 'QR link deleted successfully' });
-    } catch (error) {
-      console.error('Error deleting QR link:', error);
-      res.status(500).json({ message: 'Failed to delete QR link' });
+  app.delete('/api/qr/links/:id', requireAuth, asyncHandler(async (req, res) => {
+    const user = req.user as User;
+    const qrLink = await storage.getQrLink(req.params.id);
+    
+    if (!qrLink || qrLink.userId !== user.id) {
+      throw notFoundError('QR link', req.params.id);
     }
-  });
+    
+    await storage.deleteQrLink(req.params.id);
+    successResponse(res, null, 'QR link deleted successfully');
+  }));
   
   // QR code cache for performance optimization
   const qrCache = new Map<string, { data: string | Buffer, contentType: string, timestamp: number }>();
