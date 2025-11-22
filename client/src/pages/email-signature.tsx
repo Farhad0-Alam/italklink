@@ -787,7 +787,7 @@ export default function EmailSignature() {
           ${
             profilePhoto
               ? `
-          <td style="padding-right: ${profilePhotoRightSideGap}px; vertical-align: middle;">
+          <td style="padding-right: ${profilePhotoRightSideGap}px; vertical-align: top;">
             <div style="${getContainerStyle('profile')}">
               <img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}">
             </div>
