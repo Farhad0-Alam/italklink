@@ -298,13 +298,17 @@ export default function EmailSignature() {
   ];
   
   const nextTemplate = () => {
-    setCarouselIndex((prev) => (prev + 1) % templates.length);
-    setTemplateVariant(templates[(carouselIndex + 1) % templates.length].id);
+    setCarouselIndex((prev) => {
+      const newIndex = prev + 1;
+      return newIndex > templates.length - 4 ? templates.length - 4 : newIndex;
+    });
   };
   
   const prevTemplate = () => {
-    setCarouselIndex((prev) => (prev - 1 + templates.length) % templates.length);
-    setTemplateVariant(templates[(carouselIndex - 1 + templates.length) % templates.length].id);
+    setCarouselIndex((prev) => {
+      const newIndex = prev - 1;
+      return newIndex < 0 ? 0 : newIndex;
+    });
   };
   
   const selectTemplate = (index: number) => {
@@ -1031,31 +1035,31 @@ export default function EmailSignature() {
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
 
-                  <div className="flex-1 overflow-x-auto scrollbar-hide">
-                    <div className="flex gap-1.5 pb-1">
-                      {templates.map((template, index) => {
-                        const isSelected = index === carouselIndex;
+                  <div className="flex-1 overflow-hidden">
+                    <div className="flex gap-2 pb-1">
+                      {templates.slice(carouselIndex, carouselIndex + 4).map((template, visibleIndex) => {
+                        const actualIndex = carouselIndex + visibleIndex;
                         return (
                           <div
                             key={template.id}
-                            onClick={() => selectTemplate(index)}
-                            className="flex-shrink-0 cursor-pointer transition-all relative w-28"
+                            onClick={() => selectTemplate(actualIndex)}
+                            className="flex-shrink-0 cursor-pointer transition-all relative w-40"
                             data-testid={`template-card-${template.id}`}
                           >
                             <div
-                              className={`border-2 rounded-lg overflow-hidden shadow-lg transition-all h-24 ${
-                                isSelected
+                              className={`border-3 rounded-lg overflow-hidden shadow-lg transition-all h-32 ${
+                                actualIndex === carouselIndex && visibleIndex === 0
                                   ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400"
                                   : "border-slate-300 dark:border-slate-600"
                               }`}
                             >
-                              <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-1 overflow-hidden">
+                              <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-2 overflow-hidden">
                                 <div
                                   style={{
-                                    transform: "scale(0.28)",
+                                    transform: "scale(0.35)",
                                     transformOrigin: "top left",
-                                    width: "357%",
-                                    fontSize: "10px"
+                                    width: "286%",
+                                    fontSize: "11px"
                                   }}
                                 >
                                   <div
@@ -1067,8 +1071,8 @@ export default function EmailSignature() {
                                 </div>
                               </div>
                             </div>
-                            <div className="text-center mt-0.5">
-                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block truncate px-1">
+                            <div className="text-center mt-1">
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                                 {template.name}
                               </span>
                             </div>
