@@ -58,6 +58,7 @@ interface SignatureData {
   email: string;
   website: string;
   address: string;
+  ecardUrl: string;
 
   customFields: { label: string; value: string }[];
 
@@ -381,6 +382,7 @@ export default function EmailSignature() {
     email: "john.doe@acme.com",
     website: "www.acme.com",
     address: "123 Business Ave, Suite 100, New York, NY 10001",
+    ecardUrl: "",
     customFields: [],
     profilePhoto:
       "https://ui-avatars.com/api/?name=John+Doe&size=200&background=FF6A00&color=fff&bold=true",
@@ -605,6 +607,7 @@ export default function EmailSignature() {
       email,
       website,
       address,
+      ecardUrl,
       profilePhoto,
       companyLogo,
       primaryColor,
@@ -722,6 +725,7 @@ export default function EmailSignature() {
                 ${website ? `<a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${websiteIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${website}</a>` : ""}
               </td></tr>` : ""}
               ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${locationIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${address}</td></tr>` : ""}
+              ${ecardUrl ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><a href="${ecardUrl}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${ecardIcon}" alt="" style="width:100%; height:100%; display:block;"></span>Digital Card</a></td></tr>` : ""}
               ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: ${socialLinksTopSpacing}px; padding-bottom: ${socialLinksBottomSpacing}px;">${socialIconsHTML}</td></tr>` : ""}
             </table>
@@ -1958,6 +1962,20 @@ export default function EmailSignature() {
                     placeholder="123 Main St, City, State 12345"
                     data-testid="input-address"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ecardUrl">eCard Link</Label>
+                  <div className="flex gap-2 items-center">
+                    <span className="text-lg">📇</span>
+                    <Input
+                      id="ecardUrl"
+                      value={signatureData.ecardUrl}
+                      onChange={(e) => updateField("ecardUrl", e.target.value)}
+                      placeholder="https://talkl.ink/yourname"
+                      data-testid="input-ecard-url"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-3 pt-4 border-t">
