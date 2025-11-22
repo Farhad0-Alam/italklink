@@ -1954,17 +1954,6 @@ export default function EmailSignature() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    value={signatureData.address}
-                    onChange={(e) => updateField("address", e.target.value)}
-                    placeholder="123 Main St, City, State 12345"
-                    data-testid="input-address"
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="ecardUrl">eCard Link</Label>
                   <div className="flex gap-2 items-center">
                     <span className="text-lg">📇</span>
@@ -1976,6 +1965,17 @@ export default function EmailSignature() {
                       data-testid="input-ecard-url"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    id="address"
+                    value={signatureData.address}
+                    onChange={(e) => updateField("address", e.target.value)}
+                    placeholder="123 Main St, City, State 12345"
+                    data-testid="input-address"
+                  />
                 </div>
 
                 <div className="space-y-3 pt-4 border-t">
