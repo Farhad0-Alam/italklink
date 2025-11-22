@@ -894,7 +894,7 @@ export default function EmailSignature() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-3 md:p-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-3 mb-3">
           <Link href="/dashboard">
             <Button
