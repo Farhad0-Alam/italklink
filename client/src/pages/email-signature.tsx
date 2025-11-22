@@ -1051,33 +1051,55 @@ export default function EmailSignature() {
                     <ChevronLeft className="w-3 h-3" />
                   </Button>
 
-                  <div className="flex-1 flex gap-1 overflow-hidden">
-                    {templates.map((template, index) => (
-                      <div
-                        key={template.id}
-                        onClick={() => selectTemplate(index)}
-                        className={`flex-shrink-0 w-1/3 cursor-pointer transition-all ${
-                          index === carouselIndex ? "scale-100" : "scale-80 opacity-50"
-                        }`}
-                        data-testid={`template-card-${template.id}`}
-                      >
+                  <div className="flex-1 flex gap-2 overflow-hidden">
+                    {templates.map((template, index) => {
+                      const isSelected = index === carouselIndex;
+                      return (
                         <div
-                          className={`border-2 rounded-lg overflow-hidden shadow-md transition-all ${
-                            index === carouselIndex
-                              ? "border-blue-500 dark:border-blue-400"
-                              : "border-slate-300 dark:border-slate-600"
+                          key={template.id}
+                          onClick={() => selectTemplate(index)}
+                          className={`flex-shrink-0 cursor-pointer transition-all ${
+                            isSelected ? "w-2/5" : "w-1/4"
                           }`}
+                          data-testid={`template-card-${template.id}`}
                         >
-                          <div className="h-8 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center p-0.5">
-                            <div className="text-center">
-                              <div className="font-bold text-slate-600 dark:text-slate-300 text-xs leading-none">
-                                {template.name}
+                          <div
+                            className={`border-3 rounded-lg overflow-hidden shadow-lg transition-all h-32 ${
+                              isSelected
+                                ? "border-blue-500 dark:border-blue-400"
+                                : "border-slate-300 dark:border-slate-600"
+                            }`}
+                          >
+                            <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-1.5 overflow-hidden">
+                              <div
+                                style={{
+                                  transform: "scale(0.4)",
+                                  transformOrigin: "top left",
+                                  width: "250%",
+                                  fontSize: "12px"
+                                }}
+                              >
+                                <div
+                                  dangerouslySetInnerHTML={{
+                                    __html: template.id === 'simple'
+                                      ? generateSimpleSignature()
+                                      : template.id === 'advanced'
+                                      ? generateAdvancedSignature()
+                                      : generatePremiumSignature()
+                                  }}
+                                  style={{ margin: 0, padding: 0 }}
+                                />
                               </div>
                             </div>
                           </div>
+                          <div className="text-center mt-1">
+                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                              {template.name}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   <Button
