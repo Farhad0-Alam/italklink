@@ -829,7 +829,7 @@ export default function EmailSignature() {
           companyLogo || ctaButtons.length > 0
             ? `
         <tr>
-          <td colspan="2" style="padding-top: 25px; margin-top: 20px;">
+          <td colspan="2" style="padding-top: 0px;">
             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: ${bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; border-radius: ${bannerBorderRadius}px; padding: 20px;">
               <tr>
                 ${companyLogo ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}"><img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}"></div></td>` : ""}
