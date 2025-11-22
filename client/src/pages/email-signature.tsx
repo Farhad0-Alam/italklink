@@ -2153,18 +2153,18 @@ export default function EmailSignature() {
               </CardContent>
             </Card>
 
-            {/* Images */}
+            {/* Profile Photo */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader
                 className="cursor-pointer py-2 px-3"
-                onClick={() => toggleSection("imagesSection")}
-                data-testid="toggle-images-section"
+                onClick={() => toggleSection("profilePhotoSection")}
+                data-testid="toggle-profile-photo-section"
               >
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
-                    Images
+                    Profile Photo
                   </CardTitle>
-                  {collapsedSections.imagesSection ? (
+                  {collapsedSections.profilePhotoSection ? (
                     <ChevronDown className="w-4 h-4" />
                   ) : (
                     <ChevronUp className="w-4 h-4" />
@@ -2172,139 +2172,162 @@ export default function EmailSignature() {
                 </div>
               </CardHeader>
               <CardContent className="p-3 space-y-2">
-                {!collapsedSections.imagesSection && (
+                {!collapsedSections.profilePhotoSection && (
                   <>
-                <div className="space-y-1">
-                  <Label htmlFor="profilePhoto" className="text-xs">Profile Photo</Label>
-                  <Input
-                    id="profilePhoto"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      e.target.files?.[0] &&
-                      handleImageUpload("profilePhoto", e.target.files[0])
-                    }
-                    data-testid="input-profile-photo"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <Label htmlFor="companyLogo" className="text-xs">Company Logo</Label>
-                  <Input
-                    id="companyLogo"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      e.target.files?.[0] &&
-                      handleImageUpload("companyLogo", e.target.files[0])
-                    }
-                    data-testid="input-company-logo"
-                  />
-                </div>
-
-                {/* Profile Photo Styling */}
-                <div className="border-t pt-2 mt-2">
-                  <h4 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Profile Photo Styling</h4>
-                  
-                  <div className="space-y-2">
-                    <div>
-                      <Label className="text-xs">Shape</Label>
-                      <Select value={signatureData.profilePhotoShape} onValueChange={(v: any) => updateField("profilePhotoShape", v)}>
-                        <SelectTrigger className="w-full" data-testid="select-profile-shape">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="circle">Circle</SelectItem>
-                          <SelectItem value="square">Square</SelectItem>
-                          <SelectItem value="rounded">Rounded Square</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="space-y-1">
+                      <Label htmlFor="profilePhoto" className="text-xs">Upload Photo</Label>
+                      <Input
+                        id="profilePhoto"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          e.target.files?.[0] &&
+                          handleImageUpload("profilePhoto", e.target.files[0])
+                        }
+                        data-testid="input-profile-photo"
+                      />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">Width (px)</Label>
-                        <Input type="number" value={signatureData.profilePhotoWidth} onChange={(e) => updateField("profilePhotoWidth", Number(e.target.value))} min="20" max="300" data-testid="input-profile-width" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Height (px)</Label>
-                        <Input type="number" value={signatureData.profilePhotoHeight} onChange={(e) => updateField("profilePhotoHeight", Number(e.target.value))} min="20" max="300" data-testid="input-profile-height" />
-                      </div>
-                    </div>
+                    <div className="border-t pt-2 mt-2">
+                      <h4 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Styling</h4>
+                      
+                      <div className="space-y-2">
+                        <div>
+                          <Label className="text-xs">Shape</Label>
+                          <Select value={signatureData.profilePhotoShape} onValueChange={(v: any) => updateField("profilePhotoShape", v)}>
+                            <SelectTrigger className="w-full" data-testid="select-profile-shape">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="circle">Circle</SelectItem>
+                              <SelectItem value="square">Square</SelectItem>
+                              <SelectItem value="rounded">Rounded Square</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">Border Width (px)</Label>
-                        <Input type="number" value={signatureData.profilePhotoBorderWidth} onChange={(e) => updateField("profilePhotoBorderWidth", Number(e.target.value))} min="0" max="10" data-testid="input-profile-border-width" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Border Color</Label>
-                        <div className="flex gap-2">
-                          <input type="color" value={signatureData.profilePhotoBorderColor} onChange={(e) => updateField("profilePhotoBorderColor", e.target.value)} className="w-10 h-9 rounded" data-testid="input-profile-border-color" />
-                          <Input value={signatureData.profilePhotoBorderColor} onChange={(e) => updateField("profilePhotoBorderColor", e.target.value)} placeholder="#FF6A00" className="flex-1" data-testid="input-profile-border-color-hex" />
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-xs">Width (px)</Label>
+                            <Input type="number" value={signatureData.profilePhotoWidth} onChange={(e) => updateField("profilePhotoWidth", Number(e.target.value))} min="20" max="300" data-testid="input-profile-width" />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Height (px)</Label>
+                            <Input type="number" value={signatureData.profilePhotoHeight} onChange={(e) => updateField("profilePhotoHeight", Number(e.target.value))} min="20" max="300" data-testid="input-profile-height" />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-xs">Border Width (px)</Label>
+                            <Input type="number" value={signatureData.profilePhotoBorderWidth} onChange={(e) => updateField("profilePhotoBorderWidth", Number(e.target.value))} min="0" max="10" data-testid="input-profile-border-width" />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Border Color</Label>
+                            <div className="flex gap-2">
+                              <input type="color" value={signatureData.profilePhotoBorderColor} onChange={(e) => updateField("profilePhotoBorderColor", e.target.value)} className="w-10 h-9 rounded" data-testid="input-profile-border-color" />
+                              <Input value={signatureData.profilePhotoBorderColor} onChange={(e) => updateField("profilePhotoBorderColor", e.target.value)} placeholder="#FF6A00" className="flex-1" data-testid="input-profile-border-color-hex" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-xs">Opacity ({signatureData.profilePhotoOpacity}%)</Label>
+                            <input type="range" min="0" max="100" value={signatureData.profilePhotoOpacity} onChange={(e) => updateField("profilePhotoOpacity", Number(e.target.value))} className="w-full" data-testid="input-profile-opacity" />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Shadow</Label>
+                            <Select value={signatureData.profilePhotoShadow} onValueChange={(v: any) => updateField("profilePhotoShadow", v)}>
+                              <SelectTrigger data-testid="select-profile-shadow">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">None</SelectItem>
+                                <SelectItem value="small">Small</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="large">Large</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">Opacity ({signatureData.profilePhotoOpacity}%)</Label>
-                        <input type="range" min="0" max="100" value={signatureData.profilePhotoOpacity} onChange={(e) => updateField("profilePhotoOpacity", Number(e.target.value))} className="w-full" data-testid="input-profile-opacity" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Shadow</Label>
-                        <Select value={signatureData.profilePhotoShadow} onValueChange={(v: any) => updateField("profilePhotoShadow", v)}>
-                          <SelectTrigger data-testid="select-profile-shadow">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">None</SelectItem>
-                            <SelectItem value="small">Small</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="large">Large</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
+            {/* Company Logo */}
+            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <CardHeader
+                className="cursor-pointer py-2 px-3"
+                onClick={() => toggleSection("companyLogoSection")}
+                data-testid="toggle-company-logo-section"
+              >
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Company Logo
+                  </CardTitle>
+                  {collapsedSections.companyLogoSection ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4" />
+                  )}
                 </div>
-
-                {/* Company Logo Styling */}
-                <div className="border-t pt-2 mt-2">
-                  <h4 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Company Logo Styling</h4>
-                  
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">Width (px)</Label>
-                        <Input type="number" value={signatureData.companyLogoWidth} onChange={(e) => updateField("companyLogoWidth", Number(e.target.value))} min="20" max="300" data-testid="input-logo-width" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Height (px)</Label>
-                        <Input type="number" value={signatureData.companyLogoHeight} onChange={(e) => updateField("companyLogoHeight", Number(e.target.value))} min="20" max="300" data-testid="input-logo-height" />
-                      </div>
+              </CardHeader>
+              <CardContent className="p-3 space-y-2">
+                {!collapsedSections.companyLogoSection && (
+                  <>
+                    <div className="space-y-1">
+                      <Label htmlFor="companyLogo" className="text-xs">Upload Logo</Label>
+                      <Input
+                        id="companyLogo"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          e.target.files?.[0] &&
+                          handleImageUpload("companyLogo", e.target.files[0])
+                        }
+                        data-testid="input-company-logo"
+                      />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">Border Width (px)</Label>
-                        <Input type="number" value={signatureData.companyLogoBorderWidth} onChange={(e) => updateField("companyLogoBorderWidth", Number(e.target.value))} min="0" max="10" data-testid="input-logo-border-width" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Border Color</Label>
-                        <div className="flex gap-2">
-                          <input type="color" value={signatureData.companyLogoBorderColor} onChange={(e) => updateField("companyLogoBorderColor", e.target.value)} className="w-10 h-9 rounded" data-testid="input-logo-border-color" />
-                          <Input value={signatureData.companyLogoBorderColor} onChange={(e) => updateField("companyLogoBorderColor", e.target.value)} placeholder="#CCCCCC" className="flex-1" data-testid="input-logo-border-color-hex" />
+                    <div className="border-t pt-2 mt-2">
+                      <h4 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Styling</h4>
+                      
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-xs">Width (px)</Label>
+                            <Input type="number" value={signatureData.companyLogoWidth} onChange={(e) => updateField("companyLogoWidth", Number(e.target.value))} min="20" max="300" data-testid="input-logo-width" />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Height (px)</Label>
+                            <Input type="number" value={signatureData.companyLogoHeight} onChange={(e) => updateField("companyLogoHeight", Number(e.target.value))} min="20" max="300" data-testid="input-logo-height" />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-xs">Border Width (px)</Label>
+                            <Input type="number" value={signatureData.companyLogoBorderWidth} onChange={(e) => updateField("companyLogoBorderWidth", Number(e.target.value))} min="0" max="10" data-testid="input-logo-border-width" />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Border Color</Label>
+                            <div className="flex gap-2">
+                              <input type="color" value={signatureData.companyLogoBorderColor} onChange={(e) => updateField("companyLogoBorderColor", e.target.value)} className="w-10 h-9 rounded" data-testid="input-logo-border-color" />
+                              <Input value={signatureData.companyLogoBorderColor} onChange={(e) => updateField("companyLogoBorderColor", e.target.value)} placeholder="#CCCCCC" className="flex-1" data-testid="input-logo-border-color-hex" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Opacity ({signatureData.companyLogoOpacity}%)</Label>
+                          <input type="range" min="0" max="100" value={signatureData.companyLogoOpacity} onChange={(e) => updateField("companyLogoOpacity", Number(e.target.value))} className="w-full" data-testid="input-logo-opacity" />
                         </div>
                       </div>
                     </div>
-
-                    <div>
-                      <Label className="text-xs">Opacity ({signatureData.companyLogoOpacity}%)</Label>
-                      <input type="range" min="0" max="100" value={signatureData.companyLogoOpacity} onChange={(e) => updateField("companyLogoOpacity", Number(e.target.value))} className="w-full" data-testid="input-logo-opacity" />
-                    </div>
-                  </div>
-                </div>
                   </>
                 )}
               </CardContent>
