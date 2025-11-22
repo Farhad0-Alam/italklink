@@ -138,6 +138,7 @@ interface SignatureData {
   ctaButtonBorderColor: string;
   ctaButtonWidth: number;
   ctaButtonHeight: number;
+  ctaButtonPosition: number;
 
   showDisclaimer: boolean;
   disclaimerText: string;
@@ -490,6 +491,7 @@ export default function EmailSignature() {
     ctaButtonBorderColor: "#CCCCCC",
     ctaButtonWidth: 55,
     ctaButtonHeight: 32,
+    ctaButtonPosition: 50,
     ctaButtons: [
       { text: "SEARCH PROPERTIES NOW", url: "https://talkl.ink/" },
       { text: "GET A FREE HOME VALUATION", url: "https://talkl.ink/" },
@@ -713,6 +715,7 @@ export default function EmailSignature() {
       ctaButtonBorderColor,
       ctaButtonWidth,
       ctaButtonHeight,
+      ctaButtonPosition,
       dividerHeight,
       dividerColor,
       dividerMarginTop,
@@ -831,11 +834,12 @@ export default function EmailSignature() {
                 ${
                   ctaButtons.length > 0
                     ? `
-                <td style="text-align: center; vertical-align: middle;">
+                <td style="vertical-align: middle;">
                   <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed;">
                     ${ctaButtons.map(btn => {
                       const btnBorderRadius = ctaButtonShape === "square" ? "0px" : `${ctaButtonRadius}px`;
-                      return `<tr><td style="padding: 2px; text-align: center;"><a href="${btn.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: 8px 16px; text-decoration: none; border-radius: ${btnBorderRadius}; font-weight: bold; display: inline-block; border-right: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-size: ${ctaButtonSize}px; font-family: ${ctaButtonFont}, sans-serif; white-space: nowrap; box-sizing: border-box; width: ${ctaButtonWidth}%; height: ${ctaButtonHeight}px; line-height: ${ctaButtonHeight - 16}px; vertical-align: middle;">${btn.text}</a></td></tr>`;
+                      const btnAlignment = ctaButtonPosition < 33 ? "left" : ctaButtonPosition > 66 ? "right" : "center";
+                      return `<tr><td style="padding: 2px; text-align: ${btnAlignment};"><a href="${btn.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: 8px 16px; text-decoration: none; border-radius: ${btnBorderRadius}; font-weight: bold; display: inline-block; border-right: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-size: ${ctaButtonSize}px; font-family: ${ctaButtonFont}, sans-serif; white-space: nowrap; box-sizing: border-box; width: ${ctaButtonWidth}%; height: ${ctaButtonHeight}px; line-height: ${ctaButtonHeight - 16}px; vertical-align: middle;">${btn.text}</a></td></tr>`;
                     }).join('')}
                   </table>
                 </td>
@@ -3031,6 +3035,11 @@ export default function EmailSignature() {
                         <div>
                           <Label className="text-xs">Button Height: {signatureData.ctaButtonHeight}px</Label>
                           <input type="range" min="30" max="80" value={signatureData.ctaButtonHeight} onChange={(e) => updateField("ctaButtonHeight", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-height" />
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Button Position: {signatureData.ctaButtonPosition === 0 ? "Left" : signatureData.ctaButtonPosition === 50 ? "Center" : signatureData.ctaButtonPosition === 100 ? "Right" : signatureData.ctaButtonPosition + "%"}</Label>
+                          <input type="range" min="0" max="100" value={signatureData.ctaButtonPosition} onChange={(e) => updateField("ctaButtonPosition", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-position" />
                         </div>
 
                         <div>
