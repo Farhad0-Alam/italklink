@@ -2029,7 +2029,7 @@ export default function EmailSignature() {
                   This is how your signature will look
                 </p>
                 <div
-                  className="border border-slate-200 dark:border-slate-700 rounded-lg p-1.5 bg-white min-h-[120px] overflow-y-auto text-xs"
+                  className="border border-slate-200 dark:border-slate-700 rounded-lg p-1.5 bg-white min-h-[60px] overflow-y-auto text-xs"
                   dangerouslySetInnerHTML={{ __html: generateSignatureHTML() }}
                   data-testid="signature-preview"
                 />
