@@ -92,6 +92,12 @@ interface SignatureData {
   contactIconSize: number;
   contactIconColor: string;
 
+  dividerHeight: number;
+  dividerColor: string;
+  dividerMarginTop: number;
+  dividerMarginBottom: number;
+  dividerWidth: number;
+
   socialLinks: { platform: string; url: string; icon: string }[];
 
   showDisclaimer: boolean;
@@ -320,6 +326,7 @@ export default function EmailSignature() {
     companyFont: true,
     companySize: true,
     companyColor: true,
+    dividerStyle: true,
     contactSection: true,
     contactInfoStyle: true,
     contactIconStyle: true,
@@ -370,6 +377,11 @@ export default function EmailSignature() {
     contactLetterSpacing: 0,
     contactIconSize: 16,
     contactIconColor: "#FF6A00",
+    dividerHeight: 3,
+    dividerColor: "#FF6A00",
+    dividerMarginTop: 10,
+    dividerMarginBottom: 10,
+    dividerWidth: 100,
     socialLinks: [
       {
         platform: "linkedin",
@@ -522,6 +534,11 @@ export default function EmailSignature() {
       contactLetterSpacing,
       contactIconSize,
       contactIconColor,
+      dividerHeight,
+      dividerColor,
+      dividerMarginTop,
+      dividerMarginBottom,
+      dividerWidth,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
@@ -567,6 +584,7 @@ export default function EmailSignature() {
                   ${title}${title && company ? ` <span style="color: ${titleColor}; opacity: 0.7; margin: 0 8px;">|</span> ` : ''}${company ? `<span style="font-family: ${headerFont}, sans-serif; font-size: ${companySize}px; color: ${companyColor};">${company}</span>` : ''}
                 </td>
               </tr>
+              <tr><td style="height: ${dividerHeight}px; background-color: ${dividerColor}; margin: ${dividerMarginTop}px 0 ${dividerMarginBottom}px 0; width: ${dividerWidth}%;"></td></tr>
               ${cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding-bottom: 2px;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${cellIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${cellPhone}</td></tr>` : ""}
               ${email ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding-bottom: 2px;"><a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${emailIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${email}</a></td></tr>` : ""}
               ${website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding-bottom: 2px;"><a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${websiteIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${website}</a></td></tr>` : ""}
@@ -630,6 +648,11 @@ export default function EmailSignature() {
       contactLetterSpacing,
       contactIconSize,
       contactIconColor,
+      dividerHeight,
+      dividerColor,
+      dividerMarginTop,
+      dividerMarginBottom,
+      dividerWidth,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
@@ -674,6 +697,7 @@ export default function EmailSignature() {
                   ${title}${title && company ? ` <span style="color: ${titleColor}; opacity: 0.7; margin: 0 8px;">|</span> ` : ''}${company ? `<span style="font-family: ${headerFont}, sans-serif; font-size: ${companySize}px; color: ${companyColor};">${company}</span>` : ''}
                 </td>
               </tr>
+              <tr><td style="height: ${dividerHeight}px; background-color: ${dividerColor}; margin: ${dividerMarginTop}px 0 ${dividerMarginBottom}px 0; width: ${dividerWidth}%;"></td></tr>
               ${officePhone || cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;">
                 ${officePhone ? `<span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${phoneIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none;">${officePhone}</a>` : ""}
                 ${officePhone && cellPhone ? `<span style="margin: 0 6px;"></span>` : ""}
@@ -771,6 +795,11 @@ export default function EmailSignature() {
       contactLetterSpacing,
       contactIconSize,
       contactIconColor,
+      dividerHeight,
+      dividerColor,
+      dividerMarginTop,
+      dividerMarginBottom,
+      dividerWidth,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
@@ -826,7 +855,7 @@ export default function EmailSignature() {
                   ${title}${title && company ? ` <span style="color: ${titleColor}; opacity: 0.7; margin: 0 8px;">|</span> ` : ''}${company ? `<span style="font-family: ${headerFont}, sans-serif; font-size: ${companySize}px; color: ${companyColor}; font-weight: normal;">${company}</span>` : ''}
                 </td>
               </tr>
-              <tr><td style="height: 3px; background-color: ${primaryColor}; margin: 10px 0;"></td></tr>
+              <tr><td style="height: ${dividerHeight}px; background-color: ${dividerColor}; margin: ${dividerMarginTop}px 0 ${dividerMarginBottom}px 0; width: ${dividerWidth}%;"></td></tr>
               ${officePhone || cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;">
                 ${officePhone ? `<span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${phoneIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${officePhone}</a>` : ""}
                 ${officePhone && cellPhone ? `<span style="margin: 0 6px;"></span>` : ""}
@@ -1564,6 +1593,128 @@ export default function EmailSignature() {
                                 data-testid="input-company-color-hex"
                               />
                             </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Divider Style Subsection */}
+                    <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-3"
+                        onClick={() => toggleSection("dividerStyle")}
+                        data-testid="toggle-divider-style"
+                      >
+                        <Label className="text-sm font-semibold">
+                          Divider Style
+                        </Label>
+                        {collapsedSections.dividerStyle ? (
+                          <ChevronDown className="w-4 h-4" />
+                        ) : (
+                          <ChevronUp className="w-4 h-4" />
+                        )}
+                      </div>
+                      {!collapsedSections.dividerStyle && (
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-xs">
+                              Thickness: {signatureData.dividerHeight}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="1"
+                              max="10"
+                              value={signatureData.dividerHeight}
+                              onChange={(e) =>
+                                updateField(
+                                  "dividerHeight",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-divider-height"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">
+                              Width: {signatureData.dividerWidth}%
+                            </Label>
+                            <input
+                              type="range"
+                              min="10"
+                              max="100"
+                              step="10"
+                              value={signatureData.dividerWidth}
+                              onChange={(e) =>
+                                updateField(
+                                  "dividerWidth",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-divider-width"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs mb-1">Color</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="color"
+                                value={signatureData.dividerColor}
+                                onChange={(e) =>
+                                  updateField("dividerColor", e.target.value)
+                                }
+                                className="w-16 h-9"
+                                data-testid="input-divider-color"
+                              />
+                              <Input
+                                value={signatureData.dividerColor}
+                                onChange={(e) =>
+                                  updateField("dividerColor", e.target.value)
+                                }
+                                placeholder="#FF6A00"
+                                className="flex-1"
+                                data-testid="input-divider-color-hex"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs">
+                              Top Spacing: {signatureData.dividerMarginTop}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="30"
+                              value={signatureData.dividerMarginTop}
+                              onChange={(e) =>
+                                updateField(
+                                  "dividerMarginTop",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-divider-margin-top"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">
+                              Bottom Spacing: {signatureData.dividerMarginBottom}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="30"
+                              value={signatureData.dividerMarginBottom}
+                              onChange={(e) =>
+                                updateField(
+                                  "dividerMarginBottom",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-divider-margin-bottom"
+                            />
                           </div>
                         </div>
                       )}
