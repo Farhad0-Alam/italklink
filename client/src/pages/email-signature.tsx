@@ -1029,38 +1029,48 @@ export default function EmailSignature() {
             </CardHeader>
             <CardContent className="p-1.5">
               <div className="relative">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={prevTemplate}
-                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 w-8 h-8 flex-shrink-0"
+                    className="z-10 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white w-10 h-10 flex-shrink-0 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
                     data-testid="btn-carousel-prev"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <ChevronLeft className="w-5 h-5" />
                   </Button>
 
                   <div className="flex-1 overflow-hidden">
-                    <div className="flex gap-3 pb-1">
+                    <style>{`
+                      @keyframes slideIn {
+                        from { opacity: 0; transform: translateX(20px); }
+                        to { opacity: 1; transform: translateX(0); }
+                      }
+                      .carousel-item {
+                        animation: slideIn 0.4s ease-out forwards;
+                      }
+                    `}</style>
+                    <div className="flex gap-3 pb-1 transition-all duration-500" style={{ transform: `translateX(0)` }}>
                       {templates.slice(carouselIndex, carouselIndex + 4).map((template, visibleIndex) => {
                         const actualIndex = carouselIndex + visibleIndex;
                         return (
                           <div
                             key={template.id}
                             onClick={() => selectTemplate(actualIndex)}
-                            className="flex-shrink-0 cursor-pointer transition-all relative"
+                            className="carousel-item flex-shrink-0 cursor-pointer group relative"
                             style={{ width: "200px" }}
                             data-testid={`template-card-${template.id}`}
                           >
                             <div
-                              className={`border-3 rounded-lg overflow-hidden shadow-lg transition-all ${
+                              className={`border-3 rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1 ${
                                 actualIndex === carouselIndex && visibleIndex === 0
-                                  ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400"
-                                  : "border-slate-300 dark:border-slate-600"
+                                  ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400 ring-offset-2 dark:ring-offset-slate-800"
+                                  : "border-slate-300 dark:border-slate-600 group-hover:border-blue-400 dark:group-hover:border-blue-500"
                               }`}
                               style={{ height: "160px" }}
                             >
-                              <div className="h-full bg-white dark:bg-slate-900 flex items-start justify-start p-0 overflow-hidden">
+                              <div className="h-full bg-white dark:bg-slate-900 flex items-start justify-start p-0 overflow-hidden relative">
+                                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/0 group-hover:to-black/5 dark:group-hover:to-white/5 transition-all duration-300"></div>
                                 <div
                                   style={{
                                     transform: "scale(0.42)",
@@ -1084,8 +1094,8 @@ export default function EmailSignature() {
                                 </div>
                               </div>
                             </div>
-                            <div className="text-center mt-1">
-                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                            <div className="text-center mt-2">
+                              <span className="text-xs font-bold text-slate-900 dark:text-white block group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
                                 {template.name}
                               </span>
                             </div>
@@ -1099,10 +1109,10 @@ export default function EmailSignature() {
                     variant="ghost"
                     size="icon"
                     onClick={nextTemplate}
-                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 w-8 h-8 flex-shrink-0"
+                    className="z-10 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white w-10 h-10 flex-shrink-0 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
                     data-testid="btn-carousel-next"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-5 h-5" />
                   </Button>
                 </div>
 
