@@ -1124,7 +1124,7 @@ export default function EmailSignature() {
             <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">${name}</div>
             <div style="font-size: 14px; opacity: 0.95;">${title}</div>
           </td>
-          ${profilePhoto ? `<td style="text-align: right; vertical-align: middle;"><div style="${getContainerStyle('profile')}"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div></td>` : ''}
+          ${profilePhoto ? `<td style="text-align: right; vertical-align: top;"><div style="${getContainerStyle('profile')}"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div></td>` : ''}
         </tr>
       </table>
     </td>
