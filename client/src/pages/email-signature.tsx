@@ -508,6 +508,8 @@ export default function EmailSignature() {
       contactFont,
       contactInfoSize,
       contactInfoColor,
+      contactLineHeight,
+      contactLetterSpacing,
       contactIconSize,
       contactIconColor,
     } = signatureData;
@@ -606,6 +608,8 @@ export default function EmailSignature() {
       contactFont,
       contactInfoSize,
       contactInfoColor,
+      contactLineHeight,
+      contactLetterSpacing,
       contactIconSize,
       contactIconColor,
     } = signatureData;
@@ -620,7 +624,7 @@ export default function EmailSignature() {
     const customFieldsHTML = customFields
       .filter((f) => f.label && f.value)
       .map((field) => {
-        return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;">${field.label}: ${field.value}</td></tr>`;
+        return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;">${field.label}: ${field.value}</td></tr>`;
       })
       .join("");
 
@@ -737,6 +741,8 @@ export default function EmailSignature() {
       contactFont,
       contactInfoSize,
       contactInfoColor,
+      contactLineHeight,
+      contactLetterSpacing,
       contactIconSize,
       contactIconColor,
     } = signatureData;
@@ -751,7 +757,7 @@ export default function EmailSignature() {
     const customFieldsHTML = customFields
       .filter((f) => f.label && f.value)
       .map((field) => {
-        return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; font-weight: 500;">${field.label}: ${field.value}</td></tr>`;
+        return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; font-weight: 500; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;">${field.label}: ${field.value}</td></tr>`;
       })
       .join("");
 
