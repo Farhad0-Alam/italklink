@@ -379,8 +379,8 @@ export default function EmailSignature() {
     contactIconColor: "#FF6A00",
     dividerHeight: 3,
     dividerColor: "#FF6A00",
-    dividerMarginTop: 10,
-    dividerMarginBottom: 10,
+    dividerMarginTop: 5,
+    dividerMarginBottom: 5,
     dividerWidth: 100,
     socialLinks: [
       {
