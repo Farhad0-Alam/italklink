@@ -128,6 +128,7 @@ interface SignatureData {
 
   socialLinks: { platform: string; url: string; icon: string }[];
 
+  ctaButtonFont: string;
   ctaButtonSize: number;
   ctaButtonColor: string;
   ctaButtonBackgroundColor: string;
@@ -135,6 +136,8 @@ interface SignatureData {
   ctaButtonRadius: number;
   ctaButtonBorderWidth: number;
   ctaButtonBorderColor: string;
+  ctaButtonWidth: number;
+  ctaButtonHeight: number;
 
   showDisclaimer: boolean;
   disclaimerText: string;
@@ -477,13 +480,16 @@ export default function EmailSignature() {
     showDisclaimer: false,
     disclaimerText:
       "This email and any attachments are confidential and intended solely for the recipient.",
-    ctaButtonSize: 14,
+    ctaButtonFont: "Arial",
+    ctaButtonSize: 23,
     ctaButtonColor: "#FFFFFF",
     ctaButtonBackgroundColor: "#2C2C2C",
     ctaButtonShape: "rounded",
     ctaButtonRadius: 6,
     ctaButtonBorderWidth: 1,
     ctaButtonBorderColor: "#CCCCCC",
+    ctaButtonWidth: 50,
+    ctaButtonHeight: 50,
     ctaButtons: [
       { text: "SEARCH PROPERTIES NOW", url: "https://talkl.ink/" },
       { text: "GET A FREE HOME VALUATION", url: "https://talkl.ink/" },
@@ -697,6 +703,7 @@ export default function EmailSignature() {
       socialLinksTopSpacing,
       socialLinksBottomSpacing,
       socialIconsGap,
+      ctaButtonFont,
       ctaButtonSize,
       ctaButtonColor,
       ctaButtonBackgroundColor,
@@ -704,6 +711,8 @@ export default function EmailSignature() {
       ctaButtonRadius,
       ctaButtonBorderWidth,
       ctaButtonBorderColor,
+      ctaButtonWidth,
+      ctaButtonHeight,
       dividerHeight,
       dividerColor,
       dividerMarginTop,
@@ -826,7 +835,7 @@ export default function EmailSignature() {
                   <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed;">
                     ${ctaButtons.map(btn => {
                       const btnBorderRadius = ctaButtonShape === "square" ? "0px" : `${ctaButtonRadius}px`;
-                      return `<tr><td style="padding: 2px; text-align: center;"><a href="${btn.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: 12px 20px; text-decoration: none; border-radius: ${btnBorderRadius}; font-weight: bold; display: block; border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-size: ${ctaButtonSize}px; font-family: ${contactFont}, sans-serif; white-space: nowrap; box-sizing: border-box;">${btn.text}</a></td></tr>`;
+                      return `<tr><td style="padding: 2px; text-align: center;"><a href="${btn.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: 8px 16px; text-decoration: none; border-radius: ${btnBorderRadius}; font-weight: bold; display: inline-block; border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-size: ${ctaButtonSize}px; font-family: ${ctaButtonFont}, sans-serif; white-space: nowrap; box-sizing: border-box; width: ${ctaButtonWidth}%; height: ${ctaButtonHeight}px; line-height: ${ctaButtonHeight - 16}px; vertical-align: middle;">${btn.text}</a></td></tr>`;
                     }).join('')}
                   </table>
                 </td>
@@ -2994,8 +3003,34 @@ export default function EmailSignature() {
                     {!collapsedSections.ctaButtonStyleSection && (
                       <div className="space-y-3">
                         <div>
+                          <Label className="text-xs mb-1">Font</Label>
+                          <Select value={signatureData.ctaButtonFont} onValueChange={(v: any) => updateField("ctaButtonFont", v)}>
+                            <SelectTrigger className="w-full" data-testid="select-cta-font">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {professionalFonts.map((font) => (
+                                <SelectItem key={font} value={font}>
+                                  {font}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
                           <Label className="text-xs">Font Size: {signatureData.ctaButtonSize}px</Label>
-                          <input type="range" min="10" max="20" value={signatureData.ctaButtonSize} onChange={(e) => updateField("ctaButtonSize", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-font-size" />
+                          <input type="range" min="10" max="32" value={signatureData.ctaButtonSize} onChange={(e) => updateField("ctaButtonSize", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-font-size" />
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Button Width: {signatureData.ctaButtonWidth}%</Label>
+                          <input type="range" min="20" max="100" value={signatureData.ctaButtonWidth} onChange={(e) => updateField("ctaButtonWidth", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-width" />
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Button Height: {signatureData.ctaButtonHeight}px</Label>
+                          <input type="range" min="30" max="80" value={signatureData.ctaButtonHeight} onChange={(e) => updateField("ctaButtonHeight", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-height" />
                         </div>
 
                         <div>
