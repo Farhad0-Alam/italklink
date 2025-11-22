@@ -79,12 +79,6 @@ interface SignatureData {
   companyLogoBackgroundColor: string;
   companyLogoOpacity: number;
   companyLogoShadow: "none" | "small" | "medium" | "large";
-  
-  showLogoInitials: boolean;
-  logoInitials: string;
-  logoInitialsFontSize: number;
-  logoInitialsColor: string;
-  logoInitialsFont: string;
 
   primaryColor: string;
   secondaryColor: string;
@@ -407,12 +401,6 @@ export default function EmailSignature() {
     companyLogoBackgroundColor: "#FFFFFF",
     companyLogoOpacity: 100,
     companyLogoShadow: "none",
-    
-    showLogoInitials: true,
-    logoInitials: "JD",
-    logoInitialsFontSize: 32,
-    logoInitialsColor: "#FFFFFF",
-    logoInitialsFont: "Arial",
     primaryColor: "#FF6A00",
     secondaryColor: "#333333",
     signatureFont: "Alex Brush",
@@ -738,7 +726,7 @@ export default function EmailSignature() {
           <td colspan="2" style="padding-top: 25px; border-top: 2px solid ${primaryColor}; margin-top: 20px;">
             <table cellpadding="0" cellspacing="0" border="0" width="100%">
               <tr>
-                ${signatureData.showLogoInitials ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}; display: flex; align-items: center; justify-content: center;"><div style="font-family: ${signatureData.logoInitialsFont}, sans-serif; font-size: ${signatureData.logoInitialsFontSize}px; font-weight: bold; color: ${signatureData.logoInitialsColor};">${signatureData.logoInitials}</div></div></td>` : companyLogo ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}"><img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}"></div></td>` : ""}
+                ${companyLogo ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}"><img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}"></div></td>` : ""}
                 ${
                   showCTA && ctaUrl
                     ? `
@@ -2441,103 +2429,6 @@ export default function EmailSignature() {
                           </div>
                         </div>
                       </div>
-                    </div>
-
-                    {/* Logo Initials Subsection */}
-                    <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3 mt-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <Label className="text-sm font-semibold">Logo with Initials</Label>
-                        <Switch
-                          checked={signatureData.showLogoInitials}
-                          onCheckedChange={(checked) =>
-                            updateField("showLogoInitials", checked)
-                          }
-                          data-testid="switch-show-logo-initials"
-                        />
-                      </div>
-                      {signatureData.showLogoInitials && (
-                        <div className="space-y-2">
-                          <div>
-                            <Label className="text-xs">Initials Text</Label>
-                            <Input
-                              value={signatureData.logoInitials}
-                              onChange={(e) =>
-                                updateField("logoInitials", e.target.value.toUpperCase().slice(0, 4))
-                              }
-                              placeholder="JD"
-                              maxLength={4}
-                              className="text-center"
-                              data-testid="input-logo-initials"
-                            />
-                          </div>
-
-                          <div>
-                            <Label className="text-xs">
-                              Font Size: {signatureData.logoInitialsFontSize}px
-                            </Label>
-                            <input
-                              type="range"
-                              min="16"
-                              max="64"
-                              value={signatureData.logoInitialsFontSize}
-                              onChange={(e) =>
-                                updateField(
-                                  "logoInitialsFontSize",
-                                  parseInt(e.target.value),
-                                )
-                              }
-                              className="custom-range w-full"
-                              data-testid="slider-logo-initials-size"
-                            />
-                          </div>
-
-                          <div>
-                            <Label className="text-xs mb-1">Text Color</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                type="color"
-                                value={signatureData.logoInitialsColor}
-                                onChange={(e) =>
-                                  updateField(
-                                    "logoInitialsColor",
-                                    e.target.value,
-                                  )
-                                }
-                                className="w-16 h-9"
-                                data-testid="input-logo-initials-color"
-                              />
-                              <Input
-                                value={signatureData.logoInitialsColor}
-                                onChange={(e) =>
-                                  updateField(
-                                    "logoInitialsColor",
-                                    e.target.value,
-                                  )
-                                }
-                                placeholder="#FFFFFF"
-                                className="flex-1"
-                                data-testid="input-logo-initials-color-hex"
-                              />
-                            </div>
-                          </div>
-
-                          <div>
-                            <Label className="text-xs">Font</Label>
-                            <Select value={signatureData.logoInitialsFont} onValueChange={(v) => updateField("logoInitialsFont", v)}>
-                              <SelectTrigger className="w-full" data-testid="select-logo-initials-font">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {professionalFonts.map((font) => (
-                                  <SelectItem key={font} value={font}>
-                                    {font}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </>
                 )}
