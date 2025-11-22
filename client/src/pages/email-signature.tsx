@@ -71,12 +71,14 @@ interface SignatureData {
   profilePhotoShadow: "none" | "small" | "medium" | "large";
 
   companyLogo: string;
+  companyLogoShape: "circle" | "square" | "rounded";
   companyLogoWidth: number;
   companyLogoHeight: number;
   companyLogoBorderWidth: number;
   companyLogoBorderColor: string;
   companyLogoBackgroundColor: string;
   companyLogoOpacity: number;
+  companyLogoShadow: "none" | "small" | "medium" | "large";
 
   primaryColor: string;
   secondaryColor: string;
@@ -391,12 +393,14 @@ export default function EmailSignature() {
     profilePhotoShadow: "medium",
 
     companyLogo: "https://via.placeholder.com/200x80/FF6A00/FFFFFF?text=ACME",
+    companyLogoShape: "square",
     companyLogoWidth: 120,
     companyLogoHeight: 60,
     companyLogoBorderWidth: 0,
     companyLogoBorderColor: "#CCCCCC",
     companyLogoBackgroundColor: "#FFFFFF",
     companyLogoOpacity: 100,
+    companyLogoShadow: "none",
     primaryColor: "#FF6A00",
     secondaryColor: "#333333",
     signatureFont: "Alex Brush",
@@ -795,8 +799,18 @@ export default function EmailSignature() {
 
       return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px solid ${profilePhotoBorderColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center;`;
     } else {
-      const { companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor, companyLogoBackgroundColor } = signatureData;
-      return `width: ${companyLogoWidth}px; height: ${companyLogoHeight}px; border: ${companyLogoBorderWidth}px solid ${companyLogoBorderColor}; background-color: ${companyLogoBackgroundColor}; overflow: hidden; display: flex; align-items: center; justify-content: center;`;
+      const { companyLogoShape, companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor, companyLogoBackgroundColor, companyLogoShadow } = signatureData;
+      
+      let borderRadius = "0%";
+      if (companyLogoShape === "circle") borderRadius = "50%";
+      if (companyLogoShape === "rounded") borderRadius = "8px";
+
+      let boxShadow = "none";
+      if (companyLogoShadow === "small") boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+      if (companyLogoShadow === "medium") boxShadow = "0 4px 8px rgba(0,0,0,0.15)";
+      if (companyLogoShadow === "large") boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
+
+      return `width: ${companyLogoWidth}px; height: ${companyLogoHeight}px; border-radius: ${borderRadius}; border: ${companyLogoBorderWidth}px solid ${companyLogoBorderColor}; background-color: ${companyLogoBackgroundColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center;`;
     }
   };
 
@@ -2351,6 +2365,20 @@ export default function EmailSignature() {
 
                       <div className="space-y-2">
                         <div>
+                          <Label className="text-xs">Shape</Label>
+                          <Select value={signatureData.companyLogoShape} onValueChange={(v: any) => updateField("companyLogoShape", v)}>
+                            <SelectTrigger className="w-full" data-testid="select-logo-shape">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="circle">Circle</SelectItem>
+                              <SelectItem value="square">Square</SelectItem>
+                              <SelectItem value="rounded">Rounded Square</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
                           <Label className="text-xs">Width ({signatureData.companyLogoWidth}px)</Label>
                           <input type="range" min="20" max="300" value={signatureData.companyLogoWidth} onChange={(e) => updateField("companyLogoWidth", Number(e.target.value))} className="w-full" data-testid="input-logo-width" />
                         </div>
@@ -2380,9 +2408,25 @@ export default function EmailSignature() {
                           </div>
                         </div>
 
-                        <div>
-                          <Label className="text-xs">Opacity ({signatureData.companyLogoOpacity}%)</Label>
-                          <input type="range" min="0" max="100" value={signatureData.companyLogoOpacity} onChange={(e) => updateField("companyLogoOpacity", Number(e.target.value))} className="w-full" data-testid="input-logo-opacity" />
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-xs">Opacity ({signatureData.companyLogoOpacity}%)</Label>
+                            <input type="range" min="0" max="100" value={signatureData.companyLogoOpacity} onChange={(e) => updateField("companyLogoOpacity", Number(e.target.value))} className="w-full" data-testid="input-logo-opacity" />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Shadow</Label>
+                            <Select value={signatureData.companyLogoShadow} onValueChange={(v: any) => updateField("companyLogoShadow", v)}>
+                              <SelectTrigger data-testid="select-logo-shadow">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">None</SelectItem>
+                                <SelectItem value="small">Small</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="large">Large</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </div>
                     </div>
