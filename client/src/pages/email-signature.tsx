@@ -60,7 +60,7 @@ interface SignatureData {
   address: string;
   ecardUrl: string;
 
-  customFields: { label: string; value: string; icon: string; url: string }[];
+  customFields: { value: string; icon: string; url: string }[];
 
   profilePhoto: string;
   profilePhotoShape: "circle" | "square" | "rounded";
@@ -537,7 +537,7 @@ export default function EmailSignature() {
   const addCustomField = () => {
     setSignatureData((prev) => ({
       ...prev,
-      customFields: [...prev.customFields, { label: "", value: "", icon: "phone", url: "" }],
+      customFields: [...prev.customFields, { value: "", icon: "phone", url: "" }],
     }));
   };
 
@@ -550,7 +550,7 @@ export default function EmailSignature() {
 
   const updateCustomField = (
     index: number,
-    field: "label" | "value" | "icon" | "url",
+    field: "value" | "icon" | "url",
     value: string,
   ) => {
     setSignatureData((prev) => {
@@ -675,13 +675,13 @@ export default function EmailSignature() {
     };
 
     const customFieldsHTML = customFields
-      .filter((f) => f.label && f.value)
+      .filter((f) => f.value)
       .map((field) => {
         const iconPath = field.icon && customIconMap[field.icon] ? customIconMap[field.icon] : phoneIcon;
         if (field.url) {
-          return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><a href="${field.url}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${iconPath}" alt="" style="width:100%; height:100%; display:block;"></span>${field.label}</a></td></tr>`;
+          return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><a href="${field.url}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${iconPath}" alt="" style="width:100%; height:100%; display:block;"></span>${field.value}</a></td></tr>`;
         }
-        return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${iconPath}" alt="" style="width:100%; height:100%; display:block;"></span>${field.label}: ${field.value}</td></tr>`;
+        return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${iconPath}" alt="" style="width:100%; height:100%; display:block;"></span>${field.value}</td></tr>`;
       })
       .join("");
 
@@ -2017,14 +2017,14 @@ export default function EmailSignature() {
                         >
                           <div className="flex gap-2 items-end">
                             <div className="flex-1">
-                              <Label className="text-xs">Label</Label>
+                              <Label className="text-xs">Value</Label>
                               <Input
-                                value={field.label}
+                                value={field.value}
                                 onChange={(e) =>
-                                  updateCustomField(index, "label", e.target.value)
+                                  updateCustomField(index, "value", e.target.value)
                                 }
-                                placeholder="Label (e.g., LinkedIn)"
-                                data-testid={`input-custom-field-label-${index}`}
+                                placeholder="Value (e.g., LinkedIn, Skype)"
+                                data-testid={`input-custom-field-value-${index}`}
                               />
                             </div>
                             <Button
@@ -2064,18 +2064,6 @@ export default function EmailSignature() {
                               }
                               placeholder="https://... or tel:... or mailto:..."
                               data-testid={`input-custom-field-url-${index}`}
-                            />
-                          </div>
-
-                          <div>
-                            <Label className="text-xs">Value</Label>
-                            <Input
-                              value={field.value}
-                              onChange={(e) =>
-                                updateCustomField(index, "value", e.target.value)
-                              }
-                              placeholder="Display value"
-                              data-testid={`input-custom-field-value-${index}`}
                             />
                           </div>
                         </div>
