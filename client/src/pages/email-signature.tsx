@@ -1035,28 +1035,27 @@ export default function EmailSignature() {
                     <div className="flex gap-2 pb-1">
                       {templates.map((template, index) => {
                         const isSelected = index === carouselIndex;
-                        const isCurrent = isSelected;
                         return (
                           <div
                             key={template.id}
                             onClick={() => selectTemplate(index)}
-                            className={`flex-shrink-0 cursor-pointer transition-all relative ${isCurrent ? 'w-72' : 'w-40'}`}
+                            className="flex-shrink-0 cursor-pointer transition-all relative w-40"
                             data-testid={`template-card-${template.id}`}
                           >
                             <div
-                              className={`border-3 rounded-lg overflow-hidden shadow-lg transition-all ${isCurrent ? 'h-56' : 'h-32'} ${
+                              className={`border-3 rounded-lg overflow-hidden shadow-lg transition-all h-32 ${
                                 isSelected
                                   ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400"
                                   : "border-slate-300 dark:border-slate-600"
                               }`}
                             >
-                              <div className={`h-full bg-white dark:bg-slate-900 flex items-center justify-center p-2 overflow-auto`}>
+                              <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-2 overflow-hidden">
                                 <div
                                   style={{
-                                    transform: isCurrent ? "scale(0.6)" : "scale(0.35)",
+                                    transform: "scale(0.35)",
                                     transformOrigin: "top left",
-                                    width: isCurrent ? "166.67%" : "286%",
-                                    fontSize: isCurrent ? "13px" : "11px"
+                                    width: "286%",
+                                    fontSize: "11px"
                                   }}
                                 >
                                   <div
@@ -1068,13 +1067,8 @@ export default function EmailSignature() {
                                 </div>
                               </div>
                             </div>
-                            {isCurrent && (
-                              <div className="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                                Current
-                              </div>
-                            )}
                             <div className="text-center mt-1">
-                              <span className={`font-semibold text-slate-700 dark:text-slate-300 ${isCurrent ? 'text-sm' : 'text-xs'}`}>
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                                 {template.name}
                               </span>
                             </div>
