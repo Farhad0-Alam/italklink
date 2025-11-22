@@ -918,7 +918,7 @@ export default function EmailSignature() {
         </div>
 
         {/* Step 1 & 2: Platform Selection and Template Carousel */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           {/* Step 1: Email Platform Selection */}
           <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
             <CardHeader className="py-2 px-3">
@@ -1023,7 +1023,7 @@ export default function EmailSignature() {
         </div>
 
         {/* Step 3 & Preview: Form and Live Preview */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             {/* CARD 1: Signature (Handwritten Style) */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
