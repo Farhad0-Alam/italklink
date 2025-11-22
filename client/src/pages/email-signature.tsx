@@ -106,6 +106,12 @@ interface SignatureData {
   contactIconSize: number;
   contactIconColor: string;
 
+  socialIconSize: number;
+  socialIconColor: string;
+  socialIconShape: "circle" | "square" | "rounded";
+  socialIconBorderWidth: number;
+  socialIconBorderColor: string;
+
   dividerHeight: number;
   dividerColor: string;
   dividerMarginTop: number;
@@ -154,6 +160,7 @@ const socialPlatforms = [
   { value: "whatsapp", label: "WhatsApp", icon: SiWhatsapp },
   { value: "pinterest", label: "Pinterest", icon: SiPinterest },
   { value: "github", label: "GitHub", icon: SiGithub },
+  { value: "snapchat", label: "Snapchat", icon: SiGithub },
 ];
 
 const emailPlatforms = [
@@ -353,6 +360,7 @@ export default function EmailSignature() {
     iconColor: true,
     imagesSection: true,
     socialLinksSection: true,
+    socialIconStyle: true,
     optionalFeaturesSection: true,
   });
   const [signatureData, setSignatureData] = useState<SignatureData>({
@@ -407,6 +415,11 @@ export default function EmailSignature() {
     contactLetterSpacing: 0,
     contactIconSize: 16,
     contactIconColor: "#FF6A00",
+    socialIconSize: 24,
+    socialIconColor: "#FF6A00",
+    socialIconShape: "circle",
+    socialIconBorderWidth: 0,
+    socialIconBorderColor: "#CCCCCC",
     dividerHeight: 3,
     dividerColor: "#FF6A00",
     dividerMarginTop: 5,
@@ -574,6 +587,11 @@ export default function EmailSignature() {
       contactLetterSpacing,
       contactIconSize,
       contactIconColor,
+      socialIconSize,
+      socialIconColor,
+      socialIconShape,
+      socialIconBorderWidth,
+      socialIconBorderColor,
       dividerHeight,
       dividerColor,
       dividerMarginTop,
@@ -581,10 +599,18 @@ export default function EmailSignature() {
       dividerWidth,
     } = signatureData;
 
+    const getSocialIconBorderRadius = (shape: string): string => {
+      if (shape === "circle") return "50%";
+      if (shape === "rounded") return "8px";
+      return "0px";
+    };
+
     const socialIconsHTML = socialLinks
       .map((link) => {
         const iconSVG = getSocialIconSVG(link.platform);
-        return `<a href="${link.url}" style="display:inline-block;margin:0 6px;"><img src="${iconSVG}" alt="${link.platform}" width="${contactIconSize + 16}" height="${contactIconSize + 16}" style="border:0;display:block;border-radius:50%;"></a>`;
+        const borderRadius = getSocialIconBorderRadius(socialIconShape);
+        const borderStyle = socialIconBorderWidth > 0 ? `border: ${socialIconBorderWidth}px solid ${socialIconBorderColor};` : "";
+        return `<a href="${link.url}" style="display:inline-block;margin:0 6px;"><div style="width:${socialIconSize}px;height:${socialIconSize}px;background-color:${socialIconColor};border-radius:${borderRadius};${borderStyle}display:flex;align-items:center;justify-content:center;overflow:hidden;"><img src="${iconSVG}" alt="${link.platform}" width="${Math.round(socialIconSize * 0.6)}" height="${Math.round(socialIconSize * 0.6)}" style="border:0;display:block;"></div></a>`;
       })
       .join("");
 
@@ -704,6 +730,8 @@ export default function EmailSignature() {
         "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCI+PHBhdGggZmlsbD0iI0UwMTIxQiIgZD0iTTEyIDBDNS4zNzMgMCAwIDUuMzcyIDAgMTJjMCAzLjA3NiAxLjE1OCA1Ljg4MyAzLjA2IDguMDA3LS4wMy0uNDg4LS4wMDYtMS4wNzQuMTExLTEuNjA1LjEyOC0uNTguNzgyLTMuMzEyLjc4Mi0zLjMxMnMtLjIwNC0uNDA4LS4yMDQtMS4wMTJjMC0uOTQ4LjU1LTEuNjU2IDEuMjMyLTEuNjU2LjU4MSAwIDEuMDg4LjQzNiAxLjA4OCAxLjE2IDAgLjcwNS0uNDQ4IDEuNzYtLjY4IDIuNzM0LS4xOTQuODIxLjQxMSAxLjQ5MiAxLjIyIDEuNDkyIDEuNDY0IDAgMi41OTItMS41NDQgMi41OTItMy43NzIgMC0xLjk3Mi0xLjQxNy0zLjM0OC0zLjQ0LTMuMzQ4LTIuMzQ0IDAtMy43MiAxLjc1Ni0zLjcyIDMuNTcgMCAuNzA3LjI3MiAxLjQ2NS42MTIgMS44NzguMDY3LjA4MS4wNzcuMTUyLjA1Ni4yMzUtLjA2MS4yNTQtLjE5Ni44MDEtLjIyMy45MTctLjAzNS4xNTItLjExNi4xODQtLjI2OC4xMTEtMSAwLS40NjUtMS42MjUtMS40NjUtMy42NDMgMC0yLjU5NSAxLjg4NC01LjAxNiA1LjYwOS01LjAxNiAyLjk0IDAgNS4yMjggMi4wOTYgNS4yMjggNC44OTIgMCAyLjkxNi0xLjgzOCA1LjI2MS00LjM5IDUuMjYxLS44NTcgMC0xLjY2NC0uNDQ1LTEuOTQtLjk3MWwtLjUyOCAxLjk5OGMtLjE5LjczNS0uNzA2IDEuNjU1LTEuMDUgMi4yMTcuNzkuMjQ0IDEuNjI5LjM3NiAyLjQ5OC4zNzYgNC42MjcgMCA4LjM3Ny0zLjc1IDguMzc3LTguMzc3QzIwLjM3NyAzLjc1IDE2LjYyNyAwIDEyIDB6Ii8+PC9zdmc+",
       github:
         "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCI+PHBhdGggZD0iTTEyIDBjLTYuNjI2IDAtMTIgNS4zNzMtMTIgMTIgMCA1LjMwMiAzLjQzOCA5LjggOC4yMDcgMTEuMzg3LjU5OS4xMTEuNzkzLS4yNjEuNzkzLS41Nzd2LTIuMjM0Yy0zLjMzOC43MjYtNC4wMzMtMS40MTYtNC4wMzMtMS40MTYtLjU0Ni0xLjM4Ny0xLjMzMy0xLjc1Ni0xLjMzMy0xLjc1Ni0xLjA4OS0uNzQ1LjA4My0uNzI5LjA4My0uNzI5IDEuMjA1LjA4NCAxLjgzOSAxLjIzNyAxLjgzOSAxLjIzNyAxLjA3IDEuODM0IDIuODA3IDEuMzA0IDMuNDkyLjk5Ny4xMDctLjc3NS40MTgtMS4zMDUuNzYyLTEuNjA0LTIuNjY1LS4zMDUtNS40NjctMS4zMzQtNS40NjctNS45MzEgMC0xLjMxMS40NjktMi4zODEgMS4yMzYtMy4yMjEtLjEyNC0uMzAzLS41MzUtMS41MjQuMTE3LTMuMTc2IDAgMCAxLjAwOC0uMzIyIDMuMzAxIDEuMjNBMTEuNTA5IDExLjUwOSAwIDAgMSAxMiA1Ljg4M2MxLjAyLjAwNSAyLjA0Ny4xMzggMy4wMDYuNDA0IDIuMjkxLTEuNTUyIDMuMjk3LTEuMjMgMy4yOTctMS4yMy42NTMgMS42NTMuMjQyIDIuODc0LjExOCAzLjE3Ni43NzcuODQgMS4yMzUgMS45MTEgMS4yMzUgMy4yMjEgMCA0LjYwOS0yLjgwNyA1LjYyNC01LjQ3OSA1LjkyMS40My4zNzIuODIzIDEuMTAyLjgyMyAyLjIyMnYzLjI5M2MwIC4zMTkuMTkyLjY5NC44MDEuNTc2QzIwLjU2NiAyMS43OTcgMjQgMTcuMyAyNCAxMmMwLTYuNjI3LTUuMzczLTEyLTEyLTEyeiIvPjwvc3ZnPg==",
+      snapchat:
+        "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCI+PHBhdGggZmlsbD0iI0ZGRkEwMCIgZD0iTTEyIDBDNS4zNzMgMCAwIDUuMzczIDAgMTJzNS4zNzMgMTIgMTIgMTIgMTItNS4zNzMgMTItMTJTMTguNjI3IDAgMTIgMHptNi4yMDUgMTEuNTI3Yy4zODkuMTcxLjU4LjQzOS41OC43NTkgMCAuNjMtLjY5MiAxLjEyOC0xLjU0MyAxLjEyOC0uNTQyIDAtLjkzNC0uMjI4LS45MzQtLjU3MSAwLS4xNzEuMDg1LS4zNDIuMjU2LS40MDhjLjQzOS0uMTcxLjc1OS0uNTcxLjc1OS0xLjA0NyAwLS41NDItLjQzOS0uOTM0LTEuMTI4LS45MzQtLjQzOSAwLS43NTkuMDg1LS45MzQuMjI4bC0uMzQyLS4zNDJjLS4zNDItLjM0Mi0uNDM5LS43NTktLjEwMi0xLjEyOGwuMzQyLS4zNDJjLS4xNzEtLjI1Ni0uMjU2LS41NDItLjI1Ni0uODIxIDAtLjk2NyAxLjA0Ny0xLjcxIDIuNDEtMS43MSAxLjM2MyAwIDIuNDEuNzQzIDIuNDEgMS43MWluLTMuODczIDAgMy44NzNjMCAuMjU2LjA4NS41MTIuMjU2LjcwOC4zNDIuNDM5LjM0MiAxLjA0Ny0uMzQyIDEuMzY0bC0uMzQyLjM0MmMuMTcxLjEzNy40MzguMjI4LjkzNC4yMjguNjg5IDAgMS4xMjgtLjQ5NyAxLjEyOC0xLjEyOCAwLS4zMi0uMTkxLS41ODgtLjU4LS43NTl6Ii8+PC9zdmc+",
     };
     return icons[platform] || icons.facebook;
   };
@@ -2433,6 +2461,152 @@ export default function EmailSignature() {
                     No social links added yet
                   </p>
                 )}
+
+                {/* Social Icon Style Subsection */}
+                <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3 mt-4">
+                  <div
+                    className="flex items-center justify-between cursor-pointer mb-3"
+                    onClick={() => toggleSection("socialIconStyle")}
+                    data-testid="toggle-social-icon-style"
+                  >
+                    <Label className="text-sm font-semibold">
+                      Social Icon Style
+                    </Label>
+                    {collapsedSections.socialIconStyle ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronUp className="w-4 h-4" />
+                    )}
+                  </div>
+                  {!collapsedSections.socialIconStyle && (
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-xs">
+                          Icon Size: {signatureData.socialIconSize}px
+                        </Label>
+                        <input
+                          type="range"
+                          min="16"
+                          max="48"
+                          value={signatureData.socialIconSize}
+                          onChange={(e) =>
+                            updateField(
+                              "socialIconSize",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="custom-range w-full"
+                          data-testid="slider-social-icon-size"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-xs mb-1">Background Color</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="color"
+                            value={signatureData.socialIconColor}
+                            onChange={(e) =>
+                              updateField(
+                                "socialIconColor",
+                                e.target.value,
+                              )
+                            }
+                            className="w-16 h-9"
+                            data-testid="input-social-icon-color"
+                          />
+                          <Input
+                            value={signatureData.socialIconColor}
+                            onChange={(e) =>
+                              updateField(
+                                "socialIconColor",
+                                e.target.value,
+                              )
+                            }
+                            placeholder="#FF6A00"
+                            className="flex-1"
+                            data-testid="input-social-icon-color-hex"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-xs mb-1">Icon Shape</Label>
+                        <Select
+                          value={signatureData.socialIconShape}
+                          onValueChange={(v) =>
+                            updateField(
+                              "socialIconShape",
+                              v as "circle" | "square" | "rounded",
+                            )
+                          }
+                        >
+                          <SelectTrigger
+                            className="w-full"
+                            data-testid="select-social-icon-shape"
+                          >
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="circle">Circle</SelectItem>
+                            <SelectItem value="square">Square</SelectItem>
+                            <SelectItem value="rounded">Rounded</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">
+                          Border Width: {signatureData.socialIconBorderWidth}px
+                        </Label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="5"
+                          value={signatureData.socialIconBorderWidth}
+                          onChange={(e) =>
+                            updateField(
+                              "socialIconBorderWidth",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="custom-range w-full"
+                          data-testid="slider-social-icon-border-width"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-xs mb-1">Border Color</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="color"
+                            value={signatureData.socialIconBorderColor}
+                            onChange={(e) =>
+                              updateField(
+                                "socialIconBorderColor",
+                                e.target.value,
+                              )
+                            }
+                            className="w-16 h-9"
+                            data-testid="input-social-icon-border-color"
+                          />
+                          <Input
+                            value={signatureData.socialIconBorderColor}
+                            onChange={(e) =>
+                              updateField(
+                                "socialIconBorderColor",
+                                e.target.value,
+                              )
+                            }
+                            placeholder="#CCCCCC"
+                            className="flex-1"
+                            data-testid="input-social-icon-border-color-hex"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
                   </>
                 )}
               </CardContent>
