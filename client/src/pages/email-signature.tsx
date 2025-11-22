@@ -120,30 +120,19 @@ interface SignatureData {
   socialLinksBottomSpacing: number;
   socialIconsGap: number;
 
-  bannerBackgroundColor: string;
-  bannerBorderColor: string;
-  bannerBorderWidth: number;
-  bannerBorderRadius: number;
+  dividerHeight: number;
+  dividerColor: string;
+  dividerMarginTop: number;
+  dividerMarginBottom: number;
+  dividerWidth: number;
 
   socialLinks: { platform: string; url: string; icon: string }[];
 
-  ctaButtonFont: string;
-  ctaButtonSize: number;
-  ctaButtonColor: string;
-  ctaButtonBackgroundColor: string;
-  ctaButtonShape: "rounded" | "square";
-  ctaButtonRadius: number;
-  ctaButtonBorderWidth: number;
-  ctaButtonBorderColor: string;
-  ctaButtonWidth: number;
-  ctaButtonHeight: number;
-  ctaButtonPosition: number;
-  ctaButtonPositionVertical: number;
-  ctaButtonGap: number;
-
   showDisclaimer: boolean;
   disclaimerText: string;
-  ctaButtons: { text: string; url: string }[];
+  showCTA: boolean;
+  ctaText: string;
+  ctaUrl: string;
   showBanner: boolean;
   bannerText: string;
 }
@@ -382,8 +371,6 @@ export default function EmailSignature() {
     imagesSection: true,
     socialLinksSection: true,
     socialIconStyle: true,
-    ctaButtonsSection: true,
-    ctaButtonStyleSection: true,
     optionalFeaturesSection: true,
   });
   const [signatureData, setSignatureData] = useState<SignatureData>({
@@ -451,10 +438,11 @@ export default function EmailSignature() {
     socialIconsGap: 9,
     socialIconBorderWidth: 0,
     socialIconBorderColor: "#CCCCCC",
-    bannerBackgroundColor: "#F5F5F5",
-    bannerBorderColor: "#FF6A00",
-    bannerBorderWidth: 2,
-    bannerBorderRadius: 8,
+    dividerHeight: 3,
+    dividerColor: "#FF6A00",
+    dividerMarginTop: 5,
+    dividerMarginBottom: 5,
+    dividerWidth: 100,
     socialLinks: [
       {
         platform: "linkedin",
@@ -481,24 +469,9 @@ export default function EmailSignature() {
     showDisclaimer: false,
     disclaimerText:
       "This email and any attachments are confidential and intended solely for the recipient.",
-    ctaButtonFont: "Arial",
-    ctaButtonSize: 12,
-    ctaButtonColor: "#FFFFFF",
-    ctaButtonBackgroundColor: "#2C2C2C",
-    ctaButtonShape: "rounded",
-    ctaButtonRadius: 6,
-    ctaButtonBorderWidth: 2,
-    ctaButtonBorderColor: "#CCCCCC",
-    ctaButtonWidth: 55,
-    ctaButtonHeight: 32,
-    ctaButtonPosition: 50,
-    ctaButtonPositionVertical: 50,
-    ctaButtonGap: 8,
-    ctaButtons: [
-      { text: "SEARCH PROPERTIES NOW", url: "https://talkl.ink/" },
-      { text: "GET A FREE HOME VALUATION", url: "https://talkl.ink/" },
-      { text: "BOOK A CONSULTATION", url: "https://talkl.ink/" },
-    ],
+    showCTA: false,
+    ctaText: "Book a Consultation",
+    ctaUrl: "",
     showBanner: false,
     bannerText: "Get in touch today!",
   });
@@ -587,28 +560,6 @@ export default function EmailSignature() {
     }));
   };
 
-  const addCtaButton = () => {
-    setSignatureData((prev) => ({
-      ...prev,
-      ctaButtons: [...prev.ctaButtons, { text: "Button Text", url: "https://talkl.ink/" }],
-    }));
-  };
-
-  const removeCtaButton = (index: number) => {
-    setSignatureData((prev) => ({
-      ...prev,
-      ctaButtons: prev.ctaButtons.filter((_, i) => i !== index),
-    }));
-  };
-
-  const updateCtaButton = (index: number, field: "text" | "url", value: string) => {
-    setSignatureData((prev) => {
-      const newButtons = [...prev.ctaButtons];
-      newButtons[index] = { ...newButtons[index], [field]: value };
-      return { ...prev, ctaButtons: newButtons };
-    });
-  };
-
   const updateCustomField = (
     index: number,
     field: "value" | "icon" | "url",
@@ -674,7 +625,9 @@ export default function EmailSignature() {
       primaryColor,
       secondaryColor,
       socialLinks,
-      ctaButtons,
+      showCTA,
+      ctaText,
+      ctaUrl,
       showBanner,
       bannerText,
       customFields,
@@ -707,23 +660,11 @@ export default function EmailSignature() {
       socialLinksTopSpacing,
       socialLinksBottomSpacing,
       socialIconsGap,
-      bannerBackgroundColor,
-      bannerBorderColor,
-      bannerBorderWidth,
-      bannerBorderRadius,
-      ctaButtonFont,
-      ctaButtonSize,
-      ctaButtonColor,
-      ctaButtonBackgroundColor,
-      ctaButtonShape,
-      ctaButtonRadius,
-      ctaButtonBorderWidth,
-      ctaButtonBorderColor,
-      ctaButtonWidth,
-      ctaButtonHeight,
-      ctaButtonPosition,
-      ctaButtonPositionVertical,
-      ctaButtonGap,
+      dividerHeight,
+      dividerColor,
+      dividerMarginTop,
+      dividerMarginBottom,
+      dividerWidth,
       profilePhotoRightSideGap,
     } = signatureData;
 
@@ -787,7 +728,7 @@ export default function EmailSignature() {
           ${
             profilePhoto
               ? `
-          <td style="padding-right: ${profilePhotoRightSideGap}px; vertical-align: top;">
+          <td style="padding-right: ${profilePhotoRightSideGap}px; vertical-align: middle;">
             <div style="${getContainerStyle('profile')}">
               <img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}">
             </div>
@@ -808,6 +749,7 @@ export default function EmailSignature() {
                   ${title}${title && company ? ` <span style="color: ${titleColor}; opacity: 0.7; margin: 0 8px;">|</span> ` : ''}${company ? `<span style="font-family: ${headerFont}, sans-serif; font-size: ${companySize}px; color: ${companyColor}; font-weight: normal;">${company}</span>` : ''}
                 </td>
               </tr>
+              <tr><td style="padding-top: ${dividerMarginTop}px; padding-bottom: ${dividerMarginBottom}px;"><div style="height: ${dividerHeight}px; background-color: ${dividerColor}; width: ${dividerWidth}%;"></div></td></tr>
               ${officePhone || cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;">
                 ${officePhone ? `<span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${phoneIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${officePhone}</a>` : ""}
                 ${officePhone && cellPhone ? `<span style="margin: 0 6px;"></span>` : ""}
@@ -826,25 +768,18 @@ export default function EmailSignature() {
           </td>
         </tr>
         ${
-          companyLogo || ctaButtons.length > 0
+          companyLogo || showCTA
             ? `
         <tr>
-          <td colspan="2" style="padding-top: 0px;">
-            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: ${bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; border-radius: ${bannerBorderRadius}px; padding: 20px;">
+          <td colspan="2" style="padding-top: 25px; border-top: 2px solid ${primaryColor}; margin-top: 20px;">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%">
               <tr>
                 ${companyLogo ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}"><img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}"></div></td>` : ""}
                 ${
-                  ctaButtons.length > 0
+                  showCTA && ctaUrl
                     ? `
-                <td style="vertical-align: ${ctaButtonPositionVertical < 33 ? "top" : ctaButtonPositionVertical > 66 ? "bottom" : "middle"};">
-                  <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed; border-collapse: collapse;">
-                    ${ctaButtons.map((btn, index) => {
-                      const btnBorderRadius = ctaButtonShape === "square" ? "0px" : `${ctaButtonRadius}px`;
-                      const btnAlignment = ctaButtonPosition < 33 ? "left" : ctaButtonPosition > 66 ? "right" : "center";
-                      const marginBottom = index < ctaButtons.length - 1 ? ctaButtonGap : 0;
-                      return `<tr><td style="padding: 0; margin-bottom: ${marginBottom}px; text-align: ${btnAlignment};"><a href="${btn.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: 8px 16px; text-decoration: none; border-radius: ${btnBorderRadius}; font-weight: bold; display: inline-block; border-right: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-size: ${ctaButtonSize}px; font-family: ${ctaButtonFont}, sans-serif; white-space: nowrap; box-sizing: border-box; width: ${ctaButtonWidth}%; height: ${ctaButtonHeight}px; line-height: ${ctaButtonHeight - 16}px; vertical-align: middle; text-align: center; margin-bottom: ${marginBottom}px;">${btn.text}</a></td></tr>`;
-                    }).join('')}
-                  </table>
+                <td style="text-align: ${companyLogo ? "right" : "center"}; vertical-align: middle;">
+                  <a href="${ctaUrl}" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${ctaText}</a>
                 </td>
                 `
                     : ""
@@ -1124,7 +1059,7 @@ export default function EmailSignature() {
             <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">${name}</div>
             <div style="font-size: 14px; opacity: 0.95;">${title}</div>
           </td>
-          ${profilePhoto ? `<td style="text-align: right; vertical-align: top;"><div style="${getContainerStyle('profile')}"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div></td>` : ''}
+          ${profilePhoto ? `<td style="text-align: right; vertical-align: middle;"><div style="${getContainerStyle('profile')}"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div></td>` : ''}
         </tr>
       </table>
     </td>
@@ -1858,12 +1793,132 @@ export default function EmailSignature() {
                       )}
                     </div>
 
+                    {/* Divider Style Subsection */}
+                    <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-3"
+                        onClick={() => toggleSection("dividerStyle")}
+                        data-testid="toggle-divider-style"
+                      >
+                        <Label className="text-sm font-semibold">
+                          Divider Style
+                        </Label>
+                        {collapsedSections.dividerStyle ? (
+                          <ChevronDown className="w-4 h-4" />
+                        ) : (
+                          <ChevronUp className="w-4 h-4" />
+                        )}
+                      </div>
+                      {!collapsedSections.dividerStyle && (
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-xs">
+                              Thickness: {signatureData.dividerHeight}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="1"
+                              max="10"
+                              value={signatureData.dividerHeight}
+                              onChange={(e) =>
+                                updateField(
+                                  "dividerHeight",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-divider-height"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">
+                              Width: {signatureData.dividerWidth}%
+                            </Label>
+                            <input
+                              type="range"
+                              min="10"
+                              max="100"
+                              step="10"
+                              value={signatureData.dividerWidth}
+                              onChange={(e) =>
+                                updateField(
+                                  "dividerWidth",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-divider-width"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs mb-1">Color</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="color"
+                                value={signatureData.dividerColor}
+                                onChange={(e) =>
+                                  updateField("dividerColor", e.target.value)
+                                }
+                                className="w-16 h-9"
+                                data-testid="input-divider-color"
+                              />
+                              <Input
+                                value={signatureData.dividerColor}
+                                onChange={(e) =>
+                                  updateField("dividerColor", e.target.value)
+                                }
+                                placeholder="#FF6A00"
+                                className="flex-1"
+                                data-testid="input-divider-color-hex"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs">
+                              Top Spacing: {signatureData.dividerMarginTop}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="30"
+                              value={signatureData.dividerMarginTop}
+                              onChange={(e) =>
+                                updateField(
+                                  "dividerMarginTop",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-divider-margin-top"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">
+                              Bottom Spacing: {signatureData.dividerMarginBottom}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="30"
+                              value={signatureData.dividerMarginBottom}
+                              onChange={(e) =>
+                                updateField(
+                                  "dividerMarginBottom",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-divider-margin-bottom"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     </div>
                   </>
                 )}
               </CardContent>
             </Card>
-
 
             {/* CARD 3: Contact Info */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
@@ -2798,342 +2853,6 @@ export default function EmailSignature() {
               </CardContent>
             </Card>
 
-            {/* Banner Background Card */}
-            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <CardHeader
-                className="cursor-pointer py-2 px-3"
-                onClick={() => toggleSection("bannerStyle")}
-                data-testid="toggle-banner-style"
-              >
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
-                    Banner Background
-                  </CardTitle>
-                  {collapsedSections.bannerStyle ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronUp className="w-4 h-4" />
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="p-3 space-y-3">
-                {!collapsedSections.bannerStyle && (
-                  <>
-                    <div>
-                      <Label className="text-xs mb-1">Background Color</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          value={signatureData.bannerBackgroundColor}
-                          onChange={(e) =>
-                            updateField("bannerBackgroundColor", e.target.value)
-                          }
-                          className="w-16 h-9"
-                          data-testid="input-banner-bg-color"
-                        />
-                        <Input
-                          value={signatureData.bannerBackgroundColor}
-                          onChange={(e) =>
-                            updateField("bannerBackgroundColor", e.target.value)
-                          }
-                          placeholder="#F5F5F5"
-                          className="flex-1"
-                          data-testid="input-banner-bg-color-hex"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-xs mb-1">Border Color</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          value={signatureData.bannerBorderColor}
-                          onChange={(e) =>
-                            updateField("bannerBorderColor", e.target.value)
-                          }
-                          className="w-16 h-9"
-                          data-testid="input-banner-border-color"
-                        />
-                        <Input
-                          value={signatureData.bannerBorderColor}
-                          onChange={(e) =>
-                            updateField("bannerBorderColor", e.target.value)
-                          }
-                          placeholder="#FF6A00"
-                          className="flex-1"
-                          data-testid="input-banner-border-color-hex"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-xs">
-                        Border Width: {signatureData.bannerBorderWidth}px
-                      </Label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="10"
-                        value={signatureData.bannerBorderWidth}
-                        onChange={(e) =>
-                          updateField(
-                            "bannerBorderWidth",
-                            parseInt(e.target.value),
-                          )
-                        }
-                        className="custom-range w-full"
-                        data-testid="slider-banner-border-width"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">
-                        Border Radius: {signatureData.bannerBorderRadius}px
-                      </Label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="30"
-                        value={signatureData.bannerBorderRadius}
-                        onChange={(e) =>
-                          updateField(
-                            "bannerBorderRadius",
-                            parseInt(e.target.value),
-                          )
-                        }
-                        className="custom-range w-full"
-                        data-testid="slider-banner-border-radius"
-                      />
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Call-to-Action Buttons Section */}
-            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <CardHeader
-                className="cursor-pointer py-2 px-3"
-                onClick={() => toggleSection("ctaButtonsSection")}
-                data-testid="toggle-cta-buttons-section"
-              >
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
-                    Call-to-Action Buttons
-                  </CardTitle>
-                  {collapsedSections.ctaButtonsSection ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronUp className="w-4 h-4" />
-                  )}
-                </div>
-              </CardHeader>
-              {!collapsedSections.ctaButtonsSection && (
-                <CardContent className="p-3 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-semibold">Buttons</Label>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={addCtaButton}
-                      data-testid="button-add-cta"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add Button
-                    </Button>
-                  </div>
-
-                  {signatureData.ctaButtons.length > 0 && (
-                    <div className="space-y-2">
-                      {signatureData.ctaButtons.map((button, index) => (
-                        <div key={index} className="border rounded-lg p-3 space-y-2">
-                          <div className="flex gap-2 items-end">
-                            <Input
-                              value={button.text}
-                              onChange={(e) => updateCtaButton(index, "text", e.target.value)}
-                              placeholder="Button Text"
-                              data-testid={`input-cta-text-${index}`}
-                              className="flex-1"
-                            />
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => removeCtaButton(index)}
-                              data-testid={`button-remove-cta-${index}`}
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
-                          </div>
-                          <Input
-                            value={button.url}
-                            onChange={(e) => updateCtaButton(index, "url", e.target.value)}
-                            placeholder="Button URL"
-                            data-testid={`input-cta-url-${index}`}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {signatureData.ctaButtons.length === 0 && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-2">
-                      No buttons added yet
-                    </p>
-                  )}
-
-                  {/* Button Styling Subsection */}
-                  <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3 mt-4">
-                    <div
-                      className="flex items-center justify-between cursor-pointer mb-3"
-                      onClick={() => toggleSection("ctaButtonStyleSection")}
-                      data-testid="toggle-cta-button-style"
-                    >
-                      <Label className="text-sm font-semibold">
-                        Button Style
-                      </Label>
-                      {collapsedSections.ctaButtonStyleSection ? (
-                        <ChevronDown className="w-4 h-4" />
-                      ) : (
-                        <ChevronUp className="w-4 h-4" />
-                      )}
-                    </div>
-                    {!collapsedSections.ctaButtonStyleSection && (
-                      <div className="space-y-3">
-                        <div>
-                          <Label className="text-xs mb-1">Font</Label>
-                          <Select value={signatureData.ctaButtonFont} onValueChange={(v: any) => updateField("ctaButtonFont", v)}>
-                            <SelectTrigger className="w-full" data-testid="select-cta-font">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {professionalFonts.map((font) => (
-                                <SelectItem key={font} value={font}>
-                                  {font}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Font Size: {signatureData.ctaButtonSize}px</Label>
-                          <input type="range" min="10" max="20" value={signatureData.ctaButtonSize} onChange={(e) => updateField("ctaButtonSize", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-font-size" />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Button Width: {signatureData.ctaButtonWidth}%</Label>
-                          <input type="range" min="20" max="100" value={signatureData.ctaButtonWidth} onChange={(e) => updateField("ctaButtonWidth", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-width" />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Button Height: {signatureData.ctaButtonHeight}px</Label>
-                          <input type="range" min="30" max="80" value={signatureData.ctaButtonHeight} onChange={(e) => updateField("ctaButtonHeight", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-height" />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Horizontal Position: {signatureData.ctaButtonPosition === 0 ? "Left" : signatureData.ctaButtonPosition === 50 ? "Center" : signatureData.ctaButtonPosition === 100 ? "Right" : signatureData.ctaButtonPosition + "%"}</Label>
-                          <input type="range" min="0" max="100" value={signatureData.ctaButtonPosition} onChange={(e) => updateField("ctaButtonPosition", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-position" />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Vertical Position: {signatureData.ctaButtonPositionVertical === 0 ? "Up" : signatureData.ctaButtonPositionVertical === 50 ? "Center" : signatureData.ctaButtonPositionVertical === 100 ? "Down" : signatureData.ctaButtonPositionVertical + "%"}</Label>
-                          <input type="range" min="0" max="100" value={signatureData.ctaButtonPositionVertical} onChange={(e) => updateField("ctaButtonPositionVertical", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-position-vertical" />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Button Gap: {signatureData.ctaButtonGap}px</Label>
-                          <input type="range" min="0" max="20" value={signatureData.ctaButtonGap} onChange={(e) => updateField("ctaButtonGap", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-gap" />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs mb-1">Text Color</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              type="color"
-                              value={signatureData.ctaButtonColor}
-                              onChange={(e) => updateField("ctaButtonColor", e.target.value)}
-                              className="w-16 h-9"
-                              data-testid="input-cta-text-color"
-                            />
-                            <Input
-                              value={signatureData.ctaButtonColor}
-                              onChange={(e) => updateField("ctaButtonColor", e.target.value)}
-                              placeholder="#FFFFFF"
-                              className="flex-1"
-                              data-testid="input-cta-text-color-hex"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs mb-1">Background Color</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              type="color"
-                              value={signatureData.ctaButtonBackgroundColor}
-                              onChange={(e) => updateField("ctaButtonBackgroundColor", e.target.value)}
-                              className="w-16 h-9"
-                              data-testid="input-cta-bg-color"
-                            />
-                            <Input
-                              value={signatureData.ctaButtonBackgroundColor}
-                              onChange={(e) => updateField("ctaButtonBackgroundColor", e.target.value)}
-                              placeholder="#2C2C2C"
-                              className="flex-1"
-                              data-testid="input-cta-bg-color-hex"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs mb-1">Shape</Label>
-                          <Select value={signatureData.ctaButtonShape} onValueChange={(v: any) => updateField("ctaButtonShape", v)}>
-                            <SelectTrigger className="w-full" data-testid="select-cta-shape">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="rounded">Rounded</SelectItem>
-                              <SelectItem value="square">Square</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Border Radius: {signatureData.ctaButtonRadius}px</Label>
-                          <input type="range" min="0" max="20" value={signatureData.ctaButtonRadius} onChange={(e) => updateField("ctaButtonRadius", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-radius" disabled={signatureData.ctaButtonShape === "square"} />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs mb-1">Border Width: {signatureData.ctaButtonBorderWidth}px</Label>
-                          <input type="range" min="0" max="5" value={signatureData.ctaButtonBorderWidth} onChange={(e) => updateField("ctaButtonBorderWidth", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-border-width" />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs mb-1">Border Color</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              type="color"
-                              value={signatureData.ctaButtonBorderColor}
-                              onChange={(e) => updateField("ctaButtonBorderColor", e.target.value)}
-                              className="w-16 h-9"
-                              data-testid="input-cta-border-color"
-                            />
-                            <Input
-                              value={signatureData.ctaButtonBorderColor}
-                              onChange={(e) => updateField("ctaButtonBorderColor", e.target.value)}
-                              placeholder="#CCCCCC"
-                              className="flex-1"
-                              data-testid="input-cta-border-color-hex"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-
             {/* Optional Features */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader
@@ -3154,6 +2873,34 @@ export default function EmailSignature() {
               </CardHeader>
               {!collapsedSections.optionalFeaturesSection && (
                 <CardContent className="p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="showCTA">Call-to-Action Button</Label>
+                    <Switch
+                      id="showCTA"
+                      checked={signatureData.showCTA}
+                      onCheckedChange={(checked) =>
+                        updateField("showCTA", checked)
+                      }
+                      data-testid="switch-show-cta"
+                    />
+                  </div>
+
+                  {signatureData.showCTA && (
+                    <div className="grid grid-cols-2 gap-4 pl-6">
+                      <Input
+                        value={signatureData.ctaText}
+                        onChange={(e) => updateField("ctaText", e.target.value)}
+                        placeholder="Button Text"
+                        data-testid="input-cta-text"
+                      />
+                      <Input
+                        value={signatureData.ctaUrl}
+                        onChange={(e) => updateField("ctaUrl", e.target.value)}
+                        placeholder="Button URL"
+                        data-testid="input-cta-url"
+                      />
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-between">
                     <Label htmlFor="showBanner">Banner</Label>
