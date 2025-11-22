@@ -60,7 +60,7 @@ interface SignatureData {
   address: string;
   ecardUrl: string;
 
-  customFields: { label: string; value: string }[];
+  customFields: { label: string; value: string; icon: string; url: string }[];
 
   profilePhoto: string;
   profilePhotoShape: "circle" | "square" | "rounded";
@@ -537,7 +537,7 @@ export default function EmailSignature() {
   const addCustomField = () => {
     setSignatureData((prev) => ({
       ...prev,
-      customFields: [...prev.customFields, { label: "", value: "" }],
+      customFields: [...prev.customFields, { label: "", value: "", icon: "phone", url: "" }],
     }));
   };
 
@@ -550,7 +550,7 @@ export default function EmailSignature() {
 
   const updateCustomField = (
     index: number,
-    field: "label" | "value",
+    field: "label" | "value" | "icon" | "url",
     value: string,
   ) => {
     setSignatureData((prev) => {
@@ -665,10 +665,23 @@ export default function EmailSignature() {
       })
       .join("");
 
+    const customIconMap: Record<string, string> = {
+      phone: phoneIcon,
+      email: emailIcon,
+      website: websiteIcon,
+      cell: cellIcon,
+      location: locationIcon,
+      ecard: ecardIcon,
+    };
+
     const customFieldsHTML = customFields
       .filter((f) => f.label && f.value)
       .map((field) => {
-        return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; font-weight: 500; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;">${field.label}: ${field.value}</td></tr>`;
+        const iconPath = field.icon && customIconMap[field.icon] ? customIconMap[field.icon] : phoneIcon;
+        if (field.url) {
+          return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><a href="${field.url}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${iconPath}" alt="" style="width:100%; height:100%; display:block;"></span>${field.label}</a></td></tr>`;
+        }
+        return `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${iconPath}" alt="" style="width:100%; height:100%; display:block;"></span>${field.label}: ${field.value}</td></tr>`;
       })
       .join("");
 
@@ -1996,33 +2009,24 @@ export default function EmailSignature() {
                     </Button>
                   </div>
                   {signatureData.customFields.length > 0 && (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {signatureData.customFields.map((field, index) => (
                         <div
                           key={index}
-                          className="grid grid-cols-2 gap-2 items-center"
+                          className="border rounded-lg p-3 space-y-2"
                         >
-                          <Input
-                            value={field.label}
-                            onChange={(e) =>
-                              updateCustomField(index, "label", e.target.value)
-                            }
-                            placeholder="Label (e.g., LinkedIn)"
-                            data-testid={`input-custom-field-label-${index}`}
-                          />
-                          <div className="flex gap-2">
-                            <Input
-                              value={field.value}
-                              onChange={(e) =>
-                                updateCustomField(
-                                  index,
-                                  "value",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Value"
-                              data-testid={`input-custom-field-value-${index}`}
-                            />
+                          <div className="flex gap-2 items-end">
+                            <div className="flex-1">
+                              <Label className="text-xs">Label</Label>
+                              <Input
+                                value={field.label}
+                                onChange={(e) =>
+                                  updateCustomField(index, "label", e.target.value)
+                                }
+                                placeholder="Label (e.g., LinkedIn)"
+                                data-testid={`input-custom-field-label-${index}`}
+                              />
+                            </div>
                             <Button
                               type="button"
                               size="sm"
@@ -2032,6 +2036,47 @@ export default function EmailSignature() {
                             >
                               <X className="w-4 h-4" />
                             </Button>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-xs">Icon</Label>
+                            <Select value={field.icon} onValueChange={(v) => updateCustomField(index, "icon", v)}>
+                              <SelectTrigger data-testid={`select-custom-field-icon-${index}`}>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="phone">Phone</SelectItem>
+                                <SelectItem value="email">Email</SelectItem>
+                                <SelectItem value="website">Website</SelectItem>
+                                <SelectItem value="cell">Cell Phone</SelectItem>
+                                <SelectItem value="location">Location</SelectItem>
+                                <SelectItem value="ecard">eCard</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label className="text-xs">Link (Optional)</Label>
+                            <Input
+                              value={field.url}
+                              onChange={(e) =>
+                                updateCustomField(index, "url", e.target.value)
+                              }
+                              placeholder="https://... or tel:... or mailto:..."
+                              data-testid={`input-custom-field-url-${index}`}
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-xs">Value</Label>
+                            <Input
+                              value={field.value}
+                              onChange={(e) =>
+                                updateCustomField(index, "value", e.target.value)
+                              }
+                              placeholder="Display value"
+                              data-testid={`input-custom-field-value-${index}`}
+                            />
                           </div>
                         </div>
                       ))}
