@@ -1,0 +1,56 @@
+In `client/src/pages/email-signature.tsx`, make the social icons work exactly like the contact info icons.
+
+1) We already define PNG paths for phone/email/website/cell/location/ecard using:
+
+  const baseUrl = window.location.origin;
+  const phoneIcon = `${baseUrl}/signature/phone.png`;
+  const emailIcon = `${baseUrl}/signature/email.png`;
+  const websiteIcon = `${baseUrl}/signature/website.png`;
+  const cellIcon = `${baseUrl}/signature/cell.png`;
+  const locationIcon = `${baseUrl}/signature/location.png`;
+  const ecardIcon = `${baseUrl}/signature/ecard.png`;
+
+There are also PNG paths for social icons and a socialIconMap (facebookIcon, instagramIcon, twitterIcon, youtubeIcon, linkedinIcon, tiktokIcon, whatsappIcon, pinterestIcon, githubIcon, snapchatIcon).
+
+2) STOP using `getSocialIconSVG()` and data-URLs for social icons. Instead, use the PNG paths in `socialIconMap` and the SAME style pattern as contact icons.
+
+For each of these functions:
+- `generateSimpleSignature`
+- `generateAdvancedSignature`
+- `generatePremiumSignature`
+
+find the `const socialIconsHTML = socialLinks.map(...` block and REPLACE it with this code:
+
+  const socialIconsHTML = socialLinks
+    .filter((link) => !!link.url)
+    .map((link) => {
+      const iconPath = socialIconMap[link.platform] || socialIconMap.facebook;
+      return `
+        <a href="${link.url}" target="_blank" style="display:inline-block; margin:0 6px; text-decoration:none;">
+          <span style="
+            display:inline-block;
+            width:${contactIconSize + 12}px;
+            height:${contactIconSize + 12}px;
+            background-color:${contactIconColor};
+            border-radius:50%;
+            vertical-align:middle;
+          ">
+            <img src="${iconPath}" alt="${link.platform}" style="width:100%; height:100%; display:block; border-radius:50%; border:0;" />
+          </span>
+        </a>
+      `;
+    })
+    .join("");
+
+3) Remove or ignore the `getSocialIconSVG` function and all its usages, because social icons now use PNGs instead of base64 SVGs.
+
+4) Do NOT change the contact icon HTML. Contact icons (phone/email/website/location) must keep this pattern:
+
+  <span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;">
+    <img src="${cellIcon}" alt="" style="width:100%; height:100%; display:block;">
+  </span>
+
+Goal:
+- Social icons use `${baseUrl}/signature/{platform}.png` from `socialIconMap`.
+- They are displayed inside the same type of round colored background as contact icons.
+- No more `data:image/svg+xml;base64,...` URLs, so icons work in Gmail, Outlook, etc.
