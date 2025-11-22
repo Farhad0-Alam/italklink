@@ -793,73 +793,49 @@ export default function EmailSignature() {
             </CardHeader>
             <CardContent className="p-1.5">
               <div className="relative">
-                <div className="flex items-center gap-0.5">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={prevTemplate}
-                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 w-6 h-6"
-                    data-testid="btn-carousel-prev"
-                  >
-                    <ChevronLeft className="w-3 h-3" />
-                  </Button>
-
-                  <div className="flex-1 flex gap-2 overflow-hidden">
-                    {templates.map((template, index) => {
-                      const isSelected = index === carouselIndex;
-                      return (
+                <div className="grid grid-cols-4 gap-2">
+                  {templates.map((template, index) => {
+                    const isSelected = index === carouselIndex;
+                    return (
+                      <div
+                        key={template.id}
+                        onClick={() => selectTemplate(index)}
+                        className="cursor-pointer transition-all"
+                        data-testid={`template-card-${template.id}`}
+                      >
                         <div
-                          key={template.id}
-                          onClick={() => selectTemplate(index)}
-                          className={`flex-shrink-0 cursor-pointer transition-all ${
-                            isSelected ? "w-2/5" : "w-1/4"
+                          className={`border-3 rounded-lg overflow-hidden shadow-lg transition-all h-32 ${
+                            isSelected
+                              ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400"
+                              : "border-slate-300 dark:border-slate-600"
                           }`}
-                          data-testid={`template-card-${template.id}`}
                         >
-                          <div
-                            className={`border-3 rounded-lg overflow-hidden shadow-lg transition-all h-32 ${
-                              isSelected
-                                ? "border-blue-500 dark:border-blue-400"
-                                : "border-slate-300 dark:border-slate-600"
-                            }`}
-                          >
-                            <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-1.5 overflow-hidden">
+                          <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-1.5 overflow-hidden">
+                            <div
+                              style={{
+                                transform: "scale(0.35)",
+                                transformOrigin: "top left",
+                                width: "286%",
+                                fontSize: "11px"
+                              }}
+                            >
                               <div
-                                style={{
-                                  transform: "scale(0.4)",
-                                  transformOrigin: "top left",
-                                  width: "250%",
-                                  fontSize: "12px"
+                                dangerouslySetInnerHTML={{
+                                  __html: generatePremiumSignature()
                                 }}
-                              >
-                                <div
-                                  dangerouslySetInnerHTML={{
-                                    __html: generatePremiumSignature()
-                                  }}
-                                  style={{ margin: 0, padding: 0 }}
-                                />
-                              </div>
+                                style={{ margin: 0, padding: 0 }}
+                              />
                             </div>
                           </div>
-                          <div className="text-center mt-1">
-                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                              {template.name}
-                            </span>
-                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
-
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={nextTemplate}
-                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 w-6 h-6"
-                    data-testid="btn-carousel-next"
-                  >
-                    <ChevronRight className="w-3 h-3" />
-                  </Button>
+                        <div className="text-center mt-1">
+                          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            {template.name}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="text-center mt-0.5">
