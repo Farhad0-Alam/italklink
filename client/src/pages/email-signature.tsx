@@ -580,7 +580,7 @@ export default function EmailSignature() {
                 </td>
               </tr>
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; padding-bottom: 5px; line-height: ${titleLineHeight};">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; line-height: ${titleLineHeight};">
                   ${title}${title && company ? ` <span style="color: ${titleColor}; opacity: 0.7; margin: 0 8px;">|</span> ` : ''}${company ? `<span style="font-family: ${headerFont}, sans-serif; font-size: ${companySize}px; color: ${companyColor};">${company}</span>` : ''}
                 </td>
               </tr>
@@ -693,7 +693,7 @@ export default function EmailSignature() {
                 </td>
               </tr>
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; padding-bottom: 10px; line-height: ${titleLineHeight};">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; line-height: ${titleLineHeight};">
                   ${title}${title && company ? ` <span style="color: ${titleColor}; opacity: 0.7; margin: 0 8px;">|</span> ` : ''}${company ? `<span style="font-family: ${headerFont}, sans-serif; font-size: ${companySize}px; color: ${companyColor};">${company}</span>` : ''}
                 </td>
               </tr>
@@ -851,7 +851,7 @@ export default function EmailSignature() {
                 </td>
               </tr>
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; padding-bottom: 15px; font-weight: 600; line-height: ${titleLineHeight};">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; font-weight: 600; line-height: ${titleLineHeight};">
                   ${title}${title && company ? ` <span style="color: ${titleColor}; opacity: 0.7; margin: 0 8px;">|</span> ` : ''}${company ? `<span style="font-family: ${headerFont}, sans-serif; font-size: ${companySize}px; color: ${companyColor}; font-weight: normal;">${company}</span>` : ''}
                 </td>
               </tr>
