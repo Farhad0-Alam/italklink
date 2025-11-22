@@ -1074,12 +1074,12 @@ export default function EmailSignature() {
                               }`}
                               style={{ height: "160px" }}
                             >
-                              <div className="h-full bg-white dark:bg-slate-900 flex items-start justify-start p-0 overflow-hidden relative">
+                              <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-0 overflow-hidden relative">
                                 <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/0 group-hover:to-black/5 dark:group-hover:to-white/5 transition-all duration-300"></div>
                                 <div
                                   style={{
                                     transform: "scale(0.42)",
-                                    transformOrigin: "top left",
+                                    transformOrigin: "center",
                                     width: "238%",
                                     fontSize: "11px",
                                     lineHeight: "1.3"
