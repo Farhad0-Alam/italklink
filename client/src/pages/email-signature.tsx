@@ -672,6 +672,16 @@ export default function EmailSignature() {
       cell: cellIcon,
       location: locationIcon,
       ecard: ecardIcon,
+      facebook: facebookIcon,
+      instagram: instagramIcon,
+      twitter: twitterIcon,
+      youtube: youtubeIcon,
+      linkedin: linkedinIcon,
+      tiktok: tiktokIcon,
+      whatsapp: whatsappIcon,
+      pinterest: pinterestIcon,
+      github: githubIcon,
+      snapchat: snapchatIcon,
     };
 
     const customFieldsHTML = customFields
@@ -2051,6 +2061,16 @@ export default function EmailSignature() {
                                 <SelectItem value="cell">Cell Phone</SelectItem>
                                 <SelectItem value="location">Location</SelectItem>
                                 <SelectItem value="ecard">eCard</SelectItem>
+                                <SelectItem value="facebook">Facebook</SelectItem>
+                                <SelectItem value="instagram">Instagram</SelectItem>
+                                <SelectItem value="twitter">Twitter/X</SelectItem>
+                                <SelectItem value="youtube">YouTube</SelectItem>
+                                <SelectItem value="linkedin">LinkedIn</SelectItem>
+                                <SelectItem value="tiktok">TikTok</SelectItem>
+                                <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                                <SelectItem value="pinterest">Pinterest</SelectItem>
+                                <SelectItem value="github">GitHub</SelectItem>
+                                <SelectItem value="snapchat">Snapchat</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
