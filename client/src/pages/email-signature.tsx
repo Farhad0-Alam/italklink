@@ -139,6 +139,7 @@ interface SignatureData {
   ctaButtonWidth: number;
   ctaButtonHeight: number;
   ctaButtonPosition: number;
+  ctaButtonPositionVertical: number;
 
   showDisclaimer: boolean;
   disclaimerText: string;
@@ -492,6 +493,7 @@ export default function EmailSignature() {
     ctaButtonWidth: 55,
     ctaButtonHeight: 32,
     ctaButtonPosition: 50,
+    ctaButtonPositionVertical: 0,
     ctaButtons: [
       { text: "SEARCH PROPERTIES NOW", url: "https://talkl.ink/" },
       { text: "GET A FREE HOME VALUATION", url: "https://talkl.ink/" },
@@ -716,6 +718,7 @@ export default function EmailSignature() {
       ctaButtonWidth,
       ctaButtonHeight,
       ctaButtonPosition,
+      ctaButtonPositionVertical,
       dividerHeight,
       dividerColor,
       dividerMarginTop,
@@ -839,7 +842,8 @@ export default function EmailSignature() {
                     ${ctaButtons.map(btn => {
                       const btnBorderRadius = ctaButtonShape === "square" ? "0px" : `${ctaButtonRadius}px`;
                       const btnAlignment = ctaButtonPosition < 33 ? "left" : ctaButtonPosition > 66 ? "right" : "center";
-                      return `<tr><td style="padding: 2px; text-align: ${btnAlignment};"><a href="${btn.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: 8px 16px; text-decoration: none; border-radius: ${btnBorderRadius}; font-weight: bold; display: inline-block; border-right: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-size: ${ctaButtonSize}px; font-family: ${ctaButtonFont}, sans-serif; white-space: nowrap; box-sizing: border-box; width: ${ctaButtonWidth}%; height: ${ctaButtonHeight}px; line-height: ${ctaButtonHeight - 16}px; vertical-align: middle;">${btn.text}</a></td></tr>`;
+                      const verticalPadding = Math.max(0, ctaButtonPositionVertical);
+                      return `<tr><td style="padding: ${verticalPadding}px 2px 2px 2px; text-align: ${btnAlignment};"><a href="${btn.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: 8px 16px; text-decoration: none; border-radius: ${btnBorderRadius}; font-weight: bold; display: inline-block; border-right: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-size: ${ctaButtonSize}px; font-family: ${ctaButtonFont}, sans-serif; white-space: nowrap; box-sizing: border-box; width: ${ctaButtonWidth}%; height: ${ctaButtonHeight}px; line-height: ${ctaButtonHeight - 16}px; vertical-align: middle; text-align: center;">${btn.text}</a></td></tr>`;
                     }).join('')}
                   </table>
                 </td>
@@ -3038,8 +3042,13 @@ export default function EmailSignature() {
                         </div>
 
                         <div>
-                          <Label className="text-xs">Button Position: {signatureData.ctaButtonPosition === 0 ? "Left" : signatureData.ctaButtonPosition === 50 ? "Center" : signatureData.ctaButtonPosition === 100 ? "Right" : signatureData.ctaButtonPosition + "%"}</Label>
+                          <Label className="text-xs">Horizontal Position: {signatureData.ctaButtonPosition === 0 ? "Left" : signatureData.ctaButtonPosition === 50 ? "Center" : signatureData.ctaButtonPosition === 100 ? "Right" : signatureData.ctaButtonPosition + "%"}</Label>
                           <input type="range" min="0" max="100" value={signatureData.ctaButtonPosition} onChange={(e) => updateField("ctaButtonPosition", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-position" />
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Vertical Position: {signatureData.ctaButtonPositionVertical === -50 ? "Up" : signatureData.ctaButtonPositionVertical === 0 ? "Center" : signatureData.ctaButtonPositionVertical === 50 ? "Down" : signatureData.ctaButtonPositionVertical + "px"}</Label>
+                          <input type="range" min="-50" max="50" value={signatureData.ctaButtonPositionVertical} onChange={(e) => updateField("ctaButtonPositionVertical", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-position-vertical" />
                         </div>
 
                         <div>
