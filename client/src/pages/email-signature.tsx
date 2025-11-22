@@ -62,7 +62,20 @@ interface SignatureData {
   customFields: { label: string; value: string }[];
 
   profilePhoto: string;
+  profilePhotoShape: "circle" | "square" | "rounded";
+  profilePhotoWidth: number;
+  profilePhotoHeight: number;
+  profilePhotoBorderWidth: number;
+  profilePhotoBorderColor: string;
+  profilePhotoOpacity: number;
+  profilePhotoShadow: "none" | "small" | "medium" | "large";
+  
   companyLogo: string;
+  companyLogoWidth: number;
+  companyLogoHeight: number;
+  companyLogoBorderWidth: number;
+  companyLogoBorderColor: string;
+  companyLogoOpacity: number;
 
   primaryColor: string;
   secondaryColor: string;
@@ -354,7 +367,20 @@ export default function EmailSignature() {
     customFields: [],
     profilePhoto:
       "https://ui-avatars.com/api/?name=John+Doe&size=200&background=FF6A00&color=fff&bold=true",
+    profilePhotoShape: "circle",
+    profilePhotoWidth: 100,
+    profilePhotoHeight: 100,
+    profilePhotoBorderWidth: 2,
+    profilePhotoBorderColor: "#FF6A00",
+    profilePhotoOpacity: 100,
+    profilePhotoShadow: "medium",
+    
     companyLogo: "https://via.placeholder.com/200x80/FF6A00/FFFFFF?text=ACME",
+    companyLogoWidth: 120,
+    companyLogoHeight: 60,
+    companyLogoBorderWidth: 0,
+    companyLogoBorderColor: "#CCCCCC",
+    companyLogoOpacity: 100,
     primaryColor: "#FF6A00",
     secondaryColor: "#333333",
     signatureFont: "Alex Brush",
@@ -587,8 +613,8 @@ export default function EmailSignature() {
           ${
             profilePhoto
               ? `
-          <td style="padding-right: 25px; vertical-align: middle; width: 140px;">
-            <img src="${profilePhoto}" alt="${name}" width="140" height="140" style="border-radius: 50%; display: block; border: 5px solid ${primaryColor}; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+          <td style="padding-right: 25px; vertical-align: middle;">
+            <img src="${profilePhoto}" alt="${name}" style="display: block; ${getImageStyle('profile')}">
           </td>
           `
               : ""
@@ -709,6 +735,27 @@ export default function EmailSignature() {
     return getTemplateHTMLByIndex(carouselIndex);
   };
 
+  // Helper function to get image styles
+  const getImageStyle = (type: "profile" | "logo"): string => {
+    if (type === "profile") {
+      const { profilePhotoShape, profilePhotoWidth, profilePhotoHeight, profilePhotoBorderWidth, profilePhotoBorderColor, profilePhotoOpacity, profilePhotoShadow } = signatureData;
+      
+      let borderRadius = "50%";
+      if (profilePhotoShape === "square") borderRadius = "0%";
+      if (profilePhotoShape === "rounded") borderRadius = "8px";
+      
+      let boxShadow = "none";
+      if (profilePhotoShadow === "small") boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+      if (profilePhotoShadow === "medium") boxShadow = "0 4px 8px rgba(0,0,0,0.15)";
+      if (profilePhotoShadow === "large") boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
+      
+      return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px solid ${profilePhotoBorderColor}; opacity: ${profilePhotoOpacity / 100}; box-shadow: ${boxShadow};`;
+    } else {
+      const { companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor, companyLogoOpacity } = signatureData;
+      return `width: ${companyLogoWidth}px; height: ${companyLogoHeight}px; border: ${companyLogoBorderWidth}px solid ${companyLogoBorderColor}; opacity: ${companyLogoOpacity / 100};`;
+    }
+  };
+
   // Template 1: Classic with Profile Image on Left
   const generateTemplate1 = (): string => {
     return generatePremiumSignature();
@@ -745,7 +792,7 @@ export default function EmailSignature() {
     <td style="background-color: #f5f5f5; padding: 20px;">
       <table width="100%">
         <tr>
-          ${profilePhoto ? `<td style="width: 80px; vertical-align: top; padding-right: 15px;"><img src="${profilePhoto}" alt="${name}" width="70" height="70" style="border-radius: 50%; border: 3px solid ${primaryColor};"></td>` : ''}
+          ${profilePhoto ? `<td style="vertical-align: top; padding-right: 15px;"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></td>` : ''}
           <td style="vertical-align: top;">
             <div style="font-weight: bold; color: #333; margin-bottom: 3px;">${company}</div>
             ${cellPhone ? `<div style="font-size: 12px; color: #666; margin: 3px 0;">Phone: ${cellPhone}</div>` : ''}
@@ -762,7 +809,7 @@ export default function EmailSignature() {
 
   // Template 4: Creative with Top Bar
   const generateTemplate4 = (): string => {
-    const { name, title, company, cellPhone, email, website, primaryColor, profilePhoto } = signatureData;
+    const { name, title, company, cellPhone, email, website, primaryColor, profilePhoto, companyLogo } = signatureData;
     return `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 550px; margin: 0; padding: 0;">
   <tr>
@@ -782,7 +829,7 @@ export default function EmailSignature() {
               ${website ? `<a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${primaryColor}; text-decoration: none;">${website}</a>` : ''}
             </div>
           </td>
-          ${profilePhoto ? `<td style="padding-left: 20px; text-align: right;"><img src="${profilePhoto}" alt="${name}" width="80" height="80" style="border-radius: 8px; border: 2px solid ${primaryColor};"></td>` : ''}
+          ${profilePhoto ? `<td style="padding-left: 20px; text-align: right;"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></td>` : ''}
         </tr>
       </table>
     </td>
@@ -796,7 +843,7 @@ export default function EmailSignature() {
     const { name, title, company, cellPhone, email, website, primaryColor, secondaryColor, profilePhoto } = signatureData;
     return `
 <div style="font-family: Georgia, serif; text-align: center; max-width: 450px; margin: 0 auto; padding: 30px 0;">
-  ${profilePhoto ? `<div style="margin-bottom: 15px;"><img src="${profilePhoto}" alt="${name}" width="100" height="100" style="border-radius: 50%; border: 4px solid ${primaryColor};"></div>` : ''}
+  ${profilePhoto ? `<div style="margin-bottom: 15px;"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div>` : ''}
   <div style="font-size: 20px; font-weight: bold; color: #1a1a1a; margin-bottom: 5px;">${name}</div>
   <div style="font-size: 14px; color: ${primaryColor}; font-style: italic; margin-bottom: 15px;">${title}</div>
   <div style="border-top: 2px solid ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding: 15px 0; margin: 15px 0; font-size: 12px; color: #666; line-height: 1.8;">
@@ -816,7 +863,7 @@ export default function EmailSignature() {
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 600px;">
   <tr>
     <td style="background-color: ${primaryColor}; padding: 30px; color: white; width: 150px; vertical-align: top;">
-      ${profilePhoto ? `<img src="${profilePhoto}" alt="${name}" width="120" height="120" style="border-radius: 50%; margin-bottom: 15px; border: 4px solid white;">` : ''}
+      ${profilePhoto ? `<img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')} display: block; margin-bottom: 15px;">` : ''}
       <div style="font-size: 12px; line-height: 1.8;">
         ${cellPhone ? `<div style="margin: 8px 0;">📱 ${cellPhone}</div>` : ''}
         ${email ? `<div style="margin: 8px 0; word-break: break-all;"><a href="mailto:${email}" style="color: white; text-decoration: none;">✉ ${email}</a></div>` : ''}
@@ -851,7 +898,7 @@ export default function EmailSignature() {
             ${website ? `🔗 <a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${primaryColor}; text-decoration: none;">${website}</a>` : ''}
           </div>
         </td>
-        ${profilePhoto ? `<td style="padding-left: 15px; text-align: right;"><img src="${profilePhoto}" alt="${name}" width="70" height="70" style="border-radius: 50%;"></td>` : ''}
+        ${profilePhoto ? `<td style="padding-left: 15px; text-align: right;"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></td>` : ''}
       </tr>
     </table>
   </div>
@@ -895,7 +942,7 @@ export default function EmailSignature() {
             <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">${name}</div>
             <div style="font-size: 14px; opacity: 0.95;">${title}</div>
           </td>
-          ${profilePhoto ? `<td style="text-align: right; vertical-align: middle;"><img src="${profilePhoto}" alt="${name}" width="70" height="70" style="border-radius: 50%; border: 3px solid white;"></td>` : ''}
+          ${profilePhoto ? `<td style="text-align: right; vertical-align: middle;"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></td>` : ''}
         </tr>
       </table>
     </td>
@@ -2153,6 +2200,110 @@ export default function EmailSignature() {
                     }
                     data-testid="input-company-logo"
                   />
+                </div>
+
+                {/* Profile Photo Styling */}
+                <div className="border-t pt-2 mt-2">
+                  <h4 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Profile Photo Styling</h4>
+                  
+                  <div className="space-y-2">
+                    <div>
+                      <Label className="text-xs">Shape</Label>
+                      <Select value={signatureData.profilePhotoShape} onValueChange={(v: any) => updateField("profilePhotoShape", v)}>
+                        <SelectTrigger className="w-full" data-testid="select-profile-shape">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="circle">Circle</SelectItem>
+                          <SelectItem value="square">Square</SelectItem>
+                          <SelectItem value="rounded">Rounded Square</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Width (px)</Label>
+                        <Input type="number" value={signatureData.profilePhotoWidth} onChange={(e) => updateField("profilePhotoWidth", Number(e.target.value))} min="20" max="300" data-testid="input-profile-width" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Height (px)</Label>
+                        <Input type="number" value={signatureData.profilePhotoHeight} onChange={(e) => updateField("profilePhotoHeight", Number(e.target.value))} min="20" max="300" data-testid="input-profile-height" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Border Width (px)</Label>
+                        <Input type="number" value={signatureData.profilePhotoBorderWidth} onChange={(e) => updateField("profilePhotoBorderWidth", Number(e.target.value))} min="0" max="10" data-testid="input-profile-border-width" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Border Color</Label>
+                        <div className="flex gap-2">
+                          <input type="color" value={signatureData.profilePhotoBorderColor} onChange={(e) => updateField("profilePhotoBorderColor", e.target.value)} className="w-10 h-9 rounded" data-testid="input-profile-border-color" />
+                          <Input value={signatureData.profilePhotoBorderColor} onChange={(e) => updateField("profilePhotoBorderColor", e.target.value)} placeholder="#FF6A00" className="flex-1" data-testid="input-profile-border-color-hex" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Opacity ({signatureData.profilePhotoOpacity}%)</Label>
+                        <input type="range" min="0" max="100" value={signatureData.profilePhotoOpacity} onChange={(e) => updateField("profilePhotoOpacity", Number(e.target.value))} className="w-full" data-testid="input-profile-opacity" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Shadow</Label>
+                        <Select value={signatureData.profilePhotoShadow} onValueChange={(v: any) => updateField("profilePhotoShadow", v)}>
+                          <SelectTrigger data-testid="select-profile-shadow">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            <SelectItem value="small">Small</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="large">Large</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Company Logo Styling */}
+                <div className="border-t pt-2 mt-2">
+                  <h4 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Company Logo Styling</h4>
+                  
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Width (px)</Label>
+                        <Input type="number" value={signatureData.companyLogoWidth} onChange={(e) => updateField("companyLogoWidth", Number(e.target.value))} min="20" max="300" data-testid="input-logo-width" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Height (px)</Label>
+                        <Input type="number" value={signatureData.companyLogoHeight} onChange={(e) => updateField("companyLogoHeight", Number(e.target.value))} min="20" max="300" data-testid="input-logo-height" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Border Width (px)</Label>
+                        <Input type="number" value={signatureData.companyLogoBorderWidth} onChange={(e) => updateField("companyLogoBorderWidth", Number(e.target.value))} min="0" max="10" data-testid="input-logo-border-width" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Border Color</Label>
+                        <div className="flex gap-2">
+                          <input type="color" value={signatureData.companyLogoBorderColor} onChange={(e) => updateField("companyLogoBorderColor", e.target.value)} className="w-10 h-9 rounded" data-testid="input-logo-border-color" />
+                          <Input value={signatureData.companyLogoBorderColor} onChange={(e) => updateField("companyLogoBorderColor", e.target.value)} placeholder="#CCCCCC" className="flex-1" data-testid="input-logo-border-color-hex" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs">Opacity ({signatureData.companyLogoOpacity}%)</Label>
+                      <input type="range" min="0" max="100" value={signatureData.companyLogoOpacity} onChange={(e) => updateField("companyLogoOpacity", Number(e.target.value))} className="w-full" data-testid="input-logo-opacity" />
+                    </div>
+                  </div>
                 </div>
                   </>
                 )}
