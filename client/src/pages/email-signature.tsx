@@ -136,12 +136,6 @@ interface SignatureData {
   ctaButtonBorderWidth: number;
   ctaButtonBorderColor: string;
 
-  showMail: boolean;
-  mailText: string;
-  mailFont: string;
-  mailSize: number;
-  mailColor: string;
-
   showDisclaimer: boolean;
   disclaimerText: string;
   ctaButtons: { text: string; url: string }[];
@@ -493,11 +487,6 @@ export default function EmailSignature() {
       { text: "GET A FREE HOME VALUATION", url: "https://talkl.ink/" },
       { text: "BOOK A CONSULTATION", url: "https://talkl.ink/" },
     ],
-    showMail: true,
-    mailText: "123 Business Ave, Suite 100, New York, NY 10001",
-    mailFont: "Arial",
-    mailSize: 12,
-    mailColor: "#666666",
     showBanner: false,
     bannerText: "Get in touch today!",
   });
@@ -821,7 +810,7 @@ export default function EmailSignature() {
           </td>
         </tr>
         ${
-          companyLogo || ctaButtons.length > 0 || signatureData.showMail
+          companyLogo || ctaButtons.length > 0
             ? `
         <tr>
           <td colspan="2" style="padding-top: 25px; border-top: 2px solid ${primaryColor}; margin-top: 20px;">
@@ -829,7 +818,7 @@ export default function EmailSignature() {
               <tr>
                 ${companyLogo ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}"><img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}"></div></td>` : ""}
                 ${
-                  ctaButtons.length > 0 || signatureData.showMail
+                  ctaButtons.length > 0
                     ? `
                 <td style="text-align: ${companyLogo ? "right" : "center"}; vertical-align: middle;">
                   <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
@@ -837,7 +826,6 @@ export default function EmailSignature() {
                       const btnBorderRadius = ctaButtonShape === "square" ? "0px" : `${ctaButtonRadius}px`;
                       return `<tr><td style="padding: 4px 0; text-align: ${companyLogo ? "right" : "center"};"><a href="${btn.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: 12px 20px; text-decoration: none; border-radius: ${btnBorderRadius}; font-weight: bold; display: inline-block; border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-size: ${ctaButtonSize}px; font-family: ${contactFont}, sans-serif; white-space: nowrap;">${btn.text}</a></td></tr>`;
                     }).join('')}
-                    ${signatureData.showMail ? `<tr><td style="padding: 8px 0; text-align: ${companyLogo ? "right" : "center"}; font-family: ${mailFont}, sans-serif; font-size: ${mailSize}px; color: ${mailColor}; line-height: 1.4;">${mailText}</td></tr>` : ""}
                   </table>
                 </td>
                 `
@@ -3030,63 +3018,6 @@ export default function EmailSignature() {
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="showMail">Mail Section</Label>
-                    <Switch
-                      id="showMail"
-                      checked={signatureData.showMail}
-                      onCheckedChange={(checked) =>
-                        updateField("showMail", checked)
-                      }
-                      data-testid="switch-show-mail"
-                    />
-                  </div>
-
-                  {signatureData.showMail && (
-                    <div className="pl-6 space-y-2">
-                      <div>
-                        <Label className="text-xs">Mailing Address</Label>
-                        <Textarea
-                          value={signatureData.mailText}
-                          onChange={(e) =>
-                            updateField("mailText", e.target.value)
-                          }
-                          placeholder="Enter mailing address..."
-                          rows={2}
-                          data-testid="textarea-mail-text"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <Label className="text-xs">Font</Label>
-                          <Select value={signatureData.mailFont} onValueChange={(v) => updateField("mailFont", v)}>
-                            <SelectTrigger className="w-full" data-testid="select-mail-font">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {professionalFonts.map((font) => (
-                                <SelectItem key={font} value={font}>
-                                  {font}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label className="text-xs">Font Size ({signatureData.mailSize}px)</Label>
-                          <input type="range" min="10" max="16" value={signatureData.mailSize} onChange={(e) => updateField("mailSize", Number(e.target.value))} className="w-full" data-testid="slider-mail-font-size" />
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-xs">Text Color</Label>
-                        <div className="flex gap-2">
-                          <input type="color" value={signatureData.mailColor} onChange={(e) => updateField("mailColor", e.target.value)} className="w-10 h-9 rounded" data-testid="input-mail-color" />
-                          <Input value={signatureData.mailColor} onChange={(e) => updateField("mailColor", e.target.value)} placeholder="#666666" className="flex-1" data-testid="input-mail-color-hex" />
                         </div>
                       </div>
                     </div>
