@@ -394,7 +394,7 @@ export default function EmailSignature() {
     profilePhotoBorderColor: "#FF6A00",
     profilePhotoOpacity: 100,
     profilePhotoShadow: "medium",
-    profilePhotoRightSideGap: 16,
+    profilePhotoRightSideGap: 1,
 
     companyLogo: "https://via.placeholder.com/200x80/FF6A00/FFFFFF?text=ACME",
     companyLogoShape: "square",
@@ -717,7 +717,7 @@ export default function EmailSignature() {
           ${
             profilePhoto
               ? `
-          <td style="padding-right: 25px; vertical-align: middle;">
+          <td style="padding-right: ${profilePhotoRightSideGap}px; vertical-align: middle;">
             <div style="${getContainerStyle('profile')}">
               <img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}">
             </div>
