@@ -793,52 +793,76 @@ export default function EmailSignature() {
             </CardHeader>
             <CardContent className="p-1.5">
               <div className="relative">
-                <div className="grid grid-cols-4 gap-2">
-                  {templates.map((template, index) => {
-                    const isSelected = index === carouselIndex;
-                    return (
-                      <div
-                        key={template.id}
-                        onClick={() => selectTemplate(index)}
-                        className="cursor-pointer transition-all"
-                        data-testid={`template-card-${template.id}`}
-                      >
-                        <div
-                          className={`border-3 rounded-lg overflow-hidden shadow-lg transition-all h-32 ${
-                            isSelected
-                              ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400"
-                              : "border-slate-300 dark:border-slate-600"
-                          }`}
-                        >
-                          <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-1.5 overflow-hidden">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={prevTemplate}
+                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 w-8 h-8 flex-shrink-0"
+                    data-testid="btn-carousel-prev"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+
+                  <div className="flex-1 overflow-x-auto scrollbar-hide">
+                    <div className="flex gap-2 pb-1">
+                      {templates.map((template, index) => {
+                        const isSelected = index === carouselIndex;
+                        return (
+                          <div
+                            key={template.id}
+                            onClick={() => selectTemplate(index)}
+                            className="flex-shrink-0 cursor-pointer transition-all"
+                            data-testid={`template-card-${template.id}`}
+                          >
                             <div
-                              style={{
-                                transform: "scale(0.35)",
-                                transformOrigin: "top left",
-                                width: "286%",
-                                fontSize: "11px"
-                              }}
+                              className={`border-3 rounded-lg overflow-hidden shadow-lg transition-all h-32 w-40 ${
+                                isSelected
+                                  ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400"
+                                  : "border-slate-300 dark:border-slate-600"
+                              }`}
                             >
-                              <div
-                                dangerouslySetInnerHTML={{
-                                  __html: generatePremiumSignature()
-                                }}
-                                style={{ margin: 0, padding: 0 }}
-                              />
+                              <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-1.5 overflow-hidden">
+                                <div
+                                  style={{
+                                    transform: "scale(0.35)",
+                                    transformOrigin: "top left",
+                                    width: "286%",
+                                    fontSize: "11px"
+                                  }}
+                                >
+                                  <div
+                                    dangerouslySetInnerHTML={{
+                                      __html: generatePremiumSignature()
+                                    }}
+                                    style={{ margin: 0, padding: 0 }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-center mt-1">
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                {template.name}
+                              </span>
                             </div>
                           </div>
-                        </div>
-                        <div className="text-center mt-1">
-                          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                            {template.name}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={nextTemplate}
+                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 w-8 h-8 flex-shrink-0"
+                    data-testid="btn-carousel-next"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
                 </div>
 
-                <div className="text-center mt-0.5">
+                <div className="text-center mt-2">
                   <p className="text-xs text-slate-600 dark:text-slate-400 leading-tight py-0">
                     <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
                       More templates
