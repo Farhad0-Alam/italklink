@@ -614,7 +614,9 @@ export default function EmailSignature() {
             profilePhoto
               ? `
           <td style="padding-right: 25px; vertical-align: middle;">
-            <img src="${profilePhoto}" alt="${name}" style="display: block; ${getImageStyle('profile')}">
+            <div style="${getContainerStyle('profile')}">
+              <img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}">
+            </div>
           </td>
           `
               : ""
@@ -656,7 +658,7 @@ export default function EmailSignature() {
           <td colspan="2" style="padding-top: 25px; border-top: 2px solid ${primaryColor}; margin-top: 20px;">
             <table cellpadding="0" cellspacing="0" border="0" width="100%">
               <tr>
-                ${companyLogo ? `<td style="vertical-align: middle; width: 50%;"><img src="${companyLogo}" alt="Company Logo" style="max-height: 60px; display: block;"></td>` : ""}
+                ${companyLogo ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}"><img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}"></div></td>` : ""}
                 ${
                   showCTA && ctaUrl
                     ? `
@@ -735,8 +737,8 @@ export default function EmailSignature() {
     return getTemplateHTMLByIndex(carouselIndex);
   };
 
-  // Helper function to get image styles
-  const getImageStyle = (type: "profile" | "logo"): string => {
+  // Helper function to get container styles (wrapper div)
+  const getContainerStyle = (type: "profile" | "logo"): string => {
     if (type === "profile") {
       const { profilePhotoShape, profilePhotoWidth, profilePhotoHeight, profilePhotoBorderWidth, profilePhotoBorderColor, profilePhotoOpacity, profilePhotoShadow } = signatureData;
       
@@ -749,10 +751,21 @@ export default function EmailSignature() {
       if (profilePhotoShadow === "medium") boxShadow = "0 4px 8px rgba(0,0,0,0.15)";
       if (profilePhotoShadow === "large") boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
       
-      return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px solid ${profilePhotoBorderColor}; opacity: ${profilePhotoOpacity / 100}; box-shadow: ${boxShadow};`;
+      return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px solid ${profilePhotoBorderColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center;`;
     } else {
-      const { companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor, companyLogoOpacity } = signatureData;
-      return `width: ${companyLogoWidth}px; height: ${companyLogoHeight}px; border: ${companyLogoBorderWidth}px solid ${companyLogoBorderColor}; opacity: ${companyLogoOpacity / 100};`;
+      const { companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor } = signatureData;
+      return `width: ${companyLogoWidth}px; height: ${companyLogoHeight}px; border: ${companyLogoBorderWidth}px solid ${companyLogoBorderColor}; overflow: hidden; display: flex; align-items: center; justify-content: center;`;
+    }
+  };
+
+  // Helper function to get image styles (inner image)
+  const getImageStyle = (type: "profile" | "logo"): string => {
+    if (type === "profile") {
+      const { profilePhotoOpacity } = signatureData;
+      return `width: 100%; height: 100%; object-fit: cover; opacity: ${profilePhotoOpacity / 100};`;
+    } else {
+      const { companyLogoOpacity } = signatureData;
+      return `width: 100%; height: 100%; object-fit: contain; opacity: ${companyLogoOpacity / 100};`;
     }
   };
 
@@ -792,7 +805,7 @@ export default function EmailSignature() {
     <td style="background-color: #f5f5f5; padding: 20px;">
       <table width="100%">
         <tr>
-          ${profilePhoto ? `<td style="vertical-align: top; padding-right: 15px;"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></td>` : ''}
+          ${profilePhoto ? `<td style="vertical-align: top; padding-right: 15px;"><div style="${getContainerStyle('profile')}"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div></td>` : ''}
           <td style="vertical-align: top;">
             <div style="font-weight: bold; color: #333; margin-bottom: 3px;">${company}</div>
             ${cellPhone ? `<div style="font-size: 12px; color: #666; margin: 3px 0;">Phone: ${cellPhone}</div>` : ''}
@@ -843,7 +856,7 @@ export default function EmailSignature() {
     const { name, title, company, cellPhone, email, website, primaryColor, secondaryColor, profilePhoto } = signatureData;
     return `
 <div style="font-family: Georgia, serif; text-align: center; max-width: 450px; margin: 0 auto; padding: 30px 0;">
-  ${profilePhoto ? `<div style="margin-bottom: 15px;"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div>` : ''}
+  ${profilePhoto ? `<div style="margin-bottom: 15px; display: flex; justify-content: center;"><div style="${getContainerStyle('profile')}"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div></div>` : ''}
   <div style="font-size: 20px; font-weight: bold; color: #1a1a1a; margin-bottom: 5px;">${name}</div>
   <div style="font-size: 14px; color: ${primaryColor}; font-style: italic; margin-bottom: 15px;">${title}</div>
   <div style="border-top: 2px solid ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding: 15px 0; margin: 15px 0; font-size: 12px; color: #666; line-height: 1.8;">
@@ -863,7 +876,7 @@ export default function EmailSignature() {
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 600px;">
   <tr>
     <td style="background-color: ${primaryColor}; padding: 30px; color: white; width: 150px; vertical-align: top;">
-      ${profilePhoto ? `<img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')} display: block; margin-bottom: 15px;">` : ''}
+      ${profilePhoto ? `<div style="${getContainerStyle('profile')} margin-bottom: 15px;"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div>` : ''}
       <div style="font-size: 12px; line-height: 1.8;">
         ${cellPhone ? `<div style="margin: 8px 0;">📱 ${cellPhone}</div>` : ''}
         ${email ? `<div style="margin: 8px 0; word-break: break-all;"><a href="mailto:${email}" style="color: white; text-decoration: none;">✉ ${email}</a></div>` : ''}
@@ -898,7 +911,7 @@ export default function EmailSignature() {
             ${website ? `🔗 <a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${primaryColor}; text-decoration: none;">${website}</a>` : ''}
           </div>
         </td>
-        ${profilePhoto ? `<td style="padding-left: 15px; text-align: right;"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></td>` : ''}
+        ${profilePhoto ? `<td style="padding-left: 15px; text-align: right;"><div style="${getContainerStyle('profile')}"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div></td>` : ''}
       </tr>
     </table>
   </div>
@@ -942,7 +955,7 @@ export default function EmailSignature() {
             <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">${name}</div>
             <div style="font-size: 14px; opacity: 0.95;">${title}</div>
           </td>
-          ${profilePhoto ? `<td style="text-align: right; vertical-align: middle;"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></td>` : ''}
+          ${profilePhoto ? `<td style="text-align: right; vertical-align: middle;"><div style="${getContainerStyle('profile')}"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div></td>` : ''}
         </tr>
       </table>
     </td>
