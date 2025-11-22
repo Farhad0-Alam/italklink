@@ -636,20 +636,7 @@ export default function EmailSignature() {
       .filter((link) => !!link.url)
       .map((link) => {
         const iconPath = socialIconMap[link.platform] || socialIconMap.facebook;
-        return `
-        <a href="${link.url}" target="_blank" style="display:inline-block; margin:0 6px; text-decoration:none;">
-          <span style="
-            display:inline-block;
-            width:${contactIconSize + 12}px;
-            height:${contactIconSize + 12}px;
-            background-color:${contactIconColor};
-            border-radius:50%;
-            vertical-align:middle;
-          ">
-            <img src="${iconPath}" alt="${link.platform}" style="width:100%; height:100%; display:block; border-radius:50%; border:0;" />
-          </span>
-        </a>
-      `;
+        return `<a href="${link.url}" target="_blank" style="display:inline-block; margin:0 6px; text-decoration:none;"><span style="display:inline-block; width:${contactIconSize + 12}px; height:${contactIconSize + 12}px; background-color:${contactIconColor}; border-radius:50%; vertical-align:middle;"><img src="${iconPath}" alt="${link.platform}" style="width:100%; height:100%; display:block; border-radius:50%; border:0;" /></span></a>`;
       })
       .join("");
 
