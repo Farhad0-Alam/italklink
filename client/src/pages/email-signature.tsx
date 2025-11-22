@@ -70,6 +70,7 @@ interface SignatureData {
   profilePhotoBorderColor: string;
   profilePhotoOpacity: number;
   profilePhotoShadow: "none" | "small" | "medium" | "large";
+  profilePhotoRightSideGap: number;
 
   companyLogo: string;
   companyLogoShape: "circle" | "square" | "rounded";
@@ -393,6 +394,7 @@ export default function EmailSignature() {
     profilePhotoBorderColor: "#FF6A00",
     profilePhotoOpacity: 100,
     profilePhotoShadow: "medium",
+    profilePhotoRightSideGap: 16,
 
     companyLogo: "https://via.placeholder.com/200x80/FF6A00/FFFFFF?text=ACME",
     companyLogoShape: "square",
@@ -2410,6 +2412,11 @@ export default function EmailSignature() {
                               </SelectContent>
                             </Select>
                           </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Right Side Gap ({signatureData.profilePhotoRightSideGap}px)</Label>
+                          <input type="range" min="0" max="40" value={signatureData.profilePhotoRightSideGap} onChange={(e) => updateField("profilePhotoRightSideGap", Number(e.target.value))} className="w-full" data-testid="input-profile-right-gap" />
                         </div>
                       </div>
                     </div>
