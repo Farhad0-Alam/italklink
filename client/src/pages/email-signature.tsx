@@ -1034,7 +1034,7 @@ export default function EmailSignature() {
                     <ChevronLeft className="w-5 h-5" />
                   </Button>
 
-                  <div className="flex-1 overflow-hidden">
+                  <div className="flex-1 overflow-hidden flex items-center">
                     <style>{`
                       @keyframes slideIn {
                         from { opacity: 0; transform: translateX(20px); }
@@ -1047,7 +1047,7 @@ export default function EmailSignature() {
                         transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
                       }
                     `}</style>
-                    <div className="carousel-container flex gap-3 pb-1" style={{ transform: `translateX(0)` }}>
+                    <div className="carousel-container flex gap-3 pb-1 w-full" style={{ transform: `translateX(0)` }}>
                       {Array.from({ length: 4 }).map((_, visibleIndex) => {
                         const actualIndex = (carouselIndex + visibleIndex) % templates.length;
                         const template = templates[actualIndex];
