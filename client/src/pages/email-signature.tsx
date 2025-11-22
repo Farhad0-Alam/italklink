@@ -1049,7 +1049,7 @@ export default function EmailSignature() {
                             key={template.id}
                             onClick={() => selectTemplate(actualIndex)}
                             className="flex-shrink-0 cursor-pointer transition-all relative"
-                            style={{ width: "180px" }}
+                            style={{ width: "200px" }}
                             data-testid={`template-card-${template.id}`}
                           >
                             <div
@@ -1058,16 +1058,16 @@ export default function EmailSignature() {
                                   ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400"
                                   : "border-slate-300 dark:border-slate-600"
                               }`}
-                              style={{ height: "140px" }}
+                              style={{ height: "160px" }}
                             >
-                              <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-1.5 overflow-hidden">
+                              <div className="h-full bg-white dark:bg-slate-900 flex items-start justify-start p-0 overflow-hidden">
                                 <div
                                   style={{
-                                    transform: "scale(0.38)",
+                                    transform: "scale(0.42)",
                                     transformOrigin: "top left",
-                                    width: "263%",
-                                    fontSize: "10px",
-                                    lineHeight: "1.2"
+                                    width: "238%",
+                                    fontSize: "11px",
+                                    lineHeight: "1.3"
                                   }}
                                 >
                                   <div
@@ -1076,7 +1076,7 @@ export default function EmailSignature() {
                                     }}
                                     style={{ 
                                       margin: 0, 
-                                      padding: 0,
+                                      padding: "8px",
                                       display: "block",
                                       whiteSpace: "normal"
                                     }}
