@@ -2206,15 +2206,13 @@ export default function EmailSignature() {
                           </Select>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <Label className="text-xs">Width (px)</Label>
-                            <Input type="number" value={signatureData.profilePhotoWidth} onChange={(e) => updateField("profilePhotoWidth", Number(e.target.value))} min="20" max="300" data-testid="input-profile-width" />
-                          </div>
-                          <div>
-                            <Label className="text-xs">Height (px)</Label>
-                            <Input type="number" value={signatureData.profilePhotoHeight} onChange={(e) => updateField("profilePhotoHeight", Number(e.target.value))} min="20" max="300" data-testid="input-profile-height" />
-                          </div>
+                        <div>
+                          <Label className="text-xs">Width ({signatureData.profilePhotoWidth}px)</Label>
+                          <input type="range" min="20" max="300" value={signatureData.profilePhotoWidth} onChange={(e) => updateField("profilePhotoWidth", Number(e.target.value))} className="w-full" data-testid="input-profile-width" />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Height ({signatureData.profilePhotoHeight}px)</Label>
+                          <input type="range" min="20" max="300" value={signatureData.profilePhotoHeight} onChange={(e) => updateField("profilePhotoHeight", Number(e.target.value))} className="w-full" data-testid="input-profile-height" />
                         </div>
 
                         <div className="grid grid-cols-2 gap-2">
@@ -2297,15 +2295,13 @@ export default function EmailSignature() {
                       <h4 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Styling</h4>
                       
                       <div className="space-y-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <Label className="text-xs">Width (px)</Label>
-                            <Input type="number" value={signatureData.companyLogoWidth} onChange={(e) => updateField("companyLogoWidth", Number(e.target.value))} min="20" max="300" data-testid="input-logo-width" />
-                          </div>
-                          <div>
-                            <Label className="text-xs">Height (px)</Label>
-                            <Input type="number" value={signatureData.companyLogoHeight} onChange={(e) => updateField("companyLogoHeight", Number(e.target.value))} min="20" max="300" data-testid="input-logo-height" />
-                          </div>
+                        <div>
+                          <Label className="text-xs">Width ({signatureData.companyLogoWidth}px)</Label>
+                          <input type="range" min="20" max="300" value={signatureData.companyLogoWidth} onChange={(e) => updateField("companyLogoWidth", Number(e.target.value))} className="w-full" data-testid="input-logo-width" />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Height ({signatureData.companyLogoHeight}px)</Label>
+                          <input type="range" min="20" max="300" value={signatureData.companyLogoHeight} onChange={(e) => updateField("companyLogoHeight", Number(e.target.value))} className="w-full" data-testid="input-logo-height" />
                         </div>
 
                         <div className="grid grid-cols-2 gap-2">
