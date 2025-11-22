@@ -491,6 +491,14 @@ export default function EmailSignature() {
     reader.readAsDataURL(file);
   };
 
+  const removeProfilePhoto = () => {
+    updateField("profilePhoto", "");
+  };
+
+  const removeCompanyLogo = () => {
+    updateField("companyLogo", "");
+  };
+
   const addSocialLink = () => {
     setSignatureData((prev) => ({
       ...prev,
@@ -2243,18 +2251,32 @@ export default function EmailSignature() {
               <CardContent className="p-3 space-y-2">
                 {!collapsedSections.profilePhotoSection && (
                   <>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <Label htmlFor="profilePhoto" className="text-xs">Upload Photo</Label>
-                      <Input
-                        id="profilePhoto"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          e.target.files?.[0] &&
-                          handleImageUpload("profilePhoto", e.target.files[0])
-                        }
-                        data-testid="input-profile-photo"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          id="profilePhoto"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            e.target.files?.[0] &&
+                            handleImageUpload("profilePhoto", e.target.files[0])
+                          }
+                          className="flex-1"
+                          data-testid="input-profile-photo"
+                        />
+                        {signatureData.profilePhoto && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            onClick={removeProfilePhoto}
+                            data-testid="button-remove-profile-photo"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="border-t pt-2 mt-2">
@@ -2346,18 +2368,32 @@ export default function EmailSignature() {
               <CardContent className="p-3 space-y-2">
                 {!collapsedSections.companyLogoSection && (
                   <>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <Label htmlFor="companyLogo" className="text-xs">Upload Logo</Label>
-                      <Input
-                        id="companyLogo"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          e.target.files?.[0] &&
-                          handleImageUpload("companyLogo", e.target.files[0])
-                        }
-                        data-testid="input-company-logo"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          id="companyLogo"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            e.target.files?.[0] &&
+                            handleImageUpload("companyLogo", e.target.files[0])
+                          }
+                          className="flex-1"
+                          data-testid="input-company-logo"
+                        />
+                        {signatureData.companyLogo && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            onClick={removeCompanyLogo}
+                            data-testid="button-remove-company-logo"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="border-t pt-2 mt-2">
