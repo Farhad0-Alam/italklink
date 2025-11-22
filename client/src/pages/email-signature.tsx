@@ -539,12 +539,39 @@ export default function EmailSignature() {
 
   const generatePremiumSignature = (): string => {
     const baseUrl = window.location.origin;
+    // Contact icons
     const phoneIcon = `${baseUrl}/signature/phone.png`;
     const emailIcon = `${baseUrl}/signature/email.png`;
     const websiteIcon = `${baseUrl}/signature/website.png`;
     const cellIcon = `${baseUrl}/signature/cell.png`;
     const locationIcon = `${baseUrl}/signature/location.png`;
     const ecardIcon = `${baseUrl}/signature/ecard.png`;
+    
+    // Social media icons
+    const facebookIcon = `${baseUrl}/signature/facebook.png`;
+    const instagramIcon = `${baseUrl}/signature/instagram.png`;
+    const twitterIcon = `${baseUrl}/signature/twitter.png`;
+    const youtubeIcon = `${baseUrl}/signature/youtube.png`;
+    const linkedinIcon = `${baseUrl}/signature/linkedin.png`;
+    const tiktokIcon = `${baseUrl}/signature/tiktok.png`;
+    const whatsappIcon = `${baseUrl}/signature/whatsapp.png`;
+    const pinterestIcon = `${baseUrl}/signature/pinterest.png`;
+    const githubIcon = `${baseUrl}/signature/github.png`;
+    const snapchatIcon = `${baseUrl}/signature/snapchat.png`;
+    
+    // Social icon map
+    const socialIconMap: Record<string, string> = {
+      facebook: facebookIcon,
+      instagram: instagramIcon,
+      twitter: twitterIcon,
+      youtube: youtubeIcon,
+      linkedin: linkedinIcon,
+      tiktok: tiktokIcon,
+      whatsapp: whatsappIcon,
+      pinterest: pinterestIcon,
+      github: githubIcon,
+      snapchat: snapchatIcon,
+    };
 
     const {
       signatureName,
@@ -607,10 +634,10 @@ export default function EmailSignature() {
 
     const socialIconsHTML = socialLinks
       .map((link) => {
-        const iconSVG = getSocialIconSVG(link.platform);
+        const iconPath = socialIconMap[link.platform] || socialIconMap.facebook;
         const borderRadius = getSocialIconBorderRadius(socialIconShape);
         const borderStyle = socialIconBorderWidth > 0 ? `border: ${socialIconBorderWidth}px solid ${socialIconBorderColor};` : "";
-        return `<a href="${link.url}" style="display:inline-block;margin:0 6px;"><div style="width:${socialIconSize}px;height:${socialIconSize}px;background-color:${socialIconColor};border-radius:${borderRadius};${borderStyle}display:flex;align-items:center;justify-content:center;overflow:hidden;"><img src="${iconSVG}" alt="${link.platform}" width="${Math.round(socialIconSize * 0.6)}" height="${Math.round(socialIconSize * 0.6)}" style="border:0;display:block;"></div></a>`;
+        return `<a href="${link.url}" style="display:inline-block;margin:0 6px;"><div style="width:${socialIconSize}px;height:${socialIconSize}px;background-color:${socialIconColor};border-radius:${borderRadius};${borderStyle}display:flex;align-items:center;justify-content:center;overflow:hidden;"><img src="${iconPath}" alt="${link.platform}" width="${Math.round(socialIconSize * 0.6)}" height="${Math.round(socialIconSize * 0.6)}" style="border:0;display:block;"></div></a>`;
       })
       .join("");
 
@@ -710,22 +737,6 @@ export default function EmailSignature() {
     `.trim();
   };
 
-  const getSocialIconSVG = (platform: string): string => {
-    const baseUrl = window.location.origin;
-    const icons: Record<string, string> = {
-      facebook: `${baseUrl}/signature/facebook.png`,
-      linkedin: `${baseUrl}/signature/linkedin.png`,
-      instagram: `${baseUrl}/signature/instagram.png`,
-      twitter: `${baseUrl}/signature/twitter.png`,
-      youtube: `${baseUrl}/signature/youtube.png`,
-      tiktok: `${baseUrl}/signature/tiktok.png`,
-      whatsapp: `${baseUrl}/signature/whatsapp.png`,
-      pinterest: `${baseUrl}/signature/pinterest.png`,
-      github: `${baseUrl}/signature/github.png`,
-      snapchat: `${baseUrl}/signature/snapchat.png`,
-    };
-    return icons[platform] || icons.facebook;
-  };
 
 
   // Get template HTML by index
