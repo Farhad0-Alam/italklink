@@ -70,11 +70,14 @@ interface SignatureData {
   signatureFont: string;
   signatureSize: number;
   signatureColor: string;
+  signatureLineHeight: number;
 
   nameSize: number;
   nameColor: string;
+  nameLineHeight: number;
   titleSize: number;
   titleColor: string;
+  titleLineHeight: number;
   companySize: number;
   companyColor: string;
 
@@ -348,10 +351,13 @@ export default function EmailSignature() {
     signatureFont: "Alex Brush",
     signatureSize: 20,
     signatureColor: "#333333",
+    signatureLineHeight: 1.5,
     nameSize: 24,
     nameColor: "#333333",
+    nameLineHeight: 1.5,
     titleSize: 16,
     titleColor: "#666666",
+    titleLineHeight: 1.5,
     companySize: 16,
     companyColor: "#666666",
     headerFont: "Arial",
@@ -499,11 +505,14 @@ export default function EmailSignature() {
       signatureFont,
       signatureSize,
       signatureColor,
+      signatureLineHeight,
       headerFont,
       nameSize,
       nameColor,
+      nameLineHeight,
       titleSize,
       titleColor,
+      titleLineHeight,
       companySize,
       companyColor,
       contactFont,
@@ -547,14 +556,14 @@ export default function EmailSignature() {
           }
           <td style="vertical-align: top; padding-top: 2px;">
             <table cellpadding="0" cellspacing="0" border="0">
-              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 2px;">${signatureName}</td></tr>` : ""}
+              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 2px; line-height: ${signatureLineHeight};">${signatureName}</td></tr>` : ""}
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 3px;">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 3px; line-height: ${nameLineHeight};">
                   ${name}
                 </td>
               </tr>
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; padding-bottom: 5px;">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; padding-bottom: 5px; line-height: ${titleLineHeight};">
                   ${title}${title && company ? ` <span style="color: ${titleColor}; opacity: 0.7; margin: 0 8px;">|</span> ` : ''}${company ? `<span style="font-family: ${headerFont}, sans-serif; font-size: ${companySize}px; color: ${companyColor};">${company}</span>` : ''}
                 </td>
               </tr>
@@ -604,11 +613,14 @@ export default function EmailSignature() {
       signatureFont,
       signatureSize,
       signatureColor,
+      signatureLineHeight,
       headerFont,
       nameSize,
       nameColor,
+      nameLineHeight,
       titleSize,
       titleColor,
+      titleLineHeight,
       companySize,
       companyColor,
       contactFont,
@@ -651,14 +663,14 @@ export default function EmailSignature() {
           }
           <td style="vertical-align: top; border-left: 3px solid ${primaryColor}; padding-left: 20px;">
             <table cellpadding="0" cellspacing="0" border="0">
-              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 2px;">${signatureName}</td></tr>` : ""}
+              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 2px; line-height: ${signatureLineHeight};">${signatureName}</td></tr>` : ""}
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 3px;">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 3px; line-height: ${nameLineHeight};">
                   ${name}
                 </td>
               </tr>
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; padding-bottom: 10px;">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; padding-bottom: 10px; line-height: ${titleLineHeight};">
                   ${title}${title && company ? ` <span style="color: ${titleColor}; opacity: 0.7; margin: 0 8px;">|</span> ` : ''}${company ? `<span style="font-family: ${headerFont}, sans-serif; font-size: ${companySize}px; color: ${companyColor};">${company}</span>` : ''}
                 </td>
               </tr>
@@ -742,11 +754,14 @@ export default function EmailSignature() {
       signatureFont,
       signatureSize,
       signatureColor,
+      signatureLineHeight,
       headerFont,
       nameSize,
       nameColor,
+      nameLineHeight,
       titleSize,
       titleColor,
+      titleLineHeight,
       companySize,
       companyColor,
       contactFont,
@@ -800,14 +815,14 @@ export default function EmailSignature() {
           }
           <td style="vertical-align: top;">
             <table cellpadding="0" cellspacing="0" border="0">
-              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 2px;">${signatureName}</td></tr>` : ""}
+              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 2px; line-height: ${signatureLineHeight};">${signatureName}</td></tr>` : ""}
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 3px;">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 3px; line-height: ${nameLineHeight};">
                   ${name}
                 </td>
               </tr>
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; padding-bottom: 15px; font-weight: 600;">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; padding-bottom: 15px; font-weight: 600; line-height: ${titleLineHeight};">
                   ${title}${title && company ? ` <span style="color: ${titleColor}; opacity: 0.7; margin: 0 8px;">|</span> ` : ''}${company ? `<span style="font-family: ${headerFont}, sans-serif; font-size: ${companySize}px; color: ${companyColor}; font-weight: normal;">${company}</span>` : ''}
                 </td>
               </tr>
@@ -1178,6 +1193,26 @@ export default function EmailSignature() {
                               />
                             </div>
                           </div>
+                          <div>
+                            <Label className="text-xs">
+                              Line Spacing: {signatureData.signatureLineHeight.toFixed(1)}
+                            </Label>
+                            <input
+                              type="range"
+                              min="1"
+                              max="2.5"
+                              step="0.1"
+                              value={signatureData.signatureLineHeight}
+                              onChange={(e) =>
+                                updateField(
+                                  "signatureLineHeight",
+                                  parseFloat(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-signature-line-height"
+                            />
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1322,6 +1357,26 @@ export default function EmailSignature() {
                               />
                             </div>
                           </div>
+                          <div>
+                            <Label className="text-xs">
+                              Line Spacing: {signatureData.nameLineHeight.toFixed(1)}
+                            </Label>
+                            <input
+                              type="range"
+                              min="1"
+                              max="2.5"
+                              step="0.1"
+                              value={signatureData.nameLineHeight}
+                              onChange={(e) =>
+                                updateField(
+                                  "nameLineHeight",
+                                  parseFloat(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-name-line-height"
+                            />
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1405,6 +1460,26 @@ export default function EmailSignature() {
                                 data-testid="input-title-color-hex"
                               />
                             </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs">
+                              Line Spacing: {signatureData.titleLineHeight.toFixed(1)}
+                            </Label>
+                            <input
+                              type="range"
+                              min="1"
+                              max="2.5"
+                              step="0.1"
+                              value={signatureData.titleLineHeight}
+                              onChange={(e) =>
+                                updateField(
+                                  "titleLineHeight",
+                                  parseFloat(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-title-line-height"
+                            />
                           </div>
                         </div>
                       )}
