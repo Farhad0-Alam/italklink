@@ -948,16 +948,16 @@ export default function EmailSignature() {
                 <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-2">
                   <div className="space-y-2">
                     <div>
-                      <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Setup Location:</h4>
-                      <p className="text-xs text-amber-800 dark:text-amber-200">{platformInstructions[selectedPlatform].location}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Steps:</h4>
+                      <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">How to use:</h4>
                       <ol className="text-xs text-amber-800 dark:text-amber-200 space-y-0.5 list-decimal list-inside">
                         {platformInstructions[selectedPlatform].steps.map((step, idx) => (
                           <li key={idx} className="text-xs">{step}</li>
                         ))}
                       </ol>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Setup Location:</h4>
+                      <p className="text-xs text-amber-800 dark:text-amber-200">{platformInstructions[selectedPlatform].location}</p>
                     </div>
                     <div>
                       <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Tips:</h4>
