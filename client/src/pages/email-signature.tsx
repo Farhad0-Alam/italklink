@@ -120,11 +120,10 @@ interface SignatureData {
   socialLinksBottomSpacing: number;
   socialIconsGap: number;
 
-  dividerHeight: number;
-  dividerColor: string;
-  dividerMarginTop: number;
-  dividerMarginBottom: number;
-  dividerWidth: number;
+  bannerBackgroundColor: string;
+  bannerBorderColor: string;
+  bannerBorderWidth: number;
+  bannerBorderRadius: number;
 
   socialLinks: { platform: string; url: string; icon: string }[];
 
@@ -452,11 +451,10 @@ export default function EmailSignature() {
     socialIconsGap: 9,
     socialIconBorderWidth: 0,
     socialIconBorderColor: "#CCCCCC",
-    dividerHeight: 3,
-    dividerColor: "#FF6A00",
-    dividerMarginTop: 5,
-    dividerMarginBottom: 5,
-    dividerWidth: 100,
+    bannerBackgroundColor: "#F5F5F5",
+    bannerBorderColor: "#FF6A00",
+    bannerBorderWidth: 2,
+    bannerBorderRadius: 8,
     socialLinks: [
       {
         platform: "linkedin",
@@ -709,6 +707,10 @@ export default function EmailSignature() {
       socialLinksTopSpacing,
       socialLinksBottomSpacing,
       socialIconsGap,
+      bannerBackgroundColor,
+      bannerBorderColor,
+      bannerBorderWidth,
+      bannerBorderRadius,
       ctaButtonFont,
       ctaButtonSize,
       ctaButtonColor,
@@ -722,11 +724,6 @@ export default function EmailSignature() {
       ctaButtonPosition,
       ctaButtonPositionVertical,
       ctaButtonGap,
-      dividerHeight,
-      dividerColor,
-      dividerMarginTop,
-      dividerMarginBottom,
-      dividerWidth,
       profilePhotoRightSideGap,
     } = signatureData;
 
@@ -811,7 +808,6 @@ export default function EmailSignature() {
                   ${title}${title && company ? ` <span style="color: ${titleColor}; opacity: 0.7; margin: 0 8px;">|</span> ` : ''}${company ? `<span style="font-family: ${headerFont}, sans-serif; font-size: ${companySize}px; color: ${companyColor}; font-weight: normal;">${company}</span>` : ''}
                 </td>
               </tr>
-              <tr><td style="padding-top: ${dividerMarginTop}px; padding-bottom: ${dividerMarginBottom}px;"><div style="height: ${dividerHeight}px; background-color: ${dividerColor}; width: ${dividerWidth}%;"></div></td></tr>
               ${officePhone || cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;">
                 ${officePhone ? `<span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${phoneIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${officePhone}</a>` : ""}
                 ${officePhone && cellPhone ? `<span style="margin: 0 6px;"></span>` : ""}
@@ -833,8 +829,8 @@ export default function EmailSignature() {
           companyLogo || ctaButtons.length > 0
             ? `
         <tr>
-          <td colspan="2" style="padding-top: 25px; border-top: 2px solid ${primaryColor}; margin-top: 20px;">
-            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <td colspan="2" style="padding-top: 25px; margin-top: 20px;">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: ${bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; border-radius: ${bannerBorderRadius}px; padding: 20px;">
               <tr>
                 ${companyLogo ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}"><img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}"></div></td>` : ""}
                 ${
@@ -1862,122 +1858,106 @@ export default function EmailSignature() {
                       )}
                     </div>
 
-                    {/* Divider Style Subsection */}
+                    {/* Banner Background Style Subsection */}
                     <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
                       <div
                         className="flex items-center justify-between cursor-pointer mb-3"
-                        onClick={() => toggleSection("dividerStyle")}
-                        data-testid="toggle-divider-style"
+                        onClick={() => toggleSection("bannerStyle")}
+                        data-testid="toggle-banner-style"
                       >
                         <Label className="text-sm font-semibold">
-                          Divider Style
+                          Banner Background
                         </Label>
-                        {collapsedSections.dividerStyle ? (
+                        {collapsedSections.bannerStyle ? (
                           <ChevronDown className="w-4 h-4" />
                         ) : (
                           <ChevronUp className="w-4 h-4" />
                         )}
                       </div>
-                      {!collapsedSections.dividerStyle && (
+                      {!collapsedSections.bannerStyle && (
                         <div className="space-y-3">
                           <div>
-                            <Label className="text-xs">
-                              Thickness: {signatureData.dividerHeight}px
-                            </Label>
-                            <input
-                              type="range"
-                              min="1"
-                              max="10"
-                              value={signatureData.dividerHeight}
-                              onChange={(e) =>
-                                updateField(
-                                  "dividerHeight",
-                                  parseInt(e.target.value),
-                                )
-                              }
-                              className="custom-range w-full"
-                              data-testid="slider-divider-height"
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-xs">
-                              Width: {signatureData.dividerWidth}%
-                            </Label>
-                            <input
-                              type="range"
-                              min="10"
-                              max="100"
-                              step="10"
-                              value={signatureData.dividerWidth}
-                              onChange={(e) =>
-                                updateField(
-                                  "dividerWidth",
-                                  parseInt(e.target.value),
-                                )
-                              }
-                              className="custom-range w-full"
-                              data-testid="slider-divider-width"
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-xs mb-1">Color</Label>
+                            <Label className="text-xs mb-1">Background Color</Label>
                             <div className="flex gap-2">
                               <Input
                                 type="color"
-                                value={signatureData.dividerColor}
+                                value={signatureData.bannerBackgroundColor}
                                 onChange={(e) =>
-                                  updateField("dividerColor", e.target.value)
+                                  updateField("bannerBackgroundColor", e.target.value)
                                 }
                                 className="w-16 h-9"
-                                data-testid="input-divider-color"
+                                data-testid="input-banner-bg-color"
                               />
                               <Input
-                                value={signatureData.dividerColor}
+                                value={signatureData.bannerBackgroundColor}
                                 onChange={(e) =>
-                                  updateField("dividerColor", e.target.value)
+                                  updateField("bannerBackgroundColor", e.target.value)
+                                }
+                                placeholder="#F5F5F5"
+                                className="flex-1"
+                                data-testid="input-banner-bg-color-hex"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs mb-1">Border Color</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="color"
+                                value={signatureData.bannerBorderColor}
+                                onChange={(e) =>
+                                  updateField("bannerBorderColor", e.target.value)
+                                }
+                                className="w-16 h-9"
+                                data-testid="input-banner-border-color"
+                              />
+                              <Input
+                                value={signatureData.bannerBorderColor}
+                                onChange={(e) =>
+                                  updateField("bannerBorderColor", e.target.value)
                                 }
                                 placeholder="#FF6A00"
                                 className="flex-1"
-                                data-testid="input-divider-color-hex"
+                                data-testid="input-banner-border-color-hex"
                               />
                             </div>
                           </div>
                           <div>
                             <Label className="text-xs">
-                              Top Spacing: {signatureData.dividerMarginTop}px
+                              Border Width: {signatureData.bannerBorderWidth}px
                             </Label>
                             <input
                               type="range"
                               min="0"
-                              max="30"
-                              value={signatureData.dividerMarginTop}
+                              max="10"
+                              value={signatureData.bannerBorderWidth}
                               onChange={(e) =>
                                 updateField(
-                                  "dividerMarginTop",
+                                  "bannerBorderWidth",
                                   parseInt(e.target.value),
                                 )
                               }
                               className="custom-range w-full"
-                              data-testid="slider-divider-margin-top"
+                              data-testid="slider-banner-border-width"
                             />
                           </div>
                           <div>
                             <Label className="text-xs">
-                              Bottom Spacing: {signatureData.dividerMarginBottom}px
+                              Border Radius: {signatureData.bannerBorderRadius}px
                             </Label>
                             <input
                               type="range"
                               min="0"
                               max="30"
-                              value={signatureData.dividerMarginBottom}
+                              value={signatureData.bannerBorderRadius}
                               onChange={(e) =>
                                 updateField(
-                                  "dividerMarginBottom",
+                                  "bannerBorderRadius",
                                   parseInt(e.target.value),
                                 )
                               }
                               className="custom-range w-full"
-                              data-testid="slider-divider-margin-bottom"
+                              data-testid="slider-banner-border-radius"
                             />
                           </div>
                         </div>
