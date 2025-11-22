@@ -142,6 +142,132 @@ const emailPlatforms = [
   { id: "microsoft-365", name: "Microsoft 365", icon: "🪟" },
 ];
 
+const platformInstructions: { [key: string]: { steps: string[]; tips: string[]; location: string } } = {
+  "outlook": {
+    steps: [
+      "Click 'Copy HTML' button in the preview section",
+      "Go to File → Options → Mail → Signatures",
+      "Click 'New' and enter a signature name",
+      "Paste the HTML code into the signature editor",
+      "Click 'OK' to save your signature"
+    ],
+    tips: [
+      "Outlook supports most HTML and CSS formatting",
+      "Test your signature before using it with important emails",
+      "Images must be hosted online (not embedded)"
+    ],
+    location: "File → Options → Mail → Signatures"
+  },
+  "new-outlook": {
+    steps: [
+      "Click 'Copy HTML' button in the preview section",
+      "Go to Settings (gear icon) → Mail → Signatures",
+      "Click 'New signature' and enter a name",
+      "Switch to HTML editor (if available) and paste the code",
+      "Save and set as default if needed"
+    ],
+    tips: [
+      "New Outlook has improved HTML support",
+      "Some advanced CSS features may be limited",
+      "Test with a draft email first"
+    ],
+    location: "Settings → Mail → Signatures"
+  },
+  "outlook-365": {
+    steps: [
+      "Click 'Copy HTML' button in the preview section",
+      "Go to Settings (gear icon) → Mail → Signatures",
+      "Click 'New signature' and enter a name",
+      "In the editor, click the three dots (•••) and select 'Edit HTML'",
+      "Paste your HTML code and save"
+    ],
+    tips: [
+      "Office 365 Outlook has excellent HTML support",
+      "You can edit signatures from any device",
+      "Changes sync automatically across devices"
+    ],
+    location: "Settings → Mail → Signatures"
+  },
+  "apple-mail": {
+    steps: [
+      "Click 'Download' to save as HTML file",
+      "Open Apple Mail and go to Mail → Preferences",
+      "Click 'Signatures' tab",
+      "Click the '+' button to create new signature",
+      "Copy and paste the HTML content (may need to format)"
+    ],
+    tips: [
+      "Apple Mail may not fully support complex HTML",
+      "Test images to ensure they display correctly",
+      "Consider using the simplified version for best compatibility"
+    ],
+    location: "Mail → Preferences → Signatures"
+  },
+  "gmail": {
+    steps: [
+      "Click 'Copy HTML' button in the preview section",
+      "Go to Settings (gear icon) → See all settings",
+      "Scroll to 'Signature' section",
+      "Click in the signature text area",
+      "Paste your HTML signature"
+    ],
+    tips: [
+      "Gmail converts HTML to its own format automatically",
+      "Complex layouts may look different in Gmail",
+      "Use the live preview to verify appearance",
+      "Images must be publicly hosted online"
+    ],
+    location: "Settings → Signature"
+  },
+  "thunderbird": {
+    steps: [
+      "Click 'Copy HTML' button in the preview section",
+      "Go to Edit → Account Settings → Signature",
+      "Select 'HTML signature' checkbox",
+      "Paste your HTML code into the text area",
+      "Click 'OK' to save"
+    ],
+    tips: [
+      "Make sure to check the 'HTML signature' option",
+      "Thunderbird supports most HTML tags",
+      "Test your signature with a test email first"
+    ],
+    location: "Edit → Account Settings → Signature"
+  },
+  "exchange": {
+    steps: [
+      "Click 'Copy HTML' button in the preview section",
+      "Open Exchange Management Console or Outlook Web App",
+      "Go to Settings → Signature",
+      "Click 'New' to create a signature",
+      "Paste the HTML code and save"
+    ],
+    tips: [
+      "Exchange Server has robust HTML support",
+      "Contact your IT administrator if needed",
+      "Signatures can be applied to all users via policies",
+      "Test in Outlook before deploying organization-wide"
+    ],
+    location: "Settings → Signature (via OWA or Exchange Console)"
+  },
+  "microsoft-365": {
+    steps: [
+      "Click 'Copy HTML' button in the preview section",
+      "Go to Settings (gear icon) → View all Outlook settings",
+      "Click 'Mail' → 'Compose and reply'",
+      "Scroll to 'Email signature' section",
+      "Paste your HTML signature"
+    ],
+    tips: [
+      "Microsoft 365 Outlook has full HTML support",
+      "Signature syncs across all devices",
+      "You can set different signatures per email account",
+      "Test before adding to multiple accounts"
+    ],
+    location: "Settings → Mail → Email signature"
+  }
+};
+
 export default function EmailSignature() {
   const { toast } = useToast();
   const [selectedPlatform, setSelectedPlatform] = useState<string>("outlook");
@@ -798,7 +924,7 @@ export default function EmailSignature() {
             <CardHeader className="py-2 px-3">
               <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">1. Choose email platform</CardTitle>
             </CardHeader>
-            <CardContent className="p-3">
+            <CardContent className="p-3 space-y-3">
               <div className="grid grid-cols-4 gap-2">
                 {emailPlatforms.map((platform) => (
                   <button
@@ -816,7 +942,36 @@ export default function EmailSignature() {
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+
+              {/* Platform-Specific Instructions */}
+              {platformInstructions[selectedPlatform] && (
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-2">
+                  <div className="space-y-2">
+                    <div>
+                      <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Setup Location:</h4>
+                      <p className="text-xs text-amber-800 dark:text-amber-200">{platformInstructions[selectedPlatform].location}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Steps:</h4>
+                      <ol className="text-xs text-amber-800 dark:text-amber-200 space-y-0.5 list-decimal list-inside">
+                        {platformInstructions[selectedPlatform].steps.map((step, idx) => (
+                          <li key={idx} className="text-xs">{step}</li>
+                        ))}
+                      </ol>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Tips:</h4>
+                      <ul className="text-xs text-amber-800 dark:text-amber-200 space-y-0.5 list-disc list-inside">
+                        {platformInstructions[selectedPlatform].tips.map((tip, idx) => (
+                          <li key={idx} className="text-xs">{tip}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Looking for another email platform?{" "}
                 <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
                   Check out the supported platforms here
