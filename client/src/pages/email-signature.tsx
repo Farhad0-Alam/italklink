@@ -821,13 +821,11 @@ export default function EmailSignature() {
                   ctaButtons.length > 0
                     ? `
                 <td style="text-align: ${companyLogo ? "right" : "center"}; vertical-align: middle;">
-                  <table cellpadding="0" cellspacing="0" border="0">
-                    <tr>
-                      ${ctaButtons.map(btn => {
-                        const btnBorderRadius = ctaButtonShape === "square" ? "0px" : `${ctaButtonRadius}px`;
-                        return `<td style="padding: 0 6px;"><a href="${btn.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: 12px 20px; text-decoration: none; border-radius: ${btnBorderRadius}; font-weight: bold; display: inline-block; border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-size: ${ctaButtonSize}px; font-family: ${contactFont}, sans-serif; white-space: nowrap;">${btn.text}</a></td>`;
-                      }).join('')}
-                    </tr>
+                  <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
+                    ${ctaButtons.map(btn => {
+                      const btnBorderRadius = ctaButtonShape === "square" ? "0px" : `${ctaButtonRadius}px`;
+                      return `<tr><td style="padding: 4px 0; text-align: ${companyLogo ? "right" : "center"};"><a href="${btn.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: 12px 20px; text-decoration: none; border-radius: ${btnBorderRadius}; font-weight: bold; display: inline-block; border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-size: ${ctaButtonSize}px; font-family: ${contactFont}, sans-serif; white-space: nowrap;">${btn.text}</a></td></tr>`;
+                    }).join('')}
                   </table>
                 </td>
                 `
