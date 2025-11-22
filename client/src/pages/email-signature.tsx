@@ -684,30 +684,35 @@ export default function EmailSignature() {
     return icons[platform] || icons.facebook;
   };
 
-  // Generate signature based on selected template
-  const generateSignatureHTML = (): string => {
-    switch (templateVariant) {
-      case "template-1":
+  // Get template HTML by index
+  const getTemplateHTMLByIndex = (index: number): string => {
+    switch (index) {
+      case 0:
         return generateTemplate1();
-      case "template-2":
+      case 1:
         return generateTemplate2();
-      case "template-3":
+      case 2:
         return generateTemplate3();
-      case "template-4":
+      case 3:
         return generateTemplate4();
-      case "template-5":
+      case 4:
         return generateTemplate5();
-      case "template-6":
+      case 5:
         return generateTemplate6();
-      case "template-7":
+      case 6:
         return generateTemplate7();
-      case "template-8":
+      case 7:
         return generateTemplate8();
-      case "template-9":
+      case 8:
         return generateTemplate9();
       default:
         return generateTemplate1();
     }
+  };
+
+  // Generate signature based on selected template
+  const generateSignatureHTML = (): string => {
+    return getTemplateHTMLByIndex(carouselIndex);
   };
 
   // Template 1: Classic with Profile Image on Left
@@ -1067,7 +1072,7 @@ export default function EmailSignature() {
                                 >
                                   <div
                                     dangerouslySetInnerHTML={{
-                                      __html: generateSignatureHTML()
+                                      __html: getTemplateHTMLByIndex(actualIndex)
                                     }}
                                     style={{ 
                                       margin: 0, 
