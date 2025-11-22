@@ -987,9 +987,9 @@ export default function EmailSignature() {
                               : "border-slate-300 dark:border-slate-600"
                           }`}
                         >
-                          <div className="h-16 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center p-1">
+                          <div className="h-8 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center p-0.5">
                             <div className="text-center">
-                              <div className="font-bold text-slate-600 dark:text-slate-300 text-xs leading-tight">
+                              <div className="font-bold text-slate-600 dark:text-slate-300 text-xs leading-none">
                                 {template.name}
                               </div>
                             </div>
