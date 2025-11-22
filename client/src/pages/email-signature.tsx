@@ -130,9 +130,7 @@ interface SignatureData {
 
   showDisclaimer: boolean;
   disclaimerText: string;
-  showCTA: boolean;
-  ctaText: string;
-  ctaUrl: string;
+  ctaButtons: { text: string; url: string }[];
   showBanner: boolean;
   bannerText: string;
 }
@@ -469,9 +467,11 @@ export default function EmailSignature() {
     showDisclaimer: false,
     disclaimerText:
       "This email and any attachments are confidential and intended solely for the recipient.",
-    showCTA: false,
-    ctaText: "Book a Consultation",
-    ctaUrl: "",
+    ctaButtons: [
+      { text: "Book a Consultation", url: "https://talkl.ink/" },
+      { text: "Learn More", url: "https://talkl.ink/" },
+      { text: "Get Started", url: "https://talkl.ink/" },
+    ],
     showBanner: false,
     bannerText: "Get in touch today!",
   });
@@ -560,6 +560,28 @@ export default function EmailSignature() {
     }));
   };
 
+  const addCtaButton = () => {
+    setSignatureData((prev) => ({
+      ...prev,
+      ctaButtons: [...prev.ctaButtons, { text: "Button Text", url: "https://talkl.ink/" }],
+    }));
+  };
+
+  const removeCtaButton = (index: number) => {
+    setSignatureData((prev) => ({
+      ...prev,
+      ctaButtons: prev.ctaButtons.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateCtaButton = (index: number, field: "text" | "url", value: string) => {
+    setSignatureData((prev) => {
+      const newButtons = [...prev.ctaButtons];
+      newButtons[index] = { ...newButtons[index], [field]: value };
+      return { ...prev, ctaButtons: newButtons };
+    });
+  };
+
   const updateCustomField = (
     index: number,
     field: "value" | "icon" | "url",
@@ -625,9 +647,7 @@ export default function EmailSignature() {
       primaryColor,
       secondaryColor,
       socialLinks,
-      showCTA,
-      ctaText,
-      ctaUrl,
+      ctaButtons,
       showBanner,
       bannerText,
       customFields,
@@ -768,7 +788,7 @@ export default function EmailSignature() {
           </td>
         </tr>
         ${
-          companyLogo || showCTA
+          companyLogo || ctaButtons.length > 0
             ? `
         <tr>
           <td colspan="2" style="padding-top: 25px; border-top: 2px solid ${primaryColor}; margin-top: 20px;">
@@ -776,10 +796,10 @@ export default function EmailSignature() {
               <tr>
                 ${companyLogo ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}"><img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}"></div></td>` : ""}
                 ${
-                  showCTA && ctaUrl
+                  ctaButtons.length > 0
                     ? `
-                <td style="text-align: ${companyLogo ? "right" : "center"}; vertical-align: middle;">
-                  <a href="${ctaUrl}" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${ctaText}</a>
+                <td style="text-align: ${companyLogo ? "right" : "center"}; vertical-align: middle; display: flex; gap: 12px; flex-wrap: wrap; justify-content: ${companyLogo ? "flex-end" : "center"};">
+                  ${ctaButtons.map(btn => `<a href="${btn.url}" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${btn.text}</a>`).join('')}
                 </td>
                 `
                     : ""
@@ -2874,31 +2894,49 @@ export default function EmailSignature() {
               {!collapsedSections.optionalFeaturesSection && (
                 <CardContent className="p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="showCTA">Call-to-Action Button</Label>
-                    <Switch
-                      id="showCTA"
-                      checked={signatureData.showCTA}
-                      onCheckedChange={(checked) =>
-                        updateField("showCTA", checked)
-                      }
-                      data-testid="switch-show-cta"
-                    />
+                    <Label>Call-to-Action Buttons</Label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={addCtaButton}
+                      data-testid="button-add-cta"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Button
+                    </Button>
                   </div>
 
-                  {signatureData.showCTA && (
-                    <div className="grid grid-cols-2 gap-4 pl-6">
-                      <Input
-                        value={signatureData.ctaText}
-                        onChange={(e) => updateField("ctaText", e.target.value)}
-                        placeholder="Button Text"
-                        data-testid="input-cta-text"
-                      />
-                      <Input
-                        value={signatureData.ctaUrl}
-                        onChange={(e) => updateField("ctaUrl", e.target.value)}
-                        placeholder="Button URL"
-                        data-testid="input-cta-url"
-                      />
+                  {signatureData.ctaButtons.length > 0 && (
+                    <div className="space-y-3">
+                      {signatureData.ctaButtons.map((button, index) => (
+                        <div key={index} className="border rounded-lg p-3 space-y-2">
+                          <div className="flex gap-2 items-end">
+                            <Input
+                              value={button.text}
+                              onChange={(e) => updateCtaButton(index, "text", e.target.value)}
+                              placeholder="Button Text"
+                              data-testid={`input-cta-text-${index}`}
+                              className="flex-1"
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeCtaButton(index)}
+                              data-testid={`button-remove-cta-${index}`}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <Input
+                            value={button.url}
+                            onChange={(e) => updateCtaButton(index, "url", e.target.value)}
+                            placeholder="Button URL"
+                            data-testid={`input-cta-url-${index}`}
+                          />
+                        </div>
+                      ))}
                     </div>
                   )}
 
