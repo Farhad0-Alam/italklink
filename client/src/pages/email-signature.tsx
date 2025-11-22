@@ -959,24 +959,24 @@ export default function EmailSignature() {
             </CardHeader>
             <CardContent className="p-2">
               <div className="relative">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={prevTemplate}
-                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 w-8 h-8"
+                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 w-6 h-6"
                     data-testid="btn-carousel-prev"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <ChevronLeft className="w-3 h-3" />
                   </Button>
 
-                  <div className="flex-1 flex gap-2 overflow-hidden">
+                  <div className="flex-1 flex gap-1 overflow-hidden">
                     {templates.map((template, index) => (
                       <div
                         key={template.id}
                         onClick={() => selectTemplate(index)}
                         className={`flex-shrink-0 w-1/3 cursor-pointer transition-all ${
-                          index === carouselIndex ? "scale-100" : "scale-75 opacity-50"
+                          index === carouselIndex ? "scale-100" : "scale-80 opacity-50"
                         }`}
                         data-testid={`template-card-${template.id}`}
                       >
@@ -987,9 +987,9 @@ export default function EmailSignature() {
                               : "border-slate-300 dark:border-slate-600"
                           }`}
                         >
-                          <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center p-1">
-                            <div className="text-center text-xs">
-                              <div className="font-bold text-slate-600 dark:text-slate-300 text-xs">
+                          <div className="h-16 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center p-1">
+                            <div className="text-center">
+                              <div className="font-bold text-slate-600 dark:text-slate-300 text-xs leading-tight">
                                 {template.name}
                               </div>
                             </div>
@@ -1003,10 +1003,10 @@ export default function EmailSignature() {
                     variant="ghost"
                     size="icon"
                     onClick={nextTemplate}
-                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 w-8 h-8"
+                    className="z-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 w-6 h-6"
                     data-testid="btn-carousel-next"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-3 h-3" />
                   </Button>
                 </div>
 
