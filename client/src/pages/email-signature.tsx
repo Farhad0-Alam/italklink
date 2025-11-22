@@ -1034,7 +1034,7 @@ export default function EmailSignature() {
                     <ChevronLeft className="w-5 h-5" />
                   </Button>
 
-                  <div className="flex-1 overflow-hidden flex items-center justify-center">
+                  <div className="flex-1 overflow-hidden flex items-center justify-center py-2">
                     <style>{`
                       @keyframes slideIn {
                         from { opacity: 0; transform: translateX(20px); }
@@ -1045,15 +1045,22 @@ export default function EmailSignature() {
                       }
                       .carousel-container {
                         transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                        display: flex;
+                        gap: 12px;
                       }
                     `}</style>
-                    <div className="carousel-container flex gap-3 pb-1" style={{ transform: `translateX(0)` }}>
-                      {Array.from({ length: 4 }).map((_, visibleIndex) => {
-                        const actualIndex = (carouselIndex + visibleIndex) % templates.length;
-                        const template = templates[actualIndex];
+                    <div className="carousel-container" style={{ transform: `translateX(0)` }}>
+                      {templates && templates.map((template, actualIndex) => {
+                        const isVisible = actualIndex >= carouselIndex && actualIndex < carouselIndex + 4 || 
+                                         (carouselIndex + 4 > templates.length && actualIndex < (carouselIndex + 4) % templates.length);
+                        if (!isVisible && !(carouselIndex >= templates.length - 3)) return null;
+                        
+                        const visibleIndex = actualIndex >= carouselIndex ? actualIndex - carouselIndex : templates.length - carouselIndex + actualIndex;
+                        if (visibleIndex >= 4) return null;
+                        
                         return (
                           <div
-                            key={`${actualIndex}-${visibleIndex}`}
+                            key={`${actualIndex}-${template.id}`}
                             onClick={() => selectTemplate(actualIndex)}
                             className="carousel-item flex-shrink-0 cursor-pointer group relative"
                             style={{ width: "200px" }}
