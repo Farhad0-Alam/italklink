@@ -823,7 +823,7 @@ export default function EmailSignature() {
   // Helper function to get container styles (wrapper div)
   const getContainerStyle = (type: "profile" | "logo"): string => {
     if (type === "profile") {
-      const { profilePhotoShape, profilePhotoWidth, profilePhotoHeight, profilePhotoBorderWidth, profilePhotoBorderColor, profilePhotoOpacity, profilePhotoShadow } = signatureData;
+      const { profilePhotoShape, profilePhotoWidth, profilePhotoHeight, profilePhotoBorderWidth, profilePhotoBorderColor, profilePhotoOpacity, profilePhotoShadow, profilePhotoRightSideGap } = signatureData;
 
       let borderRadius = "50%";
       if (profilePhotoShape === "square") borderRadius = "0%";
