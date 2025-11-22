@@ -637,7 +637,7 @@ export default function EmailSignature() {
         const iconPath = socialIconMap[link.platform] || socialIconMap.facebook;
         const borderRadius = getSocialIconBorderRadius(socialIconShape);
         const borderStyle = socialIconBorderWidth > 0 ? `border: ${socialIconBorderWidth}px solid ${socialIconBorderColor};` : "";
-        return `<a href="${link.url}" style="display:inline-block;margin:0 6px;"><div style="width:${socialIconSize}px;height:${socialIconSize}px;background-color:${socialIconColor};border-radius:${borderRadius};${borderStyle}display:flex;align-items:center;justify-content:center;overflow:hidden;"><img src="${iconPath}" alt="${link.platform}" width="${Math.round(socialIconSize * 0.6)}" height="${Math.round(socialIconSize * 0.6)}" style="border:0;display:block;"></div></a>`;
+        return `<a href="${link.url}" style="display:inline-block;margin:0 6px; text-decoration:none;"><span style="display:inline-block; width:${socialIconSize}px; height:${socialIconSize}px; background-color:${socialIconColor}; border-radius:${borderRadius}; ${borderStyle} margin-right:0px; vertical-align:middle; position:relative;"><img src="${iconPath}" alt="${link.platform}" style="width:100%; height:100%; display:block; border:0;"></span></a>`;
       })
       .join("");
 
