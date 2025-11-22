@@ -412,7 +412,7 @@ export default function EmailSignature() {
     headerSize: 18,
     headerColor: "#FF6A00",
     contactFont: "Arial",
-    contactInfoSize: 20,
+    contactInfoSize: 12,
     contactInfoColor: "#333333",
     contactLineHeight: 1.5,
     contactLetterSpacing: 0,
