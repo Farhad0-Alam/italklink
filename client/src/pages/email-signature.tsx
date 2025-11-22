@@ -957,7 +957,7 @@ export default function EmailSignature() {
             <CardHeader className="py-2 px-3">
               <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">2. Choose signature template</CardTitle>
             </CardHeader>
-            <CardContent className="p-2">
+            <CardContent className="p-1.5">
               <div className="relative">
                 <div className="flex items-center gap-0.5">
                   <Button
@@ -1010,8 +1010,8 @@ export default function EmailSignature() {
                   </Button>
                 </div>
 
-                <div className="text-center mt-1">
-                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                <div className="text-center mt-0.5">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-tight py-0">
                     <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
                       More templates
                     </a>
