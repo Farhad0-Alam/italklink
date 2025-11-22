@@ -2067,59 +2067,29 @@ export default function EmailSignature() {
                   Preview in Email
                 </Button>
 
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2 mt-2">
-                  <div className="flex items-start gap-1.5">
-                    <Info className="w-3 h-3 text-blue-900 dark:text-blue-300 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <h3 className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-1">
-                        How to use
-                      </h3>
-                      <ol className="text-xs text-blue-800 dark:text-blue-200 space-y-0.5 list-decimal list-inside">
-                        <li>Click "Copy HTML"</li>
-                        <li>Open your email settings</li>
-                        <li>Find signature section</li>
-                        <li>Paste the code</li>
-                      </ol>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Platform-Specific Instructions */}
-            {platformInstructions[selectedPlatform] && (
-              <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                <CardHeader className="py-2 px-3">
-                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">Setup Guide for {emailPlatforms.find(p => p.id === selectedPlatform)?.name}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-3">
-                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-2">
-                    <div className="space-y-2">
+                {/* Platform-Specific Instructions */}
+                {platformInstructions[selectedPlatform] && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2 mt-2">
+                    <div className="flex items-start gap-1.5">
+                      <Info className="w-3 h-3 text-blue-900 dark:text-blue-300 mt-0.5 flex-shrink-0" />
                       <div>
-                        <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">How to use:</h4>
-                        <ol className="text-xs text-amber-800 dark:text-amber-200 space-y-0.5 list-decimal list-inside">
+                        <h3 className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-1">
+                          How to use
+                        </h3>
+                        <ol className="text-xs text-blue-800 dark:text-blue-200 space-y-0.5 list-decimal list-inside">
                           {platformInstructions[selectedPlatform].steps.map((step, idx) => (
                             <li key={idx} className="text-xs">{step}</li>
                           ))}
                         </ol>
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Setup Location:</h4>
-                        <p className="text-xs text-amber-800 dark:text-amber-200">{platformInstructions[selectedPlatform].location}</p>
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Tips:</h4>
-                        <ul className="text-xs text-amber-800 dark:text-amber-200 space-y-0.5 list-disc list-inside">
-                          {platformInstructions[selectedPlatform].tips.map((tip, idx) => (
-                            <li key={idx} className="text-xs">{tip}</li>
-                          ))}
-                        </ul>
+                        <div className="mt-1.5 pt-1.5 border-t border-blue-200 dark:border-blue-700">
+                          <p className="text-xs text-blue-800 dark:text-blue-200"><strong>Setup Location:</strong> {platformInstructions[selectedPlatform].location}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
