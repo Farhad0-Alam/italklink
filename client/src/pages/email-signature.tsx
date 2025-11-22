@@ -394,7 +394,7 @@ export default function EmailSignature() {
     profilePhotoBorderColor: "#FF6A00",
     profilePhotoOpacity: 100,
     profilePhotoShadow: "medium",
-    profilePhotoRightSideGap: 1,
+    profilePhotoRightSideGap: 13,
 
     companyLogo: "https://via.placeholder.com/200x80/FF6A00/FFFFFF?text=ACME",
     companyLogoShape: "square",
