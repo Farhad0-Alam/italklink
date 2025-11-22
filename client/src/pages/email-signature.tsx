@@ -1122,18 +1122,18 @@ export default function EmailSignature() {
                 </div>
               </div>
 
-              <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                <p className="text-xs text-slate-600 dark:text-slate-400 mb-1.5 font-medium">
+              <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-2 font-medium">
                   Preview
                 </p>
-                <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-white dark:bg-slate-900 min-h-[100px] overflow-y-auto text-xs">
+                <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 overflow-y-auto text-xs" style={{ minHeight: "280px" }}>
                   <div
                     dangerouslySetInnerHTML={{ __html: generateSignatureHTML() }}
                     data-testid="template-preview"
                     style={{
-                      transform: "scale(0.65)",
+                      transform: "scale(0.75)",
                       transformOrigin: "top left",
-                      width: "154%"
+                      width: "134%"
                     }}
                   />
                 </div>
