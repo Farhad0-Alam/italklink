@@ -112,6 +112,9 @@ interface SignatureData {
   socialIconRadius: number;
   socialIconBorderWidth: number;
   socialIconBorderColor: string;
+  socialLinksTopSpacing: number;
+  socialLinksBottomSpacing: number;
+  socialIconsGap: number;
 
   dividerHeight: number;
   dividerColor: string;
@@ -422,6 +425,9 @@ export default function EmailSignature() {
     socialIconColor: "#FF6A00",
     socialIconShape: "circle",
     socialIconRadius: 8,
+    socialLinksTopSpacing: 16,
+    socialLinksBottomSpacing: 16,
+    socialIconsGap: 12,
     socialIconBorderWidth: 0,
     socialIconBorderColor: "#CCCCCC",
     dividerHeight: 3,
@@ -624,6 +630,9 @@ export default function EmailSignature() {
       socialIconRadius,
       socialIconBorderWidth,
       socialIconBorderColor,
+      socialLinksTopSpacing,
+      socialLinksBottomSpacing,
+      socialIconsGap,
       dividerHeight,
       dividerColor,
       dividerMarginTop,
@@ -636,7 +645,8 @@ export default function EmailSignature() {
       .map((link) => {
         const iconPath = socialIconMap[link.platform] || socialIconMap.facebook;
         const borderRadius = socialIconShape === "circle" ? "50%" : socialIconShape === "rounded" ? `${socialIconRadius || 8}px` : "0px";
-        return `<a href="${link.url}" target="_blank" style="display:inline-block; margin:0 6px; text-decoration:none;"><span style="display:inline-block; width:${socialIconSize || contactIconSize + 10}px; height:${socialIconSize || contactIconSize + 10}px; background-color:${socialIconColor || contactIconColor}; border-radius:${borderRadius}; border:${socialIconBorderWidth}px solid ${socialIconBorderColor}; overflow:hidden; vertical-align:middle;"><img src="${iconPath}" alt="${link.platform}" style="width:100%; height:100%; border:0; display:block;" /></span></a>`;
+        const gapValue = Math.floor(socialIconsGap / 2);
+        return `<a href="${link.url}" target="_blank" style="display:inline-block; margin:0 ${gapValue}px; text-decoration:none;"><span style="display:inline-block; width:${socialIconSize || contactIconSize + 10}px; height:${socialIconSize || contactIconSize + 10}px; background-color:${socialIconColor || contactIconColor}; border-radius:${borderRadius}; border:${socialIconBorderWidth}px solid ${socialIconBorderColor}; overflow:hidden; vertical-align:middle;"><img src="${iconPath}" alt="${link.platform}" style="width:100%; height:100%; border:0; display:block;" /></span></a>`;
       })
       .join("");
 
@@ -701,7 +711,7 @@ export default function EmailSignature() {
               </td></tr>` : ""}
               ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${locationIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${address}</td></tr>` : ""}
               ${customFieldsHTML}
-              ${socialIconsHTML ? `<tr><td style="padding-top: 15px;">${socialIconsHTML}</td></tr>` : ""}
+              ${socialIconsHTML ? `<tr><td style="padding-top: ${socialLinksTopSpacing}px; padding-bottom: ${socialLinksBottomSpacing}px;">${socialIconsHTML}</td></tr>` : ""}
             </table>
           </td>
         </tr>
@@ -2605,6 +2615,66 @@ export default function EmailSignature() {
                             data-testid="input-social-icon-border-color-hex"
                           />
                         </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">
+                          Top Spacing: {signatureData.socialLinksTopSpacing}px
+                        </Label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="40"
+                          value={signatureData.socialLinksTopSpacing}
+                          onChange={(e) =>
+                            updateField(
+                              "socialLinksTopSpacing",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="custom-range w-full"
+                          data-testid="slider-social-top-spacing"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">
+                          Bottom Spacing: {signatureData.socialLinksBottomSpacing}px
+                        </Label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="40"
+                          value={signatureData.socialLinksBottomSpacing}
+                          onChange={(e) =>
+                            updateField(
+                              "socialLinksBottomSpacing",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="custom-range w-full"
+                          data-testid="slider-social-bottom-spacing"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">
+                          Icon Gap: {signatureData.socialIconsGap}px
+                        </Label>
+                        <input
+                          type="range"
+                          min="4"
+                          max="24"
+                          value={signatureData.socialIconsGap}
+                          onChange={(e) =>
+                            updateField(
+                              "socialIconsGap",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="custom-range w-full"
+                          data-testid="slider-social-icon-gap"
+                        />
                       </div>
                     </div>
                   )}
