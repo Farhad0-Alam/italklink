@@ -943,34 +943,6 @@ export default function EmailSignature() {
                 ))}
               </div>
 
-              {/* Platform-Specific Instructions */}
-              {platformInstructions[selectedPlatform] && (
-                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-2">
-                  <div className="space-y-2">
-                    <div>
-                      <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">How to use:</h4>
-                      <ol className="text-xs text-amber-800 dark:text-amber-200 space-y-0.5 list-decimal list-inside">
-                        {platformInstructions[selectedPlatform].steps.map((step, idx) => (
-                          <li key={idx} className="text-xs">{step}</li>
-                        ))}
-                      </ol>
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Setup Location:</h4>
-                      <p className="text-xs text-amber-800 dark:text-amber-200">{platformInstructions[selectedPlatform].location}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Tips:</h4>
-                      <ul className="text-xs text-amber-800 dark:text-amber-200 space-y-0.5 list-disc list-inside">
-                        {platformInstructions[selectedPlatform].tips.map((tip, idx) => (
-                          <li key={idx} className="text-xs">{tip}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Looking for another email platform?{" "}
                 <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
@@ -2113,6 +2085,41 @@ export default function EmailSignature() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Platform-Specific Instructions */}
+            {platformInstructions[selectedPlatform] && (
+              <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <CardHeader className="py-2 px-3">
+                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">Setup Guide for {emailPlatforms.find(p => p.id === selectedPlatform)?.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="p-3">
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-2">
+                    <div className="space-y-2">
+                      <div>
+                        <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">How to use:</h4>
+                        <ol className="text-xs text-amber-800 dark:text-amber-200 space-y-0.5 list-decimal list-inside">
+                          {platformInstructions[selectedPlatform].steps.map((step, idx) => (
+                            <li key={idx} className="text-xs">{step}</li>
+                          ))}
+                        </ol>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Setup Location:</h4>
+                        <p className="text-xs text-amber-800 dark:text-amber-200">{platformInstructions[selectedPlatform].location}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 mb-1">Tips:</h4>
+                        <ul className="text-xs text-amber-800 dark:text-amber-200 space-y-0.5 list-disc list-inside">
+                          {platformInstructions[selectedPlatform].tips.map((tip, idx) => (
+                            <li key={idx} className="text-xs">{tip}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
