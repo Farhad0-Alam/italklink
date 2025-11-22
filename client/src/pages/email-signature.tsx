@@ -2414,7 +2414,7 @@ export default function EmailSignature() {
                   Add Link
                 </Button>
                 {signatureData.socialLinks.map((link, index) => (
-                  <div key={index} className="flex gap-2">
+                  <div key={index} className="grid grid-cols-[120px_1fr_32px] gap-2 items-center">
                     <Select
                       value={link.platform}
                       onValueChange={(v) =>
@@ -2422,7 +2422,7 @@ export default function EmailSignature() {
                       }
                     >
                       <SelectTrigger
-                        className="w-40"
+                        className="w-full"
                         data-testid={`select-social-platform-${index}`}
                       >
                         <SelectValue />
@@ -2444,7 +2444,7 @@ export default function EmailSignature() {
                         updateSocialLink(index, "url", e.target.value)
                       }
                       placeholder="https://..."
-                      className="flex-1"
+                      className="w-full"
                       data-testid={`input-social-url-${index}`}
                     />
                     <Button
