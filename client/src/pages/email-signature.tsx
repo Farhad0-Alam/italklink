@@ -1036,43 +1036,51 @@ export default function EmailSignature() {
                   </Button>
 
                   <div className="flex-1 overflow-hidden">
-                    <div className="flex gap-2 pb-1">
+                    <div className="flex gap-3 pb-1">
                       {templates.slice(carouselIndex, carouselIndex + 4).map((template, visibleIndex) => {
                         const actualIndex = carouselIndex + visibleIndex;
                         return (
                           <div
                             key={template.id}
                             onClick={() => selectTemplate(actualIndex)}
-                            className="flex-shrink-0 cursor-pointer transition-all relative w-40"
+                            className="flex-shrink-0 cursor-pointer transition-all relative"
+                            style={{ width: "180px" }}
                             data-testid={`template-card-${template.id}`}
                           >
                             <div
-                              className={`border-3 rounded-lg overflow-hidden shadow-lg transition-all h-32 ${
+                              className={`border-3 rounded-lg overflow-hidden shadow-lg transition-all ${
                                 actualIndex === carouselIndex && visibleIndex === 0
                                   ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400"
                                   : "border-slate-300 dark:border-slate-600"
                               }`}
+                              style={{ height: "140px" }}
                             >
-                              <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-2 overflow-hidden">
+                              <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-1.5 overflow-hidden">
                                 <div
                                   style={{
-                                    transform: "scale(0.35)",
+                                    transform: "scale(0.38)",
                                     transformOrigin: "top left",
-                                    width: "286%",
-                                    fontSize: "11px"
+                                    width: "263%",
+                                    fontSize: "10px",
+                                    lineHeight: "1.2"
                                   }}
                                 >
                                   <div
                                     dangerouslySetInnerHTML={{
                                       __html: generateSignatureHTML()
                                     }}
-                                    style={{ margin: 0, padding: 0 }}
+                                    style={{ 
+                                      margin: 0, 
+                                      padding: 0,
+                                      display: "block",
+                                      whiteSpace: "normal"
+                                    }}
                                   />
                                 </div>
                               </div>
                             </div>
                             <div className="text-center mt-1">
-                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
                                 {template.name}
                               </span>
                             </div>
