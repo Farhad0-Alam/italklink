@@ -646,12 +646,12 @@ export default function EmailSignature() {
               ${company ? `<tr><td style="font-family: Arial, sans-serif; font-size: ${companySize}px; color: ${companyColor}; padding-bottom: 10px;">${company}</td></tr>` : ""}
               ${officePhone || cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;">
                 ${officePhone ? `<span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${phoneIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none;">${officePhone}</a>` : ""}
-                ${officePhone && cellPhone ? `<span style="margin: 0 16px;"></span>` : ""}
+                ${officePhone && cellPhone ? `<span style="margin: 0 6px;"></span>` : ""}
                 ${cellPhone ? `<span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${cellIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${cellPhone}" style="color: ${contactInfoColor}; text-decoration: none;">${cellPhone}</a>` : ""}
               </td></tr>` : ""}
               ${email || website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 2px 0;">
                 ${email ? `<a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${emailIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${email}</a>` : ""}
-                ${email && website ? `<span style="margin: 0 16px;"></span>` : ""}
+                ${email && website ? `<span style="margin: 0 6px;"></span>` : ""}
                 ${website ? `<a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${contactInfoColor}; text-decoration: none;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${websiteIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${website}</a>` : ""}
               </td></tr>` : ""}
               ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 2px 0;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${locationIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${address}</td></tr>` : ""}
@@ -786,15 +786,15 @@ export default function EmailSignature() {
                 </td>
               </tr>
               ${company ? `<tr><td style="font-family: Arial, sans-serif; font-size: ${companySize}px; color: ${companyColor}; padding-bottom: 15px;">${company}</td></tr>` : ""}
-              <tr><td style="height: 2px; background-color: ${primaryColor}; margin: 10px 0;"></td></tr>
+              <tr><td style="height: 3px; background-color: ${primaryColor}; margin: 10px 0;"></td></tr>
               ${officePhone || cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0;">
                 ${officePhone ? `<span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${phoneIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${officePhone}</a>` : ""}
-                ${officePhone && cellPhone ? `<span style="margin: 0 16px;"></span>` : ""}
+                ${officePhone && cellPhone ? `<span style="margin: 0 6px;"></span>` : ""}
                 ${cellPhone ? `<span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${cellIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${cellPhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${cellPhone}</a>` : ""}
               </td></tr>` : ""}
               ${email || website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 2px 0;">
                 ${email ? `<a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${emailIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${email}</a>` : ""}
-                ${email && website ? `<span style="margin: 0 16px;"></span>` : ""}
+                ${email && website ? `<span style="margin: 0 6px;"></span>` : ""}
                 ${website ? `<a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${websiteIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${website}</a>` : ""}
               </td></tr>` : ""}
               ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 2px 0;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${locationIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${address}</td></tr>` : ""}
