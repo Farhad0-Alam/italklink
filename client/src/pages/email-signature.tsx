@@ -359,6 +359,8 @@ export default function EmailSignature() {
     contactColor: true,
     iconSize: true,
     iconColor: true,
+    profilePhotoSection: true,
+    companyLogoSection: true,
     imagesSection: true,
     socialLinksSection: true,
     socialIconStyle: true,
