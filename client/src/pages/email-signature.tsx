@@ -75,6 +75,7 @@ interface SignatureData {
   companyLogoHeight: number;
   companyLogoBorderWidth: number;
   companyLogoBorderColor: string;
+  companyLogoBackgroundColor: string;
   companyLogoOpacity: number;
 
   primaryColor: string;
@@ -380,6 +381,7 @@ export default function EmailSignature() {
     companyLogoHeight: 60,
     companyLogoBorderWidth: 0,
     companyLogoBorderColor: "#CCCCCC",
+    companyLogoBackgroundColor: "#FFFFFF",
     companyLogoOpacity: 100,
     primaryColor: "#FF6A00",
     secondaryColor: "#333333",
@@ -753,8 +755,8 @@ export default function EmailSignature() {
       
       return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px solid ${profilePhotoBorderColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center;`;
     } else {
-      const { companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor } = signatureData;
-      return `width: ${companyLogoWidth}px; height: ${companyLogoHeight}px; border: ${companyLogoBorderWidth}px solid ${companyLogoBorderColor}; overflow: hidden; display: flex; align-items: center; justify-content: center;`;
+      const { companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor, companyLogoBackgroundColor } = signatureData;
+      return `width: ${companyLogoWidth}px; height: ${companyLogoHeight}px; border: ${companyLogoBorderWidth}px solid ${companyLogoBorderColor}; background-color: ${companyLogoBackgroundColor}; overflow: hidden; display: flex; align-items: center; justify-content: center;`;
     }
   };
 
@@ -2317,17 +2319,24 @@ export default function EmailSignature() {
                           <input type="range" min="20" max="300" value={signatureData.companyLogoHeight} onChange={(e) => updateField("companyLogoHeight", Number(e.target.value))} className="w-full" data-testid="input-logo-height" />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <Label className="text-xs">Border Width (px)</Label>
-                            <Input type="number" value={signatureData.companyLogoBorderWidth} onChange={(e) => updateField("companyLogoBorderWidth", Number(e.target.value))} min="0" max="10" data-testid="input-logo-border-width" />
+                        <div>
+                          <Label className="text-xs">Background Color</Label>
+                          <div className="flex gap-2">
+                            <input type="color" value={signatureData.companyLogoBackgroundColor} onChange={(e) => updateField("companyLogoBackgroundColor", e.target.value)} className="w-10 h-9 rounded" data-testid="input-logo-background-color" />
+                            <Input value={signatureData.companyLogoBackgroundColor} onChange={(e) => updateField("companyLogoBackgroundColor", e.target.value)} placeholder="#FFFFFF" className="flex-1" data-testid="input-logo-background-color-hex" />
                           </div>
-                          <div>
-                            <Label className="text-xs">Border Color</Label>
-                            <div className="flex gap-2">
-                              <input type="color" value={signatureData.companyLogoBorderColor} onChange={(e) => updateField("companyLogoBorderColor", e.target.value)} className="w-10 h-9 rounded" data-testid="input-logo-border-color" />
-                              <Input value={signatureData.companyLogoBorderColor} onChange={(e) => updateField("companyLogoBorderColor", e.target.value)} placeholder="#CCCCCC" className="flex-1" data-testid="input-logo-border-color-hex" />
-                            </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Border Width ({signatureData.companyLogoBorderWidth}px)</Label>
+                          <input type="range" min="0" max="10" value={signatureData.companyLogoBorderWidth} onChange={(e) => updateField("companyLogoBorderWidth", Number(e.target.value))} className="w-full" data-testid="input-logo-border-width" />
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Border Color</Label>
+                          <div className="flex gap-2">
+                            <input type="color" value={signatureData.companyLogoBorderColor} onChange={(e) => updateField("companyLogoBorderColor", e.target.value)} className="w-10 h-9 rounded" data-testid="input-logo-border-color" />
+                            <Input value={signatureData.companyLogoBorderColor} onChange={(e) => updateField("companyLogoBorderColor", e.target.value)} placeholder="#CCCCCC" className="flex-1" data-testid="input-logo-border-color-hex" />
                           </div>
                         </div>
 
