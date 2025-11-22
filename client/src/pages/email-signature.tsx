@@ -808,11 +808,12 @@ export default function EmailSignature() {
                     <div className="flex gap-2 pb-1">
                       {templates.map((template, index) => {
                         const isSelected = index === carouselIndex;
+                        const isCurrent = index === 0;
                         return (
                           <div
                             key={template.id}
                             onClick={() => selectTemplate(index)}
-                            className="flex-shrink-0 cursor-pointer transition-all"
+                            className="flex-shrink-0 cursor-pointer transition-all relative"
                             data-testid={`template-card-${template.id}`}
                           >
                             <div
@@ -840,6 +841,11 @@ export default function EmailSignature() {
                                 </div>
                               </div>
                             </div>
+                            {isCurrent && (
+                              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                Current
+                              </div>
+                            )}
                             <div className="text-center mt-1">
                               <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                                 {template.name}
