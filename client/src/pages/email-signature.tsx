@@ -481,15 +481,15 @@ export default function EmailSignature() {
     disclaimerText:
       "This email and any attachments are confidential and intended solely for the recipient.",
     ctaButtonFont: "Arial",
-    ctaButtonSize: 23,
+    ctaButtonSize: 12,
     ctaButtonColor: "#FFFFFF",
     ctaButtonBackgroundColor: "#2C2C2C",
     ctaButtonShape: "rounded",
     ctaButtonRadius: 6,
-    ctaButtonBorderWidth: 1,
+    ctaButtonBorderWidth: 2,
     ctaButtonBorderColor: "#CCCCCC",
-    ctaButtonWidth: 50,
-    ctaButtonHeight: 50,
+    ctaButtonWidth: 55,
+    ctaButtonHeight: 32,
     ctaButtons: [
       { text: "SEARCH PROPERTIES NOW", url: "https://talkl.ink/" },
       { text: "GET A FREE HOME VALUATION", url: "https://talkl.ink/" },
@@ -835,7 +835,7 @@ export default function EmailSignature() {
                   <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; table-layout: fixed;">
                     ${ctaButtons.map(btn => {
                       const btnBorderRadius = ctaButtonShape === "square" ? "0px" : `${ctaButtonRadius}px`;
-                      return `<tr><td style="padding: 2px; text-align: center;"><a href="${btn.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: 8px 16px; text-decoration: none; border-radius: ${btnBorderRadius}; font-weight: bold; display: inline-block; border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-size: ${ctaButtonSize}px; font-family: ${ctaButtonFont}, sans-serif; white-space: nowrap; box-sizing: border-box; width: ${ctaButtonWidth}%; height: ${ctaButtonHeight}px; line-height: ${ctaButtonHeight - 16}px; vertical-align: middle;">${btn.text}</a></td></tr>`;
+                      return `<tr><td style="padding: 2px; text-align: center;"><a href="${btn.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: 8px 16px; text-decoration: none; border-radius: ${btnBorderRadius}; font-weight: bold; display: inline-block; border-right: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-size: ${ctaButtonSize}px; font-family: ${ctaButtonFont}, sans-serif; white-space: nowrap; box-sizing: border-box; width: ${ctaButtonWidth}%; height: ${ctaButtonHeight}px; line-height: ${ctaButtonHeight - 16}px; vertical-align: middle;">${btn.text}</a></td></tr>`;
                     }).join('')}
                   </table>
                 </td>
@@ -3020,7 +3020,7 @@ export default function EmailSignature() {
 
                         <div>
                           <Label className="text-xs">Font Size: {signatureData.ctaButtonSize}px</Label>
-                          <input type="range" min="10" max="32" value={signatureData.ctaButtonSize} onChange={(e) => updateField("ctaButtonSize", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-font-size" />
+                          <input type="range" min="10" max="20" value={signatureData.ctaButtonSize} onChange={(e) => updateField("ctaButtonSize", Number(e.target.value))} className="custom-range w-full" data-testid="slider-cta-font-size" />
                         </div>
 
                         <div>
