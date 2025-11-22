@@ -680,8 +680,235 @@ export default function EmailSignature() {
     return icons[platform] || icons.facebook;
   };
 
+  // Generate signature based on selected template
   const generateSignatureHTML = (): string => {
+    switch (templateVariant) {
+      case "template-1":
+        return generateTemplate1();
+      case "template-2":
+        return generateTemplate2();
+      case "template-3":
+        return generateTemplate3();
+      case "template-4":
+        return generateTemplate4();
+      case "template-5":
+        return generateTemplate5();
+      case "template-6":
+        return generateTemplate6();
+      case "template-7":
+        return generateTemplate7();
+      case "template-8":
+        return generateTemplate8();
+      case "template-9":
+        return generateTemplate9();
+      default:
+        return generateTemplate1();
+    }
+  };
+
+  // Template 1: Classic with Profile Image on Left
+  const generateTemplate1 = (): string => {
     return generatePremiumSignature();
+  };
+
+  // Template 2: Minimal Clean
+  const generateTemplate2 = (): string => {
+    const { name, title, company, cellPhone, email, website, primaryColor } = signatureData;
+    return `
+<div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; padding: 20px 0;">
+  <div style="border-left: 4px solid ${primaryColor}; padding-left: 15px;">
+    <div style="font-size: 16px; font-weight: bold; color: #1a1a1a; margin-bottom: 4px;">${name}</div>
+    <div style="font-size: 13px; color: #666; margin-bottom: 12px;">${title}${title && company ? ' | ' : ''}${company}</div>
+    ${cellPhone ? `<div style="font-size: 12px; color: #666; margin: 4px 0;">☎ ${cellPhone}</div>` : ''}
+    ${email ? `<div style="font-size: 12px; color: #666; margin: 4px 0;">✉ <a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none;">${email}</a></div>` : ''}
+    ${website ? `<div style="font-size: 12px; color: #666; margin: 4px 0;">🌐 <a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${primaryColor}; text-decoration: none;">${website}</a></div>` : ''}
+  </div>
+</div>
+    `.trim();
+  };
+
+  // Template 3: Corporate Modern
+  const generateTemplate3 = (): string => {
+    const { name, title, company, cellPhone, email, website, profilePhoto, primaryColor, secondaryColor } = signatureData;
+    return `
+<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 600px;">
+  <tr>
+    <td style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: white; padding: 20px; text-align: center;">
+      <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">${name}</div>
+      <div style="font-size: 13px;">${title}</div>
+    </td>
+  </tr>
+  <tr>
+    <td style="background-color: #f5f5f5; padding: 20px;">
+      <table width="100%">
+        <tr>
+          ${profilePhoto ? `<td style="width: 80px; vertical-align: top; padding-right: 15px;"><img src="${profilePhoto}" alt="${name}" width="70" height="70" style="border-radius: 50%; border: 3px solid ${primaryColor};"></td>` : ''}
+          <td style="vertical-align: top;">
+            <div style="font-weight: bold; color: #333; margin-bottom: 3px;">${company}</div>
+            ${cellPhone ? `<div style="font-size: 12px; color: #666; margin: 3px 0;">Phone: ${cellPhone}</div>` : ''}
+            ${email ? `<div style="font-size: 12px; color: #666; margin: 3px 0;">Email: <a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none;">${email}</a></div>` : ''}
+            ${website ? `<div style="font-size: 12px; color: #666; margin: 3px 0;">Web: <a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${primaryColor}; text-decoration: none;">${website}</a></div>` : ''}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+    `.trim();
+  };
+
+  // Template 4: Creative with Top Bar
+  const generateTemplate4 = (): string => {
+    const { name, title, company, cellPhone, email, website, primaryColor, profilePhoto } = signatureData;
+    return `
+<table cellpadding="0" cellspacing="0" border="0" style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 550px; margin: 0; padding: 0;">
+  <tr>
+    <td style="background-color: ${primaryColor}; height: 5px;"></td>
+  </tr>
+  <tr>
+    <td style="padding: 25px 20px;">
+      <table width="100%">
+        <tr>
+          <td style="vertical-align: top;">
+            <div style="font-size: 18px; font-weight: bold; color: #222; margin-bottom: 2px;">${name}</div>
+            <div style="font-size: 13px; color: ${primaryColor}; font-weight: 600; margin-bottom: 10px;">${title}</div>
+            <div style="font-size: 12px; color: #666; line-height: 1.6;">
+              ${company ? `${company}<br>` : ''}
+              ${cellPhone ? `${cellPhone}<br>` : ''}
+              ${email ? `<a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none;">${email}</a><br>` : ''}
+              ${website ? `<a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${primaryColor}; text-decoration: none;">${website}</a>` : ''}
+            </div>
+          </td>
+          ${profilePhoto ? `<td style="padding-left: 20px; text-align: right;"><img src="${profilePhoto}" alt="${name}" width="80" height="80" style="border-radius: 8px; border: 2px solid ${primaryColor};"></td>` : ''}
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+    `.trim();
+  };
+
+  // Template 5: Elegant Centered
+  const generateTemplate5 = (): string => {
+    const { name, title, company, cellPhone, email, website, primaryColor, secondaryColor, profilePhoto } = signatureData;
+    return `
+<div style="font-family: Georgia, serif; text-align: center; max-width: 450px; margin: 0 auto; padding: 30px 0;">
+  ${profilePhoto ? `<div style="margin-bottom: 15px;"><img src="${profilePhoto}" alt="${name}" width="100" height="100" style="border-radius: 50%; border: 4px solid ${primaryColor};"></div>` : ''}
+  <div style="font-size: 20px; font-weight: bold; color: #1a1a1a; margin-bottom: 5px;">${name}</div>
+  <div style="font-size: 14px; color: ${primaryColor}; font-style: italic; margin-bottom: 15px;">${title}</div>
+  <div style="border-top: 2px solid ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding: 15px 0; margin: 15px 0; font-size: 12px; color: #666; line-height: 1.8;">
+    ${company ? `<div>${company}</div>` : ''}
+    ${cellPhone ? `<div>${cellPhone}</div>` : ''}
+    ${email ? `<div><a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none;">${email}</a></div>` : ''}
+    ${website ? `<div><a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${primaryColor}; text-decoration: none;">${website}</a></div>` : ''}
+  </div>
+</div>
+    `.trim();
+  };
+
+  // Template 6: Colorful Side Bar
+  const generateTemplate6 = (): string => {
+    const { name, title, company, cellPhone, email, website, primaryColor, secondaryColor, profilePhoto } = signatureData;
+    return `
+<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 600px;">
+  <tr>
+    <td style="background-color: ${primaryColor}; padding: 30px; color: white; width: 150px; vertical-align: top;">
+      ${profilePhoto ? `<img src="${profilePhoto}" alt="${name}" width="120" height="120" style="border-radius: 50%; margin-bottom: 15px; border: 4px solid white;">` : ''}
+      <div style="font-size: 12px; line-height: 1.8;">
+        ${cellPhone ? `<div style="margin: 8px 0;">📱 ${cellPhone}</div>` : ''}
+        ${email ? `<div style="margin: 8px 0; word-break: break-all;"><a href="mailto:${email}" style="color: white; text-decoration: none;">✉ ${email}</a></div>` : ''}
+        ${website ? `<div style="margin: 8px 0;"><a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: white; text-decoration: none;">🌐 ${website}</a></div>` : ''}
+      </div>
+    </td>
+    <td style="padding: 30px 20px; background-color: #f9f9f9;">
+      <div style="font-size: 18px; font-weight: bold; color: #1a1a1a; margin-bottom: 5px;">${name}</div>
+      <div style="font-size: 13px; color: ${primaryColor}; font-weight: 600; margin-bottom: 8px;">${title}</div>
+      <div style="font-size: 12px; color: #666;">${company}</div>
+    </td>
+  </tr>
+</table>
+    `.trim();
+  };
+
+  // Template 7: LinkedIn Style
+  const generateTemplate7 = (): string => {
+    const { name, title, company, cellPhone, email, website, primaryColor, profilePhoto } = signatureData;
+    return `
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; max-width: 500px; border: 1px solid #e5e5e5; border-radius: 5px; overflow: hidden;">
+  <div style="background-color: ${primaryColor}; height: 3px;"></div>
+  <div style="padding: 20px; background-color: white;">
+    <table width="100%">
+      <tr>
+        <td style="vertical-align: top;">
+          <div style="font-size: 16px; font-weight: 600; color: #000; margin-bottom: 2px;">${name}</div>
+          <div style="font-size: 14px; color: #666; margin-bottom: 12px; line-height: 1.5;">${title}${title && company ? ' at ' : ''}${company}</div>
+          <div style="font-size: 13px; color: #999; line-height: 1.6;">
+            ${cellPhone ? `📱 ${cellPhone}<br>` : ''}
+            ${email ? `📧 <a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none; text-decoration-color: ${primaryColor};">${email}</a><br>` : ''}
+            ${website ? `🔗 <a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${primaryColor}; text-decoration: none;">${website}</a>` : ''}
+          </div>
+        </td>
+        ${profilePhoto ? `<td style="padding-left: 15px; text-align: right;"><img src="${profilePhoto}" alt="${name}" width="70" height="70" style="border-radius: 50%;"></td>` : ''}
+      </tr>
+    </table>
+  </div>
+</div>
+    `.trim();
+  };
+
+  // Template 8: Minimalist Box
+  const generateTemplate8 = (): string => {
+    const { name, title, company, cellPhone, email, website, primaryColor } = signatureData;
+    return `
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 400px;">
+  <div style="background-color: ${primaryColor}; color: white; padding: 15px 20px; margin-bottom: 0;">
+    <div style="font-size: 15px; font-weight: bold;">${name}</div>
+  </div>
+  <div style="border: 1px solid #e0e0e0; border-top: none; padding: 15px 20px;">
+    <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+      <div style="font-weight: 600; color: #333; margin-bottom: 6px;">${title}</div>
+      <div>${company}</div>
+    </div>
+    <table cellpadding="0" cellspacing="0" style="font-size: 12px; color: #666;">
+      ${cellPhone ? `<tr><td>Phone:</td><td style="padding-left: 10px;"><a href="tel:${cellPhone}" style="color: ${primaryColor}; text-decoration: none;">${cellPhone}</a></td></tr>` : ''}
+      ${email ? `<tr><td>Email:</td><td style="padding-left: 10px;"><a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none;">${email}</a></td></tr>` : ''}
+      ${website ? `<tr><td>Web:</td><td style="padding-left: 10px;"><a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${primaryColor}; text-decoration: none;">${website}</a></td></tr>` : ''}
+    </table>
+  </div>
+</div>
+    `.trim();
+  };
+
+  // Template 9: Modern Gradient
+  const generateTemplate9 = (): string => {
+    const { name, title, company, cellPhone, email, website, primaryColor, secondaryColor, profilePhoto } = signatureData;
+    return `
+<table cellpadding="0" cellspacing="0" border="0" style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 550px;">
+  <tr>
+    <td style="background: linear-gradient(90deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: white; padding: 30px 25px;">
+      <table width="100%">
+        <tr>
+          <td style="vertical-align: middle;">
+            <div style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">${name}</div>
+            <div style="font-size: 14px; opacity: 0.95;">${title}</div>
+          </td>
+          ${profilePhoto ? `<td style="text-align: right; vertical-align: middle;"><img src="${profilePhoto}" alt="${name}" width="70" height="70" style="border-radius: 50%; border: 3px solid white;"></td>` : ''}
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="background-color: white; padding: 20px 25px; border-left: 4px solid ${primaryColor};">
+      ${company ? `<div style="font-size: 12px; font-weight: 600; color: ${primaryColor}; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">${company}</div>` : ''}
+      <table cellpadding="0" cellspacing="0" style="font-size: 12px; color: #666; width: 100%;">
+        ${cellPhone ? `<tr><td style="padding-bottom: 6px;"><strong style="color: #333;">T:</strong> <a href="tel:${cellPhone}" style="color: ${primaryColor}; text-decoration: none;">${cellPhone}</a></td></tr>` : ''}
+        ${email ? `<tr><td style="padding-bottom: 6px;"><strong style="color: #333;">E:</strong> <a href="mailto:${email}" style="color: ${primaryColor}; text-decoration: none;">${email}</a></td></tr>` : ''}
+        ${website ? `<tr><td><strong style="color: #333;">W:</strong> <a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${primaryColor}; text-decoration: none;">${website}</a></td></tr>` : ''}
+      </table>
+    </td>
+  </tr>
+</table>
+    `.trim();
   };
 
   const copyToClipboard = async () => {
@@ -808,7 +1035,7 @@ export default function EmailSignature() {
                     <div className="flex gap-2 pb-1">
                       {templates.map((template, index) => {
                         const isSelected = index === carouselIndex;
-                        const isCurrent = index === 0;
+                        const isCurrent = isSelected;
                         return (
                           <div
                             key={template.id}
@@ -834,7 +1061,7 @@ export default function EmailSignature() {
                                 >
                                   <div
                                     dangerouslySetInnerHTML={{
-                                      __html: generatePremiumSignature()
+                                      __html: generateSignatureHTML()
                                     }}
                                     style={{ margin: 0, padding: 0 }}
                                   />
