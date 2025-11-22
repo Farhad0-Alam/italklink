@@ -298,22 +298,16 @@ export default function EmailSignature() {
   ];
   
   const nextTemplate = () => {
-    setCarouselIndex((prev) => {
-      const newIndex = prev + 1;
-      return newIndex > templates.length - 4 ? templates.length - 4 : newIndex;
-    });
+    setCarouselIndex((prev) => prev + 1);
   };
   
   const prevTemplate = () => {
-    setCarouselIndex((prev) => {
-      const newIndex = prev - 1;
-      return newIndex < 0 ? 0 : newIndex;
-    });
+    setCarouselIndex((prev) => prev - 1);
   };
   
   const selectTemplate = (index: number) => {
-    setCarouselIndex(index);
-    setTemplateVariant(templates[index].id);
+    setCarouselIndex(index % templates.length);
+    setTemplateVariant(templates[index % templates.length].id);
   };
   
   const [collapsedSections, setCollapsedSections] = useState<{
@@ -1049,13 +1043,17 @@ export default function EmailSignature() {
                       .carousel-item {
                         animation: slideIn 0.4s ease-out forwards;
                       }
+                      .carousel-container {
+                        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                      }
                     `}</style>
-                    <div className="flex gap-3 pb-1 transition-all duration-500" style={{ transform: `translateX(0)` }}>
-                      {templates.slice(carouselIndex, carouselIndex + 4).map((template, visibleIndex) => {
-                        const actualIndex = carouselIndex + visibleIndex;
+                    <div className="carousel-container flex gap-3 pb-1" style={{ transform: `translateX(0)` }}>
+                      {Array.from({ length: 4 }).map((_, visibleIndex) => {
+                        const actualIndex = (carouselIndex + visibleIndex) % templates.length;
+                        const template = templates[actualIndex];
                         return (
                           <div
-                            key={template.id}
+                            key={`${actualIndex}-${visibleIndex}`}
                             onClick={() => selectTemplate(actualIndex)}
                             className="carousel-item flex-shrink-0 cursor-pointer group relative"
                             style={{ width: "200px" }}
@@ -1063,7 +1061,7 @@ export default function EmailSignature() {
                           >
                             <div
                               className={`border-3 rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1 ${
-                                actualIndex === carouselIndex && visibleIndex === 0
+                                visibleIndex === 0
                                   ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400 ring-offset-2 dark:ring-offset-slate-800"
                                   : "border-slate-300 dark:border-slate-600 group-hover:border-blue-400 dark:group-hover:border-blue-500"
                               }`}
