@@ -486,7 +486,7 @@ export default function EmailSignature() {
       ...prev,
       socialLinks: [
         ...prev.socialLinks,
-        { platform: "facebook", url: "", icon: "SiFacebook" },
+        { platform: "linkedin", url: "", icon: "SiLinkedin" },
       ],
     }));
   };
