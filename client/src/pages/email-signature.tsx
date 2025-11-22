@@ -1032,30 +1032,30 @@ export default function EmailSignature() {
                   </Button>
 
                   <div className="flex-1 overflow-x-auto scrollbar-hide">
-                    <div className="flex gap-2 pb-1">
+                    <div className="flex gap-1.5 pb-1">
                       {templates.map((template, index) => {
                         const isSelected = index === carouselIndex;
                         return (
                           <div
                             key={template.id}
                             onClick={() => selectTemplate(index)}
-                            className="flex-shrink-0 cursor-pointer transition-all relative w-40"
+                            className="flex-shrink-0 cursor-pointer transition-all relative w-28"
                             data-testid={`template-card-${template.id}`}
                           >
                             <div
-                              className={`border-3 rounded-lg overflow-hidden shadow-lg transition-all h-32 ${
+                              className={`border-2 rounded-lg overflow-hidden shadow-lg transition-all h-24 ${
                                 isSelected
                                   ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400"
                                   : "border-slate-300 dark:border-slate-600"
                               }`}
                             >
-                              <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-2 overflow-hidden">
+                              <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-1 overflow-hidden">
                                 <div
                                   style={{
-                                    transform: "scale(0.35)",
+                                    transform: "scale(0.28)",
                                     transformOrigin: "top left",
-                                    width: "286%",
-                                    fontSize: "11px"
+                                    width: "357%",
+                                    fontSize: "10px"
                                   }}
                                 >
                                   <div
@@ -1067,8 +1067,8 @@ export default function EmailSignature() {
                                 </div>
                               </div>
                             </div>
-                            <div className="text-center mt-1">
-                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            <div className="text-center mt-0.5">
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block truncate px-1">
                                 {template.name}
                               </span>
                             </div>
