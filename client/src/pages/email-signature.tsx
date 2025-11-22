@@ -282,30 +282,34 @@ const platformInstructions: { [key: string]: { steps: string[]; tips: string[]; 
 export default function EmailSignature() {
   const { toast } = useToast();
   const [selectedPlatform, setSelectedPlatform] = useState<string>("outlook");
-  const [templateVariant, setTemplateVariant] = useState<
-    "minimal" | "standard" | "full"
-  >("standard");
+  const [templateVariant, setTemplateVariant] = useState<string>("template-2");
   const [carouselIndex, setCarouselIndex] = useState(0);
   
   const templates = [
-    { id: "minimal", name: "Minimal", description: "Clean & Simple Design" },
-    { id: "standard", name: "Standard", description: "Balanced Professional Look" },
-    { id: "full", name: "Full Featured", description: "Complete with All Options" },
+    { id: "template-1", name: "Template 1", description: "Clean & Simple Design" },
+    { id: "template-2", name: "Template 2", description: "Balanced Professional Look" },
+    { id: "template-3", name: "Template 3", description: "Complete with All Options" },
+    { id: "template-4", name: "Template 4", description: "Modern Design" },
+    { id: "template-5", name: "Template 5", description: "Creative Style" },
+    { id: "template-6", name: "Template 6", description: "Corporate Design" },
+    { id: "template-7", name: "Template 7", description: "Minimalist Design" },
+    { id: "template-8", name: "Template 8", description: "Executive Style" },
+    { id: "template-9", name: "Template 9", description: "Professional Plus" },
   ];
   
   const nextTemplate = () => {
     setCarouselIndex((prev) => (prev + 1) % templates.length);
-    setTemplateVariant(templates[(carouselIndex + 1) % templates.length].id as "minimal" | "standard" | "full");
+    setTemplateVariant(templates[(carouselIndex + 1) % templates.length].id);
   };
   
   const prevTemplate = () => {
     setCarouselIndex((prev) => (prev - 1 + templates.length) % templates.length);
-    setTemplateVariant(templates[(carouselIndex - 1 + templates.length) % templates.length].id as "minimal" | "standard" | "full");
+    setTemplateVariant(templates[(carouselIndex - 1 + templates.length) % templates.length].id);
   };
   
   const selectTemplate = (index: number) => {
     setCarouselIndex(index);
-    setTemplateVariant(templates[index].id as "minimal" | "standard" | "full");
+    setTemplateVariant(templates[index].id);
   };
   
   const [collapsedSections, setCollapsedSections] = useState<{
@@ -928,7 +932,13 @@ export default function EmailSignature() {
   };
 
   const generateSignatureHTML = (): string => {
-    return generatePremiumSignature();
+    if (templateVariant === "template-1") {
+      return generateSimpleSignature();
+    } else if (["template-2", "template-3", "template-4", "template-5", "template-6"].includes(templateVariant)) {
+      return generateAdvancedSignature();
+    } else {
+      return generatePremiumSignature();
+    }
   };
 
   const copyToClipboard = async () => {
@@ -1081,9 +1091,9 @@ export default function EmailSignature() {
                               >
                                 <div
                                   dangerouslySetInnerHTML={{
-                                    __html: template.id === 'simple'
+                                    __html: template.id === 'template-1'
                                       ? generateSimpleSignature()
-                                      : template.id === 'advanced'
+                                      : ['template-2', 'template-3', 'template-4', 'template-5', 'template-6'].includes(template.id)
                                       ? generateAdvancedSignature()
                                       : generatePremiumSignature()
                                   }}
