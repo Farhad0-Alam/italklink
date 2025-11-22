@@ -573,9 +573,9 @@ export default function EmailSignature() {
           }
           <td style="vertical-align: top; padding-top: 2px;">
             <table cellpadding="0" cellspacing="0" border="0">
-              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 2px; line-height: ${signatureLineHeight};">${signatureName}</td></tr>` : ""}
+              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight};">${signatureName}</td></tr>` : ""}
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 3px; line-height: ${nameLineHeight};">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; line-height: ${nameLineHeight};">
                   ${name}
                 </td>
               </tr>
@@ -686,9 +686,9 @@ export default function EmailSignature() {
           }
           <td style="vertical-align: top; border-left: 3px solid ${primaryColor}; padding-left: 20px;">
             <table cellpadding="0" cellspacing="0" border="0">
-              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 2px; line-height: ${signatureLineHeight};">${signatureName}</td></tr>` : ""}
+              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight};">${signatureName}</td></tr>` : ""}
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 3px; line-height: ${nameLineHeight};">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; line-height: ${nameLineHeight};">
                   ${name}
                 </td>
               </tr>
@@ -844,9 +844,9 @@ export default function EmailSignature() {
           }
           <td style="vertical-align: top;">
             <table cellpadding="0" cellspacing="0" border="0">
-              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; padding-bottom: 2px; line-height: ${signatureLineHeight};">${signatureName}</td></tr>` : ""}
+              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight};">${signatureName}</td></tr>` : ""}
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; padding-bottom: 3px; line-height: ${nameLineHeight};">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; line-height: ${nameLineHeight};">
                   ${name}
                 </td>
               </tr>
