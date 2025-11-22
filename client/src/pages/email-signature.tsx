@@ -957,7 +957,7 @@ export default function EmailSignature() {
             <CardHeader className="py-2 px-3">
               <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">2. Choose signature template</CardTitle>
             </CardHeader>
-            <CardContent className="p-3">
+            <CardContent className="p-2">
               <div className="relative">
                 <div className="flex items-center gap-1">
                   <Button
@@ -1010,7 +1010,7 @@ export default function EmailSignature() {
                   </Button>
                 </div>
 
-                <div className="text-center mt-2">
+                <div className="text-center mt-1">
                   <p className="text-xs text-slate-600 dark:text-slate-400">
                     <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
                       More templates
@@ -2017,37 +2017,37 @@ export default function EmailSignature() {
             </Card>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 sticky top-4">
-              <CardHeader>
-                <CardTitle className="text-slate-900 dark:text-white">
+              <CardHeader className="py-2 px-3">
+                <CardTitle className="text-sm text-slate-900 dark:text-white">
                   Preview
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-3">
-                <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">
+              <CardContent className="p-2">
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">
                   This is how your signature will look
                 </p>
                 <div
-                  className="border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-white min-h-[160px] overflow-y-auto"
+                  className="border border-slate-200 dark:border-slate-700 rounded-lg p-1.5 bg-white min-h-[120px] overflow-y-auto text-xs"
                   dangerouslySetInnerHTML={{ __html: generateSignatureHTML() }}
                   data-testid="signature-preview"
                 />
 
-                <div className="flex gap-1.5 mt-2">
+                <div className="flex gap-1 mt-1.5">
                   <Button
                     onClick={copyToClipboard}
-                    className="flex-1 gap-1 h-8 text-xs"
+                    className="flex-1 gap-1 h-7 text-xs py-1"
                     size="sm"
                     data-testid="button-copy"
                   >
                     <Copy className="w-3 h-3" />
-                    Copy HTML
+                    Copy
                   </Button>
                   <Button
                     onClick={downloadHTML}
                     variant="outline"
-                    className="flex-1 gap-1 h-8 text-xs"
+                    className="flex-1 gap-1 h-7 text-xs py-1"
                     size="sm"
                     data-testid="button-download"
                   >
@@ -2059,30 +2059,30 @@ export default function EmailSignature() {
                 <Button
                   onClick={previewInEmail}
                   variant="secondary"
-                  className="w-full mt-1.5 gap-1 h-8 text-xs"
+                  className="w-full mt-1 gap-1 h-7 text-xs py-1"
                   size="sm"
                   data-testid="button-preview-email"
                 >
                   <Mail className="w-3 h-3" />
-                  Preview in Email
+                  Preview Email
                 </Button>
 
                 {/* Platform-Specific Instructions */}
                 {platformInstructions[selectedPlatform] && (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2 mt-2">
-                    <div className="flex items-start gap-1.5">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-1.5 mt-1.5">
+                    <div className="flex items-start gap-1">
                       <Info className="w-3 h-3 text-blue-900 dark:text-blue-300 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h3 className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-1">
+                      <div className="flex-1">
+                        <h3 className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-0.5">
                           How to use
                         </h3>
-                        <ol className="text-xs text-blue-800 dark:text-blue-200 space-y-0.5 list-decimal list-inside">
-                          {platformInstructions[selectedPlatform].steps.map((step, idx) => (
-                            <li key={idx} className="text-xs">{step}</li>
+                        <ol className="text-xs text-blue-800 dark:text-blue-200 space-y-0 list-decimal list-inside">
+                          {platformInstructions[selectedPlatform].steps.slice(0, 3).map((step, idx) => (
+                            <li key={idx} className="text-xs leading-tight">{step}</li>
                           ))}
                         </ol>
-                        <div className="mt-1.5 pt-1.5 border-t border-blue-200 dark:border-blue-700">
-                          <p className="text-xs text-blue-800 dark:text-blue-200"><strong>Setup Location:</strong> {platformInstructions[selectedPlatform].location}</p>
+                        <div className="mt-1 pt-0.5 border-t border-blue-200 dark:border-blue-700">
+                          <p className="text-xs text-blue-800 dark:text-blue-200 leading-tight"><strong>Setup:</strong> {platformInstructions[selectedPlatform].location}</p>
                         </div>
                       </div>
                     </div>
