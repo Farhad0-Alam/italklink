@@ -1,0 +1,66 @@
+<span style=" display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; border-radius: ${contactIconShape === 'circle' ? '50%' : contactIconShape === 'rounded' ? contactIconRadius + 'px' : '0'}; vertical-align:middle; ">
+<img src="${phoneIcon}" alt="" style="width:100%; height:100%; border:0; display:block;" />
+</span>
+
+
+**Important rules to copy for social icons:**
+- Use PNG images, NOT React icons (SiFacebook, SiInstagram, etc.).
+- Always <img src="..."> just like contact icons.
+- Must be wrapped inside a <span> with same background style logic.
+- Must use same radius system: square / circle / rounded.
+- Must use inline styling only (no classes).
+
+### APPLY to social icons:
+
+1) Use the PNG map already defined:
+const socialIconMap = {
+  facebook: `${baseUrl}/signature/facebook.png`,
+  instagram: `${baseUrl}/signature/instagram.png`,
+  twitter: `${baseUrl}/signature/twitter.png`,
+  youtube: `${baseUrl}/signature/youtube.png`,
+  linkedin: `${baseUrl}/signature/linkedin.png`,
+  tiktok: `${baseUrl}/signature/tiktok.png`,
+  whatsapp: `${baseUrl}/signature/whatsapp.png`,
+  pinterest: `${baseUrl}/signature/pinterest.png`,
+  github: `${baseUrl}/signature/github.png`,
+  snapchat: `${baseUrl}/signature/snapchat.png`,
+};
+
+2) INSIDE generatePremiumSignature, REPLACE the current socialIconsHTML block with:
+
+const socialIconsHTML = socialLinks
+  .filter((l) => l.url)
+  .map((link) => {
+    const iconPath = socialIconMap[link.platform] || socialIconMap.facebook;
+    const borderRadius =
+      socialIconShape === "circle"
+        ? "50%"
+        : socialIconShape === "rounded"
+        ? `${socialIconRadius || 8}px`
+        : "0px";
+
+    return `
+      <a href="${link.url}" target="_blank" style="display:inline-block; margin:0 6px; text-decoration:none;">
+        <span style="
+          display:inline-block;
+          width:${socialIconSize || contactIconSize + 10}px;
+          height:${socialIconSize || contactIconSize + 10}px;
+          background-color:${socialIconColor || contactIconColor};
+          border-radius:${borderRadius};
+          border:${socialIconBorderWidth}px solid ${socialIconBorderColor};
+          overflow:hidden;
+          vertical-align:middle;
+        ">
+          <img src="${iconPath}" alt="${link.platform}" style="width:100%; height:100%; border:0; display:block;" />
+        </span>
+      </a>
+    `;
+  })
+  .join("");
+
+3) Remove ALL usage of `getSocialIconSVG()` and remove React Icons inside HTML signatures. DO NOT use SiFacebook etc. for email signatures.
+
+GOAL:
+- Social icons render with PNG like contact icons.
+- Full support for shape options (circle, square, rounded).
+- Fully compatible with Gmail, Outlook, Apple Mail.

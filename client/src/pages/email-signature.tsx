@@ -69,7 +69,7 @@ interface SignatureData {
   profilePhotoBorderColor: string;
   profilePhotoOpacity: number;
   profilePhotoShadow: "none" | "small" | "medium" | "large";
-  
+
   companyLogo: string;
   companyLogoWidth: number;
   companyLogoHeight: number;
@@ -109,6 +109,7 @@ interface SignatureData {
   socialIconSize: number;
   socialIconColor: string;
   socialIconShape: "circle" | "square" | "rounded";
+  socialIconRadius: number;
   socialIconBorderWidth: number;
   socialIconBorderColor: string;
 
@@ -305,7 +306,7 @@ export default function EmailSignature() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("outlook");
   const [templateVariant, setTemplateVariant] = useState<string>("template-2");
   const [carouselIndex, setCarouselIndex] = useState(0);
-  
+
   const templates = [
     { id: "template-1", name: "Template 1", description: "Clean & Simple Design" },
     { id: "template-2", name: "Template 2", description: "Balanced Professional Look" },
@@ -317,20 +318,20 @@ export default function EmailSignature() {
     { id: "template-8", name: "Template 8", description: "Executive Style" },
     { id: "template-9", name: "Template 9", description: "Professional Plus" },
   ];
-  
+
   const nextTemplate = () => {
     setCarouselIndex((prev) => prev + 1);
   };
-  
+
   const prevTemplate = () => {
     setCarouselIndex((prev) => prev - 1);
   };
-  
+
   const selectTemplate = (index: number) => {
     setCarouselIndex(index % templates.length);
     setTemplateVariant(templates[index % templates.length].id);
   };
-  
+
   const [collapsedSections, setCollapsedSections] = useState<{
     [key: string]: boolean;
   }>({
@@ -383,7 +384,7 @@ export default function EmailSignature() {
     profilePhotoBorderColor: "#FF6A00",
     profilePhotoOpacity: 100,
     profilePhotoShadow: "medium",
-    
+
     companyLogo: "https://via.placeholder.com/200x80/FF6A00/FFFFFF?text=ACME",
     companyLogoWidth: 120,
     companyLogoHeight: 60,
@@ -418,6 +419,7 @@ export default function EmailSignature() {
     socialIconSize: 24,
     socialIconColor: "#FF6A00",
     socialIconShape: "circle",
+    socialIconRadius: 8,
     socialIconBorderWidth: 0,
     socialIconBorderColor: "#CCCCCC",
     dividerHeight: 3,
@@ -546,7 +548,7 @@ export default function EmailSignature() {
     const cellIcon = `${baseUrl}/signature/cell.png`;
     const locationIcon = `${baseUrl}/signature/location.png`;
     const ecardIcon = `${baseUrl}/signature/ecard.png`;
-    
+
     // Social media icons
     const facebookIcon = `${baseUrl}/signature/facebook.png`;
     const instagramIcon = `${baseUrl}/signature/instagram.png`;
@@ -558,7 +560,7 @@ export default function EmailSignature() {
     const pinterestIcon = `${baseUrl}/signature/pinterest.png`;
     const githubIcon = `${baseUrl}/signature/github.png`;
     const snapchatIcon = `${baseUrl}/signature/snapchat.png`;
-    
+
     // Social icon map
     const socialIconMap: Record<string, string> = {
       facebook: facebookIcon,
@@ -617,6 +619,7 @@ export default function EmailSignature() {
       socialIconSize,
       socialIconColor,
       socialIconShape,
+      socialIconRadius,
       socialIconBorderWidth,
       socialIconBorderColor,
       dividerHeight,
@@ -626,17 +629,12 @@ export default function EmailSignature() {
       dividerWidth,
     } = signatureData;
 
-    const getSocialIconBorderRadius = (shape: string): string => {
-      if (shape === "circle") return "50%";
-      if (shape === "rounded") return "8px";
-      return "0px";
-    };
-
     const socialIconsHTML = socialLinks
-      .filter((link) => !!link.url)
+      .filter((l) => l.url)
       .map((link) => {
         const iconPath = socialIconMap[link.platform] || socialIconMap.facebook;
-        return `<a href="${link.url}" target="_blank" style="display:inline-block; margin:0 6px; text-decoration:none;"><span style="display:inline-block; width:${contactIconSize + 12}px; height:${contactIconSize + 12}px; background-color:${contactIconColor}; border-radius:50%; vertical-align:middle;"><img src="${iconPath}" alt="${link.platform}" style="width:100%; height:100%; display:block; border-radius:50%; border:0;" /></span></a>`;
+        const borderRadius = socialIconShape === "circle" ? "50%" : socialIconShape === "rounded" ? `${socialIconRadius || 8}px` : "0px";
+        return `<a href="${link.url}" target="_blank" style="display:inline-block; margin:0 6px; text-decoration:none;"><span style="display:inline-block; width:${socialIconSize || contactIconSize + 10}px; height:${socialIconSize || contactIconSize + 10}px; background-color:${socialIconColor || contactIconColor}; border-radius:${borderRadius}; border:${socialIconBorderWidth}px solid ${socialIconBorderColor}; overflow:hidden; vertical-align:middle;"><img src="${iconPath}" alt="${link.platform}" style="width:100%; height:100%; border:0; display:block;" /></span></a>`;
       })
       .join("");
 
@@ -773,16 +771,16 @@ export default function EmailSignature() {
   const getContainerStyle = (type: "profile" | "logo"): string => {
     if (type === "profile") {
       const { profilePhotoShape, profilePhotoWidth, profilePhotoHeight, profilePhotoBorderWidth, profilePhotoBorderColor, profilePhotoOpacity, profilePhotoShadow } = signatureData;
-      
+
       let borderRadius = "50%";
       if (profilePhotoShape === "square") borderRadius = "0%";
       if (profilePhotoShape === "rounded") borderRadius = "8px";
-      
+
       let boxShadow = "none";
       if (profilePhotoShadow === "small") boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
       if (profilePhotoShadow === "medium") boxShadow = "0 4px 8px rgba(0,0,0,0.15)";
       if (profilePhotoShadow === "large") boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
-      
+
       return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px solid ${profilePhotoBorderColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center;`;
     } else {
       const { companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor, companyLogoBackgroundColor } = signatureData;
@@ -1146,10 +1144,10 @@ export default function EmailSignature() {
                         const isVisible = actualIndex >= carouselIndex && actualIndex < carouselIndex + 4 || 
                                          (carouselIndex + 4 > templates.length && actualIndex < (carouselIndex + 4) % templates.length);
                         if (!isVisible && !(carouselIndex >= templates.length - 3)) return null;
-                        
+
                         const visibleIndex = actualIndex >= carouselIndex ? actualIndex - carouselIndex : templates.length - carouselIndex + actualIndex;
                         if (visibleIndex >= 4) return null;
-                        
+
                         return (
                           <div
                             key={`${actualIndex}-${template.id}`}
@@ -2235,7 +2233,7 @@ export default function EmailSignature() {
 
                     <div className="border-t pt-2 mt-2">
                       <h4 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Styling</h4>
-                      
+
                       <div className="space-y-2">
                         <div>
                           <Label className="text-xs">Shape</Label>
@@ -2338,7 +2336,7 @@ export default function EmailSignature() {
 
                     <div className="border-t pt-2 mt-2">
                       <h4 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Styling</h4>
-                      
+
                       <div className="space-y-2">
                         <div>
                           <Label className="text-xs">Width ({signatureData.companyLogoWidth}px)</Label>
