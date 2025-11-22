@@ -120,6 +120,11 @@ interface SignatureData {
   socialLinksBottomSpacing: number;
   socialIconsGap: number;
 
+  upperBannerBackgroundColor: string;
+  upperBannerBorderColor: string;
+  upperBannerBorderWidth: number;
+  upperBannerBorderRadius: number;
+
   bannerBackgroundColor: string;
   bannerBorderColor: string;
   bannerBorderWidth: number;
@@ -451,6 +456,10 @@ export default function EmailSignature() {
     socialIconsGap: 9,
     socialIconBorderWidth: 0,
     socialIconBorderColor: "#CCCCCC",
+    upperBannerBackgroundColor: "#FFFFFF",
+    upperBannerBorderColor: "#FF6A00",
+    upperBannerBorderWidth: 0,
+    upperBannerBorderRadius: 0,
     bannerBackgroundColor: "#F5F5F5",
     bannerBorderColor: "#FF6A00",
     bannerBorderWidth: 2,
@@ -707,6 +716,10 @@ export default function EmailSignature() {
       socialLinksTopSpacing,
       socialLinksBottomSpacing,
       socialIconsGap,
+      upperBannerBackgroundColor,
+      upperBannerBorderColor,
+      upperBannerBorderWidth,
+      upperBannerBorderRadius,
       bannerBackgroundColor,
       bannerBorderColor,
       bannerBorderWidth,
@@ -781,7 +794,7 @@ export default function EmailSignature() {
       : ""
   }
   <tr>
-    <td style="background-color: #ffffff; padding: 25px;">
+    <td style="background-color: ${upperBannerBackgroundColor}; border: ${upperBannerBorderWidth}px solid ${upperBannerBorderColor}; border-radius: ${upperBannerBorderRadius}px; padding: 25px; margin: 20px;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%">
         <tr>
           ${
@@ -1858,6 +1871,116 @@ export default function EmailSignature() {
                       )}
                     </div>
 
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Upper Banner Background Card */}
+            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <CardHeader
+                className="cursor-pointer py-2 px-3"
+                onClick={() => toggleSection("upperBannerStyle")}
+                data-testid="toggle-upper-banner-style"
+              >
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Upper Banner Background
+                  </CardTitle>
+                  {collapsedSections.upperBannerStyle ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4" />
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="p-3 space-y-3">
+                {!collapsedSections.upperBannerStyle && (
+                  <>
+                    <div>
+                      <Label className="text-xs mb-1">Background Color</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          value={signatureData.upperBannerBackgroundColor}
+                          onChange={(e) =>
+                            updateField("upperBannerBackgroundColor", e.target.value)
+                          }
+                          className="w-16 h-9"
+                          data-testid="input-upper-banner-bg-color"
+                        />
+                        <Input
+                          value={signatureData.upperBannerBackgroundColor}
+                          onChange={(e) =>
+                            updateField("upperBannerBackgroundColor", e.target.value)
+                          }
+                          placeholder="#FFFFFF"
+                          className="flex-1"
+                          data-testid="input-upper-banner-bg-color-hex"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs mb-1">Border Color</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          value={signatureData.upperBannerBorderColor}
+                          onChange={(e) =>
+                            updateField("upperBannerBorderColor", e.target.value)
+                          }
+                          className="w-16 h-9"
+                          data-testid="input-upper-banner-border-color"
+                        />
+                        <Input
+                          value={signatureData.upperBannerBorderColor}
+                          onChange={(e) =>
+                            updateField("upperBannerBorderColor", e.target.value)
+                          }
+                          placeholder="#FF6A00"
+                          className="flex-1"
+                          data-testid="input-upper-banner-border-color-hex"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs">
+                        Border Width: {signatureData.upperBannerBorderWidth}px
+                      </Label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        value={signatureData.upperBannerBorderWidth}
+                        onChange={(e) =>
+                          updateField(
+                            "upperBannerBorderWidth",
+                            parseInt(e.target.value),
+                          )
+                        }
+                        className="custom-range w-full"
+                        data-testid="slider-upper-banner-border-width"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">
+                        Border Radius: {signatureData.upperBannerBorderRadius}px
+                      </Label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="30"
+                        value={signatureData.upperBannerBorderRadius}
+                        onChange={(e) =>
+                          updateField(
+                            "upperBannerBorderRadius",
+                            parseInt(e.target.value),
+                          )
+                        }
+                        className="custom-range w-full"
+                        data-testid="slider-upper-banner-border-radius"
+                      />
                     </div>
                   </>
                 )}
