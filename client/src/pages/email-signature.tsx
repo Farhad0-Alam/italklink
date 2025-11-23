@@ -780,6 +780,7 @@ export default function EmailSignature() {
       ctaSectionGradientColor1,
       ctaSectionGradientColor2,
       ctaSectionGradientAngle,
+      ctaSectionHeight,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
