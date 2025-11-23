@@ -509,8 +509,7 @@ export default function EmailSignature() {
     disclaimerBold: false,
     disclaimerItalic: true,
     showCTA: false,
-    ctaText: "Book a Consultation",
-    ctaUrl: "",
+    ctaButtons: [{ text: "Book a Consultation", url: "" }],
     showBanner: false,
     bannerText: "Get in touch today!",
     bannerBackgroundColor: "#FFFFFF",
@@ -781,6 +780,7 @@ export default function EmailSignature() {
       ctaSectionGradientColor2,
       ctaSectionGradientAngle,
       ctaSectionHeight,
+      ctaButtons,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
@@ -908,14 +908,15 @@ export default function EmailSignature() {
                       : ""
                   }
                 </td>
-                <td style="width: 60%; vertical-align: middle; text-align: center;">
-                  ${
-                    showCTA && ctaUrl
-                      ? `
-                  <a href="${ctaUrl}" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${ctaText}</a>
+                <td style="width: 60%; vertical-align: middle; text-align: center; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; padding-bottom: 10px;">
+                  ${ctaButtons
+                    .filter((btn) => btn.url)
+                    .map(
+                      (btn) => `
+                  <a href="${btn.url}" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${btn.text}</a>
                   `
-                      : ""
-                  }
+                    )
+                    .join("")}
                 </td>
               </tr>
             </table>
@@ -3511,20 +3512,59 @@ export default function EmailSignature() {
 
                         {!collapsedSections.ctaButtonSection && (
                           <div className="space-y-2 mt-2">
-                            <div className="grid grid-cols-2 gap-4">
-                              <Input
-                                value={signatureData.ctaText}
-                                onChange={(e) => updateField("ctaText", e.target.value)}
-                                placeholder="Button Text"
-                                data-testid="input-cta-text"
-                              />
-                              <Input
-                                value={signatureData.ctaUrl}
-                                onChange={(e) => updateField("ctaUrl", e.target.value)}
-                                placeholder="Button URL"
-                                data-testid="input-cta-url"
-                              />
-                            </div>
+                            {signatureData.ctaButtons.map((button, index) => (
+                              <div key={index} className="space-y-2 p-2 border rounded bg-slate-50 dark:bg-slate-900">
+                                <div className="flex items-center justify-between">
+                                  <Label className="text-xs font-semibold">Button {index + 1}</Label>
+                                  {signatureData.ctaButtons.length > 1 && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        const updated = signatureData.ctaButtons.filter((_, i) => i !== index);
+                                        updateField("ctaButtons", updated);
+                                      }}
+                                      data-testid={`button-remove-cta-${index}`}
+                                    >
+                                      Remove
+                                    </Button>
+                                  )}
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <Input
+                                    value={button.text}
+                                    onChange={(e) => {
+                                      const updated = [...signatureData.ctaButtons];
+                                      updated[index].text = e.target.value;
+                                      updateField("ctaButtons", updated);
+                                    }}
+                                    placeholder="Button Text"
+                                    data-testid={`input-cta-text-${index}`}
+                                  />
+                                  <Input
+                                    value={button.url}
+                                    onChange={(e) => {
+                                      const updated = [...signatureData.ctaButtons];
+                                      updated[index].url = e.target.value;
+                                      updateField("ctaButtons", updated);
+                                    }}
+                                    placeholder="Button URL"
+                                    data-testid={`input-cta-url-${index}`}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                            <Button
+                              onClick={() => {
+                                const updated = [...signatureData.ctaButtons, { text: "New Button", url: "" }];
+                                updateField("ctaButtons", updated);
+                              }}
+                              className="w-full"
+                              size="sm"
+                              data-testid="button-add-cta"
+                            >
+                              + Add Button
+                            </Button>
                           </div>
                         )}
                       </div>
