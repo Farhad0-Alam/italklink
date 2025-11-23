@@ -508,7 +508,7 @@ export default function EmailSignature() {
     disclaimerTextAlign: "left",
     disclaimerBold: false,
     disclaimerItalic: true,
-    showCTA: false,
+    showCTA: true,
     ctaButtons: [{ text: "Book a Consultation", url: "https://talkl.ink/" }],
     ctaButtonBgColor: "#FF6A00",
     ctaButtonUseGradient: false,
