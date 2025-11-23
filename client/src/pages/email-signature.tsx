@@ -36,6 +36,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Link } from "wouter";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import {
   SiFacebook,
   SiLinkedin,
@@ -737,14 +739,6 @@ export default function EmailSignature() {
       profilePhotoRightSideGap,
       showDisclaimer,
       disclaimerText,
-      disclaimerFont,
-      disclaimerFontSize,
-      disclaimerFontColor,
-      disclaimerTextAlign,
-      disclaimerBold,
-      disclaimerItalic,
-      disclaimerPadding,
-      disclaimerLineHeight,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
@@ -896,7 +890,7 @@ export default function EmailSignature() {
       ? `
   <tr>
     <td style="padding: ${disclaimerPadding}px 25px; font-family: ${disclaimerFont}, sans-serif; font-size: ${disclaimerFontSize}px; color: ${disclaimerFontColor}; text-align: ${disclaimerTextAlign}; font-weight: ${disclaimerBold ? "bold" : "normal"}; font-style: ${disclaimerItalic ? "italic" : "normal"}; line-height: ${disclaimerLineHeight};">
-      ${disclaimerText}
+      <div style="font-family: ${disclaimerFont}, sans-serif;">${disclaimerText}</div>
     </td>
   </tr>
   `
@@ -3329,15 +3323,24 @@ export default function EmailSignature() {
 
                   {signatureData.showDisclaimer && (
                     <div className="pl-6 space-y-3">
-                      <Textarea
-                        value={signatureData.disclaimerText}
-                        onChange={(e) =>
-                          updateField("disclaimerText", e.target.value)
-                        }
-                        placeholder="Disclaimer text..."
-                        rows={3}
-                        data-testid="textarea-disclaimer"
-                      />
+                      <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                        <ReactQuill
+                          value={signatureData.disclaimerText}
+                          onChange={(value) =>
+                            updateField("disclaimerText", value)
+                          }
+                          modules={{
+                            toolbar: [
+                              ["bold", "italic", "underline"],
+                              [{ align: [] }],
+                              [{ list: "ordered" }, { list: "bullet" }],
+                            ],
+                          }}
+                          placeholder="Disclaimer text..."
+                          theme="snow"
+                          data-testid="editor-disclaimer"
+                        />
+                      </div>
 
                       <div>
                         <Label className="text-xs">Font</Label>
