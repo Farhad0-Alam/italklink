@@ -739,12 +739,29 @@ export default function EmailSignature() {
       <table cellpadding="0" cellspacing="0" border="0" width="100%">
         <tr>
           ${
-            profilePhoto
+            profilePhoto || companyLogo
               ? `
           <td style="padding-right: ${profilePhotoRightSideGap}px; vertical-align: middle;">
+            ${
+              profilePhoto
+                ? `
             <div style="${getContainerStyle('profile')}">
               <img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}">
             </div>
+            `
+                : ""
+            }
+            ${
+              companyLogo
+                ? `
+            <div style="padding-top: 15px;">
+              <div style="${getContainerStyle('logo')}">
+                <img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}">
+              </div>
+            </div>
+            `
+                : ""
+            }
           </td>
           `
               : ""
@@ -781,24 +798,17 @@ export default function EmailSignature() {
           </td>
         </tr>
         ${
-          companyLogo || showCTA
+          showCTA
             ? `
         <tr>
-          <td colspan="2" style="padding-top: 25px; margin-top: 20px;">
-            <table cellpadding="0" cellspacing="0" border="0" width="100%">
-              <tr>
-                ${companyLogo ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}"><img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}"></div></td>` : ""}
-                ${
-                  showCTA && ctaUrl
-                    ? `
-                <td style="text-align: ${companyLogo ? "right" : "center"}; vertical-align: middle;">
-                  <a href="${ctaUrl}" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${ctaText}</a>
-                </td>
-                `
-                    : ""
-                }
-              </tr>
-            </table>
+          <td colspan="2" style="padding-top: 25px; margin-top: 20px; text-align: center;">
+            ${
+              showCTA && ctaUrl
+                ? `
+            <a href="${ctaUrl}" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${ctaText}</a>
+            `
+                : ""
+            }
           </td>
         </tr>
         `
