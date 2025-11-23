@@ -552,6 +552,8 @@ export default function EmailSignature() {
     ctaButtonLogoShape: "square",
     ctaButtonLogoBorderWidth: 0,
     ctaButtonLogoBorderColor: "#CCCCCC",
+    ctaLogoColumnWidth: 40,
+    ctaButtonsColumnWidth: 60,
     ctaSectionBackgroundColor: "#FFFFFF",
     ctaSectionBorderColor: "#FF6A00",
     ctaSectionBorderWidth: 0,
@@ -790,6 +792,8 @@ export default function EmailSignature() {
       ctaButtonLogoShape,
       ctaButtonLogoBorderWidth,
       ctaButtonLogoBorderColor,
+      ctaLogoColumnWidth,
+      ctaButtonsColumnWidth,
       ctaSectionBackgroundColor,
       ctaSectionBorderColor,
       ctaSectionBorderWidth,
@@ -935,7 +939,7 @@ export default function EmailSignature() {
           <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 20px; height: ${ctaSectionHeight}px;">
             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
               <tr>
-                <td style="width: 40%; vertical-align: middle; text-align: center; padding: 0; margin: 0;">
+                <td style="width: ${ctaLogoColumnWidth}%; vertical-align: middle; text-align: center; padding: 0; margin: 0;">
                   ${
                     ctaButtonLogo
                       ? `
@@ -946,7 +950,7 @@ export default function EmailSignature() {
                       : ""
                   }
                 </td>
-                <td style="width: 60%; vertical-align: bottom; text-align: ${ctaButtonGroupAlignment}; padding: 10px 15px 10px ${ctaButtonGroupAlignment === 'right' ? '0' : '15px'}; padding-right: ${ctaButtonGroupAlignment === 'right' ? '15px' : '15px'};">
+                <td style="width: ${ctaButtonsColumnWidth}%; vertical-align: bottom; text-align: ${ctaButtonGroupAlignment}; padding: 10px 15px 10px ${ctaButtonGroupAlignment === 'right' ? '0' : '15px'}; padding-right: ${ctaButtonGroupAlignment === 'right' ? '15px' : '15px'};">
                   <div style="line-height: 1;">
                     ${ctaButtons
                       .filter((btn) => btn.url)
@@ -3431,7 +3435,7 @@ export default function EmailSignature() {
                                   <input
                                     type="range"
                                     min="30"
-                                    max="120"
+                                    max="250"
                                     value={signatureData.ctaButtonLogoWidth}
                                     onChange={(e) =>
                                       updateField(
@@ -3451,7 +3455,7 @@ export default function EmailSignature() {
                                   <input
                                     type="range"
                                     min="30"
-                                    max="120"
+                                    max="250"
                                     value={signatureData.ctaButtonLogoHeight}
                                     onChange={(e) =>
                                       updateField(
@@ -3462,6 +3466,26 @@ export default function EmailSignature() {
                                     className="custom-range w-full"
                                     data-testid="slider-cta-logo-height"
                                   />
+                                </div>
+
+                                <div className="border-t pt-2 mt-2">
+                                  <Label className="text-xs font-semibold mb-2 block">Layout</Label>
+                                  <div>
+                                    <Label className="text-xs">Logo Column Width: {signatureData.ctaLogoColumnWidth}%</Label>
+                                    <input
+                                      type="range"
+                                      min="20"
+                                      max="80"
+                                      value={signatureData.ctaLogoColumnWidth}
+                                      onChange={(e) => {
+                                        const newLogoWidth = parseInt(e.target.value);
+                                        updateField("ctaLogoColumnWidth", newLogoWidth);
+                                        updateField("ctaButtonsColumnWidth", 100 - newLogoWidth);
+                                      }}
+                                      className="custom-range w-full"
+                                      data-testid="slider-cta-logo-column-width"
+                                    />
+                                  </div>
                                 </div>
 
                                 <div>
