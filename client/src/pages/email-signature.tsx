@@ -3317,26 +3317,6 @@ export default function EmailSignature() {
                                 />
                               </div>
                             </div>
-
-                            <div>
-                              <Label className="text-xs">
-                                Padding: {signatureData.ctaSectionPadding}px
-                              </Label>
-                              <input
-                                type="range"
-                                min="0"
-                                max="40"
-                                value={signatureData.ctaSectionPadding}
-                                onChange={(e) =>
-                                  updateField(
-                                    "ctaSectionPadding",
-                                    parseInt(e.target.value),
-                                  )
-                                }
-                                className="custom-range w-full"
-                                data-testid="slider-cta-section-padding"
-                              />
-                            </div>
                           </div>
                         )}
                       </div>
