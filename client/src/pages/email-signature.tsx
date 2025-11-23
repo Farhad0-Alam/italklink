@@ -722,19 +722,6 @@ export default function EmailSignature() {
 
     return `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 700px; margin: 0; padding: 0; background-color: #f9f9f9;">
-  ${
-    showBanner
-      ? `
-  <tr>
-    <td style="padding: ${bannerPadding}px;">
-      <div style="background-color: ${bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-size: 16px; font-weight: bold; color: #333333;">
-        ${bannerText}
-      </div>
-    </td>
-  </tr>
-  `
-      : ""
-  }
   <tr>
     <td style="background-color: #ffffff; padding: 25px;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -808,6 +795,19 @@ export default function EmailSignature() {
       </table>
     </td>
   </tr>
+  ${
+    showBanner
+      ? `
+  <tr>
+    <td style="padding: ${bannerPadding}px;">
+      <div style="background-color: ${bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-size: 16px; font-weight: bold; color: #333333;">
+        ${bannerText}
+      </div>
+    </td>
+  </tr>
+  `
+      : ""
+  }
 </table>
     `.trim();
   };
