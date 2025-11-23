@@ -511,6 +511,10 @@ export default function EmailSignature() {
     showCTA: false,
     ctaButtons: [{ text: "Book a Consultation", url: "" }],
     ctaButtonBgColor: "#FF6A00",
+    ctaButtonUseGradient: false,
+    ctaButtonGradientColor1: "#FF6A00",
+    ctaButtonGradientColor2: "#FFA500",
+    ctaButtonGradientAngle: 135,
     ctaButtonBorderColor: "#CCCCCC",
     ctaButtonBorderWidth: 0,
     ctaButtonFont: "Arial",
@@ -790,6 +794,10 @@ export default function EmailSignature() {
       ctaSectionHeight,
       ctaButtons,
       ctaButtonBgColor,
+      ctaButtonUseGradient,
+      ctaButtonGradientColor1,
+      ctaButtonGradientColor2,
+      ctaButtonGradientAngle,
       ctaButtonBorderColor,
       ctaButtonBorderWidth,
       ctaButtonFont,
@@ -930,7 +938,7 @@ export default function EmailSignature() {
                       .filter((btn) => btn.url)
                       .map(
                         (btn) => `
-                    <a href="${btn.url}" style="background: ${ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 28px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px;">${btn.text}</a>
+                    <a href="${btn.url}" style="background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 28px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px;">${btn.text}</a>
                     `
                       )
                       .join("")}
@@ -3592,6 +3600,16 @@ export default function EmailSignature() {
                             <div className="border-t pt-3">
                               <Label className="text-xs font-semibold mb-2 block">Button Style</Label>
                               <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <Label className="text-xs">Use Gradient</Label>
+                                  <Switch
+                                    checked={signatureData.ctaButtonUseGradient}
+                                    onCheckedChange={(checked) =>
+                                      updateField("ctaButtonUseGradient", checked)
+                                    }
+                                    data-testid="switch-cta-gradient"
+                                  />
+                                </div>
                                 <div>
                                   <Label className="text-xs">Background Color</Label>
                                   <div className="flex gap-2">
@@ -3603,6 +3621,7 @@ export default function EmailSignature() {
                                       }
                                       className="w-10 h-9 rounded"
                                       data-testid="input-cta-bg-color"
+                                      disabled={signatureData.ctaButtonUseGradient}
                                     />
                                     <Input
                                       value={signatureData.ctaButtonBgColor}
@@ -3612,9 +3631,76 @@ export default function EmailSignature() {
                                       placeholder="#FF6A00"
                                       className="flex-1"
                                       data-testid="input-cta-bg-color-hex"
+                                      disabled={signatureData.ctaButtonUseGradient}
                                     />
                                   </div>
                                 </div>
+
+                                {signatureData.ctaButtonUseGradient && (
+                                  <>
+                                    <div>
+                                      <Label className="text-xs">Gradient Color 1</Label>
+                                      <div className="flex gap-2">
+                                        <input
+                                          type="color"
+                                          value={signatureData.ctaButtonGradientColor1}
+                                          onChange={(e) =>
+                                            updateField("ctaButtonGradientColor1", e.target.value)
+                                          }
+                                          className="w-10 h-9 rounded"
+                                          data-testid="input-cta-gradient-color1"
+                                        />
+                                        <Input
+                                          value={signatureData.ctaButtonGradientColor1}
+                                          onChange={(e) =>
+                                            updateField("ctaButtonGradientColor1", e.target.value)
+                                          }
+                                          placeholder="#FF6A00"
+                                          className="flex-1"
+                                          data-testid="input-cta-gradient-color1-hex"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs">Gradient Color 2</Label>
+                                      <div className="flex gap-2">
+                                        <input
+                                          type="color"
+                                          value={signatureData.ctaButtonGradientColor2}
+                                          onChange={(e) =>
+                                            updateField("ctaButtonGradientColor2", e.target.value)
+                                          }
+                                          className="w-10 h-9 rounded"
+                                          data-testid="input-cta-gradient-color2"
+                                        />
+                                        <Input
+                                          value={signatureData.ctaButtonGradientColor2}
+                                          onChange={(e) =>
+                                            updateField("ctaButtonGradientColor2", e.target.value)
+                                          }
+                                          placeholder="#FFA500"
+                                          className="flex-1"
+                                          data-testid="input-cta-gradient-color2-hex"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs">Gradient Angle: {signatureData.ctaButtonGradientAngle}°</Label>
+                                      <input
+                                        type="range"
+                                        min="0"
+                                        max="360"
+                                        value={signatureData.ctaButtonGradientAngle}
+                                        onChange={(e) =>
+                                          updateField("ctaButtonGradientAngle", parseInt(e.target.value))
+                                        }
+                                        className="custom-range w-full"
+                                        data-testid="slider-cta-gradient-angle"
+                                      />
+                                    </div>
+                                  </>
+                                )}
+
                                 <div>
                                   <Label className="text-xs">Border Color</Label>
                                   <div className="flex gap-2">
