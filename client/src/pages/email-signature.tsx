@@ -135,6 +135,10 @@ interface SignatureData {
   ctaUrl: string;
   showBanner: boolean;
   bannerText: string;
+  bannerBackgroundColor: string;
+  bannerBorderColor: string;
+  bannerBorderWidth: number;
+  bannerPadding: number;
 }
 
 const signatureFonts = [
@@ -474,6 +478,10 @@ export default function EmailSignature() {
     ctaUrl: "",
     showBanner: false,
     bannerText: "Get in touch today!",
+    bannerBackgroundColor: "#FFFFFF",
+    bannerBorderColor: "#FF6A00",
+    bannerBorderWidth: 3,
+    bannerPadding: 20,
   });
 
   useEffect(() => {
@@ -630,6 +638,10 @@ export default function EmailSignature() {
       ctaUrl,
       showBanner,
       bannerText,
+      bannerBackgroundColor,
+      bannerBorderColor,
+      bannerBorderWidth,
+      bannerPadding,
       customFields,
       signatureFont,
       signatureSize,
@@ -714,8 +726,10 @@ export default function EmailSignature() {
     showBanner
       ? `
   <tr>
-    <td style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; text-align: center; padding: 15px; font-size: 16px; font-weight: bold;">
-      ${bannerText}
+    <td style="padding: ${bannerPadding}px;">
+      <div style="background-color: ${bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-size: 16px; font-weight: bold; color: #333333;">
+        ${bannerText}
+      </div>
     </td>
   </tr>
   `
@@ -2915,7 +2929,7 @@ export default function EmailSignature() {
                   </div>
 
                   {signatureData.showBanner && (
-                    <div className="pl-6">
+                    <div className="pl-6 space-y-3">
                       <Input
                         value={signatureData.bannerText}
                         onChange={(e) =>
@@ -2924,6 +2938,85 @@ export default function EmailSignature() {
                         placeholder="Banner Text"
                         data-testid="input-banner-text"
                       />
+
+                      <div>
+                        <Label className="text-xs">Background Color</Label>
+                        <div className="flex gap-2">
+                          <input
+                            type="color"
+                            value={signatureData.bannerBackgroundColor}
+                            onChange={(e) =>
+                              updateField("bannerBackgroundColor", e.target.value)
+                            }
+                            className="w-10 h-9 rounded"
+                            data-testid="input-banner-bg-color"
+                          />
+                          <Input
+                            value={signatureData.bannerBackgroundColor}
+                            onChange={(e) =>
+                              updateField("bannerBackgroundColor", e.target.value)
+                            }
+                            placeholder="#FFFFFF"
+                            className="flex-1"
+                            data-testid="input-banner-bg-color-hex"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-xs">Border Color</Label>
+                          <div className="flex gap-2">
+                            <input
+                              type="color"
+                              value={signatureData.bannerBorderColor}
+                              onChange={(e) =>
+                                updateField("bannerBorderColor", e.target.value)
+                              }
+                              className="w-10 h-9 rounded"
+                              data-testid="input-banner-border-color"
+                            />
+                            <Input
+                              value={signatureData.bannerBorderColor}
+                              onChange={(e) =>
+                                updateField("bannerBorderColor", e.target.value)
+                              }
+                              placeholder="#FF6A00"
+                              className="flex-1"
+                              data-testid="input-banner-border-color-hex"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Border Width (px)</Label>
+                          <Input
+                            type="number"
+                            value={signatureData.bannerBorderWidth}
+                            onChange={(e) =>
+                              updateField("bannerBorderWidth", Number(e.target.value))
+                            }
+                            min="0"
+                            max="10"
+                            data-testid="input-banner-border-width"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">Padding ({signatureData.bannerPadding}px)</Label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="40"
+                          value={signatureData.bannerPadding}
+                          onChange={(e) =>
+                            updateField("bannerPadding", Number(e.target.value))
+                          }
+                          className="w-full"
+                          data-testid="input-banner-padding"
+                        />
+                      </div>
                     </div>
                   )}
 
