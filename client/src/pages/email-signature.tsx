@@ -542,6 +542,7 @@ export default function EmailSignature() {
     ctaSectionGradientColor1: "#FF6A00",
     ctaSectionGradientColor2: "#FFA500",
     ctaSectionGradientAngle: 134,
+    ctaSectionHeight: 100,
   });
 
   useEffect(() => {
@@ -892,7 +893,7 @@ export default function EmailSignature() {
           showCTA
             ? `
         <tr>
-          <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 20px;">
+          <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 20px; height: ${ctaSectionHeight}px;">
             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
               <tr>
                 <td style="width: 50%; vertical-align: middle; text-align: center;">
@@ -3316,6 +3317,24 @@ export default function EmailSignature() {
                                   data-testid="input-cta-section-border-color-hex"
                                 />
                               </div>
+                            </div>
+
+                            <div>
+                              <Label className="text-xs">Height: {signatureData.ctaSectionHeight}px</Label>
+                              <input
+                                type="range"
+                                min="50"
+                                max="300"
+                                value={signatureData.ctaSectionHeight}
+                                onChange={(e) =>
+                                  updateField(
+                                    "ctaSectionHeight",
+                                    parseInt(e.target.value),
+                                  )
+                                }
+                                className="custom-range w-full"
+                                data-testid="slider-cta-section-height"
+                              />
                             </div>
                           </div>
                         )}
