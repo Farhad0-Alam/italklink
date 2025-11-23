@@ -3142,7 +3142,7 @@ export default function EmailSignature() {
                       </div>
 
                       <div>
-                        <Label className="text-xs">Banner Logo (optional)</Label>
+                        <Label className="text-xs">CTA logo (optional)</Label>
                         <div className="flex gap-2">
                           <Input
                             type="file"
