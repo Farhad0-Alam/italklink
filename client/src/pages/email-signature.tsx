@@ -129,6 +129,7 @@ interface SignatureData {
   showVerticalDivider: boolean;
   verticalDividerWidth: number;
   verticalDividerColor: string;
+  verticalDividerHeight: number;
 
   socialLinks: { platform: string; url: string; icon: string }[];
 
@@ -471,6 +472,7 @@ export default function EmailSignature() {
     showVerticalDivider: true,
     verticalDividerWidth: 2,
     verticalDividerColor: "#FF6A00",
+    verticalDividerHeight: 100,
     socialLinks: [
       {
         platform: "linkedin",
@@ -756,6 +758,7 @@ export default function EmailSignature() {
       showVerticalDivider,
       verticalDividerWidth,
       verticalDividerColor,
+      verticalDividerHeight,
       profilePhotoRightSideGap,
       showDisclaimer,
       disclaimerText,
@@ -849,7 +852,7 @@ export default function EmailSignature() {
                 : ""
             }
           </td>
-          <td style="width: 70%; vertical-align: top; padding-left: 15px; ${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor};` : ''}">
+          <td style="width: 70%; vertical-align: top; padding-left: 15px; min-height: ${verticalDividerHeight}px; ${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor};` : ''}">
             <table cellpadding="0" cellspacing="0" border="0" width="100%">
               ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
               <tr>
@@ -2101,6 +2104,25 @@ export default function EmailSignature() {
                               }
                               className="custom-range w-full"
                               data-testid="slider-vertical-divider-width"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">
+                              Height: {signatureData.verticalDividerHeight}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="50"
+                              max="300"
+                              value={signatureData.verticalDividerHeight}
+                              onChange={(e) =>
+                                updateField(
+                                  "verticalDividerHeight",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-vertical-divider-height"
                             />
                           </div>
                           <div>
