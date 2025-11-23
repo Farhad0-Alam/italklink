@@ -866,12 +866,12 @@ export default function EmailSignature() {
       .join("");
 
     return `
-<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 500px; margin: 0; padding: 0; table-layout: fixed; width: 100%;">
+<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; margin: 0; padding: 0; table-layout: fixed; width: 100%; border-collapse: collapse;">
   <tr>
-    <td style="background-color: #ffffff; padding: 25px;">
+    <td style="background-color: #ffffff; padding: 0;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
         <tr>
-          <td style="width: 30%; vertical-align: ${companyLogo ? 'top' : 'middle'}; padding-right: 15px;">
+          <td style="width: 30%; vertical-align: ${companyLogo ? 'top' : 'middle'}; padding: 0;">
             ${
               profilePhoto || companyLogo
                 ? `
@@ -900,7 +900,7 @@ export default function EmailSignature() {
             }
           </td>
           <td style="width: 70%; vertical-align: top; padding: 0;">
-            <div style="min-height: ${verticalDividerHeight}px; padding-left: 15px; ${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor};` : ''}">
+            <div style="min-height: ${verticalDividerHeight}px; padding: 0 10px; ${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor};` : ''} padding-left: ${showVerticalDivider ? '10px' : '10px'};">
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
                 <tr>
@@ -1348,25 +1348,47 @@ export default function EmailSignature() {
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
       background-color: #f5f5f5;
-      padding: 20px;
+      padding: 0;
+      margin: 0;
     }
     .signature-container {
       background-color: white;
-      padding: 20px;
-      margin: 0 auto;
+      padding: 0;
+      margin: 0;
+      width: 100%;
     }
     table {
       border-collapse: collapse;
       border-spacing: 0;
+      width: 100%;
+      max-width: 100%;
+    }
+    td {
+      word-break: break-word;
+      word-wrap: break-word;
     }
     img {
       max-width: 100%;
       height: auto;
       display: block;
+      border: none;
     }
     a {
       color: inherit;
       text-decoration: none;
+    }
+    /* Mobile responsive */
+    @media screen and (max-width: 600px) {
+      table {
+        width: 100% !important;
+      }
+      td {
+        width: 100% !important;
+        display: block !important;
+      }
+      .signature-container {
+        padding: 0 !important;
+      }
     }
   </style>
 </head>
