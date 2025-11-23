@@ -811,7 +811,7 @@ export default function EmailSignature() {
     <td style="background-color: #ffffff; padding: 25px;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
         <tr>
-          <td style="width: 30%; vertical-align: top; padding-right: 15px;">
+          <td style="width: 30%; vertical-align: ${companyLogo ? 'top' : 'middle'}; padding-right: 15px;">
             ${
               profilePhoto || companyLogo
                 ? `
