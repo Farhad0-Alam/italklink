@@ -398,6 +398,7 @@ export default function EmailSignature() {
     socialLinksSection: true,
     socialIconStyle: true,
     optionalFeaturesSection: true,
+    ctaButtonSection: true,
     ctaLogoSection: true,
   });
   const [signatureData, setSignatureData] = useState<SignatureData>({
@@ -3126,20 +3127,39 @@ export default function EmailSignature() {
                   </div>
 
                   {signatureData.showCTA && (
-                    <div className="pl-6 space-y-3">
-                      <div className="grid grid-cols-2 gap-4">
-                        <Input
-                          value={signatureData.ctaText}
-                          onChange={(e) => updateField("ctaText", e.target.value)}
-                          placeholder="Button Text"
-                          data-testid="input-cta-text"
-                        />
-                        <Input
-                          value={signatureData.ctaUrl}
-                          onChange={(e) => updateField("ctaUrl", e.target.value)}
-                          placeholder="Button URL"
-                          data-testid="input-cta-url"
-                        />
+                    <>
+                      <div className="border-t pt-3 mt-3">
+                        <div
+                          className="flex items-center justify-between cursor-pointer"
+                          onClick={() => toggleSection("ctaButtonSection")}
+                          data-testid="toggle-cta-button-section"
+                        >
+                          <Label className="text-xs font-semibold">Call-to-Action Button</Label>
+                          {collapsedSections.ctaButtonSection ? (
+                            <ChevronDown className="w-4 h-4" />
+                          ) : (
+                            <ChevronUp className="w-4 h-4" />
+                          )}
+                        </div>
+
+                        {!collapsedSections.ctaButtonSection && (
+                          <div className="space-y-2 mt-2">
+                            <div className="grid grid-cols-2 gap-4">
+                              <Input
+                                value={signatureData.ctaText}
+                                onChange={(e) => updateField("ctaText", e.target.value)}
+                                placeholder="Button Text"
+                                data-testid="input-cta-text"
+                              />
+                              <Input
+                                value={signatureData.ctaUrl}
+                                onChange={(e) => updateField("ctaUrl", e.target.value)}
+                                placeholder="Button URL"
+                                data-testid="input-cta-url"
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       <div className="border-t pt-3 mt-3">
@@ -3296,9 +3316,9 @@ export default function EmailSignature() {
                         )}
                       </div>
 
-                      <div className="border-t pt-2 mt-2">
+                      <div className="border-t pt-3 mt-3">
                         <Label className="text-xs font-semibold">Section Background</Label>
-                        <div className="flex items-center justify-between mt-1">
+                        <div className="flex items-center justify-between mt-2">
                           <Label className="text-xs">Use Gradient</Label>
                           <Switch
                             checked={signatureData.ctaSectionUseGradient}
@@ -3491,7 +3511,7 @@ export default function EmailSignature() {
                           data-testid="slider-cta-section-padding"
                         />
                       </div>
-                    </div>
+                    </>
                   )}
 
                   <div className="flex items-center justify-between">
