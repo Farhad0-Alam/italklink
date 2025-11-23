@@ -517,6 +517,7 @@ export default function EmailSignature() {
     ctaButtonFontSize: 14,
     ctaButtonFontColor: "#ffffff",
     ctaButtonGroupAlignment: "right",
+    ctaButtonShape: "pill",
     showBanner: false,
     bannerText: "Get in touch today!",
     bannerBackgroundColor: "#FFFFFF",
@@ -795,6 +796,7 @@ export default function EmailSignature() {
       ctaButtonFontSize,
       ctaButtonFontColor,
       ctaButtonGroupAlignment,
+      ctaButtonShape,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
@@ -928,7 +930,7 @@ export default function EmailSignature() {
                       .filter((btn) => btn.url)
                       .map(
                         (btn) => `
-                    <a href="${btn.url}" style="background: ${ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px;">${btn.text}</a>
+                    <a href="${btn.url}" style="background: ${ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 28px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px;">${btn.text}</a>
                     `
                       )
                       .join("")}
@@ -3724,6 +3726,21 @@ export default function EmailSignature() {
                                 <option value="left">Left</option>
                                 <option value="center">Center</option>
                                 <option value="right">Right</option>
+                              </select>
+                            </div>
+
+                            {/* Button Shape */}
+                            <div className="border-t pt-3">
+                              <Label className="text-xs font-semibold mb-2 block">Button Shape</Label>
+                              <select
+                                value={signatureData.ctaButtonShape}
+                                onChange={(e) => updateField("ctaButtonShape", e.target.value)}
+                                className="w-full px-2 py-1 border rounded text-xs"
+                                data-testid="select-cta-button-shape"
+                              >
+                                <option value="square">Square</option>
+                                <option value="rounded">Rounded</option>
+                                <option value="pill">Pill (Fully Rounded)</option>
                               </select>
                             </div>
                           </div>
