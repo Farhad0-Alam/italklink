@@ -126,6 +126,10 @@ interface SignatureData {
   dividerMarginBottom: number;
   dividerWidth: number;
 
+  showVerticalDivider: boolean;
+  verticalDividerWidth: number;
+  verticalDividerColor: string;
+
   socialLinks: { platform: string; url: string; icon: string }[];
 
   showDisclaimer: boolean;
@@ -464,6 +468,9 @@ export default function EmailSignature() {
     dividerMarginTop: 5,
     dividerMarginBottom: 5,
     dividerWidth: 100,
+    showVerticalDivider: true,
+    verticalDividerWidth: 2,
+    verticalDividerColor: "#FF6A00",
     socialLinks: [
       {
         platform: "linkedin",
@@ -746,6 +753,9 @@ export default function EmailSignature() {
       dividerMarginTop,
       dividerMarginBottom,
       dividerWidth,
+      showVerticalDivider,
+      verticalDividerWidth,
+      verticalDividerColor,
       profilePhotoRightSideGap,
       showDisclaimer,
       disclaimerText,
@@ -839,7 +849,7 @@ export default function EmailSignature() {
                 : ""
             }
           </td>
-          <td style="width: 70%; vertical-align: top; padding-left: 15px; border-left: 2px solid ${dividerColor};">
+          <td style="width: 70%; vertical-align: top; padding-left: 15px; ${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor};` : ''}">
             <table cellpadding="0" cellspacing="0" border="0" width="100%">
               ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
               <tr>
@@ -2053,6 +2063,68 @@ export default function EmailSignature() {
                               className="custom-range w-full"
                               data-testid="slider-divider-margin-bottom"
                             />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Vertical Divider Style Subsection */}
+                    <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-3">
+                        <Label className="text-sm font-semibold">
+                          Vertical Divider
+                        </Label>
+                        <Switch
+                          checked={signatureData.showVerticalDivider}
+                          onCheckedChange={(checked) =>
+                            updateField("showVerticalDivider", checked)
+                          }
+                          data-testid="toggle-vertical-divider"
+                        />
+                      </div>
+                      {signatureData.showVerticalDivider && (
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-xs">
+                              Width: {signatureData.verticalDividerWidth}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="1"
+                              max="10"
+                              value={signatureData.verticalDividerWidth}
+                              onChange={(e) =>
+                                updateField(
+                                  "verticalDividerWidth",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-vertical-divider-width"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs mb-1">Color</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="color"
+                                value={signatureData.verticalDividerColor}
+                                onChange={(e) =>
+                                  updateField("verticalDividerColor", e.target.value)
+                                }
+                                className="w-16 h-9"
+                                data-testid="input-vertical-divider-color"
+                              />
+                              <Input
+                                value={signatureData.verticalDividerColor}
+                                onChange={(e) =>
+                                  updateField("verticalDividerColor", e.target.value)
+                                }
+                                placeholder="#FF6A00"
+                                className="flex-1"
+                                data-testid="input-vertical-divider-color-hex"
+                              />
+                            </div>
                           </div>
                         </div>
                       )}
