@@ -136,6 +136,10 @@ interface SignatureData {
   showBanner: boolean;
   bannerText: string;
   bannerBackgroundColor: string;
+  bannerUseGradient: boolean;
+  bannerGradientColor1: string;
+  bannerGradientColor2: string;
+  bannerGradientAngle: number;
   bannerBorderColor: string;
   bannerBorderWidth: number;
   bannerPadding: number;
@@ -479,6 +483,10 @@ export default function EmailSignature() {
     showBanner: false,
     bannerText: "Get in touch today!",
     bannerBackgroundColor: "#FFFFFF",
+    bannerUseGradient: false,
+    bannerGradientColor1: "#FF6A00",
+    bannerGradientColor2: "#FFA500",
+    bannerGradientAngle: 135,
     bannerBorderColor: "#FF6A00",
     bannerBorderWidth: 3,
     bannerPadding: 20,
@@ -639,6 +647,10 @@ export default function EmailSignature() {
       showBanner,
       bannerText,
       bannerBackgroundColor,
+      bannerUseGradient,
+      bannerGradientColor1,
+      bannerGradientColor2,
+      bannerGradientAngle,
       bannerBorderColor,
       bannerBorderWidth,
       bannerPadding,
@@ -800,7 +812,7 @@ export default function EmailSignature() {
       ? `
   <tr>
     <td style="padding: 0px ${bannerPadding}px ${bannerPadding}px ${bannerPadding}px;">
-      <div style="background-color: ${bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-size: 16px; font-weight: bold; color: #333333;">
+      <div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-size: 16px; font-weight: bold; color: #333333;">
         ${bannerText}
       </div>
     </td>
@@ -2939,29 +2951,107 @@ export default function EmailSignature() {
                         data-testid="input-banner-text"
                       />
 
-                      <div>
-                        <Label className="text-xs">Background Color</Label>
-                        <div className="flex gap-2">
-                          <input
-                            type="color"
-                            value={signatureData.bannerBackgroundColor}
-                            onChange={(e) =>
-                              updateField("bannerBackgroundColor", e.target.value)
-                            }
-                            className="w-10 h-9 rounded"
-                            data-testid="input-banner-bg-color"
-                          />
-                          <Input
-                            value={signatureData.bannerBackgroundColor}
-                            onChange={(e) =>
-                              updateField("bannerBackgroundColor", e.target.value)
-                            }
-                            placeholder="#FFFFFF"
-                            className="flex-1"
-                            data-testid="input-banner-bg-color-hex"
-                          />
-                        </div>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs">Use Gradient</Label>
+                        <Switch
+                          checked={signatureData.bannerUseGradient}
+                          onCheckedChange={(checked) =>
+                            updateField("bannerUseGradient", checked)
+                          }
+                          data-testid="switch-banner-gradient"
+                        />
                       </div>
+
+                      {!signatureData.bannerUseGradient ? (
+                        <div>
+                          <Label className="text-xs">Background Color</Label>
+                          <div className="flex gap-2">
+                            <input
+                              type="color"
+                              value={signatureData.bannerBackgroundColor}
+                              onChange={(e) =>
+                                updateField("bannerBackgroundColor", e.target.value)
+                              }
+                              className="w-10 h-9 rounded"
+                              data-testid="input-banner-bg-color"
+                            />
+                            <Input
+                              value={signatureData.bannerBackgroundColor}
+                              onChange={(e) =>
+                                updateField("bannerBackgroundColor", e.target.value)
+                              }
+                              placeholder="#FFFFFF"
+                              className="flex-1"
+                              data-testid="input-banner-bg-color-hex"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <div>
+                            <Label className="text-xs">Gradient Color 1</Label>
+                            <div className="flex gap-2">
+                              <input
+                                type="color"
+                                value={signatureData.bannerGradientColor1}
+                                onChange={(e) =>
+                                  updateField("bannerGradientColor1", e.target.value)
+                                }
+                                className="w-10 h-9 rounded"
+                                data-testid="input-banner-gradient-color1"
+                              />
+                              <Input
+                                value={signatureData.bannerGradientColor1}
+                                onChange={(e) =>
+                                  updateField("bannerGradientColor1", e.target.value)
+                                }
+                                placeholder="#FF6A00"
+                                className="flex-1"
+                                data-testid="input-banner-gradient-color1-hex"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label className="text-xs">Gradient Color 2</Label>
+                            <div className="flex gap-2">
+                              <input
+                                type="color"
+                                value={signatureData.bannerGradientColor2}
+                                onChange={(e) =>
+                                  updateField("bannerGradientColor2", e.target.value)
+                                }
+                                className="w-10 h-9 rounded"
+                                data-testid="input-banner-gradient-color2"
+                              />
+                              <Input
+                                value={signatureData.bannerGradientColor2}
+                                onChange={(e) =>
+                                  updateField("bannerGradientColor2", e.target.value)
+                                }
+                                placeholder="#FFA500"
+                                className="flex-1"
+                                data-testid="input-banner-gradient-color2-hex"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label className="text-xs">Gradient Angle ({signatureData.bannerGradientAngle}°)</Label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="360"
+                              value={signatureData.bannerGradientAngle}
+                              onChange={(e) =>
+                                updateField("bannerGradientAngle", Number(e.target.value))
+                              }
+                              className="w-full"
+                              data-testid="input-banner-gradient-angle"
+                            />
+                          </div>
+                        </div>
+                      )}
 
                       <div className="grid grid-cols-2 gap-2">
                         <div>
