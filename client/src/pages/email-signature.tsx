@@ -2853,7 +2853,7 @@ export default function EmailSignature() {
               </CardContent>
             </Card>
 
-            {/* Optional Features */}
+            {/* Banner & CTA */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader
                 className="cursor-pointer py-2 px-3"
@@ -2862,7 +2862,7 @@ export default function EmailSignature() {
               >
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
-                    Optional Features
+                    Banner & CTA
                   </CardTitle>
                   {collapsedSections.optionalFeaturesSection ? (
                     <ChevronDown className="w-4 h-4" />
