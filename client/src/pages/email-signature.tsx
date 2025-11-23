@@ -1053,7 +1053,7 @@ export default function EmailSignature() {
       if (profilePhotoShape === "square") borderRadius = "0%";
       if (profilePhotoShape === "rounded") borderRadius = "8px";
       if (profilePhotoShape === "hexagon") {
-        borderRadius = "0%";
+        borderRadius = "15%";
         clipPath = "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)";
       }
       if (profilePhotoShape === "diamond") {
