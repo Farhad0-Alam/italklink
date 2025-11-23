@@ -3113,7 +3113,7 @@ export default function EmailSignature() {
               {!collapsedSections.optionalFeaturesSection && (
                 <CardContent className="p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="showCTA">Call-to-Action Button</Label>
+                    <Label htmlFor="showCTA">Call-to-Action</Label>
                     <Switch
                       id="showCTA"
                       checked={signatureData.showCTA}
