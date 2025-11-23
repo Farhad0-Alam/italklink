@@ -875,21 +875,20 @@ export default function EmailSignature() {
             ? `
         <tr>
           <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 20px;">
-            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: auto;">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
               <tr>
-                ${
-                  ctaButtonLogo
-                    ? `
-                <td style="width: ${ctaButtonLogoWidth}px; vertical-align: middle; text-align: center; padding-right: 12px;">
+                <td style="width: 50%; vertical-align: middle; text-align: center;">
+                  ${
+                    ctaButtonLogo
+                      ? `
                   <div style="width: ${ctaButtonLogoWidth}px; height: ${ctaButtonLogoHeight}px; border-radius: ${ctaButtonLogoShape === 'circle' ? '50%' : ctaButtonLogoShape === 'rounded' ? '8px' : '0'}; overflow: hidden; border: ${ctaButtonLogoBorderWidth}px solid ${ctaButtonLogoBorderColor}; display: inline-block;">
                     <img src="${ctaButtonLogo}" alt="" style="width: 100%; height: 100%; display: block; object-fit: cover;">
                   </div>
+                  `
+                      : ""
+                  }
                 </td>
-                `
-                    : ""
-                }
-                <td style="width: 100%; vertical-align: middle;"></td>
-                <td style="text-align: right; vertical-align: middle; padding-left: 12px;">
+                <td style="width: 50%; vertical-align: middle; text-align: center;">
                   ${
                     showCTA && ctaUrl
                       ? `
