@@ -142,14 +142,13 @@ interface SignatureData {
   bannerGradientAngle: number;
   bannerBorderColor: string;
   bannerBorderWidth: number;
+  bannerPadding: number;
   bannerTopSpacing: number;
   bannerFont: string;
   bannerFontSize: number;
   bannerFontColor: string;
-  bannerSpacingLeft: number;
-  bannerSpacingRight: number;
-  bannerSpacingUp: number;
-  bannerSpacingDown: number;
+  bannerWidth: number;
+  bannerHeight: number;
 }
 
 const signatureFonts = [
@@ -496,14 +495,13 @@ export default function EmailSignature() {
     bannerGradientAngle: 135,
     bannerBorderColor: "#FF6A00",
     bannerBorderWidth: 3,
+    bannerPadding: 20,
     bannerTopSpacing: 0,
     bannerFont: "Arial",
     bannerFontSize: 16,
     bannerFontColor: "#333333",
-    bannerSpacingLeft: 20,
-    bannerSpacingRight: 20,
-    bannerSpacingUp: 15,
-    bannerSpacingDown: 15,
+    bannerWidth: 100,
+    bannerHeight: "auto",
   });
 
   useEffect(() => {
@@ -667,14 +665,13 @@ export default function EmailSignature() {
       bannerGradientAngle,
       bannerBorderColor,
       bannerBorderWidth,
+      bannerPadding,
       bannerTopSpacing,
       bannerFont,
       bannerFontSize,
       bannerFontColor,
-      bannerSpacingLeft,
-      bannerSpacingRight,
-      bannerSpacingUp,
-      bannerSpacingDown,
+      bannerWidth,
+      bannerHeight,
       customFields,
       signatureFont,
       signatureSize,
@@ -842,8 +839,8 @@ export default function EmailSignature() {
     showBanner
       ? `
   <tr>
-    <td style="padding: ${bannerTopSpacing}px 0 0 0;">
-      <div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerSpacingUp}px ${bannerSpacingRight}px ${bannerSpacingDown}px ${bannerSpacingLeft}px; text-align: center; font-family: ${bannerFont}, sans-serif; font-size: ${bannerFontSize}px; font-weight: bold; color: ${bannerFontColor};">
+    <td style="padding: ${bannerTopSpacing}px ${bannerPadding}px ${bannerPadding}px ${bannerPadding}px;">
+      <div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-family: ${bannerFont}, sans-serif; font-size: ${bannerFontSize}px; font-weight: bold; color: ${bannerFontColor}; width: ${bannerWidth}%; height: ${bannerHeight === "auto" ? "auto" : bannerHeight + "px"};">
         ${bannerText}
       </div>
     </td>
@@ -3124,19 +3121,36 @@ export default function EmailSignature() {
                         </div>
                       </div>
 
-                      <div>
-                        <Label className="text-xs">Top Spacing ({signatureData.bannerTopSpacing}px)</Label>
-                        <input
-                          type="range"
-                          min="0"
-                          max="40"
-                          value={signatureData.bannerTopSpacing}
-                          onChange={(e) =>
-                            updateField("bannerTopSpacing", Number(e.target.value))
-                          }
-                          className="w-full"
-                          data-testid="input-banner-top-spacing"
-                        />
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-xs">Padding ({signatureData.bannerPadding}px)</Label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="40"
+                            value={signatureData.bannerPadding}
+                            onChange={(e) =>
+                              updateField("bannerPadding", Number(e.target.value))
+                            }
+                            className="w-full"
+                            data-testid="input-banner-padding"
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Top Spacing ({signatureData.bannerTopSpacing}px)</Label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="40"
+                            value={signatureData.bannerTopSpacing}
+                            onChange={(e) =>
+                              updateField("bannerTopSpacing", Number(e.target.value))
+                            }
+                            className="w-full"
+                            data-testid="input-banner-top-spacing"
+                          />
+                        </div>
                       </div>
 
                       <div>
@@ -3203,64 +3217,32 @@ export default function EmailSignature() {
 
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <Label className="text-xs">Spacing Left ({signatureData.bannerSpacingLeft}px)</Label>
+                          <Label className="text-xs">Width ({signatureData.bannerWidth}%)</Label>
                           <input
                             type="range"
-                            min="0"
-                            max="60"
-                            value={signatureData.bannerSpacingLeft}
+                            min="50"
+                            max="100"
+                            value={signatureData.bannerWidth}
                             onChange={(e) =>
-                              updateField("bannerSpacingLeft", Number(e.target.value))
+                              updateField("bannerWidth", Number(e.target.value))
                             }
                             className="w-full"
-                            data-testid="input-banner-spacing-left"
+                            data-testid="input-banner-width"
                           />
                         </div>
 
                         <div>
-                          <Label className="text-xs">Spacing Right ({signatureData.bannerSpacingRight}px)</Label>
+                          <Label className="text-xs">Height ({signatureData.bannerHeight === "auto" ? "auto" : signatureData.bannerHeight + "px"})</Label>
                           <input
                             type="range"
-                            min="0"
-                            max="60"
-                            value={signatureData.bannerSpacingRight}
+                            min="30"
+                            max="120"
+                            value={signatureData.bannerHeight === "auto" ? 30 : signatureData.bannerHeight}
                             onChange={(e) =>
-                              updateField("bannerSpacingRight", Number(e.target.value))
+                              updateField("bannerHeight", Number(e.target.value))
                             }
                             className="w-full"
-                            data-testid="input-banner-spacing-right"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <Label className="text-xs">Spacing Up ({signatureData.bannerSpacingUp}px)</Label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="60"
-                            value={signatureData.bannerSpacingUp}
-                            onChange={(e) =>
-                              updateField("bannerSpacingUp", Number(e.target.value))
-                            }
-                            className="w-full"
-                            data-testid="input-banner-spacing-up"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Spacing Down ({signatureData.bannerSpacingDown}px)</Label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="60"
-                            value={signatureData.bannerSpacingDown}
-                            onChange={(e) =>
-                              updateField("bannerSpacingDown", Number(e.target.value))
-                            }
-                            className="w-full"
-                            data-testid="input-banner-spacing-down"
+                            data-testid="input-banner-height"
                           />
                         </div>
                       </div>
