@@ -955,9 +955,12 @@ export default function EmailSignature() {
                     ${ctaButtons
                       .filter((btn) => btn.url)
                       .map(
-                        (btn) => `
-                    <a href="${btn.url}" style="background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 11px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; box-shadow: ${ctaButtonShadowOffsetX}px ${ctaButtonShadowOffsetY}px ${ctaButtonShadowBlur}px rgba(${parseInt(ctaButtonShadowColor.slice(1, 3), 16)}, ${parseInt(ctaButtonShadowColor.slice(3, 5), 16)}, ${parseInt(ctaButtonShadowColor.slice(5, 7), 16)}, ${ctaButtonShadowOpacity}); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px; width: ${ctaButtonWidth}px; height: ${ctaButtonHeight}px; text-align: center;">${btn.text}</a>
-                    `
+                        (btn) => {
+                          const lineHeightValue = Math.max(ctaButtonHeight - 24, 1);
+                          return `
+                    <a href="${btn.url}" style="display: inline-block; vertical-align: middle; background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 11px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; box-shadow: ${ctaButtonShadowOffsetX}px ${ctaButtonShadowOffsetY}px ${ctaButtonShadowBlur}px rgba(${parseInt(ctaButtonShadowColor.slice(1, 3), 16)}, ${parseInt(ctaButtonShadowColor.slice(3, 5), 16)}, ${parseInt(ctaButtonShadowColor.slice(5, 7), 16)}, ${ctaButtonShadowOpacity}); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px; width: ${ctaButtonWidth}px; height: ${ctaButtonHeight}px; line-height: ${lineHeightValue}px; text-align: center; white-space: nowrap; cursor: pointer;">${btn.text}</a>
+                    `;
+                        }
                       )
                       .join("")}
                   </div>
