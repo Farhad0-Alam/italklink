@@ -1304,8 +1304,77 @@ export default function EmailSignature() {
   };
 
   const downloadHTML = () => {
-    const html = generateSignatureHTML();
-    const blob = new Blob([html], { type: "text/html" });
+    const signatureHTML = generateSignatureHTML();
+    
+    // Get all unique fonts used in the signature
+    const usedFonts = new Set<string>();
+    const {
+      headerFont,
+      signatureFont,
+      contactFont,
+      bannerFont,
+      disclaimerFont,
+      ctaButtonFont,
+    } = signatureData;
+    
+    [headerFont, signatureFont, contactFont, bannerFont, disclaimerFont, ctaButtonFont].forEach(font => {
+      if (font && font.trim()) usedFonts.add(font);
+    });
+    
+    // Build Google Fonts import URL
+    const fontsList = Array.from(usedFonts)
+      .map(f => f.replace(/ /g, "+"))
+      .join("&family=");
+    const googleFontsLink = fontsList ? `https://fonts.googleapis.com/css2?family=${fontsList}&display=swap` : '';
+    
+    // Create complete HTML document
+    const completeHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Email Signature</title>
+  ${googleFontsLink ? `<link href="${googleFontsLink}" rel="stylesheet">` : ''}
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+    .signature-container {
+      background-color: white;
+      padding: 20px;
+      margin: 0 auto;
+    }
+    table {
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="signature-container">
+    ${signatureHTML}
+  </div>
+</body>
+</html>`;
+    
+    const blob = new Blob([completeHTML], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
