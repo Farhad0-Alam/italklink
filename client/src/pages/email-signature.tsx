@@ -774,7 +774,7 @@ export default function EmailSignature() {
       .join("");
 
     return `
-<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 700px; margin: 0; padding: 0;">
+<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 500px; margin: 0; padding: 0; table-layout: fixed; width: 100%;">
   <tr>
     <td style="background-color: #ffffff; padding: 25px;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -881,7 +881,7 @@ export default function EmailSignature() {
     showDisclaimer
       ? `
   <tr>
-    <td style="padding: 15px 25px; font-family: ${disclaimerFont}, sans-serif; font-size: ${disclaimerFontSize}px; color: ${disclaimerFontColor}; text-align: ${disclaimerTextAlign}; font-weight: ${disclaimerBold ? "bold" : "normal"}; font-style: ${disclaimerItalic ? "italic" : "normal"}; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 650px;">
+    <td style="padding: 15px 25px; font-family: ${disclaimerFont}, sans-serif; font-size: ${disclaimerFontSize}px; color: ${disclaimerFontColor}; text-align: ${disclaimerTextAlign}; font-weight: ${disclaimerBold ? "bold" : "normal"}; font-style: ${disclaimerItalic ? "italic" : "normal"}; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">
       ${disclaimerText}
     </td>
   </tr>
