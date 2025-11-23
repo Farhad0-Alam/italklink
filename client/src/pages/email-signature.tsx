@@ -522,6 +522,14 @@ export default function EmailSignature() {
     ctaButtonLogoShape: "square",
     ctaButtonLogoBorderWidth: 0,
     ctaButtonLogoBorderColor: "#CCCCCC",
+    ctaSectionBackgroundColor: "#FFFFFF",
+    ctaSectionBorderColor: "#FF6A00",
+    ctaSectionBorderWidth: 0,
+    ctaSectionPadding: 20,
+    ctaSectionUseGradient: false,
+    ctaSectionGradientColor1: "#FF6A00",
+    ctaSectionGradientColor2: "#FFA500",
+    ctaSectionGradientAngle: 134,
   });
 
   useEffect(() => {
@@ -747,6 +755,14 @@ export default function EmailSignature() {
       ctaButtonLogoShape,
       ctaButtonLogoBorderWidth,
       ctaButtonLogoBorderColor,
+      ctaSectionBackgroundColor,
+      ctaSectionBorderColor,
+      ctaSectionBorderWidth,
+      ctaSectionPadding,
+      ctaSectionUseGradient,
+      ctaSectionGradientColor1,
+      ctaSectionGradientColor2,
+      ctaSectionGradientAngle,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
@@ -858,7 +874,7 @@ export default function EmailSignature() {
           showCTA
             ? `
         <tr>
-          <td colspan="2" style="padding-top: 25px; margin-top: 20px;">
+          <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 20px;">
             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: auto;">
               <tr>
                 ${
@@ -3166,6 +3182,202 @@ export default function EmailSignature() {
                           </div>
                         </div>
                       )}
+
+                      <div className="border-t pt-2 mt-2">
+                        <Label className="text-xs font-semibold">Section Background</Label>
+                        <div className="flex items-center justify-between mt-1">
+                          <Label className="text-xs">Use Gradient</Label>
+                          <Switch
+                            checked={signatureData.ctaSectionUseGradient}
+                            onCheckedChange={(checked) =>
+                              updateField("ctaSectionUseGradient", checked)
+                            }
+                            data-testid="switch-cta-section-gradient"
+                          />
+                        </div>
+                      </div>
+
+                      {!signatureData.ctaSectionUseGradient ? (
+                        <div>
+                          <Label className="text-xs">Background Color</Label>
+                          <div className="flex gap-2">
+                            <input
+                              type="color"
+                              value={signatureData.ctaSectionBackgroundColor}
+                              onChange={(e) =>
+                                updateField(
+                                  "ctaSectionBackgroundColor",
+                                  e.target.value,
+                                )
+                              }
+                              className="w-10 h-9 rounded"
+                              data-testid="input-cta-section-bg-color"
+                            />
+                            <Input
+                              value={signatureData.ctaSectionBackgroundColor}
+                              onChange={(e) =>
+                                updateField(
+                                  "ctaSectionBackgroundColor",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="#FFFFFF"
+                              className="flex-1"
+                              data-testid="input-cta-section-bg-color-hex"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <div>
+                            <Label className="text-xs">Gradient Color 1</Label>
+                            <div className="flex gap-2">
+                              <input
+                                type="color"
+                                value={signatureData.ctaSectionGradientColor1}
+                                onChange={(e) =>
+                                  updateField(
+                                    "ctaSectionGradientColor1",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-10 h-9 rounded"
+                                data-testid="input-cta-section-gradient-color-1"
+                              />
+                              <Input
+                                value={signatureData.ctaSectionGradientColor1}
+                                onChange={(e) =>
+                                  updateField(
+                                    "ctaSectionGradientColor1",
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder="#FF6A00"
+                                className="flex-1"
+                                data-testid="input-cta-section-gradient-color-1-hex"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label className="text-xs">Gradient Color 2</Label>
+                            <div className="flex gap-2">
+                              <input
+                                type="color"
+                                value={signatureData.ctaSectionGradientColor2}
+                                onChange={(e) =>
+                                  updateField(
+                                    "ctaSectionGradientColor2",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-10 h-9 rounded"
+                                data-testid="input-cta-section-gradient-color-2"
+                              />
+                              <Input
+                                value={signatureData.ctaSectionGradientColor2}
+                                onChange={(e) =>
+                                  updateField(
+                                    "ctaSectionGradientColor2",
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder="#FFA500"
+                                className="flex-1"
+                                data-testid="input-cta-section-gradient-color-2-hex"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label className="text-xs">
+                              Gradient Angle: {signatureData.ctaSectionGradientAngle}°
+                            </Label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="360"
+                              value={signatureData.ctaSectionGradientAngle}
+                              onChange={(e) =>
+                                updateField(
+                                  "ctaSectionGradientAngle",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-cta-section-gradient-angle"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div>
+                        <Label className="text-xs">Border Width: {signatureData.ctaSectionBorderWidth}px</Label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="10"
+                          value={signatureData.ctaSectionBorderWidth}
+                          onChange={(e) =>
+                            updateField(
+                              "ctaSectionBorderWidth",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="custom-range w-full"
+                          data-testid="slider-cta-section-border-width"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">Border Color</Label>
+                        <div className="flex gap-2">
+                          <input
+                            type="color"
+                            value={signatureData.ctaSectionBorderColor}
+                            onChange={(e) =>
+                              updateField(
+                                "ctaSectionBorderColor",
+                                e.target.value,
+                              )
+                            }
+                            className="w-10 h-9 rounded"
+                            data-testid="input-cta-section-border-color"
+                          />
+                          <Input
+                            value={signatureData.ctaSectionBorderColor}
+                            onChange={(e) =>
+                              updateField(
+                                "ctaSectionBorderColor",
+                                e.target.value,
+                              )
+                            }
+                            placeholder="#FF6A00"
+                            className="flex-1"
+                            data-testid="input-cta-section-border-color-hex"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">
+                          Padding: {signatureData.ctaSectionPadding}px
+                        </Label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="40"
+                          value={signatureData.ctaSectionPadding}
+                          onChange={(e) =>
+                            updateField(
+                              "ctaSectionPadding",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="custom-range w-full"
+                          data-testid="slider-cta-section-padding"
+                        />
+                      </div>
                     </div>
                   )}
 
