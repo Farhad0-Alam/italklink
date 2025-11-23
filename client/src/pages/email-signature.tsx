@@ -483,7 +483,7 @@ export default function EmailSignature() {
     showBanner: false,
     bannerText: "Get in touch today!",
     bannerBackgroundColor: "#FFFFFF",
-    bannerUseGradient: false,
+    bannerUseGradient: true,
     bannerGradientColor1: "#FF6A00",
     bannerGradientColor2: "#FFA500",
     bannerGradientAngle: 135,
