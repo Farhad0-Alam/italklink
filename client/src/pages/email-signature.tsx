@@ -771,7 +771,7 @@ export default function EmailSignature() {
           companyLogo || showCTA
             ? `
         <tr>
-          <td colspan="2" style="padding-top: 25px; border-top: 2px solid ${primaryColor}; margin-top: 20px;">
+          <td colspan="2" style="padding-top: 25px; margin-top: 20px;">
             <table cellpadding="0" cellspacing="0" border="0" width="100%">
               <tr>
                 ${companyLogo ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}"><img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}"></div></td>` : ""}
