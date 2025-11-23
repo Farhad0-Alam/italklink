@@ -472,7 +472,7 @@ export default function EmailSignature() {
     showVerticalDivider: true,
     verticalDividerWidth: 2,
     verticalDividerColor: "#FF6A00",
-    verticalDividerHeight: 50,
+    verticalDividerHeight: 100,
     socialLinks: [
       {
         platform: "linkedin",
@@ -853,7 +853,7 @@ export default function EmailSignature() {
             }
           </td>
           <td style="width: 70%; vertical-align: top; padding: 0;">
-            <div style="height: ${verticalDividerHeight}px; padding-left: 15px; ${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor};` : ''}">
+            <div style="min-height: ${verticalDividerHeight}px; padding-left: 15px; ${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor};` : ''}">
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
                 <tr>
@@ -2114,7 +2114,7 @@ export default function EmailSignature() {
                             </Label>
                             <input
                               type="range"
-                              min="20"
+                              min="50"
                               max="300"
                               value={signatureData.verticalDividerHeight}
                               onChange={(e) =>
