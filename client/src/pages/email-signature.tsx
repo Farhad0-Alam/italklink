@@ -806,6 +806,7 @@ export default function EmailSignature() {
       ctaButtonFontColor,
       ctaButtonGroupAlignment,
       ctaButtonShape,
+      ctaButtonWidth,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
