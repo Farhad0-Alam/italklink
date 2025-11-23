@@ -524,6 +524,11 @@ export default function EmailSignature() {
     ctaButtonShape: "pill",
     ctaButtonWidth: 180,
     ctaButtonHeight: 48,
+    ctaButtonShadowColor: "#000000",
+    ctaButtonShadowOpacity: 0.2,
+    ctaButtonShadowBlur: 10,
+    ctaButtonShadowOffsetX: 0,
+    ctaButtonShadowOffsetY: 4,
     showBanner: false,
     bannerText: "Get in touch today!",
     bannerBackgroundColor: "#FFFFFF",
@@ -809,6 +814,11 @@ export default function EmailSignature() {
       ctaButtonShape,
       ctaButtonWidth,
       ctaButtonHeight,
+      ctaButtonShadowColor,
+      ctaButtonShadowOpacity,
+      ctaButtonShadowBlur,
+      ctaButtonShadowOffsetX,
+      ctaButtonShadowOffsetY,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
@@ -942,7 +952,7 @@ export default function EmailSignature() {
                       .filter((btn) => btn.url)
                       .map(
                         (btn) => `
-                    <a href="${btn.url}" style="background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 11px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px; width: ${ctaButtonWidth}px; height: ${ctaButtonHeight}px; text-align: center;">${btn.text}</a>
+                    <a href="${btn.url}" style="background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 11px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; box-shadow: ${ctaButtonShadowOffsetX}px ${ctaButtonShadowOffsetY}px ${ctaButtonShadowBlur}px rgba(${parseInt(ctaButtonShadowColor.slice(1, 3), 16)}, ${parseInt(ctaButtonShadowColor.slice(3, 5), 16)}, ${parseInt(ctaButtonShadowColor.slice(5, 7), 16)}, ${ctaButtonShadowOpacity}); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px; width: ${ctaButtonWidth}px; height: ${ctaButtonHeight}px; text-align: center;">${btn.text}</a>
                     `
                       )
                       .join("")}
@@ -3860,6 +3870,93 @@ export default function EmailSignature() {
                                 <option value="rounded">Rounded</option>
                                 <option value="pill">Pill (Fully Rounded)</option>
                               </select>
+                            </div>
+
+                            {/* Button Shadow */}
+                            <div className="border-t pt-3">
+                              <Label className="text-xs font-semibold mb-2 block">Button Shadow</Label>
+                              <div className="space-y-2">
+                                <div>
+                                  <Label className="text-xs">Shadow Color</Label>
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="color"
+                                      value={signatureData.ctaButtonShadowColor}
+                                      onChange={(e) =>
+                                        updateField("ctaButtonShadowColor", e.target.value)
+                                      }
+                                      className="w-10 h-9 rounded"
+                                      data-testid="input-cta-shadow-color"
+                                    />
+                                    <Input
+                                      value={signatureData.ctaButtonShadowColor}
+                                      onChange={(e) =>
+                                        updateField("ctaButtonShadowColor", e.target.value)
+                                      }
+                                      placeholder="#000000"
+                                      className="flex-1"
+                                      data-testid="input-cta-shadow-color-hex"
+                                    />
+                                  </div>
+                                </div>
+                                <div>
+                                  <Label className="text-xs">Shadow Opacity: {(signatureData.ctaButtonShadowOpacity * 100).toFixed(0)}%</Label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="1"
+                                    step="0.05"
+                                    value={signatureData.ctaButtonShadowOpacity}
+                                    onChange={(e) =>
+                                      updateField("ctaButtonShadowOpacity", parseFloat(e.target.value))
+                                    }
+                                    className="custom-range w-full"
+                                    data-testid="slider-cta-shadow-opacity"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs">Shadow Blur: {signatureData.ctaButtonShadowBlur}px</Label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="30"
+                                    value={signatureData.ctaButtonShadowBlur}
+                                    onChange={(e) =>
+                                      updateField("ctaButtonShadowBlur", parseInt(e.target.value))
+                                    }
+                                    className="custom-range w-full"
+                                    data-testid="slider-cta-shadow-blur"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs">Shadow X Offset: {signatureData.ctaButtonShadowOffsetX}px</Label>
+                                  <input
+                                    type="range"
+                                    min="-10"
+                                    max="10"
+                                    value={signatureData.ctaButtonShadowOffsetX}
+                                    onChange={(e) =>
+                                      updateField("ctaButtonShadowOffsetX", parseInt(e.target.value))
+                                    }
+                                    className="custom-range w-full"
+                                    data-testid="slider-cta-shadow-offset-x"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs">Shadow Y Offset: {signatureData.ctaButtonShadowOffsetY}px</Label>
+                                  <input
+                                    type="range"
+                                    min="-10"
+                                    max="10"
+                                    value={signatureData.ctaButtonShadowOffsetY}
+                                    onChange={(e) =>
+                                      updateField("ctaButtonShadowOffsetY", parseInt(e.target.value))
+                                    }
+                                    className="custom-range w-full"
+                                    data-testid="slider-cta-shadow-offset-y"
+                                  />
+                                </div>
+                              </div>
                             </div>
                           </div>
                         )}
