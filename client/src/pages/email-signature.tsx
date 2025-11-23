@@ -729,6 +729,8 @@ export default function EmailSignature() {
       dividerMarginBottom,
       dividerWidth,
       profilePhotoRightSideGap,
+      showDisclaimer,
+      disclaimerText,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
