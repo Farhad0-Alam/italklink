@@ -741,6 +741,12 @@ export default function EmailSignature() {
       profilePhotoRightSideGap,
       showDisclaimer,
       disclaimerText,
+      ctaButtonLogo,
+      ctaButtonLogoWidth,
+      ctaButtonLogoHeight,
+      ctaButtonLogoShape,
+      ctaButtonLogoBorderWidth,
+      ctaButtonLogoBorderColor,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
