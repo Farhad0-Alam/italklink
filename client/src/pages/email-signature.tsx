@@ -149,6 +149,7 @@ interface SignatureData {
   bannerTextSize: number;
   bannerTextHeight: number;
   bannerTextAlign: "left" | "center" | "right";
+  bannerUrl: string;
 }
 
 const signatureFonts = [
@@ -502,6 +503,7 @@ export default function EmailSignature() {
     bannerTextSize: 18,
     bannerTextHeight: 1.5,
     bannerTextAlign: "center",
+    bannerUrl: "",
   });
 
   useEffect(() => {
@@ -672,6 +674,7 @@ export default function EmailSignature() {
       bannerTextSize,
       bannerTextHeight,
       bannerTextAlign,
+      bannerUrl,
       customFields,
       signatureFont,
       signatureSize,
@@ -840,9 +843,15 @@ export default function EmailSignature() {
       ? `
   <tr>
     <td style="padding: ${bannerTopSpacing}px ${bannerPadding}px ${bannerPadding}px ${bannerPadding}px;">
-      <div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: ${bannerTextAlign}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block;">
+      ${
+        bannerUrl
+          ? `<a href="${bannerUrl}" style="text-decoration: none; display: block;"><div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: ${bannerTextAlign}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block;">
         ${bannerText}
-      </div>
+      </div></a>`
+          : `<div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: ${bannerTextAlign}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block;">
+        ${bannerText}
+      </div>`
+      }
     </td>
   </tr>
   `
@@ -2977,6 +2986,15 @@ export default function EmailSignature() {
                         }
                         placeholder="Banner Text"
                         data-testid="input-banner-text"
+                      />
+
+                      <Input
+                        value={signatureData.bannerUrl}
+                        onChange={(e) =>
+                          updateField("bannerUrl", e.target.value)
+                        }
+                        placeholder="Banner URL (optional)"
+                        data-testid="input-banner-url"
                       />
 
                       <div className="flex items-center justify-between">
