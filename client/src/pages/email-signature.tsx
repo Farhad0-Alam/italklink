@@ -523,6 +523,7 @@ export default function EmailSignature() {
     ctaButtonGroupAlignment: "right",
     ctaButtonShape: "pill",
     ctaButtonWidth: 180,
+    ctaButtonHeight: 48,
     showBanner: false,
     bannerText: "Get in touch today!",
     bannerBackgroundColor: "#FFFFFF",
@@ -807,6 +808,7 @@ export default function EmailSignature() {
       ctaButtonGroupAlignment,
       ctaButtonShape,
       ctaButtonWidth,
+      ctaButtonHeight,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
@@ -940,7 +942,7 @@ export default function EmailSignature() {
                       .filter((btn) => btn.url)
                       .map(
                         (btn) => `
-                    <a href="${btn.url}" style="background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 28px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px; min-width: ${ctaButtonWidth}px; text-align: center;">${btn.text}</a>
+                    <a href="${btn.url}" style="background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 28px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px; min-width: ${ctaButtonWidth}px; min-height: ${ctaButtonHeight}px; display: inline-flex; align-items: center; justify-content: center; text-align: center;">${btn.text}</a>
                     `
                       )
                       .join("")}
@@ -3752,6 +3754,20 @@ export default function EmailSignature() {
                                     }
                                     className="custom-range w-full"
                                     data-testid="slider-cta-button-width"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs">Button Height: {signatureData.ctaButtonHeight}px</Label>
+                                  <input
+                                    type="range"
+                                    min="30"
+                                    max="80"
+                                    value={signatureData.ctaButtonHeight}
+                                    onChange={(e) =>
+                                      updateField("ctaButtonHeight", parseInt(e.target.value))
+                                    }
+                                    className="custom-range w-full"
+                                    data-testid="slider-cta-button-height"
                                   />
                                 </div>
                               </div>
