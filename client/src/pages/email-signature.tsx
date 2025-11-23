@@ -147,8 +147,8 @@ interface SignatureData {
   bannerFont: string;
   bannerFontSize: number;
   bannerFontColor: string;
-  bannerWidth: number;
-  bannerHeight: number;
+  bannerTextSize: number;
+  bannerTextHeight: number;
 }
 
 const signatureFonts = [
@@ -500,8 +500,8 @@ export default function EmailSignature() {
     bannerFont: "Arial",
     bannerFontSize: 16,
     bannerFontColor: "#333333",
-    bannerWidth: 100,
-    bannerHeight: "auto",
+    bannerTextSize: 18,
+    bannerTextHeight: 1.5,
   });
 
   useEffect(() => {
@@ -670,8 +670,8 @@ export default function EmailSignature() {
       bannerFont,
       bannerFontSize,
       bannerFontColor,
-      bannerWidth,
-      bannerHeight,
+      bannerTextSize,
+      bannerTextHeight,
       customFields,
       signatureFont,
       signatureSize,
@@ -840,7 +840,7 @@ export default function EmailSignature() {
       ? `
   <tr>
     <td style="padding: ${bannerTopSpacing}px ${bannerPadding}px ${bannerPadding}px ${bannerPadding}px;">
-      <div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-family: ${bannerFont}, sans-serif; font-size: ${bannerFontSize}px; font-weight: bold; color: ${bannerFontColor}; width: ${bannerWidth}%; height: ${bannerHeight === "auto" ? "auto" : bannerHeight + "px"}; margin: 0; display: block;">
+      <div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block;">
         ${bannerText}
       </div>
     </td>
@@ -3217,32 +3217,33 @@ export default function EmailSignature() {
 
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <Label className="text-xs">Width ({signatureData.bannerWidth}%)</Label>
+                          <Label className="text-xs">Text Size ({signatureData.bannerTextSize}px)</Label>
                           <input
                             type="range"
-                            min="50"
-                            max="100"
-                            value={signatureData.bannerWidth}
+                            min="12"
+                            max="48"
+                            value={signatureData.bannerTextSize}
                             onChange={(e) =>
-                              updateField("bannerWidth", Number(e.target.value))
+                              updateField("bannerTextSize", Number(e.target.value))
                             }
                             className="w-full"
-                            data-testid="input-banner-width"
+                            data-testid="input-banner-text-size"
                           />
                         </div>
 
                         <div>
-                          <Label className="text-xs">Height ({signatureData.bannerHeight === "auto" ? "auto" : signatureData.bannerHeight + "px"})</Label>
+                          <Label className="text-xs">Line Height ({signatureData.bannerTextHeight.toFixed(1)})</Label>
                           <input
                             type="range"
-                            min="30"
-                            max="120"
-                            value={signatureData.bannerHeight === "auto" ? 30 : signatureData.bannerHeight}
+                            min="1"
+                            max="2.5"
+                            step="0.1"
+                            value={signatureData.bannerTextHeight}
                             onChange={(e) =>
-                              updateField("bannerHeight", Number(e.target.value))
+                              updateField("bannerTextHeight", Number(e.target.value))
                             }
                             className="w-full"
-                            data-testid="input-banner-height"
+                            data-testid="input-banner-text-height"
                           />
                         </div>
                       </div>
