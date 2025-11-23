@@ -448,7 +448,7 @@ export default function EmailSignature() {
     socialIconColor: "#FF6A00",
     socialIconShape: "square",
     socialIconRadius: 8,
-    socialLinksTopSpacing: 0,
+    socialLinksTopSpacing: 8,
     socialLinksBottomSpacing: 10,
     socialIconsGap: 9,
     socialIconBorderWidth: 0,
@@ -456,7 +456,7 @@ export default function EmailSignature() {
     dividerHeight: 3,
     dividerColor: "#FF6A00",
     dividerMarginTop: 5,
-    dividerMarginBottom: 0,
+    dividerMarginBottom: 5,
     dividerWidth: 100,
     socialLinks: [
       {
