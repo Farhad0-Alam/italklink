@@ -811,7 +811,7 @@ export default function EmailSignature() {
     <td style="background-color: #ffffff; padding: 25px;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
         <tr>
-          <td style="width: 50%; vertical-align: top; padding-right: 15px;">
+          <td style="width: 30%; vertical-align: top; padding-right: 15px;">
             ${
               profilePhoto || companyLogo
                 ? `
@@ -839,7 +839,7 @@ export default function EmailSignature() {
                 : ""
             }
           </td>
-          <td style="width: 50%; vertical-align: top; padding-left: 15px; border-left: 2px solid ${dividerColor};">
+          <td style="width: 70%; vertical-align: top; padding-left: 15px; border-left: 2px solid ${dividerColor};">
             <table cellpadding="0" cellspacing="0" border="0" width="100%">
               ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
               <tr>
