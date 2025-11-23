@@ -404,7 +404,7 @@ export default function EmailSignature() {
     profilePhotoShadow: "medium",
     profilePhotoRightSideGap: 13,
 
-    companyLogo: "https://via.placeholder.com/200x80/FF6A00/FFFFFF?text=ACME",
+    companyLogo: "",
     companyLogoShape: "square",
     companyLogoWidth: 120,
     companyLogoHeight: 60,
