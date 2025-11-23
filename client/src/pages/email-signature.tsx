@@ -136,8 +136,6 @@ interface SignatureData {
   disclaimerTextAlign: "left" | "center" | "right";
   disclaimerBold: boolean;
   disclaimerItalic: boolean;
-  disclaimerPadding: number;
-  disclaimerLineHeight: number;
   showCTA: boolean;
   ctaText: string;
   ctaUrl: string;
@@ -498,8 +496,6 @@ export default function EmailSignature() {
     disclaimerTextAlign: "left",
     disclaimerBold: false,
     disclaimerItalic: true,
-    disclaimerPadding: 15,
-    disclaimerLineHeight: 1.4,
     showCTA: false,
     ctaText: "Book a Consultation",
     ctaUrl: "",
@@ -697,8 +693,6 @@ export default function EmailSignature() {
       disclaimerTextAlign,
       disclaimerBold,
       disclaimerItalic,
-      disclaimerPadding,
-      disclaimerLineHeight,
       customFields,
       signatureFont,
       signatureSize,
@@ -737,14 +731,6 @@ export default function EmailSignature() {
       profilePhotoRightSideGap,
       showDisclaimer,
       disclaimerText,
-      disclaimerFont,
-      disclaimerFontSize,
-      disclaimerFontColor,
-      disclaimerTextAlign,
-      disclaimerBold,
-      disclaimerItalic,
-      disclaimerPadding,
-      disclaimerLineHeight,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
@@ -895,7 +881,7 @@ export default function EmailSignature() {
     showDisclaimer
       ? `
   <tr>
-    <td style="padding: ${disclaimerPadding}px 25px; font-family: ${disclaimerFont}, sans-serif; font-size: ${disclaimerFontSize}px; color: ${disclaimerFontColor}; text-align: ${disclaimerTextAlign}; font-weight: ${disclaimerBold ? "bold" : "normal"}; font-style: ${disclaimerItalic ? "italic" : "normal"}; line-height: ${disclaimerLineHeight};">
+    <td style="padding: 15px 25px; font-family: ${disclaimerFont}, sans-serif; font-size: ${disclaimerFontSize}px; color: ${disclaimerFontColor}; text-align: ${disclaimerTextAlign}; font-weight: ${disclaimerBold ? "bold" : "normal"}; font-style: ${disclaimerItalic ? "italic" : "normal"}; line-height: 1.4;">
       ${disclaimerText}
     </td>
   </tr>
@@ -3451,39 +3437,6 @@ export default function EmailSignature() {
                           <Label htmlFor="disclaimerItalic" className="text-xs italic cursor-pointer">
                             Italic
                           </Label>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <Label className="text-xs">Padding ({signatureData.disclaimerPadding}px)</Label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="30"
-                            value={signatureData.disclaimerPadding}
-                            onChange={(e) =>
-                              updateField("disclaimerPadding", Number(e.target.value))
-                            }
-                            className="w-full"
-                            data-testid="input-disclaimer-padding"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Line Height ({signatureData.disclaimerLineHeight.toFixed(1)})</Label>
-                          <input
-                            type="range"
-                            min="1"
-                            max="2"
-                            step="0.1"
-                            value={signatureData.disclaimerLineHeight}
-                            onChange={(e) =>
-                              updateField("disclaimerLineHeight", Number(e.target.value))
-                            }
-                            className="w-full"
-                            data-testid="input-disclaimer-line-height"
-                          />
                         </div>
                       </div>
                     </div>
