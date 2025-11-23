@@ -3585,7 +3585,7 @@ export default function EmailSignature() {
                               ))}
                               <Button
                                 onClick={() => {
-                                  const updated = [...signatureData.ctaButtons, { text: "New Button", url: "" }];
+                                  const updated = [...signatureData.ctaButtons, { text: "New Button", url: "https://talkl.ink/" }];
                                   updateField("ctaButtons", updated);
                                 }}
                                 className="w-full"
