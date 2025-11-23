@@ -3324,7 +3324,7 @@ export default function EmailSignature() {
                               <Label className="text-xs">Height: {signatureData.ctaSectionHeight}px</Label>
                               <input
                                 type="range"
-                                min="50"
+                                min="10"
                                 max="300"
                                 value={signatureData.ctaSectionHeight}
                                 onChange={(e) =>
