@@ -516,6 +516,12 @@ export default function EmailSignature() {
     bannerTextHeight: 1.0,
     bannerTextAlign: "center",
     bannerUrl: "",
+    ctaButtonLogo: "",
+    ctaButtonLogoWidth: 60,
+    ctaButtonLogoHeight: 60,
+    ctaButtonLogoShape: "square",
+    ctaButtonLogoBorderWidth: 0,
+    ctaButtonLogoBorderColor: "#CCCCCC",
   });
 
   useEffect(() => {
@@ -537,7 +543,7 @@ export default function EmailSignature() {
   };
 
   const handleImageUpload = (
-    field: "profilePhoto" | "companyLogo",
+    field: "profilePhoto" | "companyLogo" | "ctaButtonLogo",
     file: File,
   ) => {
     const reader = new FileReader();
@@ -553,6 +559,10 @@ export default function EmailSignature() {
 
   const removeCompanyLogo = () => {
     updateField("companyLogo", "");
+  };
+
+  const removeCtaButtonLogo = () => {
+    updateField("ctaButtonLogo", "");
   };
 
   const addSocialLink = () => {
@@ -842,14 +852,31 @@ export default function EmailSignature() {
           showCTA
             ? `
         <tr>
-          <td colspan="2" style="padding-top: 25px; margin-top: 20px; text-align: center;">
-            ${
-              showCTA && ctaUrl
-                ? `
-            <a href="${ctaUrl}" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${ctaText}</a>
-            `
-                : ""
-            }
+          <td colspan="2" style="padding-top: 25px; margin-top: 20px;">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: auto;">
+              <tr>
+                ${
+                  ctaButtonLogo
+                    ? `
+                <td style="width: ${ctaButtonLogoWidth}px; vertical-align: middle; text-align: center; padding-right: 12px;">
+                  <div style="width: ${ctaButtonLogoWidth}px; height: ${ctaButtonLogoHeight}px; border-radius: ${ctaButtonLogoShape === 'circle' ? '50%' : ctaButtonLogoShape === 'rounded' ? '8px' : '0'}; overflow: hidden; border: ${ctaButtonLogoBorderWidth}px solid ${ctaButtonLogoBorderColor}; display: inline-block;">
+                    <img src="${ctaButtonLogo}" alt="" style="width: 100%; height: 100%; display: block; object-fit: cover;">
+                  </div>
+                </td>
+                `
+                    : ""
+                }
+                <td style="text-align: ${ctaButtonLogo ? 'left' : 'center'}; vertical-align: middle;">
+                  ${
+                    showCTA && ctaUrl
+                      ? `
+                  <a href="${ctaUrl}" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${ctaText}</a>
+                  `
+                      : ""
+                  }
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
         `
@@ -2980,19 +3007,159 @@ export default function EmailSignature() {
                   </div>
 
                   {signatureData.showCTA && (
-                    <div className="grid grid-cols-2 gap-4 pl-6">
-                      <Input
-                        value={signatureData.ctaText}
-                        onChange={(e) => updateField("ctaText", e.target.value)}
-                        placeholder="Button Text"
-                        data-testid="input-cta-text"
-                      />
-                      <Input
-                        value={signatureData.ctaUrl}
-                        onChange={(e) => updateField("ctaUrl", e.target.value)}
-                        placeholder="Button URL"
-                        data-testid="input-cta-url"
-                      />
+                    <div className="pl-6 space-y-3">
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          value={signatureData.ctaText}
+                          onChange={(e) => updateField("ctaText", e.target.value)}
+                          placeholder="Button Text"
+                          data-testid="input-cta-text"
+                        />
+                        <Input
+                          value={signatureData.ctaUrl}
+                          onChange={(e) => updateField("ctaUrl", e.target.value)}
+                          placeholder="Button URL"
+                          data-testid="input-cta-url"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">Button Logo (optional)</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                handleImageUpload("ctaButtonLogo", e.target.files[0]);
+                              }
+                            }}
+                            className="flex-1"
+                            data-testid="input-cta-button-logo"
+                          />
+                          {signatureData.ctaButtonLogo && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={removeCtaButtonLogo}
+                              data-testid="button-remove-cta-logo"
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {signatureData.ctaButtonLogo && (
+                        <div className="space-y-2 border-t pt-2">
+                          <div>
+                            <Label className="text-xs">
+                              Logo Width: {signatureData.ctaButtonLogoWidth}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="30"
+                              max="120"
+                              value={signatureData.ctaButtonLogoWidth}
+                              onChange={(e) =>
+                                updateField(
+                                  "ctaButtonLogoWidth",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-cta-logo-width"
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-xs">
+                              Logo Height: {signatureData.ctaButtonLogoHeight}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="30"
+                              max="120"
+                              value={signatureData.ctaButtonLogoHeight}
+                              onChange={(e) =>
+                                updateField(
+                                  "ctaButtonLogoHeight",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-cta-logo-height"
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-xs">Shape</Label>
+                            <select
+                              value={signatureData.ctaButtonLogoShape}
+                              onChange={(e) =>
+                                updateField(
+                                  "ctaButtonLogoShape",
+                                  e.target.value,
+                                )
+                              }
+                              className="w-full px-2 py-1 border rounded text-xs"
+                              data-testid="select-cta-logo-shape"
+                            >
+                              <option value="square">Square</option>
+                              <option value="rounded">Rounded</option>
+                              <option value="circle">Circle</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <Label className="text-xs">Border Width: {signatureData.ctaButtonLogoBorderWidth}px</Label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="5"
+                              value={signatureData.ctaButtonLogoBorderWidth}
+                              onChange={(e) =>
+                                updateField(
+                                  "ctaButtonLogoBorderWidth",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-cta-logo-border-width"
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-xs">Border Color</Label>
+                            <div className="flex gap-2">
+                              <input
+                                type="color"
+                                value={signatureData.ctaButtonLogoBorderColor}
+                                onChange={(e) =>
+                                  updateField(
+                                    "ctaButtonLogoBorderColor",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-10 h-9 rounded"
+                                data-testid="input-cta-logo-border-color"
+                              />
+                              <Input
+                                value={signatureData.ctaButtonLogoBorderColor}
+                                onChange={(e) =>
+                                  updateField(
+                                    "ctaButtonLogoBorderColor",
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder="#CCCCCC"
+                                className="flex-1"
+                                data-testid="input-cta-logo-border-color-hex"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
