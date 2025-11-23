@@ -897,7 +897,7 @@ export default function EmailSignature() {
           <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 20px; height: ${ctaSectionHeight}px;">
             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
               <tr>
-                <td style="width: 50%; vertical-align: middle; text-align: center;">
+                <td style="width: 40%; vertical-align: middle; text-align: center;">
                   ${
                     ctaButtonLogo
                       ? `
@@ -908,7 +908,7 @@ export default function EmailSignature() {
                       : ""
                   }
                 </td>
-                <td style="width: 50%; vertical-align: middle; text-align: center;">
+                <td style="width: 60%; vertical-align: middle; text-align: center;">
                   ${
                     showCTA && ctaUrl
                       ? `
