@@ -799,7 +799,7 @@ export default function EmailSignature() {
     showBanner
       ? `
   <tr>
-    <td style="padding: ${bannerPadding}px;">
+    <td style="padding: 0px ${bannerPadding}px ${bannerPadding}px ${bannerPadding}px;">
       <div style="background-color: ${bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-size: 16px; font-weight: bold; color: #333333;">
         ${bannerText}
       </div>
