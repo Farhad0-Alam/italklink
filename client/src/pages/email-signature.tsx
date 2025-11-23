@@ -538,7 +538,7 @@ export default function EmailSignature() {
     ctaSectionBorderColor: "#FF6A00",
     ctaSectionBorderWidth: 0,
     ctaSectionPadding: 20,
-    ctaSectionUseGradient: false,
+    ctaSectionUseGradient: true,
     ctaSectionGradientColor1: "#FF6A00",
     ctaSectionGradientColor2: "#FFA500",
     ctaSectionGradientAngle: 134,
