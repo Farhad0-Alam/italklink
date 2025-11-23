@@ -809,12 +809,12 @@ export default function EmailSignature() {
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 500px; margin: 0; padding: 0; table-layout: fixed; width: 100%;">
   <tr>
     <td style="background-color: #ffffff; padding: 25px;">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
         <tr>
           ${
             profilePhoto || companyLogo
               ? `
-          <td style="padding-right: ${profilePhotoRightSideGap}px; vertical-align: middle;">
+          <td style="padding-right: ${profilePhotoRightSideGap}px; vertical-align: middle; width: auto;">
             ${
               profilePhoto
                 ? `
@@ -839,7 +839,7 @@ export default function EmailSignature() {
           `
               : ""
           }
-          <td style="vertical-align: top;">
+          <td style="vertical-align: top; width: 100%;">
             <table cellpadding="0" cellspacing="0" border="0">
               ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight};">${signatureName}</td></tr>` : ""}
               <tr>
