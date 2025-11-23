@@ -811,60 +811,60 @@ export default function EmailSignature() {
     <td style="background-color: #ffffff; padding: 25px;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
         <tr>
-          ${
-            profilePhoto || companyLogo
-              ? `
-          <td style="padding-right: ${profilePhotoRightSideGap}px; vertical-align: middle; width: auto;">
+          <td style="width: 50%; vertical-align: top; padding-right: 15px;">
             ${
-              profilePhoto
+              profilePhoto || companyLogo
                 ? `
-            <div style="${getContainerStyle('profile')}">
-              <img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}">
-            </div>
-            `
-                : ""
-            }
-            ${
-              companyLogo
-                ? `
-            <div style="padding-top: 15px;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+              ${
+                profilePhoto
+                  ? `
+              <div style="${getContainerStyle('profile')}">
+                <img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}">
+              </div>
+              `
+                  : ""
+              }
+              ${
+                companyLogo
+                  ? `
               <div style="${getContainerStyle('logo')}">
                 <img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}">
               </div>
+              `
+                  : ""
+              }
             </div>
             `
                 : ""
             }
           </td>
-          `
-              : ""
-          }
-          <td style="vertical-align: top; width: 100%;">
-            <table cellpadding="0" cellspacing="0" border="0">
-              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight};">${signatureName}</td></tr>` : ""}
+          <td style="width: 50%; vertical-align: top; padding-left: 15px; border-left: 2px solid ${dividerColor};">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+              ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; line-height: ${nameLineHeight};">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; line-height: ${nameLineHeight}; padding-bottom: 2px;">
                   ${name}
                 </td>
               </tr>
               <tr>
-                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; font-weight: 600; line-height: ${titleLineHeight};">
+                <td style="font-family: ${headerFont}, sans-serif; font-size: ${titleSize}px; color: ${titleColor}; font-weight: 600; line-height: ${titleLineHeight}; padding-bottom: ${dividerMarginTop}px;">
                   ${title}${title && company ? ` <span style="color: ${titleColor}; opacity: 0.7; margin: 0 8px;">|</span> ` : ''}${company ? `<span style="font-family: ${headerFont}, sans-serif; font-size: ${companySize}px; color: ${companyColor}; font-weight: normal;">${company}</span>` : ''}
                 </td>
               </tr>
-              <tr><td style="padding-top: ${dividerMarginTop}px; padding-bottom: ${dividerMarginBottom}px;"><div style="height: ${dividerHeight}px; background-color: ${dividerColor}; width: ${dividerWidth}%;"></div></td></tr>
-              ${officePhone || cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;">
+              <tr><td style="padding-bottom: ${dividerMarginBottom}px;"><div style="height: ${dividerHeight}px; background-color: ${dividerColor}; width: ${dividerWidth}%;"></div></td></tr>
+              ${officePhone || cellPhone ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 4px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;">
                 ${officePhone ? `<span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${phoneIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${officePhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${officePhone}</a>` : ""}
                 ${officePhone && cellPhone ? `<span style="margin: 0 6px;"></span>` : ""}
                 ${cellPhone ? `<span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${cellIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${cellPhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${cellPhone}</a>` : ""}
               </td></tr>` : ""}
-              ${email || website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px; color: ${contactInfoColor};">
+              ${email || website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 4px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px; color: ${contactInfoColor};">
                 ${email ? `<a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${emailIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${email}</a>` : ""}
                 ${email && website ? `<span style="margin: 0 6px;"></span>` : ""}
                 ${website ? `<a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${websiteIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${website}</a>` : ""}
               </td></tr>` : ""}
-              ${ecardUrl ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><a href="${ecardUrl}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${ecardIcon}" alt="" style="width:100%; height:100%; display:block;"></span>Digital Business Card</a></td></tr>` : ""}
-              ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 2px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${locationIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${address}</td></tr>` : ""}
+              ${ecardUrl ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 4px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><a href="${ecardUrl}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${ecardIcon}" alt="" style="width:100%; height:100%; display:block;"></span>Digital Business Card</a></td></tr>` : ""}
+              ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 4px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${locationIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${address}</td></tr>` : ""}
               ${customFieldsHTML}
               ${socialIconsHTML ? `<tr><td style="padding-top: ${socialLinksTopSpacing}px; padding-bottom: ${socialLinksBottomSpacing}px;">${socialIconsHTML}</td></tr>` : ""}
             </table>
