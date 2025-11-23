@@ -875,7 +875,7 @@ export default function EmailSignature() {
             ${
               profilePhoto || companyLogo
                 ? `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;">
               ${
                 profilePhoto
                   ? `
