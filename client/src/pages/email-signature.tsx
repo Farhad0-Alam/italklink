@@ -145,10 +145,10 @@ interface SignatureData {
   bannerPadding: number;
   bannerTopSpacing: number;
   bannerFont: string;
-  bannerFontSize: number;
   bannerFontColor: string;
   bannerTextSize: number;
   bannerTextHeight: number;
+  bannerTextAlign: "left" | "center" | "right";
 }
 
 const signatureFonts = [
@@ -498,10 +498,10 @@ export default function EmailSignature() {
     bannerPadding: 20,
     bannerTopSpacing: 0,
     bannerFont: "Arial",
-    bannerFontSize: 16,
     bannerFontColor: "#333333",
     bannerTextSize: 18,
     bannerTextHeight: 1.5,
+    bannerTextAlign: "center",
   });
 
   useEffect(() => {
@@ -668,10 +668,10 @@ export default function EmailSignature() {
       bannerPadding,
       bannerTopSpacing,
       bannerFont,
-      bannerFontSize,
       bannerFontColor,
       bannerTextSize,
       bannerTextHeight,
+      bannerTextAlign,
       customFields,
       signatureFont,
       signatureSize,
@@ -840,7 +840,7 @@ export default function EmailSignature() {
       ? `
   <tr>
     <td style="padding: ${bannerTopSpacing}px ${bannerPadding}px ${bannerPadding}px ${bannerPadding}px;">
-      <div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block;">
+      <div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: ${bannerTextAlign}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block;">
         ${bannerText}
       </div>
     </td>
@@ -3174,45 +3174,47 @@ export default function EmailSignature() {
                         </Select>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <Label className="text-xs">Font Size ({signatureData.bannerFontSize}px)</Label>
+                      <div>
+                        <Label className="text-xs">Font Color</Label>
+                        <div className="flex gap-2">
                           <input
-                            type="range"
-                            min="10"
-                            max="36"
-                            value={signatureData.bannerFontSize}
+                            type="color"
+                            value={signatureData.bannerFontColor}
                             onChange={(e) =>
-                              updateField("bannerFontSize", Number(e.target.value))
+                              updateField("bannerFontColor", e.target.value)
                             }
-                            className="w-full"
-                            data-testid="input-banner-font-size"
+                            className="w-10 h-9 rounded"
+                            data-testid="input-banner-font-color"
+                          />
+                          <Input
+                            value={signatureData.bannerFontColor}
+                            onChange={(e) =>
+                              updateField("bannerFontColor", e.target.value)
+                            }
+                            placeholder="#333333"
+                            className="flex-1"
+                            data-testid="input-banner-font-color-hex"
                           />
                         </div>
+                      </div>
 
-                        <div>
-                          <Label className="text-xs">Font Color</Label>
-                          <div className="flex gap-2">
-                            <input
-                              type="color"
-                              value={signatureData.bannerFontColor}
-                              onChange={(e) =>
-                                updateField("bannerFontColor", e.target.value)
-                              }
-                              className="w-10 h-9 rounded"
-                              data-testid="input-banner-font-color"
-                            />
-                            <Input
-                              value={signatureData.bannerFontColor}
-                              onChange={(e) =>
-                                updateField("bannerFontColor", e.target.value)
-                              }
-                              placeholder="#333333"
-                              className="flex-1"
-                              data-testid="input-banner-font-color-hex"
-                            />
-                          </div>
-                        </div>
+                      <div>
+                        <Label className="text-xs">Text Align</Label>
+                        <Select
+                          value={signatureData.bannerTextAlign}
+                          onValueChange={(value) =>
+                            updateField("bannerTextAlign", value as "left" | "center" | "right")
+                          }
+                        >
+                          <SelectTrigger data-testid="select-banner-text-align">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="left">Left</SelectItem>
+                            <SelectItem value="center">Center</SelectItem>
+                            <SelectItem value="right">Right</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2">
