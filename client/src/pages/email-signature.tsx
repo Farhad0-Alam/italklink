@@ -497,7 +497,7 @@ export default function EmailSignature() {
     bannerBorderColor: "#FF6A00",
     bannerBorderWidth: 0,
     bannerPadding: 11,
-    bannerTopSpacing: 0,
+    bannerTopSpacing: -10,
     bannerFont: "Arial",
     bannerFontColor: "#f7f7f7",
     bannerTextSize: 19,
@@ -842,7 +842,7 @@ export default function EmailSignature() {
     showBanner
       ? `
   <tr>
-    <td style="padding: ${bannerTopSpacing}px ${bannerPadding}px ${bannerPadding}px ${bannerPadding}px;">
+    <td style="padding: 0 ${bannerPadding}px ${bannerPadding}px ${bannerPadding}px; margin-top: ${bannerTopSpacing}px;">
       ${
         bannerUrl
           ? `<a href="${bannerUrl}" style="text-decoration: none; display: block;"><div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: ${bannerTextAlign}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block;">
