@@ -802,7 +802,7 @@ export default function EmailSignature() {
       ctaButtonGradientAngle,
       ctaButtonBorderColor,
       ctaButtonBorderWidth,
-      ctaButtonFont,
+      headerFont,
       ctaButtonFontSize,
       ctaButtonFontColor,
       ctaButtonGroupAlignment,
@@ -942,7 +942,7 @@ export default function EmailSignature() {
                       .filter((btn) => btn.url)
                       .map(
                         (btn) => `
-                    <a href="${btn.url}" style="background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 28px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px; min-width: ${ctaButtonWidth}px; min-height: ${ctaButtonHeight}px; display: inline-flex; align-items: center; justify-content: center; text-align: center;">${btn.text}</a>
+                    <a href="${btn.url}" style="background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 28px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${headerFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px; min-width: ${ctaButtonWidth}px; min-height: ${ctaButtonHeight}px; display: inline-flex; align-items: center; justify-content: center; text-align: center;">${btn.text}</a>
                     `
                       )
                       .join("")}
@@ -3778,19 +3778,7 @@ export default function EmailSignature() {
                               <Label className="text-xs font-semibold mb-2 block">Button Font</Label>
                               <div className="space-y-2">
                                 <div>
-                                  <Label className="text-xs">Font</Label>
-                                  <select
-                                    value={signatureData.ctaButtonFont}
-                                    onChange={(e) => updateField("ctaButtonFont", e.target.value)}
-                                    className="w-full px-2 py-1 border rounded text-xs"
-                                    data-testid="select-cta-font"
-                                  >
-                                    {signatureFonts.map((font) => (
-                                      <option key={font} value={font}>
-                                        {font}
-                                      </option>
-                                    ))}
-                                  </select>
+                                  <Label className="text-xs text-gray-500">Font: Uses Title Font</Label>
                                 </div>
                                 <div>
                                   <Label className="text-xs">Font Size: {signatureData.ctaButtonFontSize}px</Label>
