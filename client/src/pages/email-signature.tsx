@@ -130,6 +130,12 @@ interface SignatureData {
 
   showDisclaimer: boolean;
   disclaimerText: string;
+  disclaimerFont: string;
+  disclaimerFontSize: number;
+  disclaimerFontColor: string;
+  disclaimerTextAlign: "left" | "center" | "right";
+  disclaimerBold: boolean;
+  disclaimerItalic: boolean;
   showCTA: boolean;
   ctaText: string;
   ctaUrl: string;
@@ -484,6 +490,12 @@ export default function EmailSignature() {
     showDisclaimer: false,
     disclaimerText:
       "This email and any attachments are confidential and intended solely for the recipient.",
+    disclaimerFont: "Arial",
+    disclaimerFontSize: 11,
+    disclaimerFontColor: "#666666",
+    disclaimerTextAlign: "left",
+    disclaimerBold: false,
+    disclaimerItalic: true,
     showCTA: false,
     ctaText: "Book a Consultation",
     ctaUrl: "",
@@ -675,6 +687,12 @@ export default function EmailSignature() {
       bannerTextHeight,
       bannerTextAlign,
       bannerUrl,
+      disclaimerFont,
+      disclaimerFontSize,
+      disclaimerFontColor,
+      disclaimerTextAlign,
+      disclaimerBold,
+      disclaimerItalic,
       customFields,
       signatureFont,
       signatureSize,
@@ -852,6 +870,17 @@ export default function EmailSignature() {
         ${bannerText}
       </div>`
       }
+    </td>
+  </tr>
+  `
+      : ""
+  }
+  ${
+    showDisclaimer
+      ? `
+  <tr>
+    <td style="padding: 15px 25px; font-family: ${disclaimerFont}, sans-serif; font-size: ${disclaimerFontSize}px; color: ${disclaimerFontColor}; text-align: ${disclaimerTextAlign}; font-weight: ${disclaimerBold ? "bold" : "normal"}; font-style: ${disclaimerItalic ? "italic" : "normal"}; line-height: 1.4;">
+      ${disclaimerText}
     </td>
   </tr>
   `
@@ -3283,7 +3312,7 @@ export default function EmailSignature() {
                   </div>
 
                   {signatureData.showDisclaimer && (
-                    <div className="pl-6">
+                    <div className="pl-6 space-y-3">
                       <Textarea
                         value={signatureData.disclaimerText}
                         onChange={(e) =>
@@ -3293,6 +3322,121 @@ export default function EmailSignature() {
                         rows={3}
                         data-testid="textarea-disclaimer"
                       />
+
+                      <div>
+                        <Label className="text-xs">Font</Label>
+                        <Select
+                          value={signatureData.disclaimerFont}
+                          onValueChange={(value) =>
+                            updateField("disclaimerFont", value)
+                          }
+                        >
+                          <SelectTrigger data-testid="select-disclaimer-font">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {professionalFonts.map((font) => (
+                              <SelectItem key={font} value={font}>
+                                {font}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-xs">Font Size ({signatureData.disclaimerFontSize}px)</Label>
+                          <input
+                            type="range"
+                            min="8"
+                            max="18"
+                            value={signatureData.disclaimerFontSize}
+                            onChange={(e) =>
+                              updateField("disclaimerFontSize", Number(e.target.value))
+                            }
+                            className="w-full"
+                            data-testid="input-disclaimer-font-size"
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Font Color</Label>
+                          <div className="flex gap-2">
+                            <input
+                              type="color"
+                              value={signatureData.disclaimerFontColor}
+                              onChange={(e) =>
+                                updateField("disclaimerFontColor", e.target.value)
+                              }
+                              className="w-10 h-9 rounded"
+                              data-testid="input-disclaimer-font-color"
+                            />
+                            <Input
+                              value={signatureData.disclaimerFontColor}
+                              onChange={(e) =>
+                                updateField("disclaimerFontColor", e.target.value)
+                              }
+                              placeholder="#666666"
+                              className="flex-1"
+                              data-testid="input-disclaimer-font-color-hex"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">Text Align</Label>
+                        <Select
+                          value={signatureData.disclaimerTextAlign}
+                          onValueChange={(value) =>
+                            updateField("disclaimerTextAlign", value as "left" | "center" | "right")
+                          }
+                        >
+                          <SelectTrigger data-testid="select-disclaimer-text-align">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="left">Left</SelectItem>
+                            <SelectItem value="center">Center</SelectItem>
+                            <SelectItem value="right">Right</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="disclaimerBold"
+                            checked={signatureData.disclaimerBold}
+                            onChange={(e) =>
+                              updateField("disclaimerBold", e.target.checked)
+                            }
+                            className="rounded"
+                            data-testid="checkbox-disclaimer-bold"
+                          />
+                          <Label htmlFor="disclaimerBold" className="text-xs font-semibold cursor-pointer">
+                            Bold
+                          </Label>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="disclaimerItalic"
+                            checked={signatureData.disclaimerItalic}
+                            onChange={(e) =>
+                              updateField("disclaimerItalic", e.target.checked)
+                            }
+                            className="rounded"
+                            data-testid="checkbox-disclaimer-italic"
+                          />
+                          <Label htmlFor="disclaimerItalic" className="text-xs italic cursor-pointer">
+                            Italic
+                          </Label>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </CardContent>
