@@ -63,7 +63,7 @@ interface SignatureData {
   customFields: { value: string; icon: string; url: string }[];
 
   profilePhoto: string;
-  profilePhotoShape: "circle" | "square" | "rounded";
+  profilePhotoShape: "circle" | "square" | "rounded" | "hexagon" | "diamond" | "star" | "blob";
   profilePhotoWidth: number;
   profilePhotoHeight: number;
   profilePhotoBorderWidth: number;
@@ -1048,15 +1048,34 @@ export default function EmailSignature() {
       const { profilePhotoShape, profilePhotoWidth, profilePhotoHeight, profilePhotoBorderWidth, profilePhotoBorderColor, profilePhotoOpacity, profilePhotoShadow, profilePhotoRightSideGap } = signatureData;
 
       let borderRadius = "50%";
+      let clipPath = "none";
+      
       if (profilePhotoShape === "square") borderRadius = "0%";
       if (profilePhotoShape === "rounded") borderRadius = "8px";
+      if (profilePhotoShape === "hexagon") {
+        borderRadius = "0%";
+        clipPath = "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)";
+      }
+      if (profilePhotoShape === "diamond") {
+        borderRadius = "0%";
+        clipPath = "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)";
+      }
+      if (profilePhotoShape === "star") {
+        borderRadius = "0%";
+        clipPath = "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)";
+      }
+      if (profilePhotoShape === "blob") {
+        borderRadius = "63% 37% 54% 46% / 45% 52% 48% 55%";
+        clipPath = "none";
+      }
 
       let boxShadow = "none";
       if (profilePhotoShadow === "small") boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
       if (profilePhotoShadow === "medium") boxShadow = "0 4px 8px rgba(0,0,0,0.15)";
       if (profilePhotoShadow === "large") boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
 
-      return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px solid ${profilePhotoBorderColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center;`;
+      const clipPathStyle = clipPath !== "none" ? `; clip-path: ${clipPath}` : "";
+      return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px solid ${profilePhotoBorderColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center${clipPathStyle};`;
     } else {
       const { companyLogoShape, companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor, companyLogoBackgroundColor, companyLogoShadow } = signatureData;
       
@@ -2738,6 +2757,10 @@ export default function EmailSignature() {
                               <SelectItem value="circle">Circle</SelectItem>
                               <SelectItem value="square">Square</SelectItem>
                               <SelectItem value="rounded">Rounded Square</SelectItem>
+                              <SelectItem value="hexagon">Hexagon</SelectItem>
+                              <SelectItem value="diamond">Diamond</SelectItem>
+                              <SelectItem value="star">Star</SelectItem>
+                              <SelectItem value="blob">Blob</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
