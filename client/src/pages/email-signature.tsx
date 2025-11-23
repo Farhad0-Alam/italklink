@@ -868,10 +868,10 @@ export default function EmailSignature() {
     return `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 500px; margin: 0; padding: 0; table-layout: fixed; width: 100%;">
   <tr>
-    <td style="background-color: #ffffff; padding: 25px; padding-left: 15px; padding-right: 15px;">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed; width: 100%;">
+    <td style="background-color: #ffffff; padding: 25px;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
         <tr>
-          <td style="width: 30%; vertical-align: ${companyLogo ? 'top' : 'middle'}; padding-right: 15px; min-width: 80px;">
+          <td style="width: 30%; vertical-align: ${companyLogo ? 'top' : 'middle'}; padding-right: 15px;">
             ${
               profilePhoto || companyLogo
                 ? `
@@ -919,10 +919,10 @@ export default function EmailSignature() {
                   ${officePhone && cellPhone ? `<span style="margin: 0 6px;"></span>` : ""}
                   ${cellPhone ? `<span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${cellIcon}" alt="" style="width:100%; height:100%; display:block;"></span><a href="tel:${cellPhone}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;">${cellPhone}</a>` : ""}
                 </td></tr>` : ""}
-                ${email || website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 4px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px; color: ${contactInfoColor}; word-wrap: break-word; overflow-wrap: break-word;">
-                  ${email ? `<a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500; display: block;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${emailIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${email}</a>` : ""}
-                  ${email && website ? `<div style="margin: 4px 0;"></div>` : ""}
-                  ${website ? `<a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500; display: block;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${websiteIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${website}</a>` : ""}
+                ${email || website ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; padding: 4px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px; color: ${contactInfoColor};">
+                  ${email ? `<a href="mailto:${email}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${emailIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${email}</a>` : ""}
+                  ${email && website ? `<span style="margin: 0 6px;"></span>` : ""}
+                  ${website ? `<a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${websiteIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${website}</a>` : ""}
                 </td></tr>` : ""}
                 ${ecardUrl ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${contactInfoSize}px; color: ${contactInfoColor}; padding: 4px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><a href="${ecardUrl}" style="color: ${contactInfoColor}; text-decoration: none; font-weight: 500;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${ecardIcon}" alt="" style="width:100%; height:100%; display:block;"></span>Digital Business Card</a></td></tr>` : ""}
                 ${address ? `<tr><td style="font-family: ${contactFont}, sans-serif; font-size: ${Math.round(contactInfoSize * 0.9)}px; color: ${contactInfoColor}; opacity: 0.8; padding: 4px 0; line-height: ${contactLineHeight}; letter-spacing: ${contactLetterSpacing}px;"><span style="display:inline-block; width:${contactIconSize}px; height:${contactIconSize}px; background-color:${contactIconColor}; margin-right:8px; vertical-align:middle; position:relative;"><img src="${locationIcon}" alt="" style="width:100%; height:100%; display:block;"></span>${address}</td></tr>` : ""}
@@ -936,29 +936,29 @@ export default function EmailSignature() {
           showCTA
             ? `
         <tr>
-          <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 20px; min-height: ${ctaSectionHeight}px;">
-            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed; width: 100%;">
+          <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 20px; height: ${ctaSectionHeight}px;">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
               <tr>
-                <td style="width: ${ctaLogoColumnWidth}%; vertical-align: middle; text-align: center; padding: 5px; margin: 0; min-width: 60px;">
+                <td style="width: ${ctaLogoColumnWidth}%; vertical-align: middle; text-align: center; padding: 0; margin: 0;">
                   ${
                     ctaButtonLogo
                       ? `
-                  <div style="width: ${ctaButtonLogoWidth}px; height: ${ctaButtonLogoHeight}px; border-radius: ${ctaButtonLogoShape === 'circle' ? '50%' : ctaButtonLogoShape === 'rounded' ? '8px' : '0'}; overflow: hidden; border: ${ctaButtonLogoBorderWidth}px solid ${ctaButtonLogoBorderColor}; display: inline-block; margin: 0; padding: 0; max-width: 100%;">
+                  <div style="width: ${ctaButtonLogoWidth}px; height: ${ctaButtonLogoHeight}px; border-radius: ${ctaButtonLogoShape === 'circle' ? '50%' : ctaButtonLogoShape === 'rounded' ? '8px' : '0'}; overflow: hidden; border: ${ctaButtonLogoBorderWidth}px solid ${ctaButtonLogoBorderColor}; display: inline-block; margin: 0; padding: 0;">
                     <img src="${ctaButtonLogo}" alt="" style="width: 100%; height: 100%; display: block; object-fit: cover;">
                   </div>
                   `
                       : ""
                   }
                 </td>
-                <td style="width: ${ctaButtonsColumnWidth}%; vertical-align: middle; text-align: ${ctaButtonGroupAlignment}; padding: 8px 10px; min-width: 140px;">
-                  <div style="line-height: 1; font-size: 0;">
+                <td style="width: ${ctaButtonsColumnWidth}%; vertical-align: bottom; text-align: ${ctaButtonGroupAlignment}; padding: 10px 15px 10px ${ctaButtonGroupAlignment === 'right' ? '0' : '15px'}; padding-right: ${ctaButtonGroupAlignment === 'right' ? '15px' : '15px'};">
+                  <div style="line-height: 1;">
                     ${ctaButtons
                       .filter((btn) => btn.url)
                       .map(
                         (btn) => {
                           const lineHeightValue = Math.max(ctaButtonHeight - 24, 1);
                           return `
-                    <a href="${btn.url}" style="display: inline-block; vertical-align: middle; background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 10px 8px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; box-shadow: ${ctaButtonShadowOffsetX}px ${ctaButtonShadowOffsetY}px ${ctaButtonShadowBlur}px rgba(${parseInt(ctaButtonShadowColor.slice(1, 3), 16)}, ${parseInt(ctaButtonShadowColor.slice(3, 5), 16)}, ${parseInt(ctaButtonShadowColor.slice(5, 7), 16)}, ${ctaButtonShadowOpacity}); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 2px; width: ${ctaButtonWidth}px; height: ${ctaButtonHeight}px; line-height: ${lineHeightValue}px; text-align: center; white-space: nowrap; cursor: pointer; font-size: ${ctaButtonFontSize}px;">${btn.text}</a>
+                    <a href="${btn.url}" style="display: inline-block; vertical-align: middle; background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 11px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; box-shadow: ${ctaButtonShadowOffsetX}px ${ctaButtonShadowOffsetY}px ${ctaButtonShadowBlur}px rgba(${parseInt(ctaButtonShadowColor.slice(1, 3), 16)}, ${parseInt(ctaButtonShadowColor.slice(3, 5), 16)}, ${parseInt(ctaButtonShadowColor.slice(5, 7), 16)}, ${ctaButtonShadowOpacity}); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px; width: ${ctaButtonWidth}px; height: ${ctaButtonHeight}px; line-height: ${lineHeightValue}px; text-align: center; white-space: nowrap; cursor: pointer;">${btn.text}</a>
                     `;
                         }
                       )
@@ -1348,25 +1348,16 @@ export default function EmailSignature() {
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
       background-color: #f5f5f5;
-      padding: 10px;
-      margin: 0;
+      padding: 20px;
     }
     .signature-container {
       background-color: white;
-      padding: 15px;
+      padding: 20px;
       margin: 0 auto;
-      width: 100%;
-      max-width: 500px;
     }
     table {
       border-collapse: collapse;
       border-spacing: 0;
-      width: 100%;
-    }
-    td, th {
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      word-break: break-word;
     }
     img {
       max-width: 100%;
@@ -1376,54 +1367,6 @@ export default function EmailSignature() {
     a {
       color: inherit;
       text-decoration: none;
-    }
-    
-    /* Mobile Responsive Styles */
-    @media only screen and (max-width: 600px) {
-      body {
-        padding: 0;
-      }
-      .signature-container {
-        padding: 10px;
-        max-width: 100%;
-      }
-      table[style*="max-width: 500px"] {
-        max-width: 100% !important;
-        width: 100% !important;
-      }
-      td[style*="width: 30%"],
-      td[style*="width: 70%"],
-      td[style*="width: 40%"],
-      td[style*="width: 60%"],
-      td[style*="width:30%"],
-      td[style*="width:70%"],
-      td[style*="width:40%"],
-      td[style*="width:60%"] {
-        width: 100% !important;
-        display: block !important;
-        padding: 10px 0 !important;
-      }
-      td[style*="padding-right: 15px"] {
-        padding-right: 0 !important;
-        padding-bottom: 15px !important;
-      }
-      td[style*="padding-left: 15px"] {
-        padding-left: 0 !important;
-      }
-      a[style*="display: inline-block"] {
-        display: inline-block !important;
-        margin: 2px 2px !important;
-      }
-      div[style*="display: flex"] {
-        display: block !important;
-      }
-      .cta-section td {
-        width: 100% !important;
-      }
-      div[style*="border-left"] {
-        border-left: none !important;
-        padding-left: 0 !important;
-      }
     }
   </style>
 </head>
