@@ -137,18 +137,8 @@ interface SignatureData {
   disclaimerBold: boolean;
   disclaimerItalic: boolean;
   showCTA: boolean;
-  ctaButtons: { text: string; url: string }[];
-  ctaButtonFont: string;
-  ctaButtonSize: number;
-  ctaButtonColor: string;
-  ctaButtonBackgroundColor: string;
-  ctaButtonShape: "rounded" | "square";
-  ctaButtonRadius: number;
-  ctaButtonBorderWidth: number;
-  ctaButtonBorderColor: string;
-  ctaButtonWidth: number;
-  ctaButtonHeight: number;
-  ctaButtonGap: number;
+  ctaText: string;
+  ctaUrl: string;
   showBanner: boolean;
   bannerText: string;
   bannerBackgroundColor: string;
@@ -507,18 +497,8 @@ export default function EmailSignature() {
     disclaimerBold: false,
     disclaimerItalic: true,
     showCTA: false,
-    ctaButtons: [{ text: "Book a Consultation", url: "" }],
-    ctaButtonFont: "Arial",
-    ctaButtonSize: 14,
-    ctaButtonColor: "#FFFFFF",
-    ctaButtonBackgroundColor: "#FF6A00",
-    ctaButtonShape: "rounded",
-    ctaButtonRadius: 25,
-    ctaButtonBorderWidth: 0,
-    ctaButtonBorderColor: "#FF6A00",
-    ctaButtonWidth: 160,
-    ctaButtonHeight: 45,
-    ctaButtonGap: 12,
+    ctaText: "Book a Consultation",
+    ctaUrl: "",
     showBanner: false,
     bannerText: "Get in touch today!",
     bannerBackgroundColor: "#FFFFFF",
@@ -550,12 +530,6 @@ export default function EmailSignature() {
     ctaSectionGradientColor1: "#FF6A00",
     ctaSectionGradientColor2: "#FFA500",
     ctaSectionGradientAngle: 134,
-    ctaButtonLogo: "",
-    ctaButtonLogoWidth: 60,
-    ctaButtonLogoHeight: 60,
-    ctaButtonLogoShape: "square",
-    ctaButtonLogoBorderWidth: 0,
-    ctaButtonLogoBorderColor: "#CCCCCC",
   });
 
   useEffect(() => {
@@ -597,28 +571,6 @@ export default function EmailSignature() {
 
   const removeCtaButtonLogo = () => {
     updateField("ctaButtonLogo", "");
-  };
-
-  const addCtaButton = () => {
-    setSignatureData((prev) => ({
-      ...prev,
-      ctaButtons: [...prev.ctaButtons, { text: "New Button", url: "" }],
-    }));
-  };
-
-  const removeCtaButton = (index: number) => {
-    setSignatureData((prev) => ({
-      ...prev,
-      ctaButtons: prev.ctaButtons.filter((_, i) => i !== index),
-    }));
-  };
-
-  const updateCtaButton = (index: number, field: "text" | "url", value: string) => {
-    setSignatureData((prev) => {
-      const newButtons = [...prev.ctaButtons];
-      newButtons[index] = { ...newButtons[index], [field]: value };
-      return { ...prev, ctaButtons: newButtons };
-    });
   };
 
   const addSocialLink = () => {
@@ -811,18 +763,6 @@ export default function EmailSignature() {
       ctaSectionGradientColor1,
       ctaSectionGradientColor2,
       ctaSectionGradientAngle,
-      ctaButtons,
-      ctaButtonFont,
-      ctaButtonSize,
-      ctaButtonColor,
-      ctaButtonBackgroundColor,
-      ctaButtonShape,
-      ctaButtonRadius,
-      ctaButtonBorderWidth,
-      ctaButtonBorderColor,
-      ctaButtonWidth,
-      ctaButtonHeight,
-      ctaButtonGap,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
@@ -937,17 +877,24 @@ export default function EmailSignature() {
           <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 20px;">
             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
               <tr>
-                <td style="width: 100%; vertical-align: middle; text-align: center;">
+                <td style="width: 50%; vertical-align: middle; text-align: center;">
                   ${
-                    ctaButtons
-                      .map((button) => {
-                        if (!button.url) return "";
-                        const borderRadius = ctaButtonShape === "rounded" ? `${ctaButtonRadius}px` : "0px";
-                        return `
-                  <a href="${button.url}" style="background-color: ${ctaButtonBackgroundColor}; color: ${ctaButtonColor}; padding: ${(ctaButtonHeight - ctaButtonSize) / 2}px 20px; width: ${ctaButtonWidth}px; height: ${ctaButtonHeight}px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; border-radius: ${borderRadius}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonSize}px; font-weight: bold; border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; margin: 0 ${ctaButtonGap / 2}px; box-sizing: border-box; text-align: center; vertical-align: middle; line-height: 1.2; word-break: break-word;">${button.text}</a>
-                        `;
-                      })
-                      .join("")
+                    ctaButtonLogo
+                      ? `
+                  <div style="width: ${ctaButtonLogoWidth}px; height: ${ctaButtonLogoHeight}px; border-radius: ${ctaButtonLogoShape === 'circle' ? '50%' : ctaButtonLogoShape === 'rounded' ? '8px' : '0'}; overflow: hidden; border: ${ctaButtonLogoBorderWidth}px solid ${ctaButtonLogoBorderColor}; display: inline-block;">
+                    <img src="${ctaButtonLogo}" alt="" style="width: 100%; height: 100%; display: block; object-fit: cover;">
+                  </div>
+                  `
+                      : ""
+                  }
+                </td>
+                <td style="width: 50%; vertical-align: middle; text-align: center;">
+                  ${
+                    showCTA && ctaUrl
+                      ? `
+                  <a href="${ctaUrl}" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${ctaText}</a>
+                  `
+                      : ""
                   }
                 </td>
               </tr>
@@ -3083,295 +3030,19 @@ export default function EmailSignature() {
 
                   {signatureData.showCTA && (
                     <div className="pl-6 space-y-3">
-                      <div className="border-b pb-2">
-                        <div className="flex items-center justify-between mb-2">
-                          <Label className="text-xs font-semibold">Buttons</Label>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={addCtaButton}
-                            data-testid="button-add-cta"
-                          >
-                            <Plus className="w-3 h-3 mr-1" /> Add
-                          </Button>
-                        </div>
-                        {signatureData.ctaButtons.map((button, index) => (
-                          <div key={index} className="mb-2 p-2 bg-slate-50 dark:bg-slate-900 rounded">
-                            <div className="flex gap-2 mb-2">
-                              <Input
-                                value={button.text}
-                                onChange={(e) =>
-                                  updateCtaButton(index, "text", e.target.value)
-                                }
-                                placeholder="Button Text"
-                                data-testid={`input-cta-button-text-${index}`}
-                              />
-                              <Input
-                                value={button.url}
-                                onChange={(e) =>
-                                  updateCtaButton(index, "url", e.target.value)
-                                }
-                                placeholder="Button URL"
-                                data-testid={`input-cta-button-url-${index}`}
-                              />
-                              {signatureData.ctaButtons.length > 1 && (
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => removeCtaButton(index)}
-                                  data-testid={`button-remove-cta-${index}`}
-                                >
-                                  <X className="w-3 h-3" />
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="border-t pt-2">
-                        <Label className="text-xs font-semibold mb-2 block">Button Styling</Label>
-                        <div>
-                          <Label className="text-xs">Font</Label>
-                          <select
-                            value={signatureData.ctaButtonFont}
-                            onChange={(e) =>
-                              updateField("ctaButtonFont", e.target.value)
-                            }
-                            className="w-full px-2 py-1 border rounded text-xs"
-                            data-testid="select-cta-button-font"
-                          >
-                            {professionalFonts.map((font) => (
-                              <option key={font} value={font}>
-                                {font}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">
-                            Font Size: {signatureData.ctaButtonSize}px
-                          </Label>
-                          <input
-                            type="range"
-                            min="10"
-                            max="24"
-                            value={signatureData.ctaButtonSize}
-                            onChange={(e) =>
-                              updateField(
-                                "ctaButtonSize",
-                                parseInt(e.target.value),
-                              )
-                            }
-                            className="custom-range w-full"
-                            data-testid="slider-cta-button-size"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Text Color</Label>
-                          <div className="flex gap-2">
-                            <input
-                              type="color"
-                              value={signatureData.ctaButtonColor}
-                              onChange={(e) =>
-                                updateField("ctaButtonColor", e.target.value)
-                              }
-                              className="w-10 h-9 rounded"
-                              data-testid="input-cta-button-color"
-                            />
-                            <Input
-                              value={signatureData.ctaButtonColor}
-                              onChange={(e) =>
-                                updateField("ctaButtonColor", e.target.value)
-                              }
-                              placeholder="#FFFFFF"
-                              className="flex-1"
-                              data-testid="input-cta-button-color-hex"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Background Color</Label>
-                          <div className="flex gap-2">
-                            <input
-                              type="color"
-                              value={signatureData.ctaButtonBackgroundColor}
-                              onChange={(e) =>
-                                updateField(
-                                  "ctaButtonBackgroundColor",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-10 h-9 rounded"
-                              data-testid="input-cta-button-bg-color"
-                            />
-                            <Input
-                              value={signatureData.ctaButtonBackgroundColor}
-                              onChange={(e) =>
-                                updateField(
-                                  "ctaButtonBackgroundColor",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="#FF6A00"
-                              className="flex-1"
-                              data-testid="input-cta-button-bg-color-hex"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Shape</Label>
-                          <select
-                            value={signatureData.ctaButtonShape}
-                            onChange={(e) =>
-                              updateField(
-                                "ctaButtonShape",
-                                e.target.value as "rounded" | "square",
-                              )
-                            }
-                            className="w-full px-2 py-1 border rounded text-xs"
-                            data-testid="select-cta-button-shape"
-                          >
-                            <option value="rounded">Rounded</option>
-                            <option value="square">Square</option>
-                          </select>
-                        </div>
-
-                        {signatureData.ctaButtonShape === "rounded" && (
-                          <div>
-                            <Label className="text-xs">
-                              Border Radius: {signatureData.ctaButtonRadius}px
-                            </Label>
-                            <input
-                              type="range"
-                              min="5"
-                              max="50"
-                              value={signatureData.ctaButtonRadius}
-                              onChange={(e) =>
-                                updateField(
-                                  "ctaButtonRadius",
-                                  parseInt(e.target.value),
-                                )
-                              }
-                              className="custom-range w-full"
-                              data-testid="slider-cta-button-radius"
-                            />
-                          </div>
-                        )}
-
-                        <div>
-                          <Label className="text-xs">
-                            Border Width: {signatureData.ctaButtonBorderWidth}px
-                          </Label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="5"
-                            value={signatureData.ctaButtonBorderWidth}
-                            onChange={(e) =>
-                              updateField(
-                                "ctaButtonBorderWidth",
-                                parseInt(e.target.value),
-                              )
-                            }
-                            className="custom-range w-full"
-                            data-testid="slider-cta-button-border-width"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Border Color</Label>
-                          <div className="flex gap-2">
-                            <input
-                              type="color"
-                              value={signatureData.ctaButtonBorderColor}
-                              onChange={(e) =>
-                                updateField(
-                                  "ctaButtonBorderColor",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-10 h-9 rounded"
-                              data-testid="input-cta-button-border-color"
-                            />
-                            <Input
-                              value={signatureData.ctaButtonBorderColor}
-                              onChange={(e) =>
-                                updateField(
-                                  "ctaButtonBorderColor",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="#FF6A00"
-                              className="flex-1"
-                              data-testid="input-cta-button-border-color-hex"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">
-                            Button Width: {signatureData.ctaButtonWidth}px
-                          </Label>
-                          <input
-                            type="range"
-                            min="100"
-                            max="300"
-                            value={signatureData.ctaButtonWidth}
-                            onChange={(e) =>
-                              updateField(
-                                "ctaButtonWidth",
-                                parseInt(e.target.value),
-                              )
-                            }
-                            className="custom-range w-full"
-                            data-testid="slider-cta-button-width"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">
-                            Button Height: {signatureData.ctaButtonHeight}px
-                          </Label>
-                          <input
-                            type="range"
-                            min="30"
-                            max="80"
-                            value={signatureData.ctaButtonHeight}
-                            onChange={(e) =>
-                              updateField(
-                                "ctaButtonHeight",
-                                parseInt(e.target.value),
-                              )
-                            }
-                            className="custom-range w-full"
-                            data-testid="slider-cta-button-height"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">
-                            Button Gap: {signatureData.ctaButtonGap}px
-                          </Label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="30"
-                            value={signatureData.ctaButtonGap}
-                            onChange={(e) =>
-                              updateField(
-                                "ctaButtonGap",
-                                parseInt(e.target.value),
-                              )
-                            }
-                            className="custom-range w-full"
-                            data-testid="slider-cta-button-gap"
-                          />
-                        </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          value={signatureData.ctaText}
+                          onChange={(e) => updateField("ctaText", e.target.value)}
+                          placeholder="Button Text"
+                          data-testid="input-cta-text"
+                        />
+                        <Input
+                          value={signatureData.ctaUrl}
+                          onChange={(e) => updateField("ctaUrl", e.target.value)}
+                          placeholder="Button URL"
+                          data-testid="input-cta-url"
+                        />
                       </div>
 
                       <div>
