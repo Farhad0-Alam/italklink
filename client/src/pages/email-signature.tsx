@@ -1062,7 +1062,7 @@ export default function EmailSignature() {
       }
       if (profilePhotoShape === "star") {
         borderRadius = "0%";
-        clipPath = "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)";
+        clipPath = "polygon(50% 0%, 61% 38%, 100% 38%, 68% 60%, 82% 100%, 50% 72%, 18% 100%, 32% 60%, 0% 38%, 39% 38%)";
       }
       if (profilePhotoShape === "blob") {
         borderRadius = "63% 37% 54% 46% / 45% 52% 48% 55%";
