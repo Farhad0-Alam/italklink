@@ -840,7 +840,7 @@ export default function EmailSignature() {
       ? `
   <tr>
     <td style="padding: ${bannerTopSpacing}px ${bannerPadding}px ${bannerPadding}px ${bannerPadding}px;">
-      <div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-family: ${bannerFont}, sans-serif; font-size: ${bannerFontSize}px; font-weight: bold; color: ${bannerFontColor}; width: ${bannerWidth}%; height: ${bannerHeight === "auto" ? "auto" : bannerHeight + "px"};">
+      <div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-family: ${bannerFont}, sans-serif; font-size: ${bannerFontSize}px; font-weight: bold; color: ${bannerFontColor}; width: ${bannerWidth}%; height: ${bannerHeight === "auto" ? "auto" : bannerHeight + "px"}; margin: 0; display: block;">
         ${bannerText}
       </div>
     </td>
