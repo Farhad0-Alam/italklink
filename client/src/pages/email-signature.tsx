@@ -472,7 +472,7 @@ export default function EmailSignature() {
     showVerticalDivider: true,
     verticalDividerWidth: 2,
     verticalDividerColor: "#FF6A00",
-    verticalDividerHeight: 100,
+    verticalDividerHeight: 50,
     socialLinks: [
       {
         platform: "linkedin",
@@ -2114,7 +2114,7 @@ export default function EmailSignature() {
                             </Label>
                             <input
                               type="range"
-                              min="50"
+                              min="20"
                               max="300"
                               value={signatureData.verticalDividerHeight}
                               onChange={(e) =>
