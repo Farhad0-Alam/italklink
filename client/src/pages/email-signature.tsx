@@ -135,6 +135,9 @@ interface SignatureData {
   ctaUrl: string;
   showBanner: boolean;
   bannerText: string;
+  bannerImage: string;
+  bannerType: "text" | "image";
+  bannerCoverLogoAndCTA: boolean;
   bannerBackgroundColor: string;
   bannerBorderColor: string;
   bannerBorderWidth: number;
@@ -478,6 +481,9 @@ export default function EmailSignature() {
     ctaUrl: "",
     showBanner: false,
     bannerText: "Get in touch today!",
+    bannerImage: "",
+    bannerType: "text",
+    bannerCoverLogoAndCTA: false,
     bannerBackgroundColor: "#FFFFFF",
     bannerBorderColor: "#FF6A00",
     bannerBorderWidth: 3,
@@ -503,9 +509,10 @@ export default function EmailSignature() {
   };
 
   const handleImageUpload = (
-    field: "profilePhoto" | "companyLogo",
-    file: File,
+    field: "profilePhoto" | "companyLogo" | "bannerImage",
+    file?: File,
   ) => {
+    if (!file) return;
     const reader = new FileReader();
     reader.onloadend = () => {
       updateField(field, reader.result as string);
@@ -638,6 +645,9 @@ export default function EmailSignature() {
       ctaUrl,
       showBanner,
       bannerText,
+      bannerImage,
+      bannerType,
+      bannerCoverLogoAndCTA,
       bannerBackgroundColor,
       bannerBorderColor,
       bannerBorderWidth,
@@ -720,15 +730,39 @@ export default function EmailSignature() {
       })
       .join("");
 
+    // Build the logo + CTA content
+    const logoCtaContent = `
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr>
+        ${companyLogo ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}"><img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}"></div></td>` : ""}
+        ${
+          showCTA && ctaUrl
+            ? `
+        <td style="text-align: ${companyLogo ? "right" : "center"}; vertical-align: middle;">
+          <a href="${ctaUrl}" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${ctaText}</a>
+        </td>
+        `
+            : ""
+        }
+      </tr>
+    </table>
+    `;
+
+    // Build banner content (text or image)
+    const bannerContent = 
+      bannerType === "image" && bannerImage
+        ? `<img src="${bannerImage}" alt="Banner" style="width: 100%; display: block; height: auto;">`
+        : `<div style="text-align: center; font-size: 16px; font-weight: bold; color: #333333;">${bannerText}</div>`;
+
     return `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 700px; margin: 0; padding: 0; background-color: #f9f9f9;">
   ${
-    showBanner
+    showBanner && !bannerCoverLogoAndCTA
       ? `
   <tr>
     <td style="padding: ${bannerPadding}px;">
-      <div style="background-color: ${bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-size: 16px; font-weight: bold; color: #333333;">
-        ${bannerText}
+      <div style="background-color: ${bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px;">
+        ${bannerContent}
       </div>
     </td>
   </tr>
@@ -785,21 +819,9 @@ export default function EmailSignature() {
           companyLogo || showCTA
             ? `
         <tr>
-          <td colspan="2" style="padding-top: 25px; margin-top: 20px;">
-            <table cellpadding="0" cellspacing="0" border="0" width="100%">
-              <tr>
-                ${companyLogo ? `<td style="vertical-align: middle; width: 50%; display: flex; justify-content: center;"><div style="${getContainerStyle('logo')}"><img src="${companyLogo}" alt="Company Logo" style="${getImageStyle('logo')}"></div></td>` : ""}
-                ${
-                  showCTA && ctaUrl
-                    ? `
-                <td style="text-align: ${companyLogo ? "right" : "center"}; vertical-align: middle;">
-                  <a href="${ctaUrl}" style="background: linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${ctaText}</a>
-                </td>
-                `
-                    : ""
-                }
-              </tr>
-            </table>
+          <td colspan="2" style="padding-top: 25px; margin-top: 20px; ${showBanner && bannerCoverLogoAndCTA ? `background-color: ${bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px;` : ''}">
+            ${showBanner && bannerCoverLogoAndCTA ? `<div style="margin-bottom: ${bannerPadding}px;">${bannerContent}</div>` : ''}
+            ${logoCtaContent}
           </td>
         </tr>
         `
@@ -2930,92 +2952,148 @@ export default function EmailSignature() {
 
                   {signatureData.showBanner && (
                     <div className="pl-6 space-y-3">
-                      <Input
-                        value={signatureData.bannerText}
-                        onChange={(e) =>
-                          updateField("bannerText", e.target.value)
-                        }
-                        placeholder="Banner Text"
-                        data-testid="input-banner-text"
-                      />
-
                       <div>
-                        <Label className="text-xs">Background Color</Label>
-                        <div className="flex gap-2">
-                          <input
-                            type="color"
-                            value={signatureData.bannerBackgroundColor}
-                            onChange={(e) =>
-                              updateField("bannerBackgroundColor", e.target.value)
-                            }
-                            className="w-10 h-9 rounded"
-                            data-testid="input-banner-bg-color"
-                          />
-                          <Input
-                            value={signatureData.bannerBackgroundColor}
-                            onChange={(e) =>
-                              updateField("bannerBackgroundColor", e.target.value)
-                            }
-                            placeholder="#FFFFFF"
-                            className="flex-1"
-                            data-testid="input-banner-bg-color-hex"
-                          />
-                        </div>
+                        <Label className="text-xs">Banner Type</Label>
+                        <Select
+                          value={signatureData.bannerType}
+                          onValueChange={(value: "text" | "image") =>
+                            updateField("bannerType", value)
+                          }
+                        >
+                          <SelectTrigger data-testid="select-banner-type">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="text">Text</SelectItem>
+                            <SelectItem value="image">Image</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
+                      {signatureData.bannerType === "text" ? (
+                        <Input
+                          value={signatureData.bannerText}
+                          onChange={(e) =>
+                            updateField("bannerText", e.target.value)
+                          }
+                          placeholder="Banner Text"
+                          data-testid="input-banner-text"
+                        />
+                      ) : (
                         <div>
-                          <Label className="text-xs">Border Color</Label>
-                          <div className="flex gap-2">
-                            <input
-                              type="color"
-                              value={signatureData.bannerBorderColor}
-                              onChange={(e) =>
-                                updateField("bannerBorderColor", e.target.value)
-                              }
-                              className="w-10 h-9 rounded"
-                              data-testid="input-banner-border-color"
+                          <Label className="text-xs">Banner Image</Label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              handleImageUpload("bannerImage", e.target.files?.[0])
+                            }
+                            className="w-full text-xs"
+                            data-testid="input-banner-image"
+                          />
+                          {signatureData.bannerImage && (
+                            <img
+                              src={signatureData.bannerImage}
+                              alt="Banner Preview"
+                              className="w-full h-12 object-cover rounded mt-2"
                             />
-                            <Input
-                              value={signatureData.bannerBorderColor}
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs">Cover Logo & CTA</Label>
+                        <Switch
+                          checked={signatureData.bannerCoverLogoAndCTA}
+                          onCheckedChange={(checked) =>
+                            updateField("bannerCoverLogoAndCTA", checked)
+                          }
+                          data-testid="switch-banner-cover"
+                        />
+                      </div>
+
+                      <div className="border-t border-slate-200 pt-3">
+                        <Label className="text-xs font-semibold">Background & Border</Label>
+                        <div className="space-y-3 mt-2">
+                          <div>
+                            <Label className="text-xs">Background Color</Label>
+                            <div className="flex gap-2">
+                              <input
+                                type="color"
+                                value={signatureData.bannerBackgroundColor}
+                                onChange={(e) =>
+                                  updateField("bannerBackgroundColor", e.target.value)
+                                }
+                                className="w-10 h-9 rounded"
+                                data-testid="input-banner-bg-color"
+                              />
+                              <Input
+                                value={signatureData.bannerBackgroundColor}
+                                onChange={(e) =>
+                                  updateField("bannerBackgroundColor", e.target.value)
+                                }
+                                placeholder="#FFFFFF"
+                                className="flex-1"
+                                data-testid="input-banner-bg-color-hex"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-xs">Border Color</Label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="color"
+                                  value={signatureData.bannerBorderColor}
+                                  onChange={(e) =>
+                                    updateField("bannerBorderColor", e.target.value)
+                                  }
+                                  className="w-10 h-9 rounded"
+                                  data-testid="input-banner-border-color"
+                                />
+                                <Input
+                                  value={signatureData.bannerBorderColor}
+                                  onChange={(e) =>
+                                    updateField("bannerBorderColor", e.target.value)
+                                  }
+                                  placeholder="#FF6A00"
+                                  className="flex-1"
+                                  data-testid="input-banner-border-color-hex"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <Label className="text-xs">Border Width (px)</Label>
+                              <Input
+                                type="number"
+                                value={signatureData.bannerBorderWidth}
+                                onChange={(e) =>
+                                  updateField("bannerBorderWidth", Number(e.target.value))
+                                }
+                                min="0"
+                                max="10"
+                                data-testid="input-banner-border-width"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label className="text-xs">Padding ({signatureData.bannerPadding}px)</Label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="40"
+                              value={signatureData.bannerPadding}
                               onChange={(e) =>
-                                updateField("bannerBorderColor", e.target.value)
+                                updateField("bannerPadding", Number(e.target.value))
                               }
-                              placeholder="#FF6A00"
-                              className="flex-1"
-                              data-testid="input-banner-border-color-hex"
+                              className="w-full"
+                              data-testid="input-banner-padding"
                             />
                           </div>
                         </div>
-
-                        <div>
-                          <Label className="text-xs">Border Width (px)</Label>
-                          <Input
-                            type="number"
-                            value={signatureData.bannerBorderWidth}
-                            onChange={(e) =>
-                              updateField("bannerBorderWidth", Number(e.target.value))
-                            }
-                            min="0"
-                            max="10"
-                            data-testid="input-banner-border-width"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label className="text-xs">Padding ({signatureData.bannerPadding}px)</Label>
-                        <input
-                          type="range"
-                          min="0"
-                          max="40"
-                          value={signatureData.bannerPadding}
-                          onChange={(e) =>
-                            updateField("bannerPadding", Number(e.target.value))
-                          }
-                          className="w-full"
-                          data-testid="input-banner-padding"
-                        />
                       </div>
                     </div>
                   )}
