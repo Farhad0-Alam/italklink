@@ -922,15 +922,17 @@ export default function EmailSignature() {
                       : ""
                   }
                 </td>
-                <td style="width: 60%; vertical-align: middle; text-align: ${ctaButtonGroupAlignment}; display: flex; flex-direction: column; justify-content: flex-end; align-items: ${ctaButtonGroupAlignment === 'center' ? 'center' : ctaButtonGroupAlignment === 'left' ? 'flex-start' : 'flex-end'}; gap: 8px; padding-bottom: 10px;">
-                  ${ctaButtons
-                    .filter((btn) => btn.url)
-                    .map(
-                      (btn) => `
-                  <a href="${btn.url}" style="background: ${ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px;">${btn.text}</a>
-                  `
-                    )
-                    .join("")}
+                <td style="width: 60%; vertical-align: bottom; text-align: ${ctaButtonGroupAlignment}; padding: 10px 15px 10px ${ctaButtonGroupAlignment === 'right' ? '0' : '15px'}; padding-right: ${ctaButtonGroupAlignment === 'right' ? '15px' : '15px'};">
+                  <div style="line-height: 1;">
+                    ${ctaButtons
+                      .filter((btn) => btn.url)
+                      .map(
+                        (btn) => `
+                    <a href="${btn.url}" style="background: ${ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 28px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px;">${btn.text}</a>
+                    `
+                      )
+                      .join("")}
+                  </div>
                 </td>
               </tr>
             </table>
