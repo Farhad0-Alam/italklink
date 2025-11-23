@@ -888,7 +888,8 @@ export default function EmailSignature() {
                 `
                     : ""
                 }
-                <td style="text-align: ${ctaButtonLogo ? 'left' : 'center'}; vertical-align: middle;">
+                <td style="width: 100%; vertical-align: middle;"></td>
+                <td style="text-align: right; vertical-align: middle; padding-left: 12px;">
                   ${
                     showCTA && ctaUrl
                       ? `
