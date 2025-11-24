@@ -440,9 +440,13 @@ export default function EmailSignature() {
     profilePhotoOpacity: 100,
     profilePhotoShadow: "medium",
     profilePhotoRightSideGap: 13,
+    profilePhotoPositionX: 0,
+    profilePhotoPositionY: 0,
     textContentLeftGap: 15,
 
     companyLogo: "",
+    companyLogoPositionX: 0,
+    companyLogoPositionY: 0,
     companyLogoShape: "square",
     companyLogoWidth: 120,
     companyLogoHeight: 60,
@@ -1078,7 +1082,7 @@ export default function EmailSignature() {
   // Helper function to get container styles (wrapper div)
   const getContainerStyle = (type: "profile" | "logo"): string => {
     if (type === "profile") {
-      const { profilePhotoShape, profilePhotoWidth, profilePhotoHeight, profilePhotoBorderWidth, profilePhotoBorderColor, profilePhotoBorderStyle, profilePhotoOpacity, profilePhotoShadow, profilePhotoRightSideGap } = signatureData;
+      const { profilePhotoShape, profilePhotoWidth, profilePhotoHeight, profilePhotoBorderWidth, profilePhotoBorderColor, profilePhotoBorderStyle, profilePhotoOpacity, profilePhotoShadow, profilePhotoRightSideGap, profilePhotoPositionX, profilePhotoPositionY } = signatureData;
 
       let borderRadius = "50%";
       let clipPath = "none";
@@ -1132,9 +1136,10 @@ export default function EmailSignature() {
       if (profilePhotoShadow === "large") boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
 
       const clipPathStyle = clipPath !== "none" ? `; clip-path: ${clipPath}` : "";
-      return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px ${profilePhotoBorderStyle} ${profilePhotoBorderColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center${clipPathStyle};`;
+      const transform = (profilePhotoPositionX !== 0 || profilePhotoPositionY !== 0) ? `; transform: translate(${profilePhotoPositionX}px, ${profilePhotoPositionY}px)` : "";
+      return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px ${profilePhotoBorderStyle} ${profilePhotoBorderColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center${clipPathStyle}${transform};`;
     } else {
-      const { companyLogoShape, companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor, companyLogoBackgroundColor, companyLogoShadow } = signatureData;
+      const { companyLogoShape, companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor, companyLogoBackgroundColor, companyLogoShadow, companyLogoPositionX, companyLogoPositionY } = signatureData;
       
       let borderRadius = "0%";
       if (companyLogoShape === "circle") borderRadius = "50%";
@@ -1145,7 +1150,8 @@ export default function EmailSignature() {
       if (companyLogoShadow === "medium") boxShadow = "0 4px 8px rgba(0,0,0,0.15)";
       if (companyLogoShadow === "large") boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
 
-      return `width: ${companyLogoWidth}px; height: ${companyLogoHeight}px; border-radius: ${borderRadius}; border: ${companyLogoBorderWidth}px solid ${companyLogoBorderColor}; background-color: ${companyLogoBackgroundColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center;`;
+      const transform = (companyLogoPositionX !== 0 || companyLogoPositionY !== 0) ? `; transform: translate(${companyLogoPositionX}px, ${companyLogoPositionY}px)` : "";
+      return `width: ${companyLogoWidth}px; height: ${companyLogoHeight}px; border-radius: ${borderRadius}; border: ${companyLogoBorderWidth}px solid ${companyLogoBorderColor}; background-color: ${companyLogoBackgroundColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center${transform};`;
     }
   };
 
@@ -3027,6 +3033,20 @@ export default function EmailSignature() {
                           <Label className="text-xs">Right Side Gap ({signatureData.profilePhotoRightSideGap}px)</Label>
                           <input type="range" min="0" max="40" value={signatureData.profilePhotoRightSideGap} onChange={(e) => updateField("profilePhotoRightSideGap", Number(e.target.value))} className="w-full" data-testid="input-profile-right-gap" />
                         </div>
+
+                        <div className="border-t pt-2 mt-2">
+                          <h4 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Free Positioning</h4>
+                          <div className="space-y-2">
+                            <div>
+                              <Label className="text-xs">Horizontal Position ({signatureData.profilePhotoPositionX}px)</Label>
+                              <input type="range" min="-150" max="150" value={signatureData.profilePhotoPositionX} onChange={(e) => updateField("profilePhotoPositionX", Number(e.target.value))} className="w-full" data-testid="slider-profile-position-x" />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Vertical Position ({signatureData.profilePhotoPositionY}px)</Label>
+                              <input type="range" min="-150" max="150" value={signatureData.profilePhotoPositionY} onChange={(e) => updateField("profilePhotoPositionY", Number(e.target.value))} className="w-full" data-testid="slider-profile-position-y" />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </>
@@ -3149,6 +3169,20 @@ export default function EmailSignature() {
                                 <SelectItem value="large">Large</SelectItem>
                               </SelectContent>
                             </Select>
+                          </div>
+                        </div>
+
+                        <div className="border-t pt-2 mt-2">
+                          <h4 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Free Positioning</h4>
+                          <div className="space-y-2">
+                            <div>
+                              <Label className="text-xs">Horizontal Position ({signatureData.companyLogoPositionX}px)</Label>
+                              <input type="range" min="-150" max="150" value={signatureData.companyLogoPositionX} onChange={(e) => updateField("companyLogoPositionX", Number(e.target.value))} className="w-full" data-testid="slider-logo-position-x" />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Vertical Position ({signatureData.companyLogoPositionY}px)</Label>
+                              <input type="range" min="-150" max="150" value={signatureData.companyLogoPositionY} onChange={(e) => updateField("companyLogoPositionY", Number(e.target.value))} className="w-full" data-testid="slider-logo-position-y" />
+                            </div>
                           </div>
                         </div>
                       </div>
