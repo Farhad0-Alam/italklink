@@ -1392,18 +1392,29 @@ export default function EmailSignature() {
 
   const copyToClipboard = async () => {
     try {
+      // Highlight the preview
+      const previewElement = document.querySelector('[data-testid="signature-preview"]');
+      if (previewElement) {
+        previewElement.classList.add('ring-2', 'ring-blue-500', 'ring-offset-2');
+      }
+
       // Get the generated signature HTML (same as download)
       const signatureHTML = generateSignatureHTML();
       
-      // Copy to clipboard with proper HTML MIME type
-      const blob = new Blob([signatureHTML], { type: 'text/html' });
-      const data = [new ClipboardItem({ 'text/html': blob })];
-      await navigator.clipboard.write(data);
+      // Copy to clipboard
+      await navigator.clipboard.writeText(signatureHTML);
       
       toast({
         title: "Copied!",
         description: "Email signature copied to clipboard. Paste it directly into your email client's signature settings.",
       });
+
+      // Remove highlight after 2 seconds
+      setTimeout(() => {
+        if (previewElement) {
+          previewElement.classList.remove('ring-2', 'ring-blue-500', 'ring-offset-2');
+        }
+      }, 2000);
     } catch (err) {
       toast({
         title: "Copy failed",
