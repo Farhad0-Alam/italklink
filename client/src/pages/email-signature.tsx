@@ -945,64 +945,66 @@ export default function EmailSignature() {
             </div>
           </td>
         </tr>
-        ${
-          showCTA
-            ? `
         <tr>
-          <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 0px; height: ${ctaSectionHeight}px;">
-            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
-              <tr>
-                <td style="width: ${ctaLogoColumnWidth}%; vertical-align: middle; text-align: center; padding: 0; margin: 0;">
-                  ${
-                    ctaButtonLogo
-                      ? `
-                  <div style="width: ${ctaButtonLogoWidth}px; height: ${ctaButtonLogoHeight}px; border-radius: ${ctaButtonLogoShape === 'circle' ? '50%' : ctaButtonLogoShape === 'rounded' ? '8px' : '0'}; overflow: hidden; border: ${ctaButtonLogoBorderWidth}px solid ${ctaButtonLogoBorderColor}; display: inline-block; margin: 0; padding: 0;">
-                    <img src="${ctaButtonLogo}" alt="" style="width: 100%; height: 100%; display: block; object-fit: cover;">
-                  </div>
-                  `
-                      : ""
-                  }
-                </td>
-                <td style="width: ${ctaButtonsColumnWidth}%; vertical-align: bottom; text-align: ${ctaButtonGroupAlignment}; padding: 10px 15px 10px ${ctaButtonGroupAlignment === 'right' ? '0' : '15px'}; padding-right: ${ctaButtonGroupAlignment === 'right' ? '15px' : '15px'};">
-                  <div style="line-height: 1;">
-                    ${ctaButtons
-                      .filter((btn) => btn.url)
-                      .map(
-                        (btn) => {
-                          const lineHeightValue = Math.max(ctaButtonHeight - 24, 1);
-                          return `
-                    <a href="${btn.url}" style="display: inline-block; vertical-align: middle; background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 11px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; box-shadow: ${ctaButtonShadowOffsetX}px ${ctaButtonShadowOffsetY}px ${ctaButtonShadowBlur}px rgba(${parseInt(ctaButtonShadowColor.slice(1, 3), 16)}, ${parseInt(ctaButtonShadowColor.slice(3, 5), 16)}, ${parseInt(ctaButtonShadowColor.slice(5, 7), 16)}, ${ctaButtonShadowOpacity}); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px; width: ${ctaButtonWidth}px; height: ${ctaButtonHeight}px; line-height: ${lineHeightValue}px; text-align: center; white-space: nowrap; cursor: pointer;">${btn.text}</a>
-                    `;
-                        }
-                      )
-                      .join("")}
-                  </div>
-                </td>
-              </tr>
-            </table>
+          <td colspan="2" style="padding: 0;">
+            ${
+              showCTA
+                ? `
+            <div style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; height: ${ctaSectionHeight}px; margin-bottom: ${Math.min(0, bannerTopSpacing)}px;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
+                <tr>
+                  <td style="width: ${ctaLogoColumnWidth}%; vertical-align: middle; text-align: center; padding: 0; margin: 0;">
+                    ${
+                      ctaButtonLogo
+                        ? `
+                    <div style="width: ${ctaButtonLogoWidth}px; height: ${ctaButtonLogoHeight}px; border-radius: ${ctaButtonLogoShape === 'circle' ? '50%' : ctaButtonLogoShape === 'rounded' ? '8px' : '0'}; overflow: hidden; border: ${ctaButtonLogoBorderWidth}px solid ${ctaButtonLogoBorderColor}; display: inline-block; margin: 0; padding: 0;">
+                      <img src="${ctaButtonLogo}" alt="" style="width: 100%; height: 100%; display: block; object-fit: cover;">
+                    </div>
+                    `
+                        : ""
+                    }
+                  </td>
+                  <td style="width: ${ctaButtonsColumnWidth}%; vertical-align: bottom; text-align: ${ctaButtonGroupAlignment}; padding: 10px 15px 10px ${ctaButtonGroupAlignment === 'right' ? '0' : '15px'}; padding-right: ${ctaButtonGroupAlignment === 'right' ? '15px' : '15px'};">
+                    <div style="line-height: 1;">
+                      ${ctaButtons
+                        .filter((btn) => btn.url)
+                        .map(
+                          (btn) => {
+                            const lineHeightValue = Math.max(ctaButtonHeight - 24, 1);
+                            return `
+                      <a href="${btn.url}" style="display: inline-block; vertical-align: middle; background: ${ctaButtonUseGradient ? `linear-gradient(${ctaButtonGradientAngle}deg, ${ctaButtonGradientColor1} 0%, ${ctaButtonGradientColor2} 100%)` : ctaButtonBgColor}; color: ${ctaButtonFontColor}; padding: 12px 11px; text-decoration: none; border-radius: ${ctaButtonShape === 'square' ? '0' : ctaButtonShape === 'rounded' ? '8px' : '25px'}; font-weight: bold; box-shadow: ${ctaButtonShadowOffsetX}px ${ctaButtonShadowOffsetY}px ${ctaButtonShadowBlur}px rgba(${parseInt(ctaButtonShadowColor.slice(1, 3), 16)}, ${parseInt(ctaButtonShadowColor.slice(3, 5), 16)}, ${parseInt(ctaButtonShadowColor.slice(5, 7), 16)}, ${ctaButtonShadowOpacity}); border: ${ctaButtonBorderWidth}px solid ${ctaButtonBorderColor}; font-family: ${ctaButtonFont}, sans-serif; font-size: ${ctaButtonFontSize}px; margin: 4px 4px; width: ${ctaButtonWidth}px; height: ${ctaButtonHeight}px; line-height: ${lineHeightValue}px; text-align: center; white-space: nowrap; cursor: pointer;">${btn.text}</a>
+                      `;
+                          }
+                        )
+                        .join("")}
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            `
+                : ""
+            }
           </td>
         </tr>
-        `
-            : ""
-        }
+        <tr>
+          <td colspan="2" style="padding: ${Math.max(0, bannerTopSpacing)}px 0 0 0; width: 100%;">
+            ${
+              showBanner
+                ? `
+            ${
+              bannerUrl
+                ? `<a href="${bannerUrl}" style="text-decoration: none; display: block;"><div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block; box-sizing: border-box;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="width: ${bannerTextAlign}%; padding: 0; margin: 0;"></td><td style="padding: ${bannerPadding}px; margin: 0; text-align: center; white-space: nowrap;">${bannerText}</td><td style="width: ${Math.max(0, 100 - bannerTextAlign)}%; padding: 0; margin: 0;"></td></tr></table></div></a>`
+                : `<div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block; box-sizing: border-box;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="width: ${bannerTextAlign}%; padding: 0; margin: 0;"></td><td style="padding: ${bannerPadding}px; margin: 0; text-align: center; white-space: nowrap;">${bannerText}</td><td style="width: ${Math.max(0, 100 - bannerTextAlign)}%; padding: 0; margin: 0;"></td></tr></table></div>`
+            }
+            `
+                : ""
+            }
+          </td>
+        </tr>
       </table>
     </td>
   </tr>
-  ${
-    showBanner
-      ? `
-  <tr>
-    <td style="padding: 0; width: 100%;">
-      ${
-        bannerUrl
-          ? `<a href="${bannerUrl}" style="text-decoration: none; display: block;"><div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin-top: ${bannerTopSpacing}px; margin: 0 0 0 0; display: block; box-sizing: border-box;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="width: ${bannerTextAlign}%; padding: 0; margin: 0;"></td><td style="padding: ${bannerPadding}px; margin: 0; text-align: center; white-space: nowrap;">${bannerText}</td><td style="width: ${Math.max(0, 100 - bannerTextAlign)}%; padding: 0; margin: 0;"></td></tr></table></div></a>`
-          : `<div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin-top: ${bannerTopSpacing}px; margin: 0 0 0 0; display: block; box-sizing: border-box;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="width: ${bannerTextAlign}%; padding: 0; margin: 0;"></td><td style="padding: ${bannerPadding}px; margin: 0; text-align: center; white-space: nowrap;">${bannerText}</td><td style="width: ${Math.max(0, 100 - bannerTextAlign)}%; padding: 0; margin: 0;"></td></tr></table></div>`
-      }
-    </td>
-  </tr>
-  `
-      : ""
-  }
   ${
     showDisclaimer
       ? `
