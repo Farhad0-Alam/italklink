@@ -565,7 +565,7 @@ export default function EmailSignature() {
     bannerTextSize: 19,
     bannerTextHeight: 1.0,
     bannerTextAlign: 50,
-    bannerUrl: "",
+    bannerUrl: "https://talkl.ink/",
     ctaButtonLogo: "",
     ctaButtonLogoWidth: 60,
     ctaButtonLogoHeight: 60,
