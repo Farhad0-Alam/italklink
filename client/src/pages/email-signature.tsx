@@ -128,6 +128,11 @@ interface SignatureData {
   dividerMarginBottom: number;
   dividerWidth: number;
 
+  showVerticalDivider: boolean;
+  verticalDividerWidth: number;
+  verticalDividerColor: string;
+  verticalDividerLeftPadding: number;
+
   socialLinks: { platform: string; url: string; icon: string }[];
 
   showDisclaimer: boolean;
@@ -471,6 +476,10 @@ export default function EmailSignature() {
     dividerMarginTop: 5,
     dividerMarginBottom: 5,
     dividerWidth: 100,
+    showVerticalDivider: true,
+    verticalDividerWidth: 3,
+    verticalDividerColor: "#FF6A00",
+    verticalDividerLeftPadding: 10,
     socialLinks: [
       {
         platform: "linkedin",
@@ -774,6 +783,10 @@ export default function EmailSignature() {
       dividerMarginTop,
       dividerMarginBottom,
       dividerWidth,
+      showVerticalDivider,
+      verticalDividerWidth,
+      verticalDividerColor,
+      verticalDividerLeftPadding,
       profilePhotoRightSideGap,
       textContentLeftGap,
       showDisclaimer,
@@ -897,7 +910,7 @@ export default function EmailSignature() {
             }
           </td>
           <td style="width: ${rightContainerWidth.toFixed(1)}%; vertical-align: top; padding: 0;">
-            <div>
+            <div style="${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor}; padding-left: ${verticalDividerLeftPadding}px;` : 'padding-left: 0;'}">
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="padding-left: ${textContentLeftGap}px; margin-left: -${textContentLeftGap}px; margin-right: ${textContentLeftGap}px;">
                 ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
                 <tr>
@@ -2230,6 +2243,87 @@ export default function EmailSignature() {
                               className="custom-range w-full"
                               data-testid="slider-divider-margin-bottom"
                             />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Vertical Divider Subsection */}
+                    <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-3">
+                        <Label className="text-sm font-semibold">
+                          Vertical Divider (Text Content)
+                        </Label>
+                        <Switch
+                          checked={signatureData.showVerticalDivider}
+                          onCheckedChange={(checked) =>
+                            updateField("showVerticalDivider", checked)
+                          }
+                          data-testid="toggle-vertical-divider"
+                        />
+                      </div>
+                      {signatureData.showVerticalDivider && (
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-xs">
+                              Width: {signatureData.verticalDividerWidth}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="1"
+                              max="10"
+                              value={signatureData.verticalDividerWidth}
+                              onChange={(e) =>
+                                updateField(
+                                  "verticalDividerWidth",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-vertical-divider-width"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">
+                              Left Padding: {signatureData.verticalDividerLeftPadding}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="30"
+                              value={signatureData.verticalDividerLeftPadding}
+                              onChange={(e) =>
+                                updateField(
+                                  "verticalDividerLeftPadding",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-vertical-divider-padding"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs mb-1">Color</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="color"
+                                value={signatureData.verticalDividerColor}
+                                onChange={(e) =>
+                                  updateField("verticalDividerColor", e.target.value)
+                                }
+                                className="w-16 h-9"
+                                data-testid="input-vertical-divider-color"
+                              />
+                              <Input
+                                value={signatureData.verticalDividerColor}
+                                onChange={(e) =>
+                                  updateField("verticalDividerColor", e.target.value)
+                                }
+                                placeholder="#FF6A00"
+                                className="flex-1"
+                                data-testid="input-vertical-divider-color-hex"
+                              />
+                            </div>
                           </div>
                         </div>
                       )}
