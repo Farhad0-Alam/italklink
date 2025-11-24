@@ -841,6 +841,8 @@ export default function EmailSignature() {
       ctaButtonShadowBlur,
       ctaButtonShadowOffsetX,
       ctaButtonShadowOffsetY,
+      ctaLeftPadding,
+      ctaRightPadding,
     } = signatureData;
 
     const socialIconsHTML = socialLinks
