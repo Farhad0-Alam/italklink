@@ -910,7 +910,7 @@ export default function EmailSignature() {
             }
           </td>
           <td style="width: ${rightContainerWidth.toFixed(1)}%; vertical-align: top; padding: 0;">
-            <div style="min-height: ${verticalDividerHeight}px; ${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor};` : ''}">
+            <div style="min-height: ${verticalDividerHeight}px; ${showVerticalDivider ? `border-right: ${verticalDividerWidth}px solid ${verticalDividerColor};` : 'border-right: none;'} padding-right: 12px;">
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="padding-left: ${textContentLeftGap}px; margin-left: -${textContentLeftGap}px; margin-right: ${textContentLeftGap}px;">
                 ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
                 <tr>
