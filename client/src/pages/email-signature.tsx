@@ -2347,6 +2347,10 @@ export default function EmailSignature() {
                               data-testid="slider-vertical-divider-left-gap"
                             />
                           </div>
+                          <div>
+                            <Label className="text-xs">Text Content Left Gap ({signatureData.textContentLeftGap}px)</Label>
+                            <input type="range" min="0" max="40" value={signatureData.textContentLeftGap} onChange={(e) => updateField("textContentLeftGap", Number(e.target.value))} className="w-full" data-testid="input-text-left-gap" />
+                          </div>
                         </div>
                       )}
                     </div>
@@ -2744,14 +2748,6 @@ export default function EmailSignature() {
                           </div>
                         </div>
                       )}
-                    </div>
-
-                    {/* Text Content Left Gap */}
-                    <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3 mt-3">
-                      <div>
-                        <Label className="text-xs">Text Content Left Gap ({signatureData.textContentLeftGap}px)</Label>
-                        <input type="range" min="0" max="40" value={signatureData.textContentLeftGap} onChange={(e) => updateField("textContentLeftGap", Number(e.target.value))} className="w-full" data-testid="input-text-left-gap" />
-                      </div>
                     </div>
 
                     </div>
