@@ -992,16 +992,23 @@ export default function EmailSignature() {
     showBanner
       ? `
   <tr>
-    <td style="padding: 0 ${bannerPadding}px ${bannerPadding}px ${bannerPadding}px; margin-top: ${bannerTopSpacing}px;">
-      ${
-        bannerUrl
-          ? `<a href="${bannerUrl}" style="text-decoration: none; display: block;"><div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; padding-left: ${bannerPadding + (bannerTextAlign / 5)}px; text-align: left; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block; box-sizing: border-box;">
-        ${bannerText}
-      </div></a>`
-          : `<div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; padding-left: ${bannerPadding + (bannerTextAlign / 5)}px; text-align: left; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block; box-sizing: border-box;">
-        ${bannerText}
-      </div>`
-      }
+    <td style="margin-top: ${bannerTopSpacing}px; padding: 0; width: 100%;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
+        <tr>
+          <td style="width: ${bannerTextAlign}%; padding: 0; margin: 0;"></td>
+          <td style="width: ${100 - bannerTextAlign}%; padding: 0 ${bannerPadding}px ${bannerPadding}px ${bannerPadding}px; margin: 0;">
+            ${
+              bannerUrl
+                ? `<a href="${bannerUrl}" style="text-decoration: none; display: block;"><div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block; box-sizing: border-box;">
+                  ${bannerText}
+                </div></a>`
+                : `<div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: center; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block; box-sizing: border-box;">
+                  ${bannerText}
+                </div>`
+            }
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
   `
