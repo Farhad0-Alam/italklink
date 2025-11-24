@@ -870,13 +870,18 @@ export default function EmailSignature() {
       })
       .join("");
 
+    // Dynamic container width calculation based on text content left gap
+    // Base left width is 35%, reduces as gap increases (0px=35%, 40px=25%)
+    const leftContainerWidth = Math.max(25, 35 - (textContentLeftGap / 4));
+    const rightContainerWidth = 100 - leftContainerWidth;
+
     return `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 500px; margin: 0; padding: 0; table-layout: fixed; width: 100%;">
   <tr>
     <td style="background-color: #ffffff; padding: 25px;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
         <tr>
-          <td style="width: 30%; vertical-align: ${companyLogo ? 'top' : 'middle'}; padding-right: ${profilePhotoRightSideGap}px;">
+          <td style="width: ${leftContainerWidth.toFixed(1)}%; vertical-align: ${companyLogo ? 'top' : 'middle'}; padding-right: ${profilePhotoRightSideGap}px;">
             ${
               profilePhoto || companyLogo
                 ? `
@@ -904,7 +909,7 @@ export default function EmailSignature() {
                 : ""
             }
           </td>
-          <td style="width: 70%; vertical-align: top; padding: 0;">
+          <td style="width: ${rightContainerWidth.toFixed(1)}%; vertical-align: top; padding: 0;">
             <div style="min-height: ${verticalDividerHeight}px; padding-left: ${textContentLeftGap}px; ${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor};` : ''}">
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
