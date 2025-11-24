@@ -1524,162 +1524,6 @@ export default function EmailSignature() {
           </div>
         </div>
 
-        {/* Step 1 & 2: Platform Selection and Template Carousel */}
-        <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: "30% 70%" }}>
-          {/* Step 1: Email Platform Selection */}
-          <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-            <CardHeader className="py-2 px-3">
-              <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">1. Choose email platform</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="grid grid-cols-4 gap-0">
-                {emailPlatforms.map((platform) => (
-                  <button
-                    key={platform.id}
-                    onClick={() => setSelectedPlatform(platform.id)}
-                    className={`flex flex-col items-center justify-center gap-0 py-3 px-2 border-r border-b transition-all ${
-                      selectedPlatform === platform.id
-                        ? "border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 border-r-blue-500 border-b-blue-500 dark:border-r-blue-400 dark:border-b-blue-400"
-                        : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"
-                    }`}
-                    style={{ aspectRatio: "16/8" }}
-                    data-testid={`btn-platform-${platform.id}`}
-                  >
-                    <span className="text-2xl flex-1 flex items-center justify-center">{platform.icon}</span>
-                    <span className="text-xs font-medium text-center text-slate-900 dark:text-white flex-1 flex items-center">{platform.name}</span>
-                  </button>
-                ))}
-              </div>
-
-              <p className="text-xs text-slate-500 dark:text-slate-400 px-3 py-3">
-                Looking for another email platform?{" "}
-                <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
-                  Check out the supported platforms here
-                </a>
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Step 2: Template Carousel */}
-          <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-            <CardHeader className="py-2 px-3">
-              <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">2. Choose signature template</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="relative">
-                <div className="flex items-center gap-3 p-1.5">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={prevTemplate}
-                    disabled={!canPrev}
-                    className={`z-10 w-10 h-10 flex-shrink-0 rounded-full shadow-lg transition-all duration-200 ${
-                      canPrev
-                        ? "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-xl hover:scale-110"
-                        : "bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed"
-                    }`}
-                    data-testid="btn-carousel-prev"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </Button>
-
-                  <div className="flex-1 flex items-center justify-center">
-                    <style>{`
-                      @keyframes slideIn {
-                        from { opacity: 0; transform: translateX(20px); }
-                        to { opacity: 1; transform: translateX(0); }
-                      }
-                      .carousel-item {
-                        animation: slideIn 0.8s ease-out forwards;
-                      }
-                      .carousel-container {
-                        transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 12px;
-                        width: fit-content;
-                        justify-content: center;
-                      }
-                    `}</style>
-                    <div className="carousel-container" style={{ transform: `translateX(0)` }}>
-                      {templates && Array.from({ length: 4 }).map((_, i) => {
-                        const actualIndex = (carouselIndex + i) % templates.length;
-                        const template = templates[actualIndex];
-
-                        return (
-                          <div
-                            key={`${actualIndex}-${template.id}`}
-                            onClick={() => selectTemplate(actualIndex)}
-                            className="carousel-item flex-shrink-0 cursor-pointer group relative"
-                            style={{ width: "140px" }}
-                            data-testid={`template-card-${template.id}`}
-                          >
-                            <div
-                              className={`border-3 rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1 ${
-                                i === 0
-                                  ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400 ring-offset-2 dark:ring-offset-slate-800"
-                                  : "border-slate-300 dark:border-slate-600 group-hover:border-blue-400 dark:group-hover:border-blue-500"
-                              }`}
-                              style={{ height: "105px" }}
-                            >
-                              <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-0 overflow-hidden relative">
-                                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/0 group-hover:to-black/5 dark:group-hover:to-white/5 transition-all duration-300"></div>
-                                <div
-                                  style={{
-                                    transform: "scale(0.3)",
-                                    transformOrigin: "center",
-                                    width: "333%",
-                                    fontSize: "9px",
-                                    lineHeight: "1.2"
-                                  }}
-                                >
-                                  <div
-                                    dangerouslySetInnerHTML={{
-                                      __html: getTemplateHTMLByIndex(actualIndex)
-                                    }}
-                                    style={{ 
-                                      margin: 0, 
-                                      padding: "8px",
-                                      display: "block",
-                                      whiteSpace: "normal",
-                                      pointerEvents: "none"
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-center mt-2">
-                              <span className="text-xs font-bold text-slate-900 dark:text-white block group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
-                                {template.name}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={nextTemplate}
-                    disabled={!canNext}
-                    className={`z-10 w-10 h-10 flex-shrink-0 rounded-full shadow-lg transition-all duration-200 ${
-                      canNext
-                        ? "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-xl hover:scale-110"
-                        : "bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed"
-                    }`}
-                    data-testid="btn-carousel-next"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </Button>
-                </div>
-              </div>
-
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Step 3 & Preview: Form and Live Preview */}
         <div className="grid gap-4" style={{ gridTemplateColumns: "30% 70%" }}>
           <div className="space-y-2">
@@ -4788,6 +4632,162 @@ export default function EmailSignature() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Footer: Platform Selection and Template Carousel */}
+        <div className="grid gap-4 mt-4" style={{ gridTemplateColumns: "30% 70%" }}>
+          {/* Step 1: Email Platform Selection */}
+          <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <CardHeader className="py-2 px-3">
+              <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">1. Choose email platform</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="grid grid-cols-4 gap-0">
+                {emailPlatforms.map((platform) => (
+                  <button
+                    key={platform.id}
+                    onClick={() => setSelectedPlatform(platform.id)}
+                    className={`flex flex-col items-center justify-center gap-0 py-3 px-2 border-r border-b transition-all ${
+                      selectedPlatform === platform.id
+                        ? "border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 border-r-blue-500 border-b-blue-500 dark:border-r-blue-400 dark:border-b-blue-400"
+                        : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                    }`}
+                    style={{ aspectRatio: "16/8" }}
+                    data-testid={`btn-platform-${platform.id}`}
+                  >
+                    <span className="text-2xl flex-1 flex items-center justify-center">{platform.icon}</span>
+                    <span className="text-xs font-medium text-center text-slate-900 dark:text-white flex-1 flex items-center">{platform.name}</span>
+                  </button>
+                ))}
+              </div>
+
+              <p className="text-xs text-slate-500 dark:text-slate-400 px-3 py-3">
+                Looking for another email platform?{" "}
+                <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
+                  Check out the supported platforms here
+                </a>
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Step 2: Template Carousel */}
+          <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <CardHeader className="py-2 px-3">
+              <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">2. Choose signature template</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="relative">
+                <div className="flex items-center gap-3 p-1.5">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={prevTemplate}
+                    disabled={!canPrev}
+                    className={`z-10 w-10 h-10 flex-shrink-0 rounded-full shadow-lg transition-all duration-200 ${
+                      canPrev
+                        ? "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-xl hover:scale-110"
+                        : "bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                    }`}
+                    data-testid="btn-carousel-prev"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+
+                  <div className="flex-1 flex items-center justify-center">
+                    <style>{`
+                      @keyframes slideIn {
+                        from { opacity: 0; transform: translateX(20px); }
+                        to { opacity: 1; transform: translateX(0); }
+                      }
+                      .carousel-item {
+                        animation: slideIn 0.8s ease-out forwards;
+                      }
+                      .carousel-container {
+                        transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                        width: fit-content;
+                        justify-content: center;
+                      }
+                    `}</style>
+                    <div className="carousel-container" style={{ transform: `translateX(0)` }}>
+                      {templates && Array.from({ length: 4 }).map((_, i) => {
+                        const actualIndex = (carouselIndex + i) % templates.length;
+                        const template = templates[actualIndex];
+
+                        return (
+                          <div
+                            key={`${actualIndex}-${template.id}`}
+                            onClick={() => selectTemplate(actualIndex)}
+                            className="carousel-item flex-shrink-0 cursor-pointer group relative"
+                            style={{ width: "140px" }}
+                            data-testid={`template-card-${template.id}`}
+                          >
+                            <div
+                              className={`border-3 rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1 ${
+                                i === 0
+                                  ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400 ring-offset-2 dark:ring-offset-slate-800"
+                                  : "border-slate-300 dark:border-slate-600 group-hover:border-blue-400 dark:group-hover:border-blue-500"
+                              }`}
+                              style={{ height: "105px" }}
+                            >
+                              <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-0 overflow-hidden relative">
+                                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/0 group-hover:to-black/5 dark:group-hover:to-white/5 transition-all duration-300"></div>
+                                <div
+                                  style={{
+                                    transform: "scale(0.3)",
+                                    transformOrigin: "center",
+                                    width: "333%",
+                                    fontSize: "9px",
+                                    lineHeight: "1.2"
+                                  }}
+                                >
+                                  <div
+                                    dangerouslySetInnerHTML={{
+                                      __html: getTemplateHTMLByIndex(actualIndex)
+                                    }}
+                                    style={{ 
+                                      margin: 0, 
+                                      padding: "8px",
+                                      display: "block",
+                                      whiteSpace: "normal",
+                                      pointerEvents: "none"
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-center mt-2">
+                              <span className="text-xs font-bold text-slate-900 dark:text-white block group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+                                {template.name}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={nextTemplate}
+                    disabled={!canNext}
+                    className={`z-10 w-10 h-10 flex-shrink-0 rounded-full shadow-lg transition-all duration-200 ${
+                      canNext
+                        ? "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-xl hover:scale-110"
+                        : "bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                    }`}
+                    data-testid="btn-carousel-next"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
+                </div>
+              </div>
+
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
