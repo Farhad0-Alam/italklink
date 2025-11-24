@@ -873,7 +873,7 @@ export default function EmailSignature() {
     <td style="background-color: #ffffff; padding: 25px;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
         <tr>
-          <td style="width: 30%; vertical-align: ${companyLogo ? 'top' : 'middle'}; padding-right: 15px;">
+          <td style="width: 30%; vertical-align: ${companyLogo ? 'top' : 'middle'}; padding-right: ${profilePhotoRightSideGap}px;">
             ${
               profilePhoto || companyLogo
                 ? `
@@ -1165,7 +1165,7 @@ export default function EmailSignature() {
     <td style="background-color: #f5f5f5; padding: 20px;">
       <table width="100%">
         <tr>
-          ${profilePhoto ? `<td style="vertical-align: top; padding-right: 15px;"><div style="${getContainerStyle('profile')}"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div></td>` : ''}
+          ${profilePhoto ? `<td style="vertical-align: top; padding-right: ${profilePhotoRightSideGap}px;"><div style="${getContainerStyle('profile')}"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div></td>` : ''}
           <td style="vertical-align: top;">
             <div style="font-weight: bold; color: #333; margin-bottom: 3px;">${company}</div>
             ${cellPhone ? `<div style="font-size: 12px; color: #666; margin: 3px 0;">Phone: ${cellPhone}</div>` : ''}
@@ -1202,7 +1202,7 @@ export default function EmailSignature() {
               ${website ? `<a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${primaryColor}; text-decoration: none;">${website}</a>` : ''}
             </div>
           </td>
-          ${profilePhoto ? `<td style="padding-left: 20px; text-align: right;"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></td>` : ''}
+          ${profilePhoto ? `<td style="padding-left: ${profilePhotoRightSideGap}px; text-align: right;"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></td>` : ''}
         </tr>
       </table>
     </td>
@@ -1271,7 +1271,7 @@ export default function EmailSignature() {
             ${website ? `🔗 <a href="${website.startsWith('http') ? website : 'https://' + website}" style="color: ${primaryColor}; text-decoration: none;">${website}</a>` : ''}
           </div>
         </td>
-        ${profilePhoto ? `<td style="padding-left: 15px; text-align: right;"><div style="${getContainerStyle('profile')}"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div></td>` : ''}
+        ${profilePhoto ? `<td style="padding-left: ${profilePhotoRightSideGap}px; text-align: right;"><div style="${getContainerStyle('profile')}"><img src="${profilePhoto}" alt="${name}" style="${getImageStyle('profile')}"></div></td>` : ''}
       </tr>
     </table>
   </div>
