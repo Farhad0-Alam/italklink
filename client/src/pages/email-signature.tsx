@@ -149,6 +149,8 @@ interface SignatureData {
   showCTA: boolean;
   ctaText: string;
   ctaUrl: string;
+  ctaLeftPadding: number;
+  ctaRightPadding: number;
   showBanner: boolean;
   bannerText: string;
   bannerBackgroundColor: string;
@@ -520,6 +522,8 @@ export default function EmailSignature() {
     disclaimerTopSpacing: 0,
     showCTA: true,
     ctaButtons: [{ text: "Book a Consultation", url: "https://talkl.ink/" }],
+    ctaLeftPadding: 15,
+    ctaRightPadding: 15,
     ctaButtonBgColor: "#FF6A00",
     ctaButtonUseGradient: false,
     ctaButtonGradientColor1: "#FF6A00",
@@ -970,7 +974,7 @@ export default function EmailSignature() {
                         : ""
                     }
                   </td>
-                  <td style="width: ${ctaButtonsColumnWidth}%; vertical-align: bottom; text-align: ${ctaButtonGroupAlignment}; padding: 10px 15px 10px ${ctaButtonGroupAlignment === 'right' ? '0' : '15px'}; padding-right: ${ctaButtonGroupAlignment === 'right' ? '15px' : '15px'};">
+                  <td style="width: ${ctaButtonsColumnWidth}%; vertical-align: bottom; text-align: ${ctaButtonGroupAlignment}; padding: 10px ${ctaRightPadding}px 10px ${ctaButtonGroupAlignment === 'right' ? ctaLeftPadding - ctaRightPadding : ctaLeftPadding}px;">
                     <div style="line-height: 1;">
                       ${ctaButtons
                         .filter((btn) => btn.url)
@@ -4102,6 +4106,34 @@ export default function EmailSignature() {
                                 <option value="center">Center</option>
                                 <option value="right">Right</option>
                               </select>
+                            </div>
+
+                            {/* CTA Button Group Padding */}
+                            <div className="border-t pt-3 space-y-2">
+                              <div>
+                                <Label className="text-xs">Left Padding: {signatureData.ctaLeftPadding}px</Label>
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="40"
+                                  value={signatureData.ctaLeftPadding}
+                                  onChange={(e) => updateField("ctaLeftPadding", Number(e.target.value))}
+                                  className="w-full"
+                                  data-testid="slider-cta-left-padding"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Right Padding: {signatureData.ctaRightPadding}px</Label>
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="40"
+                                  value={signatureData.ctaRightPadding}
+                                  onChange={(e) => updateField("ctaRightPadding", Number(e.target.value))}
+                                  className="w-full"
+                                  data-testid="slider-cta-right-padding"
+                                />
+                              </div>
                             </div>
 
                             {/* Button Shape */}
