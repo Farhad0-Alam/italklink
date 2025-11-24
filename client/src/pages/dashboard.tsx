@@ -244,13 +244,13 @@ export default function Dashboard() {
     { href: "/my-links", label: "My Links", icon: null },
     { href: "/templates", label: "Templates", icon: null },
     { href: "/qr-codes", label: "QR Codes", icon: QrCode, testId: "link-qr-codes" },
+    { href: "/email-signature", label: "Email Signature", icon: Mail, testId: "link-email-signature" },
     { href: "/appointments", label: "Appointments", icon: null },
     { href: "/crm", label: "CRM", icon: Users, testId: "link-crm" },
     { href: "/card-analytics", label: "Analytics", icon: BarChart3, testId: "link-card-analytics" },
     { href: "/voice-test", label: "Voice Agent", icon: Phone, testId: "link-voice-test" },
     { href: "/availability", label: "Availability", icon: CalendarDays, testId: "link-availability" },
     { href: "/uploads", label: "Uploads", icon: FileText, testId: "link-uploads" },
-    { href: "/email-signature", label: "Email Signature", icon: Mail, testId: "link-email-signature" },
     { href: "/affiliate", label: "Affiliate", icon: DollarSign },
   ];
 
