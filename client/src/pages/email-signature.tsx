@@ -1237,7 +1237,7 @@ export default function EmailSignature() {
     return `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 400px; margin: 0; padding: 0; table-layout: fixed; width: 100%;">
   <tr>
-    <td style="background-color: ${wrapperBackgroundColor}; padding: 0;">
+    <td style="background-color: #FFFFFF; padding: 0;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
         <tr>
           <td style="padding: 0;">
