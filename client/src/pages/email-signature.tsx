@@ -360,17 +360,21 @@ export default function EmailSignature() {
   ];
 
   const nextTemplate = () => {
-    setCarouselIndex((prev) => prev + 1);
+    setCarouselIndex((prev) => (prev + 1) % templates.length);
   };
 
   const prevTemplate = () => {
-    setCarouselIndex((prev) => prev - 1);
+    setCarouselIndex((prev) => (prev - 1 + templates.length) % templates.length);
   };
 
   const selectTemplate = (index: number) => {
-    setCarouselIndex(index % templates.length);
-    setTemplateVariant(templates[index % templates.length].id);
+    const newIndex = index % templates.length;
+    setCarouselIndex(newIndex);
+    setTemplateVariant(templates[newIndex].id);
   };
+  
+  const canPrev = carouselIndex > 0;
+  const canNext = carouselIndex < templates.length - 4;
 
   const [collapsedSections, setCollapsedSections] = useState<{
     [key: string]: boolean;
@@ -1567,7 +1571,12 @@ export default function EmailSignature() {
                     variant="ghost"
                     size="icon"
                     onClick={prevTemplate}
-                    className="z-10 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white w-10 h-10 flex-shrink-0 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+                    disabled={!canPrev}
+                    className={`z-10 w-10 h-10 flex-shrink-0 rounded-full shadow-lg transition-all duration-200 ${
+                      canPrev
+                        ? "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-xl hover:scale-110"
+                        : "bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                    }`}
                     data-testid="btn-carousel-prev"
                   >
                     <ChevronLeft className="w-5 h-5" />
@@ -1654,7 +1663,12 @@ export default function EmailSignature() {
                     variant="ghost"
                     size="icon"
                     onClick={nextTemplate}
-                    className="z-10 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white w-10 h-10 flex-shrink-0 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+                    disabled={!canNext}
+                    className={`z-10 w-10 h-10 flex-shrink-0 rounded-full shadow-lg transition-all duration-200 ${
+                      canNext
+                        ? "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-xl hover:scale-110"
+                        : "bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                    }`}
                     data-testid="btn-carousel-next"
                   >
                     <ChevronRight className="w-5 h-5" />
