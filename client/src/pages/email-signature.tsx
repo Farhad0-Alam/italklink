@@ -72,6 +72,7 @@ interface SignatureData {
   profilePhotoOpacity: number;
   profilePhotoShadow: "none" | "small" | "medium" | "large";
   profilePhotoRightSideGap: number;
+  textContentLeftGap: number;
 
   companyLogo: string;
   companyLogoShape: "circle" | "square" | "rounded";
@@ -426,6 +427,7 @@ export default function EmailSignature() {
     profilePhotoOpacity: 100,
     profilePhotoShadow: "medium",
     profilePhotoRightSideGap: 13,
+    textContentLeftGap: 15,
 
     companyLogo: "",
     companyLogoShape: "square",
@@ -786,6 +788,7 @@ export default function EmailSignature() {
       verticalDividerColor,
       verticalDividerHeight,
       profilePhotoRightSideGap,
+      textContentLeftGap,
       showDisclaimer,
       disclaimerText,
       ctaButtonLogo,
@@ -902,7 +905,7 @@ export default function EmailSignature() {
             }
           </td>
           <td style="width: 70%; vertical-align: top; padding: 0;">
-            <div style="min-height: ${verticalDividerHeight}px; padding-left: 15px; ${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor};` : ''}">
+            <div style="min-height: ${verticalDividerHeight}px; padding-left: ${textContentLeftGap}px; ${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor};` : ''}">
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
                 <tr>
@@ -2859,6 +2862,11 @@ export default function EmailSignature() {
                         <div>
                           <Label className="text-xs">Right Side Gap ({signatureData.profilePhotoRightSideGap}px)</Label>
                           <input type="range" min="0" max="40" value={signatureData.profilePhotoRightSideGap} onChange={(e) => updateField("profilePhotoRightSideGap", Number(e.target.value))} className="w-full" data-testid="input-profile-right-gap" />
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Text Content Left Gap ({signatureData.textContentLeftGap}px)</Label>
+                          <input type="range" min="0" max="40" value={signatureData.textContentLeftGap} onChange={(e) => updateField("textContentLeftGap", Number(e.target.value))} className="w-full" data-testid="input-text-left-gap" />
                         </div>
                       </div>
                     </div>
