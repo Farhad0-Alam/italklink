@@ -870,6 +870,7 @@ export default function EmailSignature() {
       ctaButtonGradientAngle,
       ctaButtonBorderColor,
       ctaButtonBorderWidth,
+      ctaButtonBorderStyle,
       ctaButtonFont,
       ctaButtonFontSize,
       ctaButtonFontColor,
