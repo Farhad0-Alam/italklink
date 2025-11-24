@@ -1589,10 +1589,10 @@ export default function EmailSignature() {
                         to { opacity: 1; transform: translateX(0); }
                       }
                       .carousel-item {
-                        animation: slideIn 0.4s ease-out forwards;
+                        animation: slideIn 0.8s ease-out forwards;
                       }
                       .carousel-container {
-                        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                        transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                         display: flex;
                         gap: 12px;
                       }
