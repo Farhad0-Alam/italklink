@@ -1392,28 +1392,40 @@ export default function EmailSignature() {
 
   const copyToClipboard = async () => {
     try {
-      // Highlight the preview
+      // Get the preview element
       const previewElement = document.querySelector('[data-testid="signature-preview"]');
-      if (previewElement) {
-        previewElement.classList.add('ring-2', 'ring-blue-500', 'ring-offset-2');
+      if (!previewElement) {
+        throw new Error("Preview not found");
       }
 
-      // Get the generated signature HTML (same as download)
-      const signatureHTML = generateSignatureHTML();
+      // Highlight the preview
+      previewElement.classList.add('ring-2', 'ring-blue-500', 'ring-offset-2');
+
+      // Select all content in the preview (like Ctrl+A)
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(previewElement);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+
+      // Copy to clipboard (like Ctrl+C)
+      const successful = document.execCommand('copy');
       
-      // Copy to clipboard
-      await navigator.clipboard.writeText(signatureHTML);
-      
-      toast({
-        title: "Copied!",
-        description: "Email signature copied to clipboard. Paste it directly into your email client's signature settings.",
-      });
+      if (successful) {
+        toast({
+          title: "Copied!",
+          description: "Email signature copied to clipboard. Paste it directly into your email client's signature settings.",
+        });
+      } else {
+        throw new Error("Copy command failed");
+      }
+
+      // Deselect
+      selection?.removeAllRanges();
 
       // Remove highlight after 2 seconds
       setTimeout(() => {
-        if (previewElement) {
-          previewElement.classList.remove('ring-2', 'ring-blue-500', 'ring-offset-2');
-        }
+        previewElement.classList.remove('ring-2', 'ring-blue-500', 'ring-offset-2');
       }, 2000);
     } catch (err) {
       toast({
