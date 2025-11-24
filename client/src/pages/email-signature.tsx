@@ -4763,13 +4763,21 @@ export default function EmailSignature() {
                 <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">
                   This is how your signature will look
                 </p>
-                <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-white min-h-[60px] overflow-y-auto">
-                  <div
-                    className="text-xs"
-                    style={{ maxWidth: "400px", width: "100%" }}
-                    dangerouslySetInnerHTML={{ __html: generateSignatureHTML() }}
-                    data-testid="signature-preview"
-                  />
+                <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white">
+                  {/* Email Header */}
+                  <div className="bg-black text-white px-3 py-2 flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    <span className="text-xs font-medium">New Message</span>
+                  </div>
+                  {/* Preview Content */}
+                  <div className="p-2 min-h-[60px] overflow-y-auto">
+                    <div
+                      className="text-xs"
+                      style={{ maxWidth: "400px", width: "100%" }}
+                      dangerouslySetInnerHTML={{ __html: generateSignatureHTML() }}
+                      data-testid="signature-preview"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex gap-1 mt-1.5">
