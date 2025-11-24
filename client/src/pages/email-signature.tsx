@@ -545,7 +545,7 @@ export default function EmailSignature() {
     bannerBorderColor: "#FF6A00",
     bannerBorderWidth: 0,
     bannerPadding: 0,
-    bannerTopSpacing: 0,
+    bannerTopSpacing: -20,
     bannerFont: "Arial",
     bannerFontColor: "#f7f7f7",
     bannerTextSize: 19,
