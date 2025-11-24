@@ -1632,7 +1632,8 @@ export default function EmailSignature() {
                                       margin: 0, 
                                       padding: "8px",
                                       display: "block",
-                                      whiteSpace: "normal"
+                                      whiteSpace: "normal",
+                                      pointerEvents: "none"
                                     }}
                                   />
                                 </div>
