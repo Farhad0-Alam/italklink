@@ -63,7 +63,7 @@ interface SignatureData {
   customFields: { value: string; icon: string; url: string }[];
 
   profilePhoto: string;
-  profilePhotoShape: "circle" | "square" | "rounded" | "hexagon" | "diamond" | "star" | "blob" | "arrow" | "octagon" | "hexagon2" | "hexagon3" | "trapezoid" | "custom-rounded";
+  profilePhotoShape: "circle" | "square" | "rounded" | "hexagon" | "diamond" | "blob" | "arrow" | "octagon" | "hexagon2" | "hexagon3" | "trapezoid" | "custom-rounded" | "rounded-octagon";
   profilePhotoWidth: number;
   profilePhotoHeight: number;
   profilePhotoBorderWidth: number;
@@ -1062,10 +1062,6 @@ export default function EmailSignature() {
         borderRadius = "0%";
         clipPath = "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)";
       }
-      if (profilePhotoShape === "star") {
-        borderRadius = "0%";
-        clipPath = "polygon(50% 0%, 68% 32%, 100% 38%, 77% 59%, 88% 100%, 50% 73%, 12% 100%, 23% 59%, 0% 38%, 32% 32%)";
-      }
       if (profilePhotoShape === "blob") {
         borderRadius = "63% 37% 54% 46% / 45% 52% 48% 55%";
         clipPath = "none";
@@ -1093,6 +1089,10 @@ export default function EmailSignature() {
       if (profilePhotoShape === "custom-rounded") {
         borderRadius = "30% 70% 70% 30% / 30% 30% 70% 70%";
         clipPath = "none";
+      }
+      if (profilePhotoShape === "rounded-octagon") {
+        borderRadius = "0%";
+        clipPath = "polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)";
       }
 
       let boxShadow = "none";
@@ -2787,12 +2787,12 @@ export default function EmailSignature() {
                               <SelectItem value="hexagon2">Hexagon 2</SelectItem>
                               <SelectItem value="hexagon3">Hexagon 3</SelectItem>
                               <SelectItem value="diamond">Diamond</SelectItem>
-                              <SelectItem value="star">Star</SelectItem>
                               <SelectItem value="blob">Blob</SelectItem>
                               <SelectItem value="arrow">Arrow</SelectItem>
                               <SelectItem value="octagon">Octagon</SelectItem>
                               <SelectItem value="trapezoid">Trapezoid</SelectItem>
                               <SelectItem value="custom-rounded">Custom Rounded</SelectItem>
+                              <SelectItem value="rounded-octagon">Rounded Octagon</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
