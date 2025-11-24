@@ -537,7 +537,7 @@ export default function EmailSignature() {
     ctaButtonShadowOffsetY: 4,
     showBanner: false,
     bannerText: "Get in touch today!",
-    bannerBackgroundColor: "#FFFFFF",
+    bannerBackgroundColor: "#444141",
     bannerUseGradient: true,
     bannerGradientColor1: "#FF6A00",
     bannerGradientColor2: "#FFA500",
