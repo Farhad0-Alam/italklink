@@ -4754,15 +4754,7 @@ export default function EmailSignature() {
 
           <div className="space-y-2">
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 sticky top-4">
-              <CardHeader className="py-2 px-3">
-                <CardTitle className="text-sm text-slate-900 dark:text-white">
-                  Preview
-                </CardTitle>
-              </CardHeader>
               <CardContent className="p-2">
-                <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">
-                  This is how your signature will look
-                </p>
                 <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white">
                   {/* Email Header */}
                   <div className="bg-black text-white px-3 py-2 flex items-center gap-2">
