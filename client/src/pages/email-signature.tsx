@@ -1599,12 +1599,7 @@ export default function EmailSignature() {
                     `}</style>
                     <div className="carousel-container" style={{ transform: `translateX(-${carouselIndex * 212}px)` }}>
                       {templates && templates.map((template, actualIndex) => {
-                        const isVisible = actualIndex >= carouselIndex && actualIndex < carouselIndex + 4 || 
-                                         (carouselIndex + 4 > templates.length && actualIndex < (carouselIndex + 4) % templates.length);
-                        if (!isVisible && !(carouselIndex >= templates.length - 3)) return null;
-
                         const visibleIndex = actualIndex >= carouselIndex ? actualIndex - carouselIndex : templates.length - carouselIndex + actualIndex;
-                        if (visibleIndex >= 4) return null;
 
                         return (
                           <div
