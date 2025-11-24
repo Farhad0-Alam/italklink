@@ -162,7 +162,7 @@ interface SignatureData {
   bannerFontColor: string;
   bannerTextSize: number;
   bannerTextHeight: number;
-  bannerTextAlign: "left" | "center" | "right";
+  bannerTextAlign: number;
   bannerUrl: string;
 }
 
@@ -550,7 +550,7 @@ export default function EmailSignature() {
     bannerFontColor: "#f7f7f7",
     bannerTextSize: 19,
     bannerTextHeight: 1.0,
-    bannerTextAlign: "center",
+    bannerTextAlign: 50,
     bannerUrl: "",
     ctaButtonLogo: "",
     ctaButtonLogoWidth: 60,
@@ -995,10 +995,10 @@ export default function EmailSignature() {
     <td style="padding: 0 ${bannerPadding}px ${bannerPadding}px ${bannerPadding}px; margin-top: ${bannerTopSpacing}px;">
       ${
         bannerUrl
-          ? `<a href="${bannerUrl}" style="text-decoration: none; display: block;"><div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: ${bannerTextAlign}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block;">
+          ? `<a href="${bannerUrl}" style="text-decoration: none; display: block;"><div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: ${bannerTextAlign <= 33 ? 'left' : bannerTextAlign >= 66 ? 'right' : 'center'}; margin-left: ${Math.max(0, (bannerTextAlign - 50) * 1.2)}%; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block;">
         ${bannerText}
       </div></a>`
-          : `<div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: ${bannerTextAlign}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block;">
+          : `<div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; padding: ${bannerPadding}px; text-align: ${bannerTextAlign <= 33 ? 'left' : bannerTextAlign >= 66 ? 'right' : 'center'}; margin-left: ${Math.max(0, (bannerTextAlign - 50) * 1.2)}%; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block;">
         ${bannerText}
       </div>`
       }
@@ -4405,22 +4405,18 @@ export default function EmailSignature() {
                       </div>
 
                       <div>
-                        <Label className="text-xs">Text Align</Label>
-                        <Select
+                        <Label className="text-xs">Text Position ({signatureData.bannerTextAlign}%)</Label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
                           value={signatureData.bannerTextAlign}
-                          onValueChange={(value) =>
-                            updateField("bannerTextAlign", value as "left" | "center" | "right")
+                          onChange={(e) =>
+                            updateField("bannerTextAlign", Number(e.target.value))
                           }
-                        >
-                          <SelectTrigger data-testid="select-banner-text-align">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="left">Left</SelectItem>
-                            <SelectItem value="center">Center</SelectItem>
-                            <SelectItem value="right">Right</SelectItem>
-                          </SelectContent>
-                        </Select>
+                          className="w-full"
+                          data-testid="input-banner-text-align"
+                        />
                       </div>
 
                       <div className="grid grid-cols-2 gap-2">
