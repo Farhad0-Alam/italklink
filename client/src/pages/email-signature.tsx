@@ -3448,198 +3448,6 @@ export default function EmailSignature() {
               </CardContent>
             </Card>
 
-            {/* Disclaimer */}
-            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <CardHeader
-                className="cursor-pointer py-2 px-3"
-                onClick={() => toggleSection("disclaimerSection")}
-                data-testid="toggle-disclaimer-section"
-              >
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
-                    Disclaimer
-                  </CardTitle>
-                  {collapsedSections.disclaimerSection ? (
-                    <ChevronDown className="w-4 h-4" />
-                  ) : (
-                    <ChevronUp className="w-4 h-4" />
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="p-3 space-y-2">
-                {!collapsedSections.disclaimerSection && (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="showDisclaimer">Show Disclaimer</Label>
-                      <Switch
-                        id="showDisclaimer"
-                        checked={signatureData.showDisclaimer}
-                        onCheckedChange={(checked) =>
-                          updateField("showDisclaimer", checked)
-                        }
-                        data-testid="switch-show-disclaimer"
-                      />
-                    </div>
-
-                    {signatureData.showDisclaimer && (
-                      <>
-                        <div className="border-t pt-3 mt-3">
-                          <Label className="text-xs font-semibold">Disclaimer Text</Label>
-                          <Textarea
-                            value={signatureData.disclaimerText}
-                            onChange={(e) =>
-                              updateField("disclaimerText", e.target.value)
-                            }
-                            placeholder="Enter your disclaimer text..."
-                            className="mt-1 text-xs"
-                            rows={3}
-                            data-testid="textarea-disclaimer-text"
-                          />
-                        </div>
-
-                        <div className="border-t pt-3 mt-3 space-y-2">
-                          <Label className="text-xs font-semibold">Font</Label>
-                          <Select
-                            value={signatureData.disclaimerFont}
-                            onValueChange={(v) =>
-                              updateField("disclaimerFont", v)
-                            }
-                          >
-                            <SelectTrigger
-                              className="w-full"
-                              data-testid="select-disclaimer-font"
-                            >
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Arial">Arial</SelectItem>
-                              <SelectItem value="Helvetica">Helvetica</SelectItem>
-                              <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-                              <SelectItem value="Georgia">Georgia</SelectItem>
-                              <SelectItem value="Courier New">Courier New</SelectItem>
-                              <SelectItem value="Verdana">Verdana</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <Label className="text-xs">Font Size: {signatureData.disclaimerFontSize}px</Label>
-                            <input
-                              type="range"
-                              min="8"
-                              max="16"
-                              value={signatureData.disclaimerFontSize}
-                              onChange={(e) =>
-                                updateField(
-                                  "disclaimerFontSize",
-                                  parseInt(e.target.value),
-                                )
-                              }
-                              className="custom-range w-full"
-                              data-testid="slider-disclaimer-font-size"
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-xs">Text Alignment</Label>
-                            <Select
-                              value={signatureData.disclaimerTextAlign}
-                              onValueChange={(v: any) =>
-                                updateField("disclaimerTextAlign", v)
-                              }
-                            >
-                              <SelectTrigger
-                                className="w-full"
-                                data-testid="select-disclaimer-text-align"
-                              >
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="left">Left</SelectItem>
-                                <SelectItem value="center">Center</SelectItem>
-                                <SelectItem value="right">Right</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs mb-1">Font Color</Label>
-                          <div className="flex gap-2">
-                            <input
-                              type="color"
-                              value={signatureData.disclaimerFontColor}
-                              onChange={(e) =>
-                                updateField(
-                                  "disclaimerFontColor",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-16 h-9"
-                              data-testid="input-disclaimer-font-color"
-                            />
-                            <Input
-                              value={signatureData.disclaimerFontColor}
-                              onChange={(e) =>
-                                updateField(
-                                  "disclaimerFontColor",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="#666666"
-                              className="flex-1"
-                              data-testid="input-disclaimer-font-color-hex"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="flex items-center justify-between">
-                            <Label className="text-xs">Bold</Label>
-                            <Switch
-                              checked={signatureData.disclaimerBold}
-                              onCheckedChange={(checked) =>
-                                updateField("disclaimerBold", checked)
-                              }
-                              data-testid="switch-disclaimer-bold"
-                            />
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <Label className="text-xs">Italic</Label>
-                            <Switch
-                              checked={signatureData.disclaimerItalic}
-                              onCheckedChange={(checked) =>
-                                updateField("disclaimerItalic", checked)
-                              }
-                              data-testid="switch-disclaimer-italic"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Top Spacing: {signatureData.disclaimerTopSpacing}px</Label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="40"
-                            value={signatureData.disclaimerTopSpacing}
-                            onChange={(e) =>
-                              updateField(
-                                "disclaimerTopSpacing",
-                                parseInt(e.target.value),
-                              )
-                            }
-                            className="custom-range w-full"
-                            data-testid="slider-disclaimer-top-spacing"
-                          />
-                        </div>
-                      </>
-                    )}
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
             {/* Call-to-Action */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader
@@ -4822,6 +4630,198 @@ export default function EmailSignature() {
                   )}
                 </CardContent>
               )}
+            </Card>
+
+            {/* Disclaimer */}
+            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <CardHeader
+                className="cursor-pointer py-2 px-3"
+                onClick={() => toggleSection("disclaimerSection")}
+                data-testid="toggle-disclaimer-section"
+              >
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Disclaimer
+                  </CardTitle>
+                  {collapsedSections.disclaimerSection ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4" />
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="p-3 space-y-2">
+                {!collapsedSections.disclaimerSection && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="showDisclaimer">Show Disclaimer</Label>
+                      <Switch
+                        id="showDisclaimer"
+                        checked={signatureData.showDisclaimer}
+                        onCheckedChange={(checked) =>
+                          updateField("showDisclaimer", checked)
+                        }
+                        data-testid="switch-show-disclaimer"
+                      />
+                    </div>
+
+                    {signatureData.showDisclaimer && (
+                      <>
+                        <div className="border-t pt-3 mt-3">
+                          <Label className="text-xs font-semibold">Disclaimer Text</Label>
+                          <Textarea
+                            value={signatureData.disclaimerText}
+                            onChange={(e) =>
+                              updateField("disclaimerText", e.target.value)
+                            }
+                            placeholder="Enter your disclaimer text..."
+                            className="mt-1 text-xs"
+                            rows={3}
+                            data-testid="textarea-disclaimer-text"
+                          />
+                        </div>
+
+                        <div className="border-t pt-3 mt-3 space-y-2">
+                          <Label className="text-xs font-semibold">Font</Label>
+                          <Select
+                            value={signatureData.disclaimerFont}
+                            onValueChange={(v) =>
+                              updateField("disclaimerFont", v)
+                            }
+                          >
+                            <SelectTrigger
+                              className="w-full"
+                              data-testid="select-disclaimer-font"
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Arial">Arial</SelectItem>
+                              <SelectItem value="Helvetica">Helvetica</SelectItem>
+                              <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                              <SelectItem value="Georgia">Georgia</SelectItem>
+                              <SelectItem value="Courier New">Courier New</SelectItem>
+                              <SelectItem value="Verdana">Verdana</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-xs">Font Size: {signatureData.disclaimerFontSize}px</Label>
+                            <input
+                              type="range"
+                              min="8"
+                              max="16"
+                              value={signatureData.disclaimerFontSize}
+                              onChange={(e) =>
+                                updateField(
+                                  "disclaimerFontSize",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-disclaimer-font-size"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Text Alignment</Label>
+                            <Select
+                              value={signatureData.disclaimerTextAlign}
+                              onValueChange={(v: any) =>
+                                updateField("disclaimerTextAlign", v)
+                              }
+                            >
+                              <SelectTrigger
+                                className="w-full"
+                                data-testid="select-disclaimer-text-align"
+                              >
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="left">Left</SelectItem>
+                                <SelectItem value="center">Center</SelectItem>
+                                <SelectItem value="right">Right</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-xs mb-1">Font Color</Label>
+                          <div className="flex gap-2">
+                            <input
+                              type="color"
+                              value={signatureData.disclaimerFontColor}
+                              onChange={(e) =>
+                                updateField(
+                                  "disclaimerFontColor",
+                                  e.target.value,
+                                )
+                              }
+                              className="w-16 h-9"
+                              data-testid="input-disclaimer-font-color"
+                            />
+                            <Input
+                              value={signatureData.disclaimerFontColor}
+                              onChange={(e) =>
+                                updateField(
+                                  "disclaimerFontColor",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="#666666"
+                              className="flex-1"
+                              data-testid="input-disclaimer-font-color-hex"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs">Bold</Label>
+                            <Switch
+                              checked={signatureData.disclaimerBold}
+                              onCheckedChange={(checked) =>
+                                updateField("disclaimerBold", checked)
+                              }
+                              data-testid="switch-disclaimer-bold"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs">Italic</Label>
+                            <Switch
+                              checked={signatureData.disclaimerItalic}
+                              onCheckedChange={(checked) =>
+                                updateField("disclaimerItalic", checked)
+                              }
+                              data-testid="switch-disclaimer-italic"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Top Spacing: {signatureData.disclaimerTopSpacing}px</Label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="40"
+                            value={signatureData.disclaimerTopSpacing}
+                            onChange={(e) =>
+                              updateField(
+                                "disclaimerTopSpacing",
+                                parseInt(e.target.value),
+                              )
+                            }
+                            className="custom-range w-full"
+                            data-testid="slider-disclaimer-top-spacing"
+                          />
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </CardContent>
             </Card>
           </div>
 
