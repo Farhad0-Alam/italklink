@@ -1564,9 +1564,9 @@ export default function EmailSignature() {
             <CardHeader className="py-2 px-3">
               <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">2. Choose signature template</CardTitle>
             </CardHeader>
-            <CardContent className="p-1.5">
+            <CardContent className="p-0">
               <div className="relative">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 p-1.5">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -1582,7 +1582,7 @@ export default function EmailSignature() {
                     <ChevronLeft className="w-5 h-5" />
                   </Button>
 
-                  <div className="flex-1 flex items-center justify-center py-2">
+                  <div className="flex-1 flex items-center justify-center">
                     <style>{`
                       @keyframes slideIn {
                         from { opacity: 0; transform: translateX(20px); }
