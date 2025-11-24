@@ -427,8 +427,8 @@ export default function EmailSignature() {
     profilePhotoBorderStyle: "solid",
     profilePhotoOpacity: 100,
     profilePhotoShadow: "medium",
-    profilePhotoRightSideGap: 13,
-    textContentLeftGap: 15,
+    profilePhotoRightSideGap: 0,
+    textContentLeftGap: 0,
 
     companyLogo: "",
     companyLogoShape: "square",
@@ -481,7 +481,7 @@ export default function EmailSignature() {
     verticalDividerWidth: 3,
     verticalDividerColor: "#FF6A00",
     verticalDividerLeftPadding: 10,
-    verticalDividerLeftGap: 10,
+    verticalDividerLeftGap: 0,
     socialLinks: [
       {
         platform: "linkedin",
@@ -875,7 +875,7 @@ export default function EmailSignature() {
 
     // Dynamic container width calculation based on text content left gap
     // Base left width is 35%, reduces as gap increases (0px=35%, 40px=25%)
-    const leftContainerWidth = Math.max(25, 35 - (textContentLeftGap / 4));
+    const leftContainerWidth = 35;
     const rightContainerWidth = 100 - leftContainerWidth;
 
     return `
@@ -2251,14 +2251,6 @@ export default function EmailSignature() {
                       )}
                     </div>
 
-                    {/* Text Content Left Gap */}
-                    <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
-                      <div>
-                        <Label className="text-xs">Text Content Left Gap ({signatureData.textContentLeftGap}px)</Label>
-                        <input type="range" min="0" max="40" value={signatureData.textContentLeftGap} onChange={(e) => updateField("textContentLeftGap", Number(e.target.value))} className="w-full" data-testid="input-text-left-gap" />
-                      </div>
-                    </div>
-
                     {/* Vertical Divider Subsection */}
                     <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-3">
@@ -2335,25 +2327,6 @@ export default function EmailSignature() {
                                 data-testid="input-vertical-divider-color-hex"
                               />
                             </div>
-                          </div>
-                          <div>
-                            <Label className="text-xs">
-                              Left Gap: {signatureData.verticalDividerLeftGap}px
-                            </Label>
-                            <input
-                              type="range"
-                              min="0"
-                              max="40"
-                              value={signatureData.verticalDividerLeftGap}
-                              onChange={(e) =>
-                                updateField(
-                                  "verticalDividerLeftGap",
-                                  parseInt(e.target.value),
-                                )
-                              }
-                              className="custom-range w-full"
-                              data-testid="slider-vertical-divider-left-gap"
-                            />
                           </div>
                         </div>
                       )}
@@ -2896,10 +2869,6 @@ export default function EmailSignature() {
                           </div>
                         </div>
 
-                        <div>
-                          <Label className="text-xs">Right Side Gap ({signatureData.profilePhotoRightSideGap}px)</Label>
-                          <input type="range" min="0" max="40" value={signatureData.profilePhotoRightSideGap} onChange={(e) => updateField("profilePhotoRightSideGap", Number(e.target.value))} className="w-full" data-testid="input-profile-right-gap" />
-                        </div>
                       </div>
                     </div>
                   </>
