@@ -884,7 +884,7 @@ export default function EmailSignature() {
     return `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 400px; margin: 0; padding: 0; table-layout: fixed; width: 100%;">
   <tr>
-    <td style="background-color: #ffffff; padding: 25px;">
+    <td style="background-color: #ffffff; padding: 0;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
         <tr>
           <td style="width: ${leftContainerWidth.toFixed(1)}%; vertical-align: ${companyLogo ? 'top' : 'middle'}; padding-right: ${profilePhotoRightSideGap}px;">
