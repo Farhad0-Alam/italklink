@@ -1152,7 +1152,7 @@ export default function EmailSignature() {
 
   // Template 3: Corporate Modern
   const generateTemplate3 = (): string => {
-    const { name, title, company, cellPhone, email, website, profilePhoto, primaryColor, secondaryColor } = signatureData;
+    const { name, title, company, cellPhone, email, website, profilePhoto, primaryColor, secondaryColor, profilePhotoRightSideGap } = signatureData;
     return `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 600px;">
   <tr>
@@ -1182,7 +1182,7 @@ export default function EmailSignature() {
 
   // Template 4: Creative with Top Bar
   const generateTemplate4 = (): string => {
-    const { name, title, company, cellPhone, email, website, primaryColor, profilePhoto, companyLogo } = signatureData;
+    const { name, title, company, cellPhone, email, website, primaryColor, profilePhoto, companyLogo, profilePhotoRightSideGap } = signatureData;
     return `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 550px; margin: 0; padding: 0;">
   <tr>
@@ -1255,7 +1255,7 @@ export default function EmailSignature() {
 
   // Template 7: LinkedIn Style
   const generateTemplate7 = (): string => {
-    const { name, title, company, cellPhone, email, website, primaryColor, profilePhoto } = signatureData;
+    const { name, title, company, cellPhone, email, website, primaryColor, profilePhoto, profilePhotoRightSideGap } = signatureData;
     return `
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; max-width: 500px; border: 1px solid #e5e5e5; border-radius: 5px; overflow: hidden;">
   <div style="background-color: ${primaryColor}; height: 3px;"></div>
