@@ -444,7 +444,7 @@ export default function EmailSignature() {
     profilePhotoPositionY: 0,
     textContentLeftGap: 15,
 
-    companyLogo: "",
+    companyLogo: "/signature/talklink-logo.png",
     companyLogoPositionX: 0,
     companyLogoPositionY: 0,
     companyLogoShape: "square",
