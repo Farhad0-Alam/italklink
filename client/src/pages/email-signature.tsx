@@ -1137,7 +1137,7 @@ export default function EmailSignature() {
 
       const clipPathStyle = clipPath !== "none" ? `; clip-path: ${clipPath}` : "";
       const transform = (profilePhotoPositionX !== 0 || profilePhotoPositionY !== 0) ? `; transform: translate(${profilePhotoPositionX}px, ${profilePhotoPositionY}px)` : "";
-      return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px ${profilePhotoBorderStyle} ${profilePhotoBorderColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center${clipPathStyle}${transform};`;
+      return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px ${profilePhotoBorderStyle} ${profilePhotoBorderColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center; z-index: 10${clipPathStyle}${transform};`;
     } else {
       const { companyLogoShape, companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor, companyLogoBackgroundColor, companyLogoShadow, companyLogoPositionX, companyLogoPositionY } = signatureData;
       
@@ -1151,7 +1151,7 @@ export default function EmailSignature() {
       if (companyLogoShadow === "large") boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
 
       const transform = (companyLogoPositionX !== 0 || companyLogoPositionY !== 0) ? `; transform: translate(${companyLogoPositionX}px, ${companyLogoPositionY}px)` : "";
-      return `width: ${companyLogoWidth}px; height: ${companyLogoHeight}px; border-radius: ${borderRadius}; border: ${companyLogoBorderWidth}px solid ${companyLogoBorderColor}; background-color: ${companyLogoBackgroundColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center${transform};`;
+      return `width: ${companyLogoWidth}px; height: ${companyLogoHeight}px; border-radius: ${borderRadius}; border: ${companyLogoBorderWidth}px solid ${companyLogoBorderColor}; background-color: ${companyLogoBackgroundColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center; z-index: 1${transform};`;
     }
   };
 
