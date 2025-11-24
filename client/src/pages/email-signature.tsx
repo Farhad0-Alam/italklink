@@ -72,6 +72,12 @@ interface SignatureData {
   profilePhotoOpacity: number;
   profilePhotoShadow: "none" | "small" | "medium" | "large";
   profilePhotoRightSideGap: number;
+  signatureLeftGap: number;
+  nameLeftGap: number;
+  contactInfoLeftGap: number;
+  profilePhotoLeftGap: number;
+  companyLogoLeftGap: number;
+  socialLinksLeftGap: number;
 
   companyLogo: string;
   companyLogoShape: "circle" | "square" | "rounded";
@@ -426,6 +432,12 @@ export default function EmailSignature() {
     profilePhotoOpacity: 100,
     profilePhotoShadow: "medium",
     profilePhotoRightSideGap: 13,
+    signatureLeftGap: 0,
+    nameLeftGap: 0,
+    contactInfoLeftGap: 0,
+    profilePhotoLeftGap: 0,
+    companyLogoLeftGap: 0,
+    socialLinksLeftGap: 0,
 
     companyLogo: "",
     companyLogoShape: "square",
@@ -1762,6 +1774,10 @@ export default function EmailSignature() {
                               data-testid="slider-signature-line-height"
                             />
                           </div>
+                          <div>
+                            <Label className="text-xs">Left Side Gap ({signatureData.signatureLeftGap}px)</Label>
+                            <input type="range" min="0" max="40" value={signatureData.signatureLeftGap} onChange={(e) => updateField("signatureLeftGap", Number(e.target.value))} className="w-full" data-testid="input-signature-left-gap" />
+                          </div>
                         </div>
                       )}
                     </div>
@@ -2113,6 +2129,10 @@ export default function EmailSignature() {
                                 data-testid="input-company-color-hex"
                               />
                             </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs">Left Side Gap ({signatureData.nameLeftGap}px)</Label>
+                            <input type="range" min="0" max="40" value={signatureData.nameLeftGap} onChange={(e) => updateField("nameLeftGap", Number(e.target.value))} className="w-full" data-testid="input-name-left-gap" />
                           </div>
                         </div>
                       )}
@@ -2711,6 +2731,10 @@ export default function EmailSignature() {
                               />
                             </div>
                           </div>
+                          <div>
+                            <Label className="text-xs">Left Side Gap ({signatureData.contactInfoLeftGap}px)</Label>
+                            <input type="range" min="0" max="40" value={signatureData.contactInfoLeftGap} onChange={(e) => updateField("contactInfoLeftGap", Number(e.target.value))} className="w-full" data-testid="input-contact-left-gap" />
+                          </div>
                         </div>
                       )}
                     </div>
@@ -2860,6 +2884,10 @@ export default function EmailSignature() {
                           <Label className="text-xs">Right Side Gap ({signatureData.profilePhotoRightSideGap}px)</Label>
                           <input type="range" min="0" max="40" value={signatureData.profilePhotoRightSideGap} onChange={(e) => updateField("profilePhotoRightSideGap", Number(e.target.value))} className="w-full" data-testid="input-profile-right-gap" />
                         </div>
+                        <div>
+                          <Label className="text-xs">Left Side Gap ({signatureData.profilePhotoLeftGap}px)</Label>
+                          <input type="range" min="0" max="40" value={signatureData.profilePhotoLeftGap} onChange={(e) => updateField("profilePhotoLeftGap", Number(e.target.value))} className="w-full" data-testid="input-profile-left-gap" />
+                        </div>
                       </div>
                     </div>
                   </>
@@ -2984,6 +3012,10 @@ export default function EmailSignature() {
                             </Select>
                           </div>
                         </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Left Side Gap ({signatureData.companyLogoLeftGap}px)</Label>
+                        <input type="range" min="0" max="40" value={signatureData.companyLogoLeftGap} onChange={(e) => updateField("companyLogoLeftGap", Number(e.target.value))} className="w-full" data-testid="input-company-logo-left-gap" />
                       </div>
                     </div>
                   </>
@@ -3274,6 +3306,26 @@ export default function EmailSignature() {
                           }
                           className="custom-range w-full"
                           data-testid="slider-social-icon-gap"
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">
+                          Left Side Gap: {signatureData.socialLinksLeftGap}px
+                        </Label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="40"
+                          value={signatureData.socialLinksLeftGap}
+                          onChange={(e) =>
+                            updateField(
+                              "socialLinksLeftGap",
+                              parseInt(e.target.value),
+                            )
+                          }
+                          className="custom-range w-full"
+                          data-testid="slider-social-left-gap"
                         />
                       </div>
                     </div>
