@@ -162,7 +162,6 @@ interface SignatureData {
   bannerTextHeight: number;
   bannerTextAlign: "left" | "center" | "right";
   bannerUrl: string;
-  ctaSectionHorizontalPosition: number;
 }
 
 const signatureFonts = [
@@ -566,7 +565,6 @@ export default function EmailSignature() {
     ctaSectionGradientColor2: "#FFA500",
     ctaSectionGradientAngle: 134,
     ctaSectionHeight: 100,
-    ctaSectionHorizontalPosition: 0,
   });
 
   useEffect(() => {
@@ -807,7 +805,6 @@ export default function EmailSignature() {
       ctaSectionGradientColor2,
       ctaSectionGradientAngle,
       ctaSectionHeight,
-      ctaSectionHorizontalPosition,
       ctaButtons,
       ctaButtonBgColor,
       ctaButtonUseGradient,
@@ -941,7 +938,7 @@ export default function EmailSignature() {
           showCTA
             ? `
         <tr>
-          <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 20px; margin-left: ${ctaSectionHorizontalPosition}px; height: ${ctaSectionHeight}px;">
+          <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 20px; height: ${ctaSectionHeight}px;">
             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
               <tr>
                 <td style="width: ${ctaLogoColumnWidth}%; vertical-align: middle; text-align: center; padding: 0; margin: 0;">
@@ -3525,24 +3522,6 @@ export default function EmailSignature() {
                                 }
                                 className="custom-range w-full"
                                 data-testid="slider-cta-section-height"
-                              />
-                            </div>
-
-                            <div>
-                              <Label className="text-xs">Horizontal Position: {signatureData.ctaSectionHorizontalPosition > 0 ? '+' : ''}{signatureData.ctaSectionHorizontalPosition}px</Label>
-                              <input
-                                type="range"
-                                min="-100"
-                                max="100"
-                                value={signatureData.ctaSectionHorizontalPosition}
-                                onChange={(e) =>
-                                  updateField(
-                                    "ctaSectionHorizontalPosition",
-                                    parseInt(e.target.value),
-                                  )
-                                }
-                                className="custom-range w-full"
-                                data-testid="slider-cta-section-horizontal-position"
                               />
                             </div>
                           </div>
