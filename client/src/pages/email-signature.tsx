@@ -63,7 +63,7 @@ interface SignatureData {
   customFields: { value: string; icon: string; url: string }[];
 
   profilePhoto: string;
-  profilePhotoShape: "circle" | "square" | "rounded" | "hexagon" | "diamond" | "star" | "blob";
+  profilePhotoShape: "circle" | "square" | "rounded" | "hexagon" | "diamond" | "star" | "blob" | "arrow";
   profilePhotoWidth: number;
   profilePhotoHeight: number;
   profilePhotoBorderWidth: number;
@@ -1067,6 +1067,10 @@ export default function EmailSignature() {
       if (profilePhotoShape === "blob") {
         borderRadius = "63% 37% 54% 46% / 45% 52% 48% 55%";
         clipPath = "none";
+      }
+      if (profilePhotoShape === "arrow") {
+        borderRadius = "0%";
+        clipPath = "polygon(0% 0%, 75% 0%, 100% 50%, 75% 100%, 0% 100%)";
       }
 
       let boxShadow = "none";
@@ -2761,6 +2765,7 @@ export default function EmailSignature() {
                               <SelectItem value="diamond">Diamond</SelectItem>
                               <SelectItem value="star">Star</SelectItem>
                               <SelectItem value="blob">Blob</SelectItem>
+                              <SelectItem value="arrow">Arrow</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
