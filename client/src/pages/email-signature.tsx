@@ -545,7 +545,7 @@ export default function EmailSignature() {
     bannerBorderColor: "#FF6A00",
     bannerBorderWidth: 0,
     bannerPadding: 0,
-    bannerTopSpacing: -30,
+    bannerTopSpacing: 0,
     bannerFont: "Arial",
     bannerFontColor: "#f7f7f7",
     bannerTextSize: 19,
@@ -4344,7 +4344,7 @@ export default function EmailSignature() {
                         <Label className="text-xs">Top Spacing ({signatureData.bannerTopSpacing}px)</Label>
                         <input
                           type="range"
-                          min="-30"
+                          min="-60"
                           max="40"
                           value={signatureData.bannerTopSpacing}
                           onChange={(e) =>
