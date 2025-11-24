@@ -1391,12 +1391,21 @@ export default function EmailSignature() {
   };
 
   const copyToClipboard = async () => {
-    const html = generateSignatureHTML();
     try {
-      await navigator.clipboard.writeText(html);
+      // Get the signature preview element
+      const signatureElement = document.querySelector('[data-testid="signature-preview"]');
+      if (!signatureElement) {
+        throw new Error("Signature preview not found");
+      }
+
+      // Get the inner HTML of the signature (the table content)
+      const signatureHTML = signatureElement.innerHTML;
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(signatureHTML);
       toast({
         title: "Copied!",
-        description: "Email signature HTML copied to clipboard",
+        description: "Email signature layout copied to clipboard. You can now paste it into your email client.",
       });
     } catch (err) {
       toast({
