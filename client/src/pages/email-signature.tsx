@@ -4723,7 +4723,7 @@ export default function EmailSignature() {
                 <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-white min-h-[60px] overflow-y-auto flex justify-center">
                   <div
                     className="text-xs"
-                    style={{ maxWidth: "600px", width: "100%" }}
+                    style={{ maxWidth: "400px", width: "100%" }}
                     dangerouslySetInnerHTML={{ __html: generateSignatureHTML() }}
                     data-testid="signature-preview"
                   />
