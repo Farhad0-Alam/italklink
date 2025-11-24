@@ -545,7 +545,7 @@ export default function EmailSignature() {
     bannerBorderColor: "#FF6A00",
     bannerBorderWidth: 0,
     bannerPadding: 0,
-    bannerTopSpacing: -10,
+    bannerTopSpacing: 0,
     bannerFont: "Arial",
     bannerFontColor: "#f7f7f7",
     bannerTextSize: 19,
@@ -949,7 +949,7 @@ export default function EmailSignature() {
           showCTA
             ? `
         <tr>
-          <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 20px; height: ${ctaSectionHeight}px;">
+          <td colspan="2" style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; margin-top: 0px; height: ${ctaSectionHeight}px;">
             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
               <tr>
                 <td style="width: ${ctaLogoColumnWidth}%; vertical-align: middle; text-align: center; padding: 0; margin: 0;">
