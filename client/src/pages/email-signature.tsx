@@ -373,8 +373,8 @@ export default function EmailSignature() {
     setTemplateVariant(templates[newIndex].id);
   };
   
-  const canPrev = carouselIndex > 0;
-  const canNext = carouselIndex < templates.length - 4;
+  const canPrev = true;
+  const canNext = true;
 
   const [collapsedSections, setCollapsedSections] = useState<{
     [key: string]: boolean;
@@ -1582,7 +1582,7 @@ export default function EmailSignature() {
                     <ChevronLeft className="w-5 h-5" />
                   </Button>
 
-                  <div className="flex-1 overflow-hidden flex items-center justify-center py-2">
+                  <div className="overflow-hidden flex items-center justify-center py-2" style={{ width: "856px" }}>
                     <style>{`
                       @keyframes slideIn {
                         from { opacity: 0; transform: translateX(20px); }
@@ -1595,9 +1595,10 @@ export default function EmailSignature() {
                         transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                         display: flex;
                         gap: 12px;
+                        width: fit-content;
                       }
                     `}</style>
-                    <div className="carousel-container" style={{ transform: `translateX(-${carouselIndex * 212}px)` }}>
+                    <div className="carousel-container" style={{ transform: `translateX(-${(carouselIndex % templates.length) * 212}px)` }}>
                       {templates && templates.map((template, actualIndex) => {
                         const visibleIndex = actualIndex >= carouselIndex ? actualIndex - carouselIndex : templates.length - carouselIndex + actualIndex;
 
