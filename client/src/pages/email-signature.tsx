@@ -132,6 +132,7 @@ interface SignatureData {
   verticalDividerWidth: number;
   verticalDividerColor: string;
   verticalDividerLeftPadding: number;
+  verticalDividerLeftGap: number;
 
   socialLinks: { platform: string; url: string; icon: string }[];
 
@@ -480,6 +481,7 @@ export default function EmailSignature() {
     verticalDividerWidth: 3,
     verticalDividerColor: "#FF6A00",
     verticalDividerLeftPadding: 10,
+    verticalDividerLeftGap: 10,
     socialLinks: [
       {
         platform: "linkedin",
@@ -787,6 +789,7 @@ export default function EmailSignature() {
       verticalDividerWidth,
       verticalDividerColor,
       verticalDividerLeftPadding,
+      verticalDividerLeftGap,
       profilePhotoRightSideGap,
       textContentLeftGap,
       showDisclaimer,
@@ -910,7 +913,7 @@ export default function EmailSignature() {
             }
           </td>
           <td style="width: ${rightContainerWidth.toFixed(1)}%; vertical-align: top; padding: 0;">
-            <div style="${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor}; padding-left: ${verticalDividerLeftPadding}px;` : 'padding-left: 0;'}">
+            <div style="${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor}; padding-left: ${verticalDividerLeftPadding}px; margin-left: ${verticalDividerLeftGap}px;` : 'padding-left: 0;'}">
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="padding-left: ${textContentLeftGap}px; margin-left: -${textContentLeftGap}px; margin-right: ${textContentLeftGap}px;">
                 ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
                 <tr>
@@ -2324,6 +2327,25 @@ export default function EmailSignature() {
                                 data-testid="input-vertical-divider-color-hex"
                               />
                             </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs">
+                              Left Gap: {signatureData.verticalDividerLeftGap}px
+                            </Label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="40"
+                              value={signatureData.verticalDividerLeftGap}
+                              onChange={(e) =>
+                                updateField(
+                                  "verticalDividerLeftGap",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="custom-range w-full"
+                              data-testid="slider-vertical-divider-left-gap"
+                            />
                           </div>
                         </div>
                       )}
