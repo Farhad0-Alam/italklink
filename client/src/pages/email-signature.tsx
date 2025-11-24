@@ -1401,14 +1401,34 @@ export default function EmailSignature() {
       padding: 0;
       box-sizing: border-box;
     }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      background-color: #f5f5f5;
-      padding: 20px;
+      background-color: #ffffff;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .signature-wrapper {
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 600px;
+      padding: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .signature-container {
-      background-color: white;
-      padding: 20px;
+      background-color: #ffffff;
+      width: 100%;
+      padding: 0;
       margin: 0 auto;
     }
     table {
@@ -1427,8 +1447,10 @@ export default function EmailSignature() {
   </style>
 </head>
 <body>
-  <div class="signature-container">
-    ${signatureHTML}
+  <div class="signature-wrapper">
+    <div class="signature-container">
+      ${signatureHTML}
+    </div>
   </div>
 </body>
 </html>`;
