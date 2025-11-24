@@ -1555,20 +1555,21 @@ export default function EmailSignature() {
           </div>
         </div>
 
-        {/* Step 1 & 2: Platform Selection and Template Carousel */}
-        <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: "30% 70%" }}>
-          {/* Step 1: Email Platform Selection */}
-          <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-            <CardHeader className="py-2 px-3 flex flex-row items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" onClick={() => setCollapsedSections({ ...collapsedSections, emailPlatformSection: !collapsedSections.emailPlatformSection })}>
-              <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">1. Choose email platform</CardTitle>
-              {collapsedSections.emailPlatformSection ? (
-                <ChevronDown className="w-4 h-4 text-slate-500" />
-              ) : (
-                <ChevronUp className="w-4 h-4 text-slate-500" />
-              )}
-            </CardHeader>
-            {!collapsedSections.emailPlatformSection && <CardContent className="p-0">
-              <div className="grid grid-cols-4 gap-0">
+        {/* Step 1 & 2: Combined Platform Selection and Template Carousel */}
+        <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 mb-4">
+          <CardHeader className="py-2 px-3 flex flex-row items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" onClick={() => setCollapsedSections({ ...collapsedSections, emailPlatformSection: !collapsedSections.emailPlatformSection })}>
+            <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">1. Choose email platform & 2. Choose signature template</CardTitle>
+            {collapsedSections.emailPlatformSection ? (
+              <ChevronDown className="w-4 h-4 text-slate-500" />
+            ) : (
+              <ChevronUp className="w-4 h-4 text-slate-500" />
+            )}
+          </CardHeader>
+          {!collapsedSections.emailPlatformSection && <CardContent className="p-3 space-y-4">
+            {/* Email Platform Selection */}
+            <div>
+              <h3 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Email Platform</h3>
+              <div className="grid grid-cols-4 gap-0 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
                 {emailPlatforms.map((platform) => (
                   <button
                     key={platform.id}
@@ -1586,27 +1587,17 @@ export default function EmailSignature() {
                   </button>
                 ))}
               </div>
-
-              <p className="text-xs text-slate-500 dark:text-slate-400 px-3 py-3">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
                 Looking for another email platform?{" "}
                 <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
                   Check out the supported platforms here
                 </a>
               </p>
-            </CardContent>}
-          </Card>
+            </div>
 
-          {/* Step 2: Template Carousel */}
-          <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-            <CardHeader className="py-2 px-3 flex flex-row items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" onClick={() => setCollapsedSections({ ...collapsedSections, templateSelectionSection: !collapsedSections.templateSelectionSection })}>
-              <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">2. Choose signature template</CardTitle>
-              {collapsedSections.templateSelectionSection ? (
-                <ChevronDown className="w-4 h-4 text-slate-500" />
-              ) : (
-                <ChevronUp className="w-4 h-4 text-slate-500" />
-              )}
-            </CardHeader>
-            {!collapsedSections.templateSelectionSection && <CardContent className="p-0">
+            {/* Template Carousel */}
+            <div>
+              <h3 className="text-xs font-semibold text-slate-900 dark:text-white mb-2">Signature Template</h3>
               <div className="relative">
                 <div className="flex items-center gap-3 p-1.5">
                   <Button
@@ -1716,10 +1707,10 @@ export default function EmailSignature() {
                   </Button>
                 </div>
               </div>
-
-            </CardContent>}
-          </Card>
-        </div>
+            </div>
+            </div>
+          </CardContent>}
+        </Card>
 
         {/* Step 3 & Preview: Form and Live Preview */}
         <div className="grid gap-4" style={{ gridTemplateColumns: "30% 70%" }}>
