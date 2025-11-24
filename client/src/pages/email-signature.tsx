@@ -1531,26 +1531,27 @@ export default function EmailSignature() {
             <CardHeader className="py-2 px-3">
               <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">1. Choose email platform</CardTitle>
             </CardHeader>
-            <CardContent className="p-3 space-y-3">
-              <div className="grid grid-cols-4 gap-2">
+            <CardContent className="p-0">
+              <div className="grid grid-cols-4 gap-0">
                 {emailPlatforms.map((platform) => (
                   <button
                     key={platform.id}
                     onClick={() => setSelectedPlatform(platform.id)}
-                    className={`flex flex-col items-center justify-center gap-1 p-2 rounded-lg border-2 transition-all ${
+                    className={`flex flex-col items-center justify-center gap-1 py-6 px-2 border-r border-b transition-all ${
                       selectedPlatform === platform.id
-                        ? "border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                        : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                        ? "border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 border-r-blue-500 border-b-blue-500 dark:border-r-blue-400 dark:border-b-blue-400"
+                        : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"
                     }`}
+                    style={{ aspectRatio: "9/8" }}
                     data-testid={`btn-platform-${platform.id}`}
                   >
-                    <span className="text-lg">{platform.icon}</span>
+                    <span className="text-2xl">{platform.icon}</span>
                     <span className="text-xs font-medium text-center text-slate-900 dark:text-white">{platform.name}</span>
                   </button>
                 ))}
               </div>
 
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400 px-3 py-3">
                 Looking for another email platform?{" "}
                 <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
                   Check out the supported platforms here
