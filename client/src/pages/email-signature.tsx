@@ -68,6 +68,7 @@ interface SignatureData {
   profilePhotoHeight: number;
   profilePhotoBorderWidth: number;
   profilePhotoBorderColor: string;
+  profilePhotoBorderStyle: "solid" | "dashed" | "dotted" | "double";
   profilePhotoOpacity: number;
   profilePhotoShadow: "none" | "small" | "medium" | "large";
   profilePhotoRightSideGap: number;
@@ -421,6 +422,7 @@ export default function EmailSignature() {
     profilePhotoHeight: 100,
     profilePhotoBorderWidth: 2,
     profilePhotoBorderColor: "#FF6A00",
+    profilePhotoBorderStyle: "solid",
     profilePhotoOpacity: 100,
     profilePhotoShadow: "medium",
     profilePhotoRightSideGap: 13,
@@ -1045,7 +1047,7 @@ export default function EmailSignature() {
   // Helper function to get container styles (wrapper div)
   const getContainerStyle = (type: "profile" | "logo"): string => {
     if (type === "profile") {
-      const { profilePhotoShape, profilePhotoWidth, profilePhotoHeight, profilePhotoBorderWidth, profilePhotoBorderColor, profilePhotoOpacity, profilePhotoShadow, profilePhotoRightSideGap } = signatureData;
+      const { profilePhotoShape, profilePhotoWidth, profilePhotoHeight, profilePhotoBorderWidth, profilePhotoBorderColor, profilePhotoBorderStyle, profilePhotoOpacity, profilePhotoShadow, profilePhotoRightSideGap } = signatureData;
 
       let borderRadius = "50%";
       let clipPath = "none";
@@ -1099,7 +1101,7 @@ export default function EmailSignature() {
       if (profilePhotoShadow === "large") boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
 
       const clipPathStyle = clipPath !== "none" ? `; clip-path: ${clipPath}` : "";
-      return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px solid ${profilePhotoBorderColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center${clipPathStyle};`;
+      return `width: ${profilePhotoWidth}px; height: ${profilePhotoHeight}px; border-radius: ${borderRadius}; border: ${profilePhotoBorderWidth}px ${profilePhotoBorderStyle} ${profilePhotoBorderColor}; box-shadow: ${boxShadow}; overflow: hidden; display: flex; align-items: center; justify-content: center${clipPathStyle};`;
     } else {
       const { companyLogoShape, companyLogoWidth, companyLogoHeight, companyLogoBorderWidth, companyLogoBorderColor, companyLogoBackgroundColor, companyLogoShadow } = signatureData;
       
@@ -2810,11 +2812,26 @@ export default function EmailSignature() {
                             <Input type="number" value={signatureData.profilePhotoBorderWidth} onChange={(e) => updateField("profilePhotoBorderWidth", Number(e.target.value))} min="0" max="10" data-testid="input-profile-border-width" />
                           </div>
                           <div>
-                            <Label className="text-xs">Border Color</Label>
-                            <div className="flex gap-2">
-                              <input type="color" value={signatureData.profilePhotoBorderColor} onChange={(e) => updateField("profilePhotoBorderColor", e.target.value)} className="w-10 h-9 rounded" data-testid="input-profile-border-color" />
-                              <Input value={signatureData.profilePhotoBorderColor} onChange={(e) => updateField("profilePhotoBorderColor", e.target.value)} placeholder="#FF6A00" className="flex-1" data-testid="input-profile-border-color-hex" />
-                            </div>
+                            <Label className="text-xs">Border Style</Label>
+                            <Select value={signatureData.profilePhotoBorderStyle} onValueChange={(v: any) => updateField("profilePhotoBorderStyle", v)}>
+                              <SelectTrigger data-testid="select-profile-border-style">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="solid">Solid</SelectItem>
+                                <SelectItem value="dashed">Dashed</SelectItem>
+                                <SelectItem value="dotted">Dotted</SelectItem>
+                                <SelectItem value="double">Double</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-xs">Border Color</Label>
+                          <div className="flex gap-2">
+                            <input type="color" value={signatureData.profilePhotoBorderColor} onChange={(e) => updateField("profilePhotoBorderColor", e.target.value)} className="w-10 h-9 rounded" data-testid="input-profile-border-color" />
+                            <Input value={signatureData.profilePhotoBorderColor} onChange={(e) => updateField("profilePhotoBorderColor", e.target.value)} placeholder="#FF6A00" className="flex-1" data-testid="input-profile-border-color-hex" />
                           </div>
                         </div>
 
