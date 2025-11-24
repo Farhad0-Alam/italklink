@@ -1401,11 +1401,14 @@ export default function EmailSignature() {
       // Get the inner HTML of the signature (the table content)
       const signatureHTML = signatureElement.innerHTML;
       
-      // Copy to clipboard
-      await navigator.clipboard.writeText(signatureHTML);
+      // Copy to clipboard with proper HTML MIME type
+      const blob = new Blob([signatureHTML], { type: 'text/html' });
+      const data = [new ClipboardItem({ 'text/html': blob })];
+      await navigator.clipboard.write(data);
+      
       toast({
         title: "Copied!",
-        description: "Email signature layout copied to clipboard. You can now paste it into your email client.",
+        description: "Email signature copied to clipboard. Paste it directly into your email client's signature settings.",
       });
     } catch (err) {
       toast({
