@@ -1537,7 +1537,7 @@ export default function EmailSignature() {
                   <button
                     key={platform.id}
                     onClick={() => setSelectedPlatform(platform.id)}
-                    className={`flex flex-col items-center justify-center gap-1 py-6 px-2 border-r border-b transition-all ${
+                    className={`flex flex-col items-center justify-center gap-0 py-4 px-2 border-r border-b transition-all ${
                       selectedPlatform === platform.id
                         ? "border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 border-r-blue-500 border-b-blue-500 dark:border-r-blue-400 dark:border-b-blue-400"
                         : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"
@@ -1545,8 +1545,8 @@ export default function EmailSignature() {
                     style={{ aspectRatio: "9/8" }}
                     data-testid={`btn-platform-${platform.id}`}
                   >
-                    <span className="text-2xl">{platform.icon}</span>
-                    <span className="text-xs font-medium text-center text-slate-900 dark:text-white">{platform.name}</span>
+                    <span className="text-2xl flex-1 flex items-center justify-center">{platform.icon}</span>
+                    <span className="text-xs font-medium text-center text-slate-900 dark:text-white flex-1 flex items-center">{platform.name}</span>
                   </button>
                 ))}
               </div>
