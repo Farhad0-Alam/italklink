@@ -63,7 +63,7 @@ interface SignatureData {
   customFields: { value: string; icon: string; url: string }[];
 
   profilePhoto: string;
-  profilePhotoShape: "circle" | "square" | "rounded" | "hexagon" | "diamond" | "star" | "blob" | "arrow" | "octagon" | "hexagon2" | "hexagon3" | "trapezoid";
+  profilePhotoShape: "circle" | "square" | "rounded" | "hexagon" | "diamond" | "star" | "blob" | "arrow" | "octagon" | "hexagon2" | "hexagon3" | "trapezoid" | "custom-rounded";
   profilePhotoWidth: number;
   profilePhotoHeight: number;
   profilePhotoBorderWidth: number;
@@ -1087,6 +1087,10 @@ export default function EmailSignature() {
       if (profilePhotoShape === "trapezoid") {
         borderRadius = "0%";
         clipPath = "polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%)";
+      }
+      if (profilePhotoShape === "custom-rounded") {
+        borderRadius = "30% 70% 70% 30% / 30% 30% 70% 70%";
+        clipPath = "none";
       }
 
       let boxShadow = "none";
@@ -2786,6 +2790,7 @@ export default function EmailSignature() {
                               <SelectItem value="arrow">Arrow</SelectItem>
                               <SelectItem value="octagon">Octagon</SelectItem>
                               <SelectItem value="trapezoid">Trapezoid</SelectItem>
+                              <SelectItem value="custom-rounded">Custom Rounded</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
