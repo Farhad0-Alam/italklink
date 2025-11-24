@@ -1392,14 +1392,8 @@ export default function EmailSignature() {
 
   const copyToClipboard = async () => {
     try {
-      // Get the signature preview element
-      const signatureElement = document.querySelector('[data-testid="signature-preview"]');
-      if (!signatureElement) {
-        throw new Error("Signature preview not found");
-      }
-
-      // Get the inner HTML of the signature (the table content)
-      const signatureHTML = signatureElement.innerHTML;
+      // Get the generated signature HTML (same as download)
+      const signatureHTML = generateSignatureHTML();
       
       // Copy to clipboard with proper HTML MIME type
       const blob = new Blob([signatureHTML], { type: 'text/html' });
