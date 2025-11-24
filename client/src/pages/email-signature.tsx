@@ -1660,14 +1660,6 @@ export default function EmailSignature() {
                     <ChevronRight className="w-5 h-5" />
                   </Button>
                 </div>
-
-                <div className="text-center mt-2">
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-tight py-0">
-                    <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
-                      More templates
-                    </a>
-                  </p>
-                </div>
               </div>
 
             </CardContent>
