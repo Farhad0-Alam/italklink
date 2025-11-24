@@ -1582,7 +1582,7 @@ export default function EmailSignature() {
                     <ChevronLeft className="w-5 h-5" />
                   </Button>
 
-                  <div className="overflow-hidden flex items-center justify-center py-2" style={{ width: "856px" }}>
+                  <div className="flex-1 flex items-center justify-center py-2">
                     <style>{`
                       @keyframes slideIn {
                         from { opacity: 0; transform: translateX(20px); }
@@ -1594,8 +1594,10 @@ export default function EmailSignature() {
                       .carousel-container {
                         transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                         display: flex;
+                        flex-wrap: wrap;
                         gap: 12px;
                         width: fit-content;
+                        justify-content: center;
                       }
                     `}</style>
                     <div className="carousel-container" style={{ transform: `translateX(0)` }}>
@@ -1608,7 +1610,7 @@ export default function EmailSignature() {
                             key={`${actualIndex}-${template.id}`}
                             onClick={() => selectTemplate(actualIndex)}
                             className="carousel-item flex-shrink-0 cursor-pointer group relative"
-                            style={{ width: "200px" }}
+                            style={{ width: "140px" }}
                             data-testid={`template-card-${template.id}`}
                           >
                             <div
@@ -1617,17 +1619,17 @@ export default function EmailSignature() {
                                   ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400 ring-offset-2 dark:ring-offset-slate-800"
                                   : "border-slate-300 dark:border-slate-600 group-hover:border-blue-400 dark:group-hover:border-blue-500"
                               }`}
-                              style={{ height: "160px" }}
+                              style={{ height: "105px" }}
                             >
                               <div className="h-full bg-white dark:bg-slate-900 flex items-center justify-center p-0 overflow-hidden relative">
                                 <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/0 group-hover:to-black/5 dark:group-hover:to-white/5 transition-all duration-300"></div>
                                 <div
                                   style={{
-                                    transform: "scale(0.42)",
+                                    transform: "scale(0.3)",
                                     transformOrigin: "center",
-                                    width: "238%",
-                                    fontSize: "11px",
-                                    lineHeight: "1.3"
+                                    width: "333%",
+                                    fontSize: "9px",
+                                    lineHeight: "1.2"
                                   }}
                                 >
                                   <div
@@ -4560,19 +4562,7 @@ export default function EmailSignature() {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="showDisclaimer">Disclaimer</Label>
-                    <Switch
-                      id="showDisclaimer"
-                      checked={signatureData.showDisclaimer}
-                      onCheckedChange={(checked) =>
-                        updateField("showDisclaimer", checked)
-                      }
-                      data-testid="switch-show-disclaimer"
-                    />
-                  </div>
-
-                  {signatureData.showDisclaimer && (
+                  {false && (
                     <div className="pl-6 space-y-3">
                       <Textarea
                         value={signatureData.disclaimerText}
