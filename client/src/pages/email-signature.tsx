@@ -4757,9 +4757,9 @@ export default function EmailSignature() {
               <CardContent className="p-2">
                 <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white">
                   {/* Email Header */}
-                  <div className="bg-black text-white px-3 py-2 flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    <span className="text-xs font-medium">New Message</span>
+                  <div className="bg-black text-white px-3 py-3 flex items-center gap-2">
+                    <Mail className="w-5 h-5" />
+                    <span className="text-sm font-medium">New Message</span>
                   </div>
                   {/* Preview Content */}
                   <div className="p-2 min-h-[60px] overflow-y-auto">
