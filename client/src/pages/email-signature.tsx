@@ -360,17 +360,45 @@ export default function EmailSignature() {
   ];
 
   const nextTemplate = () => {
-    setCarouselIndex((prev) => (prev + 1) % templates.length);
+    const newIndex = (carouselIndex + 1) % templates.length;
+    setCarouselIndex(newIndex);
+    setTemplateVariant(templates[newIndex].id);
+    if (newIndex === 0) {
+      setSignatureData(prev => applyTemplate1Defaults(prev));
+    }
   };
 
   const prevTemplate = () => {
-    setCarouselIndex((prev) => (prev - 1 + templates.length) % templates.length);
+    const newIndex = (carouselIndex - 1 + templates.length) % templates.length;
+    setCarouselIndex(newIndex);
+    setTemplateVariant(templates[newIndex].id);
+    if (newIndex === 0) {
+      setSignatureData(prev => applyTemplate1Defaults(prev));
+    }
+  };
+
+  const applyTemplate1Defaults = (data: SignatureData): SignatureData => {
+    return {
+      ...data,
+      contactInfoSize: 11,
+      profilePhotoWidth: 122,
+      profilePhotoHeight: 122,
+      profilePhotoBorderWidth: 10,
+      profilePhotoBorderStyle: "double",
+      profilePhotoPositionY: 12,
+      companyLogoPositionY: 4,
+    };
   };
 
   const selectTemplate = (index: number) => {
     const newIndex = index % templates.length;
     setCarouselIndex(newIndex);
     setTemplateVariant(templates[newIndex].id);
+    
+    // Apply Template 1 specific defaults
+    if (newIndex === 0) {
+      setSignatureData(prev => applyTemplate1Defaults(prev));
+    }
   };
   
   const canPrev = true;
