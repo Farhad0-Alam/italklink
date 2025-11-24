@@ -144,6 +144,7 @@ interface SignatureData {
   disclaimerTextAlign: "left" | "center" | "right";
   disclaimerBold: boolean;
   disclaimerItalic: boolean;
+  disclaimerTopSpacing: number;
   showCTA: boolean;
   ctaText: string;
   ctaUrl: string;
@@ -514,6 +515,7 @@ export default function EmailSignature() {
     disclaimerTextAlign: "left",
     disclaimerBold: false,
     disclaimerItalic: true,
+    disclaimerTopSpacing: 0,
     showCTA: true,
     ctaButtons: [{ text: "Book a Consultation", url: "https://talkl.ink/" }],
     ctaButtonBgColor: "#FF6A00",
@@ -750,6 +752,7 @@ export default function EmailSignature() {
       disclaimerTextAlign,
       disclaimerBold,
       disclaimerItalic,
+      disclaimerTopSpacing,
       customFields,
       signatureFont,
       signatureSize,
@@ -950,7 +953,7 @@ export default function EmailSignature() {
             ${
               showCTA
                 ? `
-            <div style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; height: ${ctaSectionHeight}px; margin-bottom: ${Math.min(0, bannerTopSpacing)}px;">
+            <div style="padding: ${ctaSectionPadding}px; background: ${ctaSectionUseGradient ? `linear-gradient(${ctaSectionGradientAngle}deg, ${ctaSectionGradientColor1} 0%, ${ctaSectionGradientColor2} 100%)` : ctaSectionBackgroundColor}; border: ${ctaSectionBorderWidth}px solid ${ctaSectionBorderColor}; height: ${ctaSectionHeight}px; margin-bottom: ${Math.min(0, bannerTopSpacing) + Math.min(0, disclaimerTopSpacing)}px;">
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
                 <tr>
                   <td style="width: ${ctaLogoColumnWidth}%; vertical-align: middle; text-align: center; padding: 0; margin: 0;">
@@ -994,9 +997,22 @@ export default function EmailSignature() {
                 ? `
             ${
               bannerUrl
-                ? `<a href="${bannerUrl}" style="text-decoration: none; display: block;"><div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block; box-sizing: border-box;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="width: ${bannerTextAlign}%; padding: 0; margin: 0;"></td><td style="padding: ${bannerPadding}px; margin: 0; text-align: center; white-space: nowrap;">${bannerText}</td><td style="width: ${Math.max(0, 100 - bannerTextAlign)}%; padding: 0; margin: 0;"></td></tr></table></div></a>`
-                : `<div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block; box-sizing: border-box;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="width: ${bannerTextAlign}%; padding: 0; margin: 0;"></td><td style="padding: ${bannerPadding}px; margin: 0; text-align: center; white-space: nowrap;">${bannerText}</td><td style="width: ${Math.max(0, 100 - bannerTextAlign)}%; padding: 0; margin: 0;"></td></tr></table></div>`
+                ? `<a href="${bannerUrl}" style="text-decoration: none; display: block;"><div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block; box-sizing: border-box; margin-bottom: ${Math.min(0, disclaimerTopSpacing)}px;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="width: ${bannerTextAlign}%; padding: 0; margin: 0;"></td><td style="padding: ${bannerPadding}px; margin: 0; text-align: center; white-space: nowrap;">${bannerText}</td><td style="width: ${Math.max(0, 100 - bannerTextAlign)}%; padding: 0; margin: 0;"></td></tr></table></div></a>`
+                : `<div style="background: ${bannerUseGradient ? `linear-gradient(${bannerGradientAngle}deg, ${bannerGradientColor1} 0%, ${bannerGradientColor2} 100%)` : bannerBackgroundColor}; border: ${bannerBorderWidth}px solid ${bannerBorderColor}; font-family: ${bannerFont}, sans-serif; font-size: ${bannerTextSize}px; font-weight: bold; color: ${bannerFontColor}; line-height: ${bannerTextHeight}; width: 100%; margin: 0; display: block; box-sizing: border-box; margin-bottom: ${Math.min(0, disclaimerTopSpacing)}px;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="width: ${bannerTextAlign}%; padding: 0; margin: 0;"></td><td style="padding: ${bannerPadding}px; margin: 0; text-align: center; white-space: nowrap;">${bannerText}</td><td style="width: ${Math.max(0, 100 - bannerTextAlign)}%; padding: 0; margin: 0;"></td></tr></table></div>`
             }
+            `
+                : ""
+            }
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding: ${Math.max(0, disclaimerTopSpacing)}px 0 0 0; width: 100%;">
+            ${
+              showDisclaimer
+                ? `
+            <div style="padding: 0 25px 15px 25px; font-family: ${disclaimerFont}, sans-serif; font-size: ${disclaimerFontSize}px; color: ${disclaimerFontColor}; text-align: ${disclaimerTextAlign}; font-weight: ${disclaimerBold ? "bold" : "normal"}; font-style: ${disclaimerItalic ? "italic" : "normal"}; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">
+              ${disclaimerText}
+            </div>
             `
                 : ""
             }
@@ -1005,17 +1021,6 @@ export default function EmailSignature() {
       </table>
     </td>
   </tr>
-  ${
-    showDisclaimer
-      ? `
-  <tr>
-    <td style="padding: 0 25px 15px 25px; font-family: ${disclaimerFont}, sans-serif; font-size: ${disclaimerFontSize}px; color: ${disclaimerFontColor}; text-align: ${disclaimerTextAlign}; font-weight: ${disclaimerBold ? "bold" : "normal"}; font-style: ${disclaimerItalic ? "italic" : "normal"}; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">
-      ${disclaimerText}
-    </td>
-  </tr>
-  `
-      : ""
-  }
 </table>
     `.trim();
   };
@@ -4589,6 +4594,21 @@ export default function EmailSignature() {
                             Italic
                           </Label>
                         </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-xs">Top Spacing ({signatureData.disclaimerTopSpacing}px)</Label>
+                        <input
+                          type="range"
+                          min="-60"
+                          max="40"
+                          value={signatureData.disclaimerTopSpacing}
+                          onChange={(e) =>
+                            updateField("disclaimerTopSpacing", Number(e.target.value))
+                          }
+                          className="w-full"
+                          data-testid="input-disclaimer-top-spacing"
+                        />
                       </div>
                     </div>
                   )}
