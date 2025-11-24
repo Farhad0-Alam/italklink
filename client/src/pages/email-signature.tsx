@@ -63,7 +63,7 @@ interface SignatureData {
   customFields: { value: string; icon: string; url: string }[];
 
   profilePhoto: string;
-  profilePhotoShape: "circle" | "square" | "rounded" | "hexagon" | "diamond" | "star" | "blob" | "arrow" | "octagon";
+  profilePhotoShape: "circle" | "square" | "rounded" | "hexagon" | "diamond" | "star" | "blob" | "arrow" | "octagon" | "hexagon2" | "hexagon3";
   profilePhotoWidth: number;
   profilePhotoHeight: number;
   profilePhotoBorderWidth: number;
@@ -1075,6 +1075,14 @@ export default function EmailSignature() {
       if (profilePhotoShape === "octagon") {
         borderRadius = "0%";
         clipPath = "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)";
+      }
+      if (profilePhotoShape === "hexagon2") {
+        borderRadius = "0%";
+        clipPath = "polygon(100% 0%, 75% 50%, 100% 100%, 25% 100%, 0% 50%, 25% 0%)";
+      }
+      if (profilePhotoShape === "hexagon3") {
+        borderRadius = "0%";
+        clipPath = "polygon(75% 0%, 100% 50%, 75% 100%, 0% 100%, 25% 50%, 0% 0%)";
       }
 
       let boxShadow = "none";
@@ -2766,6 +2774,8 @@ export default function EmailSignature() {
                               <SelectItem value="square">Square</SelectItem>
                               <SelectItem value="rounded">Rounded Square</SelectItem>
                               <SelectItem value="hexagon">Hexagon</SelectItem>
+                              <SelectItem value="hexagon2">Hexagon 2</SelectItem>
+                              <SelectItem value="hexagon3">Hexagon 3</SelectItem>
                               <SelectItem value="diamond">Diamond</SelectItem>
                               <SelectItem value="star">Star</SelectItem>
                               <SelectItem value="blob">Blob</SelectItem>
