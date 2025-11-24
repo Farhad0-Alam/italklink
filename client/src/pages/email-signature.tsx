@@ -49,9 +49,8 @@ import {
   SiMicrosoftoutlook,
   SiGmail,
   SiThunderbird,
-  SiMicrosoft365,
 } from "react-icons/si";
-import { Mail as AppleMailIcon } from "lucide-react";
+import { Mail as AppleMailIcon, Box } from "lucide-react";
 
 interface SignatureData {
   signatureName: string;
@@ -212,12 +211,12 @@ const socialPlatforms = [
 const emailPlatforms = [
   { id: "outlook", name: "Outlook", icon: SiMicrosoftoutlook },
   { id: "new-outlook", name: "New Outlook", icon: SiMicrosoftoutlook },
-  { id: "outlook-365", name: "Outlook 365", icon: SiMicrosoft365 },
+  { id: "outlook-365", name: "Outlook 365", icon: SiMicrosoftoutlook },
   { id: "apple-mail", name: "Apple Mail", icon: AppleMailIcon },
   { id: "gmail", name: "Gmail", icon: SiGmail },
   { id: "thunderbird", name: "Thunderbird", icon: SiThunderbird },
-  { id: "exchange", name: "Exchange Server", icon: SiMicrosoft365 },
-  { id: "microsoft-365", name: "Microsoft 365", icon: SiMicrosoft365 },
+  { id: "exchange", name: "Exchange Server", icon: Box },
+  { id: "microsoft-365", name: "Microsoft 365", icon: Box },
 ];
 
 const platformInstructions: { [key: string]: { steps: string[]; tips: string[]; location: string } } = {
