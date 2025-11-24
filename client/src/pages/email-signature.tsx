@@ -1513,7 +1513,10 @@ export default function EmailSignature() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "email-signature.html";
+    const fileName = signatureData.signatureName && signatureData.signatureName.trim()
+      ? `${signatureData.signatureName} HTML Email Signature.html`
+      : "HTML Email Signature.html";
+    a.download = fileName;
     a.click();
     URL.revokeObjectURL(url);
 
