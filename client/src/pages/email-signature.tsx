@@ -86,6 +86,7 @@ interface SignatureData {
 
   primaryColor: string;
   secondaryColor: string;
+  wrapperBackgroundColor: string;
 
   signatureFont: string;
   signatureSize: number;
@@ -442,6 +443,7 @@ export default function EmailSignature() {
     companyLogoShadow: "none",
     primaryColor: "#FF6A00",
     secondaryColor: "#333333",
+    wrapperBackgroundColor: "#FFFFFF",
     signatureFont: "Alex Brush",
     signatureSize: 20,
     signatureColor: "#333333",
@@ -725,6 +727,7 @@ export default function EmailSignature() {
       companyLogo,
       primaryColor,
       secondaryColor,
+      wrapperBackgroundColor,
       socialLinks,
       showCTA,
       ctaText,
@@ -884,7 +887,7 @@ export default function EmailSignature() {
     return `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; max-width: 400px; margin: 0; padding: 0; table-layout: fixed; width: 100%;">
   <tr>
-    <td style="background-color: #ffffff; padding: 0;">
+    <td style="background-color: ${wrapperBackgroundColor}; padding: 0;">
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="table-layout: fixed;">
         <tr>
           <td style="width: ${leftContainerWidth.toFixed(1)}%; vertical-align: ${companyLogo ? 'top' : 'middle'}; padding-right: ${profilePhotoRightSideGap}px;">
@@ -1640,6 +1643,41 @@ export default function EmailSignature() {
         {/* Step 3 & Preview: Form and Live Preview */}
         <div className="grid gap-4" style={{ gridTemplateColumns: "30% 70%" }}>
           <div className="space-y-2">
+            {/* CARD 0: Wrapper & Layout */}
+            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <CardHeader className="py-2 px-3">
+                <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white">
+                  Wrapper & Layout
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 space-y-3">
+                <div>
+                  <Label className="text-xs">Background Color</Label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={signatureData.wrapperBackgroundColor}
+                      onChange={(e) =>
+                        updateField("wrapperBackgroundColor", e.target.value)
+                      }
+                      className="h-10 w-14 rounded border border-slate-300 dark:border-slate-600 cursor-pointer"
+                      data-testid="input-wrapper-bg-color"
+                    />
+                    <input
+                      type="text"
+                      value={signatureData.wrapperBackgroundColor}
+                      onChange={(e) =>
+                        updateField("wrapperBackgroundColor", e.target.value)
+                      }
+                      placeholder="#FFFFFF"
+                      className="flex-1 px-2 py-1 text-xs border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                      data-testid="input-wrapper-bg-color-hex"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* CARD 1: Signature (Handwritten Style) */}
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <CardHeader
