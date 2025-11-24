@@ -1598,9 +1598,10 @@ export default function EmailSignature() {
                         width: fit-content;
                       }
                     `}</style>
-                    <div className="carousel-container" style={{ transform: `translateX(-${(carouselIndex % templates.length) * 212}px)` }}>
-                      {templates && templates.map((template, actualIndex) => {
-                        const visibleIndex = actualIndex >= carouselIndex ? actualIndex - carouselIndex : templates.length - carouselIndex + actualIndex;
+                    <div className="carousel-container" style={{ transform: `translateX(0)` }}>
+                      {templates && Array.from({ length: 4 }).map((_, i) => {
+                        const actualIndex = (carouselIndex + i) % templates.length;
+                        const template = templates[actualIndex];
 
                         return (
                           <div
@@ -1612,7 +1613,7 @@ export default function EmailSignature() {
                           >
                             <div
                               className={`border-3 rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1 ${
-                                visibleIndex === 0
+                                i === 0
                                   ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-400 ring-offset-2 dark:ring-offset-slate-800"
                                   : "border-slate-300 dark:border-slate-600 group-hover:border-blue-400 dark:group-hover:border-blue-500"
                               }`}
