@@ -926,7 +926,7 @@ export default function EmailSignature() {
           </td>
           <td style="width: ${rightContainerWidth.toFixed(1)}%; vertical-align: top; padding: 0;">
             <div style="${showVerticalDivider ? `border-left: ${verticalDividerWidth}px solid ${verticalDividerColor}; padding-left: ${verticalDividerLeftPadding + verticalDividerLeftGap}px; margin-left: -${verticalDividerLeftGap}px;` : 'padding-left: 0;'}">
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="padding-left: ${textContentLeftGap}px; margin-left: -${textContentLeftGap}px; margin-right: ${textContentLeftGap}px;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="padding-left: ${textContentLeftGap}px; margin-left: -${textContentLeftGap}px; margin-right: 0;">
                 ${signatureName ? `<tr><td style="font-family: '${signatureFont}', cursive; font-size: ${signatureSize}px; color: ${signatureColor}; line-height: ${signatureLineHeight}; padding-bottom: 5px;">${signatureName}</td></tr>` : ""}
                 <tr>
                   <td style="font-family: ${headerFont}, sans-serif; font-size: ${nameSize}px; font-weight: bold; color: ${nameColor}; line-height: ${nameLineHeight}; padding-bottom: 2px;">
@@ -1019,7 +1019,7 @@ export default function EmailSignature() {
             ${
               showDisclaimer
                 ? `
-            <div style="padding: 0 25px 15px 25px; font-family: ${disclaimerFont}, sans-serif; font-size: ${disclaimerFontSize}px; color: ${disclaimerFontColor}; text-align: ${disclaimerTextAlign}; font-weight: ${disclaimerBold ? "bold" : "normal"}; font-style: ${disclaimerItalic ? "italic" : "normal"}; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">
+            <div style="padding: 0 0 15px 0; font-family: ${disclaimerFont}, sans-serif; font-size: ${disclaimerFontSize}px; color: ${disclaimerFontColor}; text-align: ${disclaimerTextAlign}; font-weight: ${disclaimerBold ? "bold" : "normal"}; font-style: ${disclaimerItalic ? "italic" : "normal"}; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">
               ${disclaimerText}
             </div>
             `
