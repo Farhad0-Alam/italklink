@@ -4344,36 +4344,19 @@ export default function EmailSignature() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <Label className="text-xs">Padding ({signatureData.bannerPadding}px)</Label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="40"
-                            value={signatureData.bannerPadding}
-                            onChange={(e) =>
-                              updateField("bannerPadding", Number(e.target.value))
-                            }
-                            className="w-full"
-                            data-testid="input-banner-padding"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs">Top Spacing ({signatureData.bannerTopSpacing}px)</Label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="40"
-                            value={signatureData.bannerTopSpacing}
-                            onChange={(e) =>
-                              updateField("bannerTopSpacing", Number(e.target.value))
-                            }
-                            className="w-full"
-                            data-testid="input-banner-top-spacing"
-                          />
-                        </div>
+                      <div>
+                        <Label className="text-xs">Top Spacing ({signatureData.bannerTopSpacing}px)</Label>
+                        <input
+                          type="range"
+                          min="-30"
+                          max="40"
+                          value={signatureData.bannerTopSpacing}
+                          onChange={(e) =>
+                            updateField("bannerTopSpacing", Number(e.target.value))
+                          }
+                          className="w-full"
+                          data-testid="input-banner-top-spacing"
+                        />
                       </div>
 
                       <div>
