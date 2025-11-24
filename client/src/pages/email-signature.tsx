@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Copy,
   Download,
@@ -46,7 +46,12 @@ import {
   SiWhatsapp,
   SiPinterest,
   SiGithub,
+  SiMicrosoftoutlook,
+  SiGmail,
+  SiThunderbird,
+  SiMicrosoft365,
 } from "react-icons/si";
+import { Mail as AppleMailIcon } from "lucide-react";
 
 interface SignatureData {
   signatureName: string;
@@ -205,14 +210,14 @@ const socialPlatforms = [
 ];
 
 const emailPlatforms = [
-  { id: "outlook", name: "Outlook", icon: "📧" },
-  { id: "new-outlook", name: "New Outlook", icon: "📧" },
-  { id: "outlook-365", name: "Outlook 365", icon: "🔵" },
-  { id: "apple-mail", name: "Apple Mail", icon: "🍎" },
-  { id: "gmail", name: "Gmail", icon: "📨" },
-  { id: "thunderbird", name: "Thunderbird", icon: "🦅" },
-  { id: "exchange", name: "Exchange Server", icon: "🔄" },
-  { id: "microsoft-365", name: "Microsoft 365", icon: "🪟" },
+  { id: "outlook", name: "Outlook", icon: SiMicrosoftoutlook },
+  { id: "new-outlook", name: "New Outlook", icon: SiMicrosoftoutlook },
+  { id: "outlook-365", name: "Outlook 365", icon: SiMicrosoft365 },
+  { id: "apple-mail", name: "Apple Mail", icon: AppleMailIcon },
+  { id: "gmail", name: "Gmail", icon: SiGmail },
+  { id: "thunderbird", name: "Thunderbird", icon: SiThunderbird },
+  { id: "exchange", name: "Exchange Server", icon: SiMicrosoft365 },
+  { id: "microsoft-365", name: "Microsoft 365", icon: SiMicrosoft365 },
 ];
 
 const platformInstructions: { [key: string]: { steps: string[]; tips: string[]; location: string } } = {
@@ -1545,7 +1550,9 @@ export default function EmailSignature() {
                     style={{ aspectRatio: "16/8" }}
                     data-testid={`btn-platform-${platform.id}`}
                   >
-                    <span className="text-2xl flex-1 flex items-center justify-center">{platform.icon}</span>
+                    <span className="flex-1 flex items-center justify-center">
+                      {React.createElement(platform.icon, { className: "w-8 h-8 text-slate-700 dark:text-slate-300" })}
+                    </span>
                     <span className="text-xs font-medium text-center text-slate-900 dark:text-white flex-1 flex items-center">{platform.name}</span>
                   </button>
                 ))}
