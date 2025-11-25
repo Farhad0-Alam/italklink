@@ -246,11 +246,14 @@ export default function CardEditor() {
     if (shareUrl) {
       try {
         await navigator.clipboard.writeText(shareUrl);
-        // Open the live view in a new window
-        window.open(shareUrl, '_blank');
+        // Extract slug and open as relative URL in new tab (works in Replit preview)
+        const slug = shareUrl.split('/').pop();
+        if (slug) {
+          window.open(`/${slug}`, '_blank');
+        }
         toast({
           title: "Link copied and opened!",
-          description: "URL copied to clipboard and opened in a new window.",
+          description: "URL copied to clipboard and opened in a new tab.",
         });
       } catch (err) {
         toast({
