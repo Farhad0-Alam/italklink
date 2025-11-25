@@ -158,6 +158,13 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
     - Updated auto-save logic: allows saving when custom URL exists OR when name/title provided
     - Enables card creation with custom URL slug from template modal (no name/title required)
     - Custom URL slug saves immediately to database
+29. ✅ Fixed React hook violation in ContactFormRenderer
+    - Extracted contactForm element rendering into separate ContactFormRenderer component
+    - Prevents calling useState/useEffect inside switch statement (Rules of Hooks violation)
+    - All 9 element types now render without React hook warnings:
+      - paragraph, heading, contactSection, socialSection, actionButtons, link, image, accordion, contactForm
+    - Elements persist correctly to database with full configuration
+    - Auto-save mechanism (100ms debounce) working smoothly without errors
 
 ## Known Status - SAAS Complete
 - Card save functionality: ✅ Auto-save enabled (100ms debounce - immediate saves on any interaction)
@@ -232,3 +239,4 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 - Custom URL feature: shareSlug auto-generated from fullName, supports custom URLs via customUrl field
 - Template defaults: defaultName and defaultTitle fields in globalTemplates table apply on template selection
 - Mobile preview: CSS-based iPhone 14 Pro mockup (430x815px) with notch and safe area
+- React hook pattern: Element rendering extracted to separate components to prevent Rules of Hooks violations (no hooks inside switch statements)
