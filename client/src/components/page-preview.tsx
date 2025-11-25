@@ -136,40 +136,41 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, individua
       <div className="flex-1 overflow-y-auto relative">
         <div className="min-h-full relative">
           {sortedElements.map((element, index) => {
-          // Calculate spacing for this element
-          let spacing = elementSpacing; // Default global spacing
-          
-          // Check if next element exists and is the same type
-          if (index < sortedElements.length - 1) {
-            const nextElement = sortedElements[index + 1];
+            // Calculate spacing for this element
+            let spacing = elementSpacing; // Default global spacing
             
-            // If next element is same type, use individual spacing for this type
-            if (nextElement.type === element.type) {
-              spacing = individualElementSpacing?.[element.type] ?? elementSpacing;
-              console.log(`[PagePreview] Element ${index} (${element.type}): Next is same type, using individual spacing:`, spacing);
+            // Check if next element exists and is the same type
+            if (index < sortedElements.length - 1) {
+              const nextElement = sortedElements[index + 1];
+              
+              // If next element is same type, use individual spacing for this type
+              if (nextElement.type === element.type) {
+                spacing = individualElementSpacing?.[element.type] ?? elementSpacing;
+                console.log(`[PagePreview] Element ${index} (${element.type}): Next is same type, using individual spacing:`, spacing);
+              } else {
+                console.log(`[PagePreview] Element ${index} (${element.type}): Next is different type (${nextElement.type}), using global spacing:`, spacing);
+              }
+              // Otherwise use global spacing (already set as default)
             } else {
-              console.log(`[PagePreview] Element ${index} (${element.type}): Next is different type (${nextElement.type}), using global spacing:`, spacing);
+              // Last element, no spacing needed
+              spacing = 0;
+              console.log(`[PagePreview] Element ${index} (${element.type}): Last element, no spacing`);
             }
-            // Otherwise use global spacing (already set as default)
-          } else {
-            // Last element, no spacing needed
-            spacing = 0;
-            console.log(`[PagePreview] Element ${index} (${element.type}): Last element, no spacing`);
-          }
 
-          return (
-            <div key={element.id} style={{ marginBottom: `${spacing}px` }}>
-              <PageElementRenderer
-                element={element}
-                isEditing={false}
-                onUpdate={() => {}}
-                onDelete={() => {}}
-                cardData={cardData}
-                onNavigatePage={onNavigatePage}
-              />
-            </div>
-          );
-        })}
+            return (
+              <div key={element.id} style={{ marginBottom: `${spacing}px` }}>
+                <PageElementRenderer
+                  element={element}
+                  isEditing={false}
+                  onUpdate={() => {}}
+                  onDelete={() => {}}
+                  cardData={cardData}
+                  onNavigatePage={onNavigatePage}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
