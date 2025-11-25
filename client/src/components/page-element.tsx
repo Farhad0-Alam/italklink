@@ -2947,15 +2947,6 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={element.data.showIngestForm}
-                    onChange={(e) => handleDataUpdate({ showIngestForm: e.target.checked })}
-                    className="rounded"
-                  />
-                  <span className="text-black text-sm">Show URL Ingestion Form</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
                     checked={element.data.showChatBox}
                     onChange={(e) => handleDataUpdate({ showChatBox: e.target.checked })}
                     className="rounded"
@@ -3025,11 +3016,9 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 )}
                 
                 {/* Technical note for card creators - only visible during editing */}
-                {element.data.showIngestForm && (
-                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
-                    <p><strong>For Card Creators:</strong> Edit this element to manage knowledge base content. End users will only see the chat interface above.</p>
-                  </div>
-                )}
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                  <p><strong>For Card Creators:</strong> Edit this element to manage knowledge base content. End users will only see the chat interface above.</p>
+                </div>
               </div>
             )}
           </div>
