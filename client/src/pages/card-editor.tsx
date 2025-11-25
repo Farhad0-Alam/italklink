@@ -229,9 +229,11 @@ export default function CardEditor() {
     if (shareUrl) {
       try {
         await navigator.clipboard.writeText(shareUrl);
+        // Open the live view in a new window
+        window.open(shareUrl, '_blank');
         toast({
-          title: "Link copied!",
-          description: "Share URL has been copied to clipboard.",
+          title: "Link copied and opened!",
+          description: "URL copied to clipboard and opened in a new window.",
         });
       } catch (err) {
         toast({
@@ -311,61 +313,30 @@ END:VCARD`;
             
             <div className="flex items-center space-x-3">
               {shareUrl && (
-                <>
-                  <div className="bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-600 max-w-xs truncate">
+                <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-orange-50 rounded-full px-6 py-3 shadow-sm border border-gray-200">
+                  <div className="text-sm text-gray-700 font-medium">
                     {shareUrl}
                   </div>
                   <Button
-                    variant="outline"
                     size="sm"
                     onClick={copyShareUrl}
-                    className="bg-blue-100 hover:bg-blue-200 text-blue-700"
+                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-6"
                     data-testid="button-copy-url"
                   >
-                    <Copy className="w-4 h-4 mr-1" />
+                    <Copy className="w-4 h-4 mr-2" />
                     Copy
                   </Button>
                   <Button
                     size="sm"
                     onClick={handleShare}
-                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6"
                     data-testid="button-share"
                   >
-                    <Share2 className="w-4 h-4 mr-1" />
+                    <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={downloadVCard}
-                    className="bg-green-100 hover:bg-green-200 text-green-700"
-                    data-testid="button-download-vcard"
-                  >
-                    <i className="fas fa-download w-4 h-4 mr-1"></i>
-                    Save Contact
-                  </Button>
-                </>
+                </div>
               )}
-              
-              <Button
-                variant="outline" 
-                size="sm"
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700"
-                data-testid="button-card-url"
-              >
-                <i className="fas fa-link w-4 h-4 mr-1"></i>
-                Card URL
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700"
-                data-testid="button-settings"
-              >
-                <Settings className="w-4 h-4 mr-1" />
-                Settings
-              </Button>
             </div>
           </div>
         </div>
