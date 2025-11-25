@@ -111,16 +111,26 @@ export default function CardEditor() {
         });
       }
       
-      // Set pageElements from all pages
-      dataToSave.pageElements = allElements.length > 0 ? allElements : (dataToSave.pageElements || []);
+      // Set pageElements from all pages - use extracted elements if available
+      const pageElementsToSave = allElements.length > 0 ? allElements : (dataToSave.pageElements || []);
       
-      console.log('[CardEditor] Saving card with', dataToSave.pageElements?.length || 0, 'page elements:', dataToSave.pageElements);
+      // Build final data without pages field (server only needs pageElements)
+      const finalData = {
+        ...dataToSave,
+        pageElements: pageElementsToSave,
+        pages: null, // Remove pages field - it's FormBuilder internal only
+        menu: null,   // Also clean up other FormBuilder-only fields
+        currentPreviewMode: undefined,
+        currentSelectedPage: undefined
+      };
+      
+      console.log('[CardEditor] Saving card with', finalData.pageElements?.length || 0, 'page elements:', finalData.pageElements);
       
       // apiRequest already handles errors and returns parsed JSON
       if (cardId) {
-        return await apiRequest('PUT', `/api/business-cards/${cardId}`, dataToSave);
+        return await apiRequest('PUT', `/api/business-cards/${cardId}`, finalData);
       } else {
-        return await apiRequest('POST', '/api/business-cards', dataToSave);
+        return await apiRequest('POST', '/api/business-cards', finalData);
       }
     },
     onSuccess: (savedCard) => {
