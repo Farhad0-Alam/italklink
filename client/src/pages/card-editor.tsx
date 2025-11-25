@@ -176,6 +176,8 @@ export default function CardEditor() {
         const newCardData = {
           ...cardData,
           template: selectedTemplate.id,
+          fullName: selectedTemplate.defaultName || cardData.fullName,
+          title: selectedTemplate.defaultTitle || cardData.title,
           brandColor: selectedTemplate.brandColor || cardData.brandColor,
           accentColor: selectedTemplate.accentColor || cardData.accentColor,
           backgroundColor: selectedTemplate.backgroundColor || cardData.backgroundColor,

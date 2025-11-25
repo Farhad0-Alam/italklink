@@ -638,6 +638,8 @@ export const globalTemplates = pgTable("global_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
   description: text("description"),
+  defaultName: varchar("default_name"), // Default name for new cards using this template
+  defaultTitle: varchar("default_title"), // Default title for new cards using this template
   templateData: jsonb("template_data").notNull(), // The template configuration
   previewImage: text("preview_image"), // base64 preview
   isActive: boolean("is_active").default(true),
