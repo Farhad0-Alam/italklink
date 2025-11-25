@@ -198,7 +198,11 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
   }
 
   const handleAddElement = (element: PageElement) => {
+    console.log('[PageBuilder] Adding element:', element.type, 'with order:', element.order);
+    console.log('[PageBuilder] Current elements count:', elements.length);
     const newElements = [...elements, element];
+    console.log('[PageBuilder] New elements count after adding:', newElements.length);
+    console.log('[PageBuilder] All element orders:', newElements.map(e => ({ type: e.type, order: e.order })));
     onElementsChange(newElements);
   };
 

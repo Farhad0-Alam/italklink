@@ -6599,7 +6599,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               <PageBuilder
                 elements={form.watch("pageElements") || []}
                 onElementsChange={(elements: PageElement[]) => {
+                  console.log('[FormBuilder] onElementsChange called with', elements.length, 'elements');
+                  console.log('[FormBuilder] Elements:', elements.map(e => ({ type: e.type, id: e.id, order: e.order })));
                   form.setValue("pageElements", elements);
+                  console.log('[FormBuilder] Form values updated for pageElements');
                 }}
                 elementSpacing={elementSpacing ?? 16}
                 onElementSpacingChange={(spacing: number) => {
