@@ -313,7 +313,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
         };
         memoizedOnDataChange(enhancedCardData);
       }
-    }, 500); // 500ms debounce to prevent rapid updates
+    }, 100); // 100ms debounce for real-time preview updates
 
     return () => clearTimeout(timer);
   }, [enhancedCardData, elementSpacing, individualElementSpacing, memoizedOnDataChange]);
