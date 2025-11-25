@@ -37,6 +37,8 @@ const PUBLIC_ENDPOINTS = [
   '/element-types', // Public element types for card builder
   '/availability',
   '/appointments/book',
+  '/cards', // Public card viewing by slug or customUrl
+  '/business-cards/slug', // Public card viewing by slug (alternative route)
   '/chat', // RAG knowledge base chat - public
   '/voice/process', // Voice processing - public
   '/voice/tts', // Text-to-speech - public

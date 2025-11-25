@@ -1652,6 +1652,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...cardData,
         userId: user.id,
         shareSlug: cardData.shareSlug || autoSlug,
+        isPublic: true, // Explicitly set cards as public by default
       });
       
       console.log('Created business card:', businessCard);
