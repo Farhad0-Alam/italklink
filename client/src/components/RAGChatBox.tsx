@@ -898,37 +898,8 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
               <div className="text-gray-400 text-sm">Loading audio...</div>
             )}
 
-            {/* Auto-Microphone Toggle Label */}
-            <div className="text-center">
-              <p className="text-white text-sm sm:text-base font-medium">
-                {autoMicrophoneEnabled ? 'Turn off microphone' : 'Turn on microphone'}
-              </p>
-              <p className="text-gray-400 text-xs sm:text-sm">Microphone Array (Realtek High Definition Audio(SST))</p>
-            </div>
-
             {/* Control Buttons */}
             <div className="flex gap-6">
-              {/* Auto-Microphone Toggle Button */}
-              <button
-                type="button"
-                onClick={() => setAutoMicrophoneEnabled(!autoMicrophoneEnabled)}
-                disabled={isProcessing || isLoading || isTTSLoading}
-                className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center transition-all transform ${
-                  autoMicrophoneEnabled
-                    ? 'bg-gray-800 hover:bg-gray-700 text-white'
-                    : 'bg-red-900/50 hover:bg-red-900 text-red-400'
-                }`}
-                data-testid="button-toggle-auto-mic"
-              >
-                {autoMicrophoneEnabled ? (
-                  <Mic className="h-7 w-7 sm:h-8 sm:w-8" />
-                ) : (
-                  <svg className="h-7 w-7 sm:h-8 sm:w-8" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 13h-3v3h-2v-3h-3v-2h3V8h2v3h3v2z" />
-                  </svg>
-                )}
-              </button>
-
               {/* Stop/Close Button */}
               <button
                 onClick={stopAudio}
