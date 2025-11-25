@@ -663,15 +663,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBusinessCardBySlug(shareSlug: string): Promise<DbBusinessCard | undefined> {
-    // First try to find by customUrl (case-insensitive), then by shareSlug (case-insensitive)
-    // Use SQL LOWER() function for case-insensitive comparison
-    let [card] = await db.select().from(businessCards).where(
-      sql`LOWER(${businessCards.customUrl}) = LOWER(${shareSlug})`
-    );
+    // First try to find by customUrl, then by shareSlug
+    let [card] = await db.select().from(businessCards).where(eq(businessCards.customUrl, shareSlug));
     if (!card) {
-      [card] = await db.select().from(businessCards).where(
-        sql`LOWER(${businessCards.shareSlug}) = LOWER(${shareSlug})`
-      );
+      [card] = await db.select().from(businessCards).where(eq(businessCards.shareSlug, shareSlug));
     }
     return card;
   }

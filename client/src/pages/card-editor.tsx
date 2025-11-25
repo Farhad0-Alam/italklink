@@ -154,16 +154,6 @@ export default function CardEditor() {
       }));
     }
   };
-
-  // Function to go back from page preview to main card view
-  const handleBackToCard = () => {
-    setCurrentPageId('home');
-    setCardData(prev => ({
-      ...prev,
-      currentPreviewMode: 'card',
-      currentSelectedPage: undefined
-    }));
-  };
   
   // Fetch template data if template parameter is provided
   const { data: templates } = useQuery({
@@ -430,7 +420,6 @@ END:VCARD`;
                         elementSpacing={(cardData as any).elementSpacing || 16}
                         individualElementSpacing={(cardData as any).individualElementSpacing || {}}
                         onNavigatePage={handleNavigatePage}
-                        onBackToCard={handleBackToCard}
                       />
                     ) : (
                       <BusinessCardComponent 
