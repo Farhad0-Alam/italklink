@@ -99,13 +99,22 @@ export default function CardEditor() {
         ...(customUrlSlug && { customUrl: customUrlSlug })
       };
       
-      // Ensure pageElements are included
-      if (!dataToSave.pageElements) {
-        console.warn('[CardEditor] pageElements missing, using empty array');
-        dataToSave.pageElements = [];
+      // Convert pages structure to pageElements for database storage
+      // FormBuilder uses pages[].elements, but database expects flat pageElements array
+      const allElements: any[] = [];
+      const pages = (dataToSave as any).pages || [];
+      if (Array.isArray(pages)) {
+        pages.forEach((page: any) => {
+          if (Array.isArray(page.elements)) {
+            allElements.push(...page.elements);
+          }
+        });
       }
       
-      console.log('[CardEditor] Saving card with', dataToSave.pageElements?.length || 0, 'page elements');
+      // Set pageElements from all pages
+      dataToSave.pageElements = allElements.length > 0 ? allElements : (dataToSave.pageElements || []);
+      
+      console.log('[CardEditor] Saving card with', dataToSave.pageElements?.length || 0, 'page elements:', dataToSave.pageElements);
       
       // apiRequest already handles errors and returns parsed JSON
       if (cardId) {
