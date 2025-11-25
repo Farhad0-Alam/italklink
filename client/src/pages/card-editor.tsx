@@ -155,33 +155,33 @@ export default function CardEditor() {
     }
   }, [existingCard]);
 
-  // Auto-save functionality - disabled to prevent page interruptions
-  // useEffect(() => {
-  //   // Don't auto-save if we don't have required fields or user is not authenticated
-  //   if (!cardData.fullName || !cardData.title || !user) {
-  //     return;
-  //   }
+  // Auto-save functionality - saves after 3 seconds of inactivity
+  useEffect(() => {
+    // Don't auto-save if we don't have required fields, user not authenticated, or mutation is pending
+    if (!cardData.fullName || !cardData.title || !user || saveMutation.isPending || !params.id) {
+      return;
+    }
 
-  //   // Clear existing timeout
-  //   if (autoSaveTimeout) {
-  //     clearTimeout(autoSaveTimeout);
-  //   }
+    // Clear existing timeout
+    if (autoSaveTimeout) {
+      clearTimeout(autoSaveTimeout);
+    }
 
-  //   // Set new timeout for auto-save (2 seconds after last change)
-  //   const timeout = setTimeout(() => {
-  //     console.log('Auto-saving card data:', cardData);
-  //     saveMutation.mutate(cardData);
-  //   }, 2000);
+    // Set new timeout for auto-save (3 seconds after last change)
+    const timeout = setTimeout(() => {
+      console.log('Auto-saving card data...');
+      saveMutation.mutate(cardData);
+    }, 3000);
 
-  //   setAutoSaveTimeout(timeout);
+    setAutoSaveTimeout(timeout);
 
-  //   // Cleanup timeout on unmount
-  //   return () => {
-  //     if (timeout) {
-  //       clearTimeout(timeout);
-  //     }
-  //   };
-  // }, [cardData, params.id, user]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Cleanup timeout on unmount
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [cardData, params.id, user, saveMutation.isPending]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateShareUrl = (card: any) => {
     if (card.customUrl) {
@@ -472,15 +472,17 @@ END:VCARD`;
                 </Button>
               </div>
               
-              {/* Auto-save indicator */}
-              <div className="flex justify-center">
-                <div className="flex items-center space-x-2 text-slate-600 bg-slate-100 px-4 py-2 rounded-lg">
-                  <div className={`w-2 h-2 rounded-full ${saveMutation.isPending ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}></div>
-                  <span className="text-sm">
-                    {saveMutation.isPending ? 'Saving...' : 'Auto-save enabled'}
-                  </span>
+              {/* Auto-save status indicator - only shows when editing existing card */}
+              {params.id && (
+                <div className="flex justify-center">
+                  <div className="flex items-center space-x-2 text-slate-600 bg-slate-100 px-4 py-2 rounded-lg text-sm">
+                    <div className={`w-2 h-2 rounded-full ${saveMutation.isPending ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}></div>
+                    <span>
+                      {saveMutation.isPending ? 'Auto-saving...' : 'All changes saved'}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
