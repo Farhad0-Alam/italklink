@@ -150,6 +150,19 @@ export default function Templates() {
     setShowUrlModal(true);
   };
 
+  // Helper function to sanitize URL in real-time
+  const sanitizeUrl = (url: string) => {
+    return url
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/[^a-z0-9-]/g, '') // Remove special characters
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+  };
+
+  const sanitizedUrlPreview = customUrl ? sanitizeUrl(customUrl) : '';
+
   const handleTemplatePreview = (template: Template) => {
     // Open template preview in new window
     window.open(`/template-preview/${template.id}`, '_blank', 'width=1200,height=800');
@@ -160,7 +173,18 @@ export default function Templates() {
       const params = new URLSearchParams();
       params.set('template', selectedTemplate.id);
       if (customUrl.trim()) {
-        params.set('url', customUrl.trim());
+        // Sanitize URL: convert spaces to hyphens and remove special characters
+        const sanitizedUrl = customUrl
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, '-') // Replace spaces with hyphens
+          .replace(/[^a-z0-9-]/g, '') // Remove special characters
+          .replace(/-+/g, '-') // Replace multiple hyphens with single
+          .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+        
+        if (sanitizedUrl) {
+          params.set('url', sanitizedUrl);
+        }
       }
       console.log('Template selection - redirecting to:', `/card-editor?${params.toString()}`);
       console.log('Selected template:', selectedTemplate);
@@ -453,6 +477,16 @@ export default function Templates() {
                 data-testid="input-custom-url"
               />
             </div>
+            
+            {/* URL Preview */}
+            {customUrl && (
+              <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                <p className="text-xs text-gray-600 mb-1">Preview:</p>
+                <p className="text-sm font-medium text-blue-600 break-all">
+                  https://talkl.ink/{sanitizedUrlPreview}
+                </p>
+              </div>
+            )}
           </div>
 
           <DialogFooter className="mt-6">
