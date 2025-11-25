@@ -71,6 +71,88 @@ export default function CardEditor() {
   const [shareUrl, setShareUrl] = useState("");
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [currentPageId, setCurrentPageId] = useState<string>('home');
+
+  // Helper function to update share URL
+  const updateShareUrl = (card: any) => {
+    if (card.customUrl) {
+      setShareUrl(`${window.location.origin}/${card.customUrl}`);
+    } else if (card.shareSlug) {
+      setShareUrl(`${window.location.origin}/${card.shareSlug}`);
+    }
+  };
+
+  // Save card mutation - declared before useEffects that depend on it
+  const saveMutation = useMutation({
+    mutationFn: async (data: BusinessCard) => {
+      console.log('=== SAVE MUTATION STARTED ===');
+      console.log('Saving business card:', data);
+      console.log('User ID:', user?.id);
+      console.log('Params ID:', params.id);
+      
+      try {
+        let response;
+        if (params.id) {
+          console.log('Updating existing card...');
+          response = await apiRequest('PUT', `/api/business-cards/${params.id}`, data);
+        } else {
+          console.log('Creating new card...');
+          response = await apiRequest('POST', '/api/business-cards', data);
+        }
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Save failed - Response text:', errorText);
+          throw new Error(`Save failed: ${response.status} ${errorText}`);
+        }
+        
+        const result = await response.json();
+        console.log('Save result:', result);
+        console.log('=== SAVE MUTATION SUCCESS ===');
+        return result;
+      } catch (error) {
+        console.error('=== SAVE MUTATION ERROR ===');
+        console.error('Error details:', error);
+        throw error;
+      }
+    },
+    onSuccess: (savedCard) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/business-cards'] });
+      
+      // Update share URL but DON'T redirect to avoid disrupting design work
+      updateShareUrl(savedCard);
+      
+      // Update the URL without page reload if creating new card
+      if (!params.id && savedCard.id) {
+        window.history.replaceState(null, '', `/card-editor/${savedCard.id}`);
+      }
+      
+      toast({
+        title: "Card saved!",
+        description: "Your business card has been saved successfully.",
+      });
+    },
+    onError: (error: any) => {
+      console.error('Save error:', error);
+      let errorMsg = "Failed to save card. Please check your login status and try again.";
+      
+      if (error instanceof Error) {
+        errorMsg = error.message;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      } else if (error?.message) {
+        errorMsg = error.message;
+      }
+      
+      toast({
+        title: "Save Failed",
+        description: errorMsg,
+        variant: "destructive",
+      });
+    },
+  });
   
   // Helper function to get current page data based on currentPageId
   const getCurrentPageData = () => {
@@ -157,8 +239,8 @@ export default function CardEditor() {
 
   // Auto-save functionality - saves after 3 seconds of inactivity
   useEffect(() => {
-    // Don't auto-save if we don't have required fields, user not authenticated, or mutation is pending
-    if (!cardData.fullName || !cardData.title || !user || saveMutation.isPending || !params.id) {
+    // Don't auto-save if we don't have required fields, user not authenticated, or not editing existing card
+    if (!cardData.fullName || !cardData.title || !user || !params.id) {
       return;
     }
 
@@ -169,8 +251,10 @@ export default function CardEditor() {
 
     // Set new timeout for auto-save (3 seconds after last change)
     const timeout = setTimeout(() => {
-      console.log('Auto-saving card data...');
-      saveMutation.mutate(cardData);
+      if (!saveMutation.isPending) {
+        console.log('Auto-saving card data...');
+        saveMutation.mutate(cardData);
+      }
     }, 3000);
 
     setAutoSaveTimeout(timeout);
@@ -181,89 +265,7 @@ export default function CardEditor() {
         clearTimeout(timeout);
       }
     };
-  }, [cardData, params.id, user, saveMutation.isPending]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const updateShareUrl = (card: any) => {
-    if (card.customUrl) {
-      setShareUrl(`${window.location.origin}/${card.customUrl}`);
-    } else if (card.shareSlug) {
-      setShareUrl(`${window.location.origin}/${card.shareSlug}`);
-    }
-  };
-
-  // Save card mutation
-  const saveMutation = useMutation({
-    mutationFn: async (data: BusinessCard) => {
-      console.log('=== SAVE MUTATION STARTED ===');
-      console.log('Saving business card:', data);
-      console.log('User ID:', user?.id);
-      console.log('Params ID:', params.id);
-      
-      try {
-        let response;
-        if (params.id) {
-          console.log('Updating existing card...');
-          response = await apiRequest('PUT', `/api/business-cards/${params.id}`, data);
-        } else {
-          console.log('Creating new card...');
-          response = await apiRequest('POST', '/api/business-cards', data);
-        }
-        
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Save failed - Response text:', errorText);
-          throw new Error(`Save failed: ${response.status} ${errorText}`);
-        }
-        
-        const result = await response.json();
-        console.log('Save result:', result);
-        console.log('=== SAVE MUTATION SUCCESS ===');
-        return result;
-      } catch (error) {
-        console.error('=== SAVE MUTATION ERROR ===');
-        console.error('Error details:', error);
-        throw error;
-      }
-    },
-    onSuccess: (savedCard) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/business-cards'] });
-      
-      // Update share URL but DON'T redirect to avoid disrupting design work
-      updateShareUrl(savedCard);
-      
-      // Update the URL without page reload if creating new card
-      if (!params.id && savedCard.id) {
-        window.history.replaceState(null, '', `/card-editor/${savedCard.id}`);
-      }
-      
-      toast({
-        title: "Card saved!",
-        description: "Your business card has been saved successfully.",
-      });
-    },
-    onError: (error: any) => {
-      console.error('Save error:', error);
-      let errorMsg = "Failed to save card. Please check your login status and try again.";
-      
-      if (error instanceof Error) {
-        errorMsg = error.message;
-      } else if (typeof error === 'string') {
-        errorMsg = error;
-      } else if (error?.message) {
-        errorMsg = error.message;
-      }
-      
-      toast({
-        title: "Save Failed",
-        description: errorMsg,
-        variant: "destructive",
-      });
-    },
-  });
-
+  }, [cardData, params.id, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const copyShareUrl = async () => {
     if (shareUrl) {
