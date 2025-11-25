@@ -71,6 +71,8 @@ export default function CardEditor() {
   const [shareUrl, setShareUrl] = useState("");
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [currentPageId, setCurrentPageId] = useState<string>('home');
+  const [cardId, setCardId] = useState<string | null>(params.id || null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Helper function to update share URL
   const updateShareUrl = (card: any) => {
@@ -84,21 +86,32 @@ export default function CardEditor() {
   // Save card mutation - declared before useEffects that depend on it
   const saveMutation = useMutation({
     mutationFn: async (data: BusinessCard) => {
-      // apiRequest already handles errors and returns parsed JSON
-      if (params.id) {
-        return await apiRequest('PUT', `/api/business-cards/${params.id}`, data);
-      } else {
-        return await apiRequest('POST', '/api/business-cards', data);
+      // Only allow one save at a time
+      if (isSaving) return null;
+      setIsSaving(true);
+      
+      try {
+        // apiRequest already handles errors and returns parsed JSON
+        if (cardId) {
+          return await apiRequest('PUT', `/api/business-cards/${cardId}`, data);
+        } else {
+          return await apiRequest('POST', '/api/business-cards', data);
+        }
+      } finally {
+        setIsSaving(false);
       }
     },
     onSuccess: (savedCard) => {
+      if (!savedCard) return; // Prevent duplicate saves
+      
       queryClient.invalidateQueries({ queryKey: ['/api/business-cards'] });
       
       // Update share URL but DON'T redirect to avoid disrupting design work
       updateShareUrl(savedCard);
       
-      // Update the URL without page reload if creating new card
-      if (!params.id && savedCard.id) {
+      // Update the card ID if creating new card
+      if (!cardId && savedCard.id) {
+        setCardId(savedCard.id);
         window.history.replaceState(null, '', `/card-editor/${savedCard.id}`);
       }
       
@@ -106,21 +119,7 @@ export default function CardEditor() {
     },
     onError: (error: any) => {
       console.error('Save error:', error);
-      let errorMsg = "Failed to save card. Please check your login status and try again.";
-      
-      if (error instanceof Error) {
-        errorMsg = error.message;
-      } else if (typeof error === 'string') {
-        errorMsg = error;
-      } else if (error?.message) {
-        errorMsg = error.message;
-      }
-      
-      toast({
-        title: "Save Failed",
-        description: errorMsg,
-        variant: "destructive",
-      });
+      // Don't show error toast for auto-save - just log it
     },
   });
   
@@ -208,8 +207,14 @@ export default function CardEditor() {
 
   // Smooth auto-save with debouncing - saves changes automatically after 2 seconds of inactivity
   useEffect(() => {
-    // Don't auto-save if we just loaded the card or if we're creating a new card without data
-    if (!params.id && !cardData.fullName) return;
+    // Don't auto-save if:
+    // 1. User is not authenticated
+    // 2. We're creating a new card but haven't entered basic info
+    // 3. Save is already in progress
+    // 4. We don't have a card ID yet AND we don't have a name
+    if (!user || isSaving) return;
+    if (!cardId && !cardData.fullName) return;
+    if (!cardData.fullName && !cardData.title) return;
     
     // Clear previous timeout
     if (autoSaveTimeout) {
@@ -218,9 +223,7 @@ export default function CardEditor() {
     
     // Set new timeout for auto-save (2 seconds)
     const timeout = setTimeout(() => {
-      if (user && (cardData.fullName || cardData.title)) {
-        saveMutation.mutate(cardData);
-      }
+      saveMutation.mutate(cardData);
     }, 2000);
     
     setAutoSaveTimeout(timeout);
@@ -228,7 +231,7 @@ export default function CardEditor() {
     return () => {
       if (timeout) clearTimeout(timeout);
     };
-  }, [cardData, user, params.id]);
+  }, [cardData, user, cardId, isSaving]);
 
   const copyShareUrl = async () => {
     if (shareUrl) {
