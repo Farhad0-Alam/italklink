@@ -152,23 +152,31 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     defaultValues: cardData,
   });
 
-  // Track if this is the initial load to avoid resetting form after user changes
-  const isInitialLoadRef = useRef(true);
-  
-  // Only reset form on initial load, not on every cardData change
-  // (which would lose user's edits that triggered the cardData change)
+  // Sync form with cardData when it changes (e.g., when loading a new card)
+  // We detect external changes by checking if cardData is different from form values
   useEffect(() => {
-    if (isInitialLoadRef.current) {
+    const currentFormData = form.getValues();
+    
+    // Only reset if this is a significant external change (e.g., loading new card)
+    // Check if the ID changed (means new card loaded) or core data is missing
+    if (!cardData) return;
+    
+    const formId = currentFormData.id;
+    const cardDataId = (cardData as any).id;
+    
+    // If card ID changed OR if form has no ID but cardData does, reset form
+    if (formId !== cardDataId || (!formId && cardDataId)) {
+      console.log('[FormBuilder] Card changed - resetting form. Old:', formId, 'New:', cardDataId);
       form.reset(cardData);
-      isInitialLoadRef.current = false;
     }
-  }, [form]);
+  }, [(cardData as any).id, form]);
 
   // Scoped watchers to prevent infinite re-render loops
   const sectionStyles = useWatch({ control: form.control, name: "sectionStyles" });
   const coverImageStyles = useWatch({ control: form.control, name: "coverImageStyles" });
   const profileImageStyles = useWatch({ control: form.control, name: "profileImageStyles" });
   const pages = useWatch({ control: form.control, name: "pages" });
+  const pageElements = useWatch({ control: form.control, name: "pageElements" }); // CRITICAL: explicitly watch pageElements
   const brandColor = useWatch({ control: form.control, name: "brandColor" });
   const accentColor = useWatch({ control: form.control, name: "accentColor" });
   const headingColor = useWatch({ control: form.control, name: "headingColor" });
