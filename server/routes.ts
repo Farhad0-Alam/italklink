@@ -3088,6 +3088,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== BILLING API ENDPOINTS =====
   app.get('/api/billing/subscription', requireAuth, asyncHandler(async (req, res) => {
     const userId = req.user!.id;
+    
+    // First check user's plan type
+    const user = await storage.getUserById(userId);
+    
+    // If user has a paid or enterprise plan assigned by admin, return subscription info
+    if (user && (user.planType === 'paid' || user.planType === 'enterprise')) {
+      // Return a mock subscription for admin-assigned plans
+      const subscription = {
+        id: `admin-plan-${userId}`,
+        planId: user.planType === 'enterprise' ? 3 : 2,
+        planName: user.planType === 'enterprise' ? 'Enterprise' : 'Pro',
+        userCount: 1,
+        pricePaid: user.planType === 'enterprise' ? 99900 : 9900, // in cents
+        features: { featureList: [] },
+        startDate: user.createdAt || new Date().toISOString(),
+        endDate: user.subscriptionEndsAt || null,
+        isActive: true,
+        status: 'active'
+      };
+      return res.json({ success: true, data: subscription });
+    }
+    
+    // Otherwise fetch from Stripe subscriptions table
     const subscription = await storage.getUserSubscription(userId);
     res.json({ success: true, data: subscription });
   }));
