@@ -133,6 +133,14 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 16. ✅ Template defaults now load and apply when selecting a template (auto-populate name and title)
 17. ✅ View TalkLink button now shows even for unsaved cards (uses cardId as fallback URL)
 18. ✅ Preview updates instantly as you type (reduced sync debounce to 50ms)
+19. ✅ Database-driven eCard elements - Icons and Element Types now stored in database:
+    - Created `page_element_types` table (28 element types)
+    - Created `icons` table (24 contact/social icons)
+    - Added public APIs: GET /api/icons, GET /api/element-types
+    - Added admin APIs for CRUD operations on icons and element types
+    - Created admin UI pages: /admin/icons, /admin/elements
+    - Frontend falls back to hardcoded values if API fails
+20. ✅ Added useIcons hook for fetching icons dynamically from API
 
 ## Known Status
 - Card save functionality: ✅ Auto-save enabled (2s debounce)

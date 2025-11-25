@@ -33,6 +33,8 @@ const PUBLIC_ENDPOINTS = [
   '/billing/plans',
   '/plans', // Public pricing page plans endpoint
   '/templates',
+  '/icons', // Public icons for card builder
+  '/element-types', // Public element types for card builder
   '/availability',
   '/appointments/book',
   '/chat', // RAG knowledge base chat - public
