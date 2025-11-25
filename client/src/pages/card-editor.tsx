@@ -69,6 +69,10 @@ export default function CardEditor() {
     individualElementSpacing: {},
   });
 
+  // Debounced cardData for preview to prevent flickering
+  const [debouncedCardData, setDebouncedCardData] = useState<BusinessCard>(cardData);
+  const previewDebounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
   // Use ref to track latest cardData to avoid stale closures in auto-save
   const latestCardDataRef = useRef<BusinessCard>(cardData);
 
@@ -317,6 +321,23 @@ export default function CardEditor() {
     };
   }, [cardData, user, cardId, saveMutation.isPending]);
 
+  // Debounce cardData updates for preview to prevent flickering
+  useEffect(() => {
+    if (previewDebounceTimeout.current) {
+      clearTimeout(previewDebounceTimeout.current);
+    }
+    
+    previewDebounceTimeout.current = setTimeout(() => {
+      setDebouncedCardData(cardData);
+    }, 200); // 200ms debounce for smooth preview without flicker
+    
+    return () => {
+      if (previewDebounceTimeout.current) {
+        clearTimeout(previewDebounceTimeout.current);
+      }
+    };
+  }, [cardData]);
+
   const copyShareUrl = async () => {
     if (shareUrl) {
       try {
@@ -503,18 +524,18 @@ END:VCARD`;
                     className="h-full overflow-y-auto"
                   >
                     {/* Check if we're in page mode by looking at current focus or form data */}
-                    {(cardData as any).currentPreviewMode === 'page' && getCurrentPageData() ? (
+                    {(debouncedCardData as any).currentPreviewMode === 'page' && getCurrentPageData() ? (
                       <PagePreview 
                         pageData={getCurrentPageData()}
-                        cardData={cardData}
-                        elementSpacing={(cardData as any).elementSpacing || 16}
-                        individualElementSpacing={(cardData as any).individualElementSpacing || {}}
+                        cardData={debouncedCardData}
+                        elementSpacing={(debouncedCardData as any).elementSpacing || 16}
+                        individualElementSpacing={(debouncedCardData as any).individualElementSpacing || {}}
                         onNavigatePage={handleNavigatePage}
                         onBackToCard={handleBackToCard}
                       />
                     ) : (
                       <BusinessCardComponent 
-                        data={cardData} 
+                        data={debouncedCardData} 
                         isMobilePreview={true}
                         showViewButton={true}
                         onNavigatePage={handleNavigatePage}
