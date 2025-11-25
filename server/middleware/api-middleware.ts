@@ -418,7 +418,7 @@ export const setupPublicRoutes = (app: Express) => {
   app.use('/api/auth/login', simpleRateLimit(5, 15 * 60 * 1000));
   // NOTE: Logout should NOT have rate limiting - users need to be able to logout anytime
   // app.use('/api/auth/logout', simpleRateLimit(5, 15 * 60 * 1000));
-  app.use('/api/admin/login', simpleRateLimit(20, 15 * 60 * 1000)); // More lenient for admin login (20 requests per 15 minutes)
+  app.use('/api/admin/login', simpleRateLimit(100, 15 * 60 * 1000)); // More lenient for admin login (100 requests per 15 minutes)
   
   // User check endpoint with more relaxed rate limiting (50 requests per 15 minutes)
   app.use('/api/auth/user', simpleRateLimit(50, 15 * 60 * 1000));

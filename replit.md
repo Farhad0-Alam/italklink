@@ -121,6 +121,7 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 5. ✅ Implemented smooth auto-save backend with 2-second debouncing
 6. ✅ Silent auto-save - no toast notifications to avoid interruptions
 7. ✅ Cleaned up save mutation logic - removed unnecessary response checks
+8. ✅ Fixed admin login "429 Too Many Requests" error - increased rate limit from 20 to 100 requests/15min
 
 ## Known Status
 - Card save functionality: ✅ Auto-save enabled (2s debounce)
