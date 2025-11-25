@@ -369,7 +369,7 @@ export default function Billing() {
                           <DollarSign className="w-5 h-5 text-blue-600" />
                         </div>
                         <div>
-                          <h4 className="font-medium">{invoice.planName}</h4>
+                          <h4 className="font-medium">{invoice.planName || subscription?.planName}</h4>
                           <p className="text-sm text-gray-600">
                             {invoice.period} • {formatDate(invoice.date)}
                           </p>

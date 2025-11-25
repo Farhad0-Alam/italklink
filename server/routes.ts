@@ -3092,39 +3092,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // First check user's plan type
     const user = await storage.getUserById(userId);
     
-    // If user has a paid or enterprise plan assigned by admin, return subscription info
-    if (user && (user.planType === 'paid' || user.planType === 'enterprise')) {
-      // Fetch the actual plan name from the database
-      const { db } = await import('./db');
-      const { subscriptionPlans } = await import('@shared/schema');
-      const { eq } = await import('drizzle-orm');
-      
-      // Find the plan matching the user's plan type
-      const [plan] = await db.select()
-        .from(subscriptionPlans)
-        .where(eq(subscriptionPlans.planType, user.planType))
-        .limit(1);
-      
-      const planName = plan?.name;
+    if (!user) {
+      throw notFoundError('User', userId);
+    }
+
+    // Fetch the actual plan from database for all plan types
+    const { db } = await import('./db');
+    const { subscriptionPlans } = await import('@shared/schema');
+    const { eq } = await import('drizzle-orm');
+    
+    // Find the plan matching the user's plan type
+    const [plan] = await db.select()
+      .from(subscriptionPlans)
+      .where(eq(subscriptionPlans.planType, user.planType))
+      .limit(1);
+    
+    // If admin-assigned plan (paid/enterprise/free), return from database
+    if (user.planType === 'paid' || user.planType === 'enterprise' || user.planType === 'free') {
+      const planName = plan?.name || user.planType.charAt(0).toUpperCase() + user.planType.slice(1);
       const planId = plan?.id;
-      const pricePaid = plan?.price; // in cents
+      const pricePaid = plan?.price || 0; // in cents
+      const amount = pricePaid / 100; // Convert to dollars for display
       
       const subscription = {
         id: `admin-plan-${userId}`,
         planId,
         planName,
+        planType: user.planType,
         userCount: 1,
         pricePaid,
+        amount,
+        interval: 'monthly',
         features: plan?.features || { featureList: [] },
         startDate: user.createdAt || new Date().toISOString(),
+        currentPeriodStart: user.createdAt || new Date().toISOString(),
+        currentPeriodEnd: user.subscriptionEndsAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         endDate: user.subscriptionEndsAt || null,
         isActive: true,
-        status: 'active'
+        status: 'active',
+        cancelAtPeriodEnd: false
       };
       return res.json({ success: true, data: subscription });
     }
     
-    // Otherwise fetch from Stripe subscriptions table
+    // Otherwise fetch from Stripe subscriptions table (for Stripe-managed plans)
     const subscription = await storage.getUserSubscription(userId);
     res.json({ success: true, data: subscription });
   }));
