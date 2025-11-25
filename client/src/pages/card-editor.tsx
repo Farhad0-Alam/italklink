@@ -241,7 +241,16 @@ export default function CardEditor() {
     
     // Set new timeout for auto-save (100ms minimum to batch very quick changes)
     const timeout = setTimeout(() => {
-      saveMutation.mutate(cardData);
+      // Use form.getValues() to get the LATEST form data including newly added elements
+      // This prevents stale data from being saved when elements are added and immediately saved
+      const currentFormData = form.getValues();
+      const dataToSave = {
+        ...currentFormData,
+        // Ensure we have the latest elements from form
+        pageElements: currentFormData.pageElements || cardData.pageElements || []
+      };
+      console.log('[CardEditor] Auto-save: Saving with', dataToSave.pageElements?.length || 0, 'elements');
+      saveMutation.mutate(dataToSave as BusinessCard);
     }, 100);
     
     setAutoSaveTimeout(timeout);
@@ -249,7 +258,7 @@ export default function CardEditor() {
     return () => {
       if (timeout) clearTimeout(timeout);
     };
-  }, [cardData, user, cardId, saveMutation.isPending]);
+  }, [cardData, user, cardId, saveMutation.isPending, form]);
 
   const copyShareUrl = async () => {
     if (shareUrl) {
