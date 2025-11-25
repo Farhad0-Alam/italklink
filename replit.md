@@ -18,9 +18,10 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 ### 1. Digital Business Card Builder
 - ✅ Real-time live preview with mobile mockup frame
 - ✅ 9+ customizable HTML templates (minimal, professional, modern, bold, elegant, corporate, creative, startup, luxury)
+- ✅ Template default names and titles - auto-populate from database when selecting template
 - ✅ QR code generation and customization
 - ✅ Image export functionality (PNG/JPG)
-- ✅ URL sharing with custom slugs
+- ✅ URL sharing with custom slugs (auto-generated from name, customizable)
 - ✅ Advanced positioning controls for profile photos, logos, text elements
 - ✅ Customizable colors (brand color, accent color, gradients)
 - ✅ Multiple font options (inter, playfair, poppins, etc.)
@@ -127,6 +128,9 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 11. ✅ Fixed admin login "429 Too Many Requests" error - increased rate limit to 100 requests/15min
 12. ✅ Fixed "Free Plan" display for admin-assigned paid plans - returns subscription info based on plan_type field
 13. ✅ Moved active plan card from Dashboard to Billing page only - cleaner dashboard layout
+14. ✅ Verified custom URL feature working - uses shareSlug auto-generated from fullName
+15. ✅ Added defaultName and defaultTitle fields to templates table in database
+16. ✅ Template defaults now load and apply when selecting a template (auto-populate name and title)
 
 ## Known Status
 - Card save functionality: ✅ Auto-save enabled (2s debounce)
@@ -172,3 +176,6 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 - Save mutation validates data before POST/PUT
 - All file uploads validated for security
 - Database schema optimized for queries
+- Custom URL feature: shareSlug auto-generated from fullName, supports custom URLs via customUrl field
+- Template defaults: defaultName and defaultTitle fields in globalTemplates table apply on template selection
+- Mobile preview: CSS-based iPhone 14 Pro mockup (430x815px) with notch and safe area
