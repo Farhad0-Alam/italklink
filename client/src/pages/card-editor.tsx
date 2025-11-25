@@ -84,6 +84,9 @@ export default function CardEditor() {
       setShareUrl(`${window.location.origin}/${card.customUrl}`);
     } else if (card.shareSlug) {
       setShareUrl(`${window.location.origin}/${card.shareSlug}`);
+    } else if (card.id) {
+      // Fallback: use cardId to generate a default shareUrl
+      setShareUrl(`${window.location.origin}/${card.id}`);
     }
   };
 
@@ -231,6 +234,13 @@ export default function CardEditor() {
   useEffect(() => {
     latestCardDataRef.current = cardData;
   }, [cardData]);
+
+  // Ensure shareUrl is set whenever cardId is available
+  useEffect(() => {
+    if (cardId && !shareUrl) {
+      setShareUrl(`${window.location.origin}/${cardId}`);
+    }
+  }, [cardId, shareUrl]);
 
   // Immediate auto-save on any interaction - saves when user clicks/changes anything
   useEffect(() => {
