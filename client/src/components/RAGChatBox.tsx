@@ -6,6 +6,7 @@ import { Loader2, Bot, User, ExternalLink, X, Settings, ChevronDown, ChevronUp, 
 import { URLManager } from '@/components/URLManager';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { RealtimeAPIClient } from '@/lib/realtime-api';
 import {
   Tooltip,
   TooltipContent,
@@ -107,6 +108,9 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   const streamRef = useRef<MediaStream | null>(null);
   const isMountedRef = useRef(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const realtimeClientRef = useRef<RealtimeAPIClient | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const currentTranscriptRef = useRef('');
   const { toast } = useToast();
 
   const scrollToBottom = () => {
@@ -131,6 +135,14 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
+      }
+      if (realtimeClientRef.current) {
+        realtimeClientRef.current.disconnect();
+        realtimeClientRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
       }
     };
   }, []);
@@ -273,144 +285,81 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   const startListening = async () => {
     if (typeof window === 'undefined') return;
 
-    console.log('[startListening] Starting microphone request...');
-    console.log('[startListening] Window location:', {
-      protocol: window.location.protocol,
-      hostname: window.location.hostname,
-      href: window.location.href,
-    });
-    console.log('[startListening] isSecureContext:', window.isSecureContext);
-
-    // Check if browser supports mediaDevices
-    if (!navigator.mediaDevices?.getUserMedia) {
-      console.error('[startListening] getUserMedia not supported');
-      toast({
-        title: 'Microphone Not Supported',
-        description: 'Your browser does not support microphone access.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Check if running on insecure context (not HTTPS)
-    if ('isSecureContext' in window && !window.isSecureContext) {
-      console.error('[startListening] Not secure context');
-      toast({
-        title: 'Secure Connection Required',
-        description: 'Microphone access requires HTTPS. Please access via a secure connection.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Additional check for non-HTTPS in non-localhost
-    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      console.error('[startListening] Not HTTPS connection');
-      toast({
-        title: 'Secure Connection Required',
-        description: 'Microphone access requires HTTPS. Please use a secure connection.',
-        variant: 'destructive',
-      });
-      return;
-    }
+    console.log('[RealtimeAPI] Starting voice conversation...');
+    setIsListening(true);
 
     try {
-      console.log('[startListening] Calling navigator.mediaDevices.getUserMedia...');
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        }
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (!apiKey) {
+        throw new Error('OpenAI API key not configured');
+      }
+
+      const realtimeClient = new RealtimeAPIClient({
+        apiKey,
       });
-      
-      console.log('[startListening] ✅ Stream obtained successfully:', {
-        audioTracks: stream.getAudioTracks().length,
-        videoTracks: stream.getVideoTracks().length,
-      });
-      
-      streamRef.current = stream;
 
-      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-      mediaRecorder.current = recorder;
-      audioChunks.current = [];
+      let transcript = '';
 
-      console.log('[startListening] MediaRecorder created:', { mimeType: 'audio/webm' });
-
-      recorder.ondataavailable = (event) => {
-        console.log('[MediaRecorder] ondataavailable:', { dataSize: event.data.size });
-        if (event.data && event.data.size > 0) {
-          audioChunks.current.push(event.data);
-        }
-      };
-
-      recorder.onstop = async () => {
-        console.log('[MediaRecorder] onstop - processing audio chunks');
-        try {
-          const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
-          console.log('[MediaRecorder] Audio blob created:', { size: audioBlob.size, type: audioBlob.type });
-          await processAudio(audioBlob);
-        } finally {
-          if (streamRef.current) {
-            streamRef.current.getTracks().forEach((t) => {
-              console.log('[MediaRecorder] Stopping track:', t.kind);
-              t.stop();
-            });
-            streamRef.current = null;
+      await realtimeClient.connect(
+        (audioData) => {
+          // Handle audio output from API
+          if (audioRef.current) {
+            try {
+              const audioBlob = new Blob([audioData], { type: 'audio/pcm' });
+              const audioUrl = URL.createObjectURL(audioBlob);
+              if (!audioRef.current.src) {
+                audioRef.current.src = audioUrl;
+                audioRef.current.play().catch((e) => console.error('Play error:', e));
+              }
+            } catch (error) {
+              console.error('Audio playback error:', error);
+            }
           }
+        },
+        (text) => {
+          // Handle transcript from API
+          console.log('[RealtimeAPI] Transcript:', text);
+          transcript += text;
+          currentTranscriptRef.current = transcript;
+        },
+        (error) => {
+          // Handle errors from API
+          console.error('[RealtimeAPI] Error:', error);
+          toast({
+            title: 'Voice Error',
+            description: error,
+            variant: 'destructive',
+          });
         }
-      };
+      );
 
-      console.log('[startListening] Starting recorder...');
-      recorder.start();
-      setIsListening(true);
-      console.log('[startListening] ✅ Recording started');
+      realtimeClientRef.current = realtimeClient;
+      realtimeClient.createResponse();
     } catch (error: any) {
-      console.error('[startListening] ❌ DETAILED ERROR INFO:', {
-        errorType: typeof error,
-        errorString: String(error),
-        errorName: error?.name,
-        errorMessage: error?.message,
-        errorCode: error?.code,
-        errorStack: error?.stack,
-        errorKeys: error ? Object.keys(error) : [],
-        fullError: error,
-      });
-      
-      // Detailed error handling
-      let errorTitle = 'Microphone Error';
-      let errorDescription = 'Unable to access microphone.';
+      console.error('[RealtimeAPI] Connection error:', error);
+      let errorDescription = 'Unable to connect to voice service';
 
-      if (error?.name === 'NotAllowedError' || error?.name === 'PermissionDeniedError') {
-        errorTitle = 'Microphone Permission Denied';
-        errorDescription = 'Permission was denied. Please check browser permissions or reload the page and try again.';
-      } else if (error?.name === 'NotFoundError' || error?.name === 'DevicesNotFoundError') {
-        errorTitle = 'No Microphone Found';
-        errorDescription = 'No microphone device was detected. Please check your hardware.';
-      } else if (error?.name === 'NotSupportedError') {
-        errorTitle = 'Not Supported';
-        errorDescription = 'Your browser does not support microphone access.';
-      } else if (error?.name === 'SecurityError') {
-        errorTitle = 'Security Error - Permissions Policy';
-        errorDescription = 'Microphone access is blocked by browser security policy. This may require HTTPS or site permissions.';
-      } else {
-        errorTitle = 'Microphone Error: ' + (error?.name || 'Unknown');
-        errorDescription = error?.message || 'Unable to access microphone. Please try reloading the page.';
+      if (error?.name === 'NotAllowedError') {
+        errorDescription = 'Microphone permission denied. Please allow access and try again.';
+      } else if (error?.message?.includes('API key')) {
+        errorDescription = 'API key not configured';
       }
 
       toast({
-        title: errorTitle,
+        title: 'Connection Error',
         description: errorDescription,
         variant: 'destructive',
       });
+      setIsListening(false);
     }
   };
 
   const stopListening = () => {
-    if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
-      mediaRecorder.current.stop();
-      setIsListening(false);
+    if (realtimeClientRef.current) {
+      realtimeClientRef.current.commitAudio();
+      // Keep connection open for response
     }
+    setIsListening(false);
   };
 
   const processAudio = async (audioBlob: Blob) => {
@@ -595,10 +544,15 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   };
 
   const stopAudio = () => {
+    if (realtimeClientRef.current) {
+      realtimeClientRef.current.disconnect();
+      realtimeClientRef.current = null;
+    }
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
+    setIsListening(false);
     setIsPlayingAudio(false);
     setIsVoiceModalOpen(false);
   };
