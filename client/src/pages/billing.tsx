@@ -34,6 +34,7 @@ interface Invoice {
 
 interface Subscription {
   id: string;
+  planName?: string;
   planType: 'free' | 'pro' | 'enterprise';
   status: 'active' | 'canceled' | 'past_due';
   currentPeriodStart: string;
@@ -84,16 +85,22 @@ export default function Billing() {
   // Mock data for subscription and invoices (replace with real API calls)
   const { data: subscription } = useQuery<Subscription>({
     queryKey: ['/api/billing/subscription'],
-    queryFn: () => ({
-      id: 'sub_mock',
-      planType: user?.planType || 'free',
-      status: 'active',
-      currentPeriodStart: '2024-01-01',
-      currentPeriodEnd: '2024-02-01',
-      cancelAtPeriodEnd: false,
-      amount: user?.planType === 'pro' ? 29 : user?.planType === 'enterprise' ? 99 : 0,
-      interval: 'monthly',
-    }),
+    queryFn: async () => {
+      const res = await fetch('/api/billing/subscription', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch subscription');
+      const json = await res.json();
+      return json.data || {
+        id: 'sub_mock',
+        planType: user?.planType || 'free',
+        planName: user?.planType === 'enterprise' ? 'Enterprise' : user?.planType === 'paid' ? 'Pro' : 'Free',
+        status: 'active',
+        currentPeriodStart: new Date().toISOString(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        cancelAtPeriodEnd: false,
+        amount: user?.planType === 'paid' ? 9.99 : user?.planType === 'enterprise' ? 99 : 0,
+        interval: 'monthly',
+      };
+    },
     enabled: !!user,
     staleTime: 1000 * 60 * 5,
   });
@@ -309,7 +316,7 @@ export default function Billing() {
             <CardContent className="space-y-4">
               <div>
                 <Badge className={`text-sm ${getPlanColor(user.planType)}`}>
-                  {user.planType.charAt(0).toUpperCase() + user.planType.slice(1)} Plan
+                  {subscription?.planName || (user.planType.charAt(0).toUpperCase() + user.planType.slice(1))} {subscription?.planName?.includes('Plan') ? '' : 'Plan'}
                 </Badge>
               </div>
 
