@@ -7,6 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import { setupAuth, requireAuth, optionalAuth, requireAdmin } from './auth';
 import { storage } from './storage';
+import { setupVoiceWebSocketServer } from './voice-realtime-server';
 import { emitAutomationEvent } from './automation-engine';
 import { emailService } from './email-service';
 import type { User, Team, TeamMember, CrmContact, CrmActivity, CrmTask, CrmPipeline, CrmStage, CrmDeal, CrmSequence, EmailTemplate } from '@shared/schema';
@@ -4961,5 +4962,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setupErrorHandling(app);
   
   const httpServer = createServer(app);
+  
+  // Setup WebSocket server for voice conversations
+  setupVoiceWebSocketServer(httpServer);
+  
   return httpServer;
 }

@@ -50,6 +50,8 @@ export class RealtimeAPIClient {
           },
         });
 
+        console.log('[RealtimeAPI] Microphone access granted');
+
         // Setup Web Audio API
         this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         const source = this.audioContext.createMediaStreamSource(this.mediaStream);
@@ -60,9 +62,11 @@ export class RealtimeAPIClient {
         source.connect(this.processor);
         this.processor.connect(this.audioContext.destination);
 
-        // Connect to OpenAI Realtime API WebSocket
-        const wsUrl = `wss://api.openai.com/v1/realtime?model=${encodeURIComponent(this.model)}`;
-        this.ws = new WebSocket(wsUrl, ['realtime', `rnxt-api-key.${this.apiKey}`]);
+        // Connect to local voice WebSocket server (proxies to OpenAI)
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/api/voice/realtime`;
+        console.log('[RealtimeAPI] Connecting to:', wsUrl);
+        this.ws = new WebSocket(wsUrl);
 
         this.ws.binaryType = 'arraybuffer';
 
