@@ -168,6 +168,115 @@ function SortableImageItem({ image, index, onDelete, onUpdateAlt }: SortableImag
   );
 }
 
+// Contact Form Renderer Component - wraps hooks to avoid React hook rules violation
+function ContactFormRenderer({ element, isEditing, handleDataUpdate, onUpdate }: any) {
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<string>('');
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus('');
+
+    try {
+      const response = await fetch('/api/contact-form/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          formData,
+          formConfig: element.data
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setSubmitStatus(element.data.successMessage || '✅ Message sent successfully!');
+        setFormData({});
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+      } else {
+        setSubmitStatus('❌ Failed to send message. Please try again.');
+      }
+    } catch (error: any) {
+      console.error('Form submission error:', error);
+      setSubmitStatus('❌ Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  if (isEditing) {
+    return (
+      <div className="space-y-4">
+        <div className="p-4 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border border-slate-500 shadow-lg">
+          <Input
+            value={element.data?.title || ''}
+            onChange={(e) => handleDataUpdate({ title: e.target.value })}
+            className="bg-transparent border-0 text-white font-semibold text-xl tracking-wide opacity-100 p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="Form Title here"
+          />
+          <div className="text-slate-300 text-sm font-medium mt-1 opacity-100">contactForm</div>
+        </div>
+        <div className="text-slate-400 text-sm">Configure form settings above</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+      <h3 className="font-bold mb-4 text-slate-800 text-xl tracking-wide opacity-100">{element.data.title}</h3>
+      <form onSubmit={handleFormSubmit} className="space-y-3">
+        {element.data.fields.includes('name') && (
+          <input
+            type="text"
+            placeholder="Your Name"
+            value={formData.name || ''}
+            onChange={(e) => handleInputChange('name', e.target.value)}
+            className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
+            required
+          />
+        )}
+        {element.data.fields.includes('email') && (
+          <input
+            type="email"
+            placeholder="Your Email"
+            value={formData.email || ''}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
+            required
+          />
+        )}
+        {element.data.fields.includes('message') && (
+          <textarea
+            placeholder="Your Message"
+            value={formData.message || ''}
+            onChange={(e) => handleInputChange('message', e.target.value)}
+            className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
+            rows={3}
+            required
+          />
+        )}
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-slate-800 text-white py-2 rounded font-medium hover:bg-slate-900 disabled:opacity-50"
+        >
+          {isSubmitting ? 'Sending...' : 'Send Message'}
+        </button>
+        {submitStatus && <div className="text-sm text-center">{submitStatus}</div>}
+      </form>
+    </div>
+  );
+}
+
 // Availability Widget Component
 interface AvailabilityWidgetProps {
   eventTypeSlug?: string;
@@ -1357,450 +1466,13 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
         );
 
       case "contactForm":
-        const [formData, setFormData] = useState<Record<string, string>>({});
-        const [isSubmitting, setIsSubmitting] = useState(false);
-        const [submitStatus, setSubmitStatus] = useState<string>('');
-
-        const handleFormSubmit = async (e: React.FormEvent) => {
-          e.preventDefault();
-          setIsSubmitting(true);
-          setSubmitStatus('');
-
-          try {
-            const response = await fetch('/api/contact-form/submit', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                formData,
-                formConfig: element.data
-              }),
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-              setSubmitStatus(element.data.successMessage || '✅ Message sent successfully!');
-              setFormData({}); // Reset form
-              // Reset file input
-              const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-              if (fileInput) fileInput.value = '';
-            } else {
-              setSubmitStatus('❌ Failed to send message. Please try again.');
-            }
-          } catch (error) {
-            console.error('Form submission error:', error);
-            setSubmitStatus('❌ Failed to send message. Please try again.');
-          } finally {
-            setIsSubmitting(false);
-          }
-        };
-
-        const handleInputChange = (field: string, value: string) => {
-          setFormData(prev => ({ ...prev, [field]: value }));
-        };
-
         return (
-          <div className="mb-4">
-            {isEditing ? (
-              <div className="space-y-4">
-                {/* Contact Form Title Display */}
-                <div className="p-4 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border border-slate-500 shadow-lg">
-                  <Input
-                    value={element.data?.title || ''}
-                    onChange={(e) => handleDataUpdate({ title: e.target.value })}
-                    className="bg-transparent border-0 text-white font-semibold text-xl tracking-wide opacity-100 p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
-                    placeholder="Form Title here"
-                  />
-                  <div className="text-slate-300 text-sm font-medium mt-1 opacity-100">contactForm</div>
-                </div>
-
-                {/* Form Fields */}
-                <Collapsible defaultOpen={true}>
-                  <CollapsibleTrigger className="w-full">
-                    <div className="flex items-center justify-between w-full p-3 rounded-lg border transition-colors" style={{backgroundColor: '#22c55e20', borderColor: '#22c55e50'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#22c55e30'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#22c55e20'}>
-                      <div className="flex items-center space-x-2">
-                        <i className="fas fa-list" style={{color: '#22c55e'}}></i>
-                        <span className="font-medium" style={{color: '#22c55e'}}>Form Fields</span>
-                      </div>
-                      <i className="fas fa-chevron-down text-xs" style={{color: '#22c55e'}}></i>
-                    </div>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-2 space-y-3">
-                    <div className="text-white text-sm mb-2">Select fields to include:</div>
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        { field: 'name', label: 'Full Name', icon: 'fas fa-user', required: true },
-                        { field: 'email', label: 'Email Address', icon: 'fas fa-envelope', required: true },
-                        { field: 'phone', label: 'Phone Number', icon: 'fas fa-phone', required: false },
-                        { field: 'company', label: 'Company', icon: 'fas fa-building', required: false },
-                        { field: 'website', label: 'Website', icon: 'fas fa-globe', required: false },
-                        { field: 'message', label: 'Message', icon: 'fas fa-comment', required: true }
-                      ].map(({ field, label, icon, required }) => (
-                        <label key={field} className="flex items-center space-x-2 p-2 bg-slate-600 rounded border hover:bg-slate-500 transition-colors cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={element.data.fields.includes(field)}
-                            onChange={(e) => {
-                              const fields = e.target.checked 
-                                ? [...element.data.fields, field]
-                                : element.data.fields.filter(f => f !== field);
-                              handleDataUpdate({ fields });
-                            }}
-                            className="rounded"
-                          />
-                          <i className={`${icon} text-white text-xs w-4`}></i>
-                          <span className="text-white text-xs flex-1">{label}</span>
-                          {required && <span className="text-red-400 text-xs">*</span>}
-                        </label>
-                      ))}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-
-                {/* Delivery Options */}
-                <Collapsible>
-                  <CollapsibleTrigger className="w-full">
-                    <div className="flex items-center justify-between w-full p-3 rounded-lg border transition-colors" style={{backgroundColor: '#06b6d420', borderColor: '#06b6d450'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#06b6d430'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#06b6d420'}>
-                      <div className="flex items-center space-x-2">
-                        <i className="fas fa-paper-plane" style={{color: '#06b6d4'}}></i>
-                        <span className="font-medium" style={{color: '#06b6d4'}}>Delivery Options</span>
-                        {element.data.emailNotifications && (
-                          <span className="text-xs px-2 py-1 rounded font-medium text-white" style={{backgroundColor: '#06b6d4'}}>
-                            EMAIL ENABLED
-                          </span>
-                        )}
-                      </div>
-                      <i className="fas fa-chevron-down text-xs" style={{color: '#06b6d4'}}></i>
-                    </div>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-2 space-y-3">
-                    <div className="p-3 bg-slate-600 rounded">
-                      <div className="text-white text-sm mb-3">
-                        <i className="fas fa-info-circle text-blue-400 mr-2"></i>
-                        Choose how you want to receive form submissions:
-                      </div>
-                      <div className="space-y-3">
-                        <div>
-                          <div className="text-white text-sm mb-2">Receiver Email Address:</div>
-                          <Input
-                            value={element.data?.receiverEmail || ""}
-                            onChange={(e) => handleDataUpdate({ receiverEmail: e.target.value })}
-                            className="bg-slate-700 border-slate-600 text-white"
-                            placeholder="your@email.com"
-                            type="email"
-                          />
-                          <div className="text-xs text-slate-300 mt-1">
-                            Where form submissions will be sent
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 p-2 bg-slate-700 rounded">
-                          <input
-                            type="checkbox"
-                            checked={element.data.emailNotifications !== false}
-                            onChange={(e) => handleDataUpdate({ emailNotifications: e.target.checked })}
-                            className="rounded"
-                          />
-                          <label className="text-white text-sm font-medium flex-1">
-                            <i className="fas fa-envelope text-blue-400 mr-2"></i>
-                            Email notifications to receiver address
-                          </label>
-                        </div>
-                      </div>
-                      <div className="text-xs text-slate-300 p-2 bg-slate-700 rounded">
-                        <div className="font-medium mb-1">How it works:</div>
-                        <ul className="list-disc list-inside space-y-1 text-xs">
-                          <li>Form submissions will be sent to the receiver email above</li>
-                          <li>Instant notifications when someone fills out your form</li>
-                          <li>Includes all form field data in a formatted email</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-
-                {/* Google Sheets Integration */}
-                <Collapsible>
-                  <CollapsibleTrigger className="w-full">
-                    <div className="flex items-center justify-between w-full p-3 rounded-lg border transition-colors" style={{backgroundColor: '#22c55e20', borderColor: '#22c55e50'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#22c55e30'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#22c55e20'}>
-                      <div className="flex items-center space-x-2">
-                        <i className="fab fa-google" style={{color: '#22c55e'}}></i>
-                        <span className="font-medium" style={{color: '#22c55e'}}>Google Sheets Integration</span>
-                        <span className="text-xs px-2 py-1 rounded font-medium text-white" style={{backgroundColor: '#22c55e'}}>
-                          PRO
-                        </span>
-                      </div>
-                      <i className="fas fa-chevron-down text-xs" style={{color: '#22c55e'}}></i>
-                    </div>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-2 space-y-3">
-                    <div className="flex items-center space-x-2 p-3 bg-slate-600 rounded">
-                      <input
-                        type="checkbox"
-                        checked={element.data.googleSheets?.enabled || false}
-                        onChange={(e) => handleDataUpdate({ 
-                          googleSheets: { 
-                            ...element.data.googleSheets, 
-                            enabled: e.target.checked 
-                          } 
-                        })}
-                        className="rounded"
-                      />
-                      <label className="text-white text-sm font-medium">
-                        Automatically save submissions to Google Sheets
-                      </label>
-                    </div>
-                    {element.data.googleSheets?.enabled && (
-                      <div className="space-y-3 p-3 bg-slate-600 rounded">
-                        <div className="text-white text-sm mb-2">
-                          <i className="fas fa-info-circle text-blue-400 mr-2"></i>
-                          Configure your Google Sheets connection:
-                        </div>
-                        <Input
-                          value={element.data.googleSheets?.spreadsheetId || ""}
-                          onChange={(e) => handleDataUpdate({ 
-                            googleSheets: { 
-                              ...element.data.googleSheets, 
-                              spreadsheetId: e.target.value 
-                            } 
-                          })}
-                          className="bg-slate-700 border-slate-600 text-white"
-                          placeholder="Paste Google Sheets ID from URL"
-                        />
-                        <Input
-                          value={element.data.googleSheets?.sheetName || "Sheet1"}
-                          onChange={(e) => handleDataUpdate({ 
-                            googleSheets: { 
-                              ...element.data.googleSheets, 
-                              sheetName: e.target.value 
-                            } 
-                          })}
-                          className="bg-slate-700 border-slate-600 text-white"
-                          placeholder="Sheet1"
-                        />
-                        <div className="text-xs text-slate-300 p-2 bg-slate-700 rounded">
-                          <div className="flex items-start space-x-2">
-                            <i className="fas fa-lightbulb text-yellow-400 mt-0.5"></i>
-                            <div>
-                              <div className="font-medium mb-1">Setup Instructions:</div>
-                              <ol className="list-decimal list-inside space-y-1 text-xs">
-                                <li>Copy the Spreadsheet ID from your Google Sheets URL</li>
-                                <li>Make sure the sheet is shared with the service account</li>
-                                <li>Data will be automatically added with timestamps</li>
-                              </ol>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </CollapsibleContent>
-                </Collapsible>
-
-                {/* Advanced Options */}
-                <Collapsible>
-                  <CollapsibleTrigger className="w-full">
-                    <div className="flex items-center justify-between w-full p-3 rounded-lg border transition-colors" style={{backgroundColor: '#a855f720', borderColor: '#a855f750'}} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#a855f730'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#a855f720'}>
-                      <div className="flex items-center space-x-2">
-                        <i className="fas fa-sliders-h" style={{color: '#a855f7'}}></i>
-                        <span className="font-medium" style={{color: '#a855f7'}}>Advanced Options</span>
-                        <span className="text-xs px-2 py-1 rounded font-medium text-white" style={{backgroundColor: '#a855f7'}}>
-                          PRO
-                        </span>
-                      </div>
-                      <i className="fas fa-chevron-down text-xs" style={{color: '#a855f7'}}></i>
-                    </div>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-2 space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          className="rounded" 
-                          checked={element.data.emailNotifications !== false}
-                          onChange={(e) => handleDataUpdate({ emailNotifications: e.target.checked })}
-                        />
-                        <span className="text-white text-xs">Email notifications</span>
-                      </label>
-                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          className="rounded" 
-                          checked={element.data.autoReply || false}
-                          onChange={(e) => handleDataUpdate({ autoReply: e.target.checked })}
-                        />
-                        <span className="text-white text-xs">Auto-reply to sender</span>
-                      </label>
-                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          className="rounded" 
-                          checked={element.data.fileAttachments || false}
-                          onChange={(e) => handleDataUpdate({ fileAttachments: e.target.checked })}
-                        />
-                        <span className="text-white text-xs">File attachments</span>
-                        <span className="bg-purple-500 text-purple-900 text-xs px-2 py-1 rounded ml-2">NEW</span>
-                      </label>
-                      <label className="flex items-center space-x-2 p-2 bg-slate-600 rounded cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          className="rounded" 
-                          checked={element.data.spamProtection || false}
-                          onChange={(e) => handleDataUpdate({ spamProtection: e.target.checked })}
-                        />
-                        <span className="text-white text-xs">Spam protection</span>
-                        <span className="bg-purple-500 text-purple-900 text-xs px-2 py-1 rounded ml-2">NEW</span>
-                      </label>
-                    </div>
-                    <div className="p-3 bg-slate-600 rounded">
-                      <div className="text-white text-sm mb-2">Custom Success Message:</div>
-                      <Textarea
-                        value={element.data.successMessage || ""}
-                        onChange={(e) => handleDataUpdate({ successMessage: e.target.value })}
-                        className="bg-slate-700 border-slate-600 text-white text-xs"
-                        placeholder="Thank you! We'll get back to you soon."
-                        rows={2}
-                      />
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-
-                {/* Form Preview */}
-                <div className="p-3 bg-slate-600 rounded-lg border border-slate-500">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <i className="fas fa-eye text-slate-400"></i>
-                    <span className="text-slate-300 text-sm font-medium">Active Fields Preview</span>
-                  </div>
-                  <div className="text-xs text-slate-400">
-                    {element.data.fields.length > 0 
-                      ? `Form includes: ${element.data.fields.join(', ')}`
-                      : 'No fields selected'}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <h3 className="font-bold mb-4 text-slate-800 text-xl tracking-wide opacity-100">{element.data.title}</h3>
-                <form onSubmit={handleFormSubmit} className="space-y-3">
-                  {element.data.fields.includes('name') && (
-                    <input
-                      type="text"
-                      placeholder="Your Name"
-                      value={formData.name || ''}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
-                      required
-                    />
-                  )}
-                  {element.data.fields.includes('email') && (
-                    <input
-                      type="email"
-                      placeholder="Your Email"
-                      value={formData.email || ''}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
-                      required
-                    />
-                  )}
-                  {element.data.fields.includes('phone') && (
-                    <input
-                      type="tel"
-                      placeholder="Your Phone"
-                      value={formData.phone || ''}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
-                    />
-                  )}
-                  {element.data.fields.includes('company') && (
-                    <input
-                      type="text"
-                      placeholder="Company Name"
-                      value={formData.company || ''}
-                      onChange={(e) => handleInputChange('company', e.target.value)}
-                      className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
-                    />
-                  )}
-                  {element.data.fields.includes('website') && (
-                    <input
-                      type="url"
-                      placeholder="Website URL"
-                      value={formData.website || ''}
-                      onChange={(e) => handleInputChange('website', e.target.value)}
-                      className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
-                    />
-                  )}
-                  {element.data.fields.includes('message') && (
-                    <textarea
-                      placeholder="Your Message"
-                      value={formData.message || ''}
-                      onChange={(e) => handleInputChange('message', e.target.value)}
-                      className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
-                      rows={3}
-                      required
-                    />
-                  )}
-
-                  {/* File Attachments */}
-                  {element.data.fileAttachments && (
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-slate-700">
-                        <i className="fas fa-paperclip mr-2"></i>
-                        Attach Files (optional)
-                      </label>
-                      <input
-                        type="file"
-                        multiple
-                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.zip"
-                        className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500 text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-talklink-50 file:text-talklink-700 hover:file:bg-talklink-100"
-                        onChange={(e) => {
-                          const files = Array.from(e.target.files || []);
-                          handleInputChange('attachments', files.map(f => f.name).join(', '));
-                        }}
-                      />
-                      <div className="text-xs text-slate-500">
-                        Supported formats: PDF, Word, Images, ZIP (Max 10MB per file)
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Spam Protection */}
-                  {element.data.spamProtection && (
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-slate-700">
-                        <i className="fas fa-shield-alt mr-2"></i>
-                        Security Check
-                      </label>
-                      <div className="flex items-center space-x-2 p-3 bg-slate-100 rounded border">
-                        <input
-                          type="checkbox"
-                          required
-                          className="rounded"
-                        />
-                        <span className="text-sm text-slate-700">
-                          I am not a robot and agree to the form submission
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {submitStatus && (
-                    <div className="text-sm text-center py-2">
-                      {submitStatus}
-                    </div>
-                  )}
-                  
-                  <Button 
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-talklink-500 hover:bg-talklink-600 text-white w-full disabled:opacity-50"
-                  >
-                    <i className={`fas ${isSubmitting ? 'fa-spinner fa-spin' : 'fa-paper-plane'} mr-2`}></i>
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
-                  </Button>
-                </form>
-              </div>
-            )}
-          </div>
+          <ContactFormRenderer
+            element={element}
+            isEditing={isEditing}
+            handleDataUpdate={handleDataUpdate}
+            onUpdate={onUpdate}
+          />
         );
 
       case "accordion":
