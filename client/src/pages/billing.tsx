@@ -82,25 +82,8 @@ export default function Billing() {
     retry: false,
   });
 
-  // Mock data for subscription and invoices (replace with real API calls)
   const { data: subscription } = useQuery<Subscription>({
     queryKey: ['/api/billing/subscription'],
-    queryFn: async () => {
-      const res = await fetch('/api/billing/subscription', { credentials: 'include' });
-      if (!res.ok) throw new Error('Failed to fetch subscription');
-      const json = await res.json();
-      return json.data || {
-        id: 'sub_mock',
-        planType: user?.planType || 'free',
-        planName: user?.planType === 'enterprise' ? 'Enterprise' : user?.planType === 'paid' ? 'Pro' : 'Free',
-        status: 'active',
-        currentPeriodStart: new Date().toISOString(),
-        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        cancelAtPeriodEnd: false,
-        amount: user?.planType === 'paid' ? 9.99 : user?.planType === 'enterprise' ? 99 : 0,
-        interval: 'monthly',
-      };
-    },
     enabled: !!user,
     staleTime: 1000 * 60 * 5,
   });

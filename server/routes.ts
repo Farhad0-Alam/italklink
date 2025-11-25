@@ -3105,9 +3105,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(eq(subscriptionPlans.planType, user.planType))
         .limit(1);
       
-      const planName = plan?.name || (user.planType === 'enterprise' ? 'Enterprise' : user.planType === 'paid' ? 'Pro' : 'Free');
-      const planId = plan?.id || (user.planType === 'enterprise' ? 3 : 2);
-      const pricePaid = plan?.price || (user.planType === 'enterprise' ? 99900 : 9900); // in cents
+      const planName = plan?.name;
+      const planId = plan?.id;
+      const pricePaid = plan?.price; // in cents
       
       const subscription = {
         id: `admin-plan-${userId}`,

@@ -101,71 +101,9 @@ export function SubscriptionCard() {
     );
   }
 
-  // If user has a paid/enterprise plan assigned by admin, show paid plan card
+  // If user has a paid/enterprise plan assigned by admin, don't show this card (handled in Billing page)
   if (!subscription && user && (user.planType === 'paid' || user.planType === 'enterprise')) {
-    const planName = user.planType === 'enterprise' ? 'Enterprise' : 'Pro';
-    const planPrice = user.planType === 'enterprise' ? '$99.00' : '$9.99';
-    
-    return (
-      <Card data-testid="card-subscription-active">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Crown className="h-5 w-5 text-orange-500" />
-              {planName} Plan
-            </CardTitle>
-            <Badge className="bg-green-500" data-testid="badge-subscription-status">
-              Active
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <p className="text-xs text-gray-500">Plan</p>
-              <p className="text-lg font-semibold flex items-center gap-1" data-testid="text-plan-name">
-                {planName}
-              </p>
-            </div>
-            
-            <div className="space-y-1">
-              <p className="text-xs text-gray-500">Monthly Price</p>
-              <p className="text-lg font-semibold" data-testid="text-plan-price">
-                {planPrice}
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <p className="text-xs text-gray-500 flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              Status
-            </p>
-            <p className="text-sm" data-testid="text-plan-status">
-              Active - Admin Assigned
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-xs text-gray-500 font-medium">Included Features</p>
-            <div className="space-y-1">
-              <div className="flex items-start gap-2 text-sm">
-                <Check className="h-4 w-4 text-green-500 mt-0.5" />
-                <span>Unlimited Business Cards</span>
-              </div>
-              <div className="flex items-start gap-2 text-sm">
-                <Check className="h-4 w-4 text-green-500 mt-0.5" />
-                <span>Premium Templates</span>
-              </div>
-              <div className="flex items-start gap-2 text-sm">
-                <Check className="h-4 w-4 text-green-500 mt-0.5" />
-                <span>Advanced Analytics</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   // Show Free Plan only if truly on free plan (no subscription and no admin plan)
