@@ -266,9 +266,12 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Mobile Sidebar in Sheet */}
-      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="left" className="w-64 p-0 md:hidden">
+      {/* Mobile Sidebar in Sheet - Stays open on menu item click */}
+      <Sheet open={mobileMenuOpen} onOpenChange={(open) => {
+        // Only allow closing from backdrop/escape, not from internal links
+        if (!open) setMobileMenuOpen(false);
+      }}>
+        <SheetContent side="left" className="w-64 p-0 md:hidden" onPointerDownOutside={() => setMobileMenuOpen(false)}>
           <DashboardSidebar 
             user={user}
             businessCardsCount={businessCards.length}
