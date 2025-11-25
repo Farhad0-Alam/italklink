@@ -17,7 +17,31 @@ export const Share: React.FC = () => {
   const [cardData, setCardData] = useState<BusinessCard>(defaultCardData);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPageId, setCurrentPageId] = useState<string>('home');
   const { trackPageView } = useButtonTracking();
+
+  const handlePageNavigation = (pageId: string) => {
+    setCurrentPageId(pageId);
+    // Update card data to track which page is being viewed
+    setCardData(prev => ({
+      ...prev,
+      currentPreviewMode: 'page',
+      currentSelectedPage: {
+        id: pageId,
+        label: (prev as any).pages?.find((p: any) => p.id === pageId)?.label || 'Page',
+        elements: (prev as any).pages?.find((p: any) => p.id === pageId)?.elements || []
+      }
+    }));
+  };
+
+  const handleBackFromPage = () => {
+    setCurrentPageId('home');
+    setCardData(prev => ({
+      ...prev,
+      currentPreviewMode: 'card',
+      currentSelectedPage: undefined
+    }));
+  };
 
   useEffect(() => {
     const loadCardData = async () => {
@@ -32,6 +56,7 @@ export const Share: React.FC = () => {
           if (response.ok) {
             const cardData = await response.json();
             setCardData(cardData);
+            setCurrentPageId('home'); // Reset to home page when loading
             logEvent("share_view");
             // Track page view for automation
             if (cardData.id) {
@@ -51,6 +76,7 @@ export const Share: React.FC = () => {
           const decodedData = decodeCardData(hash);
           if (decodedData) {
             setCardData(decodedData);
+            setCurrentPageId('home'); // Reset to home page when loading
             logEvent("share_view");
             // Track page view for automation (hash-based sharing)
             if (decodedData.id) {
@@ -120,6 +146,7 @@ export const Share: React.FC = () => {
               data={cardData}
               showQR={true}
               isInteractive={true}
+              onNavigatePage={handlePageNavigation}
             />
           </div>
         </div>
