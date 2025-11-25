@@ -145,9 +145,13 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 22. ✅ Copy button now copies URL and opens live view in new window automatically
 23. ✅ Custom URL input modal appears after template selection to set card slug
 24. ✅ Card saves with custom URL slug from template selection modal
+25. ✅ **IMMEDIATE AUTO-SAVE ON ALL INTERACTIONS** - Changed debounce from 2 seconds to 100ms
+    - Card now saves instantly when user clicks anywhere or adds elements
+    - Smooth, seamless save experience with no visible delays
+    - Prevents concurrent saves with React Query mutation queue
 
 ## Known Status - SAAS Complete
-- Card save functionality: ✅ Auto-save enabled (2s debounce)
+- Card save functionality: ✅ Auto-save enabled (100ms debounce - immediate saves on any interaction)
 - Form validation: ✅ Working
 - Live preview: ✅ Real-time updates working
 - RAG endpoints: ✅ All verified (200 status)

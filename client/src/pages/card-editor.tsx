@@ -224,7 +224,7 @@ export default function CardEditor() {
     }
   }, [existingCard]);
 
-  // Smooth auto-save with debouncing - saves changes automatically after 2 seconds of inactivity
+  // Immediate auto-save on any interaction - saves when user clicks/changes anything
   useEffect(() => {
     // Don't auto-save if:
     // 1. User is not authenticated
@@ -239,10 +239,10 @@ export default function CardEditor() {
       clearTimeout(autoSaveTimeout);
     }
     
-    // Set new timeout for auto-save (2 seconds)
+    // Set new timeout for auto-save (100ms minimum to batch very quick changes)
     const timeout = setTimeout(() => {
       saveMutation.mutate(cardData);
-    }, 2000);
+    }, 100);
     
     setAutoSaveTimeout(timeout);
     
