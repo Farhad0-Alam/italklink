@@ -6,7 +6,7 @@ import {
   calendarConnections, videoMeetingProviders, externalCalendarEvents, meetingLinks, integrationLogs,
   teamAssignments, roundRobinState, leadRoutingRules, teamMemberSkills, teamMemberCapacity, teamAvailabilityPatterns, assignmentAnalytics, routingAnalytics,
   publicUploads, qrLinks, qrEvents, cardSubscriptions, coupons, userSubscriptions,
-  bios, connections, subscriptions, analytics, affiliates, conversions, headerTemplates,
+  bios, connections, subscriptions, analytics, affiliates, conversions, headerTemplates, icons, pageElementTypes,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -243,6 +243,18 @@ export interface IStorage {
   createHeaderTemplate(templateData: any): Promise<any>;
   updateHeaderTemplate(id: string, templateData: any): Promise<any>;
   deleteHeaderTemplate(id: string): Promise<void>;
+  
+  // Icons operations
+  getIcons(filters?: { isActive?: boolean; category?: string }): Promise<any[]>;
+  createIcon(iconData: any): Promise<any>;
+  updateIcon(id: number, iconData: any): Promise<any>;
+  deleteIcon(id: number): Promise<void>;
+  
+  // Page Element Types operations
+  getPageElementTypes(filters?: { isActive?: boolean }): Promise<any[]>;
+  createPageElementType(elementTypeData: any): Promise<any>;
+  updatePageElementType(id: number, elementTypeData: any): Promise<any>;
+  deletePageElementType(id: number): Promise<void>;
   
   // Affiliates operations
   getAffiliates(filters?: { status?: string }): Promise<any[]>;
@@ -1143,6 +1155,73 @@ export class DatabaseStorage implements IStorage {
 
   async deleteHeaderTemplate(id: string): Promise<void> {
     await db.delete(headerTemplates).where(eq(headerTemplates.id, id));
+  }
+
+  // Icons operations
+  async getIcons(filters?: { isActive?: boolean; category?: string }): Promise<any[]> {
+    let conditions: any[] = [];
+    
+    if (filters?.isActive !== undefined) {
+      conditions.push(eq(icons.isActive, filters.isActive));
+    }
+    if (filters?.category) {
+      conditions.push(eq(icons.category, filters.category));
+    }
+    
+    if (conditions.length > 0) {
+      return await db.select().from(icons)
+        .where(and(...conditions))
+        .orderBy(icons.sort);
+    }
+    
+    return await db.select().from(icons).orderBy(icons.sort);
+  }
+
+  async createIcon(iconData: any): Promise<any> {
+    const [icon] = await db.insert(icons).values(iconData).returning();
+    return icon;
+  }
+
+  async updateIcon(id: number, iconData: any): Promise<any> {
+    const [icon] = await db
+      .update(icons)
+      .set(iconData)
+      .where(eq(icons.id, id))
+      .returning();
+    return icon;
+  }
+
+  async deleteIcon(id: number): Promise<void> {
+    await db.delete(icons).where(eq(icons.id, id));
+  }
+
+  // Page Element Types operations
+  async getPageElementTypes(filters?: { isActive?: boolean }): Promise<any[]> {
+    if (filters?.isActive !== undefined) {
+      return await db.select().from(pageElementTypes)
+        .where(eq(pageElementTypes.isActive, filters.isActive))
+        .orderBy(pageElementTypes.sort);
+    }
+    
+    return await db.select().from(pageElementTypes).orderBy(pageElementTypes.sort);
+  }
+
+  async createPageElementType(elementTypeData: any): Promise<any> {
+    const [elementType] = await db.insert(pageElementTypes).values(elementTypeData).returning();
+    return elementType;
+  }
+
+  async updatePageElementType(id: number, elementTypeData: any): Promise<any> {
+    const [elementType] = await db
+      .update(pageElementTypes)
+      .set(elementTypeData)
+      .where(eq(pageElementTypes.id, id))
+      .returning();
+    return elementType;
+  }
+
+  async deletePageElementType(id: number): Promise<void> {
+    await db.delete(pageElementTypes).where(eq(pageElementTypes.id, id));
   }
 
   // Affiliates operations

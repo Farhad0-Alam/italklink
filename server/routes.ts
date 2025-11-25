@@ -792,6 +792,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public icons endpoint for card builder
+  app.get("/api/icons", async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const icons = await storage.getIcons({ isActive: true, category });
+      
+      // Map to frontend format
+      const publicIcons = icons.map(icon => ({
+        name: icon.name,
+        icon: icon.fontAwesomeIcon || icon.svg,
+        category: icon.category,
+        id: icon.id
+      }));
+      
+      res.json(publicIcons);
+    } catch (error) {
+      console.error('Error fetching icons:', error);
+      res.status(500).json({ message: 'Failed to fetch icons' });
+    }
+  });
+
+  // Public element types endpoint for card builder
+  app.get("/api/element-types", async (req, res) => {
+    try {
+      const elementTypes = await storage.getPageElementTypes({ isActive: true });
+      
+      // Map to frontend format
+      const publicElementTypes = elementTypes.map(et => ({
+        type: et.type,
+        title: et.title,
+        icon: et.icon,
+        color: et.color,
+        description: et.description,
+        isPremium: et.isPremium,
+        defaultConfig: et.defaultConfig
+      }));
+      
+      res.json(publicElementTypes);
+    } catch (error) {
+      console.error('Error fetching element types:', error);
+      res.status(500).json({ message: 'Failed to fetch element types' });
+    }
+  });
+
   // Authentication routes
   app.get('/api/auth/google', 
     passport.authenticate('google', { scope: ['profile', 'email'] })
