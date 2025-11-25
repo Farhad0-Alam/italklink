@@ -1616,11 +1616,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('POST /api/business-cards - User ID:', user.id);
       console.log('POST /api/business-cards - Card data:', JSON.stringify(cardData, null, 2));
       
-      // Validate required fields
-      if (!cardData.fullName || !cardData.title) {
-        console.log('Missing required fields:', { fullName: cardData.fullName, title: cardData.title });
+      // Validate required fields - allow creation with just customUrl
+      if (!cardData.customUrl && !cardData.fullName && !cardData.title) {
+        console.log('Missing required fields - need either customUrl or fullName/title');
         return res.status(400).json({ 
-          message: 'Full name and title are required fields.' 
+          message: 'Please provide either a custom URL or name and title.' 
         });
       }
       
@@ -1636,7 +1636,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Generate a clean shareSlug from fullName if not provided
+      // Use customUrl as the primary identifier (from popup modal)
+      // Only generate shareSlug if no customUrl and fullName is provided
       const generateSlug = (name: string): string => {
         return name
           .toLowerCase()
@@ -1646,12 +1647,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
       };
 
-      const autoSlug = generateSlug(cardData.fullName);
+      const autoSlug = cardData.fullName ? generateSlug(cardData.fullName) : undefined;
       
       const businessCard = await storage.createBusinessCard({
         ...cardData,
         userId: user.id,
-        shareSlug: cardData.shareSlug || autoSlug,
+        customUrl: cardData.customUrl, // Lock in custom URL from popup
+        shareSlug: cardData.customUrl || cardData.shareSlug || autoSlug, // Use customUrl as priority
         isPublic: true, // Explicitly set cards as public by default
       });
       
@@ -1710,21 +1712,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Clean the data - remove fields that shouldn't be updated
-      const { id, userId, createdAt, updatedAt, ...cleanData } = req.body;
+      const { id, userId, createdAt, updatedAt, customUrl, shareSlug, ...cleanData } = req.body;
       
-      // Generate a clean shareSlug if fullName changed and no custom shareSlug provided
-      if (cleanData.fullName && (!cleanData.shareSlug || !card.shareSlug || card.shareSlug.includes('talklink'))) {
-        const generateSlug = (name: string): string => {
-          return name
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-            .replace(/\s+/g, '-') // Replace spaces with hyphens
-            .replace(/-+/g, '-') // Replace multiple hyphens with single
-            .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
-        };
-        cleanData.shareSlug = generateSlug(cleanData.fullName);
-      }
+      // IMPORTANT: Never change customUrl or shareSlug after creation
+      // These are locked once set to maintain consistent QR codes and eCard URLs
+      // (users share these URLs with QR codes, so they must never change)
+      // Don't regenerate based on fullName changes
       
+      console.log('PUT /api/business-cards/:id - Preserving existing URL:', { 
+        customUrl: card.customUrl, 
+        shareSlug: card.shareSlug 
+      });
       console.log('PUT /api/business-cards - Clean data:', JSON.stringify(cleanData, null, 2));
       
       const updatedCard = await storage.updateBusinessCard(req.params.id, cleanData);
