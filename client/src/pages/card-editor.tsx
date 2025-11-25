@@ -251,35 +251,8 @@ export default function CardEditor() {
     }
   }, [existingCard]);
 
-  // Auto-save functionality - saves after 3 seconds of inactivity
-  useEffect(() => {
-    // Don't auto-save if we don't have required fields, user not authenticated, or not editing existing card
-    if (!cardData.fullName || !cardData.title || !user || !params.id) {
-      return;
-    }
-
-    // Clear existing timeout
-    if (autoSaveTimeout) {
-      clearTimeout(autoSaveTimeout);
-    }
-
-    // Set new timeout for auto-save (3 seconds after last change)
-    const timeout = setTimeout(() => {
-      if (!saveMutation.isPending) {
-        console.log('Auto-saving card data...');
-        saveMutation.mutate(cardData);
-      }
-    }, 3000);
-
-    setAutoSaveTimeout(timeout);
-
-    // Cleanup timeout on unmount
-    return () => {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-    };
-  }, [cardData, params.id, user]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Auto-save disabled - users should click the Save button to save changes
+  // This prevents infinite loops and ensures data is saved intentionally
 
   const copyShareUrl = async () => {
     if (shareUrl) {
@@ -488,17 +461,15 @@ END:VCARD`;
                 </Button>
               </div>
               
-              {/* Auto-save status indicator - only shows when editing existing card */}
-              {params.id && (
-                <div className="flex justify-center">
-                  <div className="flex items-center space-x-2 text-slate-600 bg-slate-100 px-4 py-2 rounded-lg text-sm">
-                    <div className={`w-2 h-2 rounded-full ${saveMutation.isPending ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}></div>
-                    <span>
-                      {saveMutation.isPending ? 'Auto-saving...' : 'All changes saved'}
-                    </span>
-                  </div>
+              {/* Save status indicator */}
+              <div className="flex justify-center">
+                <div className="flex items-center space-x-2 text-slate-600 bg-slate-100 px-4 py-2 rounded-lg text-sm">
+                  <div className={`w-2 h-2 rounded-full ${saveMutation.isPending ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}></div>
+                  <span>
+                    {saveMutation.isPending ? 'Saving...' : 'Click Save to save changes'}
+                  </span>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
