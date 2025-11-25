@@ -182,7 +182,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const secondaryColor = useWatch({ control: form.control, name: "secondaryColor" });
   const tertiaryColor = useWatch({ control: form.control, name: "tertiaryColor" });
   const elementSpacing = useWatch({ control: form.control, name: "elementSpacing" });
-  const individualElementSpacing = useWatch({ control: form.control, name: "individualElementSpacing" });
 
   const toggleSection = (k: string) =>
     setCollapsedSections((p) => ({ ...p, [k]: !p[k] }));
@@ -224,11 +223,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const prevDataRef = useRef<{ 
     snapshot: string; 
     elementSpacing: number | undefined;
-    individualElementSpacing: Record<string, number> | undefined;
   }>({ 
     snapshot: "", 
-    elementSpacing: undefined,
-    individualElementSpacing: undefined
+    elementSpacing: undefined
   });
 
   const memoizedOnDataChange = useCallback(onDataChange, []);
@@ -257,7 +254,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     return {
       ...allFormData,
       elementSpacing: elementSpacing ?? 16,
-      individualElementSpacing: individualElementSpacing || {},
       currentPreviewMode: builderMode,
       currentSelectedPage:
         builderMode === "page" && selectedPageId
@@ -271,7 +267,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
             }
           : null,
     };
-  }, [allFormData, elementSpacing, individualElementSpacing, builderMode, selectedPageId, pages, getPageElements]);
+  }, [allFormData, elementSpacing, builderMode, selectedPageId, pages, getPageElements]);
 
   // Helper function to update elements for a specific page
   const updatePageElements = (pageId: string, elements: PageElement[]) => {
@@ -299,24 +295,21 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     const timer = setTimeout(() => {
       const currentSnapshot = JSON.stringify(enhancedCardData);
       const currentSpacing = elementSpacing ?? 16;
-      const currentIndividualSpacing = individualElementSpacing || {};
       
       const spacingChanged = prevDataRef.current.elementSpacing !== currentSpacing;
-      const individualSpacingChanged = JSON.stringify(prevDataRef.current.individualElementSpacing) !== JSON.stringify(currentIndividualSpacing);
       const dataChanged = currentSnapshot !== prevDataRef.current.snapshot;
       
-      if (spacingChanged || individualSpacingChanged || dataChanged) {
+      if (spacingChanged || dataChanged) {
         prevDataRef.current = {
           snapshot: currentSnapshot,
-          elementSpacing: currentSpacing,
-          individualElementSpacing: currentIndividualSpacing
+          elementSpacing: currentSpacing
         };
         memoizedOnDataChange(enhancedCardData);
       }
     }, 50); // 50ms debounce for instant preview updates
 
     return () => clearTimeout(timer);
-  }, [enhancedCardData, elementSpacing, individualElementSpacing, memoizedOnDataChange]);
+  }, [enhancedCardData, elementSpacing, memoizedOnDataChange]);
 
   // Auto-select first page when switching to page mode or when pages change
   useEffect(() => {
@@ -6608,20 +6601,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 onElementSpacingChange={(spacing: number) => {
                   form.setValue("elementSpacing", spacing, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
                 }}
-                individualElementSpacing={individualElementSpacing || {}}
-                onIndividualSpacingChange={(elementType: string, spacing: number) => {
-                  const currentSpacing = individualElementSpacing || {};
-                  const newSpacing = {
-                    ...currentSpacing,
-                    [elementType]: spacing
-                  };
-                  console.log('[FormBuilder] Setting individual spacing:', {
-                    elementType,
-                    spacing,
-                    newSpacing
-                  });
-                  form.setValue("individualElementSpacing", newSpacing, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
-                }}
                 cardData={enhancedCardData}
                 onNavigatePage={setSelectedPageId}
               />
@@ -6686,20 +6665,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   elementSpacing={elementSpacing ?? 16}
                   onElementSpacingChange={(spacing: number) => {
                     form.setValue("elementSpacing", spacing, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
-                  }}
-                  individualElementSpacing={individualElementSpacing || {}}
-                  onIndividualSpacingChange={(elementType: string, spacing: number) => {
-                    const currentSpacing = individualElementSpacing || {};
-                    const newSpacing = {
-                      ...currentSpacing,
-                      [elementType]: spacing
-                    };
-                    console.log('[FormBuilder Page Mode] Setting individual spacing:', {
-                      elementType,
-                      spacing,
-                      newSpacing
-                    });
-                    form.setValue("individualElementSpacing", newSpacing, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
                   }}
                   cardData={enhancedCardData}
                   onNavigatePage={setSelectedPageId}
