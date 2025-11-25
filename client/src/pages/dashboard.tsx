@@ -23,6 +23,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { ContactSupportModal } from "@/components/contact-support-modal";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 import NotifyCardButton from "@/components/NotifyCardButton";
 import NotifyAllCardsButton from "@/components/NotifyAllCardsButton";
 
@@ -254,298 +255,53 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Modern Navigation Header */}
-      <nav className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Left: Logo & Mobile Menu */}
-            <div className="flex items-center gap-4">
-              {/* Mobile Menu Button */}
-              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-                <SheetTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="lg:hidden"
-                    data-testid="button-mobile-menu"
-                  >
-                    <Menu className="h-6 w-6" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-72 p-0">
-                  <div className="flex flex-col h-full">
-                    {/* Mobile Menu Header */}
-                    <div className="p-6 border-b border-gray-200">
-                      <Link href="/" className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                          <i className="fas fa-address-card text-white text-sm"></i>
-                        </div>
-                        <div className="text-xl font-bold">
-                          <span className="text-blue-600">2talk</span>
-                          <span className="text-orange-500">Link</span>
-                        </div>
-                      </Link>
-                    </div>
-                    
-                    {/* Mobile Menu Items */}
-                    <div className="flex-1 overflow-y-auto py-4">
-                      <div className="px-3 space-y-1">
-                        {navigationItems.map((item) => (
-                          item.onClick ? (
-                            <button
-                              key={item.href + item.label}
-                              onClick={() => {
-                                item.onClick?.();
-                                setMobileMenuOpen(false);
-                              }}
-                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-orange-600 transition-colors"
-                              data-testid={item.testId}
-                            >
-                              {item.icon && <item.icon className="w-5 h-5" />}
-                              <span className="font-medium">{item.label}</span>
-                            </button>
-                          ) : (
-                            <Link
-                              key={item.href + item.label}
-                              href={item.href}
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-orange-600 transition-colors"
-                              onClick={() => setMobileMenuOpen(false)}
-                              data-testid={item.testId}
-                            >
-                              {item.icon && <item.icon className="w-5 h-5" />}
-                              <span className="font-medium">{item.label}</span>
-                            </Link>
-                          )
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Desktop Sidebar - Hidden on mobile */}
+      <div className="hidden md:block w-64 fixed h-screen">
+        <DashboardSidebar 
+          user={user}
+          businessCardsCount={businessCards.length}
+          affiliate={affiliate}
+          onLogout={() => setLocation('/')}
+        />
+      </div>
 
-              {/* Logo */}
-              <Link href="/" className="flex items-center space-x-2">
-                <div className="hidden sm:flex w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg items-center justify-center shadow-sm">
-                  <i className="fas fa-address-card text-white text-sm"></i>
-                </div>
-                <div className="text-xl font-bold">
-                  <span className="text-blue-600">2talk</span>
-                  <span className="text-orange-500">Link</span>
-                </div>
-              </Link>
-            </div>
+      {/* Mobile Sidebar in Sheet */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent side="left" className="w-64 p-0 md:hidden">
+          <DashboardSidebar 
+            user={user}
+            businessCardsCount={businessCards.length}
+            affiliate={affiliate}
+            onLogout={() => setLocation('/')}
+          />
+        </SheetContent>
+      </Sheet>
 
-            {/* Center: Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-1">
-              {navigationItems.slice(0, 8).map((item) => (
-                item.onClick ? (
-                  <button
-                    key={item.href + item.label}
-                    onClick={item.onClick}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors"
-                    data-testid={item.testId}
-                  >
-                    {item.icon && <item.icon className="w-4 h-4" />}
-                    <span>{item.label}</span>
-                  </button>
-                ) : (
-                  <Link
-                    key={item.href + item.label}
-                    href={item.href}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors"
-                    data-testid={item.testId}
-                  >
-                    {item.icon && <item.icon className="w-4 h-4" />}
-                    <span>{item.label}</span>
-                  </Link>
-                )
-              ))}
-              
-              {/* More Dropdown for remaining items */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-sm font-medium text-gray-600 hover:text-orange-600">
-                    More
-                    <i className="fas fa-chevron-down text-xs ml-1"></i>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {navigationItems.slice(8).map((item) => (
-                    <DropdownMenuItem key={item.href + item.label} asChild={!item.onClick}>
-                      {item.onClick ? (
-                        <button onClick={item.onClick} className="flex items-center gap-2 cursor-pointer w-full">
-                          {item.icon && <item.icon className="w-4 h-4" />}
-                          <span>{item.label}</span>
-                        </button>
-                      ) : (
-                        <Link href={item.href} className="flex items-center gap-2 cursor-pointer">
-                          {item.icon && <item.icon className="w-4 h-4" />}
-                          <span>{item.label}</span>
-                        </Link>
-                      )}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            {/* Right: Profile Dropdown */}
-            <div className="flex items-center gap-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 h-10 px-2 sm:px-3 rounded-lg hover:bg-gray-50">
-                    <Avatar className="h-8 w-8 ring-2 ring-orange-100">
-                      <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-orange-500 text-white text-sm font-medium">
-                        {user.firstName?.[0]}{user.lastName?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="hidden md:flex flex-col items-start">
-                      <span className="text-sm font-medium text-gray-900">
-                        {user.firstName} {user.lastName}
-                      </span>
-                      <span className="text-xs text-gray-500">{user.email}</span>
-                    </div>
-                    <i className="fas fa-chevron-down text-xs text-gray-400 hidden sm:block"></i>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 p-2" sideOffset={8}>
-                  {/* User Info Header */}
-                  <div className="flex items-center space-x-3 p-3 mb-2 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-orange-500 text-white">
-                        {user.firstName?.[0]}{user.lastName?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {user.firstName} {user.lastName}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                      <div className="flex items-center mt-1">
-                        <Badge className={`text-xs ${getPlanBadgeColor(user.planType)}`}>
-                          {user.planType === 'paid' && <Shield className="w-3 h-3 mr-1" />}
-                          {user.planType.charAt(0).toUpperCase() + user.planType.slice(1)}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  <DropdownMenuSeparator />
-
-                  {/* Profile Section */}
-                  <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider px-2">
-                    Account
-                  </DropdownMenuLabel>
-                  
-                  <DropdownMenuItem 
-                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
-                    onClick={() => setLocation('/profile')}
-                  >
-                    <UserIcon className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">Edit Profile</span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem 
-                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
-                    onClick={() => setLocation('/account-settings')}
-                  >
-                    <Settings className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">Account Settings</span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem 
-                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
-                    onClick={() => setLocation('/automation')}
-                  >
-                    <Zap className="w-4 h-4 text-gray-500" />
-                    <div className="flex flex-col flex-1">
-                      <span className="text-sm">Automation</span>
-                      <span className="text-xs text-gray-500">CRM & lead tracking</span>
-                    </div>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  {/* Billing Section */}
-                  <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider px-2">
-                    Billing
-                  </DropdownMenuLabel>
-
-                  <DropdownMenuItem 
-                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
-                    onClick={() => setLocation('/pricing')}
-                  >
-                    <Crown className="w-4 h-4 text-gray-500" />
-                    <div className="flex flex-col flex-1">
-                      <span className="text-sm">Upgrade Plan</span>
-                      <span className="text-xs text-gray-500">Get more features</span>
-                    </div>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem 
-                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
-                    onClick={() => setLocation('/billing')}
-                  >
-                    <CreditCard className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">Billing & Invoices</span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem 
-                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
-                    onClick={() => setLocation('/usage')}
-                  >
-                    <FileText className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">Usage & Limits</span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  {/* Support Section */}
-                  <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider px-2">
-                    Support
-                  </DropdownMenuLabel>
-
-                  <DropdownMenuItem 
-                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
-                    onClick={() => setLocation('/help')}
-                  >
-                    <HelpCircle className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">Help Center</span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem 
-                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer"
-                    onClick={() => setShowContactModal(true)}
-                  >
-                    <i className="fas fa-envelope w-4 h-4 text-gray-500"></i>
-                    <span className="text-sm">Contact Support</span>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  {/* Logout */}
-                  <DropdownMenuItem 
-                    className="flex items-center space-x-3 px-3 py-2 cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => logoutMutation.mutate()}
-                  >
-                    {logoutMutation.isPending ? (
-                      <i className="fas fa-spinner fa-spin w-4 h-4"></i>
-                    ) : (
-                      <LogOut className="w-4 h-4" />
-                    )}
-                    <span className="text-sm font-medium">Sign Out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+      {/* Main Content */}
+      <div className="flex-1 md:ml-64 overflow-y-auto">
+        {/* Top Bar for Mobile */}
+        <div className="md:hidden sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm h-16">
+          <div className="flex items-center justify-between h-full px-4">
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden" data-testid="button-mobile-menu">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-orange-500 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold">TL</span>
+              </div>
+              <div className="text-sm font-bold">
+                <span className="text-blue-600">2talk</span>
+                <span className="text-orange-500">Link</span>
+              </div>
+            </Link>
+            <div className="w-10" />
           </div>
         </div>
-      </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-8">
           <Card className="bg-white shadow-sm border border-gray-200">
@@ -897,6 +653,7 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+        </div>
         </div>
       </div>
 
