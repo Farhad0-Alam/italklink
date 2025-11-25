@@ -92,6 +92,15 @@ export default function CardEditor() {
         ...data,
         ...(customUrlSlug && { customUrl: customUrlSlug })
       };
+      
+      // Ensure pageElements are included
+      if (!dataToSave.pageElements) {
+        console.warn('[CardEditor] pageElements missing, using empty array');
+        dataToSave.pageElements = [];
+      }
+      
+      console.log('[CardEditor] Saving card with', dataToSave.pageElements?.length || 0, 'page elements');
+      
       // apiRequest already handles errors and returns parsed JSON
       if (cardId) {
         return await apiRequest('PUT', `/api/business-cards/${cardId}`, dataToSave);
@@ -246,11 +255,35 @@ export default function CardEditor() {
     if (shareUrl) {
       try {
         await navigator.clipboard.writeText(shareUrl);
+        
+        // Wait for any pending auto-save to complete before opening shared view
+        if (saveMutation.isPending) {
+          toast({
+            title: "Saving card...",
+            description: "Waiting for changes to save before opening preview.",
+          });
+          // Wait for current save to complete
+          await new Promise(resolve => {
+            const checkInterval = setInterval(() => {
+              if (!saveMutation.isPending) {
+                clearInterval(checkInterval);
+                resolve(true);
+              }
+            }, 100);
+            // Timeout after 5 seconds
+            setTimeout(() => {
+              clearInterval(checkInterval);
+              resolve(false);
+            }, 5000);
+          });
+        }
+        
         // Extract slug and open as relative URL in new tab (works in Replit preview)
         const slug = shareUrl.split('/').pop();
         if (slug) {
           window.open(`/${slug}`, '_blank');
         }
+        
         toast({
           title: "Link copied and opened!",
           description: "URL copied to clipboard and opened in a new tab.",

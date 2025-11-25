@@ -40,6 +40,7 @@ export const Share: React.FC = () => {
           const response = await fetch(`/api/business-cards/slug/${shareSlug}`);
           if (response.ok) {
             const cardData = await response.json();
+            console.log('[Share] Loaded card with', cardData.pageElements?.length || 0, 'page elements');
             setCardData(cardData);
             setCurrentPageId('home'); // Reset to home page when loading
             logEvent("share_view");
