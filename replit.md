@@ -120,7 +120,7 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 3. ✅ Fixed card ID tracking - uses state to track card ID after creation for subsequent updates
 4. ✅ Added mobile frame UI with CSS styling (no external image dependency) - shows iPhone mockup in preview
 5. ✅ Added "View TalkLink" button on mobile preview - opens live card in new tab
-6. ✅ Reduced live preview debounce to 100ms for real-time visual feedback
+6. ✅ Reduced live preview debounce to 50ms for instant preview updates
 7. ✅ Prevented concurrent save requests - mutations queue properly
 8. ✅ Fixed "Save failed with status undefined" error - apiRequest returns parsed JSON, not Response object
 9. ✅ Fixed infinite loop with debounced sync in FormBuilder
@@ -131,6 +131,8 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 14. ✅ Verified custom URL feature working - uses shareSlug auto-generated from fullName
 15. ✅ Added defaultName and defaultTitle fields to templates table in database
 16. ✅ Template defaults now load and apply when selecting a template (auto-populate name and title)
+17. ✅ View TalkLink button now shows even for unsaved cards (uses cardId as fallback URL)
+18. ✅ Preview updates instantly as you type (reduced sync debounce to 50ms)
 
 ## Known Status
 - Card save functionality: ✅ Auto-save enabled (2s debounce)

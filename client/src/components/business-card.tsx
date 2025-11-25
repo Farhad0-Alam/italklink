@@ -920,13 +920,16 @@ export const BusinessCardComponent = forwardRef<
         style={getBackgroundStyle()}
       >
         {/* View TalkLink Button */}
-        {showViewButton && data.shareSlug && (
+        {showViewButton && (data.shareSlug || data.id) && (
           <div className="absolute top-4 right-4 z-50">
             <Button
               size="sm"
               className="bg-orange-500 hover:bg-orange-600 text-white shadow-lg"
               onClick={() => {
-                window.open(`${window.location.origin}/${data.shareSlug}`, '_blank');
+                const url = data.shareSlug 
+                  ? `${window.location.origin}/${data.shareSlug}`
+                  : `${window.location.origin}/preview/${data.id}`;
+                window.open(url, '_blank');
               }}
               data-testid="button-view-talklink"
             >
