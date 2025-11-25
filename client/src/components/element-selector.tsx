@@ -64,6 +64,8 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
 
   const handleAddElement = (type: string) => {
     const id = generateFieldId();
+    // Use Date.now() + random decimal for unique ordering even with rapid clicks
+    const uniqueOrder = Date.now() + Math.random();
     let element: PageElement;
 
     switch (type) {
@@ -71,7 +73,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "heading",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             text: "New Heading",
             level: "h2" as const,
@@ -84,7 +86,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "paragraph",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             text: "Enter your text here...",
             alignment: "left" as const
@@ -96,7 +98,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "contactSection",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             contacts: [
               {
@@ -115,7 +117,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "socialSection",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             socials: [
               {
@@ -134,7 +136,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "actionButtons",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {}
         };
         break;
@@ -143,7 +145,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "link",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             text: "Click Here",
             url: "https://example.com",
@@ -156,7 +158,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "image",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             src: "",
             alt: "Image description"
@@ -168,7 +170,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "qrcode",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             value: window.location.href,
             size: 200,
@@ -184,7 +186,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "video",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             url: "https://youtube.com/watch?v=...",
             thumbnail: ""
@@ -196,7 +198,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "contactForm",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             title: "Contact Me",
             fields: ["name", "email", "phone", "company", "message"],
@@ -219,7 +221,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "accordion",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             items: [
               {
@@ -236,7 +238,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "imageSlider",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             images: []
           }
@@ -247,7 +249,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "testimonials",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             title: "What Our Clients Say",
             testimonials: [
@@ -269,7 +271,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "googleMaps",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             title: "Find Us",
             address: "New York, NY, USA",
@@ -286,7 +288,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "aiChatbot",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             title: "AI Assistant",
             welcomeMessage: "Hi! How can I help you today?",
@@ -310,7 +312,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "ragKnowledge",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             title: "Knowledge Base Assistant",
             description: "Advanced AI assistant with website knowledge ingestion",
@@ -330,7 +332,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "voiceAgent",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             phoneNumber: "+1-555-0000",
             agentName: "AI Voice Assistant",
@@ -351,7 +353,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "digitalWallet",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             title: "Save to Digital Wallet",
             subtitle: "Add this business card to your phone's wallet",
@@ -377,7 +379,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "navigationMenu",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             title: "Navigation Menu",
             items: [
@@ -406,7 +408,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "arPreviewMindAR",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             mindFileUrl: "",
             posterUrl: import.meta.env.VITE_AR_DEFAULT_POSTER || "",
@@ -426,7 +428,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "bookAppointment",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             title: "Book Appointment",
             subtitle: "Schedule a meeting with me",
@@ -450,7 +452,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "scheduleCall",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             title: "Schedule a Call",
             subtitle: "Let's discuss your project",
@@ -475,7 +477,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "meetingRequest",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             title: "Request a Meeting",
             subtitle: "Let's meet to discuss opportunities",
@@ -500,7 +502,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "availabilityDisplay",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             title: "My Availability",
             subtitle: "Choose a convenient time",
@@ -528,7 +530,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "html",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             content: "",
             height: 300,
@@ -542,7 +544,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "pdfViewer",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             pdf_file: "",
             button_text: "View PDF",
@@ -556,7 +558,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         element = {
           id,
           type: "subscribeForm",
-          order: Date.now(),
+          order: uniqueOrder,
           data: {
             title: "Stay Updated",
             description: "Subscribe to get notified about updates and news.",
