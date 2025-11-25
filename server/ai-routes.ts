@@ -4,6 +4,7 @@ import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
 import multer from 'multer';
 import { requireAuth, requireOwner } from './auth';
+import { getRagContext } from './services/ragService';
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -502,6 +503,31 @@ Use the provided information accurately and cite your sources clearly.`
     } catch (error) {
       console.error('PDF processing error:', error);
       res.status(500).json({ message: 'Failed to process PDF' });
+    }
+  });
+
+  // RAG Knowledge Base Search Endpoint
+  app.post('/api/rag-search', async (req, res) => {
+    try {
+      const { question } = req.body;
+      
+      if (!question || typeof question !== 'string') {
+        return res.status(400).json({ error: 'Question is required' });
+      }
+
+      const { context, sources } = await getRagContext(question, 5);
+
+      res.json({
+        context,
+        sources: sources.map(s => ({
+          id: s.id,
+          title: s.title,
+          url: s.url,
+        })),
+      });
+    } catch (error) {
+      console.error('RAG search error:', error);
+      res.status(500).json({ error: 'Failed to search knowledge base' });
     }
   });
 }
