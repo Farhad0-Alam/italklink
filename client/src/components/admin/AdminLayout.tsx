@@ -16,7 +16,9 @@ import {
   Layout,
   Ticket,
   UserPlus,
-  TrendingUp
+  TrendingUp,
+  Palette,
+  Layers
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -60,6 +62,16 @@ const sidebarNavItems = [
     title: 'Templates',
     href: '/admin/templates',
     icon: Layout,
+  },
+  {
+    title: 'Icons',
+    href: '/admin/icons',
+    icon: Palette,
+  },
+  {
+    title: 'Elements',
+    href: '/admin/elements',
+    icon: Layers,
   },
   {
     title: 'Affiliates',

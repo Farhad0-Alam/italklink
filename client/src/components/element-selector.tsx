@@ -1,8 +1,50 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PageElement } from "@shared/schema";
 import { generateFieldId } from "@/lib/card-data";
+import { useQuery } from "@tanstack/react-query";
+
+interface ElementType {
+  type: string;
+  title: string;
+  icon: string;
+  color: string;
+  description: string;
+  isPremium?: boolean;
+  defaultConfig?: any;
+}
+
+const fallbackElementTypes: ElementType[] = [
+  { type: "heading", title: "Heading", icon: "fas fa-heading", color: "bg-blue-100", description: "Add a title or heading" },
+  { type: "paragraph", title: "Paragraph", icon: "fas fa-align-left", color: "bg-orange-100", description: "Add text content" },
+  { type: "contactSection", title: "Contact Info", icon: "fas fa-address-book", color: "bg-slate-100", description: "Add contact buttons (phone, email, etc.)" },
+  { type: "socialSection", title: "Social Media", icon: "fas fa-share-alt", color: "bg-sky-100", description: "Add social media links" },
+  { type: "actionButtons", title: "Save & Share Button", icon: "fas fa-hand-pointer", color: "bg-gradient-to-r from-blue-500 to-purple-500", description: "Add to Contacts & Share buttons" },
+  { type: "link", title: "3D Button", icon: "fas fa-link", color: "bg-purple-100", description: "Add a 3D button" },
+  { type: "image", title: "Image", icon: "fas fa-image", color: "bg-green-100", description: "Upload an image" },
+  { type: "qrcode", title: "QR Code", icon: "fas fa-qrcode", color: "bg-gradient-to-br from-indigo-500 to-purple-600", description: "Premium QR code generator" },
+  { type: "video", title: "Video", icon: "fas fa-video", color: "bg-indigo-100", description: "Embed video" },
+  { type: "contactForm", title: "Contact Form", icon: "fas fa-wpforms", color: "bg-teal-100", description: "Add contact form" },
+  { type: "accordion", title: "Accordion", icon: "fas fa-list", color: "bg-yellow-100", description: "Collapsible content" },
+  { type: "imageSlider", title: "Image Slider", icon: "fas fa-images", color: "bg-pink-100", description: "Image carousel" },
+  { type: "testimonials", title: "Testimonials", icon: "fas fa-quote-right", color: "bg-emerald-100", description: "Customer reviews" },
+  { type: "googleMaps", title: "Google Maps", icon: "fas fa-map-marker-alt", color: "bg-cyan-100", description: "Embedded map location" },
+  { type: "aiChatbot", title: "AI Chatbot", icon: "fas fa-robot", color: "bg-violet-100", description: "Knowledge base assistant" },
+  { type: "ragKnowledge", title: "RAG Knowledge", icon: "fas fa-brain", color: "bg-indigo-100", description: "Advanced URL knowledge ingestion with vector search" },
+  { type: "voiceAgent", title: "AI Voice Agent", icon: "fas fa-phone-volume", color: "bg-gradient-to-r from-green-500 to-emerald-600", description: "AI-powered phone calls with ChatGPT integration" },
+  { type: "voiceAssistant", title: "Voice Chat Assistant", icon: "fas fa-microphone-alt", color: "bg-gradient-to-r from-purple-500 to-violet-600", description: "Embedded voice & text chat with knowledge base" },
+  { type: "digitalWallet", title: "Digital Wallet", icon: "fas fa-wallet", color: "bg-gradient-to-r from-black to-blue-600", description: "Save to Apple & Google Wallet" },
+  { type: "navigationMenu", title: "Navigation Menu", icon: "fas fa-bars", color: "bg-gradient-to-r from-slate-500 to-slate-700", description: "Multi-page navigation menu" },
+  { type: "arPreviewMindAR", title: "AR Preview", icon: "fas fa-cube", color: "bg-gradient-to-r from-purple-500 to-pink-600", description: "AR Digital Business Card Viewer" },
+  { type: "pdfViewer", title: "PDF Viewer", icon: "fas fa-file-pdf", color: "bg-purple-100", description: "Display PDF with modal viewer and clickable links" },
+  { type: "html", title: "Custom HTML", icon: "fas fa-code", color: "bg-gradient-to-r from-gray-600 to-gray-800", description: "Add custom HTML design" },
+  { type: "bookAppointment", title: "Book Appointment", icon: "fas fa-calendar-alt", color: "bg-gradient-to-r from-blue-500 to-teal-600", description: "Appointment booking button" },
+  { type: "scheduleCall", title: "Schedule Call", icon: "fas fa-phone", color: "bg-gradient-to-r from-green-500 to-blue-600", description: "Schedule a phone/video call" },
+  { type: "meetingRequest", title: "Meeting Request", icon: "fas fa-handshake", color: "bg-gradient-to-r from-purple-500 to-indigo-600", description: "Request a meeting button" },
+  { type: "availabilityDisplay", title: "Availability Display", icon: "fas fa-clock", color: "bg-gradient-to-r from-amber-500 to-orange-600", description: "Show your availability schedule" },
+  { type: "subscribeForm", title: "Subscribe to Updates", icon: "fas fa-bell", color: "bg-gradient-to-r from-orange-500 to-red-600", description: "Let visitors subscribe to notifications" }
+];
 
 interface ElementSelectorProps {
   open: boolean;
@@ -11,205 +53,14 @@ interface ElementSelectorProps {
 }
 
 export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSelectorProps) {
-  const elementTypes = [
-    {
-      type: "heading",
-      title: "Heading",
-      icon: "fas fa-heading",
-      color: "bg-blue-100",
-      description: "Add a title or heading"
-    },
-    {
-      type: "paragraph",
-      title: "Paragraph",
-      icon: "fas fa-align-left",
-      color: "bg-orange-100",
-      description: "Add text content"
-    },
-    {
-      type: "contactSection",
-      title: "Contact Info",
-      icon: "fas fa-address-book",
-      color: "bg-slate-100",
-      description: "Add contact buttons (phone, email, etc.)"
-    },
-    {
-      type: "socialSection",
-      title: "Social Media",
-      icon: "fas fa-share-alt",
-      color: "bg-sky-100",
-      description: "Add social media links"
-    },
-    {
-      type: "actionButtons",
-      title: "Save & Share Button",
-      icon: "fas fa-hand-pointer",
-      color: "bg-gradient-to-r from-blue-500 to-purple-500",
-      description: "Add to Contacts & Share buttons"
-    },
-    {
-      type: "link",
-      title: "3D Button",
-      icon: "fas fa-link",
-      color: "bg-purple-100",
-      description: "Add a 3D button"
-    },
-    {
-      type: "image",
-      title: "Image",
-      icon: "fas fa-image",
-      color: "bg-green-100",
-      description: "Upload an image"
-    },
-    {
-      type: "qrcode",
-      title: "QR Code",
-      icon: "fas fa-qrcode",
-      color: "bg-gradient-to-br from-indigo-500 to-purple-600",
-      description: "Premium QR code generator"
-    },
-    {
-      type: "video",
-      title: "Video",
-      icon: "fas fa-video",
-      color: "bg-indigo-100",
-      description: "Embed video"
-    },
-    {
-      type: "contactForm",
-      title: "Contact Form",
-      icon: "fas fa-wpforms",
-      color: "bg-teal-100",
-      description: "Add contact form"
-    },
-    {
-      type: "accordion",
-      title: "Accordion",
-      icon: "fas fa-list",
-      color: "bg-yellow-100",
-      description: "Collapsible content"
-    },
-    {
-      type: "imageSlider",
-      title: "Image Slider",
-      icon: "fas fa-images",
-      color: "bg-pink-100",
-      description: "Image carousel"
-    },
-    {
-      type: "testimonials",
-      title: "Testimonials",
-      icon: "fas fa-quote-right",
-      color: "bg-emerald-100",
-      description: "Customer reviews"
-    },
-    {
-      type: "googleMaps",
-      title: "Google Maps",
-      icon: "fas fa-map-marker-alt",
-      color: "bg-cyan-100",
-      description: "Embedded map location"
-    },
-    {
-      type: "aiChatbot",
-      title: "AI Chatbot",
-      icon: "fas fa-robot",
-      color: "bg-violet-100",
-      description: "Knowledge base assistant"
-    },
-    {
-      type: "ragKnowledge",
-      title: "RAG Knowledge",
-      icon: "fas fa-brain",
-      color: "bg-indigo-100",
-      description: "Advanced URL knowledge ingestion with vector search"
-    },
-    {
-      type: "voiceAgent",
-      title: "AI Voice Agent",
-      icon: "fas fa-phone-volume",
-      color: "bg-gradient-to-r from-green-500 to-emerald-600",
-      description: "AI-powered phone calls with ChatGPT integration"
-    },
-    {
-      type: "voiceAssistant",
-      title: "Voice Chat Assistant",
-      icon: "fas fa-microphone-alt",
-      color: "bg-gradient-to-r from-purple-500 to-violet-600",
-      description: "Embedded voice & text chat with knowledge base"
-    },
-    {
-      type: "digitalWallet",
-      title: "Digital Wallet",
-      icon: "fas fa-wallet",
-      color: "bg-gradient-to-r from-black to-blue-600",
-      description: "Save to Apple & Google Wallet"
-    },
-    {
-      type: "navigationMenu",
-      title: "Navigation Menu",
-      icon: "fas fa-bars",
-      color: "bg-gradient-to-r from-slate-500 to-slate-700",
-      description: "Multi-page navigation menu"
-    },
-    {
-      type: "arPreviewMindAR",
-      title: "AR Preview",
-      icon: "fas fa-cube",
-      color: "bg-gradient-to-r from-purple-500 to-pink-600",
-      description: "AR Digital Business Card Viewer"
-    },
-    {
-      type: "pdfViewer",
-      title: "PDF Viewer",
-      icon: "fas fa-file-pdf",
-      color: "bg-purple-100",
-      description: "Display PDF with modal viewer and clickable links"
-    },
-    {
-      type: "html",
-      title: "Custom HTML",
-      icon: "fas fa-code",
-      color: "bg-gradient-to-r from-gray-600 to-gray-800",
-      description: "Add custom HTML design"
-    },
-    // Appointment booking elements
-    {
-      type: "bookAppointment",
-      title: "Book Appointment",
-      icon: "fas fa-calendar-alt",
-      color: "bg-gradient-to-r from-blue-500 to-teal-600",
-      description: "Appointment booking button"
-    },
-    {
-      type: "scheduleCall",
-      title: "Schedule Call",
-      icon: "fas fa-phone",
-      color: "bg-gradient-to-r from-green-500 to-blue-600",
-      description: "Schedule a phone/video call"
-    },
-    {
-      type: "meetingRequest",
-      title: "Meeting Request",
-      icon: "fas fa-handshake",
-      color: "bg-gradient-to-r from-purple-500 to-indigo-600",
-      description: "Request a meeting button"
-    },
-    {
-      type: "availabilityDisplay",
-      title: "Availability Display",
-      icon: "fas fa-clock",
-      color: "bg-gradient-to-r from-amber-500 to-orange-600",
-      description: "Show your availability schedule"
-    },
-    {
-      type: "subscribeForm",
-      title: "Subscribe to Updates",
-      icon: "fas fa-bell",
-      color: "bg-gradient-to-r from-orange-500 to-red-600",
-      description: "Let visitors subscribe to notifications"
-    }
-  ];
+  const { data: apiElementTypes } = useQuery<ElementType[]>({
+    queryKey: ['/api/element-types'],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const elementTypes = useMemo(() => {
+    return apiElementTypes && apiElementTypes.length > 0 ? apiElementTypes : fallbackElementTypes;
+  }, [apiElementTypes]);
 
   const handleAddElement = (type: string) => {
     const id = generateFieldId();

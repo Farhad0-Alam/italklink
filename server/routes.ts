@@ -3866,6 +3866,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
 
+  // ===== ADMIN ICONS API ENDPOINTS =====
+  app.get('/api/admin/icons',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const icons = await storage.getIcons();
+      res.json(icons);
+    })
+  );
+
+  app.post('/api/admin/icons',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const iconData = req.body;
+      const newIcon = await storage.createIcon(iconData);
+      res.json({ success: true, data: newIcon });
+    })
+  );
+
+  app.put('/api/admin/icons/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const iconData = req.body;
+      const updatedIcon = await storage.updateIcon(parseInt(id), iconData);
+      res.json({ success: true, data: updatedIcon });
+    })
+  );
+
+  app.delete('/api/admin/icons/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      await storage.deleteIcon(parseInt(id));
+      res.json({ success: true, message: 'Icon deleted successfully' });
+    })
+  );
+
+  // ===== ADMIN PAGE ELEMENT TYPES API ENDPOINTS =====
+  app.get('/api/admin/element-types',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const elementTypes = await storage.getPageElementTypes();
+      res.json(elementTypes);
+    })
+  );
+
+  app.post('/api/admin/element-types',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const elementTypeData = req.body;
+      const newElementType = await storage.createPageElementType(elementTypeData);
+      res.json({ success: true, data: newElementType });
+    })
+  );
+
+  app.put('/api/admin/element-types/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      const elementTypeData = req.body;
+      const updatedElementType = await storage.updatePageElementType(parseInt(id), elementTypeData);
+      res.json({ success: true, data: updatedElementType });
+    })
+  );
+
+  app.delete('/api/admin/element-types/:id',
+    enhancedAuth,
+    requireRole('admin'),
+    asyncHandler(async (req, res) => {
+      const { id } = req.params;
+      await storage.deletePageElementType(parseInt(id));
+      res.json({ success: true, message: 'Element type deleted successfully' });
+    })
+  );
+
   // ===== ADMIN DASHBOARD API ENDPOINTS =====
   app.get('/api/admin/metrics/summary',
     enhancedAuth,

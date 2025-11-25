@@ -1,8 +1,13 @@
 import { BusinessCard, businessCardSchema } from "@shared/schema";
 
-// Available icons for custom fields
-export const getAvailableIcons = () => [
-  // Contact Icons
+export interface IconData {
+  name: string;
+  icon: string;
+  category: string;
+  id?: number;
+}
+
+export const fallbackIcons: IconData[] = [
   { name: "Phone", icon: "fas fa-phone", category: "contact" },
   { name: "Email", icon: "fas fa-envelope", category: "contact" },
   { name: "Website", icon: "fas fa-globe", category: "contact" },
@@ -11,8 +16,6 @@ export const getAvailableIcons = () => [
   { name: "Fax", icon: "fas fa-fax", category: "contact" },
   { name: "Skype", icon: "fab fa-skype", category: "contact" },
   { name: "Calendar", icon: "fas fa-calendar", category: "contact" },
-  
-  // Social Media Icons
   { name: "WhatsApp", icon: "fab fa-whatsapp", category: "social" },
   { name: "LinkedIn", icon: "fab fa-linkedin", category: "social" },
   { name: "Instagram", icon: "fab fa-instagram", category: "social" },
@@ -28,6 +31,8 @@ export const getAvailableIcons = () => [
   { name: "Behance", icon: "fab fa-behance", category: "social" },
   { name: "Dribbble", icon: "fab fa-dribbble", category: "social" },
 ];
+
+export const getAvailableIcons = () => fallbackIcons;
 
 // Generate unique ID for custom fields
 export const generateFieldId = () => {
