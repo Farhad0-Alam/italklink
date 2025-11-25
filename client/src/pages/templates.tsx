@@ -154,9 +154,8 @@ export default function Templates() {
   const sanitizeUrl = (url: string) => {
     return url
       .trim()
-      .toLowerCase()
       .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/[^a-z0-9-]/g, '') // Remove special characters
+      .replace(/[^a-zA-Z0-9-]/g, '') // Remove special characters (keep uppercase)
       .replace(/-+/g, '-') // Replace multiple hyphens with single
       .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
   };
@@ -173,12 +172,11 @@ export default function Templates() {
       const params = new URLSearchParams();
       params.set('template', selectedTemplate.id);
       if (customUrl.trim()) {
-        // Sanitize URL: convert spaces to hyphens and remove special characters
+        // Sanitize URL: convert spaces to hyphens and remove special characters (keep case)
         const sanitizedUrl = customUrl
           .trim()
-          .toLowerCase()
           .replace(/\s+/g, '-') // Replace spaces with hyphens
-          .replace(/[^a-z0-9-]/g, '') // Remove special characters
+          .replace(/[^a-zA-Z0-9-]/g, '') // Remove special characters (keep uppercase)
           .replace(/-+/g, '-') // Replace multiple hyphens with single
           .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
         
