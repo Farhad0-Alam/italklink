@@ -322,28 +322,6 @@ export default function CardEditor() {
       try {
         await navigator.clipboard.writeText(shareUrl);
         
-        // Wait for any pending auto-save to complete before opening shared view
-        if (saveMutation.isPending) {
-          toast({
-            title: "Saving card...",
-            description: "Waiting for changes to save before opening preview.",
-          });
-          // Wait for current save to complete
-          await new Promise(resolve => {
-            const checkInterval = setInterval(() => {
-              if (!saveMutation.isPending) {
-                clearInterval(checkInterval);
-                resolve(true);
-              }
-            }, 100);
-            // Timeout after 5 seconds
-            setTimeout(() => {
-              clearInterval(checkInterval);
-              resolve(false);
-            }, 5000);
-          });
-        }
-        
         // Extract slug and open as relative URL in new tab (works in Replit preview)
         const slug = shareUrl.split('/').pop();
         if (slug) {
@@ -351,7 +329,7 @@ export default function CardEditor() {
         }
         
         toast({
-          title: "Link copied and opened!",
+          title: "Link copied!",
           description: "URL copied to clipboard and opened in a new tab.",
         });
       } catch (err) {
