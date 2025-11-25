@@ -114,20 +114,22 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 - **Calendar**: Google Calendar, Zoom, Microsoft Teams OAuth
 
 ## Recent Fixes (Current Session)
-1. ✅ Removed duplicate "Show URL Ingestion Form" checkbox in card editor
-2. ✅ Fixed "saveMutation before initialization" error by reordering declarations
-3. ✅ Improved error handling for "response.text is not a function"
-4. ✅ Fixed infinite loop: Implemented 500ms debounced sync instead of live sync
-5. ✅ Updated UI to show "Click Save to save changes" status message
-6. ✅ Removed dangerous auto-save that caused "Maximum update depth exceeded"
+1. ✅ Fixed "Save failed with status undefined" error - apiRequest returns parsed JSON, not Response object
+2. ✅ Fixed infinite loop with 500ms debounced sync in FormBuilder
+3. ✅ Removed "Update Card" button completely
+4. ✅ Removed all status messages ("Auto-saving changes...", "Click Save to save changes")
+5. ✅ Implemented smooth auto-save backend with 2-second debouncing
+6. ✅ Silent auto-save - no toast notifications to avoid interruptions
+7. ✅ Cleaned up save mutation logic - removed unnecessary response checks
 
 ## Known Status
-- Card save functionality: ✅ Fixed with debounced sync (500ms)
+- Card save functionality: ✅ Auto-save enabled (2s debounce)
 - Form validation: ✅ Working
 - Live preview: ✅ Real-time updates working
 - RAG endpoints: ✅ All verified (200 status)
 - WebSocket voice: ✅ Setup complete
 - All core features: ✅ Functional
+- Auto-save: ✅ Smooth, silent, no interruptions
 
 ## Testing Instructions
 1. Create a new user account at https://talkl.ink/login

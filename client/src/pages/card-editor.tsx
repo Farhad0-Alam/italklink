@@ -84,52 +84,11 @@ export default function CardEditor() {
   // Save card mutation - declared before useEffects that depend on it
   const saveMutation = useMutation({
     mutationFn: async (data: BusinessCard) => {
-      console.log('=== SAVE MUTATION STARTED ===');
-      console.log('Saving business card:', data);
-      console.log('User ID:', user?.id);
-      console.log('Params ID:', params.id);
-      
-      try {
-        let response;
-        if (params.id) {
-          console.log('Updating existing card...');
-          response = await apiRequest('PUT', `/api/business-cards/${params.id}`, data);
-        } else {
-          console.log('Creating new card...');
-          response = await apiRequest('POST', '/api/business-cards', data);
-        }
-        
-        console.log('Response status:', response?.status);
-        console.log('Response headers:', response?.headers);
-        
-        // Check if response is valid
-        if (!response) {
-          throw new Error('No response from server');
-        }
-        
-        if (!response.ok) {
-          let errorMsg = `Save failed with status ${response.status}`;
-          try {
-            // Try to extract error text if response has it
-            if (typeof response.text === 'function') {
-              const errorText = await response.text();
-              errorMsg = `Save failed: ${response.status} ${errorText}`;
-            }
-          } catch (e) {
-            // If we can't get error text, just use status
-            console.log('Could not extract error text:', e);
-          }
-          throw new Error(errorMsg);
-        }
-        
-        const result = await response.json();
-        console.log('Save result:', result);
-        console.log('=== SAVE MUTATION SUCCESS ===');
-        return result;
-      } catch (error) {
-        console.error('=== SAVE MUTATION ERROR ===');
-        console.error('Error details:', error);
-        throw error;
+      // apiRequest already handles errors and returns parsed JSON
+      if (params.id) {
+        return await apiRequest('PUT', `/api/business-cards/${params.id}`, data);
+      } else {
+        return await apiRequest('POST', '/api/business-cards', data);
       }
     },
     onSuccess: (savedCard) => {
@@ -143,10 +102,7 @@ export default function CardEditor() {
         window.history.replaceState(null, '', `/card-editor/${savedCard.id}`);
       }
       
-      toast({
-        title: "Card saved!",
-        description: "Your business card has been saved successfully.",
-      });
+      // Silent auto-save - no toast notification to avoid interruptions
     },
     onError: (error: any) => {
       console.error('Save error:', error);
@@ -214,8 +170,7 @@ export default function CardEditor() {
     queryKey: ['/api/business-cards', params.id],
     queryFn: async () => {
       if (!params.id) return null;
-      const response = await apiRequest('GET', `/api/business-cards/${params.id}`);
-      return await response.json();
+      return await apiRequest('GET', `/api/business-cards/${params.id}`);
     },
     enabled: !!params.id,
   });
@@ -251,8 +206,29 @@ export default function CardEditor() {
     }
   }, [existingCard]);
 
-  // Auto-save disabled - users should click the Save button to save changes
-  // This prevents infinite loops and ensures data is saved intentionally
+  // Smooth auto-save with debouncing - saves changes automatically after 2 seconds of inactivity
+  useEffect(() => {
+    // Don't auto-save if we just loaded the card or if we're creating a new card without data
+    if (!params.id && !cardData.fullName) return;
+    
+    // Clear previous timeout
+    if (autoSaveTimeout) {
+      clearTimeout(autoSaveTimeout);
+    }
+    
+    // Set new timeout for auto-save (2 seconds)
+    const timeout = setTimeout(() => {
+      if (user && (cardData.fullName || cardData.title)) {
+        saveMutation.mutate(cardData);
+      }
+    }, 2000);
+    
+    setAutoSaveTimeout(timeout);
+    
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [cardData, user, params.id]);
 
   const copyShareUrl = async () => {
     if (shareUrl) {
@@ -407,70 +383,11 @@ END:VCARD`;
             <FormBuilder
               cardData={cardData}
               onDataChange={(data) => {
-                console.log('[CardEditor] Received data from FormBuilder:', {
-                  elementSpacing: data.elementSpacing,
-                  individualElementSpacing: data.individualElementSpacing
-                });
                 setCardData(data);
               }}
               onGenerateQR={() => {}}
               onNavigationChange={handleNavigatePage}
             />
-            
-            {/* Save Card Button */}
-            <div className="mt-6 space-y-4">
-              <div className="flex justify-center">
-                <Button
-                  onClick={() => {
-                    console.log('Save button clicked, cardData:', cardData);
-                    console.log('User:', user);
-                    console.log('Is user authenticated:', !!user);
-                    if (!user) {
-                      toast({
-                        title: "Please log in",
-                        description: "You need to be logged in to save business cards.",
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-                    if (!cardData.fullName || !cardData.title) {
-                      toast({
-                        title: "Missing information",
-                        description: "Please fill in your name and title before saving.",
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-                    saveMutation.mutate(cardData);
-                  }}
-                  disabled={saveMutation.isPending}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-2"
-                  data-testid="button-save-card"
-                >
-                  {saveMutation.isPending ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <i className="fas fa-save mr-2"></i>
-                      {params.id ? 'Update Card' : 'Save Card'}
-                    </>
-                  )}
-                </Button>
-              </div>
-              
-              {/* Save status indicator */}
-              <div className="flex justify-center">
-                <div className="flex items-center space-x-2 text-slate-600 bg-slate-100 px-4 py-2 rounded-lg text-sm">
-                  <div className={`w-2 h-2 rounded-full ${saveMutation.isPending ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}></div>
-                  <span>
-                    {saveMutation.isPending ? 'Saving...' : 'Click Save to save changes'}
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Right Panel - Mobile Preview */}
