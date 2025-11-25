@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Loader2, Bot, User, ExternalLink, X, Settings, ChevronDown, ChevronUp, Mic, Square, Plus, Volume2 } from 'lucide-react';
+import { Loader2, Bot, User, ExternalLink, X, Settings, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import { URLManager } from '@/components/URLManager';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -801,32 +801,6 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                   />
                 </div>
 
-                {/* Cyan Recording Indicator */}
-                {isListening && (
-                  <div className="flex-shrink-0 w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
-                )}
-
-                {/* Voice Button - Stop when Listening, Mic when not */}
-                <button
-                  type="button"
-                  onClick={isListening ? stopListening : startListening}
-                  disabled={isProcessing || isLoading}
-                  className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors ${
-                    isListening
-                      ? 'bg-red-600 hover:bg-red-700 text-white'
-                      : isLoading || isProcessing
-                      ? 'text-gray-600 opacity-50 cursor-not-allowed'
-                      : 'hover:bg-gray-800 text-gray-400 hover:text-white'
-                  }`}
-                  data-testid="button-voice"
-                >
-                  {isListening ? (
-                    <Square className="h-4 w-4 sm:h-5 sm:w-5" />
-                  ) : (
-                    <Mic className="h-4 w-4 sm:h-5 sm:w-5" />
-                  )}
-                </button>
-
                 {/* Waveform Button - TTS Mode */}
                 <button
                   type="button"
@@ -851,12 +825,6 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                 </button>
               </form>
             </TooltipProvider>
-
-            {isListening && (
-              <div className="mt-2 text-xs sm:text-sm text-gray-400 text-center animate-pulse">
-                🎙️ Recording...
-              </div>
-            )}
           </div>
         </div>
       </div>
