@@ -3094,14 +3094,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // If user has a paid or enterprise plan assigned by admin, return subscription info
     if (user && (user.planType === 'paid' || user.planType === 'enterprise')) {
-      // Return a mock subscription for admin-assigned plans
+      // Fetch the actual plan name from the database
+      const { db } = await import('./db');
+      const { subscriptionPlans } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+      
+      // Find the plan matching the user's plan type
+      const [plan] = await db.select()
+        .from(subscriptionPlans)
+        .where(eq(subscriptionPlans.planType, user.planType))
+        .limit(1);
+      
+      const planName = plan?.name || (user.planType === 'enterprise' ? 'Enterprise' : user.planType === 'paid' ? 'Pro' : 'Free');
+      const planId = plan?.id || (user.planType === 'enterprise' ? 3 : 2);
+      const pricePaid = plan?.price || (user.planType === 'enterprise' ? 99900 : 9900); // in cents
+      
       const subscription = {
         id: `admin-plan-${userId}`,
-        planId: user.planType === 'enterprise' ? 3 : 2,
-        planName: user.planType === 'enterprise' ? 'Enterprise' : 'Pro',
+        planId,
+        planName,
         userCount: 1,
-        pricePaid: user.planType === 'enterprise' ? 99900 : 9900, // in cents
-        features: { featureList: [] },
+        pricePaid,
+        features: plan?.features || { featureList: [] },
         startDate: user.createdAt || new Date().toISOString(),
         endDate: user.subscriptionEndsAt || null,
         isActive: true,

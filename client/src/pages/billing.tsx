@@ -316,7 +316,7 @@ export default function Billing() {
             <CardContent className="space-y-4">
               <div>
                 <Badge className={`text-sm ${getPlanColor(user.planType)}`}>
-                  {subscription?.planName || (user.planType.charAt(0).toUpperCase() + user.planType.slice(1))} {subscription?.planName?.includes('Plan') ? '' : 'Plan'}
+                  {subscription?.planName || (user.planType.charAt(0).toUpperCase() + user.planType.slice(1))}
                 </Badge>
               </div>
 
