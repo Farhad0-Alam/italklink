@@ -69,10 +69,6 @@ export default function CardEditor() {
     individualElementSpacing: {},
   });
 
-  // Debounced cardData for preview to prevent flickering
-  const [debouncedCardData, setDebouncedCardData] = useState<BusinessCard>(cardData);
-  const previewDebounceTimeout = useRef<NodeJS.Timeout | null>(null);
-
   // Use ref to track latest cardData to avoid stale closures in auto-save
   const latestCardDataRef = useRef<BusinessCard>(cardData);
 
@@ -321,27 +317,32 @@ export default function CardEditor() {
     };
   }, [cardData, user, cardId, saveMutation.isPending]);
 
-  // Debounce cardData updates for preview to prevent flickering
-  useEffect(() => {
-    if (previewDebounceTimeout.current) {
-      clearTimeout(previewDebounceTimeout.current);
-    }
-    
-    previewDebounceTimeout.current = setTimeout(() => {
-      setDebouncedCardData(cardData);
-    }, 200); // 200ms debounce for smooth preview without flicker
-    
-    return () => {
-      if (previewDebounceTimeout.current) {
-        clearTimeout(previewDebounceTimeout.current);
-      }
-    };
-  }, [cardData]);
-
   const copyShareUrl = async () => {
     if (shareUrl) {
       try {
         await navigator.clipboard.writeText(shareUrl);
+        
+        // Wait for any pending auto-save to complete before opening shared view
+        if (saveMutation.isPending) {
+          toast({
+            title: "Saving card...",
+            description: "Waiting for changes to save before opening preview.",
+          });
+          // Wait for current save to complete
+          await new Promise(resolve => {
+            const checkInterval = setInterval(() => {
+              if (!saveMutation.isPending) {
+                clearInterval(checkInterval);
+                resolve(true);
+              }
+            }, 100);
+            // Timeout after 5 seconds
+            setTimeout(() => {
+              clearInterval(checkInterval);
+              resolve(false);
+            }, 5000);
+          });
+        }
         
         // Extract slug and open as relative URL in new tab (works in Replit preview)
         const slug = shareUrl.split('/').pop();
@@ -350,7 +351,7 @@ export default function CardEditor() {
         }
         
         toast({
-          title: "Link copied!",
+          title: "Link copied and opened!",
           description: "URL copied to clipboard and opened in a new tab.",
         });
       } catch (err) {
@@ -524,18 +525,18 @@ END:VCARD`;
                     className="h-full overflow-y-auto"
                   >
                     {/* Check if we're in page mode by looking at current focus or form data */}
-                    {(debouncedCardData as any).currentPreviewMode === 'page' && getCurrentPageData() ? (
+                    {(cardData as any).currentPreviewMode === 'page' && getCurrentPageData() ? (
                       <PagePreview 
                         pageData={getCurrentPageData()}
-                        cardData={debouncedCardData}
-                        elementSpacing={(debouncedCardData as any).elementSpacing || 16}
-                        individualElementSpacing={(debouncedCardData as any).individualElementSpacing || {}}
+                        cardData={cardData}
+                        elementSpacing={(cardData as any).elementSpacing || 16}
+                        individualElementSpacing={(cardData as any).individualElementSpacing || {}}
                         onNavigatePage={handleNavigatePage}
                         onBackToCard={handleBackToCard}
                       />
                     ) : (
                       <BusinessCardComponent 
-                        data={debouncedCardData} 
+                        data={cardData} 
                         isMobilePreview={true}
                         showViewButton={true}
                         onNavigatePage={handleNavigatePage}

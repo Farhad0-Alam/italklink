@@ -163,18 +163,13 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     
     const formId = currentFormData.id;
     const cardDataId = (cardData as any).id;
-    const formPages = currentFormData.pages;
-    const cardDataPages = (cardData as any).pages;
     
-    // If card ID changed, pages structure changed, OR if form has no ID but cardData does, reset form
-    // Also check if pages elements count changed (detecting element additions)
-    const pagesChanged = JSON.stringify(formPages) !== JSON.stringify(cardDataPages);
-    
-    if (formId !== cardDataId || (!formId && cardDataId) || pagesChanged) {
-      console.log('[FormBuilder] Card changed - resetting form. ID changed:', formId !== cardDataId, 'Pages changed:', pagesChanged);
+    // If card ID changed OR if form has no ID but cardData does, reset form
+    if (formId !== cardDataId || (!formId && cardDataId)) {
+      console.log('[FormBuilder] Card changed - resetting form. Old:', formId, 'New:', cardDataId);
       form.reset(cardData);
     }
-  }, [(cardData as any).id, (cardData as any).pages, form]);
+  }, [(cardData as any).id, form]);
 
   // Scoped watchers to prevent infinite re-render loops
   const sectionStyles = useWatch({ control: form.control, name: "sectionStyles" });
