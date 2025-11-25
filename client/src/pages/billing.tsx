@@ -303,23 +303,25 @@ export default function Billing() {
                 </Badge>
               </div>
 
-              {subscription && subscription.planType !== 'free' && (
+              {subscription && subscription.status && subscription.planType !== 'free' && (
                 <>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Amount</span>
-                      <span className="font-medium">{formatCurrency(subscription.amount)}/{subscription.interval === 'monthly' ? 'month' : 'year'}</span>
+                      <span className="font-medium">{formatCurrency(subscription.amount || 0)}/{subscription.interval === 'monthly' ? 'month' : 'year'}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Status</span>
                       <Badge className={getStatusColor(subscription.status)}>
-                        {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
+                        {subscription.status?.charAt(0).toUpperCase() + subscription.status?.slice(1)}
                       </Badge>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Next billing</span>
-                      <span className="font-medium">{formatDate(subscription.currentPeriodEnd)}</span>
-                    </div>
+                    {subscription.currentPeriodEnd && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Next billing</span>
+                        <span className="font-medium">{formatDate(subscription.currentPeriodEnd)}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="pt-4 border-t">
