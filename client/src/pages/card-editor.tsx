@@ -319,15 +319,15 @@ END:VCARD`;
             </div>
             
             <div className="flex items-center space-x-3">
-              {shareUrl && (
+              {shareUrl ? (
                 <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-orange-50 rounded-full px-6 py-3 shadow-sm border border-gray-200">
-                  <div className="text-sm text-gray-700 font-medium">
+                  <div className="text-sm text-gray-700 font-medium truncate max-w-xs">
                     {shareUrl}
                   </div>
                   <Button
                     size="sm"
                     onClick={copyShareUrl}
-                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-6"
+                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-6 whitespace-nowrap"
                     data-testid="button-copy-url"
                   >
                     <Copy className="w-4 h-4 mr-2" />
@@ -336,7 +336,28 @@ END:VCARD`;
                   <Button
                     size="sm"
                     onClick={handleShare}
-                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6"
+                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 whitespace-nowrap"
+                    data-testid="button-share"
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  <Button
+                    size="sm"
+                    disabled
+                    className="bg-gray-200 text-gray-400 rounded-full px-6 cursor-not-allowed"
+                    data-testid="button-copy-url"
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy
+                  </Button>
+                  <Button
+                    size="sm"
+                    disabled
+                    className="bg-gray-200 text-gray-400 rounded-full px-6 cursor-not-allowed"
                     data-testid="button-share"
                   >
                     <Share2 className="w-4 h-4 mr-2" />
