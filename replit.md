@@ -141,6 +141,10 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
     - Created admin UI pages: /admin/icons, /admin/elements
     - Frontend falls back to hardcoded values if API fails
 20. ✅ Added useIcons hook for fetching icons dynamically from API
+21. ✅ Updated card editor URL sharing UI - removed Settings button, added Copy/Share buttons with gradient UI
+22. ✅ Copy button now copies URL and opens live view in new window automatically
+23. ✅ Custom URL input modal appears after template selection to set card slug
+24. ✅ Card saves with custom URL slug from template selection modal
 
 ## Known Status - SAAS Complete
 - Card save functionality: ✅ Auto-save enabled (2s debounce)

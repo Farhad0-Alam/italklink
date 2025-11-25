@@ -42,9 +42,10 @@ export default function CardEditor() {
     }
   }, [userError, userLoading, setLocation, toast]);
   
-  // Get template from URL parameters
+  // Get template and custom URL from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
   const selectedTemplateId = urlParams.get('template');
+  const customUrlFromTemplate = urlParams.get('url');
   
   const [cardData, setCardData] = useState<BusinessCard>({
     fullName: "",
@@ -72,6 +73,7 @@ export default function CardEditor() {
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [currentPageId, setCurrentPageId] = useState<string>('home');
   const [cardId, setCardId] = useState<string | null>(params.id || null);
+  const [customUrlSlug, setCustomUrlSlug] = useState<string>(customUrlFromTemplate || "");
 
   // Helper function to update share URL
   const updateShareUrl = (card: any) => {
@@ -85,11 +87,16 @@ export default function CardEditor() {
   // Save card mutation - declared before useEffects that depend on it
   const saveMutation = useMutation({
     mutationFn: async (data: BusinessCard) => {
+      // Include custom URL slug if provided
+      const dataToSave = {
+        ...data,
+        ...(customUrlSlug && { customUrl: customUrlSlug })
+      };
       // apiRequest already handles errors and returns parsed JSON
       if (cardId) {
-        return await apiRequest('PUT', `/api/business-cards/${cardId}`, data);
+        return await apiRequest('PUT', `/api/business-cards/${cardId}`, dataToSave);
       } else {
-        return await apiRequest('POST', '/api/business-cards', data);
+        return await apiRequest('POST', '/api/business-cards', dataToSave);
       }
     },
     onSuccess: (savedCard) => {
