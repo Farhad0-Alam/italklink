@@ -67,7 +67,6 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
         { href: '/appointments', label: 'Appointments', icon: CalendarDays, testId: 'link-appointments' },
         { href: '/voice-test', label: 'Voice Agent', icon: Phone, testId: 'link-voice-test' },
         { href: '/availability', label: 'Availability', icon: CalendarDays, testId: 'link-availability' },
-        { href: '/automation', label: 'Automation', icon: Workflow, testId: 'link-automation' },
       ],
     },
     {
@@ -86,6 +85,7 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
       items: [
         { href: '/profile', label: 'Profile', icon: Users, testId: 'link-profile' },
         { href: '/account-settings', label: 'Settings', icon: Settings, testId: 'link-account-settings' },
+        { href: '/automation', label: 'Automation', icon: Workflow, testId: 'link-automation', description: 'CRM & lead tracking' },
         { href: '/billing', label: 'Billing', icon: DollarSign, testId: 'link-billing' },
         { href: '/help', label: 'Help', icon: HelpCircle, testId: 'link-help' },
       ],
@@ -171,18 +171,27 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      className={`group flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
                         active
                           ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30'
                           : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
                       }`}
                       data-testid={item.testId}
                     >
-                      <item.icon className={`w-5 h-5 transition-transform group-hover:scale-110 ${
+                      <item.icon className={`w-5 h-5 transition-transform group-hover:scale-110 mt-0.5 flex-shrink-0 ${
                         active ? 'text-white' : 'text-gray-600 dark:text-gray-400'
                       }`} />
-                      <span className="flex-1">{item.label}</span>
-                      {active && <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium">{item.label}</div>
+                        {item.description && (
+                          <div className={`text-xs mt-0.5 ${
+                            active ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'
+                          }`}>
+                            {item.description}
+                          </div>
+                        )}
+                      </div>
+                      {active && <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />}
                     </Link>
                   );
                 })}
