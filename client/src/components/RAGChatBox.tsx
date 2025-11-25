@@ -588,64 +588,10 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     handleSend();
   };
 
-  const convertToSpeech = async () => {
-    // Open the modal immediately
+  const convertToSpeech = () => {
+    // Open the voice conversation modal
+    // User will use microphone button to record and get real API responses
     setIsVoiceModalOpen(true);
-    setIsTTSLoading(true);
-    
-    try {
-      let textToConvert: string = '';
-      let lastAssistantMessage = [...messages].reverse().find(msg => msg.type === 'assistant');
-      
-      // If no assistant message exists, use a default greeting
-      if (!lastAssistantMessage) {
-        const defaultGreeting = 'Hello! Welcome to the Knowledge Assistant. I\'m here to help answer your questions. Feel free to ask me anything about our services and products.';
-        
-        textToConvert = defaultGreeting;
-        
-        // Add the greeting to messages (preserving existing messages)
-        const assistantMessage: ChatMessage = {
-          id: (Date.now()).toString(),
-          type: 'assistant',
-          content: defaultGreeting,
-          timestamp: new Date(),
-          isStreaming: false,
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-      } else {
-        textToConvert = lastAssistantMessage.content;
-      }
-
-      const response = await apiRequest<{ audioUrl: string }>('POST', '/api/voice/tts', {
-        text: textToConvert,
-      });
-
-      if (response?.audioUrl) {
-        setIsPlayingAudio(true);
-        if (audioRef.current) {
-          audioRef.current.src = response.audioUrl;
-          audioRef.current.onended = () => {
-            if (isMountedRef.current) {
-              setIsPlayingAudio(false);
-            }
-          };
-          await audioRef.current.play();
-        }
-      }
-    } catch (error) {
-      console.error('TTS error:', error);
-      toast({
-        title: 'Speech Error',
-        description: error instanceof Error ? error.message : 'Failed to convert text to speech.',
-        variant: 'destructive',
-      });
-      setIsVoiceModalOpen(false);
-    } finally {
-      if (isMountedRef.current) {
-        setIsTTSLoading(false);
-        setIsLoading(false);
-      }
-    }
   };
 
   const stopAudio = () => {
