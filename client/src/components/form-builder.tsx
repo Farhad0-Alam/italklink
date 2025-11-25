@@ -293,24 +293,29 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     form.setValue("pages" as any, updatedPages);
   };
 
+  // Debounced sync to parent - prevents infinite loops while keeping data in sync
+  // Uses ref to compare snapshots and only calls onDataChange when actual data changes
   useEffect(() => {
-    const currentSnapshot = JSON.stringify(enhancedCardData);
-    const currentSpacing = elementSpacing ?? 16;
-    const currentIndividualSpacing = individualElementSpacing || {};
-    
-    // Always trigger update if spacing changed, or if full snapshot changed
-    const spacingChanged = prevDataRef.current.elementSpacing !== currentSpacing;
-    const individualSpacingChanged = JSON.stringify(prevDataRef.current.individualElementSpacing) !== JSON.stringify(currentIndividualSpacing);
-    const dataChanged = currentSnapshot !== prevDataRef.current.snapshot;
-    
-    if (spacingChanged || individualSpacingChanged || dataChanged) {
-      prevDataRef.current = {
-        snapshot: currentSnapshot,
-        elementSpacing: currentSpacing,
-        individualElementSpacing: currentIndividualSpacing
-      };
-      memoizedOnDataChange(enhancedCardData);
-    }
+    const timer = setTimeout(() => {
+      const currentSnapshot = JSON.stringify(enhancedCardData);
+      const currentSpacing = elementSpacing ?? 16;
+      const currentIndividualSpacing = individualElementSpacing || {};
+      
+      const spacingChanged = prevDataRef.current.elementSpacing !== currentSpacing;
+      const individualSpacingChanged = JSON.stringify(prevDataRef.current.individualElementSpacing) !== JSON.stringify(currentIndividualSpacing);
+      const dataChanged = currentSnapshot !== prevDataRef.current.snapshot;
+      
+      if (spacingChanged || individualSpacingChanged || dataChanged) {
+        prevDataRef.current = {
+          snapshot: currentSnapshot,
+          elementSpacing: currentSpacing,
+          individualElementSpacing: currentIndividualSpacing
+        };
+        memoizedOnDataChange(enhancedCardData);
+      }
+    }, 500); // 500ms debounce to prevent rapid updates
+
+    return () => clearTimeout(timer);
   }, [enhancedCardData, elementSpacing, individualElementSpacing, memoizedOnDataChange]);
 
   // Auto-select first page when switching to page mode or when pages change
