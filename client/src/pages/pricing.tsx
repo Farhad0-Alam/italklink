@@ -256,7 +256,7 @@ export default function Pricing() {
     return plan.features.featureList.map(id => allFeatures.find(f => f.id === id)).filter(Boolean) as Feature[];
   };
 
-  const isPopular = (planType: string) => planType.toLowerCase() === 'pro';
+  const isPopular = (planType: string) => planType.toLowerCase() === 'paid';
 
   if (isLoading) {
     return (

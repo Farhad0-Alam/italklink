@@ -307,7 +307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enhanced Team Management APIs
   app.post('/api/teams', 
     enhancedAuth,
-    requirePlan('pro', 'enterprise'),
+    requirePlan('paid'),
     asyncHandler(async (req, res) => {
       // Validate request body
       const bodyValidation = teamValidationSchemas.create.safeParse(req.body);
@@ -3150,8 +3150,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .where(eq(subscriptionPlans.planType, user.planType))
       .limit(1);
     
-    // If admin-assigned plan (paid/enterprise/free), return from database
-    if (user.planType === 'paid' || user.planType === 'enterprise' || user.planType === 'free') {
+    // If admin-assigned plan, return from database
+    if (user.planType === 'paid' || user.planType === 'free') {
       const planName = plan?.name || user.planType.charAt(0).toUpperCase() + user.planType.slice(1);
       const planId = plan?.id;
       const pricePaid = plan?.price || 0; // in cents
@@ -3570,7 +3570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Update user with plan
       await storage.updateUser(userId, {
-        planType: plan.planType === 'free' ? 'free' : plan.planType === 'paid' ? 'pro' : 'enterprise',
+        planType: plan.planType,
         subscriptionStatus: 'active',
         subscriptionEndsAt: endsAt ? new Date(endsAt) : null,
         businessCardsLimit: plan.businessCardsLimit,

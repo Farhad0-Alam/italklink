@@ -25,7 +25,7 @@ interface User {
   firstName?: string;
   lastName?: string;
   profileImageUrl?: string;
-  planType: 'free' | 'pro' | 'enterprise';
+  planType: 'free' | 'paid';
   businessCardsCount: number;
   businessCardsLimit: number;
   createdAt: string;
@@ -86,8 +86,7 @@ export default function UploadsPage() {
 
   const getPlanBadgeColor = (planType: string) => {
     switch (planType) {
-      case 'pro': return 'bg-blue-100 text-blue-700';
-      case 'enterprise': return 'bg-purple-100 text-purple-700';
+      case 'paid': return 'bg-blue-100 text-blue-700';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
@@ -192,8 +191,7 @@ export default function UploadsPage() {
                       <p className="text-xs text-gray-500 truncate">{user.email}</p>
                       <div className="flex items-center mt-1">
                         <Badge className={`text-xs ${getPlanBadgeColor(user.planType)}`}>
-                          {user.planType === 'enterprise' && <Crown className="w-3 h-3 mr-1" />}
-                          {user.planType === 'pro' && <Shield className="w-3 h-3 mr-1" />}
+                          {user.planType === 'paid' && <Shield className="w-3 h-3 mr-1" />}
                           {user.planType.charAt(0).toUpperCase() + user.planType.slice(1)}
                         </Badge>
                       </div>

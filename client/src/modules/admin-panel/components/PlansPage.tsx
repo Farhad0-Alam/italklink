@@ -49,7 +49,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 interface SubscriptionPlan {
   id: number;
   name: string;
-  planType: 'free' | 'pro' | 'enterprise';
+  planType: 'free' | 'paid';
   price: number;
   currency: string;
   frequency?: 'monthly' | 'yearly' | 'weekly' | 'daily' | 'custom';
@@ -88,7 +88,7 @@ interface ExtraCardOption {
 
 interface PlanFormData {
   name: string;
-  planType: 'free' | 'pro' | 'enterprise';
+  planType: 'free' | 'paid';
   price: number;
   currency: string;
   frequency: 'monthly' | 'yearly' | 'weekly' | 'daily' | 'custom';

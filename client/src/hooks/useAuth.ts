@@ -7,7 +7,7 @@ export interface User {
   lastName?: string;
   profileImageUrl?: string;
   role: 'user' | 'admin' | 'owner';
-  planType: 'free' | 'pro' | 'enterprise';
+  planType: 'free' | 'paid';
   businessCardsCount: number;
   businessCardsLimit: number;
   createdAt: string;

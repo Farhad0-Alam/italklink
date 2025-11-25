@@ -14,7 +14,7 @@ interface User {
   email: string;
   firstName?: string;
   lastName?: string;
-  planType: 'free' | 'pro' | 'enterprise';
+  planType: 'free' | 'paid';
   businessCardsCount: number;
   businessCardsLimit: number;
   createdAt: string;
@@ -69,18 +69,18 @@ export default function Usage() {
       businessCards: {
         used: user?.businessCardsCount || 0,
         limit: user?.businessCardsLimit || 1,
-        unlimited: user?.planType === 'enterprise',
+        unlimited: user?.planType === 'paid',
       },
       views: {
         total: user?.stats?.totalViews || 0,
         thisMonth: Math.floor((user?.stats?.totalViews || 0) * 0.3),
       },
       features: {
-        customBranding: user?.planType !== 'free',
-        analytics: user?.planType !== 'free',
-        teamFeatures: user?.planType === 'enterprise',
-        apiAccess: user?.planType === 'enterprise',
-        prioritySupport: user?.planType !== 'free',
+        customBranding: user?.planType === 'paid',
+        analytics: user?.planType === 'paid',
+        teamFeatures: user?.planType === 'paid',
+        apiAccess: user?.planType === 'paid',
+        prioritySupport: user?.planType === 'paid',
       },
     }),
     enabled: !!user,
@@ -100,9 +100,7 @@ export default function Usage() {
 
   const getPlanColor = (planType: string) => {
     switch (planType) {
-      case 'enterprise':
-        return 'bg-purple-100 text-purple-700';
-      case 'pro':
+      case 'paid':
         return 'bg-blue-100 text-blue-700';
       default:
         return 'bg-gray-100 text-gray-700';
@@ -111,10 +109,8 @@ export default function Usage() {
 
   const getPlanFeatures = (planType: string) => {
     switch (planType) {
-      case 'enterprise':
-        return ['Unlimited Cards', 'Team Features', 'Custom Branding', 'Advanced Analytics', 'API Access', 'Priority Support'];
-      case 'pro':
-        return ['Unlimited Cards', 'Custom Branding', 'Advanced Analytics', 'Priority Support'];
+      case 'paid':
+        return ['Unlimited Cards', 'Custom Branding', 'Advanced Analytics', 'Team Features', 'API Access', 'Priority Support'];
       default:
         return ['1 Business Card', 'Basic Templates', 'QR Code Generation'];
     }
@@ -352,7 +348,7 @@ export default function Usage() {
           </Card>
         )}
 
-        {getUsagePercentage() >= 80 && user.planType !== 'enterprise' && (
+        {getUsagePercentage() >= 80 && user.planType === 'free' && (
           <Card className="border-yellow-200 bg-yellow-50">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-yellow-800">

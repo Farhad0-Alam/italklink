@@ -114,7 +114,38 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 - **Payments**: Stripe integration
 - **Calendar**: Google Calendar, Zoom, Microsoft Teams OAuth
 
-## Recent Fixes (Current Session)
+## Recent Fixes (Current Session - Plan System Refactor)
+1. ✅ Simplified subscription plan system from 4 types to 2 types (FREE and PAID only)
+2. ✅ Updated database schema: planTypeEnum changed from ['free', 'pro', 'enterprise'] to ['free', 'paid']
+3. ✅ Ran database migration: `npm run db:push` successfully updated planTypeEnum across all users
+4. ✅ Updated all TypeScript interfaces across entire codebase:
+   - Updated planType type from 'free' | 'pro' | 'enterprise' to 'free' | 'paid' in 15+ files
+   - Files updated: useAuth hook, 8 page components, 3 admin components, module files
+5. ✅ Fixed plan assignment logic in server routes:
+   - Admin plan assignment now directly uses plan.planType (no longer maps pro→pro, enterprise→enterprise)
+   - Simplified billing subscription response: only checks for 'paid' or 'free'
+6. ✅ Updated UI icon rendering for plan badges:
+   - Removed Crown icon for 'enterprise' tier (no longer exists)
+   - Kept Shield icon for 'paid' tier only
+   - Updated in: dashboard.tsx, uploads.tsx, UserDashboard.tsx
+7. ✅ Updated plan display logic in all pages:
+   - usage.tsx: Simplified plan features and color mapping (paid gets all features)
+   - pricing.tsx: Updated isPopular() function to check for 'paid' instead of 'pro'
+   - SubscriptionCard.tsx: Simplified paid plan check (no 'enterprise' reference)
+   - billing.tsx: Updated plan type unions throughout
+8. ✅ Updated admin plan management:
+   - PlansPage.tsx: Updated all SubscriptionPlan and PlanFormData interfaces
+   - Admin now has full control to create unlimited custom plans with any name
+   - Feature limits controlled by businessCardsLimit field per plan, not by plan type
+9. ✅ Verified feature gating now works with simplified system:
+   - All 40+ features still available through admin panel
+   - Admin can assign any features to any custom plan
+   - Feature checks simplified: only check if planType === 'paid' or planType === 'free'
+10. ✅ Fixed usage warning: Changed from "planType !== 'enterprise'" to "planType === 'free'"
+11. ✅ All files updated and verified: 0 remaining pro/enterprise references in codebase
+12. ✅ Workflow restarted successfully: All systems running smoothly
+
+## Previous Session Fixes
 1. ✅ Fixed auto-save mutation state management - replaced problematic `isSaving` state with React Query's `isPending`
 2. ✅ Cards now properly persist to database when auto-saving (no more silent failures)
 3. ✅ Fixed card ID tracking - uses state to track card ID after creation for subsequent updates
@@ -133,38 +164,8 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 16. ✅ Template defaults now load and apply when selecting a template (auto-populate name and title)
 17. ✅ View TalkLink button now shows even for unsaved cards (uses cardId as fallback URL)
 18. ✅ Preview updates instantly as you type (reduced sync debounce to 50ms)
-19. ✅ Database-driven eCard elements - Icons and Element Types now stored in database:
-    - Created `page_element_types` table (28 element types)
-    - Created `icons` table (24 contact/social icons)
-    - Added public APIs: GET /api/icons, GET /api/element-types
-    - Added admin APIs for CRUD operations on icons and element types
-    - Created admin UI pages: /admin/icons, /admin/elements
-    - Frontend falls back to hardcoded values if API fails
-20. ✅ Added useIcons hook for fetching icons dynamically from API
-21. ✅ Updated card editor URL sharing UI - removed Settings button, added Copy/Share buttons with gradient UI
-22. ✅ Copy button now copies URL and opens live view in new window automatically
-23. ✅ Custom URL input modal appears after template selection to set card slug
-24. ✅ Card saves with custom URL slug from template selection modal
-25. ✅ **IMMEDIATE AUTO-SAVE ON ALL INTERACTIONS** - Changed debounce from 2 seconds to 100ms
-    - Card now saves instantly when user clicks anywhere or adds elements
-    - Smooth, seamless save experience with no visible delays
-    - Prevents concurrent saves with React Query mutation queue
-26. ✅ Removed Individual Element Spacing UI controls - simplified interface (kept global element spacing)
-27. ✅ Fixed copy URL display - now shows for all saved cards with fallback to cardId
-    - Added updateShareUrl fallback: uses cardId when customUrl/shareSlug unavailable
-    - Added useEffect safety net: ensures shareUrl is set whenever cardId exists
-28. ✅ Made name and title optional for business cards
-    - Updated database schema: fullName and title are now nullable fields
-    - Updated auto-save logic: allows saving when custom URL exists OR when name/title provided
-    - Enables card creation with custom URL slug from template modal (no name/title required)
-    - Custom URL slug saves immediately to database
-29. ✅ Fixed React hook violation in ContactFormRenderer
-    - Extracted contactForm element rendering into separate ContactFormRenderer component
-    - Prevents calling useState/useEffect inside switch statement (Rules of Hooks violation)
-    - All 9 element types now render without React hook warnings:
-      - paragraph, heading, contactSection, socialSection, actionButtons, link, image, accordion, contactForm
-    - Elements persist correctly to database with full configuration
-    - Auto-save mechanism (100ms debounce) working smoothly without errors
+19. ✅ Database-driven eCard elements - Icons and Element Types now stored in database
+20. ✅ Fixed React hook violation in ContactFormRenderer
 
 ## Known Status - SAAS Complete
 - Card save functionality: ✅ Auto-save enabled (100ms debounce - immediate saves on any interaction)

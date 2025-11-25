@@ -101,8 +101,8 @@ export function SubscriptionCard() {
     );
   }
 
-  // If user has a paid/enterprise plan assigned by admin, don't show this card (handled in Billing page)
-  if (!subscription && user && (user.planType === 'paid' || user.planType === 'enterprise')) {
+  // If user has a paid plan assigned by admin, don't show this card (handled in Billing page)
+  if (!subscription && user && user.planType === 'paid') {
     return null;
   }
 

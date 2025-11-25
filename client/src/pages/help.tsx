@@ -30,7 +30,7 @@ interface User {
   email: string;
   firstName?: string;
   lastName?: string;
-  planType: 'free' | 'pro' | 'enterprise';
+  planType: 'free' | 'paid';
 }
 
 interface FAQItem {

@@ -19,7 +19,7 @@ interface User {
   firstName?: string;
   lastName?: string;
   profileImageUrl?: string;
-  planType: 'free' | 'pro' | 'enterprise';
+  planType: 'free' | 'paid';
   businessCardsCount: number;
   businessCardsLimit: number;
   createdAt: string;

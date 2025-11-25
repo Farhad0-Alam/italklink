@@ -18,7 +18,7 @@ interface User {
   email: string;
   firstName?: string;
   lastName?: string;
-  planType: 'free' | 'pro' | 'enterprise';
+  planType: 'free' | 'paid';
   createdAt: string;
 }
 
@@ -35,7 +35,7 @@ interface Invoice {
 interface Subscription {
   id: string;
   planName?: string;
-  planType: 'free' | 'pro' | 'enterprise';
+  planType: 'free' | 'paid';
   status: 'active' | 'canceled' | 'past_due';
   currentPeriodStart: string;
   currentPeriodEnd: string;

@@ -53,7 +53,7 @@ interface AdminUser {
   lastName?: string;
   profileImageUrl?: string;
   role: 'admin' | 'owner';
-  planType: 'free' | 'pro' | 'enterprise';
+  planType: 'free' | 'paid';
   businessCardsCount: number;
   businessCardsLimit: number;
   createdAt: string;
