@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageElementRenderer } from './page-element';
+import { ArrowLeft } from 'lucide-react';
 import type { PageElement, BusinessCard } from '@shared/schema';
 
 interface PagePreviewProps {
@@ -12,9 +13,10 @@ interface PagePreviewProps {
   elementSpacing?: number;
   individualElementSpacing?: Record<string, number>;
   onNavigatePage?: (pageId: string) => void;
+  onBackToCard?: () => void;
 }
 
-export function PagePreview({ pageData, cardData, elementSpacing = 16, individualElementSpacing, onNavigatePage }: PagePreviewProps) {
+export function PagePreview({ pageData, cardData, elementSpacing = 16, individualElementSpacing, onNavigatePage, onBackToCard }: PagePreviewProps) {
   // Debug logging
   console.log('[PagePreview] Props received:', {
     elementSpacing,
@@ -82,16 +84,30 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, individua
   if (!visibleElements || visibleElements.length === 0) {
     return (
       <div 
-        className={`h-full flex items-center justify-center ${backgroundAnimationClass}`} 
+        className={`h-full flex flex-col ${backgroundAnimationClass}`} 
         style={backgroundStyle}
       >
-        <div className="text-center p-8">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-            <i className="fas fa-plus text-gray-400 text-xl"></i>
+        {onBackToCard && (
+          <div className="sticky top-0 bg-white/80 backdrop-blur-sm border-b border-gray-200 p-3 z-10">
+            <button
+              onClick={onBackToCard}
+              className="flex items-center text-gray-700 hover:text-gray-900 font-medium text-sm transition-colors"
+              data-testid="button-back-to-card"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to my page
+            </button>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">{pageData.label}</h3>
-          <p className="text-gray-500 text-sm mb-4">This page is empty</p>
-          <p className="text-gray-400 text-xs">Add elements to design this page</p>
+        )}
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+              <i className="fas fa-plus text-gray-400 text-xl"></i>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{pageData.label}</h3>
+            <p className="text-gray-500 text-sm mb-4">This page is empty</p>
+            <p className="text-gray-400 text-xs">Add elements to design this page</p>
+          </div>
         </div>
       </div>
     );
@@ -102,11 +118,24 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, individua
 
   return (
     <div 
-      className={`h-full overflow-y-auto relative ${backgroundAnimationClass}`} 
+      className={`h-full flex flex-col ${backgroundAnimationClass}`} 
       style={backgroundStyle}
     >
-      <div className="min-h-full relative">
-        {sortedElements.map((element, index) => {
+      {onBackToCard && (
+        <div className="sticky top-0 bg-white/80 backdrop-blur-sm border-b border-gray-200 p-3 z-10">
+          <button
+            onClick={onBackToCard}
+            className="flex items-center text-gray-700 hover:text-gray-900 font-medium text-sm transition-colors"
+            data-testid="button-back-to-card"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to my page
+          </button>
+        </div>
+      )}
+      <div className="flex-1 overflow-y-auto relative">
+        <div className="min-h-full relative">
+          {sortedElements.map((element, index) => {
           // Calculate spacing for this element
           let spacing = elementSpacing; // Default global spacing
           
