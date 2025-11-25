@@ -234,7 +234,27 @@ export default function CardEditor() {
   // Update form data when existing card loads
   useEffect(() => {
     if (existingCard) {
-      setCardData(existingCard);
+      // Convert database format (pageElements) to FormBuilder format (pages[].elements)
+      const convertedCard = {
+        ...existingCard,
+        pages: existingCard.pages || [
+          {
+            id: "home",
+            key: "home",
+            path: "",
+            label: "Home",
+            visible: true,
+            elements: existingCard.pageElements || []
+          }
+        ]
+      };
+      
+      console.log('[CardEditor] Loaded card - converting pageElements to pages:', {
+        pageElementsCount: existingCard.pageElements?.length || 0,
+        pagesElements: convertedCard.pages[0].elements.length
+      });
+      
+      setCardData(convertedCard);
       updateShareUrl(existingCard);
     }
   }, [existingCard]);
