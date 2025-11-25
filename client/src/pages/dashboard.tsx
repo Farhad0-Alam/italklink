@@ -25,7 +25,6 @@ import {
 import { ContactSupportModal } from "@/components/contact-support-modal";
 import NotifyCardButton from "@/components/NotifyCardButton";
 import NotifyAllCardsButton from "@/components/NotifyAllCardsButton";
-import { SubscriptionCard } from "@/components/SubscriptionCard";
 
 interface User {
   id: string;
@@ -631,11 +630,6 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
-        </div>
-
-        {/* Subscription Section */}
-        <div className="mb-8">
-          <SubscriptionCard />
         </div>
 
         {/* Affiliate Program Section */}
