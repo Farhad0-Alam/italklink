@@ -34,7 +34,12 @@ const PUBLIC_ENDPOINTS = [
   '/plans', // Public pricing page plans endpoint
   '/templates',
   '/availability',
-  '/appointments/book'
+  '/appointments/book',
+  '/chat', // RAG knowledge base chat - public
+  '/voice/process', // Voice processing - public
+  '/voice/tts', // Text-to-speech - public
+  '/ingest', // RAG knowledge ingestion
+  '/ingest-text', // RAG text ingestion
 ];
 
 // Enhanced authentication middleware that includes additional security checks

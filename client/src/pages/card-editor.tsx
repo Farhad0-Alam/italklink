@@ -246,9 +246,19 @@ export default function CardEditor() {
     },
     onError: (error: any) => {
       console.error('Save error:', error);
+      let errorMsg = "Failed to save card. Please check your login status and try again.";
+      
+      if (error instanceof Error) {
+        errorMsg = error.message;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      } else if (error?.message) {
+        errorMsg = error.message;
+      }
+      
       toast({
         title: "Save Failed",
-        description: error.message || "Failed to save card. Please check your login status and try again.",
+        description: errorMsg,
         variant: "destructive",
       });
     },

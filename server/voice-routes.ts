@@ -809,7 +809,7 @@ router.post('/test/simulate', async (req, res) => {
 });
 
 // Voice processing endpoint for business card voice assistants - WITH RAG
-router.post('/process', requireAuth, async (req, res) => {
+router.post('/process', async (req, res) => {
   const requestId = `voice_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   console.log(`[${requestId}] POST /api/voice/process - Request received`);
   
@@ -1006,7 +1006,7 @@ router.post('/process', requireAuth, async (req, res) => {
 });
 
 // Text chat endpoint for business card voice assistants - WITH RAG & BENGALI SUPPORT
-router.post('/chat', requireAuth, async (req, res) => {
+router.post('/chat', async (req, res) => {
   try {
     const { message, cardId, knowledgeBase, messages = [] } = req.body;
     
@@ -1223,7 +1223,7 @@ router.post('/learn-kb', requireAuth, async (req, res) => {
 });
 
 // Text-to-Speech endpoint
-router.post('/tts', requireAuth, async (req, res) => {
+router.post('/tts', async (req, res) => {
   try {
     const { text } = req.body;
     

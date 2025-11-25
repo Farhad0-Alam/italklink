@@ -289,13 +289,9 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     setIsListening(true);
 
     try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      if (!apiKey) {
-        throw new Error('OpenAI API key not configured');
-      }
-
+      // Note: API key is only needed on backend, client connects through local WebSocket proxy
       const realtimeClient = new RealtimeAPIClient({
-        apiKey,
+        apiKey: 'sk-frontend-proxy', // Dummy key - backend handles actual OpenAI API key
       });
 
       let transcript = '';
