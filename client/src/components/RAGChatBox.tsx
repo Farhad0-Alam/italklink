@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Loader2, Bot, User, ExternalLink, X, Settings, ChevronDown, ChevronUp, Plus } from 'lucide-react';
+import { Loader2, Bot, User, ExternalLink, X, Settings, ChevronDown, ChevronUp, Plus, Mic, Square } from 'lucide-react';
 import { URLManager } from '@/components/URLManager';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -866,8 +866,36 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
               <div className="text-gray-400 text-sm">Loading audio...</div>
             )}
 
+            {/* Recording Status */}
+            {isListening && (
+              <div className="text-center">
+                <p className="text-red-400 text-sm font-medium animate-pulse">🎙️ Recording...</p>
+              </div>
+            )}
+
             {/* Control Buttons */}
             <div className="flex gap-6">
+              {/* Microphone Button - Toggle Recording */}
+              <button
+                type="button"
+                onClick={isListening ? stopListening : startListening}
+                disabled={isProcessing || isTTSLoading}
+                className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center transition-all transform ${
+                  isListening
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : isTTSLoading || isProcessing
+                    ? 'text-gray-600 opacity-50 cursor-not-allowed bg-gray-800'
+                    : 'bg-gray-800 hover:bg-gray-700 text-white'
+                }`}
+                data-testid="button-voice-modal-mic"
+              >
+                {isListening ? (
+                  <Square className="h-7 w-7 sm:h-8 sm:w-8" />
+                ) : (
+                  <Mic className="h-7 w-7 sm:h-8 sm:w-8" />
+                )}
+              </button>
+
               {/* Stop/Close Button */}
               <button
                 onClick={stopAudio}
