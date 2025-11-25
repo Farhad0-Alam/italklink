@@ -831,8 +831,8 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
 
       {/* Audio Playback Modal - Voice Conversation Mode */}
       {isVoiceModalOpen && (
-        <div className="fixed inset-0 z-[51] bg-black/20 backdrop-blur-sm flex items-center justify-center">
-          <div className="relative w-96 max-w-[90vw] bg-gray-950 rounded-lg p-6 sm:p-8 shadow-2xl flex flex-col items-center gap-6">
+        <div className="fixed inset-0 z-[51] pointer-events-none flex items-end justify-end p-4 sm:p-6">
+          <div className="relative w-full sm:w-80 bg-gray-950 rounded-lg shadow-2xl flex flex-col items-center gap-3 p-4 sm:p-5 pointer-events-auto">
             {/* Title */}
             <div className="absolute top-4 right-4">
               <button
@@ -844,10 +844,10 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
               </button>
             </div>
 
-            <h2 className="text-white text-lg sm:text-xl font-semibold text-center mt-2">Voice Conversation Mode</h2>
+            <h2 className="text-white text-base sm:text-lg font-semibold text-center">Voice Mode</h2>
 
             {/* Blue Circular Waveform Animation */}
-            <div className="relative w-48 h-48 sm:w-64 sm:h-64">
+            <div className="relative w-32 h-32 sm:w-40 sm:h-40">
               <div className="absolute inset-0 rounded-full animate-waveform-gradient bg-gradient-to-b from-blue-300 to-blue-600"></div>
               <div className="absolute inset-0 rounded-full bg-gradient-to-b from-blue-200/30 to-blue-500/50 animate-waveform-pulse"></div>
               
@@ -874,13 +874,13 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
             )}
 
             {/* Control Buttons */}
-            <div className="flex gap-6">
+            <div className="flex gap-4">
               {/* Microphone Button - Toggle Recording */}
               <button
                 type="button"
                 onClick={isListening ? stopListening : startListening}
                 disabled={isProcessing || isTTSLoading}
-                className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center transition-all transform ${
+                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all transform ${
                   isListening
                     ? 'bg-red-600 hover:bg-red-700 text-white'
                     : isTTSLoading || isProcessing
@@ -890,9 +890,9 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                 data-testid="button-voice-modal-mic"
               >
                 {isListening ? (
-                  <Square className="h-7 w-7 sm:h-8 sm:w-8" />
+                  <Square className="h-6 w-6 sm:h-7 sm:w-7" />
                 ) : (
-                  <Mic className="h-7 w-7 sm:h-8 sm:w-8" />
+                  <Mic className="h-6 w-6 sm:h-7 sm:w-7" />
                 )}
               </button>
 
@@ -900,10 +900,10 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
               <button
                 onClick={stopAudio}
                 disabled={isTTSLoading}
-                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-white transition-colors disabled:opacity-50"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-white transition-colors disabled:opacity-50"
                 data-testid="button-stop-audio"
               >
-                <X className="h-7 w-7 sm:h-8 sm:w-8" />
+                <X className="h-6 w-6 sm:h-7 sm:w-7" />
               </button>
             </div>
           </div>
