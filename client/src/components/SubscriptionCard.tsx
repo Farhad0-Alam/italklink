@@ -31,10 +31,27 @@ interface UserSubscription {
   status: string;
 }
 
+interface User {
+  id: string;
+  planType?: string;
+  createdAt?: string;
+  subscriptionEndsAt?: string | null;
+}
+
 export function SubscriptionCard() {
   const { toast } = useToast();
 
-  const { data: subscription, isLoading } = useQuery<UserSubscription | null>({
+  const { data: user, isLoading: userLoading } = useQuery<User | null>({
+    queryKey: ['/api/auth/user'],
+    queryFn: async () => {
+      const res = await fetch('/api/auth/user', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch user');
+      const json = await res.json();
+      return json.data || null;
+    },
+  });
+
+  const { data: subscription, isLoading: subscriptionLoading } = useQuery<UserSubscription | null>({
     queryKey: ['/api/billing/subscription'],
     queryFn: async () => {
       const res = await fetch('/api/billing/subscription', { credentials: 'include' });
@@ -43,6 +60,8 @@ export function SubscriptionCard() {
       return json.data || null;
     },
   });
+
+  const isLoading = userLoading || subscriptionLoading;
 
   const cancelMutation = useMutation({
     mutationFn: async () => {
@@ -82,7 +101,75 @@ export function SubscriptionCard() {
     );
   }
 
-  if (!subscription) {
+  // If user has a paid/enterprise plan assigned by admin, show paid plan card
+  if (!subscription && user && (user.planType === 'paid' || user.planType === 'enterprise')) {
+    const planName = user.planType === 'enterprise' ? 'Enterprise' : 'Pro';
+    const planPrice = user.planType === 'enterprise' ? '$99.00' : '$9.99';
+    
+    return (
+      <Card data-testid="card-subscription-active">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-orange-500" />
+              {planName} Plan
+            </CardTitle>
+            <Badge className="bg-green-500" data-testid="badge-subscription-status">
+              Active
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <p className="text-xs text-gray-500">Plan</p>
+              <p className="text-lg font-semibold flex items-center gap-1" data-testid="text-plan-name">
+                {planName}
+              </p>
+            </div>
+            
+            <div className="space-y-1">
+              <p className="text-xs text-gray-500">Monthly Price</p>
+              <p className="text-lg font-semibold" data-testid="text-plan-price">
+                {planPrice}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <p className="text-xs text-gray-500 flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              Status
+            </p>
+            <p className="text-sm" data-testid="text-plan-status">
+              Active - Admin Assigned
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs text-gray-500 font-medium">Included Features</p>
+            <div className="space-y-1">
+              <div className="flex items-start gap-2 text-sm">
+                <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                <span>Unlimited Business Cards</span>
+              </div>
+              <div className="flex items-start gap-2 text-sm">
+                <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                <span>Premium Templates</span>
+              </div>
+              <div className="flex items-start gap-2 text-sm">
+                <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                <span>Advanced Analytics</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show Free Plan only if truly on free plan (no subscription and no admin plan)
+  if (!subscription && (!user || user.planType === 'free')) {
     return (
       <Card data-testid="card-subscription-free">
         <CardHeader>
