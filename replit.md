@@ -149,6 +149,15 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
     - Card now saves instantly when user clicks anywhere or adds elements
     - Smooth, seamless save experience with no visible delays
     - Prevents concurrent saves with React Query mutation queue
+26. ✅ Removed Individual Element Spacing UI controls - simplified interface (kept global element spacing)
+27. ✅ Fixed copy URL display - now shows for all saved cards with fallback to cardId
+    - Added updateShareUrl fallback: uses cardId when customUrl/shareSlug unavailable
+    - Added useEffect safety net: ensures shareUrl is set whenever cardId exists
+28. ✅ Made name and title optional for business cards
+    - Updated database schema: fullName and title are now nullable fields
+    - Updated auto-save logic: allows saving when custom URL exists OR when name/title provided
+    - Enables card creation with custom URL slug from template modal (no name/title required)
+    - Custom URL slug saves immediately to database
 
 ## Known Status - SAAS Complete
 - Card save functionality: ✅ Auto-save enabled (100ms debounce - immediate saves on any interaction)

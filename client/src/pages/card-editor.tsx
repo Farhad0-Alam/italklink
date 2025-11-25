@@ -247,10 +247,9 @@ export default function CardEditor() {
     // Don't auto-save if:
     // 1. User is not authenticated
     // 2. Save is already in progress (mutation pending)
-    // 3. We're creating a new card but haven't entered basic info
+    // 3. We're creating a new card and have no content at all (customUrl OR name/title required)
     if (!user || saveMutation.isPending) return;
-    if (!cardId && !cardData.fullName) return;
-    if (!cardData.fullName && !cardData.title) return;
+    if (!cardId && !customUrlSlug && !cardData.fullName && !cardData.title) return;
     
     // Clear previous timeout
     if (autoSaveTimeout) {

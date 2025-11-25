@@ -262,8 +262,8 @@ export const businessCards = pgTable("business_cards", {
   userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }),
   
   // Card data (matching the BusinessCard schema)
-  fullName: varchar("full_name").notNull(),
-  title: varchar("title").notNull(),
+  fullName: varchar("full_name"),
+  title: varchar("title"),
   company: varchar("company"),
   about: text("about"),
   
