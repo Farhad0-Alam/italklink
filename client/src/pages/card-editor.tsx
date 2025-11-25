@@ -99,13 +99,27 @@ export default function CardEditor() {
           response = await apiRequest('POST', '/api/business-cards', data);
         }
         
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
+        console.log('Response status:', response?.status);
+        console.log('Response headers:', response?.headers);
+        
+        // Check if response is valid
+        if (!response) {
+          throw new Error('No response from server');
+        }
         
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Save failed - Response text:', errorText);
-          throw new Error(`Save failed: ${response.status} ${errorText}`);
+          let errorMsg = `Save failed with status ${response.status}`;
+          try {
+            // Try to extract error text if response has it
+            if (typeof response.text === 'function') {
+              const errorText = await response.text();
+              errorMsg = `Save failed: ${response.status} ${errorText}`;
+            }
+          } catch (e) {
+            // If we can't get error text, just use status
+            console.log('Could not extract error text:', e);
+          }
+          throw new Error(errorMsg);
         }
         
         const result = await response.json();
