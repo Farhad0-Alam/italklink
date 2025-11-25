@@ -4251,28 +4251,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const upload = await storage.getPublicUploadBySlug(slug);
     
     if (!upload) {
-      // If no upload found, return 404 or let it fall through to SPA
-      return res.status(404).send(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>File Not Found</title>
-            <meta charset="utf-8">
-            <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; text-align: center; }
-              .error-container { max-width: 400px; margin: 0 auto; }
-              h1 { color: #e74c3c; margin-bottom: 20px; }
-              p { color: #666; line-height: 1.6; }
-            </style>
-          </head>
-          <body>
-            <div class="error-container">
-              <h1>404 - File Not Found</h1>
-              <p>The file you're looking for doesn't exist or has been removed.</p>
-            </div>
-          </body>
-        </html>
-      `);
+      // If no upload found, pass to next middleware (SPA/business card routes)
+      // This allows business card routes like /ytube to be handled by Vite/SPA router
+      return next();
     }
     
     // Increment view count
