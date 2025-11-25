@@ -840,13 +840,30 @@ export const iconPacks = pgTable("icon_packs", {
 // Icons table
 export const icons = pgTable("icons", {
   id: serial("id").primaryKey(),
-  packId: varchar("pack_id").references(() => iconPacks.id, { onDelete: 'cascade' }).notNull(),
-  typeId: integer("type_id").references(() => iconTypes.id, { onDelete: 'cascade' }).notNull(),
+  packId: varchar("pack_id").references(() => iconPacks.id, { onDelete: 'cascade' }),
+  typeId: integer("type_id").references(() => iconTypes.id, { onDelete: 'cascade' }),
   name: varchar("name").notNull(),
-  svg: text("svg").notNull(), // SVG content
+  svg: text("svg"), // SVG content (optional if using fontAwesomeIcon)
+  fontAwesomeIcon: varchar("font_awesome_icon"), // Font Awesome class like "fas fa-phone"
+  category: varchar("category").default("general"), // contact, social, general
   tags: jsonb("tags").default([]), // array of strings for search
   sort: integer("sort").default(0),
   isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Page Element Types table - stores available card builder elements
+export const pageElementTypes = pgTable("page_element_types", {
+  id: serial("id").primaryKey(),
+  type: varchar("type").notNull().unique(), // heading, paragraph, video, etc.
+  title: varchar("title").notNull(),
+  icon: varchar("icon").notNull(), // Font Awesome class
+  color: varchar("color").notNull(), // Tailwind class like "bg-blue-100"
+  description: varchar("description"),
+  defaultConfig: jsonb("default_config").default({}), // default element configuration
+  sort: integer("sort").default(0),
+  isActive: boolean("is_active").default(true),
+  isPremium: boolean("is_premium").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
