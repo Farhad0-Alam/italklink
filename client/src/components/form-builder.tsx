@@ -301,7 +301,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
       page.id === pageId ? { ...page, elements } : page,
     );
 
-    form.setValue("pages" as any, updatedPages);
+    form.setValue("pages" as any, updatedPages, { shouldDirty: true, shouldTouch: true });
+    
+    // CRITICAL: Also update parent immediately to ensure page changes are saved
+    const currentFormData = form.getValues();
+    const updatedData = {
+      ...currentFormData,
+      pages: updatedPages
+    };
+    console.log('[FormBuilder] Notifying parent of page element change');
+    onDataChange(updatedData);
   };
 
   // Debounced sync to parent - prevents infinite loops while keeping data in sync
@@ -6609,8 +6618,16 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 onElementsChange={(elements: PageElement[]) => {
                   console.log('[FormBuilder] onElementsChange called with', elements.length, 'elements');
                   console.log('[FormBuilder] Elements:', elements.map(e => ({ type: e.type, id: e.id, order: e.order })));
-                  form.setValue("pageElements", elements);
-                  console.log('[FormBuilder] Form values updated for pageElements');
+                  form.setValue("pageElements", elements, { shouldDirty: true, shouldTouch: true });
+                  // CRITICAL: Also update parent immediately with new elements to ensure they're saved
+                  // This bypasses any form sync delays
+                  const currentFormData = form.getValues();
+                  const updatedData = {
+                    ...currentFormData,
+                    pageElements: elements
+                  };
+                  console.log('[FormBuilder] Notifying parent of element change with', elements.length, 'elements');
+                  onDataChange(updatedData);
                 }}
                 elementSpacing={elementSpacing ?? 16}
                 onElementSpacingChange={(spacing: number) => {
