@@ -22,25 +22,10 @@ export const Share: React.FC = () => {
 
   const handlePageNavigation = (pageId: string) => {
     setCurrentPageId(pageId);
-    // Update card data to track which page is being viewed
-    setCardData(prev => ({
-      ...prev,
-      currentPreviewMode: 'page',
-      currentSelectedPage: {
-        id: pageId,
-        label: (prev as any).pages?.find((p: any) => p.id === pageId)?.label || 'Page',
-        elements: (prev as any).pages?.find((p: any) => p.id === pageId)?.elements || []
-      }
-    }));
   };
 
   const handleBackFromPage = () => {
     setCurrentPageId('home');
-    setCardData(prev => ({
-      ...prev,
-      currentPreviewMode: 'card',
-      currentSelectedPage: undefined
-    }));
   };
 
   useEffect(() => {
