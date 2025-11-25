@@ -152,10 +152,17 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     defaultValues: cardData,
   });
 
-  // Ensure form values stay in sync with cardData, especially template type
+  // Track if this is the initial load to avoid resetting form after user changes
+  const isInitialLoadRef = useRef(true);
+  
+  // Only reset form on initial load, not on every cardData change
+  // (which would lose user's edits that triggered the cardData change)
   useEffect(() => {
-    form.reset(cardData);
-  }, [cardData, form]);
+    if (isInitialLoadRef.current) {
+      form.reset(cardData);
+      isInitialLoadRef.current = false;
+    }
+  }, [form]);
 
   // Scoped watchers to prevent infinite re-render loops
   const sectionStyles = useWatch({ control: form.control, name: "sectionStyles" });
