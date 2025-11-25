@@ -3,7 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { 
   BarChart3, Users, FileText, LogOut, Settings, HelpCircle, Zap, 
   CalendarDays, QrCode, Mail, Phone, DollarSign, ChevronDown,
-  Home, ChevronRight, Sparkles
+  Home, ChevronRight, Sparkles, Workflow
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +67,7 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
         { href: '/appointments', label: 'Appointments', icon: CalendarDays, testId: 'link-appointments' },
         { href: '/voice-test', label: 'Voice Agent', icon: Phone, testId: 'link-voice-test' },
         { href: '/availability', label: 'Availability', icon: CalendarDays, testId: 'link-availability' },
+        { href: '/automation', label: 'Automation', icon: Workflow, testId: 'link-automation' },
       ],
     },
     {
