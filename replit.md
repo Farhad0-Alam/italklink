@@ -4,7 +4,7 @@
 TalkLink (talkl.ink) is an enterprise-grade platform offering professional digital business cards integrated with a comprehensive appointment booking and CRM system. It enables users to create customizable business cards, manage scheduling, track leads, and analyze business performance.
 
 ## Current Status
-**Build Stage**: Production Ready - Fixes: Auto-save infinite loop disabled, using 500ms debounced sync
+**Build Stage**: Production Ready - Fixes: Fixed auto-save mutation, added mobile frame UI, added View TalkLink button
 **Production URL**: https://talkl.ink/
 **Last Update**: November 25, 2025
 
@@ -114,17 +114,19 @@ TalkLink (talkl.ink) is an enterprise-grade platform offering professional digit
 - **Calendar**: Google Calendar, Zoom, Microsoft Teams OAuth
 
 ## Recent Fixes (Current Session)
-1. ✅ Fixed "Save failed with status undefined" error - apiRequest returns parsed JSON, not Response object
-2. ✅ Fixed infinite loop with 500ms debounced sync in FormBuilder
-3. ✅ Removed "Update Card" button completely
-4. ✅ Removed all status messages ("Auto-saving changes...", "Click Save to save changes")
-5. ✅ Implemented smooth auto-save backend with 2-second debouncing
-6. ✅ Silent auto-save - no toast notifications to avoid interruptions
-7. ✅ Cleaned up save mutation logic - removed unnecessary response checks
-8. ✅ Fixed admin login "429 Too Many Requests" error - increased rate limit from 20 to 100 requests/15min
-9. ✅ Fixed user login rate limit - increased from 5 to 100 requests/15min for better UX
-10. ✅ Fixed "Free Plan" display for admin-assigned paid plans - returns subscription info based on plan_type field
-11. ✅ Moved active plan card from Dashboard to Billing page only - cleaner dashboard layout
+1. ✅ Fixed auto-save mutation state management - replaced problematic `isSaving` state with React Query's `isPending`
+2. ✅ Cards now properly persist to database when auto-saving (no more silent failures)
+3. ✅ Fixed card ID tracking - uses state to track card ID after creation for subsequent updates
+4. ✅ Added mobile frame UI with CSS styling (no external image dependency) - shows iPhone mockup in preview
+5. ✅ Added "View TalkLink" button on mobile preview - opens live card in new tab
+6. ✅ Reduced live preview debounce to 100ms for real-time visual feedback
+7. ✅ Prevented concurrent save requests - mutations queue properly
+8. ✅ Fixed "Save failed with status undefined" error - apiRequest returns parsed JSON, not Response object
+9. ✅ Fixed infinite loop with debounced sync in FormBuilder
+10. ✅ Removed "Update Card" button - pure auto-save workflow
+11. ✅ Fixed admin login "429 Too Many Requests" error - increased rate limit to 100 requests/15min
+12. ✅ Fixed "Free Plan" display for admin-assigned paid plans - returns subscription info based on plan_type field
+13. ✅ Moved active plan card from Dashboard to Billing page only - cleaner dashboard layout
 
 ## Known Status
 - Card save functionality: ✅ Auto-save enabled (2s debounce)
