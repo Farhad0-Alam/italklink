@@ -100,19 +100,25 @@ export default function CardEditor() {
       };
       
       // Convert pages structure to pageElements for database storage
-      // FormBuilder uses pages[].elements, but database expects flat pageElements array
-      const allElements: any[] = [];
-      const pages = (dataToSave as any).pages || [];
-      if (Array.isArray(pages)) {
-        pages.forEach((page: any) => {
-          if (Array.isArray(page.elements)) {
-            allElements.push(...page.elements);
-          }
-        });
-      }
+      // In card mode: FormBuilder stores elements directly in pageElements
+      // In page mode: FormBuilder stores elements in pages[].elements
+      // Database always expects flat pageElements array
       
-      // Set pageElements from all pages - use extracted elements if available
-      const pageElementsToSave = allElements.length > 0 ? allElements : (dataToSave.pageElements || []);
+      let pageElementsToSave = (dataToSave.pageElements || []) as any[];
+      
+      // If pageElements is empty, try to extract from pages (page mode)
+      if (pageElementsToSave.length === 0) {
+        const allElements: any[] = [];
+        const pages = (dataToSave as any).pages || [];
+        if (Array.isArray(pages)) {
+          pages.forEach((page: any) => {
+            if (Array.isArray(page.elements)) {
+              allElements.push(...page.elements);
+            }
+          });
+        }
+        pageElementsToSave = allElements;
+      }
       
       // Build final data without pages field (server only needs pageElements)
       const finalData = {
