@@ -72,7 +72,6 @@ export default function CardEditor() {
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [currentPageId, setCurrentPageId] = useState<string>('home');
   const [cardId, setCardId] = useState<string | null>(params.id || null);
-  const [isSaving, setIsSaving] = useState(false);
 
   // Helper function to update share URL
   const updateShareUrl = (card: any) => {
@@ -86,19 +85,11 @@ export default function CardEditor() {
   // Save card mutation - declared before useEffects that depend on it
   const saveMutation = useMutation({
     mutationFn: async (data: BusinessCard) => {
-      // Only allow one save at a time
-      if (isSaving) return null;
-      setIsSaving(true);
-      
-      try {
-        // apiRequest already handles errors and returns parsed JSON
-        if (cardId) {
-          return await apiRequest('PUT', `/api/business-cards/${cardId}`, data);
-        } else {
-          return await apiRequest('POST', '/api/business-cards', data);
-        }
-      } finally {
-        setIsSaving(false);
+      // apiRequest already handles errors and returns parsed JSON
+      if (cardId) {
+        return await apiRequest('PUT', `/api/business-cards/${cardId}`, data);
+      } else {
+        return await apiRequest('POST', '/api/business-cards', data);
       }
     },
     onSuccess: (savedCard) => {
@@ -209,10 +200,9 @@ export default function CardEditor() {
   useEffect(() => {
     // Don't auto-save if:
     // 1. User is not authenticated
-    // 2. We're creating a new card but haven't entered basic info
-    // 3. Save is already in progress
-    // 4. We don't have a card ID yet AND we don't have a name
-    if (!user || isSaving) return;
+    // 2. Save is already in progress (mutation pending)
+    // 3. We're creating a new card but haven't entered basic info
+    if (!user || saveMutation.isPending) return;
     if (!cardId && !cardData.fullName) return;
     if (!cardData.fullName && !cardData.title) return;
     
@@ -231,7 +221,7 @@ export default function CardEditor() {
     return () => {
       if (timeout) clearTimeout(timeout);
     };
-  }, [cardData, user, cardId, isSaving]);
+  }, [cardData, user, cardId, saveMutation.isPending]);
 
   const copyShareUrl = async () => {
     if (shareUrl) {
@@ -405,16 +395,18 @@ END:VCARD`;
             
             {/* Mobile Phone Mockup */}
             <div className="relative mx-auto max-w-sm">
-              {/* Professional Mobile Frame */}
+              {/* Professional Mobile Frame with CSS styling */}
               <div 
-                className="relative w-[430px] h-[815px] bg-cover bg-center bg-no-repeat shadow-2xl z-99999999"
+                className="relative w-[390px] mx-auto bg-gray-900 rounded-[50px] shadow-2xl overflow-hidden border-[12px] border-gray-800"
                 style={{
-                  backgroundImage: `url(/mobile-frame.png)`,
-                  backgroundSize: 'contain'
+                  aspectRatio: '9/19.5',
                 }}
               >
+                {/* Top Notch */}
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[150px] h-[28px] bg-gray-900 rounded-b-[20px] z-10"></div>
+                
                 {/* Screen Content Area */}
-                <div className="absolute top-[17px] left-[35px] right-[35px] bottom-[17px] overflow-hidden rounded-[50px]">
+                <div className="absolute top-[10px] left-[8px] right-[8px] bottom-[10px] overflow-hidden rounded-[40px] bg-white">
                   <div 
                     ref={cardRef}
                     className="h-full overflow-y-auto"
@@ -432,6 +424,7 @@ END:VCARD`;
                       <BusinessCardComponent 
                         data={cardData} 
                         isMobilePreview={true}
+                        showViewButton={true}
                         onNavigatePage={handleNavigatePage}
                       />
                     )}

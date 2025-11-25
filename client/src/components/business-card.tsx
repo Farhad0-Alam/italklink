@@ -93,6 +93,7 @@ interface BusinessCardProps {
   showQR?: boolean;
   isInteractive?: boolean;
   isMobilePreview?: boolean;
+  showViewButton?: boolean;
   onNavigatePage?: (pageId: string) => void;
 }
 
@@ -106,6 +107,7 @@ export const BusinessCardComponent = forwardRef<
       showQR = false,
       isInteractive = true,
       isMobilePreview = false,
+      showViewButton = false,
       onNavigatePage,
     },
     ref,
@@ -917,6 +919,23 @@ export const BusinessCardComponent = forwardRef<
         } ${backgroundAnimationClass}`}
         style={getBackgroundStyle()}
       >
+        {/* View TalkLink Button */}
+        {showViewButton && data.shareSlug && (
+          <div className="absolute top-4 right-4 z-50">
+            <Button
+              size="sm"
+              className="bg-orange-500 hover:bg-orange-600 text-white shadow-lg"
+              onClick={() => {
+                window.open(`${window.location.origin}/${data.shareSlug}`, '_blank');
+              }}
+              data-testid="button-view-talklink"
+            >
+              <Globe className="w-4 h-4 mr-1" />
+              View TalkLink
+            </Button>
+          </div>
+        )}
+        
         <div className="relative">
           {/* Header Design - Cover + Logo */}
           {(data.headerDesign === "cover-logo" || !data.headerDesign) && (
