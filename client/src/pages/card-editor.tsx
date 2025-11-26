@@ -301,14 +301,15 @@ export default function CardEditor() {
       clearTimeout(autoSaveTimeout);
     }
     
-    // Set new timeout for auto-save (100ms minimum to batch very quick changes)
+    // Set new timeout for auto-save (500ms to ensure all FormBuilder changes sync to parent state)
+    // This prevents race conditions where elements are added but haven't synced yet
     const timeout = setTimeout(() => {
       // Use ref to get the LATEST cardData including newly added elements
       // This prevents stale data from closures
       const dataToSave = latestCardDataRef.current;
       console.log('[CardEditor] Auto-save: Saving with', dataToSave.pageElements?.length || 0, 'elements:', dataToSave.pageElements);
       saveMutation.mutate(dataToSave);
-    }, 100);
+    }, 500);
     
     setAutoSaveTimeout(timeout);
     
