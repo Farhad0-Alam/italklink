@@ -1134,11 +1134,11 @@ export const BusinessCardComponent = forwardRef<
                   getSectionStyle("basicInfo", "nameColor") ||
                   data.headingColor ||
                   "#1f2937",
-                fontSize: `${getSectionStyle("basicInfo", "nameFontSize") || (data.headingFontSize || 20) + 4}px`,
+                fontSize: `${getSectionStyle("basicInfo", "nameFontSize") || 22}px`,
                 fontWeight:
                   getSectionStyle("basicInfo", "nameFontWeight") ||
                   data.headingFontWeight ||
-                  600,
+                  650,
                 fontFamily:
                   getSectionStyle("basicInfo", "nameFont") || "Inter, sans-serif",
                 fontStyle:
@@ -1158,11 +1158,11 @@ export const BusinessCardComponent = forwardRef<
                   getSectionStyle("basicInfo", "titleColor") ||
                   data.paragraphColor ||
                   "#4b5563",
-                fontSize: `${getSectionStyle("basicInfo", "titleFontSize") || data.paragraphFontSize || 14}px`,
+                fontSize: `${getSectionStyle("basicInfo", "titleFontSize") || 15}px`,
                 fontWeight:
                   getSectionStyle("basicInfo", "titleFontWeight") ||
                   data.paragraphFontWeight ||
-                  400,
+                  500,
                 fontFamily:
                   getSectionStyle("basicInfo", "titleFont") ||
                   "Inter, sans-serif",
@@ -1182,11 +1182,11 @@ export const BusinessCardComponent = forwardRef<
                 style={{
                   color:
                     getSectionStyle("basicInfo", "companyColor") || "#6b7280",
-                  fontSize: `${getSectionStyle("basicInfo", "companyFontSize") || data.paragraphFontSize || 14}px`,
+                  fontSize: `${getSectionStyle("basicInfo", "companyFontSize") || 14}px`,
                   fontWeight:
                     getSectionStyle("basicInfo", "companyFontWeight") ||
                     data.paragraphFontWeight ||
-                    400,
+                    600,
                   fontFamily:
                     getSectionStyle("basicInfo", "companyFont") ||
                     "Inter, sans-serif",
@@ -1250,7 +1250,7 @@ export const BusinessCardComponent = forwardRef<
                                   "contactInfo",
                                   "iconTextColor",
                                 ) || "#374151",
-                              fontSize: `${parseNumeric(getSectionStyle("contactInfo", "iconTextSize"), 14)}px`,
+                              fontSize: `${parseNumeric(getSectionStyle("contactInfo", "iconTextSize"), 15)}px`,
                               fontFamily:
                                 getSectionStyle(
                                   "contactInfo",
@@ -1539,7 +1539,7 @@ export const BusinessCardComponent = forwardRef<
                             color:
                               getSectionStyle("socialMedia", "iconTextColor") ||
                               "#374151",
-                            fontSize: `${parseNumeric(getSectionStyle("socialMedia", "iconTextSize"), 14)}px`,
+                            fontSize: `${parseNumeric(getSectionStyle("socialMedia", "iconTextSize"), 15)}px`,
                             fontFamily:
                               getSectionStyle("socialMedia", "iconTextFont") ||
                               "Inter, sans-serif",
@@ -1643,7 +1643,7 @@ export const BusinessCardComponent = forwardRef<
                           fontFamily:
                             getSectionStyle("socialMedia", "iconTextFont") ||
                             "inherit",
-                          fontSize: `${parseNumeric(getSectionStyle("socialMedia", "iconTextSize"), 14)}px`,
+                          fontSize: `${parseNumeric(getSectionStyle("socialMedia", "iconTextSize"), 15)}px`,
                           fontWeight:
                             getSectionStyle("socialMedia", "iconTextWeight") ||
                             "600",

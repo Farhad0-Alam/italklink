@@ -1,0 +1,60 @@
+Update the typography system for the Digital Business Card so it uses a clean, premium mobile-first scale.
+
+Scope:
+- Apply only to digital business card layouts, components, and shared UI for card view/share pages.
+- Do NOT change dashboard, admin, or unrelated pages.
+
+Requirements (font sizes + weights):
+1) Name (main profile name)
+   - font-size: 22px
+   - font-weight: 600–700
+2) Title / Role
+   - font-size: 15px
+   - font-weight: 500
+3) Company Name
+   - font-size: 14px
+   - font-weight: 600
+4) Section Headings (About, Services, Contact, etc.)
+   - font-size: 16px
+   - font-weight: 600
+5) Description / Bio / Paragraph text
+   - font-size: 14px
+   - font-weight: 400–500
+   - line-height: 1.5–1.6
+6) Contact Label (e.g. “Phone”, “Email”)
+   - font-size: 12px
+   - font-weight: 500
+7) Contact Value (actual phone number, email, URL)
+   - font-size: 15px
+   - font-weight: 500
+8) Accordion Heading
+   - font-size: 16px
+   - font-weight: 600
+9) Accordion Description (content inside accordion)
+   - font-size: 14px
+   - font-weight: 400
+10) Button Text (e.g. “Save Contact”, “Call Now”)
+   - font-size: 15px
+   - font-weight: 600
+11) Tiny Footer / Copyright
+   - font-size: 12px
+   - font-weight: 400
+
+Font family:
+- Use "Inter" or similar modern sans-serif as default for the card.
+- Make sure digital card wrapper uses this font stack.
+
+Implementation details:
+- Create or update shared typography utility classes for the digital card, for example:
+  - .dc-name, .dc-title, .dc-company, .dc-section-heading, .dc-body, .dc-contact-label, .dc-contact-value, .dc-accordion-heading, .dc-accordion-body, .dc-button-text, .dc-footer-text
+- If Tailwind is used:
+  - Apply these as Tailwind classes directly in JSX/TSX where the digital card is rendered.
+  - Keep font-size values as arbitrary classes like text-[22px], text-[15px], etc. as needed.
+- Update existing digital card components to use these new classes instead of hard-coded inline styles or random font sizes.
+
+Deliverables:
+1) List of files modified (with paths).
+2) The exact CSS (or Tailwind classes) added for each typography role.
+3) Confirmation that digital card views (builder preview + share/public view) now use this consistent typography system.
+
+Return only code edits and file paths (no long explanations).
