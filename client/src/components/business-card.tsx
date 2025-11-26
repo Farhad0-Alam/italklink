@@ -912,16 +912,12 @@ export const BusinessCardComponent = forwardRef<
     return (
       <div
         ref={ref}
-        className={`overflow-hidden w-full mx-auto relative ${
-          isMobilePreview
-            ? "rounded-none shadow-none min-h-full"
-            : "rounded-none md:rounded-2xl shadow-none md:shadow-2xl card-shadow"
-        } ${backgroundAnimationClass}`}
+        className={`overflow-hidden w-full mx-auto relative rounded-none shadow-none ${backgroundAnimationClass}`}
         style={getBackgroundStyle()}
       >
         {/* View TalkLink Button */}
         {showViewButton && (data.shareSlug || data.id) && (
-          <div className="absolute top-4 right-4 z-50">
+          <div className="absolute top-0 right-4 z-50">
             <Button
               size="sm"
               className="bg-orange-500 hover:bg-orange-600 text-white shadow-lg"
