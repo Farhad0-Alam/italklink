@@ -538,7 +538,7 @@ END:VCARD`;
                       <BusinessCardComponent 
                         data={cardData} 
                         isMobilePreview={true}
-                        showViewButton={true}
+                        showViewButton={false}
                         onNavigatePage={handleNavigatePage}
                         showInternalShareButton={false}
                       />
