@@ -1109,15 +1109,7 @@ export const BusinessCardComponent = forwardRef<
 
         {/* Content */}
         <div
-          className={`pb-8 px-6 text-center text-slate-800 ${
-            data.headerDesign === "profile-center"
-              ? "pt-20"
-              : data.headerDesign === "split-design"
-                ? "pt-16"
-                : data.headerDesign === "shape-divider"
-                  ? "pt-8"
-                  : "pt-16"
-          }`}
+          className="text-center text-slate-800"
         >
           {/* Name, Title, Company with Group Positioning */}
           <div
@@ -1202,7 +1194,7 @@ export const BusinessCardComponent = forwardRef<
           </div>
 
           {/* New Button Layout - Top 8 Buttons from Contact Information */}
-          <div className="mb-6 space-y-2">
+          <div className="space-y-0">
             {/* Grid of Contact Buttons ONLY - Responsive 2 rows of 4 */}
             <div className="space-y-2">
               {/* Contact Information with Enhanced Icon Styling */}
@@ -1728,7 +1720,7 @@ export const BusinessCardComponent = forwardRef<
 
           {/* Floating Share Button */}
           {isInteractive && (
-            <div className="absolute top-4 right-4 z-10">
+            <div className="absolute top-0 right-4 z-10">
               <div className="relative">
                 <Button
                   onClick={() => setShowShareMenu(!showShareMenu)}
