@@ -40,11 +40,12 @@ export default function CardEditor() {
   
   // Handle auth and plan validation redirects
   useEffect(() => {
-    // Skip if already handled or still loading
-    if (redirectHandled || userLoading) return;
+    // Skip if already handled or still loading user data
+    if (redirectHandled) return;
+    if (userLoading) return;
     
-    // Check authentication
-    if (userError && !userLoading) {
+    // Check authentication - if error, redirect to login
+    if (userError) {
       setRedirectHandled(true);
       toast({
         title: "Authentication Required",
@@ -55,20 +56,27 @@ export default function CardEditor() {
       return;
     }
     
+    // User is authenticated, check if subscription is loaded
+    if (!user) return; // Still loading user data
+    
+    // If subscription hasn't loaded yet, wait for it
+    if (subscription === undefined) return;
+    
     // Check plan validation
-    if (user && subscription) {
-      const hasValidPlan = subscription?.planType === 'paid' || subscription?.customPlan;
-      if (!hasValidPlan) {
-        setRedirectHandled(true);
-        toast({
-          title: "Plan Required",
-          description: "Upgrade to a paid plan or contact support to create business cards.",
-          variant: "destructive",
-        });
-        setLocation('/billing');
-        return;
-      }
+    const hasValidPlan = subscription?.planType === 'paid' || subscription?.customPlan;
+    if (!hasValidPlan) {
+      setRedirectHandled(true);
+      toast({
+        title: "Plan Required",
+        description: "Upgrade to a paid plan or contact support to create business cards.",
+        variant: "destructive",
+      });
+      setLocation('/billing');
+      return;
     }
+    
+    // User has valid access - mark as handled and allow rendering
+    setRedirectHandled(true);
   }, [userError, userLoading, user, subscription, redirectHandled, setLocation, toast]);
   
   // Get template and custom URL from URL parameters
