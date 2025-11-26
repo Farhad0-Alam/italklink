@@ -97,13 +97,15 @@ export const Share: React.FC = () => {
       const pathParts = location.split('/');
       const shareSlug = pathParts[1]; // Get the slug from URL like domain.com/customname
       
+      let slugLoadSucceeded = false;
+      
       // Try to load by shareSlug first (for clean URLs)
       if (shareSlug && shareSlug !== 'share' && !hash) {
         try {
           const response = await fetch(`/api/business-cards/slug/${shareSlug}`);
           if (response.ok) {
             const cardData = await response.json();
-            console.log('[Share] Loaded card with', cardData.pageElements?.length || 0, 'page elements');
+            console.log('[Share] Loaded card by slug with', cardData.pageElements?.length || 0, 'page elements');
             setCardData(cardData);
             setCurrentPageId('home'); // Reset to home page when loading
             logEvent("share_view");
@@ -112,18 +114,29 @@ export const Share: React.FC = () => {
               trackPageView(cardData.id, 'page_view', window.location.href);
             }
             setIsLoading(false);
+            slugLoadSucceeded = true;
+            return;
+          } else {
+            // 404 or other non-ok response
+            console.warn(`Failed to load card by slug: ${response.status}`);
+            setError(`Card not found (${response.status})`);
+            setIsLoading(false);
             return;
           }
         } catch (error) {
-          console.error("Failed to load card by slug:", error);
+          console.error("Network error loading card by slug:", error);
+          setError("Failed to load card - network error");
+          setIsLoading(false);
+          return;
         }
       }
       
-      // Fallback to hash-based sharing
-      if (hash) {
+      // Fallback to hash-based sharing (only if slug load wasn't attempted or succeeded)
+      if (!slugLoadSucceeded && hash) {
         try {
           const decodedData = decodeCardData(hash);
           if (decodedData) {
+            console.log('[Share] Loaded card by hash with', decodedData.pageElements?.length || 0, 'page elements');
             setCardData(decodedData);
             setCurrentPageId('home'); // Reset to home page when loading
             logEvent("share_view");
@@ -138,7 +151,12 @@ export const Share: React.FC = () => {
           console.error("Failed to decode card data:", error);
           setError("Failed to load shared card");
         }
-      } else {
+        setIsLoading(false);
+        return;
+      }
+      
+      // No slug and no hash - invalid URL
+      if (!shareSlug || shareSlug === 'share') {
         setError("No card data found in URL");
       }
       
