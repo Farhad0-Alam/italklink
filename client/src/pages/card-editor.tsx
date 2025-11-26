@@ -540,12 +540,30 @@ END:VCARD`;
                         isMobilePreview={true}
                         showViewButton={true}
                         onNavigatePage={handleNavigatePage}
+                        showInternalShareButton={false}
                       />
                     )}
                   </div>
                 </div>
               </div>
             </div>
+            
+            {/* View TalkLink Button Below Mobile Frame */}
+            {shareUrl && (
+              <div className="mt-4 flex justify-center">
+                <Button
+                  onClick={() => {
+                    const slug = shareUrl.split('/').pop();
+                    if (slug) window.open(`/${slug}`, '_blank');
+                  }}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full"
+                  data-testid="button-view-talklink"
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  View TalkLink
+                </Button>
+              </div>
+            )}
             
             <div className="mt-6 text-center">
               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
