@@ -201,12 +201,12 @@ export const Share: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-50 md:bg-slate-900">
+    <div className="fixed inset-0 bg-slate-900 text-slate-50 overflow-y-auto">
       {/* Dynamic SEO Head Component */}
       <SEOHead cardData={cardData} />
       
-      <div className="w-full max-w-[400px] mx-auto px-4 py-0">
-        {/* Premium Mobile Card Layout - 400px max-width centered container */}
+      <div className="w-full max-w-[400px] mx-auto px-4 py-0 min-h-screen">
+        {/* Premium Mobile Card Layout - 400px max-width centered container, edge-to-edge */}
         <div className="flex justify-center">
           <div className="w-full">
             <BusinessCardComponent
