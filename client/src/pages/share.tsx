@@ -10,8 +10,6 @@ import { defaultCardData } from "@/lib/card-data";
 import { BusinessCardPWAInstaller } from "@/components/BusinessCardPWAInstaller";
 import { SEOHead } from "@/components/SEOHead";
 import { useButtonTracking } from "@/modules/automation/useButtonTracking";
-import { Share2, Copy, MessageCircle, Facebook, Twitter, Linkedin } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 export const Share: React.FC = () => {
   const { t } = useTranslation();
@@ -20,9 +18,7 @@ export const Share: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPageId, setCurrentPageId] = useState<string>('home');
-  const [showShareMenu, setShowShareMenu] = useState(false);
   const { trackPageView } = useButtonTracking();
-  const { toast } = useToast();
 
   const handlePageNavigation = (pageId: string) => {
     setCurrentPageId(pageId);
@@ -30,65 +26,6 @@ export const Share: React.FC = () => {
 
   const handleBackFromPage = () => {
     setCurrentPageId('home');
-  };
-
-  const handleShare = async (platform?: string) => {
-    const url = window.location.href;
-    const text = `Check out ${cardData.fullName || 'this'}'s business card`;
-
-    if (platform === "copy") {
-      try {
-        await navigator.clipboard.writeText(url);
-        toast({
-          title: "Link copied!",
-          description: "Business card link copied to clipboard",
-        });
-      } catch (err) {
-        toast({
-          title: "Copy failed",
-          description: "Please copy the link manually",
-          variant: "destructive",
-        });
-      }
-      setShowShareMenu(false);
-      return;
-    }
-
-    let shareUrl_platform = "";
-    switch (platform) {
-      case "facebook":
-        shareUrl_platform = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-        break;
-      case "twitter":
-        shareUrl_platform = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-        break;
-      case "linkedin":
-        shareUrl_platform = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
-        break;
-      case "whatsapp":
-        shareUrl_platform = `https://wa.me/?text=${encodeURIComponent(text + " " + url)}`;
-        break;
-      default:
-        if (navigator.share) {
-          try {
-            await navigator.share({
-              title: text,
-              url: url,
-            });
-          } catch (err) {
-            console.log("Share cancelled");
-          }
-        } else {
-          await handleShare("copy");
-        }
-        setShowShareMenu(false);
-        return;
-    }
-
-    if (shareUrl_platform) {
-      window.open(shareUrl_platform, "_blank", "width=600,height=400");
-      setShowShareMenu(false);
-    }
   };
 
   useEffect(() => {
@@ -203,89 +140,6 @@ export const Share: React.FC = () => {
         
         {/* PWA Install Button */}
         <BusinessCardPWAInstaller cardData={cardData} />
-      </div>
-
-      {/* Floating Share Button - Bottom Right */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <div className="relative">
-          <Button
-            onClick={() => setShowShareMenu(!showShareMenu)}
-            size="lg"
-            className="w-14 h-14 rounded-full p-0 bg-talklink-500 hover:bg-talklink-600 text-white shadow-lg"
-            data-testid="button-floating-share"
-          >
-            <Share2 className="h-6 w-6" />
-          </Button>
-
-          {/* Share Menu Popup */}
-          {showShareMenu && (
-            <div className="absolute bottom-full right-0 mb-3 bg-white rounded-lg shadow-xl border border-slate-200 p-2 min-w-48">
-              <div className="space-y-1">
-                <Button
-                  onClick={() => handleShare("copy")}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-gray-700 hover:bg-gray-50"
-                  data-testid="button-share-copy"
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Link
-                </Button>
-                <Button
-                  onClick={() => handleShare("whatsapp")}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-gray-700 hover:bg-gray-50"
-                  data-testid="button-share-whatsapp"
-                >
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  WhatsApp
-                </Button>
-                <Button
-                  onClick={() => handleShare("facebook")}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-gray-700 hover:bg-gray-50"
-                  data-testid="button-share-facebook"
-                >
-                  <Facebook className="h-4 w-4 mr-2" />
-                  Facebook
-                </Button>
-                <Button
-                  onClick={() => handleShare("twitter")}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-gray-700 hover:bg-gray-50"
-                  data-testid="button-share-twitter"
-                >
-                  <Twitter className="h-4 w-4 mr-2" />
-                  Twitter
-                </Button>
-                <Button
-                  onClick={() => handleShare("linkedin")}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-gray-700 hover:bg-gray-50"
-                  data-testid="button-share-linkedin"
-                >
-                  <Linkedin className="h-4 w-4 mr-2" />
-                  LinkedIn
-                </Button>
-                <hr className="my-1" />
-                <Button
-                  onClick={() => handleShare()}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-gray-700 hover:bg-gray-50"
-                  data-testid="button-share-more"
-                >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  More Options
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
