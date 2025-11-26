@@ -95,6 +95,7 @@ interface BusinessCardProps {
   isMobilePreview?: boolean;
   showViewButton?: boolean;
   onNavigatePage?: (pageId: string) => void;
+  showInternalShareButton?: boolean;
 }
 
 export const BusinessCardComponent = forwardRef<
@@ -109,6 +110,7 @@ export const BusinessCardComponent = forwardRef<
       isMobilePreview = false,
       showViewButton = false,
       onNavigatePage,
+      showInternalShareButton = true,
     },
     ref,
   ) => {
@@ -1727,7 +1729,7 @@ export const BusinessCardComponent = forwardRef<
           )}
 
           {/* Floating Share Button */}
-          {isInteractive && (
+          {isInteractive && showInternalShareButton && (
             <div className="absolute top-0 right-4 z-10">
               <div className="relative">
                 <Button
