@@ -23,7 +23,6 @@ export default function CardEditor() {
   const params = useParams() as CardEditorParams;
   const [, setLocation] = useLocation();
   const cardRef = useRef<HTMLDivElement>(null);
-  const [redirectHandled, setRedirectHandled] = useState(false);
   
   // Check authentication first
   const { data: user, isLoading: userLoading, error: userError } = useQuery({
@@ -31,53 +30,17 @@ export default function CardEditor() {
     retry: false,
   });
   
-  // Get user subscription/plan info
-  const { data: subscription } = useQuery({
-    queryKey: ['/api/subscription'],
-    enabled: !!user && !userError,
-    retry: false,
-  });
-  
-  // Handle auth and plan validation redirects
+  // Redirect to login if not authenticated
   useEffect(() => {
-    // Skip if already handled or still loading user data
-    if (redirectHandled) return;
-    if (userLoading) return;
-    
-    // Check authentication - if error, redirect to login
-    if (userError) {
-      setRedirectHandled(true);
+    if (userError && !userLoading) {
       toast({
         title: "Authentication Required",
         description: "Please log in to create or edit business cards.",
         variant: "destructive",
       });
       setLocation('/login');
-      return;
     }
-    
-    // User is authenticated, check if subscription is loaded
-    if (!user) return; // Still loading user data
-    
-    // If subscription hasn't loaded yet, wait for it
-    if (subscription === undefined) return;
-    
-    // Check plan validation
-    const hasValidPlan = subscription?.planType === 'paid' || subscription?.customPlan;
-    if (!hasValidPlan) {
-      setRedirectHandled(true);
-      toast({
-        title: "Plan Required",
-        description: "Upgrade to a paid plan or contact support to create business cards.",
-        variant: "destructive",
-      });
-      setLocation('/billing');
-      return;
-    }
-    
-    // User has valid access - mark as handled and allow rendering
-    setRedirectHandled(true);
-  }, [userError, userLoading, user, subscription, redirectHandled, setLocation, toast]);
+  }, [userError, userLoading, setLocation, toast]);
   
   // Get template and custom URL from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -441,34 +404,6 @@ END:VCARD`;
     });
   };
 
-  // Prevent rendering until auth and plan validation is complete
-  if (userLoading || redirectHandled === false) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600">Checking access...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error if auth failed
-  if (userError || (user && subscription && subscription?.planType === 'free' && !subscription?.customPlan)) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-lg shadow">
-          <h2 className="text-xl font-bold text-red-600 mb-2">Access Denied</h2>
-          <p className="text-gray-600 mb-4">You need a valid plan to create business cards.</p>
-          <Button onClick={() => setLocation('/billing')} className="bg-orange-500 hover:bg-orange-600">
-            View Plans
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Only show loading for card data, not auth
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
