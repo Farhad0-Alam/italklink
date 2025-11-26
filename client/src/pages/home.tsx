@@ -47,7 +47,7 @@ export const Home: React.FC = () => {
               onClick={handleCreateCard}
               data-testid="button-create-card"
             >
-              <Link href="/builder">
+              <Link href="/card-editor">
                 {t('home.cta.create')}
               </Link>
             </Button>

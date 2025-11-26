@@ -24,7 +24,6 @@ const ResetPassword = lazy(() => import("./pages/reset-password"));
 const MyLinks = lazy(() => import("./pages/my-links"));
 const Templates = lazy(() => import("./pages/templates"));
 const Appointments = lazy(() => import("./pages/appointments"));
-const Builder = lazy(() => import("./pages/builder").then(module => ({ default: module.Builder })));
 const Share = lazy(() => import("./pages/share").then(module => ({ default: module.Share })));
 const TemplatePreview = lazy(() => import("./pages/template-preview"));
 const CardEditor = lazy(() => import("./pages/card-editor"));
@@ -81,7 +80,6 @@ function Router() {
       <Route path="/templates">{() => <PageSuspense><Templates /></PageSuspense>}</Route>
       <Route path="/appointments/:rest*">{(params) => <PageSuspense><Appointments {...params} /></PageSuspense>}</Route>
       <Route path="/appointments">{() => <PageSuspense><Appointments /></PageSuspense>}</Route>
-      <Route path="/builder">{() => <PageSuspense><Builder /></PageSuspense>}</Route>
       <Route path="/card-editor/:id?">{(params) => <PageSuspense><CardEditor {...params} /></PageSuspense>}</Route>
       <Route path="/card-editor">{() => <PageSuspense><CardEditor /></PageSuspense>}</Route>
       <Route path="/share">{() => <PageSuspense><Share /></PageSuspense>}</Route>
