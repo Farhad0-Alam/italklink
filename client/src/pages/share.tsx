@@ -124,8 +124,8 @@ export const Share: React.FC = () => {
       {/* Dynamic SEO Head Component */}
       <SEOHead cardData={cardData} />
       
-      <div className="w-full max-w-[470px] mx-auto px-0 py-0 md:px-4 md:py-8 sm:px-6 lg:px-8">
-        {/* Shared Card Display - Mobile Responsive Layout */}
+      <div className="w-full max-w-[400px] mx-auto px-4 py-8">
+        {/* Premium Mobile Card Layout - 400px max-width centered container */}
         <div className="flex justify-center">
           <div className="w-full">
             <BusinessCardComponent
