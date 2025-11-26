@@ -218,71 +218,77 @@ export const Share: React.FC = () => {
             <Share2 className="h-6 w-6" />
           </Button>
 
-          {/* Share Menu Popup */}
+          {/* Share Menu Popup - Modern Design */}
           {showShareMenu && (
-            <div className="absolute bottom-full right-0 mb-3 bg-white rounded-lg shadow-xl border border-slate-200 p-2 min-w-48">
-              <div className="space-y-1">
-                <Button
+            <div className="absolute bottom-full right-0 mb-4 bg-white rounded-2xl shadow-2xl p-4 min-w-56 backdrop-blur-sm border border-gray-100">
+              <div className="space-y-0">
+                <button
                   onClick={() => handleShare("copy")}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-gray-700 hover:bg-gray-50"
+                  className="w-full flex items-center gap-4 px-4 py-3.5 rounded-lg hover:bg-slate-50 transition-all duration-200 group"
                   data-testid="button-share-copy"
                 >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Link
-                </Button>
-                <Button
+                  <div className="flex-shrink-0">
+                    <Copy className="h-5 w-5 text-slate-600 group-hover:text-talklink-500 transition-colors" />
+                  </div>
+                  <span className="text-base font-500 text-slate-700 group-hover:text-slate-900">Copy Link</span>
+                </button>
+
+                <button
                   onClick={() => handleShare("whatsapp")}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-gray-700 hover:bg-gray-50"
+                  className="w-full flex items-center gap-4 px-4 py-3.5 rounded-lg hover:bg-green-50 transition-all duration-200 group"
                   data-testid="button-share-whatsapp"
                 >
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  WhatsApp
-                </Button>
-                <Button
+                  <div className="flex-shrink-0">
+                    <MessageCircle className="h-5 w-5 text-slate-600 group-hover:text-green-500 transition-colors" />
+                  </div>
+                  <span className="text-base font-500 text-slate-700 group-hover:text-slate-900">WhatsApp</span>
+                </button>
+
+                <button
                   onClick={() => handleShare("facebook")}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-gray-700 hover:bg-gray-50"
+                  className="w-full flex items-center gap-4 px-4 py-3.5 rounded-lg hover:bg-blue-50 transition-all duration-200 group"
                   data-testid="button-share-facebook"
                 >
-                  <Facebook className="h-4 w-4 mr-2" />
-                  Facebook
-                </Button>
-                <Button
+                  <div className="flex-shrink-0">
+                    <Facebook className="h-5 w-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
+                  </div>
+                  <span className="text-base font-500 text-slate-700 group-hover:text-slate-900">Facebook</span>
+                </button>
+
+                <button
                   onClick={() => handleShare("twitter")}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-gray-700 hover:bg-gray-50"
+                  className="w-full flex items-center gap-4 px-4 py-3.5 rounded-lg hover:bg-sky-50 transition-all duration-200 group"
                   data-testid="button-share-twitter"
                 >
-                  <Twitter className="h-4 w-4 mr-2" />
-                  Twitter
-                </Button>
-                <Button
+                  <div className="flex-shrink-0">
+                    <Twitter className="h-5 w-5 text-slate-600 group-hover:text-sky-500 transition-colors" />
+                  </div>
+                  <span className="text-base font-500 text-slate-700 group-hover:text-slate-900">Twitter</span>
+                </button>
+
+                <button
                   onClick={() => handleShare("linkedin")}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-gray-700 hover:bg-gray-50"
+                  className="w-full flex items-center gap-4 px-4 py-3.5 rounded-lg hover:bg-indigo-50 transition-all duration-200 group"
                   data-testid="button-share-linkedin"
                 >
-                  <Linkedin className="h-4 w-4 mr-2" />
-                  LinkedIn
-                </Button>
-                <hr className="my-1" />
-                <Button
+                  <div className="flex-shrink-0">
+                    <Linkedin className="h-5 w-5 text-slate-600 group-hover:text-indigo-600 transition-colors" />
+                  </div>
+                  <span className="text-base font-500 text-slate-700 group-hover:text-slate-900">LinkedIn</span>
+                </button>
+
+                <div className="h-px bg-slate-200 my-2"></div>
+
+                <button
                   onClick={() => handleShare()}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-gray-700 hover:bg-gray-50"
+                  className="w-full flex items-center gap-4 px-4 py-3.5 rounded-lg hover:bg-slate-50 transition-all duration-200 group"
                   data-testid="button-share-more"
                 >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  More Options
-                </Button>
+                  <div className="flex-shrink-0">
+                    <Share2 className="h-5 w-5 text-slate-600 group-hover:text-talklink-500 transition-colors" />
+                  </div>
+                  <span className="text-base font-500 text-slate-700 group-hover:text-slate-900">More Options</span>
+                </button>
               </div>
             </div>
           )}
