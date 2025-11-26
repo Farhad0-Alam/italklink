@@ -1109,7 +1109,15 @@ export const BusinessCardComponent = forwardRef<
 
         {/* Content */}
         <div
-          className="pb-8 px-6 text-center text-slate-800 pt-0"
+          className={`pb-8 px-6 text-center text-slate-800 ${
+            data.headerDesign === "profile-center"
+              ? "pt-20"
+              : data.headerDesign === "split-design"
+                ? "pt-16"
+                : data.headerDesign === "shape-divider"
+                  ? "pt-8"
+                  : "pt-16"
+          }`}
         >
           {/* Name, Title, Company with Group Positioning */}
           <div
