@@ -89,7 +89,7 @@ export const Share: React.FC = () => {
               className="bg-talklink-500 hover:bg-talklink-600"
               data-testid="button-create-own-card"
             >
-              <a href="/card-editor">Create Your Own Card</a>
+              <a href="https://talkl.ink/">Create Your Own Card</a>
             </Button>
           </CardContent>
         </Card>

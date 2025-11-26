@@ -41,15 +41,15 @@ export const Home: React.FC = () => {
           {/* CTAs */}
           <div className="space-y-4">
             <Button 
-              asChild
               size="lg"
               className="bg-talklink-500 hover:bg-talklink-600 text-white px-8 py-4 rounded-2xl text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 w-full sm:w-auto"
-              onClick={handleCreateCard}
+              onClick={() => {
+                handleCreateCard();
+                window.location.href = 'https://talkl.ink/';
+              }}
               data-testid="button-create-card"
             >
-              <Link href="/card-editor">
-                {t('home.cta.create')}
-              </Link>
+              {t('home.cta.create')}
             </Button>
             <div>
               <a 
