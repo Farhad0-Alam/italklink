@@ -1109,7 +1109,15 @@ export const BusinessCardComponent = forwardRef<
 
         {/* Content */}
         <div
-          className="text-center text-slate-800"
+          className={`pb-8 px-6 text-center text-slate-800 ${
+            data.headerDesign === "profile-center"
+              ? "pt-20"
+              : data.headerDesign === "split-design"
+                ? "pt-16"
+                : data.headerDesign === "shape-divider"
+                  ? "pt-8"
+                  : "pt-16"
+          }`}
         >
           {/* Name, Title, Company with Group Positioning */}
           <div
@@ -1194,7 +1202,7 @@ export const BusinessCardComponent = forwardRef<
           </div>
 
           {/* New Button Layout - Top 8 Buttons from Contact Information */}
-          <div className="space-y-0">
+          <div className="mb-6 space-y-2">
             {/* Grid of Contact Buttons ONLY - Responsive 2 rows of 4 */}
             <div className="space-y-2">
               {/* Contact Information with Enhanced Icon Styling */}
