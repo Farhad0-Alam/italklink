@@ -166,16 +166,21 @@ ${context}`;
   }
 });
 
-// POST /api/rag/tts - Convert text to speech
-router.post('/tts', async (req, res) => {
+// POST /api/rag/tts - Convert text to speech (AUTHENTICATED)
+router.post('/tts', requireAuth, async (req, res) => {
   try {
     const { text } = req.body;
+    const userId = (req.user as any)?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
     
     if (!text) {
       return res.status(400).json({ error: 'Text required' });
     }
 
-    console.log('TTS request:', { textLength: text.length });
+    console.log('TTS request for user', userId, ':', { textLength: text.length });
 
     // Generate speech using OpenAI
     const response = await openai.audio.speech.create({
@@ -201,16 +206,21 @@ router.post('/tts', async (req, res) => {
   }
 });
 
-// POST /api/rag/stt - Convert speech to text (using Realtime API for chat)
-router.post('/stt', async (req, res) => {
+// POST /api/rag/stt - Convert speech to text (AUTHENTICATED - using Realtime API for chat)
+router.post('/stt', requireAuth, async (req, res) => {
   try {
     const { audio } = req.body;
+    const userId = (req.user as any)?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
     
     if (!audio) {
       return res.status(400).json({ error: 'Audio data required' });
     }
 
-    console.log('STT request received');
+    console.log('STT request for user', userId);
 
     // Convert base64 audio to buffer
     const base64Data = audio.split(',')[1] || audio;
