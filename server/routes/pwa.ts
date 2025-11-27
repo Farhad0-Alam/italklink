@@ -44,8 +44,9 @@ router.get('/manifest', async (req, res) => {
       cardData = result[0];
     }
 
-    // Extract app name from installButton element or use card PWA settings
+    // Extract app name and icon from installButton element or use card PWA settings
     let appName = 'TalkLink';
+    let appIcon = cardData?.pwaAppIcon as string;
     if (cardData) {
       // Try to get from installButton element first
       try {
@@ -57,6 +58,9 @@ router.get('/manifest', async (req, res) => {
           appName = cardData.pwaAppName;
         } else {
           appName = cardData.fullName || 'TalkLink';
+        }
+        if (installButton?.data?.iconUrl) {
+          appIcon = installButton.data.iconUrl;
         }
       } catch (error) {
         appName = cardData.pwaAppName || cardData.fullName || 'TalkLink';

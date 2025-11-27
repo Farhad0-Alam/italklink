@@ -201,11 +201,19 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
         style={styleMap[data.buttonStyle]}
       >
         {data.showIcon && data.iconPosition === 'left' && (
-          <Download size={iconSizes[data.buttonSize]} />
+          data.iconUrl ? (
+            <img src={data.iconUrl} alt="icon" className={`w-${iconSizes[data.buttonSize] * 0.25} h-${iconSizes[data.buttonSize] * 0.25} object-cover`} style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} />
+          ) : (
+            <Download size={iconSizes[data.buttonSize]} />
+          )
         )}
         <span>{data.buttonText}</span>
         {data.showIcon && data.iconPosition === 'right' && (
-          <Download size={iconSizes[data.buttonSize]} />
+          data.iconUrl ? (
+            <img src={data.iconUrl} alt="icon" className={`w-${iconSizes[data.buttonSize] * 0.25} h-${iconSizes[data.buttonSize] * 0.25} object-cover`} style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} />
+          ) : (
+            <Download size={iconSizes[data.buttonSize]} />
+          )
         )}
       </div>
     </div>
@@ -219,6 +227,52 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
             <Download className="w-5 h-5 text-green-600" />
             Install App Button
           </h3>
+        </div>
+
+        <div className="space-y-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+          <div>
+            <Label className="text-sm text-slate-700 font-medium mb-1 block">App Name</Label>
+            <Input
+              value={data.appName}
+              onChange={(e) => handleDataUpdate({ appName: e.target.value })}
+              placeholder="TalkLink"
+              className="text-black"
+              data-testid="input-install-app-name"
+            />
+            <p className="text-xs text-slate-500 mt-1">Name that appears on home screen after installation</p>
+          </div>
+
+          <div>
+            <Label className="text-sm text-slate-700 font-medium mb-2 block">App Icon</Label>
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <label className="flex items-center justify-center w-full px-4 py-2 bg-white border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-slate-400 transition-colors">
+                  <span className="text-sm text-slate-600">{uploadingIcon ? 'Uploading...' : 'Choose Icon'}</span>
+                  <input
+                    type="file"
+                    onChange={handleIconUpload}
+                    accept="image/*"
+                    disabled={uploadingIcon}
+                    className="hidden"
+                    data-testid="input-install-icon-upload"
+                  />
+                </label>
+              </div>
+              {data.iconUrl && (
+                <div className="flex items-center gap-2">
+                  <img src={data.iconUrl} alt="app-icon" className="w-10 h-10 rounded object-cover" />
+                  <button
+                    onClick={() => handleDataUpdate({ iconUrl: undefined })}
+                    className="p-1 hover:bg-red-100 rounded transition-colors"
+                    data-testid="button-remove-install-icon"
+                  >
+                    <X size={18} className="text-red-600" />
+                  </button>
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-slate-500 mt-1">Max 5MB. Recommended: 192x192px square PNG or JPG</p>
+          </div>
         </div>
 
         <ButtonPreview />
@@ -386,22 +440,8 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
           </CollapsibleContent>
         </Collapsible>
 
-        <div className="space-y-4">
-          <div>
-            <Label className="text-sm text-slate-700 font-medium mb-1 block">App Name</Label>
-            <Input
-              value={data.appName}
-              onChange={(e) => handleDataUpdate({ appName: e.target.value })}
-              placeholder="TalkLink"
-              className="text-black"
-              data-testid="input-install-app-name"
-            />
-            <p className="text-xs text-slate-500 mt-1">This is the name that appears on the home screen after installation.</p>
-          </div>
-
-          <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-            <p><strong>Note:</strong> This button lets visitors install your business card as an app on their phone. Works on both Android and iPhone.</p>
-          </div>
+        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+          <p><strong>Note:</strong> This button lets visitors install your business card as an app on their phone. Works on both Android and iPhone.</p>
         </div>
       </div>
     );
@@ -438,6 +478,8 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
         {data.showIcon && data.iconPosition === 'left' && (
           installing ? (
             <Loader2 size={iconSizes[data.buttonSize]} className="animate-spin" />
+          ) : data.iconUrl ? (
+            <img src={data.iconUrl} alt="icon" style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} className="object-cover rounded" />
           ) : (
             <Download size={iconSizes[data.buttonSize]} />
           )
@@ -446,6 +488,8 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
         {data.showIcon && data.iconPosition === 'right' && (
           installing ? (
             <Loader2 size={iconSizes[data.buttonSize]} className="animate-spin" />
+          ) : data.iconUrl ? (
+            <img src={data.iconUrl} alt="icon" style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} className="object-cover rounded" />
           ) : (
             <Download size={iconSizes[data.buttonSize]} />
           )
