@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 type InstallButtonElement = Extract<PageElement, { type: "installButton" }>;
 
 interface InstallButtonData {
+  enabled: boolean;
   appName: string;
   iconUrl?: string;
   buttonText: string;
@@ -26,6 +27,7 @@ interface InstallButtonData {
 }
 
 const defaultData: InstallButtonData = {
+  enabled: true,
   appName: "TalkLink",
   iconUrl: undefined,
   buttonText: "Install App",
@@ -63,6 +65,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
   const elementData = (element as InstallButtonElement).data || {};
   
   const data: InstallButtonData = {
+    enabled: elementData.enabled ?? defaultData.enabled,
     appName: elementData.appName ?? cardData?.pwaAppName ?? defaultData.appName,
     iconUrl: elementData.iconUrl,
     buttonText: elementData.buttonText ?? cardData?.pwaInstallButtonText ?? defaultData.buttonText,
@@ -227,6 +230,14 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
             <Download className="w-5 h-5 text-green-600" />
             Install App Button
           </h3>
+          <div className="flex items-center gap-2">
+            <Label className="text-sm text-slate-600">Enable</Label>
+            <Switch
+              checked={data.enabled}
+              onCheckedChange={(checked) => handleDataUpdate({ enabled: checked })}
+              data-testid="switch-install-button-enabled"
+            />
+          </div>
         </div>
 
         <div className="space-y-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
@@ -445,6 +456,10 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
         </div>
       </div>
     );
+  }
+
+  if (!data.enabled) {
+    return null;
   }
 
   if (cardData?.pwaInstallButtonEnabled === false) {
