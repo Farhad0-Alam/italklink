@@ -651,10 +651,9 @@ interface PageElementProps {
   isInteractive?: boolean;
   cardData?: any; // Business card data for theme colors
   onNavigatePage?: (pageId: string) => void;
-  onUpdatePWASettings?: (updates: any) => void; // Special callback for Install Button element
 }
 
-export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, isInteractive = true, cardData, onNavigatePage, onUpdatePWASettings }: PageElementProps) {
+export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, isInteractive = true, cardData, onNavigatePage }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [voiceAgentSections, setVoiceAgentSections] = useState({
@@ -2777,7 +2776,6 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
             element={element}
             isEditing={isEditing}
             onUpdate={onUpdate}
-            onUpdatePWASettings={onUpdatePWASettings}
             cardData={cardData}
           />
         );

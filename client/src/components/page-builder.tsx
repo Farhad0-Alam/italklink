@@ -36,10 +36,9 @@ interface SortableElementProps {
   onToggleVisibility: (elementId: string) => void;
   cardData?: any;
   onNavigatePage?: (pageId: string) => void;
-  onUpdatePWASettings?: (updates: any) => void;
 }
 
-function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibility, cardData, onNavigatePage, onUpdatePWASettings }: SortableElementProps) {
+function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibility, cardData, onNavigatePage }: SortableElementProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const {
     attributes,
@@ -151,7 +150,6 @@ function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibil
                 onDelete={onDelete}
                 cardData={cardData}
                 onNavigatePage={onNavigatePage}
-                onUpdatePWASettings={onUpdatePWASettings}
               />
             </div>
           </CollapsibleContent>
@@ -170,10 +168,9 @@ interface PageBuilderProps {
   onIndividualSpacingChange?: (elementType: string, spacing: number) => void;
   cardData?: any; // Business card data for theme colors
   onNavigatePage?: (pageId: string) => void;
-  onUpdatePWASettings?: (updates: any) => void; // Special callback for PWA settings
 }
 
-export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, onElementSpacingChange, individualElementSpacing, onIndividualSpacingChange, cardData, onNavigatePage, onUpdatePWASettings }: PageBuilderProps) {
+export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, onElementSpacingChange, individualElementSpacing, onIndividualSpacingChange, cardData, onNavigatePage }: PageBuilderProps) {
   const [showElementSelector, setShowElementSelector] = useState(false);
   
   const sensors = useSensors(
@@ -406,7 +403,6 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
                   onToggleVisibility={handleToggleVisibility}
                   cardData={cardData}
                   onNavigatePage={onNavigatePage}
-                  onUpdatePWASettings={onUpdatePWASettings}
                 />
               ))}
             </div>

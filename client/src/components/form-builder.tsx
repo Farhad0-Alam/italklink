@@ -23,6 +23,7 @@ import { fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
 import { GradientBuilder, type GradientConfig } from "@/components/GradientBuilder";
+import { PWASettings } from "@/components/sidebar-panel-theme";
 import { PageBuilder } from "@/modules/form-builder/components/PageBuilder";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -124,6 +125,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     customization: true,
     appearance: false,
     seo: false,
+    pwaSettings: true,
     pages: false, // Pages section expanded by default
     pageBuilder: true,
     // subsections inside Profile
@@ -312,41 +314,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     console.log('[FormBuilder] Notifying parent of page element change');
     onDataChange(updatedData);
   };
-
-  // Special callback for Install Button element to update root-level PWA fields
-  const updatePWASettings = useCallback((updates: Partial<BusinessCard>) => {
-    // Whitelist of allowed PWA fields
-    const allowedFields = [
-      'pwaInstallButtonEnabled',
-      'pwaAppName',
-      'pwaAppIcon',
-      'pwaThemeColor',
-      'pwaInstallButtonText',
-      'pwaInstallButtonColor',
-      'pwaInstallButtonTextColor',
-      'pwaInstallButtonSize',
-      'pwaInstallButtonStyle',
-      'pwaInstallButtonAlignment'
-    ];
-
-    // Filter updates to only include whitelisted fields
-    const filteredUpdates: any = {};
-    Object.entries(updates).forEach(([key, value]) => {
-      if (allowedFields.includes(key)) {
-        form.setValue(key as any, value, { shouldDirty: true, shouldTouch: true });
-        filteredUpdates[key] = value;
-      }
-    });
-
-    // CRITICAL: Merge filtered PWA fields onto enhancedCardData to preserve both
-    // persisted structure AND unsaved edits currently in form state
-    const updatedData = {
-      ...enhancedCardData,
-      ...filteredUpdates
-    };
-    console.log('[FormBuilder] Notifying parent of PWA settings change:', Object.keys(filteredUpdates));
-    onDataChange(updatedData);
-  }, [form, onDataChange, enhancedCardData]);
 
   // Debounced sync to parent - prevents infinite loops while keeping data in sync
   // Uses ref to compare snapshots and only calls onDataChange when actual data changes
@@ -6253,6 +6220,39 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 )}
               </div>
 
+              {/* PWA Settings Section */}
+              <div className="bg-green-900/30 border border-green-600/30 rounded-lg p-4 space-y-4 mt-4">
+                <div
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() => toggleSection("pwaSettings")}
+                >
+                  <h3 className="text-lg font-semibold text-green-300">
+                    <i className="fas fa-download mr-2"></i>
+                    PWA Installation Settings
+                  </h3>
+                  <i
+                    className={`fas ${collapsedSections.pwaSettings ? "fa-chevron-down" : "fa-chevron-up"} text-green-300`}
+                  />
+                </div>
+
+                {!collapsedSections.pwaSettings && (
+                  <PWASettings
+                    cardData={form.getValues()}
+                    onUpdate={(field, value) => {
+                      form.setValue(field as any, value, { shouldDirty: true });
+                    }}
+                    onImageUpload={async (file, field) => {
+                      try {
+                        const base64 = await fileToBase64(file);
+                        return base64;
+                      } catch (error) {
+                        console.error('Image upload failed:', error);
+                        throw error;
+                      }
+                    }}
+                  />
+                )}
+              </div>
             </>
           )}
 
@@ -6671,7 +6671,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 }}
                 cardData={enhancedCardData}
                 onNavigatePage={setSelectedPageId}
-                onUpdatePWASettings={updatePWASettings}
               />
             </div>
           )}
@@ -6737,7 +6736,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   }}
                   cardData={enhancedCardData}
                   onNavigatePage={setSelectedPageId}
-                  onUpdatePWASettings={updatePWASettings}
                 />
               ) : (
                 <div className="text-center py-8">
