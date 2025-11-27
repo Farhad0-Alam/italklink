@@ -262,7 +262,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         // Auto-convert AI response to speech (ChatGPT Voice mode style)
         try {
           setIsTTSLoading(true);
-          const ttsResponse = await fetch('/api/rag/tts', {
+          const ttsResponse = await fetch('/api/tts', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
