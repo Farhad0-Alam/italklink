@@ -43,7 +43,8 @@ const fallbackElementTypes: ElementType[] = [
   { type: "scheduleCall", title: "Schedule Call", icon: "fas fa-phone", color: "bg-gradient-to-r from-green-500 to-blue-600", description: "Schedule a phone/video call" },
   { type: "meetingRequest", title: "Meeting Request", icon: "fas fa-handshake", color: "bg-gradient-to-r from-purple-500 to-indigo-600", description: "Request a meeting button" },
   { type: "availabilityDisplay", title: "Availability Display", icon: "fas fa-clock", color: "bg-gradient-to-r from-amber-500 to-orange-600", description: "Show your availability schedule" },
-  { type: "subscribeForm", title: "Subscribe to Updates", icon: "fas fa-bell", color: "bg-gradient-to-r from-orange-500 to-red-600", description: "Let visitors subscribe to notifications" }
+  { type: "subscribeForm", title: "Subscribe to Updates", icon: "fas fa-bell", color: "bg-gradient-to-r from-orange-500 to-red-600", description: "Let visitors subscribe to notifications" },
+  { type: "installButton", title: "Install Button", icon: "fas fa-download", color: "bg-green-100", description: "PWA install button for Android & iPhone" }
 ];
 
 interface ElementSelectorProps {
@@ -571,6 +572,15 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             backgroundColor: "#ffffff",
             textColor: "#1e293b",
           },
+        };
+        break;
+
+      case "installButton":
+        element = {
+          id,
+          type: "installButton",
+          order: uniqueOrder,
+          data: {}
         };
         break;
       

@@ -76,6 +76,7 @@ function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibil
       case "googleMaps": return element.data.title || "Google Maps";
       case "aiChatbot": return element.data.title || "AI Chatbot";
       case "arPreviewMindAR": return "AR Preview";
+      case "installButton": return "Install Button";
       default: return "Page Element";
     }
   };
