@@ -356,6 +356,18 @@ export const businessCards = pgTable("business_cards", {
   // Stats
   viewCount: integer("view_count").default(0),
   
+  // PWA Settings
+  pwaAppName: varchar("pwa_app_name"),
+  pwaAppIcon: text("pwa_app_icon"), // base64 or URL
+  pwaThemeColor: varchar("pwa_theme_color").default('#22c55e'),
+  pwaInstallButtonText: varchar("pwa_install_button_text").default('Install App'),
+  pwaInstallButtonColor: varchar("pwa_install_button_color").default('#22c55e'),
+  pwaInstallButtonTextColor: varchar("pwa_install_button_text_color").default('#ffffff'),
+  pwaInstallButtonSize: varchar("pwa_install_button_size").default('md'),
+  pwaInstallButtonStyle: varchar("pwa_install_button_style").default('filled'),
+  pwaInstallButtonAlignment: varchar("pwa_install_button_alignment").default('center'),
+  pwaInstallButtonEnabled: boolean("pwa_install_button_enabled").default(true),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

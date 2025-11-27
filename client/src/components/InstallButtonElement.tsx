@@ -1,5 +1,3 @@
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BusinessCard, PageElement } from '@shared/schema';
 import { useBusinessCardPWA } from '@/hooks/useBusinessCardPWA';
 import { useState } from 'react';
@@ -21,12 +19,6 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
     installBusinessCard 
   } = useBusinessCardPWA(cardData || {} as BusinessCard);
 
-  const handleDataUpdate = (newData: any) => {
-    if (onUpdate) {
-      onUpdate({ ...element, data: { ...(element.data || {}), ...newData } });
-    }
-  };
-
   const handleInstallClick = async () => {
     setInstalling(true);
     try {
@@ -38,133 +30,37 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
     }
   };
 
-  // EDITING MODE - Show settings panel
+  // In editing mode, just show a placeholder
   if (isEditing) {
     return (
-      <div className="p-4 bg-white rounded-lg border border-slate-200 space-y-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold text-slate-800 text-lg">Install Button Settings</h3>
-          <i className="fas fa-download text-green-600 text-xl"></i>
+      <div className="p-4 bg-blue-50 border-2 border-blue-300 rounded-lg text-center">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <i className="fas fa-download text-blue-600 text-lg"></i>
+          <h3 className="font-semibold text-blue-800">Install Button</h3>
         </div>
-
-        <div className="space-y-3">
-          <div>
-            <label className="text-sm text-slate-700 font-medium mb-2 block">Button Text</label>
-            <Input
-              value={element.data?.buttonText || 'Install App'}
-              onChange={(e) => handleDataUpdate({ buttonText: e.target.value })}
-              placeholder="Install App"
-              className="text-black"
-              data-testid="input-install-button-text"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-slate-700 font-medium mb-2 block">Button Color</label>
-            <div className="flex gap-2 items-center">
-              <input
-                type="color"
-                value={element.data?.buttonColor || '#22c55e'}
-                onChange={(e) => handleDataUpdate({ buttonColor: e.target.value })}
-                className="h-10 rounded cursor-pointer"
-                data-testid="input-install-button-color"
-              />
-              <span className="text-xs text-slate-600">
-                {element.data?.buttonColor || '#22c55e'}
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm text-slate-700 font-medium mb-2 block">Text Color</label>
-            <div className="flex gap-2 items-center">
-              <input
-                type="color"
-                value={element.data?.textColor || '#ffffff'}
-                onChange={(e) => handleDataUpdate({ textColor: e.target.value })}
-                className="h-10 rounded cursor-pointer"
-                data-testid="input-install-text-color"
-              />
-              <span className="text-xs text-slate-600">
-                {element.data?.textColor || '#ffffff'}
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm text-slate-700 font-medium mb-2 block">Button Size</label>
-            <Select
-              value={element.data?.buttonSize || 'md'}
-              onValueChange={(value) => handleDataUpdate({ buttonSize: value })}
-            >
-              <SelectTrigger className="text-black" data-testid="select-install-button-size">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="sm">Small</SelectItem>
-                <SelectItem value="md">Medium</SelectItem>
-                <SelectItem value="lg">Large</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="text-sm text-slate-700 font-medium mb-2 block">Button Style</label>
-            <Select
-              value={element.data?.buttonStyle || 'filled'}
-              onValueChange={(value) => handleDataUpdate({ buttonStyle: value })}
-            >
-              <SelectTrigger className="text-black" data-testid="select-install-button-style">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="filled">Filled</SelectItem>
-                <SelectItem value="outline">Outline</SelectItem>
-                <SelectItem value="ghost">Ghost</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="text-sm text-slate-700 font-medium mb-2 block">Button Alignment</label>
-            <Select
-              value={element.data?.alignment || 'center'}
-              onValueChange={(value) => handleDataUpdate({ alignment: value })}
-            >
-              <SelectTrigger className="text-black" data-testid="select-install-alignment">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="left">Left</SelectItem>
-                <SelectItem value="center">Center</SelectItem>
-                <SelectItem value="right">Right</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-800">
-              <i className="fas fa-info-circle mr-2"></i>
-              Button will only appear to visitors when PWA installation is available (Chrome, Edge, Firefox on Android & Safari on iPhone).
-            </p>
-          </div>
-        </div>
+        <p className="text-sm text-blue-700">
+          Configured in Theme Settings. Customize text, colors, and size there.
+        </p>
       </div>
     );
   }
 
-  // DISPLAY MODE - Show the button or nothing if not installable
-  const buttonSize = element.data?.buttonSize || 'md';
-  const buttonColor = element.data?.buttonColor || '#22c55e';
-  const textColor = element.data?.textColor || '#ffffff';
-  const buttonStyle = element.data?.buttonStyle || 'filled';
-  const alignment = element.data?.alignment || 'center';
-  const buttonText = element.data?.buttonText || 'Install App';
+  // DISPLAY MODE - Read all settings from cardData PWA settings
+  if (!cardData?.pwaInstallButtonEnabled) {
+    return null;
+  }
 
   // If already installed or not installable, hide the button
   if (isInstalled || !isInstallable) {
     return null;
   }
+
+  const buttonSize = cardData?.pwaInstallButtonSize || 'md';
+  const buttonColor = cardData?.pwaInstallButtonColor || '#22c55e';
+  const textColor = cardData?.pwaInstallButtonTextColor || '#ffffff';
+  const buttonStyle = cardData?.pwaInstallButtonStyle || 'filled';
+  const alignment = cardData?.pwaInstallButtonAlignment || 'center';
+  const buttonText = cardData?.pwaInstallButtonText || 'Install App';
 
   // Calculate padding based on size
   const sizeClasses = {
