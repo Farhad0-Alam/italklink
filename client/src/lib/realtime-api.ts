@@ -93,6 +93,16 @@ export class RealtimeAPIClient {
           resolve();
         };
 
+        this.ws.onerror = (event) => {
+          console.error('[RealtimeAPI] WebSocket error:', event);
+          reject(new Error('WebSocket connection failed'));
+        };
+
+        this.ws.onclose = () => {
+          console.log('[RealtimeAPI] WebSocket closed');
+          this.isConnected = false;
+        };
+
         this.ws.onmessage = (event) => {
           try {
             if (event.data instanceof ArrayBuffer) {

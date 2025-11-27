@@ -365,15 +365,32 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     } catch (error: any) {
       console.error('[RealtimeAPI] Connection error:', error);
       let errorDescription = 'Unable to connect to voice service';
+      let errorTitle = 'Connection Error';
 
       if (error?.name === 'NotAllowedError') {
-        errorDescription = 'Microphone permission denied. Please allow access and try again.';
+        errorDescription = 'Microphone permission denied. Please check browser permissions and try again.';
+        errorTitle = 'Microphone Permission';
+      } else if (error?.name === 'NotFoundError') {
+        errorDescription = 'Microphone not found. Please check your device.';
+        errorTitle = 'Microphone Not Found';
       } else if (error?.message?.includes('API key')) {
         errorDescription = 'API key not configured';
+      } else if (error?.message?.includes('WebSocket') || error?.code === 1006) {
+        errorDescription = 'Voice service connection failed. Please refresh and try again.';
+        errorTitle = 'WebSocket Error';
+      } else if (error?.message) {
+        errorDescription = error.message;
       }
 
+      console.error('[RealtimeAPI] Full error details:', {
+        name: error?.name,
+        message: error?.message,
+        code: error?.code,
+        toString: error?.toString?.(),
+      });
+
       toast({
-        title: 'Connection Error',
+        title: errorTitle,
         description: errorDescription,
         variant: 'destructive',
       });
