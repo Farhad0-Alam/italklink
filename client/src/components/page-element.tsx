@@ -2634,6 +2634,11 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                           }
                         });
                       }}
+                      onDocumentsIngested={() => {
+                        // Refresh chunks list
+                        toggleRagSection('chunks');
+                        setTimeout(() => toggleRagSection('chunks'), 100);
+                      }}
                       maxDocuments={50}
                       acceptedTypes={['.pdf', '.doc', '.docx', '.txt', '.md', '.rtf']}
                       className="bg-slate-700 border-slate-500"

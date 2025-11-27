@@ -19,6 +19,7 @@ interface DocumentManagerProps {
   title?: string;
   description?: string;
   onDocumentsChange?: (documents: DocumentItem[]) => void;
+  onDocumentsIngested?: (count: number) => void;
   maxDocuments?: number;
   maxFileSize?: number; // in bytes
   acceptedTypes?: string[];
@@ -30,6 +31,7 @@ export function DocumentManager({
   title = "PDF Documents", 
   description = "Upload documents one by one for knowledge extraction",
   onDocumentsChange,
+  onDocumentsIngested,
   maxDocuments = 20,
   maxFileSize = 10 * 1024 * 1024, // 10MB
   acceptedTypes = ['.pdf', '.doc', '.docx', '.txt', '.md'],
@@ -38,6 +40,7 @@ export function DocumentManager({
 }: DocumentManagerProps) {
   const [documents, setDocuments] = useState<DocumentItem[]>(externalDocuments);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isIngesting, setIsIngesting] = useState(false);
   const { toast } = useToast();
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -137,6 +140,65 @@ export function DocumentManager({
 
   const handleDragOver = (event: React.DragEvent) => {
     event.preventDefault();
+  };
+
+  const ingestDocuments = async () => {
+    const readyDocs = documents.filter(d => d.status === 'success');
+    if (readyDocs.length === 0) {
+      toast({
+        title: 'Error',
+        description: 'No documents ready to ingest',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsIngesting(true);
+    let successCount = 0;
+    let failedCount = 0;
+
+    try {
+      for (const doc of readyDocs) {
+        try {
+          const response = await fetch('/api/ingest-text', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: doc.content,
+              title: doc.name,
+            }),
+          });
+
+          if (response.ok) {
+            successCount++;
+          } else {
+            failedCount++;
+          }
+        } catch (error) {
+          failedCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        toast({
+          title: 'Success',
+          description: `${successCount} document${successCount !== 1 ? 's' : ''} ingested to knowledge base`,
+        });
+        onDocumentsIngested?.(successCount);
+        setDocuments([]);
+        onDocumentsChange?.([]);
+      }
+
+      if (failedCount > 0) {
+        toast({
+          title: 'Warning',
+          description: `${failedCount} document${failedCount !== 1 ? 's' : ''} failed to ingest`,
+          variant: 'destructive',
+        });
+      }
+    } finally {
+      setIsIngesting(false);
+    }
   };
 
   const getStatusIcon = (status: DocumentItem['status']) => {
@@ -267,21 +329,31 @@ export function DocumentManager({
 
         {/* Actions */}
         {documents.length > 0 && (
-          <div className="flex justify-between items-center pt-2 border-t">
+          <div className="flex flex-col gap-2 pt-2 border-t">
             <div className="text-sm text-slate-400">
               {documents.filter(d => d.status === 'success').length} ready, {documents.filter(d => d.status === 'error').length} failed
             </div>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setDocuments([]);
-                onDocumentsChange?.([]);
-              }}
-              disabled={isProcessing}
-              size="sm"
-            >
-              Clear All
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={ingestDocuments}
+                disabled={isIngesting || documents.filter(d => d.status === 'success').length === 0}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                size="sm"
+              >
+                {isIngesting ? 'Ingesting...' : `📎 Ingest ${documents.filter(d => d.status === 'success').length} Document${documents.filter(d => d.status === 'success').length !== 1 ? 's' : ''}`}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDocuments([]);
+                  onDocumentsChange?.([]);
+                }}
+                disabled={isProcessing || isIngesting}
+                size="sm"
+              >
+                Clear All
+              </Button>
+            </div>
           </div>
         )}
 
