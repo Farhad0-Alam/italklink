@@ -242,15 +242,28 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
 
         <div className="space-y-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
           <div>
-            <Label className="text-sm text-slate-700 font-medium mb-1 block">App Name</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label className="text-sm text-slate-700 font-medium">App Name</Label>
+              {cardData?.fullName && (
+                <button
+                  onClick={() => handleDataUpdate({ appName: cardData.fullName || '' })}
+                  className="text-xs px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition-colors"
+                  data-testid="button-sync-app-name"
+                >
+                  Use "{cardData.fullName}"
+                </button>
+              )}
+            </div>
             <Input
               value={data.appName}
               onChange={(e) => handleDataUpdate({ appName: e.target.value })}
-              placeholder="TalkLink"
+              placeholder={cardData?.fullName || "TalkLink"}
               className="text-black"
               data-testid="input-install-app-name"
             />
-            <p className="text-xs text-slate-500 mt-1">Name that appears on home screen after installation</p>
+            <p className="text-xs text-slate-500 mt-1">
+              {cardData?.fullName ? `Currently: "${cardData.fullName}" (click button to use)` : 'Name that appears on home screen after installation'}
+            </p>
           </div>
 
           <div>
