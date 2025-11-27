@@ -258,6 +258,37 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         };
 
         setMessages(prev => [...prev, assistantMessage]);
+
+        // Auto-convert AI response to speech (ChatGPT Voice mode style)
+        try {
+          setIsTTSLoading(true);
+          const ttsResponse = await fetch('/api/rag/tts', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: result.answer }),
+          });
+
+          const ttsData = await ttsResponse.json();
+
+          if (ttsResponse.ok && ttsData.audioUrl) {
+            if (audioRef.current && isMountedRef.current) {
+              audioRef.current.src = ttsData.audioUrl;
+              audioRef.current.onended = () => {
+                if (isMountedRef.current) {
+                  setIsPlayingAudio(false);
+                }
+              };
+              await audioRef.current.play();
+              setIsPlayingAudio(true);
+            }
+          }
+        } catch (ttsError) {
+          console.error('[TTS Error]:', ttsError);
+        } finally {
+          setIsTTSLoading(false);
+        }
       } else {
         throw new Error(result.answer || 'Failed to get response');
       }
@@ -695,6 +726,24 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                     className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none text-sm sm:text-base disabled:cursor-not-allowed"
                     data-testid="input-chat"
                   />
+                  
+                  {/* Voice-to-Text Mic Button in Chat Input */}
+                  <button
+                    type="button"
+                    onClick={startListening}
+                    disabled={isLoading || isProcessing || isListening}
+                    className={`flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-colors ${
+                      isListening
+                        ? 'bg-red-600 text-white animate-pulse'
+                        : isLoading || isProcessing
+                        ? 'text-gray-600 cursor-not-allowed'
+                        : 'hover:bg-gray-700 text-gray-400 hover:text-white'
+                    }`}
+                    data-testid="button-voice-input-mic"
+                    title="Click to speak your message"
+                  >
+                    <Mic className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </button>
                 </div>
 
                 {/* Waveform Button - TTS Mode */}

@@ -150,4 +150,73 @@ ${context}`;
   }
 });
 
+// POST /api/rag/tts - Convert text to speech
+router.post('/tts', async (req, res) => {
+  try {
+    const { text } = req.body;
+    
+    if (!text) {
+      return res.status(400).json({ error: 'Text required' });
+    }
+
+    console.log('TTS request:', { textLength: text.length });
+
+    // Generate speech using OpenAI
+    const response = await openai.audio.speech.create({
+      model: 'tts-1',
+      voice: 'alloy',
+      input: text,
+    });
+
+    // Convert response to buffer
+    const buffer = Buffer.from(await response.arrayBuffer());
+    
+    // Create data URL for audio
+    const base64Audio = buffer.toString('base64');
+    const audioUrl = `data:audio/mpeg;base64,${base64Audio}`;
+
+    res.json({
+      audioUrl,
+      success: true,
+    });
+  } catch (error) {
+    console.error('TTS error:', error);
+    res.status(500).json({ error: 'Failed to generate speech' });
+  }
+});
+
+// POST /api/rag/stt - Convert speech to text (using Realtime API for chat)
+router.post('/stt', async (req, res) => {
+  try {
+    const { audio } = req.body;
+    
+    if (!audio) {
+      return res.status(400).json({ error: 'Audio data required' });
+    }
+
+    console.log('STT request received');
+
+    // Convert base64 audio to buffer
+    const base64Data = audio.split(',')[1] || audio;
+    const audioBuffer = Buffer.from(base64Data, 'base64');
+
+    // Transcribe using OpenAI Whisper
+    const transcriptionResponse = await openai.audio.transcriptions.create({
+      file: new File([audioBuffer], 'audio.wav', { type: 'audio/wav' }),
+      model: 'whisper-1',
+      language: 'en',
+    });
+
+    console.log('Transcription:', transcriptionResponse.text);
+
+    res.json({
+      transcript: transcriptionResponse.text,
+      success: true,
+    });
+  } catch (error) {
+    console.error('STT error:', error);
+    res.status(500).json({ error: 'Failed to transcribe audio' });
+  }
+});
+
 export default router;
