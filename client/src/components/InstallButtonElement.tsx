@@ -50,8 +50,8 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
     return null;
   }
 
-  // If already installed or not installable, hide the button
-  if (isInstalled || !isInstallable) {
+  // If already installed, hide the button
+  if (isInstalled) {
     return null;
   }
 
