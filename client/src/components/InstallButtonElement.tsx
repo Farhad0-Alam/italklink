@@ -71,34 +71,67 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
 
   // In editing mode, show PWA Installation Settings
   if (isEditing) {
+    const lightLabel = (label: string) => (
+      <label className="text-xs font-medium text-slate-600 block mb-2">
+        {label}
+      </label>
+    );
+
+    const lightInput = (props: any) => (
+      <input
+        {...props}
+        className="w-full h-9 px-3 rounded border border-slate-300 bg-white text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      />
+    );
+
+    const lightColorPicker = (props: any) => (
+      <input
+        type="color"
+        {...props}
+        className="h-9 w-16 rounded border border-slate-300 cursor-pointer"
+      />
+    );
+
+    const lightSelect = (value: string, onChange: (v: string) => void, options: {value: string, label: string}[]) => (
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full h-9 px-3 rounded border border-slate-300 bg-white text-slate-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      >
+        {options.map(opt => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+    );
+
     return (
-      <div className="p-4 space-y-4 bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-300 rounded-lg">
-        <div className="flex items-center gap-2 mb-4 pb-4 border-b-2 border-slate-200">
-          <i className="fas fa-cog text-slate-600 text-lg"></i>
+      <div className="p-4 space-y-4 bg-white rounded-lg border-2 border-slate-200">
+        <div className="flex items-center gap-2 pb-3 border-b border-slate-200">
+          <i className="fas fa-cog text-slate-700 text-lg"></i>
           <h3 className="font-semibold text-slate-800 text-lg">PWA Installation Settings</h3>
         </div>
 
         {/* App Name */}
         <div>
-          <PanelLabel htmlFor="install-app-name">App Name</PanelLabel>
-          <PanelInput
-            id="install-app-name"
-            value={cardData?.pwaAppName || 'APP'}
-            onChange={(e) => onUpdate?.({ pwaAppName: e.target.value })}
-            placeholder="Enter app name"
-            data-testid="input-install-app-name"
-          />
+          {lightLabel('App Name')}
+          {lightInput({
+            id: 'install-app-name',
+            value: cardData?.pwaAppName || 'APP',
+            onChange: (e: any) => onUpdate?.({ pwaAppName: e.target.value }),
+            placeholder: 'Enter app name',
+            'data-testid': 'input-install-app-name'
+          })}
         </div>
 
         {/* App Icon */}
         <div>
-          <PanelLabel>App Icon</PanelLabel>
+          {lightLabel('App Icon')}
           <div className="flex items-center gap-3">
-            <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-800 border border-slate-600 flex items-center justify-center flex-shrink-0">
+            <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100 border border-slate-300 flex items-center justify-center flex-shrink-0">
               {cardData?.pwaAppIcon ? (
                 <img src={cardData.pwaAppIcon} alt="PWA Icon" className="w-full h-full object-cover" />
               ) : (
-                <i className="fas fa-image text-slate-500 text-xl"></i>
+                <i className="fas fa-image text-slate-400 text-xl"></i>
               )}
             </div>
             <div>
@@ -112,8 +145,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
               />
               <button
                 onClick={() => document.getElementById('install-app-icon')?.click()}
-                className="px-3 py-1.5 rounded text-sm font-medium transition-opacity hover:opacity-90"
-                style={{ backgroundColor: panelTheme.colors.success, color: 'white' }}
+                className="px-3 py-1.5 rounded text-sm font-medium transition-opacity hover:opacity-90 bg-green-500 text-white"
                 data-testid="button-upload-install-icon"
               >
                 <i className="fas fa-upload mr-1"></i>
@@ -123,67 +155,70 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
           </div>
         </div>
 
-        <PanelDivider />
+        <div className="border-t border-slate-200"></div>
 
         {/* Theme Color */}
         <div>
-          <PanelLabel htmlFor="install-theme-color">Theme Color</PanelLabel>
+          {lightLabel('Theme Color')}
           <div className="flex items-center gap-2">
-            <PanelColorPicker
-              id="install-theme-color"
-              value={cardData?.pwaThemeColor || '#22c55e'}
-              onChange={(e) => onUpdate?.({ pwaThemeColor: e.target.value })}
-              data-testid="input-install-theme-color"
-            />
-            <span className="text-xs font-mono" style={{ color: panelTheme.colors.textSecondary }}>
+            {lightColorPicker({
+              id: 'install-theme-color',
+              value: cardData?.pwaThemeColor || '#22c55e',
+              onChange: (e: any) => onUpdate?.({ pwaThemeColor: e.target.value }),
+              'data-testid': 'input-install-theme-color'
+            })}
+            <span className="text-xs font-mono text-slate-600">
               {cardData?.pwaThemeColor || '#22c55e'}
             </span>
           </div>
         </div>
 
-        <PanelDivider />
+        <div className="border-t border-slate-200"></div>
 
         {/* Enable Install Button */}
         <div>
-          <PanelLabel>
-            <div className="flex items-center gap-2">
-              <i className="fas fa-download text-green-400"></i>
-              <span>Enable Install Button</span>
-            </div>
-          </PanelLabel>
-          <PanelCheckbox
-            id="install-enabled"
-            checked={cardData?.pwaInstallButtonEnabled !== false}
-            onCheckedChange={(checked) => onUpdate?.({ pwaInstallButtonEnabled: checked })}
-            label="Show install button on card"
-          />
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              id="install-enabled"
+              checked={cardData?.pwaInstallButtonEnabled !== false}
+              onChange={(e) => onUpdate?.({ pwaInstallButtonEnabled: e.target.checked })}
+              className="w-4 h-4 rounded border-slate-300 text-green-500 focus:ring-green-500"
+              data-testid="checkbox-install-enabled"
+            />
+            <span className="text-sm font-medium text-slate-700">
+              <i className="fas fa-download text-green-500 mr-2"></i>
+              Enable Install Button
+            </span>
+          </label>
+          <p className="text-xs text-slate-600 mt-1 ml-7">Show install button on card</p>
         </div>
 
         {cardData?.pwaInstallButtonEnabled !== false && (
           <>
             {/* Button Text */}
             <div>
-              <PanelLabel htmlFor="install-button-text">Install Button Text</PanelLabel>
-              <PanelInput
-                id="install-button-text"
-                value={cardData?.pwaInstallButtonText || 'Install App'}
-                onChange={(e) => onUpdate?.({ pwaInstallButtonText: e.target.value })}
-                placeholder="Install App"
-                data-testid="input-install-button-text"
-              />
+              {lightLabel('Install Button Text')}
+              {lightInput({
+                id: 'install-button-text',
+                value: cardData?.pwaInstallButtonText || 'Install App',
+                onChange: (e: any) => onUpdate?.({ pwaInstallButtonText: e.target.value }),
+                placeholder: 'Install App',
+                'data-testid': 'input-install-button-text'
+              })}
             </div>
 
             {/* Button Color */}
             <div>
-              <PanelLabel htmlFor="install-button-color">Button Color</PanelLabel>
+              {lightLabel('Button Color')}
               <div className="flex items-center gap-2">
-                <PanelColorPicker
-                  id="install-button-color"
-                  value={cardData?.pwaInstallButtonColor || '#22c55e'}
-                  onChange={(e) => onUpdate?.({ pwaInstallButtonColor: e.target.value })}
-                  data-testid="input-install-button-color"
-                />
-                <span className="text-xs font-mono" style={{ color: panelTheme.colors.textSecondary }}>
+                {lightColorPicker({
+                  id: 'install-button-color',
+                  value: cardData?.pwaInstallButtonColor || '#22c55e',
+                  onChange: (e: any) => onUpdate?.({ pwaInstallButtonColor: e.target.value }),
+                  'data-testid': 'input-install-button-color'
+                })}
+                <span className="text-xs font-mono text-slate-600">
                   {cardData?.pwaInstallButtonColor || '#22c55e'}
                 </span>
               </div>
@@ -191,15 +226,15 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
 
             {/* Text Color */}
             <div>
-              <PanelLabel htmlFor="install-text-color">Text Color</PanelLabel>
+              {lightLabel('Text Color')}
               <div className="flex items-center gap-2">
-                <PanelColorPicker
-                  id="install-text-color"
-                  value={cardData?.pwaInstallButtonTextColor || '#ffffff'}
-                  onChange={(e) => onUpdate?.({ pwaInstallButtonTextColor: e.target.value })}
-                  data-testid="input-install-text-color"
-                />
-                <span className="text-xs font-mono" style={{ color: panelTheme.colors.textSecondary }}>
+                {lightColorPicker({
+                  id: 'install-text-color',
+                  value: cardData?.pwaInstallButtonTextColor || '#ffffff',
+                  onChange: (e: any) => onUpdate?.({ pwaInstallButtonTextColor: e.target.value }),
+                  'data-testid': 'input-install-text-color'
+                })}
+                <span className="text-xs font-mono text-slate-600">
                   {cardData?.pwaInstallButtonTextColor || '#ffffff'}
                 </span>
               </div>
@@ -207,47 +242,50 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
 
             {/* Button Size */}
             <div>
-              <PanelLabel htmlFor="install-button-size">Button Size</PanelLabel>
-              <PanelSelect
-                value={cardData?.pwaInstallButtonSize || 'md'}
-                onValueChange={(value) => onUpdate?.({ pwaInstallButtonSize: value as 'sm' | 'md' | 'lg' })}
-              >
-                <SelectItem value="sm">Small</SelectItem>
-                <SelectItem value="md">Medium</SelectItem>
-                <SelectItem value="lg">Large</SelectItem>
-              </PanelSelect>
+              {lightLabel('Button Size')}
+              {lightSelect(
+                cardData?.pwaInstallButtonSize || 'md',
+                (value) => onUpdate?.({ pwaInstallButtonSize: value as 'sm' | 'md' | 'lg' }),
+                [
+                  { value: 'sm', label: 'Small' },
+                  { value: 'md', label: 'Medium' },
+                  { value: 'lg', label: 'Large' }
+                ]
+              )}
             </div>
 
             {/* Button Style */}
             <div>
-              <PanelLabel htmlFor="install-button-style">Button Style</PanelLabel>
-              <PanelSelect
-                value={cardData?.pwaInstallButtonStyle || 'solid'}
-                onValueChange={(value) => onUpdate?.({ pwaInstallButtonStyle: value as 'solid' | 'outline' | 'ghost' })}
-              >
-                <SelectItem value="solid">Filled</SelectItem>
-                <SelectItem value="outline">Outline</SelectItem>
-                <SelectItem value="ghost">Ghost</SelectItem>
-              </PanelSelect>
+              {lightLabel('Button Style')}
+              {lightSelect(
+                cardData?.pwaInstallButtonStyle || 'solid',
+                (value) => onUpdate?.({ pwaInstallButtonStyle: value as 'solid' | 'outline' | 'ghost' }),
+                [
+                  { value: 'solid', label: 'Filled' },
+                  { value: 'outline', label: 'Outline' },
+                  { value: 'ghost', label: 'Ghost' }
+                ]
+              )}
             </div>
 
             {/* Button Alignment */}
             <div>
-              <PanelLabel htmlFor="install-button-alignment">Button Alignment</PanelLabel>
-              <PanelSelect
-                value={cardData?.pwaInstallButtonAlignment || 'center'}
-                onValueChange={(value) => onUpdate?.({ pwaInstallButtonAlignment: value as 'left' | 'center' | 'right' })}
-              >
-                <SelectItem value="left">Left</SelectItem>
-                <SelectItem value="center">Center</SelectItem>
-                <SelectItem value="right">Right</SelectItem>
-              </PanelSelect>
+              {lightLabel('Button Alignment')}
+              {lightSelect(
+                cardData?.pwaInstallButtonAlignment || 'center',
+                (value) => onUpdate?.({ pwaInstallButtonAlignment: value as 'left' | 'center' | 'right' }),
+                [
+                  { value: 'left', label: 'Left' },
+                  { value: 'center', label: 'Center' },
+                  { value: 'right', label: 'Right' }
+                ]
+              )}
             </div>
           </>
         )}
 
-        <div className="p-3 rounded-md mt-4" style={{ backgroundColor: `${panelTheme.colors.accent}20`, borderColor: panelTheme.colors.accent, border: '1px solid' }}>
-          <p className="text-xs" style={{ color: panelTheme.colors.textSecondary }}>
+        <div className="p-3 rounded-md border border-blue-200 bg-blue-50">
+          <p className="text-xs text-blue-700">
             <i className="fas fa-info-circle mr-2"></i>
             Install button appears on Android (Chrome, Edge, Firefox) and iPhone (Safari) only.
           </p>
