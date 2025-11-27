@@ -53,7 +53,7 @@ export const rateLimitConfigs = {
   // General API rate limiting
   api: createRateLimit(
     15 * 60 * 1000, // 15 minutes
-    100, // 100 requests per window
+    500, // 500 requests per window (allows auto-save without throttling)
     {
       error: 'Too many API requests',
       code: 'RATE_LIMIT_API',

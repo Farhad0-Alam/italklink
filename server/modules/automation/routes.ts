@@ -213,9 +213,17 @@ router.post('/track', checkTrackingRateLimit, async (req: Request, res: Response
       });
     }
     
+    // Provide more detailed error logging for debugging
+    console.error('Track interaction detailed error:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code
+    });
+    
     res.status(500).json({
       success: false,
-      error: 'Internal server error'
+      error: error.message || 'Internal server error',
+      code: 'TRACKING_ERROR'
     });
   }
 });
