@@ -1058,7 +1058,20 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  // User Subscription operations (legacy - use subscriptions table instead)
+  // User Subscription operations
+  async getUserSubscription(userId: string): Promise<any | undefined> {
+    const [subscription] = await db
+      .select()
+      .from(userSubscriptions)
+      .where(and(
+        eq(userSubscriptions.userId, userId),
+        eq(userSubscriptions.isActive, true)
+      ))
+      .orderBy(desc(userSubscriptions.createdAt))
+      .limit(1);
+    return subscription;
+  }
+
   async createUserSubscription(subscriptionData: any): Promise<any> {
     const [subscription] = await db.insert(userSubscriptions).values(subscriptionData).returning();
     return subscription;
