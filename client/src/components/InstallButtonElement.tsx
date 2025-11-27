@@ -1,17 +1,19 @@
 import { BusinessCard, PageElement } from '@shared/schema';
 import { useBusinessCardPWA } from '@/hooks/useBusinessCardPWA';
 import { useState } from 'react';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useToast } from "@/hooks/use-toast";
 
 type InstallButtonElement = Extract<PageElement, { type: "installButton" }>;
 
 interface InstallButtonData {
   appName: string;
+  iconUrl?: string;
   buttonText: string;
   buttonColor: string;
   textColor: string;
@@ -25,6 +27,7 @@ interface InstallButtonData {
 
 const defaultData: InstallButtonData = {
   appName: "TalkLink",
+  iconUrl: undefined,
   buttonText: "Install App",
   buttonColor: "#22c55e",
   textColor: "#ffffff",
@@ -46,6 +49,8 @@ interface InstallButtonElementProps {
 export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }: InstallButtonElementProps) => {
   const [installing, setInstalling] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
+  const [uploadingIcon, setUploadingIcon] = useState(false);
+  const { toast } = useToast();
   
   const { 
     isInstallable, 
@@ -59,6 +64,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
   
   const data: InstallButtonData = {
     appName: elementData.appName ?? cardData?.pwaAppName ?? defaultData.appName,
+    iconUrl: elementData.iconUrl,
     buttonText: elementData.buttonText ?? cardData?.pwaInstallButtonText ?? defaultData.buttonText,
     buttonColor: elementData.buttonColor ?? cardData?.pwaInstallButtonColor ?? defaultData.buttonColor,
     textColor: elementData.textColor ?? cardData?.pwaInstallButtonTextColor ?? defaultData.textColor,
@@ -78,6 +84,36 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
         type: "installButton",
         data: newData
       } as PageElement);
+    }
+  };
+
+  const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Error", description: "Icon must be less than 5MB", variant: "destructive" });
+      return;
+    }
+
+    setUploadingIcon(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+      const { url } = await response.json();
+      handleDataUpdate({ iconUrl: url });
+      toast({ title: "Success", description: "Icon uploaded successfully" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to upload icon", variant: "destructive" });
+    } finally {
+      setUploadingIcon(false);
     }
   };
 
