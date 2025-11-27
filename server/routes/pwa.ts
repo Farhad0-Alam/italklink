@@ -70,6 +70,9 @@ router.get('/manifest', async (req, res) => {
     const brandColor = (cardData?.brandColor as string) || '#22c55e';
     const profileImage = cardData?.profileImage as string;
     
+    // Prioritize element iconUrl, then pwaAppIcon, then profileImage for PWA icons
+    const iconSource = appIcon || profileImage;
+    
     // Use the exact pathname from referer as start_url (critical for PWA launch)
     const manifest = {
       name: appName,
@@ -85,9 +88,9 @@ router.get('/manifest', async (req, res) => {
       icons: [] as any[]
     };
 
-    if (profileImage && profileImage.startsWith('http')) {
+    if (iconSource && iconSource.startsWith('http')) {
       try {
-        const imageResponse = await fetch(profileImage);
+        const imageResponse = await fetch(iconSource);
         const arrayBuffer = await imageResponse.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 

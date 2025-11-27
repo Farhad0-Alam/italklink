@@ -64,10 +64,11 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
 
   const elementData = (element as InstallButtonElement).data || {};
   
+  // Element data takes priority, then legacy cardData.pwa* fallback for backward compatibility
   const data: InstallButtonData = {
     enabled: elementData.enabled ?? defaultData.enabled,
     appName: elementData.appName ?? cardData?.pwaAppName ?? defaultData.appName,
-    iconUrl: elementData.iconUrl,
+    iconUrl: elementData.iconUrl ?? cardData?.pwaAppIcon,
     buttonText: elementData.buttonText ?? cardData?.pwaInstallButtonText ?? defaultData.buttonText,
     buttonColor: elementData.buttonColor ?? cardData?.pwaInstallButtonColor ?? defaultData.buttonColor,
     textColor: elementData.textColor ?? cardData?.pwaInstallButtonTextColor ?? defaultData.textColor,
@@ -459,10 +460,6 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
   }
 
   if (!data.enabled) {
-    return null;
-  }
-
-  if (cardData?.pwaInstallButtonEnabled === false) {
     return null;
   }
 
