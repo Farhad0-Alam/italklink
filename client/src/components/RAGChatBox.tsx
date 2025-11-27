@@ -381,12 +381,81 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     }
   };
 
-  const stopListening = () => {
-    if (realtimeClientRef.current) {
-      realtimeClientRef.current.commitAudio();
-      // Keep connection open for response
-    }
+  const stopListening = async () => {
     setIsListening(false);
+    
+    if (realtimeClientRef.current) {
+      try {
+        // Commit audio and wait for AI response
+        realtimeClientRef.current.commitAudio();
+        
+        // Wait for audio playback to complete
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Get transcript that was captured
+        const userTranscript = currentTranscriptRef.current || '';
+        
+        if (userTranscript) {
+          console.log('[Voice] Processing transcript:', userTranscript);
+          
+          // Add user message to chat
+          const userMessage: ChatMessage = {
+            id: Date.now().toString(),
+            type: 'user',
+            content: userTranscript,
+            timestamp: new Date(),
+          };
+          
+          setMessages(prev => [...prev, userMessage]);
+          
+          // Send to RAG for response
+          try {
+            const ragResponse = await apiRequest<{ answer: string }>('POST', '/api/chat', {
+              message: userTranscript,
+              cardId: cardId || '',
+            });
+            
+            if (ragResponse?.answer) {
+              const assistantMessage: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                type: 'assistant',
+                content: ragResponse.answer,
+                timestamp: new Date(),
+              };
+              
+              setMessages(prev => [...prev, assistantMessage]);
+              
+              // Auto-play as audio (ChatGPT Voice mode)
+              try {
+                const ttsResponse = await fetch('/api/tts', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ text: ragResponse.answer }),
+                });
+                
+                const ttsData = await ttsResponse.json();
+                if (ttsResponse.ok && ttsData.audioUrl && audioRef.current) {
+                  audioRef.current.src = ttsData.audioUrl;
+                  await audioRef.current.play();
+                  setIsPlayingAudio(true);
+                }
+              } catch (ttsErr) {
+                console.error('[TTS Error]:', ttsErr);
+              }
+            }
+          } catch (ragErr) {
+            console.error('[RAG Error]:', ragErr);
+          }
+        }
+        
+        // Reset transcript
+        currentTranscriptRef.current = '';
+        realtimeClientRef.current.disconnect();
+        realtimeClientRef.current = null;
+      } catch (error) {
+        console.error('[Stop Listening Error]:', error);
+      }
+    }
   };
 
   // Simple voice-to-text input (not full conversation)
@@ -628,9 +697,12 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
   };
 
   const convertToSpeech = () => {
-    // Open the voice conversation modal
-    // User will use microphone button to record and get real API responses
+    // Open the voice conversation modal for ChatGPT Voice mode style conversation
     setIsVoiceModalOpen(true);
+    // Auto-start listening when modal opens
+    setTimeout(() => {
+      startListening();
+    }, 300);
   };
 
   const stopAudio = () => {
