@@ -980,6 +980,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // General file upload endpoint (for icons, images, etc.)
+  app.post('/api/upload', requireAuth, profileUpload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file provided' });
+      }
+
+      const user = req.user as User;
+      const file = req.file;
+
+      // Create uploads directory if it doesn't exist
+      const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'files');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      // Generate unique filename
+      const fileExtension = path.extname(file.originalname);
+      const filename = `file-${user.id}-${Date.now()}${fileExtension}`;
+      const filepath = path.join(uploadsDir, filename);
+
+      // Save file to disk
+      fs.writeFileSync(filepath, file.buffer);
+
+      // Return public URL
+      const url = `/uploads/files/${filename}`;
+      res.json({ url });
+    } catch (error) {
+      console.error('File upload error:', error);
+      res.status(500).json({ message: 'Failed to upload file' });
+    }
+  });
+
   // Email/password registration
   app.post('/api/auth/register', async (req, res) => {
     try {
