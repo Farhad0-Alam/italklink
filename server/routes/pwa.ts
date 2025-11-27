@@ -10,11 +10,30 @@ const router = Router();
 // Generate dynamic manifest for each business card
 router.get('/manifest', async (req, res) => {
   try {
-    const referer = req.headers.referer || req.headers.origin;
-    const cardSlug = req.query.slug as string;
+    // Extract pathname from referer header (primary method - like old 2talklink)
+    let pathname = '/';
+    let slugFromPath = '';
+    
+    if (req.headers.referer) {
+      const refererUrl = new URL(req.headers.referer);
+      pathname = refererUrl.pathname;
+      // Extract slug from pathname (e.g., "/my-card" -> "my-card")
+      const pathParts = pathname.split('/').filter(Boolean);
+      slugFromPath = pathParts[pathParts.length - 1] || '';
+    }
+    
+    // Fallback to query param if referer not available
+    const querySlug = req.query.slug as string;
+    const cardSlug = slugFromPath || querySlug;
+    
+    // Update pathname if using query param fallback
+    if (!slugFromPath && querySlug) {
+      pathname = `/${querySlug}`;
+    }
     
     let cardData = null;
     
+    // Fetch card data using slug from referer or query
     if (cardSlug) {
       const result = await db
         .select()
@@ -23,31 +42,18 @@ router.get('/manifest', async (req, res) => {
         .limit(1);
       
       cardData = result[0];
-    } else if (referer) {
-      const url = new URL(referer);
-      const pathParts = url.pathname.split('/');
-      const slugFromPath = pathParts[pathParts.length - 1];
-      
-      if (slugFromPath) {
-        const result = await db
-          .select()
-          .from(businessCards)
-          .where(eq(businessCards.shareSlug, slugFromPath))
-          .limit(1);
-        
-        cardData = result[0];
-      }
     }
 
     const name = cardData?.fullName || 'TalkLink';
     const brandColor = (cardData?.brandColor as string) || '#22c55e';
     const profileImage = cardData?.profileImage as string;
     
+    // Use the exact pathname from referer as start_url (critical for PWA launch)
     const manifest = {
       name: name,
       short_name: name.split(' ')[0] || 'TalkLink',
       description: `Digital Business Card - ${name}`,
-      start_url: cardSlug ? `/${cardSlug}` : '/',
+      start_url: pathname, // Use referer pathname directly
       display: 'standalone',
       background_color: '#ffffff',
       theme_color: brandColor,
