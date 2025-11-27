@@ -399,98 +399,67 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               {t("form.title")}
             </CardTitle>
 
-            {/* Builder Mode Toggle & Share */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center bg-slate-700 rounded-lg p-1">
-                <Button
-                  type="button"
-                  variant={builderMode === "card" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setBuilderMode("card")}
-                  className={`${
-                    builderMode === "card"
-                      ? "bg-orange-500 hover:bg-orange-600 text-white"
-                      : "text-gray-300 hover:text-white hover:bg-slate-600"
-                  } transition-all duration-200`}
-                  data-testid="button-card-mode"
-                >
-                  <i className="fas fa-id-card mr-2"></i>
-                  Card
-                </Button>
-                <Button
-                  type="button"
-                  variant={builderMode === "page" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setBuilderMode("page")}
-                  className={`${
-                    builderMode === "page"
-                      ? "bg-blue-500 hover:bg-blue-600 text-white"
-                      : "text-gray-300 hover:text-white hover:bg-slate-600"
-                  } transition-all duration-200`}
-                  data-testid="button-page-mode"
-                >
-                  <i className="fas fa-sitemap mr-2"></i>
-                  Page
-                </Button>
-                <Button
-                  type="button"
-                  variant={builderMode === "theme" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setBuilderMode("theme")}
-                  className={`${
-                    builderMode === "theme"
-                      ? "bg-purple-500 hover:bg-purple-600 text-white"
-                      : "text-gray-300 hover:text-white hover:bg-slate-600"
-                  } transition-all duration-200`}
-                  data-testid="button-theme-mode"
-                >
-                  <i className="fas fa-palette mr-2"></i>
-                  Theme
-                </Button>
-                <Button
-                  type="button"
-                  variant={builderMode === "seo" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setBuilderMode("seo")}
-                  className={`${
-                    builderMode === "seo"
-                      ? "bg-orange-500 hover:bg-orange-600 text-white"
-                      : "text-gray-300 hover:text-white hover:bg-slate-600"
-                  } transition-all duration-200`}
-                  data-testid="button-seo-mode"
-                >
-                  <i className="fas fa-search mr-2"></i>
-                  SEO
-                </Button>
-              </div>
-
-              {/* Share Button */}
+            {/* Builder Mode Toggle */}
+            <div className="flex items-center bg-slate-700 rounded-lg p-1">
               <Button
                 type="button"
-                onClick={async () => {
-                  const fullName = form.getValues("fullName") || "card";
-                  const shareSlug = form.getValues("shareSlug") || fullName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                  const url = `${window.location.origin}/${shareSlug}`;
-                  
-                  try {
-                    await navigator.clipboard.writeText(url);
-                    toast({
-                      title: "Link copied!",
-                      description: "Share link has been copied to clipboard.",
-                    });
-                  } catch (error) {
-                    toast({
-                      title: "Copy failed",
-                      description: "Could not copy to clipboard",
-                      variant: "destructive",
-                    });
-                  }
-                }}
-                className="bg-green-600 hover:bg-green-700 text-white"
-                data-testid="button-share-card"
+                variant={builderMode === "card" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBuilderMode("card")}
+                className={`${
+                  builderMode === "card"
+                    ? "bg-orange-500 hover:bg-orange-600 text-white"
+                    : "text-gray-300 hover:text-white hover:bg-slate-600"
+                } transition-all duration-200`}
+                data-testid="button-card-mode"
               >
-                <i className="fas fa-share-alt mr-2"></i>
-                Share
+                <i className="fas fa-id-card mr-2"></i>
+                Card
+              </Button>
+              <Button
+                type="button"
+                variant={builderMode === "page" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBuilderMode("page")}
+                className={`${
+                  builderMode === "page"
+                    ? "bg-blue-500 hover:bg-blue-600 text-white"
+                    : "text-gray-300 hover:text-white hover:bg-slate-600"
+                } transition-all duration-200`}
+                data-testid="button-page-mode"
+              >
+                <i className="fas fa-sitemap mr-2"></i>
+                Page
+              </Button>
+              <Button
+                type="button"
+                variant={builderMode === "theme" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBuilderMode("theme")}
+                className={`${
+                  builderMode === "theme"
+                    ? "bg-purple-500 hover:bg-purple-600 text-white"
+                    : "text-gray-300 hover:text-white hover:bg-slate-600"
+                } transition-all duration-200`}
+                data-testid="button-theme-mode"
+              >
+                <i className="fas fa-palette mr-2"></i>
+                Theme
+              </Button>
+              <Button
+                type="button"
+                variant={builderMode === "seo" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBuilderMode("seo")}
+                className={`${
+                  builderMode === "seo"
+                    ? "bg-orange-500 hover:bg-orange-600 text-white"
+                    : "text-gray-300 hover:text-white hover:bg-slate-600"
+                } transition-all duration-200`}
+                data-testid="button-seo-mode"
+              >
+                <i className="fas fa-search mr-2"></i>
+                SEO
               </Button>
             </div>
           </div>
