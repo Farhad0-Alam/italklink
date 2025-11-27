@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
+import { AutoSaveProvider } from "@/contexts/AutoSaveContext";
 import i18n from "./lib/i18n";
 
 // Lazy load Landing to reduce initial bundle size (it imports framer-motion + 30+ icons)
@@ -136,11 +137,13 @@ function App() {
       <I18nextProvider i18n={i18n}>
         <ThemeProvider>
           <TooltipProvider>
-            <div className="min-h-screen">
-              <ImpersonationBanner />
-              <Router />
-              <Toaster />
-            </div>
+            <AutoSaveProvider>
+              <div className="min-h-screen">
+                <ImpersonationBanner />
+                <Router />
+                <Toaster />
+              </div>
+            </AutoSaveProvider>
           </TooltipProvider>
         </ThemeProvider>
       </I18nextProvider>

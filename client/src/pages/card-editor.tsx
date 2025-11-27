@@ -1,15 +1,16 @@
 import React from "react";
 import { useState, useEffect, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { BusinessCardComponent } from "@/components/business-card";
 import { PagePreview } from "@/components/page-preview";
 import { FormBuilder } from "@/components/form-builder";
-import { Copy, Share2, Settings, ArrowLeft } from "lucide-react";
+import { AutoSaveIndicator } from "@/components/AutoSaveIndicator";
+import { useAutoSave } from "@/contexts/AutoSaveContext";
+import { Copy, Share2, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import type { BusinessCard } from "@shared/schema";
 
@@ -19,18 +20,17 @@ interface CardEditorParams {
 
 export default function CardEditor() {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const params = useParams() as CardEditorParams;
   const [, setLocation] = useLocation();
   const cardRef = useRef<HTMLDivElement>(null);
   
-  // Check authentication first
+  const { queueSave, setCardId: setAutoSaveCardId, forceSave, status: autoSaveStatus, lastSavedCard } = useAutoSave();
+  
   const { data: user, isLoading: userLoading, error: userError } = useQuery({
     queryKey: ['/api/auth/user'],
     retry: false,
   });
   
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (userError && !userLoading) {
       toast({
@@ -42,7 +42,6 @@ export default function CardEditor() {
     }
   }, [userError, userLoading, setLocation, toast]);
   
-  // Get template and custom URL from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
   const selectedTemplateId = urlParams.get('template');
   const customUrlFromTemplate = urlParams.get('url');
@@ -69,14 +68,15 @@ export default function CardEditor() {
     individualElementSpacing: {},
   });
 
-  // Use ref to track latest cardData to avoid stale closures in auto-save
-  const latestCardDataRef = useRef<BusinessCard>(cardData);
-
   const [shareUrl, setShareUrl] = useState("");
-  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [currentPageId, setCurrentPageId] = useState<string>('home');
-  const [cardId, setCardId] = useState<string | null>(params.id || null);
   const [customUrlSlug, setCustomUrlSlug] = useState<string>(customUrlFromTemplate || "");
+  
+  useEffect(() => {
+    if (params.id) {
+      setAutoSaveCardId(params.id);
+    }
+  }, [params.id, setAutoSaveCardId]);
 
   // Helper function to update share URL
   const updateShareUrl = (card: any) => {
@@ -90,76 +90,6 @@ export default function CardEditor() {
     }
   };
 
-  // Save card mutation - declared before useEffects that depend on it
-  const saveMutation = useMutation({
-    mutationFn: async (data: BusinessCard) => {
-      // Include custom URL slug if provided
-      const dataToSave = {
-        ...data,
-        ...(customUrlSlug && { customUrl: customUrlSlug })
-      };
-      
-      // Convert pages structure to pageElements for database storage
-      // In card mode: FormBuilder stores elements directly in pageElements
-      // In page mode: FormBuilder stores elements in pages[].elements
-      // Database always expects flat pageElements array
-      
-      let pageElementsToSave = (dataToSave.pageElements || []) as any[];
-      
-      // If pageElements is empty, try to extract from pages (page mode)
-      if (pageElementsToSave.length === 0) {
-        const allElements: any[] = [];
-        const pages = (dataToSave as any).pages || [];
-        if (Array.isArray(pages)) {
-          pages.forEach((page: any) => {
-            if (Array.isArray(page.elements)) {
-              allElements.push(...page.elements);
-            }
-          });
-        }
-        pageElementsToSave = allElements;
-      }
-      
-      // Build final data without pages field (server only needs pageElements)
-      const finalData = {
-        ...dataToSave,
-        pageElements: pageElementsToSave,
-        pages: null, // Remove pages field - it's FormBuilder internal only
-        menu: null,   // Also clean up other FormBuilder-only fields
-        currentPreviewMode: undefined,
-        currentSelectedPage: undefined
-      };
-      
-      console.log('[CardEditor] Saving card with', finalData.pageElements?.length || 0, 'page elements:', finalData.pageElements);
-      
-      // apiRequest already handles errors and returns parsed JSON
-      if (cardId) {
-        return await apiRequest('PUT', `/api/business-cards/${cardId}`, finalData);
-      } else {
-        return await apiRequest('POST', '/api/business-cards', finalData);
-      }
-    },
-    onSuccess: (savedCard) => {
-      if (!savedCard) return; // Prevent duplicate saves
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/business-cards'] });
-      
-      // Update share URL but DON'T redirect to avoid disrupting design work
-      updateShareUrl(savedCard);
-      
-      // Update the card ID if creating new card
-      if (!cardId && savedCard.id) {
-        setCardId(savedCard.id);
-        window.history.replaceState(null, '', `/card-editor/${savedCard.id}`);
-      }
-      
-      // Silent auto-save - no toast notification to avoid interruptions
-    },
-    onError: (error: any) => {
-      console.error('Save error:', error);
-      // Don't show error toast for auto-save - just log it
-    },
-  });
   
   // Helper function to get current page data based on currentPageId
   const getCurrentPageData = () => {
@@ -275,77 +205,32 @@ export default function CardEditor() {
     }
   }, [existingCard]);
 
-  // Update ref whenever cardData changes
   useEffect(() => {
-    latestCardDataRef.current = cardData;
-  }, [cardData]);
-
-  // Ensure shareUrl is set whenever cardId is available
-  useEffect(() => {
-    if (cardId && !shareUrl) {
-      setShareUrl(`${window.location.origin}/${cardId}`);
+    if (lastSavedCard) {
+      updateShareUrl(lastSavedCard);
     }
-  }, [cardId, shareUrl]);
+  }, [lastSavedCard]);
 
-  // Immediate auto-save on any interaction - saves when user clicks/changes anything
   useEffect(() => {
-    // Don't auto-save if:
-    // 1. User is not authenticated
-    // 2. Save is already in progress (mutation pending)
-    // 3. We're creating a new card and have no content at all (customUrl OR name/title required)
-    if (!user || saveMutation.isPending) return;
-    if (!cardId && !customUrlSlug && !cardData.fullName && !cardData.title) return;
+    if (!user) return;
+    if (!params.id && !customUrlSlug && !cardData.fullName && !cardData.title) return;
     
-    // Clear previous timeout
-    if (autoSaveTimeout) {
-      clearTimeout(autoSaveTimeout);
-    }
-    
-    // Set new timeout for auto-save (500ms to ensure all FormBuilder changes sync to parent state)
-    // This prevents race conditions where elements are added but haven't synced yet
-    const timeout = setTimeout(() => {
-      // Use ref to get the LATEST cardData including newly added elements
-      // This prevents stale data from closures
-      const dataToSave = latestCardDataRef.current;
-      console.log('[CardEditor] Auto-save: Saving with', dataToSave.pageElements?.length || 0, 'elements:', dataToSave.pageElements);
-      saveMutation.mutate(dataToSave);
-    }, 500);
-    
-    setAutoSaveTimeout(timeout);
-    
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [cardData, user, cardId, saveMutation.isPending]);
+    queueSave(cardData, customUrlSlug);
+  }, [cardData, user, params.id, customUrlSlug, queueSave]);
 
   const copyShareUrl = async () => {
     if (shareUrl) {
       try {
         await navigator.clipboard.writeText(shareUrl);
         
-        // Wait for any pending auto-save to complete before opening shared view
-        if (saveMutation.isPending) {
+        if (autoSaveStatus === "saving" || autoSaveStatus === "dirty") {
           toast({
             title: "Saving card...",
             description: "Waiting for changes to save before opening preview.",
           });
-          // Wait for current save to complete
-          await new Promise(resolve => {
-            const checkInterval = setInterval(() => {
-              if (!saveMutation.isPending) {
-                clearInterval(checkInterval);
-                resolve(true);
-              }
-            }, 100);
-            // Timeout after 5 seconds
-            setTimeout(() => {
-              clearInterval(checkInterval);
-              resolve(false);
-            }, 5000);
-          });
+          await forceSave();
         }
         
-        // Extract slug and open as relative URL in new tab (works in Replit preview)
         const slug = shareUrl.split('/').pop();
         if (slug) {
           window.open(`/${slug}`, '_blank');
@@ -429,6 +314,7 @@ END:VCARD`;
               <div className="text-xl font-semibold text-gray-900">
                 {params.id ? 'Edit Card' : 'Create Card'}
               </div>
+              <AutoSaveIndicator />
             </div>
             
             <div className="flex items-center space-x-3">

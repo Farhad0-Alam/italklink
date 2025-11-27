@@ -1,14 +1,15 @@
 import React from "react";
 import { useState, useEffect, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { BusinessCardComponent } from "@/components/business-card";
 import { FormBuilder } from "@/components/form-builder";
-import { Copy, Share2, Settings, ArrowLeft } from "lucide-react";
+import { AutoSaveIndicator } from "@/components/AutoSaveIndicator";
+import { useAutoSave } from "@/contexts/AutoSaveContext";
+import { Copy, Share2, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import type { BusinessCard } from "@shared/schema";
 
@@ -18,18 +19,17 @@ interface CardEditorParams {
 
 export default function CardEditor() {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const params = useParams() as CardEditorParams;
   const [, setLocation] = useLocation();
   const cardRef = useRef<HTMLDivElement>(null);
   
-  // Check authentication first
+  const { queueSave, setCardId: setAutoSaveCardId, status: autoSaveStatus } = useAutoSave();
+  
   const { data: user, isLoading: userLoading, error: userError } = useQuery({
     queryKey: ['/api/auth/user'],
     retry: false,
   });
   
-  // Redirect to login if not authenticated
   useEffect(() => {
     if (userError && !userLoading) {
       toast({
@@ -41,7 +41,6 @@ export default function CardEditor() {
     }
   }, [userError, userLoading, setLocation, toast]);
   
-  // Get template from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
   const selectedTemplateId = urlParams.get('template');
   
@@ -66,7 +65,12 @@ export default function CardEditor() {
   });
 
   const [shareUrl, setShareUrl] = useState("");
-  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  
+  useEffect(() => {
+    if (params.id) {
+      setAutoSaveCardId(params.id);
+    }
+  }, [params.id, setAutoSaveCardId]);
   
   // Fetch template data if template parameter is provided
   const { data: templates } = useQuery({
@@ -109,7 +113,6 @@ export default function CardEditor() {
     }
   }, [selectedTemplateId, templates, existingCard]);
 
-  // Update form data when existing card loads
   useEffect(() => {
     if (existingCard) {
       setCardData(existingCard);
@@ -117,33 +120,12 @@ export default function CardEditor() {
     }
   }, [existingCard]);
 
-  // Auto-save functionality - disabled to prevent page interruptions
-  // useEffect(() => {
-  //   // Don't auto-save if we don't have required fields or user is not authenticated
-  //   if (!cardData.fullName || !cardData.title || !user) {
-  //     return;
-  //   }
-
-  //   // Clear existing timeout
-  //   if (autoSaveTimeout) {
-  //     clearTimeout(autoSaveTimeout);
-  //   }
-
-  //   // Set new timeout for auto-save (2 seconds after last change)
-  //   const timeout = setTimeout(() => {
-  //     console.log('Auto-saving card data:', cardData);
-  //     saveMutation.mutate(cardData);
-  //   }, 2000);
-
-  //   setAutoSaveTimeout(timeout);
-
-  //   // Cleanup timeout on unmount
-  //   return () => {
-  //     if (timeout) {
-  //       clearTimeout(timeout);
-  //     }
-  //   };
-  // }, [cardData, params.id, user]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!user) return;
+    if (!params.id && !cardData.fullName && !cardData.title) return;
+    
+    queueSave(cardData);
+  }, [cardData, user, params.id, queueSave]);
 
   const updateShareUrl = (card: any) => {
     if (card.customUrl) {
@@ -152,69 +134,6 @@ export default function CardEditor() {
       setShareUrl(`${window.location.origin}/${card.shareSlug}`);
     }
   };
-
-  // Save card mutation
-  const saveMutation = useMutation({
-    mutationFn: async (data: BusinessCard) => {
-      console.log('=== SAVE MUTATION STARTED ===');
-      console.log('Saving business card:', data);
-      console.log('User ID:', user?.id);
-      console.log('Params ID:', params.id);
-      
-      try {
-        let response;
-        if (params.id) {
-          console.log('Updating existing card...');
-          response = await apiRequest('PUT', `/api/business-cards/${params.id}`, data);
-        } else {
-          console.log('Creating new card...');
-          response = await apiRequest('POST', '/api/business-cards', data);
-        }
-        
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Save failed - Response text:', errorText);
-          throw new Error(`Save failed: ${response.status} ${errorText}`);
-        }
-        
-        const result = await response.json();
-        console.log('Save result:', result);
-        console.log('=== SAVE MUTATION SUCCESS ===');
-        return result;
-      } catch (error) {
-        console.error('=== SAVE MUTATION ERROR ===');
-        console.error('Error details:', error);
-        throw error;
-      }
-    },
-    onSuccess: (savedCard) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/business-cards'] });
-      
-      // Update share URL but DON'T redirect to avoid disrupting design work
-      updateShareUrl(savedCard);
-      
-      // Update the URL without page reload if creating new card
-      if (!params.id && savedCard.id) {
-        window.history.replaceState(null, '', `/card-editor/${savedCard.id}`);
-      }
-      
-      toast({
-        title: "Card saved!",
-        description: "Your business card has been saved successfully.",
-      });
-    },
-    onError: (error: any) => {
-      console.error('Save error:', error);
-      toast({
-        title: "Save Failed",
-        description: error.message || "Failed to save card. Please check your login status and try again.",
-        variant: "destructive",
-      });
-    },
-  });
 
 
   const copyShareUrl = async () => {
