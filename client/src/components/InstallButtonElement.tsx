@@ -287,8 +287,6 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
           </div>
         </div>
 
-        <ButtonPreview />
-
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
           <CollapsibleTrigger className="w-full flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors">
             <div className="flex items-center gap-2">
