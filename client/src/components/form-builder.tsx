@@ -338,16 +338,15 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
       }
     });
 
-    // CRITICAL: Also update parent immediately to ensure PWA changes are saved
-    // Only merge filtered (whitelisted) fields to prevent rogue mutations
-    const currentFormData = form.getValues();
+    // CRITICAL: Merge filtered PWA fields onto enhancedCardData to preserve both
+    // persisted structure AND unsaved edits currently in form state
     const updatedData = {
-      ...currentFormData,
+      ...enhancedCardData,
       ...filteredUpdates
     };
     console.log('[FormBuilder] Notifying parent of PWA settings change:', Object.keys(filteredUpdates));
     onDataChange(updatedData);
-  }, [form, onDataChange]);
+  }, [form, onDataChange, enhancedCardData]);
 
   // Debounced sync to parent - prevents infinite loops while keeping data in sync
   // Uses ref to compare snapshots and only calls onDataChange when actual data changes
