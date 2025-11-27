@@ -22,7 +22,17 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
   const handleInstallClick = async () => {
     setInstalling(true);
     try {
-      await installBusinessCard();
+      const result = await installBusinessCard();
+      
+      // If native install didn't work, try Web Share as fallback
+      if (!result && (navigator as any).share) {
+        console.log('Using Web Share API as fallback');
+        await (navigator as any).share({
+          title: cardData?.fullName || 'Digital Business Card',
+          text: `Check out my digital business card: ${cardData?.fullName || 'My Professional Card'}`,
+          url: window.location.href
+        });
+      }
     } catch (error) {
       console.error('Install failed:', error);
     } finally {

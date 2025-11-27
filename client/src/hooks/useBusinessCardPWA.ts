@@ -15,6 +15,7 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [canUseWebShare, setCanUseWebShare] = useState(false);
 
   useEffect(() => {
     console.log('PWA Hook: Initializing...');
@@ -38,6 +39,11 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
       setIsInstalled(true);
     }
 
+    // Check if Web Share API is available (fallback)
+    const hasWebShare = !!(navigator as any).share;
+    setCanUseWebShare(hasWebShare);
+    console.log('PWA: Web Share API available:', hasWebShare);
+
     // Listen for install prompt
     const handleBeforeInstallPrompt = (e: Event) => {
       console.log('PWA: beforeinstallprompt event fired!', e);
@@ -59,15 +65,24 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
     window.addEventListener('appinstalled', handleAppInstalled);
 
     // Force check for PWA installability after a delay
+    // Since beforeinstallprompt may not fire, we default to installable if Web Share is available
     setTimeout(() => {
       console.log('PWA Status Check:', {
+        beforeInstallPromptFired: !!deferredPrompt,
         isInstallable,
         isInstalled,
         hasServiceWorker: 'serviceWorker' in navigator,
         hasManifest: !!document.querySelector('link[rel="manifest"]'),
         isHTTPS: location.protocol === 'https:',
-        userAgent: navigator.userAgent
+        userAgent: navigator.userAgent,
+        canUseWebShare: hasWebShare
       });
+      
+      // If no native install prompt but Web Share available, make button installable
+      if (!deferredPrompt && hasWebShare) {
+        console.log('PWA: No beforeinstallprompt, but Web Share available - enabling button');
+        setIsInstallable(true);
+      }
     }, 2000);
 
     return () => {
