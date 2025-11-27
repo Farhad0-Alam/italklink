@@ -47,7 +47,7 @@ router.get('/manifest', async (req, res) => {
       name: name,
       short_name: name.split(' ')[0] || 'TalkLink',
       description: `Digital Business Card - ${name}`,
-      start_url: cardSlug ? `/share/${cardSlug}` : '/',
+      start_url: cardSlug ? `/${cardSlug}` : '/',
       display: 'standalone',
       background_color: '#ffffff',
       theme_color: brandColor,
