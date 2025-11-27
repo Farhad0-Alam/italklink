@@ -16,6 +16,7 @@ import { URLManager } from "@/components/URLManager";
 import { DocumentManager, DocumentItem } from "@/components/DocumentManager";
 import { RAGChatBox } from "@/components/RAGChatBox";
 import { KnowledgeManager } from "@/components/KnowledgeManager";
+import { TextChunkManager } from "@/components/TextChunkManager";
 import { VoiceAgentElement } from "@/components/VoiceAgentElement";
 import { VoiceAssistantCard } from "@/components/VoiceAssistantCard";
 import { MessageCircle } from "lucide-react";
@@ -2562,58 +2563,16 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <span className="font-semibold text-white text-sm">📄 Text Content</span>
                     <i className={`fas fa-chevron-${ragKnowledgeSections.textContent ? 'up' : 'down'} text-slate-300`}></i>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="pt-3 space-y-3">
-                    <Textarea
-                      value={element.data.knowledgeBase?.textContent || ''}
-                      onChange={(e) => handleDataUpdate({ 
-                        knowledgeBase: { 
-                          ...element.data.knowledgeBase, 
-                          textContent: e.target.value 
-                        } 
-                      })}
-                      placeholder="Enter knowledge base content..."
-                      rows={4}
-                      className="bg-slate-700 border-slate-600 text-white text-sm"
-                    />
-                    <Button
-                      onClick={async () => {
-                        const textContent = element.data.knowledgeBase?.textContent;
-                        if (!textContent || textContent.trim().length < 10) {
-                          alert('Please enter at least 10 characters of text');
-                          return;
-                        }
-                        
-                        try {
-                          const response = await fetch('/api/ingest-text', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              text: textContent,
-                              title: element.data.title || 'Knowledge Base Content'
-                            })
-                          });
-                          
-                          const result = await response.json();
-                          
-                          if (response.ok && result.ok) {
-                            alert(`Success! ${result.chunks} chunks added to knowledge base.`);
-                            // Refresh chunks list
-                            toggleRagSection('chunks');
-                            setTimeout(() => toggleRagSection('chunks'), 100);
-                          } else {
-                            alert(`Error: ${result.error || 'Failed to save to knowledge base'}`);
-                          }
-                        } catch (error) {
-                          console.error('Error saving to knowledge base:', error);
-                          alert('Failed to save to knowledge base. Please try again.');
-                        }
+                  <CollapsibleContent className="pt-3">
+                    <TextChunkManager
+                      maxChunks={50}
+                      className="bg-slate-700 border-slate-600"
+                      onChunksAdded={() => {
+                        // Refresh chunks list
+                        toggleRagSection('chunks');
+                        setTimeout(() => toggleRagSection('chunks'), 100);
                       }}
-                      className="w-full text-sm"
-                      style={{ backgroundColor: element.data.primaryColor || '#22c55e' }}
-                      data-testid="button-save-kb-text"
-                    >
-                      💾 Save to Knowledge Base
-                    </Button>
+                    />
                   </CollapsibleContent>
                 </Collapsible>
 
