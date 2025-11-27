@@ -205,8 +205,8 @@ export const Share: React.FC = () => {
       {/* Dynamic SEO Head Component */}
       <SEOHead cardData={cardData} />
       
-      <div className="w-full max-w-[430px] mx-auto px-0 py-0 min-h-screen">
-        {/* Premium Mobile Card Layout - 430px max-width responsive (390px-430px range), centered, true edge-to-edge on mobile */}
+      <div className="w-full max-w-[430px] md:max-w-[380px] mx-auto px-0 py-0 min-h-screen">
+        {/* Premium Mobile Card Layout - Mobile: 390-430px responsive range, Desktop: 380px fixed width, centered, true edge-to-edge */}
         <div className="flex justify-center">
           <div className="w-full">
             <BusinessCardComponent
