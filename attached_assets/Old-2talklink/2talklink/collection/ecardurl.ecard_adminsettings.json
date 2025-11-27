@@ -1,0 +1,29 @@
+[
+    {
+        "_id": {
+            "$oid": "66bdbba9fecee965d38a2573"
+        },
+        "parentId": {
+            "$oid": "66bc93baceaa50dead24e024"
+        },
+        "stripeKey": "your-stripe-key",
+        "stripeSecret": "your-stripe-secret",
+        "isEnabled": true,
+        "isAdEnabled": false,
+        "adScript": "<script>Your ad script here</script>",
+        "adScriptCode": "AD12345",
+        "source": "Self",
+        "currency": {
+            "code": "USD",
+            "symbol": "$"
+        },
+        "status": 1,
+        "createdAt": {
+            "$date": "2024-08-14T11:23:38.796Z"
+        },
+        "updatedAt": {
+            "$date": "2024-08-20T16:26:52.464Z"
+        },
+        "__v": 0
+    }
+]

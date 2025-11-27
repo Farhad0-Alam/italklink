@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, Edit2, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface KnowledgeDoc {
   id: string;
@@ -31,13 +32,7 @@ export function KnowledgeManager({ cardId, onDocumentAdded }: KnowledgeManagerPr
   const loadDocuments = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/knowledge');
-      
-      if (!response.ok) {
-        throw new Error('Failed to load documents');
-      }
-      
-      const data = await response.json();
+      const data = await apiRequest('GET', '/api/knowledge');
       setDocuments(data.documents || []);
     } catch (error) {
       console.error('Error loading documents:', error);
@@ -57,14 +52,7 @@ export function KnowledgeManager({ cardId, onDocumentAdded }: KnowledgeManagerPr
     }
 
     try {
-      const response = await fetch(`/api/knowledge/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete document');
-      }
-
+      await apiRequest('DELETE', `/api/knowledge/${id}`);
       setDocuments(documents.filter(doc => doc.id !== id));
       toast({
         title: 'Success',
@@ -91,16 +79,7 @@ export function KnowledgeManager({ cardId, onDocumentAdded }: KnowledgeManagerPr
     }
 
     try {
-      const response = await fetch(`/api/knowledge/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: editTitle }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update document');
-      }
-
+      await apiRequest('PATCH', `/api/knowledge/${id}`, { title: editTitle });
       setDocuments(documents.map(doc => 
         doc.id === id ? { ...doc, title: editTitle } : doc
       ));
