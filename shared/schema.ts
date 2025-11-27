@@ -1623,9 +1623,11 @@ export type CreateBookingForm = z.infer<typeof createBookingFormSchema>;
 export type AppointmentFilters = z.infer<typeof appointmentFiltersSchema>;
 export type AppointmentAnalyticsQuery = z.infer<typeof appointmentAnalyticsSchema>;
 
-// Knowledge base documents table with vector embeddings
+// Knowledge base documents table with vector embeddings - ISOLATED PER USER
 export const kbDocs = pgTable("kb_docs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(), // Each user has their own knowledge base
+  cardId: varchar("card_id"), // Optional: link to specific card
   url: text("url").notNull(),
   title: text("title"),
   content: text("content").notNull(),

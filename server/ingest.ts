@@ -192,6 +192,11 @@ export async function fetchViaCrawler(url: string): Promise<{ title: string; con
   return null;
 }
 
+// Add userId to document metadata before ingestion
+function addUserToDoc(meta: Record<string, any>, userId: string): Record<string, any> {
+  return { ...meta, userId };
+}
+
 // Split text into chunks with overlap
 export function chunkText(text: string, chunkSize: number = CHUNK_SIZE, overlap: number = CHUNK_OVERLAP): string[] {
   if (text.length <= chunkSize) {
