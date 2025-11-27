@@ -2682,21 +2682,14 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                   </CollapsibleContent>
                 </Collapsible>
 
-                {/* Knowledge Base Chunks */}
-                <Collapsible open={ragKnowledgeSections.chunks}>
-                  <CollapsibleTrigger
-                    onClick={() => toggleRagSection('chunks')}
-                    className="w-full flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
-                  >
-                    <span className="font-semibold text-white text-sm">📚 Knowledge Base Chunks</span>
-                    <i className={`fas fa-chevron-${ragKnowledgeSections.chunks ? 'up' : 'down'} text-slate-300`}></i>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="pt-3">
-                    <div className="bg-slate-700 p-3 rounded-lg border border-slate-600">
-                      <KnowledgeManager cardId={element.id} />
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
+                {/* Knowledge Base Chunks - Dedicated Section */}
+                <div className="bg-slate-700 p-3 rounded-lg border-2 border-slate-500">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-lg">📚</span>
+                    <span className="font-semibold text-white text-sm">Knowledge Base Chunks</span>
+                  </div>
+                  <KnowledgeManager cardId={element.id} />
+                </div>
 
                 {/* Settings */}
                 <Collapsible open={ragKnowledgeSections.settings}>
@@ -2718,6 +2711,15 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <span className="text-white text-sm">Show Chat Interface</span>
                     </div>
                     <div className="space-y-2">
+                      <label className="text-white text-sm block">Welcome Message:</label>
+                      <Input
+                        value={element.data.welcomeMessage || 'Hi! How can I help you today?'}
+                        onChange={(e) => handleDataUpdate({ welcomeMessage: e.target.value })}
+                        placeholder="Hi! How can I help you today?"
+                        className="bg-slate-600 border-slate-500 text-white text-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
                       <label className="text-white text-sm block">Primary Color:</label>
                       <div className="flex gap-2 items-center">
                         <Input
@@ -2728,6 +2730,15 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         />
                         <span className="text-slate-400 text-sm">{element.data.primaryColor || '#22c55e'}</span>
                       </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={element.data.enableStreaming !== false}
+                        onChange={(e) => handleDataUpdate({ enableStreaming: e.target.checked })}
+                        className="rounded"
+                      />
+                      <span className="text-white text-sm">Enable Response Streaming</span>
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
