@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 type InstallButtonElement = Extract<PageElement, { type: "installButton" }>;
 
 interface InstallButtonData {
+  appName: string;
   buttonText: string;
   buttonColor: string;
   textColor: string;
@@ -23,6 +24,7 @@ interface InstallButtonData {
 }
 
 const defaultData: InstallButtonData = {
+  appName: "TalkLink",
   buttonText: "Install App",
   buttonColor: "#22c55e",
   textColor: "#ffffff",
@@ -56,6 +58,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
   const elementData = (element as InstallButtonElement).data || {};
   
   const data: InstallButtonData = {
+    appName: elementData.appName ?? cardData?.pwaAppName ?? defaultData.appName,
     buttonText: elementData.buttonText ?? cardData?.pwaInstallButtonText ?? defaultData.buttonText,
     buttonColor: elementData.buttonColor ?? cardData?.pwaInstallButtonColor ?? defaultData.buttonColor,
     textColor: elementData.textColor ?? cardData?.pwaInstallButtonTextColor ?? defaultData.textColor,
@@ -347,8 +350,22 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
           </CollapsibleContent>
         </Collapsible>
 
-        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-          <p><strong>Note:</strong> This button lets visitors install your business card as an app on their phone. Works on both Android and iPhone.</p>
+        <div className="space-y-4">
+          <div>
+            <Label className="text-sm text-slate-700 font-medium mb-1 block">App Name</Label>
+            <Input
+              value={data.appName}
+              onChange={(e) => handleDataUpdate({ appName: e.target.value })}
+              placeholder="TalkLink"
+              className="text-black"
+              data-testid="input-install-app-name"
+            />
+            <p className="text-xs text-slate-500 mt-1">This is the name that appears on the home screen after installation.</p>
+          </div>
+
+          <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+            <p><strong>Note:</strong> This button lets visitors install your business card as an app on their phone. Works on both Android and iPhone.</p>
+          </div>
         </div>
       </div>
     );

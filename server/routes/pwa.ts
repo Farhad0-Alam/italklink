@@ -44,15 +44,33 @@ router.get('/manifest', async (req, res) => {
       cardData = result[0];
     }
 
-    const name = cardData?.fullName || 'TalkLink';
+    // Extract app name from installButton element or use card PWA settings
+    let appName = 'TalkLink';
+    if (cardData) {
+      // Try to get from installButton element first
+      try {
+        const pageElements = (cardData.pageElements as any[]) || [];
+        const installButton = pageElements.find(el => el.type === 'installButton');
+        if (installButton?.data?.appName) {
+          appName = installButton.data.appName;
+        } else if (cardData.pwaAppName) {
+          appName = cardData.pwaAppName;
+        } else {
+          appName = cardData.fullName || 'TalkLink';
+        }
+      } catch (error) {
+        appName = cardData.pwaAppName || cardData.fullName || 'TalkLink';
+      }
+    }
+
     const brandColor = (cardData?.brandColor as string) || '#22c55e';
     const profileImage = cardData?.profileImage as string;
     
     // Use the exact pathname from referer as start_url (critical for PWA launch)
     const manifest = {
-      name: name,
-      short_name: name.split(' ')[0] || 'TalkLink',
-      description: `Digital Business Card - ${name}`,
+      name: appName,
+      short_name: appName.split(' ')[0] || 'TalkLink',
+      description: `Digital Business Card - ${appName}`,
       start_url: pathname, // Use referer pathname directly
       display: 'standalone',
       background_color: '#ffffff',
