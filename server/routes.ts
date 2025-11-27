@@ -4510,7 +4510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       storage.countUserQrLinks(user.id)
     ]);
     
-    successResponse(res, { links, total, total: total }, 'QR links retrieved successfully');
+    successResponse(res, { links, total }, 'QR links retrieved successfully');
   }));
   
   // Create new QR link with URL validation
