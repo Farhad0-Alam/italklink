@@ -4,6 +4,7 @@ import { MenuElement } from './MenuElement';
 import { BusinessCardComponent } from '@/modules/business-cards';
 import { useQuery } from '@tanstack/react-query';
 import { BusinessCard } from '@shared/schema';
+import { BusinessCardPWAInstaller } from '@/components/BusinessCardPWAInstaller';
 
 interface CardLayoutProps {
   children: React.ReactNode;
@@ -116,6 +117,9 @@ export function CardLayout({ children }: CardLayoutProps) {
       <main className="max-w-6xl mx-auto px-4 py-8">
         {children}
       </main>
+
+      {/* PWA Install Button - Floating on all card pages */}
+      <BusinessCardPWAInstaller cardData={card} />
     </div>
   );
 }
