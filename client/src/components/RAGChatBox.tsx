@@ -389,6 +389,69 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     setIsListening(false);
   };
 
+  // Simple voice-to-text input (not full conversation)
+  const recordVoiceInput = async () => {
+    if (isListening) {
+      if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
+        mediaRecorder.current.stop();
+      }
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      setIsListening(true);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
+      const options: MediaRecorderOptions = { mimeType: 'audio/webm' };
+      const recorder = new MediaRecorder(stream, options);
+      mediaRecorder.current = recorder;
+      audioChunks.current = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunks.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = async () => {
+        try {
+          const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+          const base64Audio = await blobToBase64(audioBlob);
+          
+          // Send to STT endpoint
+          const sttResponse = await fetch('/api/stt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audio: base64Audio }),
+          });
+
+          const sttData = await sttResponse.json();
+          
+          if (sttResponse.ok && sttData.transcript) {
+            setInput(sttData.transcript);
+          }
+        } finally {
+          if (streamRef.current) {
+            streamRef.current.getTracks().forEach((track) => track.stop());
+            streamRef.current = null;
+          }
+        }
+      };
+
+      recorder.start();
+    } catch (error: any) {
+      console.error('Microphone error:', error);
+      toast({
+        title: 'Microphone Error',
+        description: 'Could not access microphone. Please check permissions.',
+        variant: 'destructive',
+      });
+      setIsListening(false);
+    }
+  };
+
   const processAudio = async (audioBlob: Blob) => {
     if (!isMountedRef.current) return;
 
@@ -730,8 +793,8 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                   {/* Voice-to-Text Mic Button in Chat Input */}
                   <button
                     type="button"
-                    onClick={startListening}
-                    disabled={isLoading || isProcessing || isListening}
+                    onClick={recordVoiceInput}
+                    disabled={isLoading || isProcessing}
                     className={`flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-colors ${
                       isListening
                         ? 'bg-red-600 text-white animate-pulse'
@@ -740,7 +803,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                         : 'hover:bg-gray-700 text-gray-400 hover:text-white'
                     }`}
                     data-testid="button-voice-input-mic"
-                    title="Click to speak your message"
+                    title={isListening ? 'Click to stop recording' : 'Click to speak your message'}
                   >
                     <Mic className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
