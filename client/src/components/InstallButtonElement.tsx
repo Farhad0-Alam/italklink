@@ -15,7 +15,7 @@ import { SelectItem } from '@/components/ui/select';
 interface InstallButtonElementProps {
   element: PageElement;
   isEditing: boolean;
-  onUpdate?: (cardData: Partial<BusinessCard>) => void;
+  onUpdate?: (element: PageElement) => void;
   cardData?: BusinessCard;
 }
 
@@ -30,6 +30,13 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
     showInstructions,
     setShowInstructions
   } = useBusinessCardPWA(cardData || {} as BusinessCard);
+
+  // Helper to update element with new data
+  const handleDataUpdate = (newData: any) => {
+    if (onUpdate) {
+      onUpdate({ ...element, data: { ...(element.data || {}), ...newData } });
+    }
+  };
 
   const handleInstallClick = async () => {
     console.log('Install button clicked from element');
@@ -61,7 +68,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64 = event.target?.result as string;
-        onUpdate?.({ pwaAppIcon: base64 });
+        handleDataUpdate({ pwaAppIcon: base64 });
       };
       reader.readAsDataURL(file);
     } catch (error) {
@@ -117,7 +124,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
           {lightInput({
             id: 'install-app-name',
             value: cardData?.pwaAppName || 'APP',
-            onChange: (e: any) => onUpdate?.({ pwaAppName: e.target.value }),
+            onChange: (e: any) => handleDataUpdate({ pwaAppName: e.target.value }),
             placeholder: 'Enter app name',
             'data-testid': 'input-install-app-name'
           })}
@@ -164,7 +171,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
             {lightColorPicker({
               id: 'install-theme-color',
               value: cardData?.pwaThemeColor || '#22c55e',
-              onChange: (e: any) => onUpdate?.({ pwaThemeColor: e.target.value }),
+              onChange: (e: any) => handleDataUpdate({ pwaThemeColor: e.target.value }),
               'data-testid': 'input-install-theme-color'
             })}
             <span className="text-xs font-mono text-slate-600">
@@ -182,7 +189,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
               type="checkbox"
               id="install-enabled"
               checked={cardData?.pwaInstallButtonEnabled !== false}
-              onChange={(e) => onUpdate?.({ pwaInstallButtonEnabled: e.target.checked })}
+              onChange={(e) => handleDataUpdate({ pwaInstallButtonEnabled: e.target.checked })}
               className="w-4 h-4 rounded border-slate-300 text-green-500 focus:ring-green-500"
               data-testid="checkbox-install-enabled"
             />
@@ -202,7 +209,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
               {lightInput({
                 id: 'install-button-text',
                 value: cardData?.pwaInstallButtonText || 'Install App',
-                onChange: (e: any) => onUpdate?.({ pwaInstallButtonText: e.target.value }),
+                onChange: (e: any) => handleDataUpdate({ pwaInstallButtonText: e.target.value }),
                 placeholder: 'Install App',
                 'data-testid': 'input-install-button-text'
               })}
@@ -215,7 +222,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
                 {lightColorPicker({
                   id: 'install-button-color',
                   value: cardData?.pwaInstallButtonColor || '#22c55e',
-                  onChange: (e: any) => onUpdate?.({ pwaInstallButtonColor: e.target.value }),
+                  onChange: (e: any) => handleDataUpdate({ pwaInstallButtonColor: e.target.value }),
                   'data-testid': 'input-install-button-color'
                 })}
                 <span className="text-xs font-mono text-slate-600">
