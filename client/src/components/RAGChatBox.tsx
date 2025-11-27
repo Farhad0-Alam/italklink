@@ -467,8 +467,10 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         
         // Reset transcript
         currentTranscriptRef.current = '';
-        realtimeClientRef.current.disconnect();
-        realtimeClientRef.current = null;
+        if (realtimeClientRef.current) {
+          realtimeClientRef.current.disconnect();
+          realtimeClientRef.current = null;
+        }
       } catch (error) {
         console.error('[Stop Listening Error]:', error);
       }

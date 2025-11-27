@@ -98,7 +98,7 @@ Keep responses concise and natural for voice conversation.`,
         this.ws.onerror = (error) => {
           console.error('[RealtimeAPI] WebSocket error:', error);
           if (this.onError) {
-            this.onError('Connection error');
+            this.onError('Connection error: ' + (error?.message || 'Unknown error'));
           }
           reject(error);
         };
@@ -230,11 +230,17 @@ Keep responses concise and natural for voice conversation.`,
   }
 
   disconnect(): void {
-    if (this.ws) {
-      this.ws.close();
+    try {
+      if (this.ws) {
+        this.ws.close();
+        this.ws = null;
+      }
+      this.isConnected = false;
+    } catch (error) {
+      console.error('[RealtimeAPI] Error during disconnect:', error);
       this.ws = null;
+      this.isConnected = false;
     }
-    this.isConnected = false;
   }
 
   isConnectedToAPI(): boolean {

@@ -26,22 +26,23 @@ const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute in milliseconds
 
 // Rate limit middleware for tracking endpoint
 function checkTrackingRateLimit(req: Request, res: Response, next: Function) {
-  const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+  // Use userId for authenticated requests, otherwise use IP
+  const identifier = (req.user?.id) || req.ip || req.connection.remoteAddress || 'unknown';
   const now = Date.now();
   
   // Clean up old entries
-  for (const [ip, data] of trackingRateLimit.entries()) {
+  for (const [key, data] of trackingRateLimit.entries()) {
     if (now > data.resetTime) {
-      trackingRateLimit.delete(ip);
+      trackingRateLimit.delete(key);
     }
   }
   
-  // Check rate limit for this IP
-  const rateLimitData = trackingRateLimit.get(clientIP);
+  // Check rate limit for this identifier
+  const rateLimitData = trackingRateLimit.get(identifier);
   
   if (!rateLimitData) {
-    // First request from this IP
-    trackingRateLimit.set(clientIP, {
+    // First request from this identifier
+    trackingRateLimit.set(identifier, {
       count: 1,
       resetTime: now + RATE_LIMIT_WINDOW
     });
@@ -217,12 +218,14 @@ router.post('/track', checkTrackingRateLimit, async (req: Request, res: Response
     console.error('Track interaction detailed error:', {
       message: error.message,
       stack: error.stack,
-      code: error.code
+      code: error.code,
+      type: error.constructor?.name
     });
     
+    // Return 500 with helpful error info but don't expose internal details
     res.status(500).json({
       success: false,
-      error: error.message || 'Internal server error',
+      error: 'Failed to track interaction',
       code: 'TRACKING_ERROR'
     });
   }
