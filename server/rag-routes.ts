@@ -245,4 +245,124 @@ router.post('/stt', requireAuth, async (req, res) => {
   }
 });
 
+// GET /api/knowledge - List user's knowledge base documents
+router.get('/knowledge', requireAuth, async (req, res) => {
+  try {
+    const userId = (req.user as any)?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const result = await pool.query(
+      `SELECT id, url, title, created_at as createdAt 
+       FROM kb_docs 
+       WHERE user_id = $1 
+       GROUP BY id, url, title, created_at
+       ORDER BY created_at DESC`,
+      [userId]
+    );
+    
+    res.json({
+      ok: true,
+      documents: result.rows.map((row: any) => ({
+        id: row.id,
+        url: row.url,
+        title: row.title,
+        createdAt: row.createdat,
+      })),
+    });
+  } catch (error) {
+    console.error('Knowledge list error:', error);
+    res.status(500).json({ error: 'Failed to fetch knowledge base' });
+  }
+});
+
+// DELETE /api/knowledge/:id - Delete knowledge document
+router.delete('/knowledge/:id', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = (req.user as any)?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    // Verify ownership before deleting
+    const doc = await pool.query(
+      `SELECT user_id FROM kb_docs WHERE id = $1 LIMIT 1`,
+      [id]
+    );
+    
+    if (doc.rows.length === 0) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+    
+    if (doc.rows[0].user_id !== userId) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
+    // Delete all chunks for this document (same URL)
+    const urlResult = await pool.query(
+      `SELECT url FROM kb_docs WHERE id = $1`,
+      [id]
+    );
+    
+    if (urlResult.rows.length > 0) {
+      await pool.query(
+        `DELETE FROM kb_docs WHERE user_id = $1 AND url = $2`,
+        [userId, urlResult.rows[0].url]
+      );
+    }
+    
+    res.json({ ok: true, message: 'Document deleted' });
+  } catch (error) {
+    console.error('Knowledge delete error:', error);
+    res.status(500).json({ error: 'Failed to delete document' });
+  }
+});
+
+// PATCH /api/knowledge/:id - Update knowledge document title
+router.patch('/knowledge/:id', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title } = req.body;
+    const userId = (req.user as any)?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    if (!title) {
+      return res.status(400).json({ error: 'Title required' });
+    }
+    
+    // Verify ownership
+    const doc = await pool.query(
+      `SELECT user_id, url FROM kb_docs WHERE id = $1 LIMIT 1`,
+      [id]
+    );
+    
+    if (doc.rows.length === 0) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+    
+    if (doc.rows[0].user_id !== userId) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
+    // Update title for all chunks of this document
+    const url = doc.rows[0].url;
+    await pool.query(
+      `UPDATE kb_docs SET title = $1 WHERE user_id = $2 AND url = $3`,
+      [title, userId, url]
+    );
+    
+    res.json({ ok: true, message: 'Document updated' });
+  } catch (error) {
+    console.error('Knowledge update error:', error);
+    res.status(500).json({ error: 'Failed to update document' });
+  }
+});
+
 export default router;

@@ -15,6 +15,7 @@ import { IngestForm } from "@/components/IngestForm";
 import { URLManager } from "@/components/URLManager";
 import { DocumentManager, DocumentItem } from "@/components/DocumentManager";
 import { RAGChatBox } from "@/components/RAGChatBox";
+import { KnowledgeManager } from "@/components/KnowledgeManager";
 import { VoiceAgentElement } from "@/components/VoiceAgentElement";
 import { VoiceAssistantCard } from "@/components/VoiceAssistantCard";
 import { MessageCircle } from "lucide-react";
@@ -2615,6 +2616,10 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     acceptedTypes={['.pdf', '.doc', '.docx', '.txt', '.md', '.rtf']}
                     className="bg-slate-800 border-slate-600"
                   />
+                </div>
+                {/* Knowledge Base Management */}
+                <div className="mt-4 p-3 bg-slate-700 rounded-lg border border-slate-600">
+                  <KnowledgeManager cardId={element.id} />
                 </div>
                 <div className="flex items-center space-x-2">
                   <input
