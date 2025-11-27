@@ -91,131 +91,52 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
     };
   }, []);
 
-  // Generate dynamic manifest for this card
-  useEffect(() => {
-    if (cardData) {
-      console.log('PWA: Updating manifest for card:', cardData.fullName);
-      updateDynamicManifest(cardData);
-    }
-  }, [cardData]);
-
   const installBusinessCard = async () => {
-    // Only trigger native install prompt (like TalkLink)
+    console.log('PWA: Install button clicked');
+    console.log('PWA: deferredPrompt available:', !!deferredPrompt);
+    
+    // Trigger native install prompt
     if (deferredPrompt) {
       try {
+        console.log('PWA: Showing install prompt...');
         await deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
+        console.log('PWA: User choice:', outcome);
+        
         setDeferredPrompt(null);
         setIsInstallable(false);
         
         if (outcome === 'accepted') {
-          console.log('User installed business card app');
+          console.log('User accepted: Business card app will be installed');
           return true;
         } else {
-          console.log('User dismissed install prompt');
+          console.log('User dismissed: Install prompt cancelled');
           return false;
         }
       } catch (error) {
-        console.error('Error installing business card app:', error);
+        console.error('Error showing install prompt:', error);
         setDeferredPrompt(null);
         setIsInstallable(false);
         return false;
       }
+    } else {
+      console.warn('PWA: No deferredPrompt available - beforeinstallprompt may not have fired');
+      console.log('PWA Debug Info:', {
+        hasManifest: !!document.querySelector('link[rel="manifest"]'),
+        manifestHref: document.querySelector('link[rel="manifest"]')?.getAttribute('href'),
+        isHTTPS: location.protocol === 'https:',
+        isStandalone: window.matchMedia('(display-mode: standalone)').matches,
+        userAgent: navigator.userAgent
+      });
+      return false;
     }
-    return false;
   };
 
   return {
     isInstallable,
     isInstalled,
-    installBusinessCard
+    installBusinessCard,
+    showInstructions,
+    setShowInstructions
   };
 };
-
-// Update manifest for current business card
-function updateDynamicManifest(cardData: BusinessCard) {
-  const manifestData = {
-    name: `${cardData.fullName || 'Digital Business Card'}`,
-    short_name: cardData.fullName?.split(' ')[0] || 'Card',
-    description: `Connect with ${cardData.fullName || 'this professional'} - Digital Business Card`,
-    start_url: window.location.pathname + window.location.search + window.location.hash,
-    display: 'standalone',
-    background_color: cardData.backgroundColor || '#ffffff',
-    theme_color: cardData.accentColor || '#22c55e',
-    orientation: 'portrait-primary',
-    scope: '/',
-    categories: ['business', 'networking', 'social'],
-    icons: [
-      {
-        src: '/icon-192x192.png',
-        sizes: '192x192',
-        type: 'image/png',
-        purpose: 'any maskable'
-      },
-      {
-        src: '/icon-256x256.png',
-        sizes: '256x256',
-        type: 'image/png'
-      },
-      {
-        src: '/icon-384x384.png',
-        sizes: '384x384',
-        type: 'image/png'
-      },
-      {
-        src: '/icon-512x512.png',
-        sizes: '512x512',
-        type: 'image/png'
-      }
-    ]
-  };
-
-  console.log('PWA: Generating manifest:', manifestData);
-
-  // Create and inject dynamic manifest
-  const manifestBlob = new Blob([JSON.stringify(manifestData, null, 2)], { type: 'application/json' });
-  const manifestURL = URL.createObjectURL(manifestBlob);
-  
-  // Remove existing manifest
-  const existingManifest = document.querySelector('link[rel="manifest"]');
-  if (existingManifest) {
-    existingManifest.remove();
-    console.log('PWA: Removed existing manifest');
-  }
-  
-  // Add new manifest
-  const manifestLink = document.createElement('link');
-  manifestLink.rel = 'manifest';
-  manifestLink.href = manifestURL;
-  manifestLink.crossOrigin = 'anonymous';
-  document.head.appendChild(manifestLink);
-  console.log('PWA: Added manifest link:', manifestURL);
-  
-  // Update theme color
-  let themeColorMeta = document.querySelector('meta[name="theme-color"]');
-  if (!themeColorMeta) {
-    themeColorMeta = document.createElement('meta');
-    themeColorMeta.setAttribute('name', 'theme-color');
-    document.head.appendChild(themeColorMeta);
-  }
-  themeColorMeta.setAttribute('content', cardData.accentColor || '#22c55e');
-  
-  // Add viewport meta if not exists
-  if (!document.querySelector('meta[name="viewport"]')) {
-    const viewportMeta = document.createElement('meta');
-    viewportMeta.setAttribute('name', 'viewport');
-    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0');
-    document.head.appendChild(viewportMeta);
-    console.log('PWA: Added viewport meta');
-  }
-  
-  // Trigger a small delay to let browser process manifest
-  setTimeout(() => {
-    console.log('PWA: Manifest should be ready for beforeinstallprompt');
-    // Check if manifest is accessible
-    fetch(manifestURL)
-      .then(res => res.json())
-      .then(data => console.log('PWA: Manifest verification:', data))
-      .catch(err => console.error('PWA: Manifest fetch error:', err));
-  }, 500);
-}

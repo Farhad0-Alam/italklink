@@ -44,6 +44,7 @@ const PUBLIC_ENDPOINTS = [
   '/voice/tts', // Text-to-speech - public
   '/ingest', // RAG knowledge ingestion
   '/ingest-text', // RAG text ingestion
+  '/pwa/manifest', // PWA manifest endpoint - must be public for native install
 ];
 
 // Enhanced authentication middleware that includes additional security checks

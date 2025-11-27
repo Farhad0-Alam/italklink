@@ -201,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup template collections routes
   app.use('/api/collections', requireAuth, templateCollectionsRoutes);
   
-  // Setup PWA routes
+  // Setup PWA routes (public - no auth required for manifest)
   app.use('/api/pwa', pwaRouter);
   
   // Setup notification routes

@@ -122,6 +122,46 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ cardData }) => {
     updateTwitterMeta('twitter:description', ogDescriptionContent);
     updateTwitterMeta('twitter:image', ogImageContent);
     
+    // Update PWA manifest link
+    const pathParts = window.location.pathname.split('/');
+    const shareSlug = pathParts[pathParts.length - 1];
+    
+    let manifestLink = document.querySelector('link[rel="manifest"]');
+    if (manifestLink) {
+      manifestLink.setAttribute('href', `/api/pwa/manifest?slug=${shareSlug}`);
+    } else {
+      manifestLink = document.createElement('link');
+      manifestLink.setAttribute('rel', 'manifest');
+      manifestLink.setAttribute('href', `/api/pwa/manifest?slug=${shareSlug}`);
+      document.head.appendChild(manifestLink);
+    }
+    
+    // Update theme-color meta tag from card brand color
+    const themeColor = (cardData.brandColor as string) || '#22c55e';
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', themeColor);
+    } else {
+      metaThemeColor = document.createElement('meta');
+      metaThemeColor.setAttribute('name', 'theme-color');
+      metaThemeColor.setAttribute('content', themeColor);
+      document.head.appendChild(metaThemeColor);
+    }
+    
+    // Update apple-touch-icon if profile image exists
+    if (cardData.profileImage) {
+      let appleTouchIcon = document.querySelector('link[rel="apple-touch-icon"]');
+      const iconUrl = typeof cardData.profileImage === 'string' ? cardData.profileImage : '/logo.png';
+      if (appleTouchIcon) {
+        appleTouchIcon.setAttribute('href', iconUrl);
+      } else {
+        appleTouchIcon = document.createElement('link');
+        appleTouchIcon.setAttribute('rel', 'apple-touch-icon');
+        appleTouchIcon.setAttribute('href', iconUrl);
+        document.head.appendChild(appleTouchIcon);
+      }
+    }
+    
     // Update structured data
     let structuredData = document.querySelector('script[type="application/ld+json"]#person-schema');
     if (structuredData) {

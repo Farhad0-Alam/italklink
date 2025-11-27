@@ -16,22 +16,25 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
   const { 
     isInstallable, 
     isInstalled, 
-    installBusinessCard 
+    installBusinessCard,
+    showInstructions,
+    setShowInstructions
   } = useBusinessCardPWA(cardData || {} as BusinessCard);
 
   const handleInstallClick = async () => {
+    console.log('Install button clicked from element');
     setInstalling(true);
+    
     try {
-      const result = await installBusinessCard();
+      const installed = await installBusinessCard();
       
-      // If native install didn't work, try Web Share as fallback
-      if (!result && (navigator as any).share) {
-        console.log('Using Web Share API as fallback');
-        await (navigator as any).share({
-          title: cardData?.fullName || 'Digital Business Card',
-          text: `Check out my digital business card: ${cardData?.fullName || 'My Professional Card'}`,
-          url: window.location.href
-        });
+      if (installed) {
+        console.log('PWA installation initiated successfully');
+      } else {
+        console.log('PWA installation was not initiated - may need manual steps');
+        if (setShowInstructions) {
+          setShowInstructions(true);
+        }
       }
     } catch (error) {
       console.error('Install failed:', error);
