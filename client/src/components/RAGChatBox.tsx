@@ -967,7 +967,13 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
             {isListening && (
               <div className="text-center">
                 <p className="text-red-400 text-sm font-medium animate-pulse">🎙️ Recording...</p>
+                <p className="text-cyan-400 text-xs mt-2">📚 Using Knowledge Base</p>
               </div>
+            )}
+            
+            {/* Knowledge Base Indicator When Not Recording */}
+            {!isListening && !isProcessing && !isTTSLoading && (
+              <p className="text-cyan-400 text-xs">📚 Connected to Knowledge Base</p>
             )}
 
             {/* Control Buttons */}

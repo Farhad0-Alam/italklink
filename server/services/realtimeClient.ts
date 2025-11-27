@@ -147,7 +147,8 @@ Keep responses concise and natural for voice conversation.`,
 
       case 'response.function_call_arguments.done':
         if (message.name === 'get_knowledge_context') {
-          this.handleKnowledgeContextCall(message.arguments);
+          this.currentToolCallId = message.call_id || '';
+          this.handleKnowledgeContextCall(message.arguments, message.call_id);
         }
         break;
 
@@ -162,7 +163,9 @@ Keep responses concise and natural for voice conversation.`,
     }
   }
 
-  private async handleKnowledgeContextCall(args: string) {
+  private currentToolCallId: string = '';
+
+  private async handleKnowledgeContextCall(args: string, callId?: string) {
     try {
       const parsed = JSON.parse(args);
       const question = parsed.question || '';
@@ -170,15 +173,17 @@ Keep responses concise and natural for voice conversation.`,
       console.log('[RAG] Knowledge context call with question:', question);
 
       const context = await getRagContext(question, 3);
+      
+      console.log('[RAG] Retrieved', context.sources.length, 'sources for voice response');
 
-      // Send tool result back
+      // Send tool result back with proper call_id
       this.sendMessage({
         type: 'conversation.item.create',
         item: {
           type: 'function_call_result',
-          call_id: '',
+          call_id: callId || this.currentToolCallId || 'call_' + Date.now(),
           result: JSON.stringify({
-            context: context.context,
+            context: context.context.substring(0, 2000), // Limit context size for voice
             sources: context.sources.map((s) => ({ title: s.title, url: s.url })),
           }),
         },
