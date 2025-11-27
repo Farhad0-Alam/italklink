@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Trash2, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface TextChunk {
   id: string;
@@ -88,24 +89,23 @@ export function TextChunkManager({ maxChunks = 50, className = '', onChunksAdded
         const chunk = chunks[i];
         
         try {
-          const response = await fetch('/api/ingest-text', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              text: chunk.content,
-              title: chunk.title,
-            }),
+          await apiRequest('POST', '/api/ingest-text', {
+            text: chunk.content,
+            title: chunk.title,
           });
-
-          if (response.ok) {
-            chunks[i].status = 'success';
-            successCount++;
-          } else {
-            chunks[i].status = 'failed';
-            failedCount++;
-          }
-        } catch (error) {
+          chunks[i].status = 'success';
+          successCount++;
+        } catch (error: any) {
           chunks[i].status = 'failed';
+          const errorMsg = error?.message || 'Failed to ingest chunk';
+          if (errorMsg.includes('429')) {
+            toast({
+              title: 'Rate Limited',
+              description: 'Too many requests. Please wait a moment and try again.',
+              variant: 'destructive',
+            });
+            break;
+          }
           failedCount++;
         }
 

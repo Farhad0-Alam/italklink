@@ -166,8 +166,17 @@ export function DocumentManager({
             title: doc.name,
           });
           successCount++;
-        } catch (error) {
+        } catch (error: any) {
           console.error('Document ingest error:', error);
+          const errorMsg = error?.message || 'Failed to ingest document';
+          if (errorMsg.includes('429')) {
+            toast({
+              title: 'Rate Limited',
+              description: 'Too many requests. Please wait a moment and try again.',
+              variant: 'destructive',
+            });
+            break;
+          }
           failedCount++;
         }
       }

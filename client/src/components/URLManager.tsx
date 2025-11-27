@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 export interface URLItem {
   id: string;
@@ -127,17 +128,9 @@ export function URLManager({
       // Process URLs one by one for better UX
       for (const urlItem of urls) {
         try {
-          const response = await fetch('/api/ingest', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ url: urlItem.url }),
-          });
+          const result = await apiRequest('POST', '/api/ingest', { url: urlItem.url });
 
-          const result = await response.json();
-
-          if (response.ok && result.ok) {
+          if (result && result.ok) {
             setUrls(prev => prev.map(item => 
               item.id === urlItem.id 
                 ? { 
@@ -154,18 +147,27 @@ export function URLManager({
                 ? { 
                     ...item, 
                     status: 'error',
-                    error: result.error || 'Failed to ingest URL'
+                    error: result?.error || 'Failed to ingest URL'
                   }
                 : item
             ));
           }
-        } catch (error) {
+        } catch (error: any) {
+          const errorMsg = error?.message || 'Network error';
+          if (errorMsg.includes('429')) {
+            toast({
+              title: 'Rate Limited',
+              description: 'Too many requests. Please wait a moment and try again.',
+              variant: 'destructive',
+            });
+            break;
+          }
           setUrls(prev => prev.map(item => 
             item.id === urlItem.id 
               ? { 
                   ...item, 
                   status: 'error',
-                  error: 'Network error'
+                  error: errorMsg.includes('429') ? 'Too many requests' : errorMsg
                 }
               : item
           ));
