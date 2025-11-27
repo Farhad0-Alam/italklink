@@ -3565,6 +3565,22 @@ export const actionButtonsElementSchema = baseElementSchema.extend({
   }),
 });
 
+// PWA Install Button element - allows users to install the business card as a native app
+export const installButtonElementSchema = baseElementSchema.extend({
+  type: z.literal("installButton"),
+  data: z.object({
+    buttonText: z.string().default("Install App"),
+    buttonColor: z.string().default("#22c55e"),
+    textColor: z.string().default("#ffffff"),
+    buttonSize: z.enum(["sm", "md", "lg"]).default("md"),
+    buttonStyle: z.enum(["filled", "outline", "ghost"]).default("filled"),
+    buttonAlignment: z.enum(["left", "center", "right"]).default("center"),
+    borderRadius: z.enum(["none", "sm", "md", "lg", "full"]).default("md"),
+    showIcon: z.boolean().default(true),
+    iconPosition: z.enum(["left", "right"]).default("left"),
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   headingElementSchema,
@@ -3594,6 +3610,7 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   pdfViewerElementSchema,
   subscribeElementSchema,
   actionButtonsElementSchema,
+  installButtonElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;
