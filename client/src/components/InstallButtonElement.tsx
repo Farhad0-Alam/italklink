@@ -66,7 +66,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
   
   // Element data takes priority, then legacy cardData.pwa* fallback for backward compatibility
   const data: InstallButtonData = {
-    enabled: elementData.enabled ?? defaultData.enabled,
+    enabled: elementData.enabled ?? cardData?.pwaInstallButtonEnabled ?? defaultData.enabled,
     appName: elementData.appName ?? cardData?.pwaAppName ?? defaultData.appName,
     iconUrl: elementData.iconUrl ?? cardData?.pwaAppIcon,
     buttonText: elementData.buttonText ?? cardData?.pwaInstallButtonText ?? defaultData.buttonText,
