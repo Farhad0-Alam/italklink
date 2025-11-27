@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 export interface DocumentItem {
   id: string;
@@ -160,21 +161,13 @@ export function DocumentManager({
     try {
       for (const doc of readyDocs) {
         try {
-          const response = await fetch('/api/ingest-text', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              text: doc.content,
-              title: doc.name,
-            }),
+          await apiRequest('POST', '/api/ingest-text', {
+            text: doc.content,
+            title: doc.name,
           });
-
-          if (response.ok) {
-            successCount++;
-          } else {
-            failedCount++;
-          }
+          successCount++;
         } catch (error) {
+          console.error('Document ingest error:', error);
           failedCount++;
         }
       }
