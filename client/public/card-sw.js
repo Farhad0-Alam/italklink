@@ -23,36 +23,62 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   
-  // Cache business card pages
-  if (url.pathname.includes('/share')) {
+  // Network-first strategy for HTML pages (share pages)
+  if (url.pathname.includes('/share') && event.request.method === 'GET') {
     event.respondWith(
-      caches.match(event.request)
+      fetch(event.request)
         .then(response => {
-          if (response) {
+          if (!response || response.status !== 200) {
             return response;
           }
           
-          return fetch(event.request)
-            .then(response => {
-              const responseClone = response.clone();
-              const cardId = extractCardId(url);
-              
-              if (cardId) {
-                caches.open(CARD_CACHE_PREFIX + cardId)
-                  .then(cache => cache.put(event.request, responseClone));
-              }
-              
-              return response;
-            });
+          const responseClone = response.clone();
+          const cardId = extractCardId(url);
+          
+          if (cardId) {
+            caches.open(CARD_CACHE_PREFIX + cardId)
+              .then(cache => cache.put(event.request, responseClone));
+          }
+          
+          return response;
+        })
+        .catch(() => {
+          // Fall back to cache on network error
+          return caches.match(event.request)
+            .then(response => response || new Response('Offline - Page not available', { status: 503 }));
         })
     );
     return;
   }
   
-  // Default cache strategy for other resources
+  // Cache-first strategy for static resources
+  if (event.request.method === 'GET' && 
+      (url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2)$/i) || 
+       url.pathname.includes('/api/'))) {
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => response || fetch(event.request))
+        .catch(() => new Response('Offline', { status: 503 }))
+    );
+    return;
+  }
+  
+  // Network-only for API requests that aren't GET
+  if (url.pathname.includes('/api/')) {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => new Response(JSON.stringify({ error: 'Offline' }), { 
+          status: 503,
+          headers: { 'Content-Type': 'application/json' }
+        }))
+    );
+    return;
+  }
+  
+  // Default fetch strategy
   event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
+    fetch(event.request)
+      .catch(() => caches.match(event.request) || new Response('Offline', { status: 503 }))
   );
 });
 
