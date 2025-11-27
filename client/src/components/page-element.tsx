@@ -2502,6 +2502,22 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
         );
 
       case "ragKnowledge":
+        const [ragKnowledgeSections, setRagKnowledgeSections] = useState({
+          basic: true,
+          textContent: false,
+          urls: false,
+          documents: false,
+          chunks: false,
+          settings: false,
+        });
+
+        const toggleRagSection = (section: string) => {
+          setRagKnowledgeSections(prev => ({
+            ...prev,
+            [section]: !prev[section]
+          }));
+        };
+
         return (
           <div className="mb-6">
             <h3 className="text-lg font-bold text-black mb-4 text-center">
@@ -2510,135 +2526,211 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
             <p className="text-center text-gray-600 mb-6">{element.data.description}</p>
             
             {isEditing ? (
-              <div className="space-y-4">
-                <Input
-                  value={element.data.title}
-                  onChange={(e) => handleDataUpdate({ title: e.target.value })}
-                  placeholder="Knowledge assistant title"
-                  className="bg-slate-700 border-slate-600 text-white"
-                />
-                <Textarea
-                  value={element.data.description}
-                  onChange={(e) => handleDataUpdate({ description: e.target.value })}
-                  placeholder="Description"
-                  className="bg-slate-700 border-slate-600 text-white"
-                />
-                <div className="space-y-2">
-                  <label className="text-black text-sm">Knowledge Base Content:</label>
-                  <Textarea
-                    value={element.data.knowledgeBase?.textContent || ''}
-                    onChange={(e) => handleDataUpdate({ 
-                      knowledgeBase: { 
-                        ...element.data.knowledgeBase, 
-                        textContent: e.target.value 
-                      } 
-                    })}
-                    placeholder="Enter knowledge base content..."
-                    rows={4}
-                    className="bg-slate-700 border-slate-600 text-white"
-                  />
-                  <Button
-                    onClick={async () => {
-                      const textContent = element.data.knowledgeBase?.textContent;
-                      if (!textContent || textContent.trim().length < 10) {
-                        alert('Please enter at least 10 characters of text');
-                        return;
-                      }
-                      
-                      try {
-                        const response = await fetch('/api/ingest-text', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            text: textContent,
-                            title: element.data.title || 'Knowledge Base Content'
-                          })
-                        });
-                        
-                        const result = await response.json();
-                        
-                        if (response.ok && result.ok) {
-                          alert(`Success! ${result.chunks} chunks added to knowledge base.`);
-                        } else {
-                          alert(`Error: ${result.error || 'Failed to save to knowledge base'}`);
-                        }
-                      } catch (error) {
-                        console.error('Error saving to knowledge base:', error);
-                        alert('Failed to save to knowledge base. Please try again.');
-                      }
-                    }}
-                    className="w-full"
-                    style={{ backgroundColor: element.data.primaryColor || '#22c55e' }}
-                    data-testid="button-save-kb-text"
+              <div className="space-y-3 max-h-[70vh] overflow-y-auto p-3 bg-slate-800 rounded-lg border border-slate-600">
+                {/* Basic Settings */}
+                <Collapsible open={ragKnowledgeSections.basic}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleRagSection('basic')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
                   >
-                    💾 Save to Knowledge Base
-                  </Button>
-                </div>
-                {/* Enhanced URL Manager - unlimited URLs */}
-                <div className="mt-2">
-                  <URLManager
-                    title="+ Add Website URLs"
-                    description="Add unlimited website URLs for comprehensive knowledge extraction"
-                    onIngest={async (urls) => {
-                      // URLs are automatically ingested through the URLManager component
-                      console.log('URLs ingested:', urls);
-                    }}
-                    maxUrls={100}
-                    className="bg-slate-800 border-slate-600"
-                  />
-                </div>
-                {/* Enhanced Document Manager - one by one upload */}
-                <div className="mt-4">
-                  <DocumentManager
-                    title="+ Add Documents (One by One)"
-                    description="Upload documents one by one for precise knowledge management"
-                    documents={element.data.knowledgeBase?.pdfFiles?.map((pdf: any) => ({
-                      id: pdf.id || generateFieldId(),
-                      name: pdf.name,
-                      content: pdf.content,
-                      size: pdf.size,
-                      status: 'success' as const
-                    })) || []}
-                    onDocumentsChange={(documents: DocumentItem[]) => {
-                      handleDataUpdate({
-                        knowledgeBase: {
-                          ...element.data.knowledgeBase,
-                          pdfFiles: documents.map(doc => ({
-                            id: doc.id,
-                            name: doc.name,
-                            content: doc.content,
-                            size: doc.size
-                          }))
+                    <span className="font-semibold text-white text-sm">📝 Basic Settings</span>
+                    <i className={`fas fa-chevron-${ragKnowledgeSections.basic ? 'up' : 'down'} text-slate-300`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3 space-y-3">
+                    <Input
+                      value={element.data.title}
+                      onChange={(e) => handleDataUpdate({ title: e.target.value })}
+                      placeholder="Knowledge assistant title"
+                      className="bg-slate-700 border-slate-600 text-white"
+                    />
+                    <Textarea
+                      value={element.data.description}
+                      onChange={(e) => handleDataUpdate({ description: e.target.value })}
+                      placeholder="Description"
+                      className="bg-slate-700 border-slate-600 text-white"
+                      rows={2}
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Text Content */}
+                <Collapsible open={ragKnowledgeSections.textContent}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleRagSection('textContent')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                  >
+                    <span className="font-semibold text-white text-sm">📄 Text Content</span>
+                    <i className={`fas fa-chevron-${ragKnowledgeSections.textContent ? 'up' : 'down'} text-slate-300`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3 space-y-3">
+                    <Textarea
+                      value={element.data.knowledgeBase?.textContent || ''}
+                      onChange={(e) => handleDataUpdate({ 
+                        knowledgeBase: { 
+                          ...element.data.knowledgeBase, 
+                          textContent: e.target.value 
+                        } 
+                      })}
+                      placeholder="Enter knowledge base content..."
+                      rows={4}
+                      className="bg-slate-700 border-slate-600 text-white text-sm"
+                    />
+                    <Button
+                      onClick={async () => {
+                        const textContent = element.data.knowledgeBase?.textContent;
+                        if (!textContent || textContent.trim().length < 10) {
+                          alert('Please enter at least 10 characters of text');
+                          return;
                         }
-                      });
-                    }}
-                    maxDocuments={50}
-                    acceptedTypes={['.pdf', '.doc', '.docx', '.txt', '.md', '.rtf']}
-                    className="bg-slate-800 border-slate-600"
-                  />
-                </div>
-                {/* Knowledge Base Management */}
-                <div className="mt-4 p-3 bg-slate-700 rounded-lg border border-slate-600">
-                  <KnowledgeManager cardId={element.id} />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={element.data.showChatBox}
-                    onChange={(e) => handleDataUpdate({ showChatBox: e.target.checked })}
-                    className="rounded"
-                  />
-                  <span className="text-black text-sm">Show Chat Interface</span>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-black text-sm">Primary Color:</label>
-                  <Input
-                    type="color"
-                    value={element.data.primaryColor}
-                    onChange={(e) => handleDataUpdate({ primaryColor: e.target.value })}
-                    className="w-20 h-10"
-                  />
-                </div>
+                        
+                        try {
+                          const response = await fetch('/api/ingest-text', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              text: textContent,
+                              title: element.data.title || 'Knowledge Base Content'
+                            })
+                          });
+                          
+                          const result = await response.json();
+                          
+                          if (response.ok && result.ok) {
+                            alert(`Success! ${result.chunks} chunks added to knowledge base.`);
+                            // Refresh chunks list
+                            toggleRagSection('chunks');
+                            setTimeout(() => toggleRagSection('chunks'), 100);
+                          } else {
+                            alert(`Error: ${result.error || 'Failed to save to knowledge base'}`);
+                          }
+                        } catch (error) {
+                          console.error('Error saving to knowledge base:', error);
+                          alert('Failed to save to knowledge base. Please try again.');
+                        }
+                      }}
+                      className="w-full text-sm"
+                      style={{ backgroundColor: element.data.primaryColor || '#22c55e' }}
+                      data-testid="button-save-kb-text"
+                    >
+                      💾 Save to Knowledge Base
+                    </Button>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Website URLs */}
+                <Collapsible open={ragKnowledgeSections.urls}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleRagSection('urls')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                  >
+                    <span className="font-semibold text-white text-sm">🌐 Website URLs</span>
+                    <i className={`fas fa-chevron-${ragKnowledgeSections.urls ? 'up' : 'down'} text-slate-300`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3">
+                    <URLManager
+                      title="+ Add Website URLs"
+                      description="Add unlimited website URLs for comprehensive knowledge extraction"
+                      onIngest={async (urls) => {
+                        console.log('URLs ingested:', urls);
+                        // Refresh chunks list
+                        toggleRagSection('chunks');
+                        setTimeout(() => toggleRagSection('chunks'), 100);
+                      }}
+                      maxUrls={100}
+                      className="bg-slate-700 border-slate-500"
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Documents */}
+                <Collapsible open={ragKnowledgeSections.documents}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleRagSection('documents')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                  >
+                    <span className="font-semibold text-white text-sm">📎 Documents</span>
+                    <i className={`fas fa-chevron-${ragKnowledgeSections.documents ? 'up' : 'down'} text-slate-300`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3">
+                    <DocumentManager
+                      title="+ Add Documents (One by One)"
+                      description="Upload documents one by one for precise knowledge management"
+                      documents={element.data.knowledgeBase?.pdfFiles?.map((pdf: any) => ({
+                        id: pdf.id || generateFieldId(),
+                        name: pdf.name,
+                        content: pdf.content,
+                        size: pdf.size,
+                        status: 'success' as const
+                      })) || []}
+                      onDocumentsChange={(documents: DocumentItem[]) => {
+                        handleDataUpdate({
+                          knowledgeBase: {
+                            ...element.data.knowledgeBase,
+                            pdfFiles: documents.map(doc => ({
+                              id: doc.id,
+                              name: doc.name,
+                              content: doc.content,
+                              size: doc.size
+                            }))
+                          }
+                        });
+                      }}
+                      maxDocuments={50}
+                      acceptedTypes={['.pdf', '.doc', '.docx', '.txt', '.md', '.rtf']}
+                      className="bg-slate-700 border-slate-500"
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Knowledge Base Chunks */}
+                <Collapsible open={ragKnowledgeSections.chunks}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleRagSection('chunks')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                  >
+                    <span className="font-semibold text-white text-sm">📚 Knowledge Base Chunks</span>
+                    <i className={`fas fa-chevron-${ragKnowledgeSections.chunks ? 'up' : 'down'} text-slate-300`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3">
+                    <div className="bg-slate-700 p-3 rounded-lg border border-slate-600">
+                      <KnowledgeManager cardId={element.id} />
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Settings */}
+                <Collapsible open={ragKnowledgeSections.settings}>
+                  <CollapsibleTrigger
+                    onClick={() => toggleRagSection('settings')}
+                    className="w-full flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                  >
+                    <span className="font-semibold text-white text-sm">⚙️ Settings</span>
+                    <i className={`fas fa-chevron-${ragKnowledgeSections.settings ? 'up' : 'down'} text-slate-300`}></i>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-3 space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={element.data.showChatBox}
+                        onChange={(e) => handleDataUpdate({ showChatBox: e.target.checked })}
+                        className="rounded"
+                      />
+                      <span className="text-white text-sm">Show Chat Interface</span>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-white text-sm block">Primary Color:</label>
+                      <div className="flex gap-2 items-center">
+                        <Input
+                          type="color"
+                          value={element.data.primaryColor || '#22c55e'}
+                          onChange={(e) => handleDataUpdate({ primaryColor: e.target.value })}
+                          className="w-12 h-10 rounded cursor-pointer"
+                        />
+                        <span className="text-slate-400 text-sm">{element.data.primaryColor || '#22c55e'}</span>
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
             ) : (
               <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
