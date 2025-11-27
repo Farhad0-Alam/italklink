@@ -32,10 +32,11 @@ async function getEmbedding(text: string): Promise<number[]> {
 }
 
 /**
- * Retrieve RAG context for a question
+ * Retrieve RAG context for a question - PER USER
  * Uses vector similarity search to find relevant documents
  */
 export async function getRagContext(
+  userId: string,
   question: string,
   limit: number = 5
 ): Promise<RagContext> {
@@ -43,12 +44,12 @@ export async function getRagContext(
     // Get embedding for the question
     const questionEmbedding = await getEmbedding(question);
 
-    // Vector similarity search using pgvector
+    // Vector similarity search using pgvector - FILTERED BY USER
     const docs = await db.execute(
       sql`
         SELECT id, title, content, url
         FROM kb_docs
-        WHERE embedding IS NOT NULL
+        WHERE user_id = ${userId} AND embedding IS NOT NULL
         ORDER BY embedding <-> ${sql.raw(`'[${questionEmbedding.join(',')}]'`)}
         LIMIT ${limit}
       `
@@ -75,9 +76,10 @@ export async function getRagContext(
 }
 
 /**
- * Add a document to the knowledge base
+ * Add a document to the knowledge base - PER USER
  */
 export async function addKbDoc(
+  userId: string,
   url: string,
   title: string,
   content: string,
@@ -90,6 +92,7 @@ export async function addKbDoc(
     const result = await db
       .insert(kbDocs)
       .values({
+        userId,
         url,
         title,
         content,

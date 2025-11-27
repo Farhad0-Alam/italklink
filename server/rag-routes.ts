@@ -2,6 +2,7 @@ import express from 'express';
 import OpenAI from 'openai';
 import { z } from 'zod';
 import { ingestUrl, ingestText, retrieveSimilarContent } from './ingest';
+import { requireAuth } from './auth';
 
 const router = express.Router();
 
@@ -26,13 +27,18 @@ const chatRequestSchema = z.object({
   topK: z.number().min(1).max(20).optional().default(5),
 });
 
-// POST /api/ingest - Ingest URL content
-router.post('/ingest', async (req, res) => {
+// POST /api/ingest - Ingest URL content (PER-USER)
+router.post('/ingest', requireAuth, async (req, res) => {
   try {
     const { url } = ingestRequestSchema.parse(req.body);
+    const userId = (req.user as any)?.id;
     
-    console.log('Ingesting URL:', url);
-    const result = await ingestUrl(url);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    console.log('Ingesting URL for user', userId, ':', url);
+    const result = await ingestUrl(userId, url);
     
     if (result.ok) {
       res.json({
@@ -55,13 +61,18 @@ router.post('/ingest', async (req, res) => {
   }
 });
 
-// POST /api/ingest-text - Ingest raw text content
-router.post('/ingest-text', async (req, res) => {
+// POST /api/ingest-text - Ingest raw text content (PER-USER)
+router.post('/ingest-text', requireAuth, async (req, res) => {
   try {
     const { text, title } = ingestTextRequestSchema.parse(req.body);
+    const userId = (req.user as any)?.id;
     
-    console.log('Ingesting text:', title);
-    const result = await ingestText(text, title);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    console.log('Ingesting text for user', userId, ':', title);
+    const result = await ingestText(userId, text, title);
     
     if (result.ok) {
       res.json({
@@ -84,16 +95,21 @@ router.post('/ingest-text', async (req, res) => {
   }
 });
 
-// POST /api/chat - RAG-powered chat
-router.post('/chat', async (req, res) => {
+// POST /api/chat - RAG-powered chat (PER-USER)
+router.post('/chat', requireAuth, async (req, res) => {
   try {
     const { query, topK } = chatRequestSchema.parse(req.body);
+    const userId = (req.user as any)?.id;
     
-    console.log('RAG chat query:', query);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
     
-    // 1. Retrieve similar content
-    const similarDocs = await retrieveSimilarContent(query, topK);
-    console.log('Found', similarDocs.length, 'similar documents');
+    console.log('RAG chat query for user', userId, ':', query);
+    
+    // 1. Retrieve similar content - USER-SPECIFIC
+    const similarDocs = await retrieveSimilarContent(userId, query, topK);
+    console.log('Found', similarDocs.length, 'similar documents for user', userId);
     
     if (similarDocs.length === 0) {
       return res.json({

@@ -274,12 +274,12 @@ export function computeContentHash(content: string): string {
   return crypto.createHash('sha256').update(content, 'utf8').digest('hex');
 }
 
-// Check if content already exists
-export async function contentExists(url: string, contentHash: string): Promise<boolean> {
+// Check if content already exists for a user
+export async function contentExists(userId: string, url: string, contentHash: string): Promise<boolean> {
   try {
     const result = await pool.query(
-      `SELECT 1 FROM kb_docs WHERE url = $1 AND meta->>'hash' = $2 LIMIT 1`,
-      [url, contentHash]
+      `SELECT 1 FROM kb_docs WHERE user_id = $1 AND url = $2 AND meta->>'hash' = $3 LIMIT 1`,
+      [userId, url, contentHash]
     );
     return result.rows.length > 0;
   } catch (error) {
@@ -288,8 +288,8 @@ export async function contentExists(url: string, contentHash: string): Promise<b
   }
 }
 
-// Ingest raw text into knowledge base
-export async function ingestText(text: string, title: string = 'Manual Text Entry'): Promise<IngestResult> {
+// Ingest raw text into knowledge base - ISOLATED PER USER
+export async function ingestText(userId: string, text: string, title: string = 'Manual Text Entry'): Promise<IngestResult> {
   try {
     if (!text || text.trim().length < 10) {
       return {
@@ -305,12 +305,12 @@ export async function ingestText(text: string, title: string = 'Manual Text Entr
     const contentHash = computeContentHash(content);
     const identifier = `text://${contentHash.substring(0, 12)}`;
 
-    // 1. Check for duplicates
-    if (await contentExists(identifier, contentHash)) {
-      console.log('Text content already exists, skipping ingestion');
+    // 1. Check for duplicates for this user only
+    if (await contentExists(userId, identifier, contentHash)) {
+      console.log('Text content already exists for user, skipping ingestion');
       const existingChunks = await pool.query(
-        `SELECT COUNT(*) as count FROM kb_docs WHERE url = $1`,
-        [identifier]
+        `SELECT COUNT(*) as count FROM kb_docs WHERE user_id = $1 AND url = $2`,
+        [userId, identifier]
       );
       const count = Number(existingChunks.rows[0]?.count || 0);
       
@@ -322,8 +322,8 @@ export async function ingestText(text: string, title: string = 'Manual Text Entr
       };
     }
 
-    // 2. Delete existing chunks for this identifier (refresh)
-    await pool.query(`DELETE FROM kb_docs WHERE url = $1`, [identifier]);
+    // 2. Delete existing chunks for this user and identifier (refresh)
+    await pool.query(`DELETE FROM kb_docs WHERE user_id = $1 AND url = $2`, [userId, identifier]);
 
     // 3. Split into chunks
     let chunks = chunkText(content);
@@ -338,9 +338,10 @@ export async function ingestText(text: string, title: string = 'Manual Text Entr
     // 4. Generate embeddings
     const embeddings = await generateEmbeddings(chunks);
 
-    // 5. Insert chunks with embeddings
+    // 5. Insert chunks with embeddings - tagged with userId
     for (let i = 0; i < chunks.length; i++) {
-      const chunkData: Omit<InsertKbDoc, 'id' | 'createdAt'> = {
+      const chunkData = {
+        userId,
         url: identifier,
         title,
         content: chunks[i],
@@ -353,9 +354,10 @@ export async function ingestText(text: string, title: string = 'Manual Text Entr
       };
 
       await pool.query(
-        `INSERT INTO kb_docs (url, title, content, content_tokens, meta, embedding) 
-         VALUES ($1, $2, $3, $4, $5, $6)`,
+        `INSERT INTO kb_docs (user_id, url, title, content, content_tokens, meta, embedding) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
         [
+          chunkData.userId,
           chunkData.url,
           chunkData.title,
           chunkData.content,
@@ -386,8 +388,8 @@ export async function ingestText(text: string, title: string = 'Manual Text Entr
   }
 }
 
-// Ingest URL content into knowledge base
-export async function ingestUrl(url: string): Promise<IngestResult> {
+// Ingest URL content into knowledge base - ISOLATED PER USER
+export async function ingestUrl(userId: string, url: string): Promise<IngestResult> {
   try {
     // 1. Extract readable content
     let extracted = await fetchReadable(url);
@@ -496,7 +498,7 @@ export async function ingestUrl(url: string): Promise<IngestResult> {
   }
 }
 
-// Retrieve similar content for RAG
+// Retrieve similar content for RAG - FILTERED BY USER
 export interface RetrievalResult {
   id: number;
   url: string;
@@ -506,6 +508,7 @@ export interface RetrievalResult {
 }
 
 export async function retrieveSimilarContent(
+  userId: string,
   query: string, 
   topK: number = 5
 ): Promise<RetrievalResult[]> {
@@ -514,30 +517,31 @@ export async function retrieveSimilarContent(
     const queryEmbedding = await generateEmbeddings([query]);
     const queryVector = embeddingToVector(queryEmbedding[0]);
 
-    // Perform similarity search with relaxed threshold
+    // Perform similarity search with relaxed threshold - FILTERED BY USER
     const result = await pool.query(`
       SELECT id, url, title, content, 
              1 - (embedding <=> $1::vector) as score
       FROM kb_docs 
-      WHERE (1 - (embedding <=> $1::vector)) > 0.05
+      WHERE user_id = $2 AND (1 - (embedding <=> $1::vector)) > 0.05
       ORDER BY embedding <=> $1::vector
-      LIMIT $2
-    `, [queryVector, topK]);
+      LIMIT $3
+    `, [queryVector, userId, topK]);
 
-    console.log('Vector search found', result.rows.length, 'documents with threshold > 0.05');
+    console.log('Vector search found', result.rows.length, 'documents for user', userId);
     
     // If no results with threshold, try without threshold
     if (result.rows.length === 0) {
-      console.log('No documents above threshold, trying without threshold...');
+      console.log('No documents above threshold for user, trying without threshold...');
       const fallbackResult = await pool.query(`
         SELECT id, url, title, content, 
                1 - (embedding <=> $1::vector) as score
         FROM kb_docs 
+        WHERE user_id = $2
         ORDER BY embedding <=> $1::vector
-        LIMIT $2
-      `, [queryVector, topK]);
+        LIMIT $3
+      `, [queryVector, userId, topK]);
       
-      console.log('Fallback search found', fallbackResult.rows.length, 'documents');
+      console.log('Fallback search found', fallbackResult.rows.length, 'documents for user');
       return fallbackResult.rows.map((row: any) => ({
         id: Number(row.id),
         url: row.url,
