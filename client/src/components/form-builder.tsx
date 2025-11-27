@@ -313,6 +313,42 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     onDataChange(updatedData);
   };
 
+  // Special callback for Install Button element to update root-level PWA fields
+  const updatePWASettings = useCallback((updates: Partial<BusinessCard>) => {
+    // Whitelist of allowed PWA fields
+    const allowedFields = [
+      'pwaInstallButtonEnabled',
+      'pwaAppName',
+      'pwaAppIcon',
+      'pwaThemeColor',
+      'pwaInstallButtonText',
+      'pwaInstallButtonColor',
+      'pwaInstallButtonTextColor',
+      'pwaInstallButtonSize',
+      'pwaInstallButtonStyle',
+      'pwaInstallButtonAlignment'
+    ];
+
+    // Filter updates to only include whitelisted fields
+    const filteredUpdates: any = {};
+    Object.entries(updates).forEach(([key, value]) => {
+      if (allowedFields.includes(key)) {
+        form.setValue(key as any, value, { shouldDirty: true, shouldTouch: true });
+        filteredUpdates[key] = value;
+      }
+    });
+
+    // CRITICAL: Also update parent immediately to ensure PWA changes are saved
+    // Only merge filtered (whitelisted) fields to prevent rogue mutations
+    const currentFormData = form.getValues();
+    const updatedData = {
+      ...currentFormData,
+      ...filteredUpdates
+    };
+    console.log('[FormBuilder] Notifying parent of PWA settings change:', Object.keys(filteredUpdates));
+    onDataChange(updatedData);
+  }, [form, onDataChange]);
+
   // Debounced sync to parent - prevents infinite loops while keeping data in sync
   // Uses ref to compare snapshots and only calls onDataChange when actual data changes
   useEffect(() => {
@@ -6636,6 +6672,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 }}
                 cardData={enhancedCardData}
                 onNavigatePage={setSelectedPageId}
+                onUpdatePWASettings={updatePWASettings}
               />
             </div>
           )}
@@ -6701,6 +6738,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   }}
                   cardData={enhancedCardData}
                   onNavigatePage={setSelectedPageId}
+                  onUpdatePWASettings={updatePWASettings}
                 />
               ) : (
                 <div className="text-center py-8">
