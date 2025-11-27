@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { decodeCardData, logEvent } from "@/lib/share";
 import { defaultCardData } from "@/lib/card-data";
-import { BusinessCardPWAInstaller } from "@/components/BusinessCardPWAInstaller";
 import { SEOHead } from "@/components/SEOHead";
 
 export const Share: React.FC = () => {
@@ -114,9 +113,6 @@ export const Share: React.FC = () => {
           </div>
         </div>
         
-        
-        {/* PWA Install Button */}
-        <BusinessCardPWAInstaller cardData={cardData} />
       </div>
     </div>
   );

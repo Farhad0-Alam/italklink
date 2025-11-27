@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { decodeCardData, logEvent } from "@/lib/share";
 import { defaultCardData } from "@/lib/card-data";
-import { BusinessCardPWAInstaller } from "@/components/BusinessCardPWAInstaller";
 import { SEOHead } from "@/components/SEOHead";
 import { useButtonTracking } from "@/modules/automation/useButtonTracking";
 import { Share2, Copy, MessageCircle, Facebook, Twitter, Linkedin } from "lucide-react";
@@ -219,9 +218,6 @@ export const Share: React.FC = () => {
           </div>
         </div>
         
-        
-        {/* PWA Install Button */}
-        <BusinessCardPWAInstaller cardData={cardData} />
       </div>
 
       {/* Floating Share Button - Bottom Right */}
