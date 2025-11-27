@@ -260,3 +260,198 @@ export const PanelDivider = () => (
     style={{ backgroundColor: panelTheme.colors.borderColor }}
   />
 );
+
+// PWA Settings Component
+interface PWASettingsProps {
+  cardData: any;
+  onUpdate: (field: string, value: any) => void;
+  onImageUpload?: (file: File, field: string) => Promise<string>;
+}
+
+export const PWASettings = ({ cardData, onUpdate, onImageUpload }: PWASettingsProps) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (onImageUpload) {
+      try {
+        const base64 = await onImageUpload(file, field);
+        onUpdate(field, base64);
+      } catch (error) {
+        console.error('Image upload failed:', error);
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <PanelLabel htmlFor="pwa-app-name">App Name</PanelLabel>
+        <PanelInput
+          id="pwa-app-name"
+          value={cardData?.pwaAppName || ''}
+          onChange={(e) => onUpdate('pwaAppName', e.target.value)}
+          placeholder="Enter app name for installation"
+          data-testid="input-pwa-app-name"
+        />
+      </div>
+
+      <div>
+        <PanelLabel>App Icon</PanelLabel>
+        <div className="flex items-center gap-3">
+          <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-800 border border-slate-600 flex items-center justify-center flex-shrink-0">
+            {cardData?.pwaAppIcon ? (
+              <img src={cardData.pwaAppIcon} alt="PWA Icon" className="w-full h-full object-cover" />
+            ) : (
+              <i className="fas fa-image text-slate-500 text-xl"></i>
+            )}
+          </div>
+          <div>
+            <input
+              type="file"
+              id="pwa-app-icon"
+              accept="image/*"
+              onChange={(e) => handleImageUpload(e, 'pwaAppIcon')}
+              className="hidden"
+              data-testid="input-pwa-app-icon"
+            />
+            <button
+              onClick={() => document.getElementById('pwa-app-icon')?.click()}
+              className="px-3 py-1.5 rounded text-sm font-medium transition-opacity hover:opacity-90"
+              style={{ backgroundColor: panelTheme.colors.accent, color: 'white' }}
+              data-testid="button-upload-pwa-icon"
+            >
+              <i className="fas fa-upload mr-1"></i>
+              Upload
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <PanelDivider />
+
+      <div>
+        <PanelLabel htmlFor="pwa-theme-color">Theme Color</PanelLabel>
+        <div className="flex items-center gap-2">
+          <PanelColorPicker
+            id="pwa-theme-color"
+            value={cardData?.pwaThemeColor || '#22c55e'}
+            onChange={(e) => onUpdate('pwaThemeColor', e.target.value)}
+            data-testid="input-pwa-theme-color"
+          />
+          <span className="text-xs" style={{ color: panelTheme.colors.textSecondary }}>
+            {cardData?.pwaThemeColor || '#22c55e'}
+          </span>
+        </div>
+      </div>
+
+      <PanelDivider />
+
+      <div>
+        <PanelLabel htmlFor="pwa-install-enabled">
+          <div className="flex items-center gap-2">
+            <i className="fas fa-download text-green-400"></i>
+            <span>Enable Install Button</span>
+          </div>
+        </PanelLabel>
+        <PanelCheckbox
+          id="pwa-install-enabled"
+          checked={cardData?.pwaInstallButtonEnabled !== false}
+          onCheckedChange={(checked) => onUpdate('pwaInstallButtonEnabled', checked)}
+          label="Show install button on card"
+        />
+      </div>
+
+      {cardData?.pwaInstallButtonEnabled !== false && (
+        <>
+          <div>
+            <PanelLabel htmlFor="pwa-install-text">Install Button Text</PanelLabel>
+            <PanelInput
+              id="pwa-install-text"
+              value={cardData?.pwaInstallButtonText || 'Install App'}
+              onChange={(e) => onUpdate('pwaInstallButtonText', e.target.value)}
+              placeholder="Install App"
+              data-testid="input-pwa-install-text"
+            />
+          </div>
+
+          <div>
+            <PanelLabel htmlFor="pwa-button-color">Button Color</PanelLabel>
+            <div className="flex items-center gap-2">
+              <PanelColorPicker
+                id="pwa-button-color"
+                value={cardData?.pwaInstallButtonColor || '#22c55e'}
+                onChange={(e) => onUpdate('pwaInstallButtonColor', e.target.value)}
+                data-testid="input-pwa-button-color"
+              />
+              <span className="text-xs" style={{ color: panelTheme.colors.textSecondary }}>
+                {cardData?.pwaInstallButtonColor || '#22c55e'}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <PanelLabel htmlFor="pwa-text-color">Text Color</PanelLabel>
+            <div className="flex items-center gap-2">
+              <PanelColorPicker
+                id="pwa-text-color"
+                value={cardData?.pwaInstallButtonTextColor || '#ffffff'}
+                onChange={(e) => onUpdate('pwaInstallButtonTextColor', e.target.value)}
+                data-testid="input-pwa-text-color"
+              />
+              <span className="text-xs" style={{ color: panelTheme.colors.textSecondary }}>
+                {cardData?.pwaInstallButtonTextColor || '#ffffff'}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <PanelLabel htmlFor="pwa-button-size">Button Size</PanelLabel>
+            <PanelSelect
+              value={cardData?.pwaInstallButtonSize || 'md'}
+              onValueChange={(value) => onUpdate('pwaInstallButtonSize', value)}
+              placeholder="Select size"
+            >
+              <SelectItem value="sm">Small</SelectItem>
+              <SelectItem value="md">Medium</SelectItem>
+              <SelectItem value="lg">Large</SelectItem>
+            </PanelSelect>
+          </div>
+
+          <div>
+            <PanelLabel htmlFor="pwa-button-style">Button Style</PanelLabel>
+            <PanelSelect
+              value={cardData?.pwaInstallButtonStyle || 'filled'}
+              onValueChange={(value) => onUpdate('pwaInstallButtonStyle', value)}
+              placeholder="Select style"
+            >
+              <SelectItem value="filled">Filled</SelectItem>
+              <SelectItem value="outline">Outline</SelectItem>
+              <SelectItem value="ghost">Ghost</SelectItem>
+            </PanelSelect>
+          </div>
+
+          <div>
+            <PanelLabel htmlFor="pwa-button-alignment">Button Alignment</PanelLabel>
+            <PanelSelect
+              value={cardData?.pwaInstallButtonAlignment || 'center'}
+              onValueChange={(value) => onUpdate('pwaInstallButtonAlignment', value)}
+              placeholder="Select alignment"
+            >
+              <SelectItem value="left">Left</SelectItem>
+              <SelectItem value="center">Center</SelectItem>
+              <SelectItem value="right">Right</SelectItem>
+            </PanelSelect>
+          </div>
+        </>
+      )}
+
+      <div className="p-3 rounded-md" style={{ backgroundColor: `${panelTheme.colors.accent}20`, borderColor: panelTheme.colors.accent, border: '1px solid' }}>
+        <p className="text-xs" style={{ color: panelTheme.colors.textSecondary }}>
+          <i className="fas fa-info-circle mr-2"></i>
+          Install button appears on Android (Chrome, Edge, Firefox) and iPhone (Safari) only.
+        </p>
+      </div>
+    </div>
+  );
+};
