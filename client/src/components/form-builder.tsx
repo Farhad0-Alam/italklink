@@ -6521,7 +6521,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             selectedPageId === page.id
                               ? "bg-blue-600 border-blue-500"
                               : "bg-slate-700 border-slate-600 hover:bg-slate-600"
-                          } border rounded-md px-3 py-2 pr-8 transition-all duration-200 cursor-pointer flex items-center`}
+                          } border rounded-md px-3 py-2 pr-16 transition-all duration-200 cursor-pointer flex items-center`}
                           onClick={() => {
                             setSelectedPageId(page.id);
                             onNavigationChange?.(page.id);
@@ -6553,6 +6553,34 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                             </div>
                           )}
                         </div>
+
+                        {/* Copy button */}
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const cardShareUrl = cardData?.customUrl 
+                              ? `${window.location.origin}/${cardData.customUrl}`
+                              : cardData?.shareSlug
+                              ? `${window.location.origin}/${cardData.shareSlug}`
+                              : cardData?.id
+                              ? `${window.location.origin}/${cardData.id}`
+                              : '';
+                            const pageUrl = `${cardShareUrl}?page=${page.id}`;
+                            navigator.clipboard.writeText(pageUrl).then(() => {
+                              onShowToast?.({
+                                title: "Link Copied",
+                                description: `Page link copied to clipboard`,
+                              });
+                            });
+                          }}
+                          className="absolute -top-2 -right-10 w-5 h-5 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity bg-blue-500 hover:bg-blue-600"
+                          title="Copy page link"
+                          data-testid={`button-copy-page-link-${index}`}
+                        >
+                          <i className="fas fa-copy text-xs"></i>
+                        </Button>
 
                         {/* Delete button */}
                         <Button
