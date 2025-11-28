@@ -398,7 +398,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   return (
     <div className="space-y-6">
       <Card className="bg-slate-800 border-slate-700">
-        <CardHeader className="pb-4">
+        <CardHeader className="sticky top-0 z-50 pb-4 bg-slate-800 border-b border-slate-700">
           <div className="flex items-center justify-between gap-4">
             {/* Builder Mode Toggle */}
             <div className="flex items-center bg-slate-700 rounded-lg p-1">
