@@ -124,10 +124,11 @@ export default function CardEditor() {
     const pages = (cardData as any).pages || [];
     const targetPage = pages.find((p: any) => p.id === pageId);
     if (targetPage) {
+      const isHome = pageId === 'home' || targetPage.key === 'home';
       setCardData(prev => ({
         ...prev,
-        currentPreviewMode: 'page',
-        currentSelectedPage: {
+        currentPreviewMode: isHome ? 'card' : 'page',
+        currentSelectedPage: isHome ? undefined : {
           id: targetPage.id,
           label: targetPage.label,
           elements: targetPage.elements || []

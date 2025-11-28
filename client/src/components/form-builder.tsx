@@ -409,7 +409,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 type="button"
                 variant={builderMode === "card" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setBuilderMode("card")}
+                onClick={() => {
+                  setBuilderMode("card");
+                  onNavigationChange?.('home');
+                }}
                 className={`${
                   builderMode === "card"
                     ? "bg-orange-500 hover:bg-orange-600 text-white"
