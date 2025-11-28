@@ -421,6 +421,7 @@ END:VCARD`;
                         individualElementSpacing={(cardData as any).individualElementSpacing || {}}
                         onNavigatePage={handleNavigatePage}
                         onBackToCard={handleBackToCard}
+                        hideBackButton={true}
                       />
                     ) : (
                       <BusinessCardComponent 

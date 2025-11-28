@@ -14,9 +14,10 @@ interface PagePreviewProps {
   individualElementSpacing?: Record<string, number>;
   onNavigatePage?: (pageId: string) => void;
   onBackToCard?: () => void;
+  hideBackButton?: boolean;
 }
 
-export function PagePreview({ pageData, cardData, elementSpacing = 16, individualElementSpacing, onNavigatePage, onBackToCard }: PagePreviewProps) {
+export function PagePreview({ pageData, cardData, elementSpacing = 16, individualElementSpacing, onNavigatePage, onBackToCard, hideBackButton = false }: PagePreviewProps) {
   // Debug logging
   console.log('[PagePreview] Props received:', {
     elementSpacing,
@@ -87,7 +88,7 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, individua
         className={`h-full flex flex-col ${backgroundAnimationClass}`} 
         style={backgroundStyle}
       >
-        {onBackToCard && (
+        {onBackToCard && !hideBackButton && (
           <div className="sticky top-0 bg-white/80 backdrop-blur-sm border-b border-gray-200 p-3 z-10">
             <button
               onClick={onBackToCard}
@@ -121,7 +122,7 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, individua
       className={`h-full flex flex-col ${backgroundAnimationClass}`} 
       style={backgroundStyle}
     >
-      {onBackToCard && (
+      {onBackToCard && !hideBackButton && (
         <div className="sticky top-0 bg-white/80 backdrop-blur-sm border-b border-gray-200 p-3 z-10">
           <button
             onClick={onBackToCard}
