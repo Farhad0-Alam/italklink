@@ -1703,31 +1703,6 @@ export const BusinessCardComponent = forwardRef<
             </div>
           )}
 
-          {/* QR Code */}
-          {showQR && (
-            <div className="text-center">
-              <p className="text-sm text-slate-600 mb-2">Scan me</p>
-              <div className="inline-block p-2 bg-white border border-slate-200 rounded-lg">
-                <QRCodeSVG
-                  value={
-                    shareUrl.length > 200
-                      ? shareUrl.substring(0, 200)
-                      : shareUrl
-                  }
-                  size={80}
-                  level="L"
-                  includeMargin={false}
-                />
-              </div>
-              <p
-                className="text-xs mt-2 font-medium"
-                style={{ color: data.brandColor || "#22c55e" }}
-              >
-                Share my eCardURL
-              </p>
-            </div>
-          )}
-
           {/* Floating Share Button */}
           {isInteractive && showInternalShareButton && (
             <div className="absolute top-0 right-4 z-10">
