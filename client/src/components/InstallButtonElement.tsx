@@ -465,10 +465,6 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
     return null;
   }
 
-  if (!isInstallable) {
-    return null;
-  }
-
   return (
     <div className={`flex ${alignmentClass[data.buttonAlignment]} py-4`}>
       <button
