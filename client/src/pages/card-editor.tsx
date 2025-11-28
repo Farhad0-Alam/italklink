@@ -47,21 +47,31 @@ export default function CardEditor() {
   const selectedTemplateId = urlParams.get('template');
   const customUrlFromTemplate = urlParams.get('url');
   
-  // Function to create a profile element with unique ID
-  const createProfileElement = () => ({
-    id: `profile-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    type: "profile" as const,
-    order: 0,
-    visible: true,
-    data: {
-      showCoverImage: true,
-      showProfilePhoto: true,
-      showLogo: true,
-      showName: true,
-      showTitle: true,
-      showCompany: true,
-    }
-  });
+  // Counter for generating unique IDs within the same render cycle
+  let profileElementIdCounter = 0;
+  
+  // Function to create a profile element with guaranteed unique ID
+  const createProfileElement = () => {
+    profileElementIdCounter++;
+    const uniqueId = typeof crypto !== 'undefined' && crypto.randomUUID 
+      ? crypto.randomUUID()
+      : `profile-${Date.now()}-${profileElementIdCounter}-${Math.random().toString(36).substring(2, 11)}`;
+    
+    return {
+      id: uniqueId,
+      type: "profile" as const,
+      order: 0,
+      visible: true,
+      data: {
+        showCoverImage: true,
+        showProfilePhoto: true,
+        showLogo: true,
+        showName: true,
+        showTitle: true,
+        showCompany: true,
+      }
+    };
+  };
   
   // Create separate profile elements for pageElements and pages to avoid shared references
   const initialProfileElement = createProfileElement();
@@ -220,23 +230,10 @@ export default function CardEditor() {
       // Inject profile element if it doesn't exist in the home page elements
       const hasProfileElement = homePageElements.some((el: any) => el.type === 'profile');
       if (!hasProfileElement && existingCard.profileSectionEnabled !== false) {
-        // Generate unique ID for profile element
-        const profileElementId = `profile-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-        
-        // Add profile element at the beginning
+        // Use createProfileElement for consistent unique ID generation
         const profileElement = {
-          id: profileElementId,
-          type: "profile" as const,
+          ...createProfileElement(),
           order: -1, // Will be reindexed
-          visible: true,
-          data: {
-            showCoverImage: true,
-            showProfilePhoto: true,
-            showLogo: true,
-            showName: true,
-            showTitle: true,
-            showCompany: true,
-          }
         };
         homePageElements = [profileElement, ...homePageElements];
         // Re-index order
