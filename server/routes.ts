@@ -875,6 +875,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: "Let visitors subscribe to notifications",
           isPremium: false,
           defaultConfig: {}
+        },
+        {
+          type: "profile",
+          title: "Profile Section",
+          icon: "fas fa-user-circle",
+          color: "bg-gradient-to-r from-amber-500 to-orange-600",
+          description: "Add profile with cover image, photo, name, title, company",
+          isPremium: false,
+          defaultConfig: {}
         }
       ];
       
