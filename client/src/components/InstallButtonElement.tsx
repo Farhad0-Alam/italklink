@@ -488,7 +488,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
         >
           {data.showIcon && data.iconPosition === 'left' && (
             installing ? (
-              <Loader2 size={iconSizes[data.buttonSize]} className="animate-spin" />
+              <Loader2 size={iconSizes[data.buttonSize]} className="animate-slow-spin" />
             ) : data.iconUrl ? (
               <img src={data.iconUrl} alt="icon" style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} className="object-cover rounded" />
             ) : (
@@ -498,7 +498,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
           <span>{installing ? 'Installing...' : data.buttonText}</span>
           {data.showIcon && data.iconPosition === 'right' && (
             installing ? (
-              <Loader2 size={iconSizes[data.buttonSize]} className="animate-spin" />
+              <Loader2 size={iconSizes[data.buttonSize]} className="animate-slow-spin" />
             ) : data.iconUrl ? (
               <img src={data.iconUrl} alt="icon" style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} className="object-cover rounded" />
             ) : (
