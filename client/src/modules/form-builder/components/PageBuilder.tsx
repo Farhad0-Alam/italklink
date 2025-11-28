@@ -255,18 +255,6 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-talklink-400">Page Elements</h3>
-        <Button
-          onClick={() => setShowElementSelector(true)}
-          className="bg-talklink-500 hover:bg-talklink-600 text-white"
-          size="sm"
-        >
-          <i className="fas fa-plus mr-2"></i>
-          Add Element
-        </Button>
-      </div>
-
       {sortedElements.length === 0 ? (
         <div className="text-center py-8 text-slate-500">
           <i className="fas fa-plus-circle text-4xl mb-4"></i>
