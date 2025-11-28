@@ -127,8 +127,8 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
     setInstalling(true);
     
     try {
-      // Wait 1.5 seconds to let animation play before triggering install prompt
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Wait 2 seconds to let animation play before triggering install prompt
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       const installed = await installBusinessCard();
       
