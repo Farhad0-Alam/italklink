@@ -424,7 +424,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 type="button"
                 variant={builderMode === "page" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setBuilderMode("page")}
+                onClick={() => {
+                  setBuilderMode("page");
+                  onNavigationChange?.(selectedPageId);
+                }}
                 className={`${
                   builderMode === "page"
                     ? "bg-blue-500 hover:bg-blue-600 text-white"
@@ -6516,7 +6519,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               ? "bg-blue-600 border-blue-500"
                               : "bg-slate-700 border-slate-600 hover:bg-slate-600"
                           } border rounded-md px-3 py-2 pr-8 transition-all duration-200 cursor-pointer flex items-center`}
-                          onClick={() => setSelectedPageId(page.id)}
+                          onClick={() => {
+                            setSelectedPageId(page.id);
+                            onNavigationChange?.(page.id);
+                          }}
                           data-testid={`button-page-toggle-${index}`}
                         >
                           <i className="fas fa-file-alt mr-2 text-white"></i>
