@@ -35,6 +35,7 @@ const fallbackElementTypes: ElementType[] = [
   { type: "voiceAgent", title: "AI Voice Agent", icon: "fas fa-phone-volume", color: "bg-gradient-to-r from-green-500 to-emerald-600", description: "AI-powered phone calls with ChatGPT integration" },
   { type: "voiceAssistant", title: "Voice Chat Assistant", icon: "fas fa-microphone-alt", color: "bg-gradient-to-r from-purple-500 to-violet-600", description: "Embedded voice & text chat with knowledge base" },
   { type: "digitalWallet", title: "Digital Wallet", icon: "fas fa-wallet", color: "bg-gradient-to-r from-black to-blue-600", description: "Save to Apple & Google Wallet" },
+  { type: "profile", title: "Profile Section", icon: "fas fa-user-circle", color: "bg-gradient-to-r from-amber-500 to-orange-600", description: "Add profile with cover image, photo, name, title, company" },
   { type: "navigationMenu", title: "Navigation Menu", icon: "fas fa-bars", color: "bg-gradient-to-r from-slate-500 to-slate-700", description: "Multi-page navigation menu" },
   { type: "arPreviewMindAR", title: "AR Preview", icon: "fas fa-cube", color: "bg-gradient-to-r from-purple-500 to-pink-600", description: "AR Digital Business Card Viewer" },
   { type: "pdfViewer", title: "PDF Viewer", icon: "fas fa-file-pdf", color: "bg-purple-100", description: "Display PDF with modal viewer and clickable links" },
@@ -372,6 +373,23 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
             googleButtonText: "Add to Google Wallet",
             qrButtonText: "Download QR Code",
             qrButtonColor: "#000000"
+          }
+        };
+        break;
+
+      case "profile":
+        element = {
+          id,
+          type: "profile",
+          order: uniqueOrder,
+          visible: true,
+          data: {
+            showCoverImage: true,
+            showProfilePhoto: true,
+            showLogo: true,
+            showName: true,
+            showTitle: true,
+            showCompany: true,
           }
         };
         break;
