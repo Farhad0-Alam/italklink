@@ -603,8 +603,26 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
                       <Download className="w-4 h-4 text-blue-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-800">Look for install icon</p>
-                      <p className="text-xs text-slate-500">In your browser's address bar or menu</p>
+                      <p className="text-sm font-medium text-slate-800">1. Look for install icon</p>
+                      <p className="text-xs text-slate-500">Address bar (right side) or browser menu</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <Plus className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">2. Click "Install" or "Add to shelf"</p>
+                      <p className="text-xs text-slate-500">Chrome, Edge, and Firefox support this</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <Download className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">3. Confirm installation</p>
+                      <p className="text-xs text-slate-500">App appears on desktop or app menu</p>
                     </div>
                   </div>
                 </div>
