@@ -1126,7 +1126,8 @@ export const BusinessCardComponent = forwardRef<
                     : "pt-16"
           }`}
         >
-          {/* Name, Title, Company with Group Positioning */}
+          {/* Name, Title, Company with Group Positioning - only show if profile section enabled */}
+          {data.profileSectionEnabled !== false && (
           <div
             style={{
               transform: `translate(${Number(getSectionStyle("basicInfo", "textGroupHorizontal")) || 0}px, ${Number(getSectionStyle("basicInfo", "textGroupVertical")) || 0}px)`,
@@ -1207,6 +1208,7 @@ export const BusinessCardComponent = forwardRef<
               </p>
             )}
           </div>
+          )}
 
           {/* New Button Layout - Top 8 Buttons from Contact Information */}
           <div className="mb-6 space-y-2">
