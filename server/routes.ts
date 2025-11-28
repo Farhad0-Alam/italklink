@@ -829,29 +829,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         defaultConfig: et.defaultConfig
       }));
       
-      // Essential element types that must always be available
+      // Essential element types that must always be available (if missing from database)
       const essentialElements = [
-        {
-          type: "installButton",
-          title: "Install Button",
-          icon: "fas fa-download",
-          color: "bg-green-100",
-          description: "PWA install button for Android & iPhone",
-          isPremium: false,
-          defaultConfig: {
-            enabled: true,
-            appName: "TalkLink",
-            buttonText: "Install App",
-            buttonColor: "#22c55e",
-            textColor: "#ffffff",
-            buttonSize: "md",
-            buttonStyle: "filled",
-            buttonAlignment: "center",
-            borderRadius: "md",
-            showIcon: true,
-            iconPosition: "left"
-          }
-        },
         {
           type: "bookAppointment",
           title: "Book Appointment",
