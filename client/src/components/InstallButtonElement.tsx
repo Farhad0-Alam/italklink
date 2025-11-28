@@ -204,13 +204,14 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
           ${sizeClasses[data.buttonSize]}
           ${borderRadiusClass[data.borderRadius]}
           font-medium transition-all duration-200
-          shadow-lg flex items-center cursor-default
+          shadow-lg hover:shadow-xl transform hover:scale-105
+          flex items-center cursor-pointer
         `}
         style={styleMap[data.buttonStyle]}
       >
         {data.showIcon && data.iconPosition === 'left' && (
           data.iconUrl ? (
-            <img src={data.iconUrl} alt="icon" className={`w-${iconSizes[data.buttonSize] * 0.25} h-${iconSizes[data.buttonSize] * 0.25} object-cover`} style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} />
+            <img src={data.iconUrl} alt="icon" className="object-cover rounded" style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} />
           ) : (
             <Download size={iconSizes[data.buttonSize]} />
           )
@@ -218,7 +219,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
         <span>{data.buttonText}</span>
         {data.showIcon && data.iconPosition === 'right' && (
           data.iconUrl ? (
-            <img src={data.iconUrl} alt="icon" className={`w-${iconSizes[data.buttonSize] * 0.25} h-${iconSizes[data.buttonSize] * 0.25} object-cover`} style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} />
+            <img src={data.iconUrl} alt="icon" className="object-cover rounded" style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} />
           ) : (
             <Download size={iconSizes[data.buttonSize]} />
           )
