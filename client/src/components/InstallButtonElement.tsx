@@ -1,12 +1,13 @@
 import { BusinessCard, PageElement } from '@shared/schema';
 import { useBusinessCardPWA } from '@/hooks/useBusinessCardPWA';
 import { useState } from 'react';
-import { Download, Loader2, X } from 'lucide-react';
+import { Download, Loader2, X, Share, MoreVertical, Plus, Smartphone } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 type InstallButtonElement = Extract<PageElement, { type: "installButton" }>;
@@ -465,42 +466,159 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
     return null;
   }
 
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
   return (
-    <div className={`flex ${alignmentClass[data.buttonAlignment]} py-4`}>
-      <button
-        onClick={handleInstallClick}
-        disabled={installing}
-        className={`
-          ${sizeClasses[data.buttonSize]}
-          ${borderRadiusClass[data.borderRadius]}
-          font-medium transition-all duration-200
-          shadow-lg hover:shadow-xl transform hover:scale-105
-          flex items-center
-          disabled:opacity-50 disabled:cursor-not-allowed
-        `}
-        style={styleMap[data.buttonStyle]}
-        data-testid="button-install-app"
-      >
-        {data.showIcon && data.iconPosition === 'left' && (
-          installing ? (
-            <Loader2 size={iconSizes[data.buttonSize]} className="animate-spin" />
-          ) : data.iconUrl ? (
-            <img src={data.iconUrl} alt="icon" style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} className="object-cover rounded" />
-          ) : (
-            <Download size={iconSizes[data.buttonSize]} />
-          )
-        )}
-        <span>{installing ? 'Installing...' : data.buttonText}</span>
-        {data.showIcon && data.iconPosition === 'right' && (
-          installing ? (
-            <Loader2 size={iconSizes[data.buttonSize]} className="animate-spin" />
-          ) : data.iconUrl ? (
-            <img src={data.iconUrl} alt="icon" style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} className="object-cover rounded" />
-          ) : (
-            <Download size={iconSizes[data.buttonSize]} />
-          )
-        )}
-      </button>
-    </div>
+    <>
+      <div className={`flex ${alignmentClass[data.buttonAlignment]} py-4`}>
+        <button
+          onClick={handleInstallClick}
+          disabled={installing}
+          className={`
+            ${sizeClasses[data.buttonSize]}
+            ${borderRadiusClass[data.borderRadius]}
+            font-medium transition-all duration-200
+            shadow-lg hover:shadow-xl transform hover:scale-105
+            flex items-center
+            disabled:opacity-50 disabled:cursor-not-allowed
+          `}
+          style={styleMap[data.buttonStyle]}
+          data-testid="button-install-app"
+        >
+          {data.showIcon && data.iconPosition === 'left' && (
+            installing ? (
+              <Loader2 size={iconSizes[data.buttonSize]} className="animate-spin" />
+            ) : data.iconUrl ? (
+              <img src={data.iconUrl} alt="icon" style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} className="object-cover rounded" />
+            ) : (
+              <Download size={iconSizes[data.buttonSize]} />
+            )
+          )}
+          <span>{installing ? 'Installing...' : data.buttonText}</span>
+          {data.showIcon && data.iconPosition === 'right' && (
+            installing ? (
+              <Loader2 size={iconSizes[data.buttonSize]} className="animate-spin" />
+            ) : data.iconUrl ? (
+              <img src={data.iconUrl} alt="icon" style={{ width: `${iconSizes[data.buttonSize]}px`, height: `${iconSizes[data.buttonSize]}px` }} className="object-cover rounded" />
+            ) : (
+              <Download size={iconSizes[data.buttonSize]} />
+            )
+          )}
+        </button>
+      </div>
+
+      <Dialog open={showInstructions} onOpenChange={setShowInstructions}>
+        <DialogContent className="max-w-sm mx-auto bg-white rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-center flex items-center justify-center gap-2">
+              <Smartphone className="w-6 h-6 text-green-600" />
+              Install {data.appName || 'App'}
+            </DialogTitle>
+            <DialogDescription className="text-center text-slate-600">
+              Add this business card to your home screen for quick access
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 pt-4">
+            {isIOS && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-slate-800">For iPhone/iPad (Safari):</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Share className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">1. Tap the Share button</p>
+                      <p className="text-xs text-slate-500">At the bottom of your screen</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <Plus className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">2. Add to Home Screen</p>
+                      <p className="text-xs text-slate-500">Scroll down and tap this option</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <Download className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">3. Tap Add</p>
+                      <p className="text-xs text-slate-500">The app will appear on your home screen</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {isAndroid && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-slate-800">For Android (Chrome):</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <MoreVertical className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">1. Tap the menu (3 dots)</p>
+                      <p className="text-xs text-slate-500">Top right corner of your browser</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <Plus className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">2. Add to Home screen</p>
+                      <p className="text-xs text-slate-500">Or "Install app" if available</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <Download className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">3. Tap Install/Add</p>
+                      <p className="text-xs text-slate-500">The app will appear on your home screen</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {!isIOS && !isAndroid && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-slate-800">Desktop Instructions:</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Download className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">Look for install icon</p>
+                      <p className="text-xs text-slate-500">In your browser's address bar or menu</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <button
+              onClick={() => setShowInstructions(false)}
+              className="w-full py-3 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 transition-colors"
+              data-testid="button-close-install-instructions"
+            >
+              Got it!
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
