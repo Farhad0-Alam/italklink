@@ -468,7 +468,6 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const isAndroid = /Android/.test(navigator.userAgent);
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
   return (
     <>
