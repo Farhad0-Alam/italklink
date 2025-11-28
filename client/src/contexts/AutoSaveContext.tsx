@@ -79,8 +79,6 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         pageElements: pageElementsToSave,
         pages: pagesToSave && pagesToSave.length > 0 ? pagesToSave : null,
         menu: null,
-        currentPreviewMode: undefined,
-        currentSelectedPage: undefined
       };
       
       console.log('[AutoSave] Saving card with', finalData.pageElements?.length || 0, 'home elements and', finalData.pages?.length || 0, 'additional pages');
