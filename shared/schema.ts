@@ -3584,8 +3584,22 @@ export const installButtonElementSchema = baseElementSchema.extend({
   }),
 });
 
+// Profile Section element - draggable profile header with cover, photo, name, title, company
+export const profileElementSchema = baseElementSchema.extend({
+  type: z.literal("profile"),
+  data: z.object({
+    showCoverImage: z.boolean().default(true),
+    showProfilePhoto: z.boolean().default(true),
+    showLogo: z.boolean().default(true),
+    showName: z.boolean().default(true),
+    showTitle: z.boolean().default(true),
+    showCompany: z.boolean().default(true),
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
+  profileElementSchema,
   headingElementSchema,
   paragraphElementSchema,
   linkElementSchema,

@@ -5471,6 +5471,82 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
           </div>
         );
 
+      case "profile":
+        return (
+          <div className="mb-4">
+            {isEditing ? (
+              <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border border-slate-200 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+                    <i className="fas fa-user-circle text-talklink-600"></i>
+                    Profile Section
+                  </h3>
+                  <span className="text-xs text-slate-500 bg-slate-200 px-2 py-1 rounded">Draggable</span>
+                </div>
+                <p className="text-sm text-slate-600">
+                  The profile section includes cover image, profile photo, logo, name, title, and company. 
+                  Drag this element to reorder it with other page elements.
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-slate-700">Show Cover Image</label>
+                    <Switch
+                      checked={element.data.showCoverImage !== false}
+                      onCheckedChange={(checked) => handleDataUpdate({ showCoverImage: checked })}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-slate-700">Show Profile Photo</label>
+                    <Switch
+                      checked={element.data.showProfilePhoto !== false}
+                      onCheckedChange={(checked) => handleDataUpdate({ showProfilePhoto: checked })}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-slate-700">Show Logo</label>
+                    <Switch
+                      checked={element.data.showLogo !== false}
+                      onCheckedChange={(checked) => handleDataUpdate({ showLogo: checked })}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-slate-700">Show Name</label>
+                    <Switch
+                      checked={element.data.showName !== false}
+                      onCheckedChange={(checked) => handleDataUpdate({ showName: checked })}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-slate-700">Show Title</label>
+                    <Switch
+                      checked={element.data.showTitle !== false}
+                      onCheckedChange={(checked) => handleDataUpdate({ showTitle: checked })}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-slate-700">Show Company</label>
+                    <Switch
+                      checked={element.data.showCompany !== false}
+                      onCheckedChange={(checked) => handleDataUpdate({ showCompany: checked })}
+                    />
+                  </div>
+                </div>
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <p className="text-sm text-blue-800">
+                    <i className="fas fa-info-circle mr-2"></i>
+                    Edit profile details (name, title, photo) in the Profile tab of the editor.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              // In preview mode, this renders a placeholder - actual content rendered by business-card.tsx
+              <div className="profile-element-placeholder" data-element-type="profile" data-testid="profile-element">
+                {/* Profile section content is rendered by business-card.tsx based on element position */}
+              </div>
+            )}
+          </div>
+        );
+
       default:
         return (
           <div className="mb-4 p-4 bg-slate-100 rounded-lg text-center text-slate-600">

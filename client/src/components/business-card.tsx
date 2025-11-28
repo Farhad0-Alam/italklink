@@ -911,6 +911,13 @@ export const BusinessCardComponent = forwardRef<
     const socialLinksConverted = convertSocialLinksToCustomSocials();
     const customSocialsForDisplay = data.customSocials && data.customSocials.length > 0 ? data.customSocials : socialLinksConverted;
 
+    // Check if there's a profile element in pageElements for draggable profile support
+    const hasProfileElement = data.pageElements?.some((el: any) => el.type === 'profile');
+    const profileElement = data.pageElements?.find((el: any) => el.type === 'profile');
+    
+    // Determine if profile should render in fixed position (legacy) or as page element (new)
+    const shouldRenderFixedProfile = data.profileSectionEnabled !== false && !hasProfileElement;
+
     return (
       <div
         ref={ref}
@@ -937,8 +944,8 @@ export const BusinessCardComponent = forwardRef<
           </div>
         )}
         
-        {/* Profile Section - only render if enabled (default: true) */}
-        {data.profileSectionEnabled !== false && (
+        {/* Profile Section - render in fixed position only if no profile element in pageElements */}
+        {shouldRenderFixedProfile && (
         <div className="relative">
           {/* Header Design - Cover + Logo */}
           {(data.headerDesign === "cover-logo" || !data.headerDesign) && (
@@ -1126,8 +1133,8 @@ export const BusinessCardComponent = forwardRef<
                     : "pt-16"
           }`}
         >
-          {/* Name, Title, Company with Group Positioning - only show if profile section enabled */}
-          {data.profileSectionEnabled !== false && (
+          {/* Name, Title, Company with Group Positioning - only show if fixed profile (no profile element) */}
+          {shouldRenderFixedProfile && (
           <div
             style={{
               transform: `translate(${Number(getSectionStyle("basicInfo", "textGroupHorizontal")) || 0}px, ${Number(getSectionStyle("basicInfo", "textGroupVertical")) || 0}px)`,
@@ -1695,18 +1702,215 @@ export const BusinessCardComponent = forwardRef<
             )}
           </div>
 
-          {/* Page Elements */}
+          {/* Page Elements - renders all elements including profile element when present */}
           {data.pageElements && data.pageElements.length > 0 && (
             <div className="space-y-4 mb-6">
-              {data.pageElements.map((element) => (
-                <PageElementRenderer
-                  key={element.id}
-                  element={element}
-                  isInteractive={isInteractive}
-                  cardData={data}
-                  onNavigatePage={onNavigatePage}
-                />
-              ))}
+              {data.pageElements.map((element: any) => {
+                // Render profile section content when encountering a profile element
+                if (element.type === 'profile') {
+                  // Skip if profile element is hidden
+                  if (element.visible === false) return null;
+                  const showCoverImage = element.data?.showCoverImage !== false;
+                  const showProfilePhoto = element.data?.showProfilePhoto !== false;
+                  const showLogo = element.data?.showLogo !== false;
+                  const showName = element.data?.showName !== false;
+                  const showTitle = element.data?.showTitle !== false;
+                  const showCompany = element.data?.showCompany !== false;
+                  
+                  return (
+                    <div key={element.id} className="profile-section-element -mx-6" data-testid="profile-section-element">
+                      {/* Header with Cover Image, Profile Photo, and Logo */}
+                      <div className="relative mb-4">
+                        {/* Cover Image Section */}
+                        {showCoverImage && (
+                          <CoverImageSection
+                            coverImageUrl={data.backgroundImage ? getOptimizedImageSrc(data.backgroundImage, "large") : undefined}
+                            brandColor={data.brandColor || "#22c55e"}
+                            coverImageStyles={data.coverImageStyles}
+                            defaultHeight={160}
+                          >
+                            {/* Logo in top left corner */}
+                            {showLogo && data.logo && (
+                              <div 
+                                className="absolute z-10"
+                                style={{
+                                  top: data.coverImageStyles?.logoPositionY !== undefined ? `${data.coverImageStyles.logoPositionY}%` : '16px',
+                                  left: data.coverImageStyles?.logoPositionX !== undefined ? `${data.coverImageStyles.logoPositionX}%` : '16px',
+                                }}
+                              >
+                                <img
+                                  src={data.logo}
+                                  alt="Logo"
+                                  className="h-8 w-auto max-w-20 object-contain"
+                                  data-testid="img-logo"
+                                />
+                              </div>
+                            )}
+
+                            {/* Profile Photo with Styling */}
+                            {showProfilePhoto && (() => {
+                              const { wrapperStyles, imageStyles, wrapperAnimationClass, imageAnimationClass, visible } = getProfileImageStyle(96);
+                              if (!visible) return null;
+                              const profilePosX = data.coverImageStyles?.profilePositionX ?? 50;
+                              const profilePosY = data.coverImageStyles?.profilePositionY ?? 100;
+                              return (
+                                <div 
+                                  className="absolute z-30"
+                                  style={{
+                                    left: `${profilePosX}%`,
+                                    top: `${profilePosY}%`,
+                                    transform: 'translate(-50%, -50%)',
+                                  }}
+                                >
+                                  <div className={wrapperAnimationClass} style={wrapperStyles}>
+                                    <img
+                                      src={profileImageSrc}
+                                      alt={data.fullName || "Profile photo"}
+                                      className={imageAnimationClass}
+                                      style={imageStyles}
+                                      data-testid="img-profile-photo"
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                          </CoverImageSection>
+                        )}
+                        
+                        {/* Profile Photo without cover (standalone) */}
+                        {!showCoverImage && showProfilePhoto && (() => {
+                          const { wrapperStyles, imageStyles, wrapperAnimationClass, imageAnimationClass, visible } = getProfileImageStyle(96);
+                          if (!visible) return null;
+                          return (
+                            <div className="flex justify-center py-4">
+                              <div className={wrapperAnimationClass} style={wrapperStyles}>
+                                <img
+                                  src={profileImageSrc}
+                                  alt={data.fullName || "Profile photo"}
+                                  className={imageAnimationClass}
+                                  style={imageStyles}
+                                  data-testid="img-profile-photo"
+                                />
+                              </div>
+                            </div>
+                          );
+                        })()}
+                        
+                        {/* Logo without cover (standalone) */}
+                        {!showCoverImage && showLogo && data.logo && (
+                          <div className="flex justify-center py-2">
+                            <img
+                              src={data.logo}
+                              alt="Logo"
+                              className="h-8 w-auto max-w-20 object-contain"
+                              data-testid="img-logo"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Name, Title, Company */}
+                      <div
+                        className="px-6"
+                        style={{
+                          paddingTop: showCoverImage ? '40px' : '0',
+                          transform: `translate(${Number(getSectionStyle("basicInfo", "textGroupHorizontal")) || 0}px, ${Number(getSectionStyle("basicInfo", "textGroupVertical")) || 0}px)`,
+                        }}
+                      >
+                        {showName && (
+                          <h3
+                            className="text-xl font-bold"
+                            style={{
+                              color:
+                                getSectionStyle("basicInfo", "nameColor") ||
+                                data.headingColor ||
+                                "#1f2937",
+                              fontSize: `${getSectionStyle("basicInfo", "nameFontSize") || 22}px`,
+                              fontWeight:
+                                getSectionStyle("basicInfo", "nameFontWeight") ||
+                                data.headingFontWeight ||
+                                650,
+                              fontFamily:
+                                getSectionStyle("basicInfo", "nameFont") || "Inter, sans-serif",
+                              fontStyle:
+                                getSectionStyle("basicInfo", "nameTextStyle") || "normal",
+                              marginBottom: `${getSectionStyle("basicInfo", "nameSpacing") ?? 8}px`,
+                              textAlign: "center",
+                              transform: `translate(${Number(getSectionStyle("basicInfo", "namePositionX")) || 0}px, ${Number(getSectionStyle("basicInfo", "namePositionY")) || 0}px)`,
+                            }}
+                            data-testid="text-name"
+                          >
+                            {data.fullName || "Your Name"}
+                          </h3>
+                        )}
+                        {showTitle && (
+                          <p
+                            className="text-sm"
+                            style={{
+                              color:
+                                getSectionStyle("basicInfo", "titleColor") ||
+                                data.paragraphColor ||
+                                "#4b5563",
+                              fontSize: `${getSectionStyle("basicInfo", "titleFontSize") || 15}px`,
+                              fontWeight:
+                                getSectionStyle("basicInfo", "titleFontWeight") ||
+                                data.paragraphFontWeight ||
+                                500,
+                              fontFamily:
+                                getSectionStyle("basicInfo", "titleFont") ||
+                                "Inter, sans-serif",
+                              fontStyle:
+                                getSectionStyle("basicInfo", "titleTextStyle") || "normal",
+                              marginBottom: `${getSectionStyle("basicInfo", "titleSpacing") ?? 8}px`,
+                              textAlign: "center",
+                              transform: `translate(${Number(getSectionStyle("basicInfo", "titlePositionX")) || 0}px, ${Number(getSectionStyle("basicInfo", "titlePositionY")) || 0}px)`,
+                            }}
+                            data-testid="text-title"
+                          >
+                            {data.title || "Your Title"}
+                          </p>
+                        )}
+                        {showCompany && data.company && (
+                          <p
+                            className="text-sm"
+                            style={{
+                              color:
+                                getSectionStyle("basicInfo", "companyColor") || "#6b7280",
+                              fontSize: `${getSectionStyle("basicInfo", "companyFontSize") || 14}px`,
+                              fontWeight:
+                                getSectionStyle("basicInfo", "companyFontWeight") ||
+                                data.paragraphFontWeight ||
+                                600,
+                              fontFamily:
+                                getSectionStyle("basicInfo", "companyFont") ||
+                                "Inter, sans-serif",
+                              fontStyle:
+                                getSectionStyle("basicInfo", "companyTextStyle") || "normal",
+                              marginBottom: `${getSectionStyle("basicInfo", "companySpacing") ?? 8}px`,
+                              textAlign: "center",
+                              transform: `translate(${Number(getSectionStyle("basicInfo", "companyPositionX")) || 0}px, ${Number(getSectionStyle("basicInfo", "companyPositionY")) || 0}px)`,
+                            }}
+                            data-testid="text-company"
+                          >
+                            {data.company}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+                
+                // Render other elements normally
+                return (
+                  <PageElementRenderer
+                    key={element.id}
+                    element={element}
+                    isInteractive={isInteractive}
+                    cardData={data}
+                    onNavigatePage={onNavigatePage}
+                  />
+                );
+              })}
             </div>
           )}
 

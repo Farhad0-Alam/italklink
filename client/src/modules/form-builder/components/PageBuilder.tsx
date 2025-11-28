@@ -60,6 +60,7 @@ function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibil
 
   const getElementTitle = () => {
     switch (element.type) {
+      case "profile": return "Profile Section";
       case "heading": return element.data.text || "Heading";
       case "paragraph": return "Paragraph";
       case "link": return element.data.text || "Link";

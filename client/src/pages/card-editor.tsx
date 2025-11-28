@@ -47,12 +47,32 @@ export default function CardEditor() {
   const selectedTemplateId = urlParams.get('template');
   const customUrlFromTemplate = urlParams.get('url');
   
+  // Function to create a profile element with unique ID
+  const createProfileElement = () => ({
+    id: `profile-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    type: "profile" as const,
+    order: 0,
+    visible: true,
+    data: {
+      showCoverImage: true,
+      showProfilePhoto: true,
+      showLogo: true,
+      showName: true,
+      showTitle: true,
+      showCompany: true,
+    }
+  });
+  
+  // Create separate profile elements for pageElements and pages to avoid shared references
+  const initialProfileElement = createProfileElement();
+  const homePageProfileElement = createProfileElement();
+
   const [cardData, setCardData] = useState<BusinessCard>({
     fullName: "",
     title: "",
     template: "minimal" as const,
     customContacts: [],
-    pageElements: [],
+    pageElements: [initialProfileElement],
     customSocials: [],
     galleryImages: [],
     availableIcons: [],
@@ -74,7 +94,7 @@ export default function CardEditor() {
         path: "",
         label: "Home",
         visible: true,
-        elements: []
+        elements: [homePageProfileElement]
       }
     ] as any,
   });
@@ -194,10 +214,37 @@ export default function CardEditor() {
     if (existingCard) {
       // Convert database format to FormBuilder format
       // Home page elements are in pageElements, additional pages are in pages array
-      const homePageElements = existingCard.pageElements || [];
+      let homePageElements = existingCard.pageElements || [];
       const additionalPages = existingCard.pages || [];
       
+      // Inject profile element if it doesn't exist in the home page elements
+      const hasProfileElement = homePageElements.some((el: any) => el.type === 'profile');
+      if (!hasProfileElement && existingCard.profileSectionEnabled !== false) {
+        // Generate unique ID for profile element
+        const profileElementId = `profile-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        
+        // Add profile element at the beginning
+        const profileElement = {
+          id: profileElementId,
+          type: "profile" as const,
+          order: -1, // Will be reindexed
+          visible: true,
+          data: {
+            showCoverImage: true,
+            showProfilePhoto: true,
+            showLogo: true,
+            showName: true,
+            showTitle: true,
+            showCompany: true,
+          }
+        };
+        homePageElements = [profileElement, ...homePageElements];
+        // Re-index order
+        homePageElements = homePageElements.map((el: any, idx: number) => ({ ...el, order: idx }));
+      }
+      
       // Build complete pages array with home page first, then any additional pages
+      // Clone elements arrays to avoid shared mutations between pageElements and pages[0].elements
       const allPages = [
         {
           id: "home",
@@ -205,7 +252,7 @@ export default function CardEditor() {
           path: "",
           label: "Home",
           visible: true,
-          elements: homePageElements
+          elements: homePageElements.map((el: any) => ({ ...el }))
         },
         ...additionalPages.map((page: any) => ({
           id: page.id,
@@ -213,19 +260,21 @@ export default function CardEditor() {
           path: page.path,
           label: page.label,
           visible: page.visible !== false,
-          elements: page.elements || []
+          elements: (page.elements || []).map((el: any) => ({ ...el }))
         }))
       ];
       
       const convertedCard = {
         ...existingCard,
+        pageElements: homePageElements.map((el: any) => ({ ...el })), // Clone to avoid shared reference
         pages: allPages
       };
       
       console.log('[CardEditor] Loaded card - pages structure:', {
         homePageElements: homePageElements.length,
         additionalPages: additionalPages.length,
-        totalPages: allPages.length
+        totalPages: allPages.length,
+        hasProfileElement: homePageElements.some((el: any) => el.type === 'profile')
       });
       
       setCardData(prev => ({
