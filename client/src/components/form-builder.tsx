@@ -6569,7 +6569,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                               : '';
                             const pageUrl = `${cardShareUrl}?page=${page.id}`;
                             navigator.clipboard.writeText(pageUrl).then(() => {
-                              onShowToast?.({
+                              toast({
                                 title: "Link Copied",
                                 description: `Page link copied to clipboard`,
                               });
