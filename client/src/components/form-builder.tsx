@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
 import { GradientBuilder, type GradientConfig } from "@/components/GradientBuilder";
 import { PageBuilder } from "@/modules/form-builder/components/PageBuilder";
+import { ElementSelector } from "@/components/element-selector";
 import { useQuery } from "@tanstack/react-query";
 import {
   DndContext,
@@ -115,6 +116,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   const [builderMode, setBuilderMode] = useState<"card" | "page" | "theme" | "seo">("card");
   const [selectedPageId, setSelectedPageId] = useState<string>("home");
   const [activeDividerPosition, setActiveDividerPosition] = useState<"top" | "bottom">("top");
+  const [showElementSelector, setShowElementSelector] = useState(false);
 
   const [collapsedSections, setCollapsedSections] = useState<{
     [key: string]: boolean;
@@ -396,13 +398,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   return (
     <div className="space-y-6">
       <Card className="bg-slate-800 border-slate-700">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl font-bold flex items-center text-white">
-              <i className="fas fa-edit text-talklink-500 mr-3" />
-              {t("form.title")}
-            </CardTitle>
-
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between gap-4">
             {/* Builder Mode Toggle */}
             <div className="flex items-center bg-slate-700 rounded-lg p-1">
               <Button
@@ -472,6 +469,20 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 SEO
               </Button>
             </div>
+
+            {/* Add Element Button - visible in Card and Page modes */}
+            {(builderMode === "card" || builderMode === "page") && (
+              <Button
+                type="button"
+                onClick={() => setShowElementSelector(true)}
+                className="bg-talklink-500 hover:bg-talklink-600 text-white"
+                size="sm"
+                data-testid="button-add-element-header"
+              >
+                <i className="fas fa-plus mr-2"></i>
+                Add Element
+              </Button>
+            )}
           </div>
         </CardHeader>
 
@@ -6773,6 +6784,28 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Element Selector Dialog */}
+      <ElementSelector
+        open={showElementSelector}
+        onOpenChange={setShowElementSelector}
+        onAddElement={(element: PageElement) => {
+          if (builderMode === "card") {
+            // Add to main card pageElements
+            const currentElements = form.watch("pageElements") || [];
+            const newElements = [...currentElements, element];
+            form.setValue("pageElements", newElements, { shouldDirty: true, shouldTouch: true });
+            // Notify parent immediately
+            const currentFormData = form.getValues();
+            onDataChange({ ...currentFormData, pageElements: newElements });
+          } else if (builderMode === "page" && selectedPageId) {
+            // Add to selected page's elements
+            const pageElements = getPageElements(selectedPageId);
+            const newElements = [...pageElements, element];
+            updatePageElements(selectedPageId, newElements);
+          }
+        }}
+      />
     </div>
   );
 };
