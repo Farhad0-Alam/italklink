@@ -227,7 +227,11 @@ export default function CardEditor() {
         totalPages: allPages.length
       });
       
-      setCardData(convertedCard);
+      setCardData(prev => ({
+        ...convertedCard,
+        currentPreviewMode: prev.currentPreviewMode,
+        currentSelectedPage: prev.currentSelectedPage
+      }));
       updateShareUrl(existingCard);
     }
   }, [existingCard]);
