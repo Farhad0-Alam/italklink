@@ -282,7 +282,7 @@ export const setupHealthChecks = (app: Express) => {
 // Built-in rate limiting (simple implementation)
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
 
-const simpleRateLimit = (maxRequests: number = 100, windowMs: number = 15 * 60 * 1000) => {
+const simpleRateLimit = (maxRequests: number = 500, windowMs: number = 15 * 60 * 1000) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const identifier = req.ip || 'unknown';
     const now = Date.now();

@@ -146,6 +146,11 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     socialFontStyling: true,
     socialDropShadow: true,
     socialContainerStyling: true,
+    // Page tab sections - expanded by default for better UX
+    pageEditor: false,
+    pageElements: false,
+    pageNavigation: false,
+    pageLayout: false,
   });
 
   const form = useForm<BusinessCard>({

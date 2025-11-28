@@ -224,22 +224,9 @@ export default function CardEditor() {
       try {
         await navigator.clipboard.writeText(shareUrl);
         
-        if (autoSaveStatus === "saving" || autoSaveStatus === "dirty") {
-          toast({
-            title: "Saving card...",
-            description: "Waiting for changes to save before opening preview.",
-          });
-          await forceSave();
-        }
-        
-        const slug = shareUrl.split('/').pop();
-        if (slug) {
-          window.open(`/${slug}`, '_blank');
-        }
-        
         toast({
-          title: "Link copied and opened!",
-          description: "URL copied to clipboard and opened in a new tab.",
+          title: "Link copied!",
+          description: "URL copied to clipboard. Use the View TalkLink button to preview.",
         });
       } catch (err) {
         toast({
@@ -440,17 +427,16 @@ END:VCARD`;
             {/* View TalkLink Button Below Mobile Frame */}
             {shareUrl && (
               <div className="mt-4 flex justify-center">
-                <Button
-                  onClick={() => {
-                    const slug = shareUrl.split('/').pop();
-                    if (slug) window.open(`/${slug}`, '_blank');
-                  }}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full"
+                <a
+                  href={shareUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-medium transition-colors"
                   data-testid="button-view-talklink"
                 >
                   <Share2 className="w-4 h-4 mr-2" />
                   View TalkLink
-                </Button>
+                </a>
               </div>
             )}
             
