@@ -390,7 +390,11 @@ END:VCARD`;
             <FormBuilder
               cardData={cardData}
               onDataChange={(data) => {
-                setCardData(data);
+                setCardData(prev => ({
+                  ...data,
+                  currentPreviewMode: prev.currentPreviewMode,
+                  currentSelectedPage: prev.currentSelectedPage
+                }));
               }}
               onGenerateQR={() => {}}
               onNavigationChange={handleNavigatePage}
