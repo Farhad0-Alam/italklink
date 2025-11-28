@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -496,9 +497,25 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleSection("profile")}
                 >
-                  <h3 className="text-base font-medium text-slate-200">
-                    Profile
-                  </h3>
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-base font-medium text-slate-200">
+                      Profile
+                    </h3>
+                    <div 
+                      className="flex items-center gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Switch
+                        checked={form.watch("profileSectionEnabled") !== false}
+                        onCheckedChange={(checked) => form.setValue("profileSectionEnabled", checked)}
+                        className="data-[state=checked]:bg-talklink-500"
+                        data-testid="switch-profile-enabled"
+                      />
+                      <span className="text-xs text-slate-400">
+                        {form.watch("profileSectionEnabled") !== false ? "Enabled" : "Disabled"}
+                      </span>
+                    </div>
+                  </div>
                   <i
                     className={`fas ${collapsedSections.profile ? "fa-chevron-down" : "fa-chevron-up"} text-slate-400 text-sm`}
                   />

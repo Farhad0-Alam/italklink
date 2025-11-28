@@ -338,6 +338,9 @@ export const businessCards = pgTable("business_cards", {
   coverImageStyles: jsonb("cover_image_styles"), // {height, borderWidth, borderColor, animation, opacity, gradient, shapeDivider: {enabled, preset, position, color, width, height, invert, bringToFront}}
   galleryImages: jsonb("gallery_images"),
   
+  // Profile section visibility
+  profileSectionEnabled: boolean("profile_section_enabled").default(true),
+  
   // Extended content
   vision: text("vision"),
   mission: text("mission"),
@@ -3936,6 +3939,9 @@ export const businessCardSchema = z.object({
   logo: z.string().optional(),
   backgroundImage: z.string().optional(),
   galleryImages: z.array(z.string()).default([]),
+  
+  // Profile section visibility
+  profileSectionEnabled: z.boolean().default(true),
   
   // Available icons for selection
   availableIcons: z.array(z.object({

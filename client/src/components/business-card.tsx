@@ -937,6 +937,8 @@ export const BusinessCardComponent = forwardRef<
           </div>
         )}
         
+        {/* Profile Section - only render if enabled (default: true) */}
+        {data.profileSectionEnabled !== false && (
         <div className="relative">
           {/* Header Design - Cover + Logo */}
           {(data.headerDesign === "cover-logo" || !data.headerDesign) && (
@@ -1108,17 +1110,20 @@ export const BusinessCardComponent = forwardRef<
             />
           )}
         </div>
+        )}
 
         {/* Content */}
         <div
           className={`pb-8 px-6 text-center text-slate-800 ${
-            data.headerDesign === "profile-center"
-              ? "pt-20"
-              : data.headerDesign === "split-design"
-                ? "pt-16"
-                : data.headerDesign === "shape-divider"
-                  ? "pt-8"
-                  : "pt-16"
+            data.profileSectionEnabled === false
+              ? "pt-6"
+              : data.headerDesign === "profile-center"
+                ? "pt-20"
+                : data.headerDesign === "split-design"
+                  ? "pt-16"
+                  : data.headerDesign === "shape-divider"
+                    ? "pt-8"
+                    : "pt-16"
           }`}
         >
           {/* Name, Title, Company with Group Positioning */}
