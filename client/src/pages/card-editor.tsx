@@ -67,6 +67,16 @@ export default function CardEditor() {
     font: "inter",
     elementSpacing: 16,
     individualElementSpacing: {},
+    pages: [
+      {
+        id: "home",
+        key: "home",
+        path: "",
+        label: "Home",
+        visible: true,
+        elements: []
+      }
+    ] as any,
   });
 
   const [shareUrl, setShareUrl] = useState("");
@@ -181,24 +191,40 @@ export default function CardEditor() {
   // Update form data when existing card loads
   useEffect(() => {
     if (existingCard) {
-      // Convert database format (pageElements) to FormBuilder format (pages[].elements)
+      // Convert database format to FormBuilder format
+      // Home page elements are in pageElements, additional pages are in pages array
+      const homePageElements = existingCard.pageElements || [];
+      const additionalPages = existingCard.pages || [];
+      
+      // Build complete pages array with home page first, then any additional pages
+      const allPages = [
+        {
+          id: "home",
+          key: "home",
+          path: "",
+          label: "Home",
+          visible: true,
+          elements: homePageElements
+        },
+        ...additionalPages.map((page: any) => ({
+          id: page.id,
+          key: page.key || page.id,
+          path: page.path,
+          label: page.label,
+          visible: page.visible !== false,
+          elements: page.elements || []
+        }))
+      ];
+      
       const convertedCard = {
         ...existingCard,
-        pages: existingCard.pages || [
-          {
-            id: "home",
-            key: "home",
-            path: "",
-            label: "Home",
-            visible: true,
-            elements: existingCard.pageElements || []
-          }
-        ]
+        pages: allPages
       };
       
-      console.log('[CardEditor] Loaded card - converting pageElements to pages:', {
-        pageElementsCount: existingCard.pageElements?.length || 0,
-        pagesElements: convertedCard.pages[0].elements.length
+      console.log('[CardEditor] Loaded card - pages structure:', {
+        homePageElements: homePageElements.length,
+        additionalPages: additionalPages.length,
+        totalPages: allPages.length
       });
       
       setCardData(convertedCard);

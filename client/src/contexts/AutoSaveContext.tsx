@@ -48,31 +48,42 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         ...(customUrlSlug && { customUrl: customUrlSlug })
       };
       
+      const pages = (dataToSave as any).pages || [];
+      
+      // Merge all elements from all pages into pageElements for backward compatibility
+      // The first page (home) elements go to pageElements, additional pages are stored in pages array
       let pageElementsToSave = (dataToSave.pageElements || []) as any[];
       
-      if (pageElementsToSave.length === 0) {
-        const allElements: any[] = [];
-        const pages = (dataToSave as any).pages || [];
-        if (Array.isArray(pages)) {
-          pages.forEach((page: any) => {
-            if (Array.isArray(page.elements)) {
-              allElements.push(...page.elements);
-            }
-          });
+      // If we have a home page with elements, use those as pageElements
+      if (Array.isArray(pages)) {
+        const homePage = pages.find((p: any) => p.key === 'home' || p.id === 'home');
+        if (homePage?.elements && Array.isArray(homePage.elements) && homePage.elements.length > 0) {
+          pageElementsToSave = homePage.elements;
         }
-        pageElementsToSave = allElements;
       }
+      
+      // Prepare pages array - keep only non-home pages with their elements for multi-page support
+      const pagesToSave = Array.isArray(pages) 
+        ? pages.filter((p: any) => p.key !== 'home' && p.id !== 'home').map((page: any) => ({
+            id: page.id,
+            key: page.key || page.id,
+            path: page.path,
+            label: page.label,
+            visible: page.visible !== false,
+            elements: page.elements || []
+          }))
+        : null;
       
       const finalData = {
         ...dataToSave,
         pageElements: pageElementsToSave,
-        pages: null,
+        pages: pagesToSave && pagesToSave.length > 0 ? pagesToSave : null,
         menu: null,
         currentPreviewMode: undefined,
         currentSelectedPage: undefined
       };
       
-      console.log('[AutoSave] Saving card with', finalData.pageElements?.length || 0, 'elements');
+      console.log('[AutoSave] Saving card with', finalData.pageElements?.length || 0, 'home elements and', finalData.pages?.length || 0, 'additional pages');
       
       const result = currentCardId 
         ? await apiRequest('PUT', `/api/business-cards/${currentCardId}`, finalData)
