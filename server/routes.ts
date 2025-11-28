@@ -829,6 +829,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
         defaultConfig: et.defaultConfig
       }));
       
+      // Essential element types that must always be available
+      const essentialElements = [
+        {
+          type: "installButton",
+          title: "Install Button",
+          icon: "fas fa-download",
+          color: "bg-green-100",
+          description: "PWA install button for Android & iPhone",
+          isPremium: false,
+          defaultConfig: {
+            enabled: true,
+            appName: "TalkLink",
+            buttonText: "Install App",
+            buttonColor: "#22c55e",
+            textColor: "#ffffff",
+            buttonSize: "md",
+            buttonStyle: "filled",
+            buttonAlignment: "center",
+            borderRadius: "md",
+            showIcon: true,
+            iconPosition: "left"
+          }
+        },
+        {
+          type: "bookAppointment",
+          title: "Book Appointment",
+          icon: "fas fa-calendar-alt",
+          color: "bg-gradient-to-r from-blue-500 to-teal-600",
+          description: "Appointment booking button",
+          isPremium: false,
+          defaultConfig: {}
+        },
+        {
+          type: "scheduleCall",
+          title: "Schedule Call",
+          icon: "fas fa-phone",
+          color: "bg-gradient-to-r from-green-500 to-blue-600",
+          description: "Schedule a phone/video call",
+          isPremium: false,
+          defaultConfig: {}
+        },
+        {
+          type: "meetingRequest",
+          title: "Meeting Request",
+          icon: "fas fa-handshake",
+          color: "bg-gradient-to-r from-purple-500 to-indigo-600",
+          description: "Request a meeting button",
+          isPremium: false,
+          defaultConfig: {}
+        },
+        {
+          type: "availabilityDisplay",
+          title: "Availability Display",
+          icon: "fas fa-clock",
+          color: "bg-gradient-to-r from-amber-500 to-orange-600",
+          description: "Show your availability schedule",
+          isPremium: false,
+          defaultConfig: {}
+        },
+        {
+          type: "subscribeForm",
+          title: "Subscribe to Updates",
+          icon: "fas fa-bell",
+          color: "bg-gradient-to-r from-orange-500 to-red-600",
+          description: "Let visitors subscribe to notifications",
+          isPremium: false,
+          defaultConfig: {}
+        }
+      ];
+      
+      // Merge essential elements that are missing from database
+      const existingTypes = new Set(publicElementTypes.map(et => et.type));
+      for (const essential of essentialElements) {
+        if (!existingTypes.has(essential.type)) {
+          publicElementTypes.push(essential);
+        }
+      }
+      
       res.json(publicElementTypes);
     } catch (error) {
       console.error('Error fetching element types:', error);
