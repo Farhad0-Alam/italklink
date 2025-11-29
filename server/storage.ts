@@ -7,6 +7,7 @@ import {
   teamAssignments, roundRobinState, leadRoutingRules, teamMemberSkills, teamMemberCapacity, teamAvailabilityPatterns, assignmentAnalytics, routingAnalytics,
   publicUploads, qrLinks, qrEvents, cardSubscriptions, coupons, userSubscriptions,
   bios, connections, subscriptions, analytics, affiliates, conversions, headerTemplates, icons, pageElementTypes,
+  nfcTags, nfcTapEvents, nfcAnalytics,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -35,7 +36,8 @@ import {
   type PublicUpload, type InsertPublicUpload,
   type QrLink, type InsertQrLink, type QrEvent, type InsertQrEvent,
   type Bio, type InsertBio, type Connection, type InsertConnection,
-  type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics
+  type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
+  type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 

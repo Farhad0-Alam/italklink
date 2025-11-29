@@ -4911,3 +4911,145 @@ export const insertVoiceCallAnalyticsSchema = createInsertSchema(voiceCallAnalyt
   id: true,
   createdAt: true,
 });
+
+// ===== NFC SYSTEM TABLES =====
+
+// NFC Tags table - Store NFC tag configurations
+export const nfcTags = pgTable("nfc_tags", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cardId: varchar("card_id").references(() => businessCards.id, { onDelete: 'cascade' }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // NFC Configuration
+  tagName: varchar("tag_name").notNull(),
+  tagId: varchar("tag_id").unique(), // Unique NFC tag ID from chip
+  tagType: varchar("tag_type").default('NTAG216'), // NTAG215, NTAG216, NTAG424, etc.
+  
+  // NDEF Data (NFC Data Exchange Format)
+  ndefPayload: text("ndef_payload"), // Base64 encoded NDEF message
+  targetUrl: varchar("target_url").notNull(), // Where tap redirects to
+  
+  // NFC Metadata
+  accessLevel: varchar("access_level").default('public'), // public, private, encrypted
+  isEncrypted: boolean("is_encrypted").default(false),
+  encryptionKey: text("encryption_key"), // Encrypted key for security
+  
+  // Analytics
+  totalTaps: integer("total_taps").default(0),
+  lastTappedAt: timestamp("last_tapped_at"),
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  isProgrammed: boolean("is_programmed").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_nfc_card").on(table.cardId),
+  index("idx_nfc_user").on(table.userId),
+  index("idx_nfc_tag_id").on(table.tagId),
+  index("idx_nfc_active").on(table.isActive),
+]);
+
+// NFC Tap Events table - Track every NFC tap
+export const nfcTapEvents = pgTable("nfc_tap_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  nfcTagId: varchar("nfc_tag_id").references(() => nfcTags.id, { onDelete: 'cascade' }).notNull(),
+  cardId: varchar("card_id").references(() => businessCards.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Tap metadata
+  tapSource: varchar("tap_source").default('nfc'), // nfc, qr, web, etc.
+  deviceType: deviceTypeEnum("device_type"), // mobile, desktop, tablet, bot
+  
+  // Location and device info
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  geoLocation: varchar("geo_location"), // City, Country
+  latitude: varchar("latitude"),
+  longitude: varchar("longitude"),
+  
+  // User info (if logged in)
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'set null' }),
+  visitorEmail: varchar("visitor_email"),
+  visitorName: varchar("visitor_name"),
+  
+  // Action tracking
+  actionTaken: varchar("action_taken"), // view, contact_save, call, email, etc.
+  actionUrl: varchar("action_url"),
+  
+  tappedAt: timestamp("tapped_at").defaultNow(),
+}, (table) => [
+  index("idx_nfc_event_tag").on(table.nfcTagId),
+  index("idx_nfc_event_card").on(table.cardId),
+  index("idx_nfc_event_date").on(table.tappedAt),
+  index("idx_nfc_event_user").on(table.userId),
+]);
+
+// NFC Analytics table - Aggregated statistics
+export const nfcAnalytics = pgTable("nfc_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  nfcTagId: varchar("nfc_tag_id").references(() => nfcTags.id, { onDelete: 'cascade' }).notNull(),
+  cardId: varchar("card_id").references(() => businessCards.id, { onDelete: 'cascade' }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Aggregated metrics
+  totalTaps: integer("total_taps").default(0),
+  uniqueDevices: integer("unique_devices").default(0),
+  uniqueLocations: integer("unique_locations").default(0),
+  
+  // Device breakdown
+  mobileTaps: integer("mobile_taps").default(0),
+  desktopTaps: integer("desktop_taps").default(0),
+  tabletTaps: integer("tablet_taps").default(0),
+  
+  // Action breakdown
+  viewCount: integer("view_count").default(0),
+  contactSaveCount: integer("contact_save_count").default(0),
+  callCount: integer("call_count").default(0),
+  emailCount: integer("email_count").default(0),
+  
+  // Time tracking
+  lastTappedAt: timestamp("last_tapped_at"),
+  periodType: varchar("period_type").default('all_time'), // all_time, daily, weekly, monthly
+  periodStart: timestamp("period_start"),
+  periodEnd: timestamp("period_end"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_nfc_analytics_tag").on(table.nfcTagId),
+  index("idx_nfc_analytics_card").on(table.cardId),
+  index("idx_nfc_analytics_period").on(table.periodType),
+]);
+
+// NFC Tag types
+export type NfcTag = typeof nfcTags.$inferSelect;
+export type InsertNfcTag = typeof nfcTags.$inferInsert;
+export type NfcTapEvent = typeof nfcTapEvents.$inferSelect;
+export type InsertNfcTapEvent = typeof nfcTapEvents.$inferInsert;
+export type NfcAnalytics = typeof nfcAnalytics.$inferSelect;
+export type InsertNfcAnalytics = typeof nfcAnalytics.$inferInsert;
+
+// ===== NFC VALIDATION SCHEMAS =====
+
+export const insertNfcTagSchema = createInsertSchema(nfcTags).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  totalTaps: true,
+  lastTappedAt: true,
+  isProgrammed: true,
+}).extend({
+  tagName: z.string().min(1).max(100),
+  targetUrl: z.string().url('Target URL must be valid'),
+  tagType: z.enum(['NTAG215', 'NTAG216', 'NTAG424', 'ICODE', 'Other']).default('NTAG216'),
+});
+
+export type NfcTagForm = z.infer<typeof insertNfcTagSchema>;
+
+export const insertNfcTapEventSchema = createInsertSchema(nfcTapEvents).omit({
+  id: true,
+  tappedAt: true,
+});
+
+export type NfcTapEventForm = z.infer<typeof insertNfcTapEventSchema>;
