@@ -60,14 +60,28 @@ const nfcTagSchema = z.object({
   cardId: z.string().optional(),
 });
 
+interface User {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  profileImageUrl?: string;
+  planType: 'free' | 'paid';
+}
+
 export default function NfcManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedTag, setSelectedTag] = useState<NfcTag | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Fetch user data
+  const { data: user, isLoading: userLoading } = useQuery<User>({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+  });
 
   // Fetch user's business cards for selection
   const { data: cards = [], isLoading: cardsLoading } = useQuery({
@@ -203,24 +217,28 @@ export default function NfcManagement() {
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Desktop Sidebar - Hidden on mobile */}
-      <div className="hidden md:block w-64 fixed h-screen">
-        <DashboardSidebar 
-          user={user}
-          businessCardsCount={0}
-          onLogout={() => setLocation('/')}
-        />
-      </div>
-
-      {/* Mobile Sidebar in Sheet */}
-      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="left" className="w-64 p-0 md:hidden">
+      {user && (
+        <div className="hidden md:block w-64 fixed h-screen">
           <DashboardSidebar 
             user={user}
             businessCardsCount={0}
             onLogout={() => setLocation('/')}
           />
-        </SheetContent>
-      </Sheet>
+        </div>
+      )}
+
+      {/* Mobile Sidebar in Sheet */}
+      {user && (
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetContent side="left" className="w-64 p-0 md:hidden">
+            <DashboardSidebar 
+              user={user}
+              businessCardsCount={0}
+              onLogout={() => setLocation('/')}
+            />
+          </SheetContent>
+        </Sheet>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 md:ml-64 overflow-y-auto">
