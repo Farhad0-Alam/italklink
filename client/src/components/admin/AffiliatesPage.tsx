@@ -53,6 +53,7 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import CommissionRulesPage from './CommissionRulesPage';
+import AffiliateConversionsPage from './AffiliateConversionsPage';
 
 interface Affiliate {
   id: string;
@@ -247,8 +248,12 @@ export default function AffiliatesPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="affiliates">Affiliates</TabsTrigger>
+          <TabsTrigger value="conversions" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Conversions
+          </TabsTrigger>
           <TabsTrigger value="commission-rules" className="flex items-center gap-2">
             <Percent className="h-4 w-4" />
             Commission Rules
@@ -616,6 +621,11 @@ export default function AffiliatesPage() {
           )}
         </DialogContent>
         </Dialog>
+        </TabsContent>
+
+        {/* Conversions Tab */}
+        <TabsContent value="conversions">
+          <AffiliateConversionsPage />
         </TabsContent>
 
         {/* Commission Rules Tab */}

@@ -79,11 +79,6 @@ const sidebarNavItems = [
     href: '/admin/affiliates',
     icon: UserPlus,
   },
-  {
-    title: 'Conversions',
-    href: '/admin/conversions',
-    icon: TrendingUp,
-  },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
