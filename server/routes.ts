@@ -931,6 +931,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Delete account
+  app.delete('/api/auth/account', requireAuth, asyncHandler(async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+    
+    await storage.deleteUser(req.user.id);
+    res.clearCookie('connect.sid');
+    res.json({ success: true, message: 'Account deleted successfully' });
+  }));
+
   // Get current user
   app.get('/api/auth/user', optionalAuth, async (req, res) => {
     // Prevent caching to ensure fresh user data during impersonation
