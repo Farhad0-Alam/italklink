@@ -8,7 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
@@ -32,6 +32,12 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [expandedSection, setExpandedSection] = useState<string | null>('tools');
+
+  // Fetch subscription to get plan name
+  const { data: subscriptionData } = useQuery({
+    queryKey: ['/api/billing/subscription'],
+    retry: false,
+  });
 
   const logoutMutation = useMutation({
     mutationFn: () => apiRequest('POST', '/api/auth/logout', {}),
@@ -136,7 +142,7 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
         {/* Plan Badge */}
         <div className="mt-3 flex items-center gap-2">
           <Badge className={`${getPlanColor(user.planType)} text-white text-xs font-semibold`}>
-            {user.planType === 'paid' ? '⭐ Premium' : '🎯 Free'}
+            {subscriptionData?.data?.plan?.name || (user.planType === 'paid' ? '⭐ Premium' : '🎯 Free')}
           </Badge>
           <span className="text-xs text-gray-600 dark:text-gray-400">{businessCardsCount} Cards</span>
         </div>
