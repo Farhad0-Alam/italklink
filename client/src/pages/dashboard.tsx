@@ -737,6 +737,36 @@ export default function Dashboard() {
               ))}
             </div>
           )}
+
+          {/* Affiliate Banner */}
+          <Link href="/affiliate" className="block px-6 py-6">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-blue-600 dark:from-emerald-600 dark:via-teal-600 dark:to-blue-700 p-6 shadow-xl hover:shadow-2xl transition-all transform hover:scale-102 cursor-pointer group">
+              {/* Animated gradient background */}
+              <div className="absolute inset-0 opacity-20">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-300 rounded-full blur-2xl"></div>
+              </div>
+              
+              {/* Content */}
+              <div className="relative flex items-center justify-between gap-4 sm:gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0 p-3 bg-white/20 group-hover:bg-white/30 rounded-xl transition-colors">
+                    <Users className="w-6 h-6 text-white drop-shadow-md" />
+                  </div>
+                  <div>
+                    <div className="text-lg sm:text-xl font-bold text-white">Join Our Affiliate Program</div>
+                    <div className="text-sm text-white/90 mt-1">Earn up to 30% commission on every referral. Start making passive income today!</div>
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <Button className="bg-white hover:bg-gray-100 text-emerald-600 font-bold shadow-lg transition-all transform group-hover:scale-105">
+                    <DollarSign className="w-4 h-4 mr-2" />
+                    Join Now
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Link>
           
           {/* Pagination */}
           {businessCards.length > 0 && totalPages > 1 && (
