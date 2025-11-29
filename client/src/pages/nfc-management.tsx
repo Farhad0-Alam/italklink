@@ -237,31 +237,36 @@ export default function NfcManagement() {
                       </FormItem>
                     )} />
 
-                    <FormField control={form.control} name="cardId" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm">Business Card</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={cardsLoading || cards.length === 0}>
-                          <FormControl>
-                            <SelectTrigger className="text-sm h-9">
-                              <SelectValue placeholder={cardsLoading ? 'Loading cards...' : cards.length === 0 ? 'No cards available' : 'Select a card'} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {cards.length === 0 ? (
-                              <div className="text-sm p-2 text-gray-500">No business cards found. Create one first.</div>
-                            ) : (
-                              cards.map((card: any) => (
-                                <SelectItem key={card.id} value={card.id} className="text-sm">
-                                  {card.name || card.cardName}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription className="text-xs">Choose which card this NFC tag links to</FormDescription>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )} />
+                    <FormField control={form.control} name="cardId" render={({ field }) => {
+                      const selectedCardValue = cards.find((c: any) => c.id === field.value);
+                      return (
+                        <FormItem>
+                          <FormLabel className="text-sm">Business Card</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value} disabled={cardsLoading || cards.length === 0}>
+                            <FormControl>
+                              <SelectTrigger className="text-sm h-9">
+                                <SelectValue placeholder={cardsLoading ? 'Loading cards...' : cards.length === 0 ? 'No cards available' : 'Select a card'}>
+                                  {field.value && selectedCardValue ? (selectedCardValue.name || selectedCardValue.cardName) : ''}
+                                </SelectValue>
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {cards.length === 0 ? (
+                                <div className="text-sm p-2 text-gray-500">No business cards found. Create one first.</div>
+                              ) : (
+                                cards.map((card: any) => (
+                                  <SelectItem key={card.id} value={card.id} className="text-sm">
+                                    {card.name || card.cardName}
+                                  </SelectItem>
+                                ))
+                              )}
+                            </SelectContent>
+                          </Select>
+                          <FormDescription className="text-xs">Choose which card this NFC tag links to</FormDescription>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      );
+                    }} />
 
                     <FormField control={form.control} name="tagType" render={({ field }) => (
                       <FormItem>
