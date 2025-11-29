@@ -28,6 +28,7 @@ import {
 } from '../shared/schema';
 import { eq, desc, asc, and, or, sql, count, sum, gte, lte, between } from 'drizzle-orm';
 import crypto from 'crypto';
+import { stripeAffiliateService } from './stripeAffiliateService';
 
 const router = express.Router();
 

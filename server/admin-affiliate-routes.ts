@@ -19,6 +19,7 @@ import {
   type InsertConversion
 } from '../shared/schema';
 import { eq, desc, asc, and, or, sql, count, sum, gte, lte, between, inArray } from 'drizzle-orm';
+import { stripeAffiliateService } from './stripeAffiliateService';
 
 const router = express.Router();
 
@@ -749,11 +750,11 @@ router.post('/payouts/:id/verify', requireAdmin, async (req, res) => {
   }
 });
 
-// PROCESS PAYOUT (Final processing - execute payment)
+// PROCESS PAYOUT (Final processing - execute payment via Stripe Connect)
 router.post('/payouts/:id/process', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { transactionRef, notes } = req.body;
+    const { notes } = req.body;
 
     const [currentPayout] = await db.select().from(payouts).where(eq(payouts.id, id));
     
@@ -768,15 +769,38 @@ router.post('/payouts/:id/process', requireAdmin, async (req, res) => {
     // Get affiliate to verify payout method
     const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.id, currentPayout.affiliateId));
     
-    if (!affiliate || !affiliate.payoutDetails) {
-      return res.status(400).json({ success: false, message: 'Affiliate payout details not configured' });
+    if (!affiliate) {
+      return res.status(400).json({ success: false, message: 'Affiliate not found' });
     }
 
-    // SECURITY: Update payout to paid status
+    let transactionRef: string | null = null;
+    let errorMsg: string | null = null;
+
+    // Execute payment based on payout method
+    try {
+      if (affiliate.payoutMethod === 'stripe_connect') {
+        // Execute Stripe Connect transfer
+        transactionRef = await stripeAffiliateService.executeTransfer(
+          currentPayout.affiliateId,
+          currentPayout.amount,
+          `Affiliate Commission Payout #${id.substring(0, 8)} - Period ${currentPayout.periodStart.toISOString().split('T')[0]} to ${currentPayout.periodEnd.toISOString().split('T')[0]}`
+        );
+      } else {
+        // Other payout methods would be handled here (PayPal, bank transfer, etc.)
+        errorMsg = `Payout method '${affiliate.payoutMethod}' not yet implemented`;
+        return res.status(400).json({ success: false, message: errorMsg });
+      }
+    } catch (paymentError: any) {
+      console.error('Payment execution failed:', paymentError);
+      errorMsg = paymentError.message || 'Payment processing failed';
+      return res.status(400).json({ success: false, message: errorMsg });
+    }
+
+    // Update payout to paid status
     const [updatedPayout] = await db.update(payouts)
       .set({
         status: 'paid',
-        transactionRef: transactionRef || null,
+        transactionRef,
         processedAt: new Date(),
         notes: notes || currentPayout.notes,
         updatedAt: new Date()
@@ -792,7 +816,7 @@ router.post('/payouts/:id/process', requireAdmin, async (req, res) => {
       kind: 'debit',
       refType: 'payout',
       refId: id,
-      description: `Payout processed #${id.substring(0, 8)} - ${currentPayout.method} - Transaction: ${transactionRef || 'N/A'}`,
+      description: `Payout processed #${id.substring(0, 8)} - ${currentPayout.method} - Transaction: ${transactionRef}`,
       runningBalance: 0 // Will be calculated
     });
 
@@ -808,7 +832,7 @@ router.post('/payouts/:id/process', requireAdmin, async (req, res) => {
       }
     });
 
-    res.json({ success: true, message: 'Payout processed successfully', data: updatedPayout });
+    res.json({ success: true, message: 'Payout processed successfully and funds transferred', data: updatedPayout });
   } catch (error) {
     console.error('Failed to process payout:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });

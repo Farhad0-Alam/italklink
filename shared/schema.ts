@@ -920,6 +920,7 @@ export const affiliates = pgTable("affiliates", {
   payoutDetails: jsonb("payout_details"), // Stripe Connect account, PayPal email, etc.
   payoutVerificationStatus: varchar("payout_verification_status").default('pending'),
   minPayoutThreshold: integer("min_payout_threshold").default(5000), // $50.00 in cents
+  stripeConnectAccountId: varchar("stripe_connect_account_id"), // Stripe Connected Account ID
   
   // Status and settings
   status: affiliateStatusEnum("status").default('pending'),
