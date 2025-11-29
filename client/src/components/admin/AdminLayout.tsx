@@ -18,7 +18,8 @@ import {
   UserPlus,
   TrendingUp,
   Palette,
-  Layers
+  Layers,
+  Percent
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
