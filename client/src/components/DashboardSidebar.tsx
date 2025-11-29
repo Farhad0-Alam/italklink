@@ -60,7 +60,7 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
       label: 'Core',
       items: [
         { href: '/dashboard', label: 'Dashboard', icon: Home, testId: 'link-dashboard' },
-        { href: '/my-links', label: 'My Links', icon: FileText, testId: 'link-my-links' },
+        { href: '/my-links', label: 'Talk Links', icon: FileText, testId: 'link-my-links' },
         { href: '/templates', label: 'Templates', icon: Sparkles, testId: 'link-templates' },
       ],
     },

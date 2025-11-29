@@ -125,8 +125,8 @@ export default function UploadsPage() {
                 <Link href="/dashboard" className="text-gray-500 hover:text-gray-700">
                   Dashboard
                 </Link>
-                <Link href="/dashboard" className="text-gray-500 hover:text-gray-700">
-                  My Links
+                <Link href="/my-links" className="text-gray-500 hover:text-gray-700">
+                  Talk Links
                 </Link>
                 <Link href="/templates" className="text-gray-500 hover:text-gray-700">
                   Templates

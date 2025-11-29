@@ -227,7 +227,7 @@ export default function Dashboard() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCards = businessCards.slice(startIndex, startIndex + itemsPerPage);
 
-  // Scroll to My Links section
+  // Scroll to Talk Links section
   const scrollToMyLinks = () => {
     const myLinksSection = document.getElementById('my-links-section');
     if (myLinksSection) {
@@ -244,7 +244,7 @@ export default function Dashboard() {
     onClick?: () => void;
   }> = [
     { href: "/dashboard", label: "Dashboard", icon: null },
-    { href: "/my-links", label: "My Links", icon: null },
+    { href: "/my-links", label: "Talk Links", icon: null },
     { href: "/templates", label: "Templates", icon: null },
     { href: "/qr-codes", label: "QR Codes", icon: QrCode, testId: "link-qr-codes" },
     { href: "/email-signature", label: "Email Signature", icon: Mail, testId: "link-email-signature" },
