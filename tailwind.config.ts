@@ -75,9 +75,24 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["var(--font-sans)"],
-        serif: ["var(--font-serif)"],
-        mono: ["var(--font-mono)"],
+        sans: ["var(--font-sans)", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
+        mono: ["var(--font-mono)", "Courier New", "monospace"],
+        inter: ["var(--font-inter)"],
+        outfit: ["var(--font-outfit)"],
+      },
+      fontSize: {
+        xs: ["12px", { lineHeight: "16px", letterSpacing: "-0.2px" }],
+        sm: ["14px", { lineHeight: "20px", letterSpacing: "-0.2px" }],
+        base: ["16px", { lineHeight: "24px", letterSpacing: "-0.3px" }],
+        lg: ["18px", { lineHeight: "28px", letterSpacing: "-0.3px" }],
+        xl: ["20px", { lineHeight: "28px", letterSpacing: "-0.1px" }],
+        "2xl": ["24px", { lineHeight: "32px", letterSpacing: "-0.2px" }],
+        "3xl": ["30px", { lineHeight: "36px", letterSpacing: "-0.3px" }],
+        "4xl": ["36px", { lineHeight: "40px", letterSpacing: "-0.4px" }],
+        "5xl": ["48px", { lineHeight: "52px", letterSpacing: "-0.5px" }],
+        "6xl": ["60px", { lineHeight: "64px", letterSpacing: "-0.5px" }],
+        "7xl": ["72px", { lineHeight: "76px", letterSpacing: "-0.6px" }],
       },
       keyframes: {
         "accordion-down": {

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;500;600;700;800&family=Lato:wght@300;400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&family=Source+Sans+Pro:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700;800&family=Raleway:wght@300;400;500;600;700;800&family=Ubuntu:wght@300;700&family=PT+Sans:wght@400;700&family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@400;500;600;700;800&family=Oswald:wght@300;400;500;600;700&family=Libre+Baskerville:wght@400;700&family=Crimson+Text:wght@400;600;700&family=Work+Sans:wght@300;400;500;600;700;800&family=Fira+Sans:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Alex+Brush&family=Dancing+Script&family=Great+Vibes&family=Allura&family=Sacramento&family=Parisienne&family=Mr+De+Haviland&family=Tahoma&family=Georgia&family=Verdana&family=Times+New+Roman&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=Roboto:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;500;600;700;800&family=Lato:wght@300;400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&family=Source+Sans+Pro:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700;800&family=Raleway:wght@300;400;500;600;700;800&family=Ubuntu:wght@300;700&family=PT+Sans:wght@400;700&family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@400;500;600;700;800&family=Oswald:wght@300;400;500;600;700&family=Libre+Baskerville:wght@400;700&family=Crimson+Text:wght@400;600;700&family=Work+Sans:wght@300;400;500;600;700;800&family=Fira+Sans:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Alex+Brush&family=Dancing+Script&family=Great+Vibes&family=Allura&family=Sacramento&family=Parisienne&family=Mr+De+Haviland&family=Tahoma&family=Georgia&family=Verdana&family=Times+New+Roman&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -38,16 +38,21 @@
   --talklink-800: hsl(142 64% 24%);
   --talklink-900: hsl(143 61% 20%);
   
+  /* Primary Font Stack - Premium Modern Design */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-mono: 'Fira Code', 'Courier New', monospace;
+  
   /* Font Families */
   --font-inter: 'Inter', sans-serif;
+  --font-outfit: 'Outfit', sans-serif;
+  --font-plus-jakarta-sans: 'Plus Jakarta Sans', sans-serif;
   --font-roboto: 'Roboto', sans-serif;
   --font-poppins: 'Poppins', sans-serif;
   --font-work-sans: 'Work Sans', sans-serif;
   --font-dm-sans: 'DM Sans', sans-serif;
-  --font-plus-jakarta-sans: 'Plus Jakarta Sans', sans-serif;
   --font-manrope: 'Manrope', sans-serif;
   --font-space-grotesk: 'Space Grotesk', sans-serif;
-  --font-outfit: 'Outfit', sans-serif;
   --font-nunito-sans: 'Nunito Sans', sans-serif;
   --font-red-hat-display: 'Red Hat Display', sans-serif;
   --font-ibm-plex-sans: 'IBM Plex Sans', sans-serif;
@@ -102,12 +107,91 @@
     @apply border-border;
   }
   
-  body {
-    @apply bg-background text-foreground transition-colors duration-300;
-  }
-  
   html {
     scroll-behavior: smooth;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    letter-spacing: -0.3px;
+    font-weight: 400;
+  }
+  
+  /* Premium Modern Headings */
+  h1 {
+    font-family: var(--font-outfit);
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    @apply tracking-tight;
+  }
+  
+  h2 {
+    font-family: var(--font-outfit);
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.4px;
+    @apply tracking-tight;
+  }
+  
+  h3 {
+    font-family: var(--font-outfit);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.3px;
+  }
+  
+  h4 {
+    font-family: var(--font-outfit);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.2px;
+  }
+  
+  h5 {
+    font-family: var(--font-inter);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: -0.1px;
+  }
+  
+  h6 {
+    font-family: var(--font-inter);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: 0px;
+  }
+  
+  /* Body Text */
+  p {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: -0.3px;
+  }
+  
+  small {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: -0.2px;
+  }
+  
+  /* Links */
+  a {
+    @apply transition-colors duration-200;
   }
   
   /* Custom scrollbar */
