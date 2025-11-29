@@ -168,7 +168,7 @@
   
   h6 {
     font-family: var(--font-inter);
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 600;
     line-height: 1.5;
     letter-spacing: 0px;
@@ -176,14 +176,14 @@
   
   /* Body Text */
   p {
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 400;
     line-height: 1.6;
     letter-spacing: -0.3px;
   }
   
   small {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 400;
     line-height: 1.5;
     letter-spacing: -0.2px;

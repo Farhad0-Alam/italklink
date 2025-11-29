@@ -82,9 +82,9 @@ export default {
         outfit: ["var(--font-outfit)"],
       },
       fontSize: {
-        xs: ["14px", { lineHeight: "18px", letterSpacing: "-0.2px" }],
-        sm: ["16px", { lineHeight: "24px", letterSpacing: "-0.2px" }],
-        base: ["18px", { lineHeight: "28px", letterSpacing: "-0.3px" }],
+        xs: ["17px", { lineHeight: "20px", letterSpacing: "-0.2px" }],
+        sm: ["17px", { lineHeight: "24px", letterSpacing: "-0.2px" }],
+        base: ["19px", { lineHeight: "28px", letterSpacing: "-0.3px" }],
         lg: ["20px", { lineHeight: "30px", letterSpacing: "-0.3px" }],
         xl: ["24px", { lineHeight: "32px", letterSpacing: "-0.1px" }],
         "2xl": ["28px", { lineHeight: "36px", letterSpacing: "-0.2px" }],
