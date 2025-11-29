@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, Filter, X, ArrowLeft } from "lucide-react";
+import { Search, Filter, X, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +21,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 
 interface User {
   id: string;
@@ -51,6 +57,7 @@ export default function Templates() {
   const [showUrlModal, setShowUrlModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [customUrl, setCustomUrl] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
     queryKey: ['/api/auth/user'],
@@ -261,78 +268,43 @@ export default function Templates() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setLocation('/dashboard')}
-                className="flex items-center space-x-2 hover:bg-gray-100"
-                data-testid="button-back-dashboard"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span>Back to Dashboard</span>
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Desktop Sidebar - Hidden on mobile */}
+      <div className="hidden md:block w-64 fixed h-screen">
+        <DashboardSidebar 
+          user={user}
+          businessCardsCount={0}
+          onLogout={() => setLocation('/')}
+        />
+      </div>
+
+      {/* Mobile Sidebar in Sheet */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent side="left" className="w-64 p-0 md:hidden">
+          <DashboardSidebar 
+            user={user}
+            businessCardsCount={0}
+            onLogout={() => setLocation('/')}
+          />
+        </SheetContent>
+      </Sheet>
+
+      {/* Main Content */}
+      <div className="flex-1 md:ml-64 w-full md:w-auto overflow-y-auto">
+        {/* Mobile Header */}
+        <div className="md:hidden sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-bold text-gray-900 dark:text-white">Templates</h1>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
               </Button>
-              <div className="h-6 w-px bg-gray-300" />
-              <Link href="/" className="flex items-center space-x-2">
-                <div className="text-2xl font-bold">
-                  <span className="text-blue-600">2talk</span>
-                  <span className="text-orange-500">Link</span>
-                </div>
-              </Link>
-              
-              <div className="hidden md:flex items-center space-x-8">
-                <Link href="/dashboard" className="text-gray-500 hover:text-gray-700">
-                  Dashboard
-                </Link>
-                <Link href="/my-links" className="text-gray-500 hover:text-gray-700">
-                  Talk Links
-                </Link>
-                <Link href="/templates" className="text-gray-900 font-medium hover:text-blue-600">
-                  Templates
-                </Link>
-                <Link href="/pricing" className="text-gray-500 hover:text-gray-700">
-                  Pricing
-                </Link>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
-                  <AvatarFallback className="bg-orange-500 text-white">
-                    {user.firstName?.[0]}{user.lastName?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-gray-700">Hi {user.firstName}</span>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <i className="fas fa-chevron-down"></i>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem>
-                      <Link href="/dashboard">Dashboard</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <i className="fas fa-sign-out-alt mr-2"></i>
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-          </div>
+            </SheetTrigger>
+          </Sheet>
         </div>
-      </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Content */}
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-6 md:py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -438,6 +410,7 @@ export default function Templates() {
             </p>
           </div>
         )}
+        </div>
       </div>
 
       {/* Custom URL Modal */}
