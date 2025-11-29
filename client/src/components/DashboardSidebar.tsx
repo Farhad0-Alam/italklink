@@ -119,32 +119,41 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
 
   return (
     <aside className="h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col overflow-y-auto scrollbar-hide">
-      {/* Header - User Profile Card */}
-      <div className="p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
-        <Link href="/profile" className="flex items-center gap-3 group cursor-pointer">
-          <div className="relative">
-            <Avatar className="h-12 w-12 ring-2 ring-orange-100 dark:ring-orange-900 group-hover:ring-orange-200 transition-all">
-              <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
-              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-orange-500 text-white">
-                {user.firstName?.[0]}{user.lastName?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-800" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-              {user.firstName} {user.lastName}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
-          </div>
-        </Link>
+      {/* Header - User Profile Card with Modern Gradient Design */}
+      <div className="relative p-6 pb-4 bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 dark:from-emerald-950/40 dark:via-teal-950/40 dark:to-blue-950/40 border-b-2 border-gradient-to-r from-emerald-200 to-blue-200 dark:border-emerald-800/50 dark:to-blue-800/50 overflow-hidden">
+        {/* Gradient background accent */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-blue-400 to-cyan-400 rounded-full blur-2xl"></div>
+        </div>
 
-        {/* Plan Badge */}
-        <div className="mt-3 flex items-center gap-2">
-          <Badge className={`${getPlanColor(user.planType)} text-white text-xs font-semibold`}>
-            {subscriptionData?.data?.plan?.name || (user.planType === 'paid' ? '⭐ Premium' : '🎯 Free')}
-          </Badge>
-          <span className="text-xs text-gray-600 dark:text-gray-400">{businessCardsCount} Cards</span>
+        {/* Content */}
+        <div className="relative">
+          <Link href="/profile" className="flex items-center gap-3 group cursor-pointer">
+            <div className="relative">
+              <Avatar className="h-14 w-14 ring-3 ring-emerald-200 dark:ring-emerald-700 group-hover:ring-emerald-300 dark:group-hover:ring-emerald-600 transition-all shadow-lg">
+                <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
+                <AvatarFallback className="bg-gradient-to-br from-emerald-500 via-teal-500 to-blue-500 text-white font-bold text-sm">
+                  {user.firstName?.[0]}{user.lastName?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-white dark:border-gray-800 shadow-md" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-gray-900 dark:text-white truncate group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-emerald-600 group-hover:to-blue-600 group-hover:bg-clip-text transition-all">
+                {user.firstName} {user.lastName}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">{user.email}</p>
+            </div>
+          </Link>
+
+          {/* Plan Badge with Modern Design */}
+          <div className="mt-4 flex items-center gap-2">
+            <Badge className={`${getPlanColor(user.planType)} text-white text-xs font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105`}>
+              {subscriptionData?.data?.plan?.name || (user.planType === 'paid' ? '⭐ Premium' : '🎯 Free')}
+            </Badge>
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2.5 py-1 rounded-full">{businessCardsCount} Cards</span>
+          </div>
         </div>
       </div>
 
