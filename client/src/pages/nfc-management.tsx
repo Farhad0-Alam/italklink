@@ -621,6 +621,8 @@ export default function NfcManagement() {
             )}
           </TabsContent>
         </Tabs>
+        </div>
+        </div>
       </div>
     </div>
   );
