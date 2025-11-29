@@ -87,11 +87,23 @@ router.post('/apply', async (req, res) => {
       return res.status(401).json({ message: 'Authentication required' });
     }
 
-    const { country, website, sourceInfo } = req.body;
+    const { country, website, sourceInfo, paymentType, recurringDuration, payoutMethod } = req.body;
 
     // Validate input
     if (!country) {
       return res.status(400).json({ message: 'Country is required' });
+    }
+
+    if (!paymentType || !['onetime', 'recurring'].includes(paymentType)) {
+      return res.status(400).json({ message: 'Valid payment type is required' });
+    }
+
+    if (paymentType === 'recurring' && (!recurringDuration || recurringDuration < 3 || recurringDuration > 36)) {
+      return res.status(400).json({ message: 'Recurring duration must be between 3 and 36 months' });
+    }
+
+    if (!payoutMethod || !['stripe_connect', 'bank_transfer', 'paypal'].includes(payoutMethod)) {
+      return res.status(400).json({ message: 'Valid payout method is required' });
     }
 
     // Check if user is already an affiliate
@@ -126,8 +138,25 @@ router.post('/apply', async (req, res) => {
       country,
       website,
       sourceInfo,
+      payoutMethod: payoutMethod as any,
       status: 'pending'
     }).returning();
+
+    // Set initial payment preferences
+    await db.insert(affiliatePaymentPreferences).values({
+      affiliateId: newAffiliate.id,
+      paymentType: paymentType as any,
+      recurringDuration: paymentType === 'recurring' ? recurringDuration : null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).onConflictDoUpdate({
+      target: [affiliatePaymentPreferences.affiliateId],
+      set: {
+        paymentType: paymentType as any,
+        recurringDuration: paymentType === 'recurring' ? recurringDuration : null,
+        updatedAt: new Date()
+      }
+    });
 
     // Create initial balance entry
     await db.insert(balances).values({

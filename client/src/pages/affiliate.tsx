@@ -118,7 +118,10 @@ export default function Affiliate() {
   const [applicationForm, setApplicationForm] = useState({
     country: '',
     website: '',
-    sourceInfo: ''
+    sourceInfo: '',
+    paymentType: 'onetime',
+    recurringDuration: 12,
+    payoutMethod: 'stripe_connect'
   });
   const [copySuccess, setCopySuccess] = useState('');
   const { toast } = useToast();
@@ -484,6 +487,75 @@ export default function Affiliate() {
                   value={applicationForm.sourceInfo}
                   onChange={(e) => setApplicationForm(prev => ({ ...prev, sourceInfo: e.target.value }))}
                 />
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="font-semibold mb-4">Payment Preferences</h3>
+                
+                <div>
+                  <Label htmlFor="paymentType">Payment Type *</Label>
+                  <Select 
+                    value={applicationForm.paymentType} 
+                    onValueChange={(value) => setApplicationForm(prev => ({ ...prev, paymentType: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select payment type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="onetime">One-Time Payments Only</SelectItem>
+                      <SelectItem value="recurring">Recurring Payments (Track Lifetime Value)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {applicationForm.paymentType === 'recurring' 
+                      ? 'Get commissions from recurring subscriptions for the specified duration'
+                      : 'Earn commissions only on first-time purchases'}
+                  </p>
+                </div>
+
+                {applicationForm.paymentType === 'recurring' && (
+                  <div className="mt-4">
+                    <Label htmlFor="recurringDuration">Recurring Duration (Months) *</Label>
+                    <Select 
+                      value={applicationForm.recurringDuration.toString()} 
+                      onValueChange={(value) => setApplicationForm(prev => ({ ...prev, recurringDuration: parseInt(value) }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select duration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3">3 Months</SelectItem>
+                        <SelectItem value="6">6 Months</SelectItem>
+                        <SelectItem value="12">12 Months</SelectItem>
+                        <SelectItem value="24">24 Months</SelectItem>
+                        <SelectItem value="36">36 Months (Lifetime)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      How long you'll earn commissions from each recurring customer
+                    </p>
+                  </div>
+                )}
+
+                <div className="mt-4">
+                  <Label htmlFor="payoutMethod">Preferred Payout Method *</Label>
+                  <Select 
+                    value={applicationForm.payoutMethod} 
+                    onValueChange={(value) => setApplicationForm(prev => ({ ...prev, payoutMethod: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select payout method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="stripe_connect">Stripe Connect (Recommended)</SelectItem>
+                      <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                      <SelectItem value="paypal">PayPal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    How you'll receive your affiliate commissions
+                  </p>
+                </div>
               </div>
 
               <Button type="submit" className="w-full" size="lg">
