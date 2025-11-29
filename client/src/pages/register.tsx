@@ -22,15 +22,22 @@ export default function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
 
+  // Get redirect param from URL
+  const getRedirectPath = () => {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    return redirect ? `/${redirect}` : '/dashboard';
+  };
+
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      setLocation('/dashboard');
+      setLocation(getRedirectPath());
     }
   }, [isAuthenticated, setLocation]);
 
@@ -69,7 +76,7 @@ export default function Register() {
         description: 'Welcome to TalkLink! You can now start creating digital business cards.',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      setLocation('/dashboard');
+      setLocation(getRedirectPath());
     },
     onError: (error: any) => {
       toast({
