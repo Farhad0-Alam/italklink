@@ -433,84 +433,94 @@ export default function Affiliate() {
   // Application form for non-affiliates
   if (!affiliate) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
-          <div className="flex items-center space-x-4 mb-6">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setLocation('/dashboard')}
-              className="flex items-center space-x-2 hover:bg-gray-100"
-              data-testid="button-back-dashboard"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to Dashboard</span>
-            </Button>
-            <div className="h-6 w-px bg-gray-300" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+        {/* Back Navigation */}
+        <div className="container mx-auto px-4 py-6 max-w-4xl">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setLocation('/dashboard')}
+            className="flex items-center space-x-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+            data-testid="button-back-dashboard"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Dashboard</span>
+          </Button>
+        </div>
+
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Modern Header Section */}
+        <div className="mb-12">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-600 p-12 text-white shadow-lg">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0 bg-gradient-to-br from-white to-transparent"></div>
+            </div>
+            <div className="relative text-center">
+              <h1 className="text-4xl font-bold mb-3">Join Our Affiliate Program 🚀</h1>
+              <p className="text-lg text-emerald-50">Earn up to 30% commission on every referral and build passive income</p>
+            </div>
           </div>
         </div>
-        
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Join Our Affiliate Program</h1>
-          <p className="text-xl text-muted-foreground mb-8">
-            Earn commissions by promoting our digital business card platform
-          </p>
-        </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
-          <Card>
+        {/* Feature Cards Grid */}
+        <div className="grid md:grid-cols-2 gap-6 mb-12">
+          {/* Competitive Commissions */}
+          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Competitive Commissions
-              </CardTitle>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-2.5">
+                  <DollarSign className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <CardTitle className="text-emerald-700 dark:text-emerald-300">Competitive Commissions</CardTitle>
+              </div>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Earn up to 30% commission on every successful referral with our tiered commission structure.
-              </p>
+              <p className="text-muted-foreground">Earn up to 30% commission on every successful referral with our tiered commission structure.</p>
             </CardContent>
           </Card>
 
-          <Card>
+          {/* Real-time Analytics */}
+          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Real-time Analytics
-              </CardTitle>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-2.5">
+                  <BarChart3 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <CardTitle className="text-blue-700 dark:text-blue-300">Real-time Analytics</CardTitle>
+              </div>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Track your performance with detailed analytics, conversion tracking, and earnings reports.
-              </p>
+              <p className="text-muted-foreground">Track your performance with detailed analytics, conversion tracking, and earnings reports.</p>
             </CardContent>
           </Card>
 
-          <Card>
+          {/* Marketing Materials */}
+          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Gift className="h-5 w-5" />
-                Marketing Materials
-              </CardTitle>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="rounded-lg bg-purple-100 dark:bg-purple-900 p-2.5">
+                  <Gift className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <CardTitle className="text-purple-700 dark:text-purple-300">Marketing Materials</CardTitle>
+              </div>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Access professionally designed banners, landing pages, and promotional materials.
-              </p>
+              <p className="text-muted-foreground">Access professionally designed banners, landing pages, and promotional materials.</p>
             </CardContent>
           </Card>
 
-          <Card>
+          {/* Dedicated Support */}
+          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Dedicated Support
-              </CardTitle>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="rounded-lg bg-orange-100 dark:bg-orange-900 p-2.5">
+                  <Users className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                </div>
+                <CardTitle className="text-orange-700 dark:text-orange-300">Dedicated Support</CardTitle>
+              </div>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Get help from our affiliate team with optimization tips and promotional strategies.
-              </p>
+              <p className="text-muted-foreground">Get help from our affiliate team with optimization tips and promotional strategies.</p>
             </CardContent>
           </Card>
         </div>
