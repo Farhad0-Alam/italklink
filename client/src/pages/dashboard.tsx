@@ -308,63 +308,63 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         {/* Modern Header Section */}
-        <div className="mb-8">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 p-8 text-white shadow-lg">
+        <div className="mb-6 sm:mb-8">
+          <div className="relative overflow-hidden rounded-lg sm:rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 p-4 sm:p-6 md:p-8 text-white shadow-lg">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute inset-0 bg-gradient-to-br from-white to-transparent"></div>
             </div>
             <div className="relative">
-              <h2 className="text-3xl font-bold mb-2">Welcome back, {user?.firstName || 'User'}! 👋</h2>
-              <p className="text-blue-100">Track your business card performance and grow your network</p>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2">Welcome back, {user?.firstName || 'User'}! 👋</h2>
+              <p className="text-xs sm:text-sm md:text-base text-blue-100">Track your business card performance and grow your network</p>
             </div>
           </div>
         </div>
 
         {/* Modern Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5 mb-6 sm:mb-8">
           {/* Weekly Clicks Card */}
           <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="rounded-lg bg-green-100 dark:bg-green-900 p-2.5">
-                  <i className="fas fa-mouse-pointer text-green-600 dark:text-green-400 text-lg"></i>
+            <CardContent className="p-3 sm:p-4 md:p-6">
+              <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
+                <div className="rounded-lg bg-green-100 dark:bg-green-900 p-1.5 sm:p-2 md:p-2.5">
+                  <i className="fas fa-mouse-pointer text-green-600 dark:text-green-400 text-sm sm:text-base md:text-lg"></i>
                 </div>
-                <span className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 px-2.5 py-1 rounded-full">This week</span>
+                <span className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">This week</span>
               </div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Weekly Clicks</p>
-              <div className="text-3xl font-bold text-green-700 dark:text-green-300 mb-1">0</div>
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Weekly Clicks</p>
+              <div className="text-2xl sm:text-3xl font-bold text-green-700 dark:text-green-300 mb-1">0</div>
               <p className="text-xs text-muted-foreground">Total interactions</p>
             </CardContent>
           </Card>
 
           {/* Weekly Visitor Card */}
           <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="rounded-lg bg-orange-100 dark:bg-orange-900 p-2.5">
-                  <i className="fas fa-eye text-orange-600 dark:text-orange-400 text-lg"></i>
+            <CardContent className="p-3 sm:p-4 md:p-6">
+              <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
+                <div className="rounded-lg bg-orange-100 dark:bg-orange-900 p-1.5 sm:p-2 md:p-2.5">
+                  <i className="fas fa-eye text-orange-600 dark:text-orange-400 text-sm sm:text-base md:text-lg"></i>
                 </div>
-                <span className="text-xs font-medium text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900 px-2.5 py-1 rounded-full">This week</span>
+                <span className="text-xs font-medium text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">This week</span>
               </div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Weekly Visitor</p>
-              <div className="text-3xl font-bold text-orange-700 dark:text-orange-300 mb-1">0</div>
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Weekly Visitor</p>
+              <div className="text-2xl sm:text-3xl font-bold text-orange-700 dark:text-orange-300 mb-1">0</div>
               <p className="text-xs text-muted-foreground">Unique visitors</p>
             </CardContent>
           </Card>
 
           {/* Monthly Visitor Card */}
           <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950 dark:to-rose-950">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="rounded-lg bg-pink-100 dark:bg-pink-900 p-2.5">
-                  <i className="fas fa-users text-pink-600 dark:text-pink-400 text-lg"></i>
+            <CardContent className="p-3 sm:p-4 md:p-6">
+              <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
+                <div className="rounded-lg bg-pink-100 dark:bg-pink-900 p-1.5 sm:p-2 md:p-2.5">
+                  <i className="fas fa-users text-pink-600 dark:text-pink-400 text-sm sm:text-base md:text-lg"></i>
                 </div>
-                <span className="text-xs font-medium text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900 px-2.5 py-1 rounded-full">This month</span>
+                <span className="text-xs font-medium text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">This month</span>
               </div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Monthly Visitor</p>
-              <div className="text-3xl font-bold text-pink-700 dark:text-pink-300 mb-1">
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Monthly Visitor</p>
+              <div className="text-2xl sm:text-3xl font-bold text-pink-700 dark:text-pink-300 mb-1">
                 {businessCards.reduce((sum, card) => sum + card.viewCount, 0)}
               </div>
               <p className="text-xs text-muted-foreground">Total views</p>
@@ -373,15 +373,15 @@ export default function Dashboard() {
 
           {/* Created Links Card */}
           <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950 dark:to-violet-950">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="rounded-lg bg-purple-100 dark:bg-purple-900 p-2.5">
-                  <i className="fas fa-link text-purple-600 dark:text-purple-400 text-lg"></i>
+            <CardContent className="p-3 sm:p-4 md:p-6">
+              <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
+                <div className="rounded-lg bg-purple-100 dark:bg-purple-900 p-1.5 sm:p-2 md:p-2.5">
+                  <i className="fas fa-link text-purple-600 dark:text-purple-400 text-sm sm:text-base md:text-lg"></i>
                 </div>
-                <span className="text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-2.5 py-1 rounded-full">Total</span>
+                <span className="text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">Total</span>
               </div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Created Links</p>
-              <div className="text-3xl font-bold text-purple-700 dark:text-purple-300 mb-1">
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Created Links</p>
+              <div className="text-2xl sm:text-3xl font-bold text-purple-700 dark:text-purple-300 mb-1">
                 {businessCards.length}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -392,15 +392,15 @@ export default function Dashboard() {
 
           {/* Affiliate Earnings Card */}
           <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-2.5">
-                  <DollarSign className="text-emerald-600 dark:text-emerald-400 h-5 w-5" />
+            <CardContent className="p-3 sm:p-4 md:p-6">
+              <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
+                <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-1.5 sm:p-2 md:p-2.5">
+                  <DollarSign className="text-emerald-600 dark:text-emerald-400 h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900 px-2.5 py-1 rounded-full">Earnings</span>
+                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">Earnings</span>
               </div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Affiliate Earnings</p>
-              <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Affiliate Earnings</p>
+              <div className="text-2xl sm:text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
                 ${affiliate ? (affiliate.stats.totalEarnings / 100).toFixed(2) : '0.00'}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -412,24 +412,24 @@ export default function Dashboard() {
 
         {/* Affiliate Program Section */}
         {!affiliate ? (
-          <div className="mb-8">
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-600 p-8 text-white shadow-lg">
+          <div className="mb-6 sm:mb-8">
+            <div className="relative overflow-hidden rounded-lg sm:rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-600 p-4 sm:p-6 md:p-8 text-white shadow-lg">
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-white to-transparent"></div>
               </div>
-              <div className="relative flex items-center justify-between gap-6">
-                <div className="flex items-center space-x-6">
+              <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+                <div className="flex items-start sm:items-center space-x-3 sm:space-x-6">
                   <div className="flex-shrink-0">
-                    <div className="rounded-full bg-white bg-opacity-20 p-4">
-                      <Users className="h-8 w-8" />
+                    <div className="rounded-full bg-white bg-opacity-20 p-2 sm:p-3 md:p-4">
+                      <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold mb-2">Join Our Affiliate Program</h3>
-                    <p className="text-emerald-50 text-lg">Earn up to 30% commission on every referral. Start making passive income today!</p>
+                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2">Join Our Affiliate Program</h3>
+                    <p className="text-xs sm:text-sm md:text-lg text-emerald-50">Earn up to 30% commission on every referral. Start making passive income today!</p>
                   </div>
                 </div>
-                <Button className="bg-white text-emerald-600 hover:bg-emerald-50 font-semibold px-8 flex-shrink-0" asChild>
+                <Button className="bg-white text-emerald-600 hover:bg-emerald-50 font-semibold px-4 sm:px-8 flex-shrink-0 w-full sm:w-auto" asChild>
                   <Link href="/affiliate" data-testid="button-join-affiliate">
                     <DollarSign className="h-4 w-4 mr-2" />
                     Join Now
@@ -439,17 +439,17 @@ export default function Dashboard() {
             </div>
           </div>
         ) : (
-          <div className="mb-8">
-            <div className="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-lg">
+          <div className="mb-6 sm:mb-8">
+            <div className="rounded-lg sm:rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-lg">
               {/* Modern Header */}
-              <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 px-6 py-6 text-white flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="rounded-lg bg-white bg-opacity-20 p-2.5">
-                    <DollarSign className="h-6 w-6" />
+              <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 px-4 sm:px-6 py-4 sm:py-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <div className="rounded-lg bg-white bg-opacity-20 p-1.5 sm:p-2.5">
+                    <DollarSign className="h-4 w-4 sm:h-6 sm:w-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold">Affiliate Dashboard</h3>
-                    <p className="text-blue-100 text-sm">Your commission performance at a glance</p>
+                    <h3 className="text-base sm:text-xl font-bold">Affiliate Dashboard</h3>
+                    <p className="text-blue-100 text-xs sm:text-sm">Your commission performance at a glance</p>
                   </div>
                 </div>
                 <Badge className={`${
@@ -462,57 +462,57 @@ export default function Dashboard() {
               </div>
               
               {/* Content */}
-              <div className="p-6 bg-white dark:bg-gray-950">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="p-3 sm:p-4 md:p-6 bg-white dark:bg-gray-950">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6">
                   {/* Clicks */}
-                  <div className="rounded-lg bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950 p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-2">
-                        <MousePointer className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <div className="rounded-lg bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950 p-3 sm:p-4 md:p-6">
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-1.5 sm:p-2">
+                        <MousePointer className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
                       </div>
                       <span className="text-xs font-medium text-blue-600 dark:text-blue-400">Total</span>
                     </div>
-                    <div className="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-1">{affiliate.stats.totalClicks}</div>
-                    <div className="text-sm text-muted-foreground">Total Clicks</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-blue-700 dark:text-blue-300 mb-1">{affiliate.stats.totalClicks}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Total Clicks</div>
                   </div>
 
                   {/* Conversions */}
-                  <div className="rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="rounded-lg bg-purple-100 dark:bg-purple-900 p-2">
-                        <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <div className="rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 p-3 sm:p-4 md:p-6">
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <div className="rounded-lg bg-purple-100 dark:bg-purple-900 p-1.5 sm:p-2">
+                        <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600 dark:text-purple-400" />
                       </div>
                       <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Active</span>
                     </div>
-                    <div className="text-3xl font-bold text-purple-700 dark:text-purple-300 mb-1">{affiliate.stats.totalConversions}</div>
-                    <div className="text-sm text-muted-foreground">Conversions</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-purple-700 dark:text-purple-300 mb-1">{affiliate.stats.totalConversions}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Conversions</div>
                   </div>
 
                   {/* Earnings */}
-                  <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-2">
-                        <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 p-3 sm:p-4 md:p-6">
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-1.5 sm:p-2">
+                        <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
                       </div>
                       <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Total</span>
                     </div>
-                    <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">${(affiliate.stats.totalEarnings / 100).toFixed(2)}</div>
-                    <div className="text-sm text-muted-foreground">Total Earnings</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">${(affiliate.stats.totalEarnings / 100).toFixed(2)}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Total Earnings</div>
                   </div>
                 </div>
 
                 {/* Payout Settings Section */}
-                <div className="border-t border-gray-200 dark:border-gray-800 pt-6">
+                <div className="border-t border-gray-200 dark:border-gray-800 pt-4 sm:pt-6">
                   <button
                     onClick={() => setShowPayoutSettings(!showPayoutSettings)}
-                    className="flex items-center justify-between w-full mb-4 hover:opacity-80 transition-opacity"
+                    className="flex items-center justify-between w-full mb-3 sm:mb-4 hover:opacity-80 transition-opacity"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 p-2">
-                        <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 p-1.5 sm:p-2">
+                        <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div className="text-left">
-                        <p className="font-semibold text-sm">Payout Settings</p>
+                        <p className="font-semibold text-xs sm:text-sm">Payout Settings</p>
                         <p className="text-xs text-muted-foreground">
                           {affiliate?.payoutMethod === 'stripe_connect' ? 'Stripe Connect' : 
                            affiliate?.payoutMethod === 'paypal' ? 'PayPal' :
@@ -522,12 +522,12 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className={`transform transition-transform ${showPayoutSettings ? 'rotate-180' : ''}`}>
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
                     </div>
                   </button>
 
                   {showPayoutSettings && (
-                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-lg p-4 space-y-3">
+                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3">
                       {affiliate?.payoutMethod === 'stripe_connect' && (
                         <div>
                           <div className="flex items-center gap-2 mb-2">
