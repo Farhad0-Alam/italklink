@@ -1,9 +1,33 @@
+import { Footer } from "@/components/Footer";
+import { Link } from "wouter";
+
 export default function TermsOfService() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-      <div className="max-w-4xl mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
-        <div className="prose dark:prose-invert max-w-none space-y-6">
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 flex flex-col">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/">
+            <a className="flex items-center space-x-2 hover:opacity-80 transition">
+              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold">2T</span>
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">TalkLink</span>
+            </a>
+          </Link>
+          <nav className="flex gap-6">
+            <Link href="/"><a className="hover:text-orange-500 transition">Home</a></Link>
+            <Link href="/pricing"><a className="hover:text-orange-500 transition">Pricing</a></Link>
+            <Link href="/login"><a className="hover:text-orange-500 transition">Login</a></Link>
+          </nav>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1">
+        <div className="max-w-4xl mx-auto px-4 py-16">
+          <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
+          <div className="prose dark:prose-invert max-w-none space-y-6">
           <section>
             <h2 className="text-2xl font-bold mt-8 mb-4">1. Agreement to Terms</h2>
             <p>By accessing and using the TalkLink platform, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.</p>
@@ -56,7 +80,11 @@ export default function TermsOfService() {
             <p>If you have any questions about these Terms of Service, please contact us at support@talklink.com</p>
           </section>
         </div>
-      </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
