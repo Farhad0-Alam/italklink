@@ -81,7 +81,12 @@ interface Conversion {
   id: string;
   orderId: string;
   amount: number;
+  currency: string;
   commissionAmount: number;
+  commissionRate: string;
+  paymentType?: string;
+  recurringValue?: string;
+  recurringDuration?: number;
   status: string;
   createdAt: string;
   approvedAt?: string;
@@ -697,42 +702,58 @@ export default function Affiliate() {
                   <CardTitle>Recent Conversions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Order ID</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Commission</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {conversions.length > 0 ? (
-                        conversions.slice(0, 10).map((conversion) => (
-                          <TableRow key={conversion.id}>
-                            <TableCell className="font-mono text-sm">{conversion.orderId}</TableCell>
-                            <TableCell>${(conversion.amount / 100).toFixed(2)}</TableCell>
-                            <TableCell className="font-medium">${(conversion.commissionAmount / 100).toFixed(2)}</TableCell>
-                            <TableCell>
-                              <Badge className={getStatusColor(conversion.status)}>
-                                {conversion.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{format(new Date(conversion.createdAt), 'MMM dd, yyyy')}</TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8">
-                            <TrendingUp className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
-                            <p className="text-muted-foreground">No conversions yet</p>
-                            <p className="text-sm text-muted-foreground">Start promoting to see your first conversion!</p>
-                          </TableCell>
+                          <TableHead>Order ID</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Commission</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Duration</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
                         </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {conversions.length > 0 ? (
+                          conversions.slice(0, 10).map((conversion) => (
+                            <TableRow key={conversion.id}>
+                              <TableCell className="font-mono text-sm">{conversion.orderId}</TableCell>
+                              <TableCell>${(conversion.amount / 100).toFixed(2)}</TableCell>
+                              <TableCell className="font-medium">${(conversion.commissionAmount / 100).toFixed(2)}</TableCell>
+                              <TableCell>
+                                <Badge variant={conversion.paymentType === 'recurring' ? 'default' : 'secondary'}>
+                                  {conversion.paymentType === 'recurring' ? 'Recurring' : 'One-Time'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                {conversion.paymentType === 'recurring' && conversion.recurringDuration ? (
+                                  <span className="text-sm">{conversion.recurringDuration}m</span>
+                                ) : (
+                                  <span className="text-muted-foreground text-sm">-</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={getStatusColor(conversion.status)}>
+                                  {conversion.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{format(new Date(conversion.createdAt), 'MMM dd, yyyy')}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-8">
+                              <TrendingUp className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                              <p className="text-muted-foreground">No conversions yet</p>
+                              <p className="text-sm text-muted-foreground">Start promoting to see your first conversion!</p>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
