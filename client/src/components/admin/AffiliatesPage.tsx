@@ -52,6 +52,7 @@ interface Affiliate {
   code: string;
   country: string;
   website?: string;
+  cookieDurationDays?: number;
   status: 'pending' | 'approved' | 'suspended' | 'rejected';
   kycStatus: 'pending' | 'submitted' | 'approved' | 'rejected' | 'expired';
   totalEarnings: number;
@@ -72,6 +73,8 @@ export default function AffiliatesPage() {
   const [selectedAffiliate, setSelectedAffiliate] = useState<Affiliate | null>(null);
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+  const [editCookieDialogOpen, setEditCookieDialogOpen] = useState(false);
+  const [editingCookieDays, setEditingCookieDays] = useState<number>(30);
   const [notes, setNotes] = useState('');
   
   const queryClient = useQueryClient();
@@ -170,6 +173,31 @@ export default function AffiliatesPage() {
     } catch (error) {
       console.error('Failed to suspend affiliate:', error);
       alert('Failed to suspend affiliate');
+    }
+  };
+
+  const handleUpdateCookieDuration = async () => {
+    if (!selectedAffiliate) return;
+    
+    try {
+      const response = await fetch(`/api/affiliate/me`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ cookieDurationDays: editingCookieDays })
+      });
+
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/affiliates'] });
+        setEditCookieDialogOpen(false);
+        alert(`Cookie duration updated to ${editingCookieDays} days`);
+      } else {
+        const error = await response.json();
+        alert(`Failed to update: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('Failed to update cookie duration:', error);
+      alert('Failed to update cookie duration');
     }
   };
 
@@ -454,6 +482,46 @@ export default function AffiliatesPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Cookie Duration Dialog */}
+      <Dialog open={editCookieDialogOpen} onOpenChange={setEditCookieDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Cookie Duration</DialogTitle>
+            <DialogDescription>
+              Set the attribution window for tracking affiliate commissions (7-90 days)
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="cookie-days">Cookie Duration (Days)</Label>
+              <div className="flex gap-2 mt-1">
+                <Input
+                  id="cookie-days"
+                  type="number"
+                  min="7"
+                  max="90"
+                  value={editingCookieDays}
+                  onChange={(e) => setEditingCookieDays(Math.max(7, Math.min(90, parseInt(e.target.value) || 7)))}
+                  className="flex-1"
+                />
+                <div className="text-sm text-muted-foreground pt-2">days</div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Minimum 7 days, maximum 90 days. Default is 30 days.</p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditCookieDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateCookieDuration}>
+              Update Duration
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* View Details Dialog */}
       <Dialog open={viewDetailsOpen} onOpenChange={setViewDetailsOpen}>
         <DialogContent className="max-w-4xl">
@@ -498,6 +566,27 @@ export default function AffiliatesPage() {
                     {selectedAffiliate.approvedAt && (
                       <div><strong>Approved:</strong> {format(new Date(selectedAffiliate.approvedAt), 'PPP')}</div>
                     )}
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold mb-3">Attribution Settings</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center">
+                      <div><strong>Cookie Duration:</strong> {selectedAffiliate.cookieDurationDays || 30} days</div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditingCookieDays(selectedAffiliate.cookieDurationDays || 30);
+                          setEditCookieDialogOpen(true);
+                        }}
+                        className="text-blue-600"
+                      >
+                        Edit
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Controls how long affiliate clicks are tracked for commission attribution (7-90 days)</p>
                   </div>
                 </div>
               </div>
