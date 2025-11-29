@@ -142,11 +142,7 @@ router.post('/coupons/validate', asyncHandler(async (req, res) => {
   res.json({ success: true, data: validation });
 }));
 
-router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({ success: false, message: 'Not authenticated' });
-  }
-
+router.post('/checkout/create-session', asyncHandler(async (req, res) => {
   const { planId, userCount, couponCode, isYearly } = createCheckoutSchema.parse(req.body);
   
   const plans = await storage.getPlans();
@@ -193,18 +189,28 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
 
   const finalAmount = Math.max(totalAmount - discountAmount, 0);
 
-  let stripeCustomerId = req.user.stripeCustomerId;
-  
-  if (!stripeCustomerId) {
-    const customer = await stripe.customers.create({
-      email: req.user.email || undefined,
-      name: req.user.username,
-      metadata: {
-        userId: req.user.id,
-      },
-    });
+  let stripeCustomerId: string | null = null;
+  let userId: string | null = null;
+
+  if (req.user) {
+    userId = req.user.id;
+    stripeCustomerId = req.user.stripeCustomerId;
+    
+    if (!stripeCustomerId) {
+      const customer = await stripe.customers.create({
+        email: req.user.email || undefined,
+        name: req.user.username,
+        metadata: {
+          userId: req.user.id,
+        },
+      });
+      stripeCustomerId = customer.id;
+      await storage.updateUser(req.user.id, { stripeCustomerId });
+    }
+  } else {
+    // Create anonymous Stripe customer for guest checkout
+    const customer = await stripe.customers.create({});
     stripeCustomerId = customer.id;
-    await storage.updateUser(req.user.id, { stripeCustomerId });
   }
 
   const session = await stripe.checkout.sessions.create({
@@ -227,7 +233,7 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
     success_url: `https://${process.env.REPLIT_DEV_DOMAIN || 'localhost:5000'}/dashboard?payment=success`,
     cancel_url: `https://${process.env.REPLIT_DEV_DOMAIN || 'localhost:5000'}/pricing?payment=cancelled`,
     metadata: {
-      userId: req.user.id,
+      userId: userId || '',
       planId: planId.toString(),
       userCount: userCount.toString(),
       couponId: couponId || '',
@@ -237,28 +243,30 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
     },
   });
 
-  // Update user plan immediately (skip webhook)
-  await storage.updateUser(req.user.id, { planType: 'paid' });
-  
-  // Create subscription record
-  await storage.createUserSubscription({
-    userId: req.user.id,
-    planId: planId,
-    couponId: couponId || null,
-    stripeSubscriptionId: null,
-    stripeCustomerId: stripeCustomerId,
-    userCount: userCount,
-    pricePaid: finalAmount,
-    features: plan.features || {},
-    startDate: new Date(),
-    endDate: null,
-    isActive: true,
-    status: 'active',
-    metadata: {
-      sessionId: session.id,
-      paymentIntent: session.payment_intent,
-    },
-  });
+  // Update user plan immediately (skip webhook) - only for authenticated users
+  if (req.user) {
+    await storage.updateUser(req.user.id, { planType: 'paid' });
+    
+    // Create subscription record
+    await storage.createUserSubscription({
+      userId: req.user.id,
+      planId: planId,
+      couponId: couponId || null,
+      stripeSubscriptionId: null,
+      stripeCustomerId: stripeCustomerId,
+      userCount: userCount,
+      pricePaid: finalAmount,
+      features: plan.features || {},
+      startDate: new Date(),
+      endDate: null,
+      isActive: true,
+      status: 'active',
+      metadata: {
+        sessionId: session.id,
+        paymentIntent: session.payment_intent,
+      },
+    });
+  }
 
   res.json({ success: true, data: { url: session.url, sessionId: session.id } });
 }));
