@@ -555,7 +555,7 @@ router.get('/commission-rules', requireAdmin, async (req, res) => {
 // Create commission rule
 router.post('/commission-rules', requireAdmin, async (req, res) => {
   try {
-    const { name, scope, scopeValue, type, value, recurringEnabled, recurringValue, priority, effectiveFrom, effectiveTo } = req.body;
+    const { name, scope, scopeValue, type, value, paymentType = 'onetime', recurringEnabled, recurringValue, recurringDuration, priority, effectiveFrom, effectiveTo } = req.body;
 
     const [newRule] = await db.insert(commissionRules).values({
       name,
@@ -563,8 +563,10 @@ router.post('/commission-rules', requireAdmin, async (req, res) => {
       scopeValue,
       type,
       value,
-      recurringEnabled,
-      recurringValue,
+      paymentType, // 'onetime' or 'recurring'
+      recurringEnabled: paymentType === 'recurring' ? true : recurringEnabled,
+      recurringValue: paymentType === 'recurring' ? recurringValue : null,
+      recurringDuration: paymentType === 'recurring' ? (recurringDuration || 12) : null,
       priority: priority || 0,
       effectiveFrom: effectiveFrom ? new Date(effectiveFrom) : new Date(),
       effectiveTo: effectiveTo ? new Date(effectiveTo) : null,

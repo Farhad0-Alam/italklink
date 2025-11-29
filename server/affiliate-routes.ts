@@ -228,13 +228,18 @@ router.get('/me', requireAuth, async (req, res) => {
 router.patch('/me', requireAffiliate, async (req, res) => {
   try {
     const affiliate = req.affiliate;
-    const { website, payoutMethod, payoutDetails, minPayoutThreshold } = req.body;
+    const { website, payoutMethod, payoutDetails, minPayoutThreshold, cookieDurationDays } = req.body;
 
     const updates: Partial<Affiliate> = {};
     if (website !== undefined) updates.website = website;
     if (payoutMethod !== undefined) updates.payoutMethod = payoutMethod;
     if (payoutDetails !== undefined) updates.payoutDetails = payoutDetails;
     if (minPayoutThreshold !== undefined) updates.minPayoutThreshold = minPayoutThreshold;
+    if (cookieDurationDays !== undefined) {
+      // Validate cookie duration (7-90 days)
+      const days = Math.max(7, Math.min(90, parseInt(cookieDurationDays)));
+      updates.cookieDurationDays = days;
+    }
 
     const [updatedAffiliate] = await db.update(affiliates)
       .set({ ...updates, updatedAt: new Date() })

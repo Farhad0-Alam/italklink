@@ -926,6 +926,7 @@ export const affiliates = pgTable("affiliates", {
   status: affiliateStatusEnum("status").default('pending'),
   notes: text("notes"), // Admin notes
   attribution: attributionModeEnum("attribution").default('last_touch'),
+  cookieDurationDays: integer("cookie_duration_days").default(30), // Attribution window in days (default 30)
   
   // Approval workflow
   approvedBy: varchar("approved_by").references(() => users.id),
@@ -1037,8 +1038,12 @@ export const commissionRules = pgTable("commission_rules", {
   // Commission details
   type: commissionTypeEnum("type").notNull(), // percentage, flat
   value: varchar("value").notNull(), // "0.15" for 15% or "1500" for $15.00
+  
+  // Payment type control
+  paymentType: varchar("payment_type").default('onetime'), // 'onetime' or 'recurring'
   recurringEnabled: boolean("recurring_enabled").default(false),
   recurringValue: varchar("recurring_value"), // Different rate for recurring payments
+  recurringDuration: integer("recurring_duration"), // Max months to track recurring revenue
   
   // Validity
   effectiveFrom: timestamp("effective_from").defaultNow(),
