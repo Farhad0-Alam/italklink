@@ -668,6 +668,7 @@ export default function Affiliate() {
             </form>
           </CardContent>
         </Card>
+        </div>
       </div>
     );
   }
