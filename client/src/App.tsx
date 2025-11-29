@@ -1,7 +1,7 @@
 import { Switch, Route } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { I18nextProvider } from "react-i18next";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,6 +9,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { AutoSaveProvider } from "@/contexts/AutoSaveContext";
+import { CookieConsent } from "@/components/CookieConsent";
+import { initializeUsefulCookies } from "@/utils/cookies";
 import i18n from "./lib/i18n";
 
 // Lazy load Landing to reduce initial bundle size (it imports framer-motion + 30+ icons)
@@ -67,6 +69,11 @@ const PageSuspense = ({ children }: { children: React.ReactNode }) => (
 );
 
 function Router() {
+  useEffect(() => {
+    // Initialize useful cookies on app load
+    initializeUsefulCookies();
+  }, []);
+
   return (
     <Switch>
       {/* All pages lazy loaded for optimal initial bundle size */}
@@ -148,6 +155,7 @@ function App() {
                 <ImpersonationBanner />
                 <Router />
                 <Toaster />
+                <CookieConsent />
               </div>
             </AutoSaveProvider>
           </TooltipProvider>
