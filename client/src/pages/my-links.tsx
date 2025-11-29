@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
@@ -6,7 +6,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Edit, BarChart3, Trash2, Copy, ExternalLink } from "lucide-react";
+import { Edit, BarChart3, Trash2, Copy, ExternalLink, Menu, X } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 import NotifyCardButton from "@/components/NotifyCardButton";
 import NotifyAllCardsButton from "@/components/NotifyAllCardsButton";
 
@@ -22,11 +28,28 @@ interface BusinessCard {
   updatedAt: string;
 }
 
+interface User {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  profileImageUrl?: string;
+  planType: 'free' | 'paid';
+}
+
 export default function MyLinks() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Fetch user data
+  const { data: user, isLoading: userLoading } = useQuery<User>({
+    queryKey: ['/api/auth/user'],
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+  });
 
   const { data: businessCards = [], isLoading: cardsLoading } = useQuery<BusinessCard[]>({
     queryKey: ['/api/business-cards'],
@@ -104,10 +127,61 @@ export default function MyLinks() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedCards = businessCards.slice(startIndex, startIndex + itemsPerPage);
 
+  // Show loading state
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Desktop Sidebar - Hidden on mobile */}
+      <div className="hidden md:block w-64 fixed h-screen">
+        <DashboardSidebar 
+          user={user}
+          businessCardsCount={businessCards.length}
+          onLogout={() => setLocation('/')}
+        />
+      </div>
+
+      {/* Mobile Sidebar in Sheet */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent side="left" className="w-64 p-0 md:hidden">
+          <DashboardSidebar 
+            user={user}
+            businessCardsCount={businessCards.length}
+            onLogout={() => setLocation('/')}
+          />
+        </SheetContent>
+      </Sheet>
+
+      {/* Main Content */}
+      <div className="flex-1 md:ml-64 w-full md:w-auto overflow-y-auto">
+        {/* Mobile Header */}
+        <div className="md:hidden sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-bold text-gray-900 dark:text-white">Talk Links</h1>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+          </Sheet>
+        </div>
+
+        {/* Page Content */}
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-6 md:py-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="px-4 sm:px-6 py-5 border-b border-gray-200">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
@@ -329,6 +403,7 @@ export default function MyLinks() {
               )}
             </>
           )}
+          </div>
         </div>
       </div>
     </div>
