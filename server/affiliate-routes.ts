@@ -520,7 +520,7 @@ router.post('/track/conversion', async (req, res) => {
 
     let commissionAmount = 0;
     let commissionRate = '0';
-    let paymentType = 'onetime';
+    let paymentType = affiliate.preferredPaymentType || 'onetime'; // Use affiliate's preference
     let recurringValue: string | null = null;
     let recurringDuration: number | null = null;
     
@@ -528,16 +528,18 @@ router.post('/track/conversion', async (req, res) => {
       const rule = commissionRule[0];
       commissionAmount = calculateCommission(amount, rule.value, rule.type);
       commissionRate = rule.value;
-      paymentType = rule.paymentType || 'onetime';
       
-      // If recurring payment, use recurring value if specified
+      // Use affiliate's preferred payment type, or fallback to rule's payment type
+      paymentType = affiliate.preferredPaymentType || rule.paymentType || 'onetime';
+      
+      // If recurring payment, use affiliate's preferred recurring value if available
       if (paymentType === 'recurring') {
-        recurringValue = rule.recurringValue || rule.value; // Use recurring value if defined, else use base value
-        recurringDuration = rule.recurringDuration || 12; // Default to 12 months
+        recurringValue = affiliate.preferredRecurringValue || rule.recurringValue || rule.value;
+        recurringDuration = affiliate.preferredRecurringDuration || rule.recurringDuration || 12;
         
-        // For recurring commissions, also apply the recurring value if it's different
-        if (rule.recurringValue) {
-          commissionAmount = calculateCommission(amount, rule.recurringValue, rule.type);
+        // For recurring commissions, apply the recurring value if it's different from base
+        if (recurringValue && recurringValue !== rule.value) {
+          commissionAmount = calculateCommission(amount, recurringValue, rule.type);
         }
       }
       
@@ -875,6 +877,58 @@ router.get('/assets', async (req, res) => {
     });
   } catch (error) {
     console.error('Failed to get marketing assets:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// UPDATE PAYMENT PREFERENCES
+router.patch('/payment-preferences', requireAffiliate, async (req, res) => {
+  try {
+    const affiliate = req.affiliate;
+    const { preferredPaymentType, preferredRecurringDuration, preferredRecurringValue } = req.body;
+
+    // Validate input
+    if (preferredPaymentType && !['onetime', 'recurring'].includes(preferredPaymentType)) {
+      return res.status(400).json({ message: 'Invalid payment type' });
+    }
+    
+    if (preferredRecurringDuration && (preferredRecurringDuration < 1 || preferredRecurringDuration > 60)) {
+      return res.status(400).json({ message: 'Recurring duration must be between 1 and 60 months' });
+    }
+
+    // Update affiliate preferences
+    const [updated] = await db.update(affiliates)
+      .set({
+        preferredPaymentType: preferredPaymentType || affiliate.preferredPaymentType,
+        preferredRecurringDuration: preferredRecurringDuration || affiliate.preferredRecurringDuration,
+        preferredRecurringValue: preferredRecurringValue || affiliate.preferredRecurringValue,
+        updatedAt: new Date()
+      })
+      .where(eq(affiliates.id, affiliate.id))
+      .returning();
+
+    res.json({
+      success: true,
+      message: 'Payment preferences updated',
+      data: updated
+    });
+  } catch (error) {
+    console.error('Failed to update payment preferences:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET PAYMENT PREFERENCES
+router.get('/payment-preferences', requireAffiliate, async (req, res) => {
+  try {
+    const affiliate = req.affiliate;
+    res.json({
+      preferredPaymentType: affiliate.preferredPaymentType,
+      preferredRecurringDuration: affiliate.preferredRecurringDuration,
+      preferredRecurringValue: affiliate.preferredRecurringValue
+    });
+  } catch (error) {
+    console.error('Failed to get payment preferences:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });

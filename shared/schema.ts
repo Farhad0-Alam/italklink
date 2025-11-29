@@ -928,6 +928,11 @@ export const affiliates = pgTable("affiliates", {
   attribution: attributionModeEnum("attribution").default('last_touch'),
   cookieDurationDays: integer("cookie_duration_days").default(30), // Attribution window in days (default 30)
   
+  // Payment preferences (affiliate can switch between one-time and recurring)
+  preferredPaymentType: varchar("preferred_payment_type").default('onetime'), // 'onetime' or 'recurring'
+  preferredRecurringDuration: integer("preferred_recurring_duration").default(12), // Months for recurring
+  preferredRecurringValue: varchar("preferred_recurring_value"), // Custom rate for recurring (optional)
+  
   // Approval workflow
   approvedBy: varchar("approved_by").references(() => users.id),
   approvedAt: timestamp("approved_at"),
