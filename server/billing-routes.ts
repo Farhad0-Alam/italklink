@@ -338,7 +338,14 @@ router.get('/subscription', requireAuth, asyncHandler(async (req, res) => {
   }
 
   const subscription = await storage.getUserSubscription(req.user.id);
-  res.json({ success: true, data: subscription });
+  
+  if (subscription) {
+    const plans = await storage.getPlans();
+    const plan = plans.find(p => p.id === subscription.planId);
+    res.json({ success: true, data: { ...subscription, plan } });
+  } else {
+    res.json({ success: true, data: null });
+  }
 }));
 
 router.post('/subscription/cancel', requireAuth, asyncHandler(async (req, res) => {

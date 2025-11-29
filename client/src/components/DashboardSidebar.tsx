@@ -147,6 +147,7 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
           <span className="text-xs text-gray-600 dark:text-gray-400">{businessCardsCount} Cards</span>
         </div>
       </div>
+      </div>
 
       {/* Navigation Sections */}
       <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
