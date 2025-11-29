@@ -1,30 +1,44 @@
 import { Footer } from "@/components/Footer";
 import { Link } from "wouter";
+import { motion } from "framer-motion";
 
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 flex flex-col">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/">
-            <a className="flex items-center space-x-2 hover:opacity-80 transition">
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">2T</span>
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">TalkLink</span>
-            </a>
-          </Link>
-          <nav className="flex gap-6">
-            <Link href="/"><a className="hover:text-orange-500 transition">Home</a></Link>
-            <Link href="/pricing"><a className="hover:text-orange-500 transition">Pricing</a></Link>
-            <Link href="/login"><a className="hover:text-orange-500 transition">Login</a></Link>
-          </nav>
+      {/* Navigation - Same as Landing */}
+      <motion.nav 
+        className="fixed top-0 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 z-50"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link href="/">
+              <a className="flex items-center space-x-2 hover:opacity-80 transition">
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">2T</span>
+                </div>
+                <span className="text-lg font-bold bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">TalkLink</span>
+              </a>
+            </Link>
+            <div className="flex items-center gap-8">
+              <nav className="hidden md:flex gap-8">
+                <Link href="/"><a className="text-sm font-medium hover:text-orange-500 transition">Home</a></Link>
+                <Link href="/pricing"><a className="text-sm font-medium hover:text-orange-500 transition">Pricing</a></Link>
+              </nav>
+              <Link href="/login">
+                <a className="px-4 py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition">
+                  Sign In
+                </a>
+              </Link>
+            </div>
+          </div>
         </div>
-      </header>
+      </motion.nav>
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 pt-20">
         <div className="max-w-4xl mx-auto px-4 py-16">
           <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
           <div className="prose dark:prose-invert max-w-none space-y-6">
