@@ -587,6 +587,21 @@ export interface IStorage {
     clicksCount: number;
     initials: string;
   }[]>;
+  
+  // ===== NFC OPERATIONS =====
+  createNfcTag(data: InsertNfcTag): Promise<NfcTag>;
+  getNfcTag(id: string): Promise<NfcTag | undefined>;
+  getNfcTagsByCard(cardId: string): Promise<NfcTag[]>;
+  getNfcTagsByUser(userId: string): Promise<NfcTag[]>;
+  updateNfcTag(id: string, data: Partial<InsertNfcTag>): Promise<NfcTag>;
+  deleteNfcTag(id: string): Promise<void>;
+  
+  recordNfcTapEvent(data: InsertNfcTapEvent): Promise<NfcTapEvent>;
+  getNfcTapEvents(tagId: string, limit?: number): Promise<NfcTapEvent[]>;
+  
+  getNfcAnalyticsForCard(cardId: string): Promise<NfcAnalytics[]>;
+  getNfcAnalyticsForUser(userId: string): Promise<NfcAnalytics[]>;
+  updateNfcAnalytics(cardId: string, tagId: string): Promise<NfcAnalytics>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -6090,6 +6105,78 @@ export class DatabaseStorage implements IStorage {
         initials
       };
     });
+  }
+
+  // ===== NFC OPERATIONS =====
+  
+  async createNfcTag(data: InsertNfcTag): Promise<NfcTag> {
+    const [tag] = await db.insert(nfcTags).values(data).returning();
+    return tag;
+  }
+
+  async getNfcTag(id: string): Promise<NfcTag | undefined> {
+    const [tag] = await db.select().from(nfcTags).where(eq(nfcTags.id, id));
+    return tag;
+  }
+
+  async getNfcTagsByCard(cardId: string): Promise<NfcTag[]> {
+    return await db.select().from(nfcTags).where(eq(nfcTags.cardId, cardId));
+  }
+
+  async getNfcTagsByUser(userId: string): Promise<NfcTag[]> {
+    return await db.select().from(nfcTags).where(eq(nfcTags.userId, userId));
+  }
+
+  async updateNfcTag(id: string, data: Partial<InsertNfcTag>): Promise<NfcTag> {
+    const [tag] = await db.update(nfcTags).set({ ...data, updatedAt: new Date() }).where(eq(nfcTags.id, id)).returning();
+    return tag;
+  }
+
+  async deleteNfcTag(id: string): Promise<void> {
+    await db.delete(nfcTags).where(eq(nfcTags.id, id));
+  }
+
+  async recordNfcTapEvent(data: InsertNfcTapEvent): Promise<NfcTapEvent> {
+    const [event] = await db.insert(nfcTapEvents).values(data).returning();
+    return event;
+  }
+
+  async getNfcTapEvents(tagId: string, limit: number = 100): Promise<NfcTapEvent[]> {
+    return await db.select().from(nfcTapEvents).where(eq(nfcTapEvents.nfcTagId, tagId)).limit(limit).orderBy(desc(nfcTapEvents.tappedAt));
+  }
+
+  async getNfcAnalyticsForCard(cardId: string): Promise<NfcAnalytics[]> {
+    return await db.select().from(nfcAnalytics).where(eq(nfcAnalytics.cardId, cardId));
+  }
+
+  async getNfcAnalyticsForUser(userId: string): Promise<NfcAnalytics[]> {
+    return await db.select().from(nfcAnalytics).where(eq(nfcAnalytics.userId, userId));
+  }
+
+  async updateNfcAnalytics(cardId: string, tagId: string): Promise<NfcAnalytics> {
+    let [analytic] = await db.select().from(nfcAnalytics).where(and(eq(nfcAnalytics.cardId, cardId), eq(nfcAnalytics.nfcTagId, tagId)));
+    
+    if (!analytic) {
+      const tag = await this.getNfcTag(tagId);
+      if (!tag) throw new Error('NFC tag not found');
+      
+      const [newAnalytic] = await db.insert(nfcAnalytics).values({
+        nfcTagId: tagId,
+        cardId,
+        userId: tag.userId,
+        totalTaps: 1,
+        viewCount: 1,
+      } as any).returning();
+      return newAnalytic;
+    }
+
+    const [updated] = await db.update(nfcAnalytics).set({
+      totalTaps: (analytic.totalTaps || 0) + 1,
+      viewCount: (analytic.viewCount || 0) + 1,
+      updatedAt: new Date(),
+    }).where(and(eq(nfcAnalytics.cardId, cardId), eq(nfcAnalytics.nfcTagId, tagId))).returning();
+    
+    return updated;
   }
 }
 

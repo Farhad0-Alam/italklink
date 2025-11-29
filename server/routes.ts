@@ -159,6 +159,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup affiliate routes
   const affiliateRoutes = (await import('./affiliate-routes')).default;
   app.use('/api/affiliate', affiliateRoutes);
+
+  // Setup NFC routes
+  const nfcRoutes = (await import('./nfc-routes')).default;
+  app.use('/api/nfc', nfcRoutes);
   
   // Setup email notification routes
   app.use('/api/notifications', emailNotificationRoutes);
