@@ -13,6 +13,7 @@ import {
   Palette, Layers, Code, Wand2, CircleDot, ChevronDown, ChevronRight,
   CheckCircle2, Star, ArrowRight, PlayCircle, Image, Sliders
 } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 // Comprehensive feature data organized by category
 const cardBuilderElements = [
@@ -1220,60 +1221,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                  <i className="fas fa-address-card text-white text-sm"></i>
-                </div>
-                <span className="text-xl font-bold">TalkLink</span>
-              </div>
-              <p className="text-gray-400 text-sm">
-                The all-in-one platform for digital business cards, appointments, and CRM.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-bold mb-4">Product</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><Link href="/dashboard" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="/templates" className="hover:text-white transition-colors">Templates</Link></li>
-                <li><Link href="/register" className="hover:text-white transition-colors">Get Started</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-bold mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><Link href="/help" className="hover:text-white transition-colors">Support</Link></li>
-                <li><Link href="/affiliate" className="hover:text-white transition-colors">Affiliates</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-bold mb-4">Connect</h4>
-              <div className="flex space-x-4">
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
-                  <i className="fab fa-twitter text-white"></i>
-                </a>
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
-                  <i className="fab fa-linkedin-in text-white"></i>
-                </a>
-                <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
-                  <i className="fab fa-facebook-f text-white"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-            <p>&copy; 2025 TalkLink. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Custom animations */}
       <style dangerouslySetInnerHTML={{__html: `

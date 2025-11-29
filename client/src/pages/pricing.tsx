@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Check, Star, Sparkles, Zap, Crown, Infinity, Plus, Minus, Users, ArrowLeft, Tag, Loader2, CreditCard, Smartphone, Wallet, DollarSign } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { Footer } from "@/components/Footer";
 
 interface BillingPlan {
   id: number;
@@ -690,6 +691,7 @@ export default function Pricing() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

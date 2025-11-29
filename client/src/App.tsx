@@ -9,7 +9,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { AutoSaveProvider } from "@/contexts/AutoSaveContext";
-import { Footer } from "@/components/Footer";
 import i18n from "./lib/i18n";
 
 // Lazy load Landing to reduce initial bundle size (it imports framer-motion + 30+ icons)
@@ -139,12 +138,9 @@ function App() {
         <ThemeProvider>
           <TooltipProvider>
             <AutoSaveProvider>
-              <div className="min-h-screen flex flex-col">
+              <div className="min-h-screen">
                 <ImpersonationBanner />
-                <div className="flex-1">
-                  <Router />
-                </div>
-                <Footer />
+                <Router />
                 <Toaster />
               </div>
             </AutoSaveProvider>
