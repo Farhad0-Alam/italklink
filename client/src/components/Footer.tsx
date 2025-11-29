@@ -1,7 +1,21 @@
-import { CreditCard, Smartphone, Wallet, DollarSign, Zap } from "lucide-react";
 import { Link } from "wouter";
 
 export const Footer = () => {
+  const paymentMethods = [
+    { name: "Visa", icon: "fab fa-cc-visa", color: "text-blue-600" },
+    { name: "Mastercard", icon: "fab fa-cc-mastercard", color: "text-red-600" },
+    { name: "American Express", icon: "fab fa-cc-amex", color: "text-blue-500" },
+    { name: "PayPal", icon: "fab fa-paypal", color: "text-blue-700" },
+    { name: "Apple Pay", icon: "fab fa-apple", color: "text-gray-900" },
+    { name: "Google Pay", icon: "fab fa-google", color: "text-blue-600" },
+    { name: "Alipay", icon: "fab fa-alipay", color: "text-blue-700" },
+    { name: "WeChat Pay", icon: "fab fa-weixin", color: "text-green-600" },
+    { name: "Klarna", icon: "fas fa-wallet", color: "text-pink-600" },
+    { name: "Affirm", icon: "fas fa-credit-card", color: "text-blue-600" },
+    { name: "Bank Transfer", icon: "fas fa-university", color: "text-gray-700" },
+    { name: "iDEAL", icon: "fas fa-building", color: "text-red-600" },
+  ];
+
   return (
     <footer className="bg-gray-900 dark:bg-gray-950 text-gray-200 dark:text-gray-300 py-12 border-t border-gray-800">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -52,47 +66,19 @@ export const Footer = () => {
 
         {/* Payment Methods Section */}
         <div className="border-t border-gray-800 pt-8">
-          <h4 className="font-semibold text-white mb-4">We Accept Multiple Payment Methods</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Digital Wallets & Cards */}
-            <div>
-              <h5 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">Digital Wallets & Cards</h5>
-              <div className="flex flex-wrap gap-3">
-                <div className="flex items-center space-x-2 px-3 py-2 bg-gray-800 rounded-lg">
-                  <CreditCard className="h-4 w-4 text-orange-400" />
-                  <span className="text-sm">Visa, Mastercard, Amex</span>
+          <h4 className="font-semibold text-white mb-6">We Accept 27+ Payment Methods</h4>
+          <div className="flex flex-wrap gap-4 justify-start">
+            {paymentMethods.map((method, index) => (
+              <div key={index} className="flex flex-col items-center group">
+                <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
+                  <i className={`${method.icon} text-2xl ${method.color}`}></i>
                 </div>
-                <div className="flex items-center space-x-2 px-3 py-2 bg-gray-800 rounded-lg">
-                  <Smartphone className="h-4 w-4 text-blue-400" />
-                  <span className="text-sm">Apple Pay, Google Pay</span>
-                </div>
-                <div className="flex items-center space-x-2 px-3 py-2 bg-gray-800 rounded-lg">
-                  <Wallet className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm">PayPal</span>
-                </div>
+                <span className="text-xs text-gray-400 mt-2 text-center max-w-16">{method.name}</span>
               </div>
-            </div>
-
-            {/* Regional & BNPL */}
-            <div>
-              <h5 className="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">Regional & BNPL</h5>
-              <div className="flex flex-wrap gap-3">
-                <div className="flex items-center space-x-2 px-3 py-2 bg-gray-800 rounded-lg">
-                  <span className="text-sm">Alipay, WeChat Pay</span>
-                </div>
-                <div className="flex items-center space-x-2 px-3 py-2 bg-gray-800 rounded-lg">
-                  <Zap className="h-4 w-4 text-yellow-400" />
-                  <span className="text-sm">Klarna, Affirm</span>
-                </div>
-                <div className="flex items-center space-x-2 px-3 py-2 bg-gray-800 rounded-lg">
-                  <DollarSign className="h-4 w-4 text-green-400" />
-                  <span className="text-sm">Bank Transfers</span>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
-          <p className="text-xs text-gray-500 mt-4">
-            + 12 more payment methods including Boleto, iDEAL, Giropay, SEPA, ACH, and more regional options
+          <p className="text-xs text-gray-500 mt-6">
+            + 15 more payment methods including Prompt Pay, Boleto, Pix, SEPA, ACH, Giropay, Sofort, BACS, and regional options
           </p>
         </div>
 
