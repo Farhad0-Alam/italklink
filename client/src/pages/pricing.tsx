@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Check, Star, Sparkles, Zap, Crown, Infinity, Plus, Minus, Users, ArrowLeft, Tag, Loader2 } from "lucide-react";
+import { Check, Star, Sparkles, Zap, Crown, Infinity, Plus, Minus, Users, ArrowLeft, Tag, Loader2, CreditCard, Smartphone, Wallet, DollarSign } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface BillingPlan {
@@ -514,6 +514,35 @@ export default function Pricing() {
                               </div>
                             </div>
                           )}
+
+                          <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">Payment Methods</p>
+                            <div className="flex flex-wrap gap-2">
+                              <span className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-xs font-medium text-gray-700 dark:text-gray-300">
+                                <CreditCard className="h-3 w-3" />
+                                <span>Cards</span>
+                              </span>
+                              <span className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-xs font-medium text-gray-700 dark:text-gray-300">
+                                <Smartphone className="h-3 w-3" />
+                                <span>Apple/Google Pay</span>
+                              </span>
+                              <span className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-xs font-medium text-gray-700 dark:text-gray-300">
+                                <Wallet className="h-3 w-3" />
+                                <span>PayPal</span>
+                              </span>
+                              <span className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-xs font-medium text-gray-700 dark:text-gray-300">
+                                <DollarSign className="h-3 w-3" />
+                                <span>Bank Transfers</span>
+                              </span>
+                              <span className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-xs font-medium text-gray-700 dark:text-gray-300">
+                                <Zap className="h-3 w-3" />
+                                <span>BNPL</span>
+                              </span>
+                              <span className="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-xs font-medium text-gray-700 dark:text-gray-300">
+                                <span>+ More</span>
+                              </span>
+                            </div>
+                          </div>
                           
                           <Button
                             className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg"
