@@ -118,32 +118,38 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
   };
 
   const getSectionGradient = (id: string, isExpanded: boolean) => {
-    const baseClass = isExpanded ? 'bg-gradient-to-r' : '';
     switch (id) {
       case 'core':
-        return isExpanded ? 'bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-950/40 dark:to-teal-950/40 text-emerald-700 dark:text-emerald-300' : '';
+        return isExpanded 
+          ? 'bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-950/40 dark:to-teal-950/40 text-emerald-700 dark:text-emerald-300' 
+          : 'bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 text-emerald-600 dark:text-emerald-400 hover:from-emerald-100 hover:to-teal-100 dark:hover:from-emerald-950/30 dark:hover:to-teal-950/30';
       case 'tools':
-        return isExpanded ? 'bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-950/40 dark:to-cyan-950/40 text-blue-700 dark:text-blue-300' : '';
+        return isExpanded 
+          ? 'bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-950/40 dark:to-cyan-950/40 text-blue-700 dark:text-blue-300' 
+          : 'bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 text-blue-600 dark:text-blue-400 hover:from-blue-100 hover:to-cyan-100 dark:hover:from-blue-950/30 dark:hover:to-cyan-950/30';
       case 'business':
-        return isExpanded ? 'bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-950/40 dark:to-pink-950/40 text-purple-700 dark:text-purple-300' : '';
+        return isExpanded 
+          ? 'bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-950/40 dark:to-pink-950/40 text-purple-700 dark:text-purple-300' 
+          : 'bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 text-purple-600 dark:text-purple-400 hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-950/30 dark:hover:to-pink-950/30';
       case 'account':
-        return isExpanded ? 'bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-950/40 dark:to-amber-950/40 text-orange-700 dark:text-orange-300' : '';
+        return isExpanded 
+          ? 'bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-950/40 dark:to-amber-950/40 text-orange-700 dark:text-orange-300' 
+          : 'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 text-orange-600 dark:text-orange-400 hover:from-orange-100 hover:to-amber-100 dark:hover:from-orange-950/30 dark:hover:to-amber-950/30';
       default:
         return '';
     }
   };
 
   const getChevronColor = (id: string, isExpanded: boolean) => {
-    if (!isExpanded) return 'text-gray-400 dark:text-gray-600';
     switch (id) {
       case 'core':
-        return 'text-emerald-600 dark:text-emerald-400';
+        return isExpanded ? 'text-emerald-600 dark:text-emerald-400' : 'text-emerald-500 dark:text-emerald-500';
       case 'tools':
-        return 'text-blue-600 dark:text-blue-400';
+        return isExpanded ? 'text-blue-600 dark:text-blue-400' : 'text-blue-500 dark:text-blue-500';
       case 'business':
-        return 'text-purple-600 dark:text-purple-400';
+        return isExpanded ? 'text-purple-600 dark:text-purple-400' : 'text-purple-500 dark:text-purple-500';
       case 'account':
-        return 'text-orange-600 dark:text-orange-400';
+        return isExpanded ? 'text-orange-600 dark:text-orange-400' : 'text-orange-500 dark:text-orange-500';
       default:
         return 'text-gray-400 dark:text-gray-600';
     }
@@ -196,11 +202,7 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
             {/* Section Header */}
             <button
               onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-200 group ${
-                expandedSection === section.id
-                  ? getSectionGradient(section.id, true)
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/30'
-              }`}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-200 group ${getSectionGradient(section.id, expandedSection === section.id)}`}
             >
               <div className="flex items-center gap-2">
                 {getSectionIcon(section.id)}
