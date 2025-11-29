@@ -411,34 +411,7 @@ export default function Dashboard() {
         </div>
 
         {/* Affiliate Program Section */}
-        {!affiliate ? (
-          <div className="mb-6 sm:mb-8">
-            <div className="relative overflow-hidden rounded-lg sm:rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-600 p-4 sm:p-6 md:p-8 text-white shadow-lg">
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute inset-0 bg-gradient-to-br from-white to-transparent"></div>
-              </div>
-              <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
-                <div className="flex items-start sm:items-center space-x-3 sm:space-x-6">
-                  <div className="flex-shrink-0">
-                    <div className="rounded-full bg-white bg-opacity-20 p-2 sm:p-3 md:p-4">
-                      <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2">Join Our Affiliate Program</h3>
-                    <p className="text-xs sm:text-sm md:text-lg text-emerald-50">Earn up to 30% commission on every referral. Start making passive income today!</p>
-                  </div>
-                </div>
-                <Button className="bg-white text-emerald-600 hover:bg-emerald-50 font-semibold px-4 sm:px-8 flex-shrink-0 w-full sm:w-auto" asChild>
-                  <Link href="/affiliate" data-testid="button-join-affiliate">
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    Join Now
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        ) : (
+        {affiliate && (
           <div className="mb-6 sm:mb-8">
             <div className="rounded-lg sm:rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-lg">
               {/* Modern Header */}
