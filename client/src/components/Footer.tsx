@@ -66,18 +66,18 @@ export const Footer = () => {
 
         {/* Payment Methods Section */}
         <div className="border-t border-gray-800 pt-8">
-          <h4 className="font-semibold text-white mb-6">We Accept 27+ Payment Methods</h4>
-          <div className="flex flex-wrap gap-4 justify-start">
+          <h4 className="font-semibold text-white mb-8">We Accept 27+ Payment Methods</h4>
+          <div className="flex flex-wrap gap-6 justify-start">
             {paymentMethods.map((method, index) => (
               <div key={index} className="flex flex-col items-center group">
-                <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
-                  <i className={`${method.icon} text-2xl ${method.color}`}></i>
+                <div className="w-24 h-24 bg-white rounded-lg flex items-center justify-center shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                  <i className={`${method.icon} text-4xl ${method.color}`}></i>
                 </div>
-                <span className="text-xs text-gray-400 mt-2 text-center max-w-16">{method.name}</span>
+                <span className="text-sm font-medium text-white bg-gradient-to-r from-gray-700 to-gray-600 px-3 py-1.5 rounded-lg mt-3 text-center w-fit">{method.name}</span>
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-500 mt-6">
+          <p className="text-sm text-gray-400 mt-8 font-medium">
             + 15 more payment methods including Prompt Pay, Boleto, Pix, SEPA, ACH, Giropay, Sofort, BACS, and regional options
           </p>
         </div>
