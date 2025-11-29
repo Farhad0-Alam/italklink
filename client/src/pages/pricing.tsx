@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Check, Star, Sparkles, Zap, Crown, Infinity, Plus, Minus, Users, ArrowLeft, Tag, Loader2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -75,6 +76,7 @@ export default function Pricing() {
     message?: string;
   } | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const { data: plans, isLoading } = useQuery<BillingPlan[]>({
     queryKey: ['/api/plans'],
@@ -89,6 +91,33 @@ export default function Pricing() {
 
   // Get the discount percentage from plans (use the first plan's discount or default to 20%)
   const yearlyDiscountPercent = plans?.find(p => (p as any).discount > 0)?.discount || 20;
+
+  // Auto-checkout after signup/login if there's a pending plan
+  useEffect(() => {
+    if (user) {
+      const pending = localStorage.getItem('pendingPlan');
+      if (pending) {
+        try {
+          const { planId, userCount, couponCode, isYearly: savedIsYearly } = JSON.parse(pending);
+          localStorage.removeItem('pendingPlan');
+          
+          // Set the yearly state if it was saved
+          if (savedIsYearly !== undefined) {
+            setIsYearly(savedIsYearly);
+          }
+          
+          // Trigger checkout with saved plan info
+          checkoutMutation.mutate({
+            planId,
+            userCount,
+            couponCode
+          });
+        } catch (error) {
+          console.error('Failed to process pending plan:', error);
+        }
+      }
+    }
+  }, [user, checkoutMutation]);
 
   const validateCouponMutation = useMutation({
     mutationFn: async ({ code, planId, userCount }: { code: string; planId: number; userCount: number }) => {
@@ -240,6 +269,22 @@ export default function Pricing() {
         title: "Free Plan",
         description: "This plan is free. No checkout required.",
       });
+      return;
+    }
+
+    // Check if user is logged in
+    if (!user) {
+      // Save plan info to localStorage
+      const userCount = getUserCount(planId);
+      localStorage.setItem('pendingPlan', JSON.stringify({
+        planId,
+        userCount,
+        couponCode: validatedCoupon?.valid ? couponCode : undefined,
+        isYearly
+      }));
+      
+      // Redirect to signup
+      setLocation('/auth/signup?redirect=pricing');
       return;
     }
 
