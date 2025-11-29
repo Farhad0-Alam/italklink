@@ -265,6 +265,32 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
             </Button>
           </Link>
         )}
+
+        {/* Affiliate Banner */}
+        <Link href="/affiliate" className="block">
+          <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-emerald-400 to-blue-500 dark:from-emerald-600 dark:to-blue-600 p-3.5 shadow-lg hover:shadow-xl transition-all transform hover:scale-105 cursor-pointer group">
+            {/* Gradient accent background */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-12 h-12 bg-white rounded-full blur-xl"></div>
+            </div>
+            
+            {/* Content */}
+            <div className="relative flex items-start gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                <Users className="w-5 h-5 text-white drop-shadow-md" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-bold text-white mb-0.5">Join Our Affiliate Program</div>
+                <div className="text-xs text-white/90 line-clamp-2">Earn up to 30% commission on every referral</div>
+              </div>
+              <div className="flex-shrink-0">
+                <div className="inline-flex items-center justify-center w-7 h-7 bg-white/20 group-hover:bg-white/30 rounded-lg transition-colors">
+                  <DollarSign className="w-4 h-4 text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Link>
         
         <Button
           onClick={() => logoutMutation.mutate()}
