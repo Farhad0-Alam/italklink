@@ -65,6 +65,8 @@ interface AffiliateProfile {
   kycStatus: string;
   country: string;
   website?: string;
+  payoutMethod?: string;
+  stripeConnectAccountId?: string;
   stats: {
     totalClicks: number;
     totalConversions: number;
@@ -684,73 +686,156 @@ export default function Affiliate() {
 
       {affiliate.status === 'approved' && (
         <>
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">${(affiliate.stats.totalEarnings / 100).toFixed(2)}</div>
+          {/* Modern Header Section */}
+          <div className="mb-8">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 p-8 text-white shadow-lg">
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute inset-0 bg-gradient-to-br from-white to-transparent"></div>
+              </div>
+              <div className="relative">
+                <h2 className="text-3xl font-bold mb-2">Welcome back! 👋</h2>
+                <p className="text-blue-100">Your affiliate performance is growing strong</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Payout Settings Alert Card - PROMINENT */}
+          {!affiliate?.stripeConnectAccountId && affiliate?.payoutMethod === 'stripe_connect' && (
+            <Card className="mb-8 border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="rounded-full bg-amber-100 dark:bg-amber-900 p-3 flex-shrink-0">
+                      <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-amber-900 dark:text-amber-100">Complete Your Payout Setup</h3>
+                      <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
+                        Connect your Stripe account to start receiving affiliate commissions
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    className="bg-amber-600 hover:bg-amber-700 text-white flex-shrink-0"
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/affiliate/stripe-connect/link', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          credentials: 'include',
+                          body: JSON.stringify({ returnUrl: window.location.href })
+                        });
+                        if (response.ok) {
+                          const data = await response.json();
+                          window.location.href = data.data.url;
+                        }
+                      } catch (error) {
+                        console.error('Failed to connect', error);
+                      }
+                    }}
+                  >
+                    Setup Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Modern Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            {/* Total Earnings Card */}
+            <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-2.5">
+                    <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900 px-2.5 py-1 rounded-full">+12% this month</span>
+                </div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Total Earnings</p>
+                <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
+                  ${(affiliate.stats.totalEarnings / 100).toFixed(2)}
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  +${(affiliate.stats.pendingEarnings / 100).toFixed(2)} pending
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">+${(affiliate.stats.pendingEarnings / 100).toFixed(2)}</span> pending
                 </p>
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Conversions</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{affiliate.stats.totalConversions}</div>
+
+            {/* Conversions Card */}
+            <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-2.5">
+                    <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2.5 py-1 rounded-full">+5 this week</span>
+                </div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Conversions</p>
+                <div className="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-1">
+                  {affiliate.stats.totalConversions}
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  +{affiliate.stats.pendingConversions} pending
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">+{affiliate.stats.pendingConversions}</span> pending
                 </p>
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
-                <MousePointer className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{affiliate.stats.totalClicks}</div>
+
+            {/* Clicks Card */}
+            <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="rounded-lg bg-purple-100 dark:bg-purple-900 p-2.5">
+                    <MousePointer className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <span className="text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-2.5 py-1 rounded-full">This month</span>
+                </div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Total Clicks</p>
+                <div className="text-3xl font-bold text-purple-700 dark:text-purple-300 mb-1">
+                  {affiliate.stats.totalClicks}
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  {affiliate.stats.totalClicks > 0 
-                    ? `${((affiliate.stats.totalConversions / affiliate.stats.totalClicks) * 100).toFixed(2)}% conversion rate`
-                    : 'No clicks yet'
-                  }
+                  <span className="text-purple-600 dark:text-purple-400 font-medium">
+                    {affiliate.stats.totalClicks > 0 
+                      ? `${((affiliate.stats.totalConversions / affiliate.stats.totalClicks) * 100).toFixed(2)}%`
+                      : '0%'
+                    }
+                  </span> conversion rate
                 </p>
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Commission Rate</CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">15%</div>
+
+            {/* Commission Rate Card */}
+            <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="rounded-lg bg-orange-100 dark:bg-orange-900 p-2.5">
+                    <BarChart3 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <span className="text-xs font-medium text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900 px-2.5 py-1 rounded-full">Base rate</span>
+                </div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Commission Rate</p>
+                <div className="text-3xl font-bold text-orange-700 dark:text-orange-300 mb-1">
+                  15%
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  Base commission rate
+                  <span className="text-orange-600 dark:text-orange-400 font-medium">Tier 1</span> commissions
                 </p>
               </CardContent>
             </Card>
           </div>
 
           <Tabs defaultValue="links" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="links">Affiliate Links</TabsTrigger>
-              <TabsTrigger value="conversions">Conversions</TabsTrigger>
-              <TabsTrigger value="payouts">Payouts</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="assets">Marketing</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
+            <div className="bg-white dark:bg-slate-950 rounded-lg border border-gray-200 dark:border-gray-800 p-1 inline-flex gap-1">
+              <TabsList className="grid grid-cols-6 gap-1 bg-transparent">
+                <TabsTrigger value="links" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-md transition-all">Links</TabsTrigger>
+                <TabsTrigger value="conversions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-md transition-all">Conversions</TabsTrigger>
+                <TabsTrigger value="payouts" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-md transition-all">Payouts</TabsTrigger>
+                <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-md transition-all">Analytics</TabsTrigger>
+                <TabsTrigger value="assets" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-md transition-all">Marketing</TabsTrigger>
+                <TabsTrigger value="settings" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-md transition-all">Settings</TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="links" className="space-y-6">
               <Card>
