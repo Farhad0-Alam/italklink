@@ -267,7 +267,7 @@ export default function Landing() {
       </motion.nav>
 
       {/* Hero Section */}
-      <section id="about" className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-orange-50 via-white to-blue-50 overflow-hidden relative">
+      <section id="about" className="pt-32 pb-20 bg-gradient-to-br from-orange-50 via-white to-blue-50 overflow-hidden relative w-full">
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
@@ -275,7 +275,7 @@ export default function Landing() {
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto relative">
+        <div className="w-full relative px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
