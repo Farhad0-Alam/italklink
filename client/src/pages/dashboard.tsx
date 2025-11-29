@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays, QrCode, Mail, Menu, X, Phone } from "lucide-react";
+import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays, QrCode, Mail, Menu, X, Phone, MousePointer } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -306,106 +306,127 @@ export default function Dashboard() {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-8">
-          <Card className="bg-white shadow-sm border border-gray-200">
+        {/* Modern Header Section */}
+        <div className="mb-8">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 p-8 text-white shadow-lg">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0 bg-gradient-to-br from-white to-transparent"></div>
+            </div>
+            <div className="relative">
+              <h2 className="text-3xl font-bold mb-2">Welcome back, {user?.firstName || 'User'}! 👋</h2>
+              <p className="text-blue-100">Track your business card performance and grow your network</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Modern Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
+          {/* Weekly Clicks Card */}
+          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950">
             <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-green-100 rounded-full">
-                  <i className="fas fa-mouse-pointer text-green-600 text-xl"></i>
+              <div className="flex items-center justify-between mb-4">
+                <div className="rounded-lg bg-green-100 dark:bg-green-900 p-2.5">
+                  <i className="fas fa-mouse-pointer text-green-600 dark:text-green-400 text-lg"></i>
                 </div>
-                <div className="ml-4">
-                  <p className="text-3xl font-bold text-gray-900">0</p>
-                  <p className="text-sm text-gray-600">Weekly Clicks</p>
-                </div>
+                <span className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900 px-2.5 py-1 rounded-full">This week</span>
               </div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Weekly Clicks</p>
+              <div className="text-3xl font-bold text-green-700 dark:text-green-300 mb-1">0</div>
+              <p className="text-xs text-muted-foreground">Total interactions</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white shadow-sm border border-gray-200">
+          {/* Weekly Visitor Card */}
+          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950">
             <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-orange-100 rounded-full">
-                  <i className="fas fa-eye text-orange-600 text-xl"></i>
+              <div className="flex items-center justify-between mb-4">
+                <div className="rounded-lg bg-orange-100 dark:bg-orange-900 p-2.5">
+                  <i className="fas fa-eye text-orange-600 dark:text-orange-400 text-lg"></i>
                 </div>
-                <div className="ml-4">
-                  <p className="text-3xl font-bold text-gray-900">0</p>
-                  <p className="text-sm text-gray-600">Weekly Visitor</p>
-                </div>
+                <span className="text-xs font-medium text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900 px-2.5 py-1 rounded-full">This week</span>
               </div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Weekly Visitor</p>
+              <div className="text-3xl font-bold text-orange-700 dark:text-orange-300 mb-1">0</div>
+              <p className="text-xs text-muted-foreground">Unique visitors</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white shadow-sm border border-gray-200">
+          {/* Monthly Visitor Card */}
+          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950 dark:to-rose-950">
             <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-pink-100 rounded-full">
-                  <i className="fas fa-users text-pink-600 text-xl"></i>
+              <div className="flex items-center justify-between mb-4">
+                <div className="rounded-lg bg-pink-100 dark:bg-pink-900 p-2.5">
+                  <i className="fas fa-users text-pink-600 dark:text-pink-400 text-lg"></i>
                 </div>
-                <div className="ml-4">
-                  <p className="text-3xl font-bold text-gray-900">
-                    {businessCards.reduce((sum, card) => sum + card.viewCount, 0)}
-                  </p>
-                  <p className="text-sm text-gray-600">Monthly Visitor</p>
-                </div>
+                <span className="text-xs font-medium text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900 px-2.5 py-1 rounded-full">This month</span>
               </div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Monthly Visitor</p>
+              <div className="text-3xl font-bold text-pink-700 dark:text-pink-300 mb-1">
+                {businessCards.reduce((sum, card) => sum + card.viewCount, 0)}
+              </div>
+              <p className="text-xs text-muted-foreground">Total views</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white shadow-sm border border-gray-200">
+          {/* Created Links Card */}
+          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950 dark:to-violet-950">
             <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-purple-100 rounded-full">
-                  <i className="fas fa-link text-purple-600 text-xl"></i>
+              <div className="flex items-center justify-between mb-4">
+                <div className="rounded-lg bg-purple-100 dark:bg-purple-900 p-2.5">
+                  <i className="fas fa-link text-purple-600 dark:text-purple-400 text-lg"></i>
                 </div>
-                <div className="ml-4">
-                  <p className="text-3xl font-bold text-gray-900">
-                    {businessCards.length}
-                  </p>
-                  <p className="text-sm text-gray-600">Created Links</p>
-                </div>
+                <span className="text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-2.5 py-1 rounded-full">Total</span>
               </div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Created Links</p>
+              <div className="text-3xl font-bold text-purple-700 dark:text-purple-300 mb-1">
+                {businessCards.length}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                <span className="text-purple-600 dark:text-purple-400 font-medium">{user?.businessCardsLimit ? `${businessCards.length}/${user.businessCardsLimit}` : 'Unlimited'}</span> available
+              </p>
             </CardContent>
           </Card>
 
-          {/* Affiliate Stats Card */}
-          <Card className="bg-white shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+          {/* Affiliate Earnings Card */}
+          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950">
             <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-emerald-100 rounded-full">
-                  <DollarSign className="text-emerald-600 text-xl h-6 w-6" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-2.5">
+                  <DollarSign className="text-emerald-600 dark:text-emerald-400 h-5 w-5" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-3xl font-bold text-gray-900">
-                    ${affiliate ? (affiliate.stats.totalEarnings / 100).toFixed(2) : '0.00'}
-                  </p>
-                  <p className="text-sm text-gray-600">Affiliate Earnings</p>
-                </div>
+                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900 px-2.5 py-1 rounded-full">Earnings</span>
               </div>
-              {affiliate && (
-                <div className="mt-3 text-xs text-gray-500">
-                  +${(affiliate.stats.pendingEarnings / 100).toFixed(2)} pending
-                </div>
-              )}
+              <p className="text-sm font-medium text-muted-foreground mb-1">Affiliate Earnings</p>
+              <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
+                ${affiliate ? (affiliate.stats.totalEarnings / 100).toFixed(2) : '0.00'}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {affiliate ? <span><span className="text-emerald-600 dark:text-emerald-400 font-medium">+${(affiliate.stats.pendingEarnings / 100).toFixed(2)}</span> pending</span> : 'Join affiliate program'}
+              </p>
             </CardContent>
           </Card>
         </div>
 
         {/* Affiliate Program Section */}
         {!affiliate ? (
-          <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg shadow-sm border border-emerald-200 mb-8">
-            <div className="px-6 py-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-emerald-100 rounded-full">
-                    <Users className="text-emerald-600 h-8 w-8" />
+          <div className="mb-8">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-600 p-8 text-white shadow-lg">
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute inset-0 bg-gradient-to-br from-white to-transparent"></div>
+              </div>
+              <div className="relative flex items-center justify-between gap-6">
+                <div className="flex items-center space-x-6">
+                  <div className="flex-shrink-0">
+                    <div className="rounded-full bg-white bg-opacity-20 p-4">
+                      <Users className="h-8 w-8" />
+                    </div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1">Join Our Affiliate Program</h3>
-                    <p className="text-gray-600">Earn commissions by promoting our platform. Get up to 30% commission on every referral!</p>
+                    <h3 className="text-2xl font-bold mb-2">Join Our Affiliate Program</h3>
+                    <p className="text-emerald-50 text-lg">Earn up to 30% commission on every referral. Start making passive income today!</p>
                   </div>
                 </div>
-                <Button className="bg-emerald-500 hover:bg-emerald-600 text-white" asChild>
+                <Button className="bg-white text-emerald-600 hover:bg-emerald-50 font-semibold px-8 flex-shrink-0" asChild>
                   <Link href="/affiliate" data-testid="button-join-affiliate">
                     <DollarSign className="h-4 w-4 mr-2" />
                     Join Now
@@ -415,46 +436,80 @@ export default function Dashboard() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <DollarSign className="h-5 w-5 mr-2 text-emerald-600" />
-                Affiliate Dashboard
-              </h2>
-              <Badge className={`${
-                affiliate.status === 'approved' ? 'bg-green-100 text-green-800 border-green-200' :
-                affiliate.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                'bg-red-100 text-red-800 border-red-200'
-              }`}>
-                {affiliate.status}
-              </Badge>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">{affiliate.stats.totalClicks}</div>
-                  <div className="text-sm text-gray-600">Total Clicks</div>
+          <div className="mb-8">
+            <div className="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-lg">
+              {/* Modern Header */}
+              <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 px-6 py-6 text-white flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="rounded-lg bg-white bg-opacity-20 p-2.5">
+                    <DollarSign className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Affiliate Dashboard</h3>
+                    <p className="text-blue-100 text-sm">Your commission performance at a glance</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">{affiliate.stats.totalConversions}</div>
-                  <div className="text-sm text-gray-600">Conversions</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-emerald-600">${(affiliate.stats.totalEarnings / 100).toFixed(2)}</div>
-                  <div className="text-sm text-gray-600">Total Earnings</div>
-                </div>
+                <Badge className={`${
+                  affiliate.status === 'approved' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 border-green-200 dark:border-green-800' :
+                  affiliate.status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100 border-yellow-200 dark:border-yellow-800' :
+                  'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100 border-red-200 dark:border-red-800'
+                }`}>
+                  {affiliate.status}
+                </Badge>
               </div>
-              <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
-                <div>
-                  <p className="text-sm text-gray-600">Affiliate Code:</p>
-                  <code className="font-mono text-sm bg-white px-2 py-1 rounded border">{affiliate.code}</code>
+              
+              {/* Content */}
+              <div className="p-6 bg-white dark:bg-gray-950">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  {/* Clicks */}
+                  <div className="rounded-lg bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950 p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-2">
+                        <MousePointer className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <span className="text-xs font-medium text-blue-600 dark:text-blue-400">Total</span>
+                    </div>
+                    <div className="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-1">{affiliate.stats.totalClicks}</div>
+                    <div className="text-sm text-muted-foreground">Total Clicks</div>
+                  </div>
+
+                  {/* Conversions */}
+                  <div className="rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="rounded-lg bg-purple-100 dark:bg-purple-900 p-2">
+                        <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Active</span>
+                    </div>
+                    <div className="text-3xl font-bold text-purple-700 dark:text-purple-300 mb-1">{affiliate.stats.totalConversions}</div>
+                    <div className="text-sm text-muted-foreground">Conversions</div>
+                  </div>
+
+                  {/* Earnings */}
+                  <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-2">
+                        <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Total</span>
+                    </div>
+                    <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">${(affiliate.stats.totalEarnings / 100).toFixed(2)}</div>
+                    <div className="text-sm text-muted-foreground">Total Earnings</div>
+                  </div>
                 </div>
-                <Button variant="outline" asChild>
-                  <Link href="/affiliate" data-testid="button-affiliate-dashboard">
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    View Full Dashboard
-                  </Link>
-                </Button>
+
+                <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-800">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Affiliate Code:</p>
+                    <code className="font-mono text-sm bg-white dark:bg-gray-800 px-3 py-2 rounded border border-gray-200 dark:border-gray-700">{affiliate.code}</code>
+                  </div>
+                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" asChild>
+                    <Link href="/affiliate" data-testid="button-affiliate-dashboard">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Full Dashboard
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
