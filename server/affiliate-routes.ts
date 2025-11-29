@@ -520,11 +520,26 @@ router.post('/track/conversion', async (req, res) => {
 
     let commissionAmount = 0;
     let commissionRate = '0';
+    let paymentType = 'onetime';
+    let recurringValue: string | null = null;
+    let recurringDuration: number | null = null;
     
     if (commissionRule.length > 0) {
       const rule = commissionRule[0];
       commissionAmount = calculateCommission(amount, rule.value, rule.type);
       commissionRate = rule.value;
+      paymentType = rule.paymentType || 'onetime';
+      
+      // If recurring payment, use recurring value if specified
+      if (paymentType === 'recurring') {
+        recurringValue = rule.recurringValue || rule.value; // Use recurring value if defined, else use base value
+        recurringDuration = rule.recurringDuration || 12; // Default to 12 months
+        
+        // For recurring commissions, also apply the recurring value if it's different
+        if (rule.recurringValue) {
+          commissionAmount = calculateCommission(amount, rule.recurringValue, rule.type);
+        }
+      }
       
       // SECURITY: Validate commission rate is within reasonable bounds (0-50%)
       const ratePercentage = parseFloat(rule.value);
@@ -552,6 +567,9 @@ router.post('/track/conversion', async (req, res) => {
       homeCurrency: 'USD',
       commissionAmount,
       commissionRate,
+      paymentType,
+      recurringValue,
+      recurringDuration,
       planId: planId ? parseInt(planId) : null,
       status: 'pending', // SECURITY: All conversions start in 'pending' status
       lockUntil: lockUntilDate // SECURITY: Commission locked until this date

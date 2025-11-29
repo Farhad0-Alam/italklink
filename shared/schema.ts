@@ -1004,6 +1004,11 @@ export const conversions = pgTable("conversions", {
   commissionRate: varchar("commission_rate"), // Rate used (e.g., "0.15" for 15%)
   holdbackAmount: integer("holdback_amount").default(0), // Amount held back
   
+  // Commission payment type (one-time vs recurring)
+  paymentType: varchar("payment_type").default('onetime'), // 'onetime' or 'recurring'
+  recurringValue: varchar("recurring_value"), // Different rate for recurring payments (if applicable)
+  recurringDuration: integer("recurring_duration"), // Number of months to track recurring revenue
+  
   // Plan and product info
   planId: integer("plan_id").references(() => subscriptionPlans.id),
   planType: planTypeEnum("plan_type"),
