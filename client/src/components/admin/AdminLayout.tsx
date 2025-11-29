@@ -59,6 +59,11 @@ const sidebarNavItems = [
     icon: Ticket,
   },
   {
+    title: 'Commission Rules',
+    href: '/admin/commission-rules',
+    icon: Percent,
+  },
+  {
     title: 'Templates',
     href: '/admin/templates',
     icon: Layout,
