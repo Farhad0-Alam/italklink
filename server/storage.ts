@@ -5446,15 +5446,6 @@ export class DatabaseStorage implements IStorage {
     return subscription;
   }
 
-  async getUserSubscription(userId: string): Promise<Subscription | undefined> {
-    const [subscription] = await db
-      .select()
-      .from(subscriptions)
-      .where(eq(subscriptions.userId, userId))
-      .orderBy(desc(subscriptions.createdAt));
-    return subscription;
-  }
-
   async getSubscriptionByStripeId(stripeSubscriptionId: string): Promise<Subscription | undefined> {
     const [subscription] = await db
       .select()
