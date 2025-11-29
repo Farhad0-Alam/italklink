@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -67,7 +67,7 @@ export default function NfcManagement() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   // Fetch user's business cards for selection
-  const { data: cards = [] } = useQuery({
+  const { data: cards = [], isLoading: cardsLoading } = useQuery({
     queryKey: ['/api/business-cards'],
   });
 
@@ -88,9 +88,36 @@ export default function NfcManagement() {
       tagName: '',
       tagType: 'NTAG216',
       targetUrl: '',
-      cardId: cards[0]?.id || '',
+      cardId: '',
     },
   });
+
+  // Watch the selected card and auto-populate fields
+  const selectedCardId = useWatch({
+    control: form.control,
+    name: 'cardId',
+  });
+
+  const selectedCard = cards.find((card: any) => card.id === selectedCardId);
+
+  // Auto-update form when cards load
+  useEffect(() => {
+    if (cards.length > 0 && !selectedCardId) {
+      form.setValue('cardId', cards[0].id);
+    }
+  }, [cards, selectedCardId, form]);
+
+  // Auto-populate target URL when card is selected
+  useEffect(() => {
+    if (selectedCard) {
+      const cardUrl = `https://talkl.ink/${selectedCard.customUrl || selectedCard.shareSlug || selectedCard.id}`;
+      form.setValue('targetUrl', cardUrl);
+      // Auto-generate tag name from card name
+      if (!form.getValues('tagName') || form.getValues('tagName') === '') {
+        form.setValue('tagName', `${selectedCard.name || selectedCard.cardName} - NFC Tag`);
+      }
+    }
+  }, [selectedCard, form]);
 
   // Create NFC tag mutation
   const createTagMutation = useMutation({
@@ -211,20 +238,25 @@ export default function NfcManagement() {
                     <FormField control={form.control} name="cardId" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm">Business Card</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={cardsLoading || cards.length === 0}>
                           <FormControl>
                             <SelectTrigger className="text-sm h-9">
-                              <SelectValue />
+                              <SelectValue placeholder={cardsLoading ? 'Loading cards...' : cards.length === 0 ? 'No cards available' : 'Select a card'} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {cards.map((card: any) => (
-                              <SelectItem key={card.id} value={card.id} className="text-sm">
-                                {card.name || card.cardName}
-                              </SelectItem>
-                            ))}
+                            {cards.length === 0 ? (
+                              <div className="text-sm p-2 text-gray-500">No business cards found. Create one first.</div>
+                            ) : (
+                              cards.map((card: any) => (
+                                <SelectItem key={card.id} value={card.id} className="text-sm">
+                                  {card.name || card.cardName}
+                                </SelectItem>
+                              ))
+                            )}
                           </SelectContent>
                         </Select>
+                        <FormDescription className="text-xs">Choose which card this NFC tag links to</FormDescription>
                         <FormMessage className="text-xs" />
                       </FormItem>
                     )} />
