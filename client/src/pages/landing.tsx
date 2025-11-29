@@ -219,34 +219,33 @@ export default function Landing() {
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <motion.div 
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 flex-shrink-0"
               whileHover={{ scale: 1.02 }}
             >
               <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
                 <i className="fas fa-address-card text-white text-sm"></i>
               </div>
-              <span className="text-xl font-bold text-gray-900">TalkLink</span>
+              <span className="text-lg sm:text-xl font-bold text-gray-900 whitespace-nowrap">TalkLink</span>
             </motion.div>
             
-            <div className="hidden md:flex items-center space-x-8 overflow-x-auto">
+            <div className="hidden lg:flex items-center space-x-1 xl:space-x-6 overflow-x-auto flex-1 justify-center">
               {[
                 { label: "Features", hash: "features" },
                 { label: "Appointments", hash: "appointments" },
-                { label: "Email Signature", hash: "email-signatures" },
+                { label: "Email Sig", hash: "email-signatures" },
                 { label: "QR Code", hash: "qr-codes" },
                 { label: "Automation", hash: "automation" },
                 { label: "Analytics", hash: "analytics" },
                 { label: "Integrations", hash: "integrations" },
-                { label: "FAQ", hash: "faq" },
-                { label: "Contact", hash: "contact" }
+                { label: "FAQ", hash: "faq" }
               ].map((item) => (
                 <a 
                   key={item.hash}
                   href={`#${item.hash}`}
-                  className="text-gray-600 hover:text-orange-500 transition-colors font-medium whitespace-nowrap"
+                  className="text-gray-600 hover:text-orange-500 transition-colors font-medium whitespace-nowrap text-sm xl:text-base"
                   data-testid={`link-nav-${item.hash}`}
                 >
                   {item.label}
@@ -254,12 +253,12 @@ export default function Landing() {
               ))}
             </div>
             
-            <div className="flex items-center space-x-3">
-              <Button variant="ghost" asChild className="font-medium" data-testid="button-signin">
+            <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+              <Button variant="ghost" asChild className="font-medium text-sm sm:text-base px-2 sm:px-4" data-testid="button-signin">
                 <Link href="/login">Sign In</Link>
               </Button>
-              <Button asChild className="bg-orange-500 hover:bg-orange-600 font-medium" data-testid="button-get-started-nav">
-                <Link href="/register">Get Started Free</Link>
+              <Button asChild className="bg-orange-500 hover:bg-orange-600 font-medium text-sm sm:text-base px-3 sm:px-6 h-9 sm:h-10" data-testid="button-get-started-nav">
+                <Link href="/register">Get Started</Link>
               </Button>
             </div>
           </div>
@@ -288,7 +287,7 @@ export default function Landing() {
             </motion.div>
             
             <motion.h1 
-              className="text-5xl sm:text-6xl lg:text-7xl font-black text-gray-900 mb-6 leading-tight"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-gray-900 mb-4 sm:mb-6 leading-tight"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
@@ -300,7 +299,7 @@ export default function Landing() {
             </motion.h1>
             
             <motion.p 
-              className="text-xl sm:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.6 }}
@@ -311,61 +310,61 @@ export default function Landing() {
             </motion.p>
             
             <motion.div 
-              className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 px-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.6 }}
             >
-              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-lg px-8 py-6 h-auto shadow-xl hover:shadow-2xl transition-all" asChild data-testid="button-create-card-hero">
+              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 h-auto shadow-xl hover:shadow-2xl transition-all w-full sm:w-auto" asChild data-testid="button-create-card-hero">
                 <Link href="/register">
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Create Your Card Free
+                  <Sparkles className="w-4 sm:w-5 h-4 sm:h-5 mr-2" />
+                  Create Card Free
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6 h-auto border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600 transition-all" asChild data-testid="button-watch-demo">
+              <Button size="lg" variant="outline" className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 h-auto border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600 transition-all w-full sm:w-auto" asChild data-testid="button-watch-demo">
                 <Link href="/dashboard">
-                  <PlayCircle className="w-5 h-5 mr-2" />
+                  <PlayCircle className="w-4 sm:w-5 h-4 sm:h-5 mr-2" />
                   Watch Demo
                 </Link>
               </Button>
             </motion.div>
             
             <motion.div 
-              className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500"
+              className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-500 px-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.6 }}
             >
               <div className="flex items-center">
-                <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
-                No credit card required
+                <CheckCircle2 className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                <span>No credit card</span>
               </div>
               <div className="flex items-center">
-                <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
-                Free forever plan
+                <CheckCircle2 className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                <span>Free forever</span>
               </div>
               <div className="flex items-center">
-                <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
-                Setup in 60 seconds
+                <CheckCircle2 className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                <span>60 sec setup</span>
               </div>
             </motion.div>
           </div>
           
           {/* Hero Card Preview */}
           <motion.div 
-            className="max-w-5xl mx-auto"
+            className="w-full max-w-5xl mx-auto px-4 mt-6 sm:mt-10"
             initial={{ opacity: 0, y: 40, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.8, duration: 0.8 }}
           >
             <div className="relative">
               {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-orange-500 to-blue-500 rounded-3xl blur-3xl opacity-20"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-orange-500 to-blue-500 rounded-2xl sm:rounded-3xl blur-3xl opacity-20"></div>
               
               {/* Main preview card */}
-              <div className="relative bg-white rounded-3xl shadow-2xl p-1 border border-gray-200">
-                <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8">
-                  <div className="grid md:grid-cols-3 gap-6">
+              <div className="relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-1 border border-gray-200">
+                <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl p-4 sm:p-8">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                     {/* Card Preview */}
                     <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                       <div className="flex items-center justify-center mb-4">
