@@ -209,7 +209,26 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
 
   const session = await stripe.checkout.sessions.create({
     customer: stripeCustomerId,
-    payment_method_types: ['card'],
+    payment_method_types: [
+      'card',
+      'alipay',
+      'wechat_pay',
+      'google_pay',
+      'apple_pay',
+      'klarna',
+      'affirm',
+      'acss_debit',
+      'au_becs_debit',
+      'bacs_debit',
+      'bancontact',
+      'eps',
+      'giropay',
+      'ideal',
+      'p24',
+      'sepa_debit',
+      'sofort',
+      'us_bank_account',
+    ],
     line_items: [
       {
         price_data: {
