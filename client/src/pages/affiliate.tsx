@@ -49,7 +49,10 @@ import {
   Calendar,
   ArrowLeft,
   Wallet,
-  Send
+  Send,
+  Settings,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -122,9 +125,17 @@ export default function Affiliate() {
     paymentType: 'onetime',
     recurringDuration: 12
   });
-  const [stripeConnectStatus, setStripeConnectStatus] = useState<'not_started' | 'pending' | 'complete'>('not_started');
-  const [stripeConnectUrl, setStripeConnectUrl] = useState('');
   const [copySuccess, setCopySuccess] = useState('');
+  const [savingPayoutDetails, setSavingPayoutDetails] = useState(false);
+  
+  // Payout details form states
+  const [paypalEmail, setPaypalEmail] = useState('');
+  const [bankAccountHolder, setBankAccountHolder] = useState('');
+  const [bankAccountNumber, setBankAccountNumber] = useState('');
+  const [bankRoutingNumber, setBankRoutingNumber] = useState('');
+  const [bankAccountType, setBankAccountType] = useState('checking');
+  const [showBankDetails, setShowBankDetails] = useState(false);
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -252,6 +263,72 @@ export default function Affiliate() {
     });
     
     return url.toString();
+  };
+
+  const handleSavePayoutDetails = async () => {
+    setSavingPayoutDetails(true);
+    try {
+      let payoutDetails: any = {};
+
+      if (affiliate?.payoutMethod === 'paypal') {
+        if (!paypalEmail) {
+          toast({
+            title: 'Error',
+            description: 'PayPal email is required',
+            variant: 'destructive'
+          });
+          setSavingPayoutDetails(false);
+          return;
+        }
+        payoutDetails = { paypalEmail };
+      } else if (affiliate?.payoutMethod === 'bank_transfer') {
+        if (!bankAccountHolder || !bankAccountNumber || !bankRoutingNumber) {
+          toast({
+            title: 'Error',
+            description: 'All bank details are required',
+            variant: 'destructive'
+          });
+          setSavingPayoutDetails(false);
+          return;
+        }
+        payoutDetails = {
+          accountHolder: bankAccountHolder,
+          accountNumber: bankAccountNumber,
+          routingNumber: bankRoutingNumber,
+          accountType: bankAccountType
+        };
+      }
+
+      const response = await fetch('/api/affiliate/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ payoutDetails })
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Success',
+          description: 'Payout details saved successfully',
+        });
+        queryClient.invalidateQueries({ queryKey: ['/api/affiliate/me'] });
+      } else {
+        const error = await response.json();
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to save payout details',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save payout details',
+        variant: 'destructive'
+      });
+    } finally {
+      setSavingPayoutDetails(false);
+    }
   };
 
   const handlePayoutRequest = async (e: React.FormEvent) => {
@@ -941,92 +1018,208 @@ export default function Affiliate() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Settings className="h-5 w-5" />
-                    Stripe Connect Setup
+                    Payout Settings
                   </CardTitle>
                   <p className="text-muted-foreground mt-2">
-                    Link your Stripe account to receive commission payouts
+                    Configure your payout method and details
                   </p>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {affiliate.stripeConnectAccountId ? (
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-center gap-2 text-green-900">
-                        <CheckCircle className="h-5 w-5" />
-                        <div>
-                          <p className="font-semibold">Stripe Account Connected</p>
-                          <p className="text-sm text-green-800">Account ID: {affiliate.stripeConnectAccountId.substring(0, 10)}...</p>
-                        </div>
-                      </div>
+                <CardContent className="space-y-6">
+                  {/* Current Payout Method */}
+                  <div>
+                    <Label className="font-semibold">Current Payout Method</Label>
+                    <div className="mt-2 p-3 bg-muted rounded-lg">
+                      <p className="text-sm font-medium capitalize">
+                        {affiliate?.payoutMethod === 'stripe_connect' ? 'Stripe Connect' : 
+                         affiliate?.payoutMethod === 'paypal' ? 'PayPal' :
+                         affiliate?.payoutMethod === 'bank_transfer' ? 'Bank Transfer' : 'Not Set'}
+                      </p>
                     </div>
-                  ) : (
-                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-start gap-3">
-                        <Clock className="h-5 w-5 text-yellow-600 mt-0.5" />
-                        <div>
-                          <p className="font-semibold text-yellow-900">Stripe Account Not Connected</p>
-                          <p className="text-sm text-yellow-800 mt-1">Connect your Stripe account to enable payouts. This will redirect you to Stripe to complete the setup.</p>
-                        </div>
+                  </div>
+
+                  {/* Stripe Connect Section */}
+                  {affiliate?.payoutMethod === 'stripe_connect' && (
+                    <div className="border rounded-lg p-4 space-y-4">
+                      <div>
+                        <h3 className="font-semibold mb-3 flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          Stripe Connect Setup
+                        </h3>
+                        {affiliate?.stripeConnectAccountId ? (
+                          <div className="p-3 bg-green-50 border border-green-200 rounded">
+                            <div className="flex items-center gap-2 text-green-900">
+                              <CheckCircle className="h-4 w-4" />
+                              <div>
+                                <p className="text-sm font-semibold">Connected</p>
+                                <p className="text-xs text-green-800">Account ID: {affiliate.stripeConnectAccountId.substring(0, 15)}...</p>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
+                            <div className="flex items-start gap-2">
+                              <Clock className="h-4 w-4 text-yellow-600 mt-0.5" />
+                              <div>
+                                <p className="text-sm font-semibold text-yellow-900">Not Connected</p>
+                                <p className="text-xs text-yellow-800">Click below to link your Stripe account</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
+
+                      <Button 
+                        className="w-full"
+                        onClick={async () => {
+                          try {
+                            const response = await fetch('/api/affiliate/stripe-connect/link', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              credentials: 'include',
+                              body: JSON.stringify({ returnUrl: window.location.href })
+                            });
+                            if (response.ok) {
+                              const data = await response.json();
+                              window.location.href = data.data.url;
+                            } else {
+                              const error = await response.json();
+                              toast({
+                                title: 'Error',
+                                description: error.message || 'Failed to generate Stripe link',
+                                variant: 'destructive'
+                              });
+                            }
+                          } catch (error) {
+                            toast({
+                              title: 'Error',
+                              description: 'Failed to connect Stripe account',
+                              variant: 'destructive'
+                            });
+                          }
+                        }}
+                      >
+                        {affiliate?.stripeConnectAccountId ? 'Update Stripe Account' : 'Connect Stripe Account'}
+                      </Button>
                     </div>
                   )}
 
-                  <Button 
-                    className="w-full"
-                    onClick={async () => {
-                      try {
-                        const response = await fetch('/api/affiliate/stripe-connect/link', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          credentials: 'include',
-                          body: JSON.stringify({ 
-                            returnUrl: window.location.href 
-                          })
-                        });
+                  {/* PayPal Section */}
+                  {affiliate?.payoutMethod === 'paypal' && (
+                    <div className="border rounded-lg p-4 space-y-4">
+                      <div>
+                        <h3 className="font-semibold mb-3">PayPal Account</h3>
+                        <div className="space-y-2">
+                          <Label htmlFor="paypal-email">PayPal Email Address</Label>
+                          <Input
+                            id="paypal-email"
+                            type="email"
+                            placeholder="your-email@paypal.com"
+                            value={paypalEmail}
+                            onChange={(e) => setPaypalEmail(e.target.value)}
+                            disabled={savingPayoutDetails}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Payouts will be sent to this PayPal account
+                          </p>
+                        </div>
+                      </div>
+                      <Button 
+                        className="w-full"
+                        disabled={savingPayoutDetails}
+                        onClick={handleSavePayoutDetails}
+                      >
+                        {savingPayoutDetails ? 'Saving...' : 'Save PayPal Details'}
+                      </Button>
+                    </div>
+                  )}
 
-                        if (response.ok) {
-                          const data = await response.json();
-                          window.location.href = data.data.url;
-                        } else {
-                          const error = await response.json();
-                          toast({
-                            title: 'Error',
-                            description: error.message || 'Failed to generate Stripe link',
-                            variant: 'destructive'
-                          });
-                        }
-                      } catch (error) {
-                        toast({
-                          title: 'Error',
-                          description: 'Failed to connect Stripe account',
-                          variant: 'destructive'
-                        });
-                      }
-                    }}
-                  >
-                    {affiliate.stripeConnectAccountId ? 'Update Stripe Account' : 'Connect Stripe Account'}
-                  </Button>
+                  {/* Bank Transfer Section */}
+                  {affiliate?.payoutMethod === 'bank_transfer' && (
+                    <div className="border rounded-lg p-4 space-y-4">
+                      <div>
+                        <h3 className="font-semibold mb-3">Bank Account Details</h3>
+                        <div className="space-y-3">
+                          <div>
+                            <Label htmlFor="account-holder">Account Holder Name</Label>
+                            <Input
+                              id="account-holder"
+                              placeholder="John Doe"
+                              value={bankAccountHolder}
+                              onChange={(e) => setBankAccountHolder(e.target.value)}
+                              disabled={savingPayoutDetails}
+                            />
+                          </div>
 
-                  <div className="pt-4 border-t">
-                    <h3 className="font-semibold mb-3">About Stripe Connect</h3>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li className="flex gap-2">
-                        <span className="text-green-600">✓</span>
-                        <span>Secure direct payouts to your Stripe account</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <span className="text-green-600">✓</span>
-                        <span>Automatic commission transfers based on your payment preferences</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <span className="text-green-600">✓</span>
-                        <span>View detailed payout history and settlement reports</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <span className="text-green-600">✓</span>
-                        <span>Fast payouts - typically within 1-2 business days</span>
-                      </li>
-                    </ul>
-                  </div>
+                          <div>
+                            <Label htmlFor="account-type">Account Type</Label>
+                            <Select value={bankAccountType} onValueChange={setBankAccountType} disabled={savingPayoutDetails}>
+                              <SelectTrigger id="account-type">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="checking">Checking</SelectItem>
+                                <SelectItem value="savings">Savings</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="routing-number">Routing Number</Label>
+                            <Input
+                              id="routing-number"
+                              placeholder="123456789"
+                              value={bankRoutingNumber}
+                              onChange={(e) => setBankRoutingNumber(e.target.value)}
+                              disabled={savingPayoutDetails}
+                              type={showBankDetails ? 'text' : 'password'}
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="account-number">Account Number</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                id="account-number"
+                                placeholder="1234567890"
+                                value={bankAccountNumber}
+                                onChange={(e) => setBankAccountNumber(e.target.value)}
+                                disabled={savingPayoutDetails}
+                                type={showBankDetails ? 'text' : 'password'}
+                                className="flex-1"
+                              />
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowBankDetails(!showBankDetails)}
+                                disabled={savingPayoutDetails}
+                              >
+                                {showBankDetails ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </Button>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Bank details are encrypted and secure
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <Button 
+                        className="w-full"
+                        disabled={savingPayoutDetails}
+                        onClick={handleSavePayoutDetails}
+                      >
+                        {savingPayoutDetails ? 'Saving...' : 'Save Bank Details'}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* No payout method set */}
+                  {!affiliate?.payoutMethod && (
+                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-sm text-yellow-900">
+                        No payout method configured. Please contact support to set up your preferred payout method.
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
