@@ -52,6 +52,9 @@ const TeamDashboard = lazy(() => import("./pages/TeamDashboard"));
 const Uploads = lazy(() => import("./pages/uploads"));
 const QrCodes = lazy(() => import("./pages/qr-codes"));
 const EmailSignature = lazy(() => import("./pages/email-signature"));
+const TermsOfService = lazy(() => import("./pages/terms-of-service"));
+const PrivacyPolicy = lazy(() => import("./pages/privacy-policy"));
+const CookiePolicy = lazy(() => import("./pages/cookie-policy"));
 
 // Lazy load CardRoutes to prevent loading multi-page module eagerly
 const LazyCardRoutes = lazy(() => import("@/modules/multi-page").then(module => ({ default: module.CardRoutes })));
@@ -104,6 +107,9 @@ function Router() {
       <Route path="/teams">{() => <PageSuspense><TeamDashboard /></PageSuspense>}</Route>
       <Route path="/help">{() => <PageSuspense><Help /></PageSuspense>}</Route>
       <Route path="/email-signature">{() => <PageSuspense><EmailSignature /></PageSuspense>}</Route>
+      <Route path="/terms-of-service">{() => <PageSuspense><TermsOfService /></PageSuspense>}</Route>
+      <Route path="/privacy-policy">{() => <PageSuspense><PrivacyPolicy /></PageSuspense>}</Route>
+      <Route path="/cookie-policy">{() => <PageSuspense><CookiePolicy /></PageSuspense>}</Route>
       <Route path="/booking/:eventTypeSlug">{(params) => <PageSuspense><BookingPage {...params} /></PageSuspense>}</Route>
       <Route path="/admin/templates/builder">{() => <PageSuspense><TemplateBuilderPage /></PageSuspense>}</Route>
       <Route path="/admin/users">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
