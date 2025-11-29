@@ -140,16 +140,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Modern centered header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 backdrop-blur-sm bg-white/95 dark:bg-gray-800/95">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-          <div className="flex items-center justify-between h-16 gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-950">
+      {/* Premium Modern Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-gray-800/80 border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-4">
             {/* Logo - Left (Mobile only) */}
-            <div className="flex items-center lg:hidden">
+            <div className="flex items-center lg:hidden flex-shrink-0">
               <Link href="/admin" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md">
-                  <span className="text-white font-bold text-sm">2T</span>
+                <div className="w-7 sm:w-8 h-7 sm:h-8 bg-gradient-to-br from-blue-600 via-purple-600 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-xs sm:text-sm">2T</span>
                 </div>
               </Link>
             </div>
@@ -160,14 +160,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </div>
 
             {/* Right side: Actions */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1 sm:space-x-3 flex-shrink-0">
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
+                  <Button variant="ghost" className="relative h-7 sm:h-8 w-7 sm:w-8 rounded-full p-0 hover:bg-blue-50 dark:hover:bg-gray-700/50">
+                    <Avatar className="h-7 sm:h-8 w-7 sm:w-8">
                       <AvatarImage src="" alt="Admin" />
-                      <AvatarFallback className="bg-orange-600 text-white">
+                      <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white text-xs sm:text-sm font-bold">
                         AB
                       </AvatarFallback>
                     </Avatar>
@@ -203,13 +203,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="lg:hidden hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                    className="lg:hidden h-9 w-9 hover:bg-blue-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
                     data-testid="button-mobile-menu"
                   >
-                    <Menu className="h-5 w-5" />
+                    <Menu className="h-4 sm:h-5 w-4 sm:w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="p-0 w-72">
+                <SheetContent side="left" className="p-0 w-64 sm:w-72">
                   <div className="h-full px-4 py-6 overflow-y-auto bg-white dark:bg-gray-800">
                     <div className="flex items-center mb-8 px-2">
                       <Link href="/admin" className="flex items-center space-x-3">
@@ -257,8 +257,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </header>
 
       {/* Page content */}
-      <main className="py-6">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+      <main className="py-4 sm:py-6 md:py-8">
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
           {children}
         </div>
       </main>

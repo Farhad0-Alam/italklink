@@ -59,20 +59,21 @@ export default function DashboardPage() {
   };
 
   const MetricCard = ({ title, value, description, isLoading }: { title: string; value: number; description: string; isLoading?: boolean }) => (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+    <Card className="border-0 bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-gray-900 shadow-md hover:shadow-lg transition-all duration-300">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3">
+        <CardTitle className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">{title}</CardTitle>
+        <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <div className="space-y-2">
-            <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
-            <div className="h-3 w-32 bg-gray-200 animate-pulse rounded"></div>
+            <div className="h-7 sm:h-8 w-20 bg-gray-300 dark:bg-gray-700 animate-pulse rounded-lg"></div>
+            <div className="h-2 sm:h-3 w-32 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
           </div>
         ) : (
           <>
-            <div className="text-2xl font-bold">{value.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">{description}</p>
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{value.toLocaleString()}</div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{description}</p>
           </>
         )}
       </CardContent>
@@ -80,17 +81,20 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="space-y-8">
-      {/* Greeting */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">
-          {greeting} Abdur
-        </h1>
+    <div className="space-y-6 sm:space-y-8">
+      {/* Premium Greeting Section */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            {greeting}, Abdur 👋
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Platform metrics & overview</p>
+        </div>
         <AdminBroadcastButton />
       </div>
 
-      {/* Metrics Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      {/* Premium Metrics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
         <MetricCard 
           title="Weekly Clicks" 
           value={metrics?.weeklyClicks || 0} 
@@ -111,51 +115,52 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* All Links Section */}
-      <Card>
+      {/* All Links Section - Premium Design */}
+      <Card className="border-0 bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-gray-900 shadow-md overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>All Links ({links.length})</span>
-            <Button variant="outline" size="sm">
+          <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+            <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">All Links <span className="text-blue-600 dark:text-blue-400">({links.length})</span></span>
+            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg w-full sm:w-auto" size="sm">
               View All
             </Button>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             All public business card links on the platform
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4 md:p-6">
           {linksLoading ? (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center space-x-4 animate-pulse">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                <div key={i} className="flex items-center space-x-3 sm:space-x-4 animate-pulse">
+                  <div className="w-8 sm:w-10 h-8 sm:h-10 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                    <div className="h-3 sm:h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/4"></div>
+                    <div className="h-2 sm:h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
                   </div>
-                  <div className="w-8 h-8 bg-gray-200 rounded"></div>
+                  <div className="w-6 sm:w-8 h-6 sm:h-8 bg-gray-300 dark:bg-gray-700 rounded"></div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-2 sm:space-y-3">
               {links.slice(0, 10).map((link) => (
-                <div key={link.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm font-semibold">
+                <div key={link.id} className="flex items-center justify-between p-2 sm:p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-gray-700/50 dark:hover:to-gray-700/30 transition-all duration-200">
+                  <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                    <Avatar className="h-8 sm:h-10 w-8 sm:w-10 flex-shrink-0">
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs sm:text-sm font-semibold">
                         {link.initials}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{link.title}</p>
-                      <p className="text-xs text-gray-500">{link.ownerName}</p>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Badge variant="secondary" className="text-xs">
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white truncate">{link.title}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{link.ownerName}</p>
+                      <div className="flex items-center space-x-1 sm:space-x-2 mt-0.5 flex-wrap">
+                        <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
                           {link.visitorCount} visitors
                         </Badge>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs px-2 py-0.5 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300">
                           {link.clicksCount} clicks
                         </Badge>
                       </div>
