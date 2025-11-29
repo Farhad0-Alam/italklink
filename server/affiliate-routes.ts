@@ -87,7 +87,7 @@ router.post('/apply', async (req, res) => {
       return res.status(401).json({ message: 'Authentication required' });
     }
 
-    const { country, website, sourceInfo, paymentType, recurringDuration, payoutMethod } = req.body;
+    const { country, website, sourceInfo, paymentType, recurringDuration } = req.body;
 
     // Validate input
     if (!country) {
@@ -100,10 +100,6 @@ router.post('/apply', async (req, res) => {
 
     if (paymentType === 'recurring' && (!recurringDuration || recurringDuration < 3 || recurringDuration > 36)) {
       return res.status(400).json({ message: 'Recurring duration must be between 3 and 36 months' });
-    }
-
-    if (!payoutMethod || !['stripe_connect', 'bank_transfer', 'paypal'].includes(payoutMethod)) {
-      return res.status(400).json({ message: 'Valid payout method is required' });
     }
 
     // Check if user is already an affiliate
@@ -131,14 +127,14 @@ router.post('/apply', async (req, res) => {
       attempts++;
     }
 
-    // Create affiliate record
+    // Create affiliate record - Stripe Connect is the default and only payout method
     const [newAffiliate] = await db.insert(affiliates).values({
       userId: req.user.id,
       code,
       country,
       website,
       sourceInfo,
-      payoutMethod: payoutMethod as any,
+      payoutMethod: 'stripe_connect', // Always Stripe Connect
       status: 'pending'
     }).returning();
 

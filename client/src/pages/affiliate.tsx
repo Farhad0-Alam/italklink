@@ -120,9 +120,10 @@ export default function Affiliate() {
     website: '',
     sourceInfo: '',
     paymentType: 'onetime',
-    recurringDuration: 12,
-    payoutMethod: 'stripe_connect'
+    recurringDuration: 12
   });
+  const [stripeConnectStatus, setStripeConnectStatus] = useState<'not_started' | 'pending' | 'complete'>('not_started');
+  const [stripeConnectUrl, setStripeConnectUrl] = useState('');
   const [copySuccess, setCopySuccess] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -490,32 +491,32 @@ export default function Affiliate() {
               </div>
 
               <div className="border-t pt-6">
-                <h3 className="font-semibold mb-4">Payment Preferences</h3>
+                <h3 className="font-semibold mb-4">Commission Preferences</h3>
                 
                 <div>
-                  <Label htmlFor="paymentType">Payment Type *</Label>
+                  <Label htmlFor="paymentType">Commission Type *</Label>
                   <Select 
                     value={applicationForm.paymentType} 
                     onValueChange={(value) => setApplicationForm(prev => ({ ...prev, paymentType: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select payment type" />
+                      <SelectValue placeholder="Select commission type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="onetime">One-Time Payments Only</SelectItem>
-                      <SelectItem value="recurring">Recurring Payments (Track Lifetime Value)</SelectItem>
+                      <SelectItem value="onetime">One-Time Commissions</SelectItem>
+                      <SelectItem value="recurring">Recurring Commissions (Track Lifetime Value)</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground mt-1">
                     {applicationForm.paymentType === 'recurring' 
-                      ? 'Get commissions from recurring subscriptions for the specified duration'
+                      ? 'Earn commissions from recurring subscriptions for the specified duration'
                       : 'Earn commissions only on first-time purchases'}
                   </p>
                 </div>
 
                 {applicationForm.paymentType === 'recurring' && (
                   <div className="mt-4">
-                    <Label htmlFor="recurringDuration">Recurring Duration (Months) *</Label>
+                    <Label htmlFor="recurringDuration">Recurring Commission Duration *</Label>
                     <Select 
                       value={applicationForm.recurringDuration.toString()} 
                       onValueChange={(value) => setApplicationForm(prev => ({ ...prev, recurringDuration: parseInt(value) }))}
@@ -537,23 +538,9 @@ export default function Affiliate() {
                   </div>
                 )}
 
-                <div className="mt-4">
-                  <Label htmlFor="payoutMethod">Preferred Payout Method *</Label>
-                  <Select 
-                    value={applicationForm.payoutMethod} 
-                    onValueChange={(value) => setApplicationForm(prev => ({ ...prev, payoutMethod: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select payout method" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="stripe_connect">Stripe Connect (Recommended)</SelectItem>
-                      <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                      <SelectItem value="paypal">PayPal</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    How you'll receive your affiliate commissions
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-900">
+                    <strong>Payout Method:</strong> All affiliates receive commissions via Stripe Connect. You'll link your Stripe account during dashboard setup.
                   </p>
                 </div>
               </div>
@@ -679,12 +666,13 @@ export default function Affiliate() {
           </div>
 
           <Tabs defaultValue="links" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="links">Affiliate Links</TabsTrigger>
               <TabsTrigger value="conversions">Conversions</TabsTrigger>
               <TabsTrigger value="payouts">Payouts</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="assets">Marketing</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
             <TabsContent value="links" className="space-y-6">
@@ -943,6 +931,101 @@ export default function Affiliate() {
                     <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
                     <p className="text-muted-foreground">Analytics coming soon</p>
                     <p className="text-sm text-muted-foreground">Detailed charts and reports will be available here</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="settings" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Stripe Connect Setup
+                  </CardTitle>
+                  <p className="text-muted-foreground mt-2">
+                    Link your Stripe account to receive commission payouts
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {affiliate.stripeConnectAccountId ? (
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-2 text-green-900">
+                        <CheckCircle className="h-5 w-5" />
+                        <div>
+                          <p className="font-semibold">Stripe Account Connected</p>
+                          <p className="text-sm text-green-800">Account ID: {affiliate.stripeConnectAccountId.substring(0, 10)}...</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <Clock className="h-5 w-5 text-yellow-600 mt-0.5" />
+                        <div>
+                          <p className="font-semibold text-yellow-900">Stripe Account Not Connected</p>
+                          <p className="text-sm text-yellow-800 mt-1">Connect your Stripe account to enable payouts. This will redirect you to Stripe to complete the setup.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <Button 
+                    className="w-full"
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/affiliate/stripe-connect/link', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          credentials: 'include',
+                          body: JSON.stringify({ 
+                            returnUrl: window.location.href 
+                          })
+                        });
+
+                        if (response.ok) {
+                          const data = await response.json();
+                          window.location.href = data.data.url;
+                        } else {
+                          const error = await response.json();
+                          toast({
+                            title: 'Error',
+                            description: error.message || 'Failed to generate Stripe link',
+                            variant: 'destructive'
+                          });
+                        }
+                      } catch (error) {
+                        toast({
+                          title: 'Error',
+                          description: 'Failed to connect Stripe account',
+                          variant: 'destructive'
+                        });
+                      }
+                    }}
+                  >
+                    {affiliate.stripeConnectAccountId ? 'Update Stripe Account' : 'Connect Stripe Account'}
+                  </Button>
+
+                  <div className="pt-4 border-t">
+                    <h3 className="font-semibold mb-3">About Stripe Connect</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex gap-2">
+                        <span className="text-green-600">✓</span>
+                        <span>Secure direct payouts to your Stripe account</span>
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-green-600">✓</span>
+                        <span>Automatic commission transfers based on your payment preferences</span>
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-green-600">✓</span>
+                        <span>View detailed payout history and settlement reports</span>
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-green-600">✓</span>
+                        <span>Fast payouts - typically within 1-2 business days</span>
+                      </li>
+                    </ul>
                   </div>
                 </CardContent>
               </Card>
