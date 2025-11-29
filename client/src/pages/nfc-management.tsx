@@ -7,7 +7,7 @@ import { z } from 'zod';
 import {
   Smartphone, Plus, Download, BarChart3, Trash2, Copy, 
   ExternalLink, Sparkles, TrendingUp, Users, Globe, Grid3x3,
-  Check, AlertCircle, Loader, Zap, Radio
+  Check, AlertCircle, Loader, Zap, Radio, Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -20,9 +20,11 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
 
 interface NfcTag {
   id: string;
@@ -65,6 +67,7 @@ export default function NfcManagement() {
   const [, setLocation] = useLocation();
   const [selectedTag, setSelectedTag] = useState<NfcTag | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Fetch user's business cards for selection
   const { data: cards = [], isLoading: cardsLoading } = useQuery({
@@ -198,8 +201,43 @@ export default function NfcManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-950 dark:to-purple-950">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Desktop Sidebar - Hidden on mobile */}
+      <div className="hidden md:block w-64 fixed h-screen">
+        <DashboardSidebar 
+          user={user}
+          businessCardsCount={0}
+          onLogout={() => setLocation('/')}
+        />
+      </div>
+
+      {/* Mobile Sidebar in Sheet */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent side="left" className="w-64 p-0 md:hidden">
+          <DashboardSidebar 
+            user={user}
+            businessCardsCount={0}
+            onLogout={() => setLocation('/')}
+          />
+        </SheetContent>
+      </Sheet>
+
+      {/* Main Content */}
+      <div className="flex-1 md:ml-64 overflow-y-auto">
+        {/* Mobile Header */}
+        <div className="md:hidden sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-bold text-gray-900 dark:text-white">NFC Management</h1>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+          </Sheet>
+        </div>
+
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-6 md:py-8">
+        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
