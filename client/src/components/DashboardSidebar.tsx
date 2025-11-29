@@ -31,7 +31,7 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
   const [location] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [expandedSection, setExpandedSection] = useState<string | null>('tools');
+  const [expandedSection, setExpandedSection] = useState<string | null>('core');
 
   // Fetch subscription to get plan name
   const { data: subscriptionData } = useQuery({
