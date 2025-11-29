@@ -280,6 +280,65 @@ router.post('/kyc', requireAffiliate, async (req, res) => {
   }
 });
 
+// Stripe Connect onboarding
+router.post('/stripe-connect/link', requireAffiliate, async (req, res) => {
+  try {
+    const affiliate = req.affiliate;
+    
+    // Check if KYC is approved first
+    if (affiliate.kycStatus !== 'approved') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'KYC must be approved before connecting Stripe account' 
+      });
+    }
+
+    // Get the return URL from request (or use default)
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const returnUrl = `${baseUrl}/affiliate/dashboard`;
+
+    // Generate Stripe Connect account link
+    const { url, stripeAccountId } = await stripeAffiliateService.generateConnectLink(
+      affiliate.id,
+      returnUrl
+    );
+
+    res.json({ 
+      success: true, 
+      message: 'Stripe Connect authorization link generated',
+      data: {
+        url,
+        stripeAccountId
+      }
+    });
+  } catch (error: any) {
+    console.error('Failed to generate Stripe Connect link:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Failed to generate Stripe Connect link' 
+    });
+  }
+});
+
+// Check Stripe Connect account status
+router.get('/stripe-connect/status', requireAffiliate, async (req, res) => {
+  try {
+    const affiliate = req.affiliate;
+    const status = await stripeAffiliateService.getAccountStatus(affiliate.id);
+    
+    res.json({ 
+      success: true, 
+      data: status 
+    });
+  } catch (error: any) {
+    console.error('Failed to get Stripe Connect status:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message || 'Failed to check account status' 
+    });
+  }
+});
+
 // TRACKING ROUTES
 
 // Track click (redirect endpoint)
