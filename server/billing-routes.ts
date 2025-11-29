@@ -237,6 +237,29 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
     },
   });
 
+  // Update user plan immediately (skip webhook)
+  await storage.updateUser(req.user.id, { planType: 'paid' });
+  
+  // Create subscription record
+  await storage.createUserSubscription({
+    userId: req.user.id,
+    planId: planId,
+    couponId: couponId || null,
+    stripeSubscriptionId: null,
+    stripeCustomerId: stripeCustomerId,
+    userCount: userCount,
+    pricePaid: finalAmount,
+    features: plan.features || {},
+    startDate: new Date(),
+    endDate: null,
+    isActive: true,
+    status: 'active',
+    metadata: {
+      sessionId: session.id,
+      paymentIntent: session.payment_intent,
+    },
+  });
+
   res.json({ success: true, data: { url: session.url, sessionId: session.id } });
 }));
 
@@ -412,6 +435,22 @@ router.post('/checkout/create-subscription', requireAuth, asyncHandler(async (re
         planId: planId.toString(),
       },
     },
+  });
+
+  // Update user plan immediately (skip webhook)
+  await storage.updateUser(req.user.id, { planType: 'paid' });
+  
+  // Create subscription record
+  await storage.createSubscription({
+    userId: req.user.id,
+    planId: planId,
+    status: 'active',
+    stripeSubscriptionId: session.subscription as string || null,
+    stripeCustomerId: stripeCustomerId,
+    stripePriceId: priceId,
+    startDate: new Date(),
+    currentPeriodStart: new Date(),
+    currentPeriodEnd: new Date(Date.now() + (isYearly ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000)),
   });
 
   res.json({ success: true, data: { url: session.url, sessionId: session.id } });
