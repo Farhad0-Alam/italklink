@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays, QrCode, Mail, Menu, X, Phone, MousePointer } from "lucide-react";
+import { MoreHorizontal, Edit, BarChart3, Trash2, Copy, ExternalLink, DollarSign, Users, TrendingUp, User as UserIcon, CreditCard, Settings, FileText, LogOut, Crown, Shield, HelpCircle, Zap, CalendarDays, QrCode, Mail, Menu, X, Phone, MousePointer, CheckCircle, ChevronDown } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -61,6 +61,8 @@ interface AffiliateProfile {
   id: string;
   code: string;
   status: 'pending' | 'approved' | 'suspended' | 'rejected';
+  payoutMethod?: string;
+  stripeConnectAccountId?: string;
   stats: {
     totalEarnings: number;
     pendingEarnings: number;
@@ -76,6 +78,7 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showContactModal, setShowContactModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showPayoutSettings, setShowPayoutSettings] = useState(false);
 
   // All hooks must be called unconditionally at the top level
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
@@ -498,7 +501,69 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-800">
+                {/* Payout Settings Section */}
+                <div className="border-t border-gray-200 dark:border-gray-800 pt-6">
+                  <button
+                    onClick={() => setShowPayoutSettings(!showPayoutSettings)}
+                    className="flex items-center justify-between w-full mb-4 hover:opacity-80 transition-opacity"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 p-2">
+                        <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-sm">Payout Settings</p>
+                        <p className="text-xs text-muted-foreground">
+                          {affiliate?.payoutMethod === 'stripe_connect' ? 'Stripe Connect' : 
+                           affiliate?.payoutMethod === 'paypal' ? 'PayPal' :
+                           affiliate?.payoutMethod === 'bank_transfer' ? 'Bank Transfer' : 
+                           'Not configured'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className={`transform transition-transform ${showPayoutSettings ? 'rotate-180' : ''}`}>
+                      <ChevronDown className="h-4 w-4" />
+                    </div>
+                  </button>
+
+                  {showPayoutSettings && (
+                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-lg p-4 space-y-3">
+                      {affiliate?.payoutMethod === 'stripe_connect' && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <span className="text-sm font-medium text-green-900 dark:text-green-100">Stripe Connect Active</span>
+                          </div>
+                          {affiliate?.stripeConnectAccountId && (
+                            <p className="text-xs text-muted-foreground ml-6">
+                              Account ID: {affiliate.stripeConnectAccountId.substring(0, 15)}...
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      {affiliate?.payoutMethod === 'paypal' && (
+                        <div className="text-sm text-muted-foreground">
+                          💳 PayPal account configured for payouts
+                        </div>
+                      )}
+                      {affiliate?.payoutMethod === 'bank_transfer' && (
+                        <div className="text-sm text-muted-foreground">
+                          🏦 Bank transfer method configured
+                        </div>
+                      )}
+                      {!affiliate?.payoutMethod && (
+                        <div className="text-sm text-amber-900 dark:text-amber-100">
+                          ⚠️ No payout method configured yet
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground pt-2 border-t border-blue-200 dark:border-blue-800">
+                        Visit your full affiliate dashboard to update payout settings
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Affiliate Code:</p>
                     <code className="font-mono text-sm bg-white dark:bg-gray-800 px-3 py-2 rounded border border-gray-200 dark:border-gray-700">{affiliate.code}</code>
