@@ -576,34 +576,6 @@ export default function NfcManagement() {
             )}
           </TabsContent>
         </Tabs>
-
-        {/* Affiliate Program CTA */}
-        <div className="mt-6 sm:mt-8 px-0">
-          <div className="relative overflow-hidden rounded-lg sm:rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-600 dark:from-emerald-600 dark:via-teal-600 dark:to-blue-700 p-4 sm:p-6 shadow-lg">
-            {/* Decorative element */}
-            <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-            <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
-            
-            {/* Content */}
-            <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-3 sm:gap-4 flex-1">
-                <div className="flex-shrink-0 mt-0.5 sm:mt-1">
-                  <Users className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-white">Join Our Affiliate Program</h3>
-                  <p className="text-sm sm:text-base text-white/90 mt-1">Earn up to 30% commission on every referral. Start making passive income today!</p>
-                </div>
-              </div>
-              <Link
-                href="/dashboard/affiliate"
-                className="flex-shrink-0 bg-white hover:bg-gray-50 dark:hover:bg-gray-100 text-emerald-600 dark:text-emerald-700 font-semibold px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg transition-colors text-sm sm:text-base whitespace-nowrap"
-              >
-                Join Now
-              </Link>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
