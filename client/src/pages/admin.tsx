@@ -9,7 +9,6 @@ import CouponsPage from '@/components/admin/CouponsPage';
 import AffiliatesPage from '@/components/admin/AffiliatesPage';
 import AffiliateConversionsPage from '@/components/admin/AffiliateConversionsPage';
 import AffiliatePayoutsPage from '@/components/admin/AffiliatePayoutsPage';
-import CommissionRulesPage from '@/components/admin/CommissionRulesPage';
 import TemplatesPage from '@/components/admin/TemplatesPage';
 import IconsPage from '@/components/admin/IconsPage';
 import ElementTypesPage from '@/components/admin/ElementTypesPage';
@@ -73,8 +72,6 @@ export default function Admin() {
         return <PlansPage />;
       case '/admin/coupons':
         return <CouponsPage />;
-      case '/admin/commission-rules':
-        return <CommissionRulesPage />;
       case '/admin/templates':
         return <TemplatesPage />;
       case '/admin/icons':

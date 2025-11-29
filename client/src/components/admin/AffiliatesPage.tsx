@@ -41,10 +41,18 @@ import {
   Eye,
   MessageSquare,
   TrendingUp,
-  AlertTriangle
+  AlertTriangle,
+  Percent
 } from 'lucide-react';
+import { 
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
+import CommissionRulesPage from './CommissionRulesPage';
 
 interface Affiliate {
   id: string;
@@ -68,6 +76,7 @@ interface Affiliate {
 }
 
 export default function AffiliatesPage() {
+  const [activeTab, setActiveTab] = useState('affiliates');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedAffiliate, setSelectedAffiliate] = useState<Affiliate | null>(null);
@@ -232,9 +241,22 @@ export default function AffiliatesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Affiliate Management</h1>
-          <p className="text-muted-foreground mt-2">Manage affiliate partners and their performance</p>
+          <p className="text-muted-foreground mt-2">Manage affiliate partners, commission rules, and performance</p>
         </div>
       </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="affiliates">Affiliates</TabsTrigger>
+          <TabsTrigger value="commission-rules" className="flex items-center gap-2">
+            <Percent className="h-4 w-4" />
+            Commission Rules
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Affiliates Tab */}
+        <TabsContent value="affiliates" className="space-y-6">
 
       {/* Stats Cards */}
       {stats && (
@@ -522,8 +544,8 @@ export default function AffiliatesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* View Details Dialog */}
-      <Dialog open={viewDetailsOpen} onOpenChange={setViewDetailsOpen}>
+        {/* View Details Dialog */}
+        <Dialog open={viewDetailsOpen} onOpenChange={setViewDetailsOpen}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>Affiliate Details</DialogTitle>
@@ -593,7 +615,14 @@ export default function AffiliatesPage() {
             </div>
           )}
         </DialogContent>
-      </Dialog>
+        </Dialog>
+        </TabsContent>
+
+        {/* Commission Rules Tab */}
+        <TabsContent value="commission-rules">
+          <CommissionRulesPage />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
