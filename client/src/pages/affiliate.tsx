@@ -692,7 +692,7 @@ export default function Affiliate() {
           <div className="h-6 w-px bg-gray-300" />
         </div>
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold">Affiliate Dashboard</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent dark:from-emerald-400 dark:to-blue-400">Affiliate Dashboard</h1>
           <Badge className={getStatusColor(affiliate.status)}>
             <div className="flex items-center gap-1">
               {getStatusIcon(affiliate.status)}
