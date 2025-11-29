@@ -118,6 +118,7 @@ export const COOKIES = {
   SESSION_ID: "talklink_session_id", // Anonymous session tracking
   ANALYTICS_CONSENT: "talklink_analytics_consent", // true or false
   MARKETING_CONSENT: "talklink_marketing_consent", // true or false
+  COOKIE_CONSENT_SHOWN: "talklink_consent_shown", // flag to track if user has made a choice
   
   // Session
   SESSION_TOKEN: "_session_token", // Session authentication
@@ -141,11 +142,8 @@ export const initializeUsefulCookies = () => {
     });
   }
 
-  // Initialize analytics consent if not set
-  if (!CookieUtils.exists(COOKIES.ANALYTICS_CONSENT)) {
-    // Default to true for analytics
-    CookieUtils.set(COOKIES.ANALYTICS_CONSENT, "true", { days: 365 });
-  }
+  // Note: Don't auto-initialize ANALYTICS_CONSENT/MARKETING_CONSENT
+  // Let CookieConsent banner show to user first for explicit consent
 
   // Initialize theme cookie from localStorage or system preference
   if (!CookieUtils.exists(COOKIES.THEME)) {

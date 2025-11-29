@@ -7,11 +7,9 @@ export const CookieConsent = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Show banner if consent not given
-    const analyticsConsent = CookieUtils.get(COOKIES.ANALYTICS_CONSENT);
-    const marketingConsent = CookieUtils.get(COOKIES.MARKETING_CONSENT);
-    
-    if (!analyticsConsent && !marketingConsent) {
+    // Show banner if user hasn't made a consent choice yet
+    const consentShown = CookieUtils.get(COOKIES.COOKIE_CONSENT_SHOWN);
+    if (!consentShown) {
       setIsVisible(true);
     }
   }, []);
@@ -19,12 +17,14 @@ export const CookieConsent = () => {
   const handleAcceptAll = () => {
     CookieUtils.set(COOKIES.ANALYTICS_CONSENT, "true", { days: 365 });
     CookieUtils.set(COOKIES.MARKETING_CONSENT, "true", { days: 365 });
+    CookieUtils.set(COOKIES.COOKIE_CONSENT_SHOWN, "true", { days: 365 });
     setIsVisible(false);
   };
 
   const handleAcceptEssential = () => {
     CookieUtils.set(COOKIES.ANALYTICS_CONSENT, "false", { days: 365 });
     CookieUtils.set(COOKIES.MARKETING_CONSENT, "false", { days: 365 });
+    CookieUtils.set(COOKIES.COOKIE_CONSENT_SHOWN, "true", { days: 365 });
     setIsVisible(false);
   };
 
