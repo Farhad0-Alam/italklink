@@ -53,6 +53,7 @@ const VoiceAgentTest = lazy(() => import("./pages/VoiceAgentTest"));
 const TeamDashboard = lazy(() => import("./pages/TeamDashboard"));
 const Uploads = lazy(() => import("./pages/uploads"));
 const QrCodes = lazy(() => import("./pages/qr-codes"));
+const NfcManagement = lazy(() => import("./pages/nfc-management"));
 const EmailSignature = lazy(() => import("./pages/email-signature"));
 const TermsOfService = lazy(() => import("./pages/terms-of-service"));
 const PrivacyPolicy = lazy(() => import("./pages/privacy-policy"));
@@ -106,6 +107,7 @@ function Router() {
       <Route path="/email-templates">{() => <PageSuspense><EmailTemplatesPage /></PageSuspense>}</Route>
       <Route path="/uploads">{() => <PageSuspense><Uploads /></PageSuspense>}</Route>
       <Route path="/qr-codes">{() => <PageSuspense><QrCodes /></PageSuspense>}</Route>
+      <Route path="/nfc-management">{() => <PageSuspense><NfcManagement /></PageSuspense>}</Route>
       <Route path="/crm">{() => <PageSuspense><CRM /></PageSuspense>}</Route>
       <Route path="/analytics">{() => <PageSuspense><Analytics /></PageSuspense>}</Route>
       <Route path="/card-analytics">{() => <PageSuspense><CardAnalytics /></PageSuspense>}</Route>

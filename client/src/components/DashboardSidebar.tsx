@@ -69,6 +69,7 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
       label: 'Tools',
       items: [
         { href: '/qr-codes', label: 'QR Codes', icon: QrCode, testId: 'link-qr-codes' },
+        { href: '/nfc-management', label: 'NFC Tags', icon: QrCode, testId: 'link-nfc-management', description: 'Smart NFC cards' },
         { href: '/email-signature', label: 'Email Signature', icon: Mail, testId: 'link-email-signature' },
         { href: '/appointments', label: 'Appointments', icon: CalendarDays, testId: 'link-appointments' },
         { href: '/voice-test', label: 'Voice Agent', icon: Phone, testId: 'link-voice-test' },
