@@ -117,6 +117,38 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
     }
   };
 
+  const getSectionGradient = (id: string, isExpanded: boolean) => {
+    const baseClass = isExpanded ? 'bg-gradient-to-r' : '';
+    switch (id) {
+      case 'core':
+        return isExpanded ? 'bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-950/40 dark:to-teal-950/40 text-emerald-700 dark:text-emerald-300' : '';
+      case 'tools':
+        return isExpanded ? 'bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-950/40 dark:to-cyan-950/40 text-blue-700 dark:text-blue-300' : '';
+      case 'business':
+        return isExpanded ? 'bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-950/40 dark:to-pink-950/40 text-purple-700 dark:text-purple-300' : '';
+      case 'account':
+        return isExpanded ? 'bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-950/40 dark:to-amber-950/40 text-orange-700 dark:text-orange-300' : '';
+      default:
+        return '';
+    }
+  };
+
+  const getChevronColor = (id: string, isExpanded: boolean) => {
+    if (!isExpanded) return 'text-gray-400 dark:text-gray-600';
+    switch (id) {
+      case 'core':
+        return 'text-emerald-600 dark:text-emerald-400';
+      case 'tools':
+        return 'text-blue-600 dark:text-blue-400';
+      case 'business':
+        return 'text-purple-600 dark:text-purple-400';
+      case 'account':
+        return 'text-orange-600 dark:text-orange-400';
+      default:
+        return 'text-gray-400 dark:text-gray-600';
+    }
+  };
+
   return (
     <aside className="h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col overflow-y-auto scrollbar-hide">
       {/* Header - User Profile Card with Modern Gradient Design */}
@@ -164,16 +196,20 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
             {/* Section Header */}
             <button
               onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}
-              className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider hover:text-gray-900 dark:hover:text-gray-300 transition-colors group"
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-200 group ${
+                expandedSection === section.id
+                  ? getSectionGradient(section.id, true)
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/30'
+              }`}
             >
               <div className="flex items-center gap-2">
                 {getSectionIcon(section.id)}
                 {section.label}
               </div>
               <ChevronDown
-                className={`w-4 h-4 transition-transform duration-200 ${
+                className={`w-4 h-4 transition-all duration-200 ${
                   expandedSection === section.id ? 'rotate-180' : ''
-                }`}
+                } ${getChevronColor(section.id, expandedSection === section.id)}`}
               />
             </button>
 
