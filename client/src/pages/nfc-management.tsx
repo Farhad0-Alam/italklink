@@ -100,24 +100,26 @@ export default function NfcManagement() {
 
   const selectedCard = cards.find((card: any) => card.id === selectedCardId);
 
-  // Auto-update form when cards load
+  // Reset form when dialog opens
   useEffect(() => {
-    if (cards.length > 0 && !selectedCardId) {
-      form.setValue('cardId', cards[0].id);
+    if (showCreateDialog && cards.length > 0) {
+      form.reset({
+        tagName: '',
+        tagType: 'NTAG216',
+        targetUrl: '',
+        cardId: cards[0]?.id || '',
+      });
     }
-  }, [cards, selectedCardId, form]);
+  }, [showCreateDialog, cards, form]);
 
-  // Auto-populate target URL when card is selected
+  // Auto-populate target URL and tag name when card is selected
   useEffect(() => {
-    if (selectedCard) {
+    if (selectedCard && selectedCardId) {
       const cardUrl = `https://talkl.ink/${selectedCard.customUrl || selectedCard.shareSlug || selectedCard.id}`;
       form.setValue('targetUrl', cardUrl);
-      // Auto-generate tag name from card name
-      if (!form.getValues('tagName') || form.getValues('tagName') === '') {
-        form.setValue('tagName', `${selectedCard.name || selectedCard.cardName} - NFC Tag`);
-      }
+      form.setValue('tagName', `${selectedCard.name || selectedCard.cardName} - NFC Tag`);
     }
-  }, [selectedCard, form]);
+  }, [selectedCard, selectedCardId, form]);
 
   // Create NFC tag mutation
   const createTagMutation = useMutation({
