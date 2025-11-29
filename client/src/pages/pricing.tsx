@@ -284,7 +284,7 @@ export default function Pricing() {
       }));
       
       // Redirect to signup
-      setLocation('/auth/signup?redirect=pricing');
+      setLocation('/register?redirect=pricing');
       return;
     }
 
