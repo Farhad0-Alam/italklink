@@ -525,117 +525,144 @@ export default function Affiliate() {
           </Card>
         </div>
 
-        <Card className="max-w-2xl mx-auto">
-          <CardHeader>
-            <CardTitle>Apply to Become an Affiliate</CardTitle>
-            <p className="text-muted-foreground">
+        {/* Modern Application Form Card */}
+        <Card className="max-w-2xl mx-auto border-0 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-xl">
+            <CardTitle className="text-2xl">Apply to Become an Affiliate</CardTitle>
+            <p className="text-blue-50 mt-2">
               Fill out the form below to start your affiliate journey
             </p>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-8">
             <form onSubmit={handleApply} className="space-y-6">
-              <div>
-                <Label htmlFor="country">Country *</Label>
-                <Select 
-                  value={applicationForm.country} 
-                  onValueChange={(value) => setApplicationForm(prev => ({ ...prev, country: value }))}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="US">United States</SelectItem>
-                    <SelectItem value="CA">Canada</SelectItem>
-                    <SelectItem value="GB">United Kingdom</SelectItem>
-                    <SelectItem value="AU">Australia</SelectItem>
-                    <SelectItem value="DE">Germany</SelectItem>
-                    <SelectItem value="FR">France</SelectItem>
-                    <SelectItem value="BD">Bangladesh</SelectItem>
-                    <SelectItem value="IN">India</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="website">Website/Social Media (Optional)</Label>
-                <Input
-                  id="website"
-                  type="url"
-                  placeholder="https://your-website.com"
-                  value={applicationForm.website}
-                  onChange={(e) => setApplicationForm(prev => ({ ...prev, website: e.target.value }))}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="sourceInfo">How did you hear about us? (Optional)</Label>
-                <Textarea
-                  id="sourceInfo"
-                  placeholder="Tell us how you discovered our affiliate program..."
-                  value={applicationForm.sourceInfo}
-                  onChange={(e) => setApplicationForm(prev => ({ ...prev, sourceInfo: e.target.value }))}
-                />
-              </div>
-
-              <div className="border-t pt-6">
-                <h3 className="font-semibold mb-4">Commission Preferences</h3>
-                
+              {/* Basic Information Section */}
+              <div className="space-y-5">
                 <div>
-                  <Label htmlFor="paymentType">Commission Type *</Label>
+                  <Label htmlFor="country" className="font-semibold text-base">Country *</Label>
                   <Select 
-                    value={applicationForm.paymentType} 
-                    onValueChange={(value) => setApplicationForm(prev => ({ ...prev, paymentType: value }))}
+                    value={applicationForm.country} 
+                    onValueChange={(value) => setApplicationForm(prev => ({ ...prev, country: value }))}
+                    required
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select commission type" />
+                    <SelectTrigger className="mt-2 h-11 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:border-blue-500 transition-colors">
+                      <SelectValue placeholder="Select your country" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="onetime">One-Time Commissions</SelectItem>
-                      <SelectItem value="recurring">Recurring Commissions (Track Lifetime Value)</SelectItem>
+                      <SelectItem value="US">United States</SelectItem>
+                      <SelectItem value="CA">Canada</SelectItem>
+                      <SelectItem value="GB">United Kingdom</SelectItem>
+                      <SelectItem value="AU">Australia</SelectItem>
+                      <SelectItem value="DE">Germany</SelectItem>
+                      <SelectItem value="FR">France</SelectItem>
+                      <SelectItem value="BD">Bangladesh</SelectItem>
+                      <SelectItem value="IN">India</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {applicationForm.paymentType === 'recurring' 
-                      ? 'Earn commissions from recurring subscriptions for the specified duration'
-                      : 'Earn commissions only on first-time purchases'}
-                  </p>
                 </div>
 
-                {applicationForm.paymentType === 'recurring' && (
-                  <div className="mt-4">
-                    <Label htmlFor="recurringDuration">Recurring Commission Duration *</Label>
-                    <Select 
-                      value={applicationForm.recurringDuration.toString()} 
-                      onValueChange={(value) => setApplicationForm(prev => ({ ...prev, recurringDuration: parseInt(value) }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select duration" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="3">3 Months</SelectItem>
-                        <SelectItem value="6">6 Months</SelectItem>
-                        <SelectItem value="12">12 Months</SelectItem>
-                        <SelectItem value="24">24 Months</SelectItem>
-                        <SelectItem value="36">36 Months (Lifetime)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      How long you'll earn commissions from each recurring customer
-                    </p>
-                  </div>
-                )}
+                <div>
+                  <Label htmlFor="website" className="font-semibold text-base">Website/Social Media (Optional)</Label>
+                  <Input
+                    id="website"
+                    type="url"
+                    placeholder="https://your-website.com"
+                    value={applicationForm.website}
+                    onChange={(e) => setApplicationForm(prev => ({ ...prev, website: e.target.value }))}
+                    className="mt-2 h-11 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:border-blue-500 transition-colors"
+                  />
+                </div>
 
-                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-900">
-                    <strong>Payout Method:</strong> All affiliates receive commissions via Stripe Connect. You'll link your Stripe account during dashboard setup.
-                  </p>
+                <div>
+                  <Label htmlFor="sourceInfo" className="font-semibold text-base">How did you hear about us? (Optional)</Label>
+                  <Textarea
+                    id="sourceInfo"
+                    placeholder="Tell us how you discovered our affiliate program..."
+                    value={applicationForm.sourceInfo}
+                    onChange={(e) => setApplicationForm(prev => ({ ...prev, sourceInfo: e.target.value }))}
+                    className="mt-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:border-blue-500 transition-colors"
+                    rows={4}
+                  />
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" size="lg">
-                <UserPlus className="h-4 w-4 mr-2" />
+              {/* Commission Preferences Section */}
+              <div className="border-t-2 border-gray-200 dark:border-gray-700 pt-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="rounded-lg bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 p-2.5">
+                    <DollarSign className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Commission Preferences</h3>
+                </div>
+                
+                <div className="space-y-5">
+                  <div>
+                    <Label htmlFor="paymentType" className="font-semibold">Commission Type *</Label>
+                    <Select 
+                      value={applicationForm.paymentType} 
+                      onValueChange={(value) => setApplicationForm(prev => ({ ...prev, paymentType: value }))}
+                    >
+                      <SelectTrigger className="mt-2 h-11 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:border-purple-500 transition-colors">
+                        <SelectValue placeholder="Select commission type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="onetime">One-Time Commissions</SelectItem>
+                        <SelectItem value="recurring">Recurring Commissions (Track Lifetime Value)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {applicationForm.paymentType === 'recurring' 
+                        ? '💰 Earn commissions from recurring subscriptions for the specified duration'
+                        : '💳 Earn commissions only on first-time purchases'}
+                    </p>
+                  </div>
+
+                  {applicationForm.paymentType === 'recurring' && (
+                    <div>
+                      <Label htmlFor="recurringDuration" className="font-semibold">Recurring Commission Duration *</Label>
+                      <Select 
+                        value={applicationForm.recurringDuration.toString()} 
+                        onValueChange={(value) => setApplicationForm(prev => ({ ...prev, recurringDuration: parseInt(value) }))}
+                      >
+                        <SelectTrigger className="mt-2 h-11 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:border-purple-500 transition-colors">
+                          <SelectValue placeholder="Select duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="3">3 Months</SelectItem>
+                          <SelectItem value="6">6 Months</SelectItem>
+                          <SelectItem value="12">12 Months</SelectItem>
+                          <SelectItem value="24">24 Months</SelectItem>
+                          <SelectItem value="36">36 Months (Lifetime)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        How long you'll earn commissions from each recurring customer
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Modern Payout Info Box */}
+                <div className="mt-6 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-2 border-blue-200 dark:border-blue-800 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-2 flex-shrink-0 mt-0.5">
+                      <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                        Payout Method: Stripe Connect
+                      </p>
+                      <p className="text-sm text-blue-800 dark:text-blue-200">
+                        All affiliates receive commissions via Stripe Connect for secure, automated payouts. You'll link your Stripe account during dashboard setup.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modern Submit Button */}
+              <Button type="submit" size="lg" className="w-full mt-8 h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                <UserPlus className="h-5 w-5 mr-2" />
                 Submit Application
               </Button>
             </form>
