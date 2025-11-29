@@ -436,6 +436,7 @@ router.post('/track/conversion', async (req, res) => {
 
     let affiliateId: string | null = null;
     let affiliateUserId: string | null = null;
+    let cookieDurationDays = 30; // Default
 
     // Try to find affiliate from provided code or tracking cookie
     if (affiliateCode) {
@@ -448,6 +449,7 @@ router.post('/track/conversion', async (req, res) => {
       if (affiliate.length) {
         affiliateId = affiliate[0].id;
         affiliateUserId = affiliate[0].userId;
+        cookieDurationDays = affiliate[0].cookieDurationDays || 30;
         
         // SECURITY: Prevent self-referral (user can't earn commission for their own purchase)
         if (userId && affiliateUserId === userId) {
@@ -468,6 +470,21 @@ router.post('/track/conversion', async (req, res) => {
 
     if (!affiliateId) {
       return res.status(400).json({ message: 'No valid affiliate found for conversion' });
+    }
+
+    // SECURITY: Validate conversion is within affiliate's cookie attribution window
+    if (customerId) {
+      const attributionWindowStart = new Date(Date.now() - (cookieDurationDays * 24 * 60 * 60 * 1000));
+      const recentClick = await db.select().from(clicks)
+        .where(and(
+          eq(clicks.affiliateId, affiliateId),
+          gte(clicks.createdAt, attributionWindowStart)
+        ))
+        .limit(1);
+      
+      if (!recentClick.length) {
+        return res.status(400).json({ message: `No recent click found within ${cookieDurationDays}-day attribution window` });
+      }
     }
 
     // SECURITY: Prevent duplicate conversions from same user within 24 hours (fraud detection)
