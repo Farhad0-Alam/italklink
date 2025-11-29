@@ -602,6 +602,30 @@ router.patch('/commission-rules/:id', requireAdmin, async (req, res) => {
   }
 });
 
+// Delete commission rule
+router.delete('/commission-rules/:id', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if rule exists
+    const [existingRule] = await db.select().from(commissionRules)
+      .where(eq(commissionRules.id, id));
+
+    if (!existingRule) {
+      return res.status(404).json({ success: false, message: 'Commission rule not found' });
+    }
+
+    // Delete the rule
+    await db.delete(commissionRules)
+      .where(eq(commissionRules.id, id));
+
+    res.json({ success: true, message: 'Commission rule deleted successfully' });
+  } catch (error) {
+    console.error('Failed to delete commission rule:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // GET ALL PAYOUTS (Admin can view and process all payouts)
 router.get('/payouts', requireAdmin, async (req, res) => {
   try {
