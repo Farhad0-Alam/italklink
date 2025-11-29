@@ -224,8 +224,8 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
       },
     ],
     mode: 'payment',
-    success_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/dashboard?payment=success`,
-    cancel_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/pricing?payment=cancelled`,
+    success_url: `https://${process.env.REPLIT_DEV_DOMAIN || 'localhost:5000'}/dashboard?payment=success`,
+    cancel_url: `https://${process.env.REPLIT_DEV_DOMAIN || 'localhost:5000'}/pricing?payment=cancelled`,
     metadata: {
       userId: req.user.id,
       planId: planId.toString(),
@@ -399,8 +399,8 @@ router.post('/checkout/create-subscription', requireAuth, asyncHandler(async (re
       },
     ],
     mode: 'subscription',
-    success_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/dashboard?subscription=success`,
-    cancel_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/pricing?subscription=cancelled`,
+    success_url: `https://${process.env.REPLIT_DEV_DOMAIN || 'localhost:5000'}/dashboard?subscription=success`,
+    cancel_url: `https://${process.env.REPLIT_DEV_DOMAIN || 'localhost:5000'}/pricing?subscription=cancelled`,
     metadata: {
       userId: req.user.id,
       planId: planId.toString(),
