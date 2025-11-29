@@ -92,33 +92,6 @@ export default function Pricing() {
   // Get the discount percentage from plans (use the first plan's discount or default to 20%)
   const yearlyDiscountPercent = plans?.find(p => (p as any).discount > 0)?.discount || 20;
 
-  // Auto-checkout after signup/login if there's a pending plan
-  useEffect(() => {
-    if (user) {
-      const pending = localStorage.getItem('pendingPlan');
-      if (pending) {
-        try {
-          const { planId, userCount, couponCode, isYearly: savedIsYearly } = JSON.parse(pending);
-          localStorage.removeItem('pendingPlan');
-          
-          // Set the yearly state if it was saved
-          if (savedIsYearly !== undefined) {
-            setIsYearly(savedIsYearly);
-          }
-          
-          // Trigger checkout with saved plan info
-          checkoutMutation.mutate({
-            planId,
-            userCount,
-            couponCode
-          });
-        } catch (error) {
-          console.error('Failed to process pending plan:', error);
-        }
-      }
-    }
-  }, [user, checkoutMutation]);
-
   const validateCouponMutation = useMutation({
     mutationFn: async ({ code, planId, userCount }: { code: string; planId: number; userCount: number }) => {
       return apiRequest('POST', '/api/billing/coupons/validate', {
@@ -175,6 +148,33 @@ export default function Pricing() {
       });
     }
   });
+
+  // Auto-checkout after signup/login if there's a pending plan
+  useEffect(() => {
+    if (user) {
+      const pending = localStorage.getItem('pendingPlan');
+      if (pending) {
+        try {
+          const { planId, userCount, couponCode, isYearly: savedIsYearly } = JSON.parse(pending);
+          localStorage.removeItem('pendingPlan');
+          
+          // Set the yearly state if it was saved
+          if (savedIsYearly !== undefined) {
+            setIsYearly(savedIsYearly);
+          }
+          
+          // Trigger checkout with saved plan info
+          checkoutMutation.mutate({
+            planId,
+            userCount,
+            couponCode
+          });
+        } catch (error) {
+          console.error('Failed to process pending plan:', error);
+        }
+      }
+    }
+  }, [user, checkoutMutation]);
 
   const handleUserCountChange = (planId: number, count: number) => {
     const plan = plans?.find(p => p.id === planId);
