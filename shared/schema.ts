@@ -108,6 +108,7 @@ export const productStatusEnum = pgEnum('product_status', ['draft', 'active', 'i
 export const orderStatusEnum = pgEnum('order_status', ['pending', 'completed', 'failed', 'refunded']);
 export const downloadStatusEnum = pgEnum('download_status', ['active', 'expired', 'revoked']);
 export const reviewStatusEnum = pgEnum('review_status', ['approved', 'pending', 'rejected']);
+export const refundStatusEnum = pgEnum('refund_status', ['requested', 'approved', 'rejected', 'processed', 'cancelled']);
 
 // Database Tables
 
