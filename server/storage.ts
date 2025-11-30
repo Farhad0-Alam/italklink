@@ -6786,6 +6786,41 @@ export class DatabaseStorage implements IStorage {
     return order;
   }
 
+  async getAllProductsBySeller(sellerId: string): Promise<DigitalProduct[]> {
+    const products = await db.select().from(digitalProducts)
+      .where(eq(digitalProducts.sellerId, sellerId))
+      .orderBy(desc(digitalProducts.createdAt || sql`now()`));
+    return products;
+  }
+
+  async getSellerStats(sellerId: string): Promise<any> {
+    const products = await this.getAllProductsBySeller(sellerId);
+    
+    const totalViews = products.reduce((sum, p) => sum + (p.views || 0), 0);
+    const totalSales = products.reduce((sum, p) => sum + (p.purchases || 0), 0);
+    const averageRating = products.length > 0
+      ? products.reduce((sum, p) => sum + (p.averageRating || 0), 0) / products.length
+      : 0;
+
+    // Get total revenue from completed orders
+    const orders = await db.select({ amount: shopOrders.amount })
+      .from(shopOrders)
+      .where(and(
+        eq(shopOrders.sellerId, sellerId),
+        eq(shopOrders.status, 'completed')
+      ));
+    
+    const totalRevenue = orders.reduce((sum, o) => sum + o.amount, 0);
+
+    return {
+      productCount: products.length,
+      totalViews,
+      totalSales,
+      averageRating: averageRating.toFixed(1),
+      totalRevenue,
+    };
+  }
+
   async validateCoupon(code: string, userId: string | null): Promise<any> {
     const [coupon] = await db.select().from(coupons).where(eq(coupons.code, code.toUpperCase()));
     
