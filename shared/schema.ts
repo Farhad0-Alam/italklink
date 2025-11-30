@@ -5034,11 +5034,13 @@ export type InsertNfcAnalytics = typeof nfcAnalytics.$inferInsert;
 
 export const insertNfcTagSchema = createInsertSchema(nfcTags).omit({
   id: true,
+  userId: true,
   createdAt: true,
   updatedAt: true,
   totalTaps: true,
   lastTappedAt: true,
   isProgrammed: true,
+  ndefPayload: true,
 }).extend({
   tagName: z.string().min(1).max(100),
   targetUrl: z.string().url('Target URL must be valid'),
