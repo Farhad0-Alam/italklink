@@ -211,8 +211,6 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
     customer: stripeCustomerId,
     payment_method_types: [
       'card',
-      'alipay',
-      'wechat_pay',
       'paypal',
       'klarna',
       'affirm',
