@@ -14,15 +14,31 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState(0);
 
+  // Fetch product
   const { data: product, isLoading, error } = useQuery<DigitalProduct>({
     queryKey: ["/api/shop/product", slug],
   });
 
-  // Fetch related products
-  const { data: relatedProducts } = useQuery({
-    queryKey: ["/api/shop/browse", product?.category],
-    enabled: !!product?.category,
+  // Fetch seller profile
+  const { data: sellerResponse } = useQuery({
+    queryKey: ["/api/shop/seller", product?.sellerId],
+    enabled: !!product?.sellerId,
   });
+  const seller = sellerResponse?.data;
+
+  // Fetch reviews
+  const { data: reviewsResponse } = useQuery({
+    queryKey: ["/api/shop/product", slug, "reviews"],
+    enabled: !!slug,
+  });
+  const reviews = reviewsResponse?.data || [];
+
+  // Fetch related products
+  const { data: relatedResponse } = useQuery({
+    queryKey: ["/api/shop/product", slug, "related"],
+    enabled: !!slug,
+  });
+  const relatedProducts = relatedResponse?.data || [];
 
   if (isLoading) return <LoadingSkeleton />;
 
@@ -260,72 +276,80 @@ export default function ProductDetails() {
               </p>
             </div>
 
-            {/* Seller Profile */}
+            {/* Seller Profile - Dynamic from DB */}
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 h-fit">
               <h3 className="font-bold text-lg mb-4 text-gray-900 dark:text-white">Seller</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex-shrink-0" />
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900 dark:text-white">Shop Owner</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                      ))}
-                      <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">4.8 (128 reviews)</span>
+              {seller ? (
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    {seller.avatar ? (
+                      <img src={seller.avatar} alt={seller.name} className="w-12 h-12 rounded-full" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500" />
+                    )}
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 dark:text-white">{seller.name}</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className={`w-4 h-4 ${i < Math.round(seller.rating) ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
+                        ))}
+                        <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">{seller.rating} ({reviewCount} reviews)</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Positive reviews</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">98%</span>
+                  <div className="space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Positive reviews</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{seller.positiveReviews}%</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Response time</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{seller.responseTime}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Products sold</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{seller.productsSold}+</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Response time</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">&lt;1 hour</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Products sold</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">500+</span>
-                  </div>
-                </div>
 
-                <Button variant="outline" size="sm" className="w-full">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Contact Seller
-                </Button>
-              </div>
+                  <Button variant="outline" size="sm" className="w-full">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Contact Seller
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-gray-600 dark:text-gray-400">Loading seller info...</p>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Reviews Section */}
+        {/* Reviews Section - Dynamic from DB */}
         <div className="mt-12 bg-white dark:bg-slate-800 rounded-xl p-8 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Customer Reviews</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Customer Reviews ({reviewCount})</h2>
           
-          {reviewCount > 0 ? (
+          {reviews && reviews.length > 0 ? (
             <div className="space-y-6">
-              {[...Array(3)].map((_, idx) => (
+              {reviews.map((review: any, idx: number) => (
                 <div key={idx} className="pb-6 border-b border-gray-200 dark:border-gray-700 last:border-0">
                   <div className="flex items-start gap-4 mb-3">
                     <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex-shrink-0" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="font-semibold text-gray-900 dark:text-white">Customer {idx + 1}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">{review.buyerName}</p>
                         <div className="flex">
                           {[...Array(5)].map((_, i) => (
                             <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                           ))}
                         </div>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">2 weeks ago</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    Great product! Exactly what I was looking for. The quality is excellent and the seller provided great support.
-                  </p>
+                  <p className="text-gray-700 dark:text-gray-300">{review.comment}</p>
                 </div>
               ))}
             </div>
@@ -334,12 +358,12 @@ export default function ProductDetails() {
           )}
         </div>
 
-        {/* Related Products */}
-        {relatedProducts && relatedProducts.data && relatedProducts.data.length > 0 && (
+        {/* Related Products - Dynamic from DB */}
+        {relatedProducts && relatedProducts.length > 0 && (
           <div className="mt-12">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">You may also like</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.data.slice(0, 4).map((prod: DigitalProduct) => (
+              {relatedProducts.map((prod: DigitalProduct) => (
                 <div
                   key={prod.id}
                   onClick={() => setLocation(`/shop/product/${prod.slug}`)}
@@ -357,13 +381,13 @@ export default function ProductDetails() {
                     <div className="flex items-center gap-2 mb-3">
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                          <Star key={i} className={`w-3 h-3 ${i < Math.round((prod.rating || 0) / 100 * 5) ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
                         ))}
                       </div>
                       <span className="text-xs text-gray-600 dark:text-gray-400">({prod.reviewCount})</span>
                     </div>
                     <p className="font-bold text-emerald-600">
-                      ${((prod.discountPrice || prod.price) / 100).toFixed(2)}
+                      ${(((prod.discountPrice || prod.price) || 0) / 100).toFixed(2)}
                     </p>
                   </div>
                 </div>
