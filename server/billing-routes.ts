@@ -239,21 +239,11 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
       acss_debit: {
         mandate_options: {
           payment_schedule: 'sporadic',
-          transaction_type: 'one_off',
+          transaction_type: 'one_time',
         },
-      },
-      au_becs_debit: {
-        mandate_options: {},
-      },
-      bacs_debit: {
-        mandate_options: {},
       },
       wechat_pay: {
         client: 'web' as const,
-      },
-      alipay: {},
-      sepa_debit: {
-        mandate_options: {},
       },
       us_bank_account: {
         financial_connections: {
