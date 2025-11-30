@@ -6868,6 +6868,88 @@ export class DatabaseStorage implements IStorage {
     // Increment coupon usage count
     await db.update(coupons).set({ usageCount: (coupon.usageCount || 0) + 1 }).where(eq(coupons.id, coupon.id));
   }
+
+  async getPendingProducts(): Promise<any[]> {
+    const products = await db.select({
+      id: digitalProducts.id,
+      title: digitalProducts.title,
+      description: digitalProducts.description,
+      price: digitalProducts.price,
+      sellerName: users.fullName,
+      sellerId: digitalProducts.sellerId,
+      status: digitalProducts.status,
+      moderationNotes: digitalProducts.moderationNotes,
+      createdAt: digitalProducts.createdAt,
+      image: digitalProducts.image,
+    })
+      .from(digitalProducts)
+      .leftJoin(users, eq(digitalProducts.sellerId, users.id))
+      .where(eq(digitalProducts.status, 'pending'))
+      .orderBy(desc(digitalProducts.createdAt || sql`now()`));
+    
+    return products;
+  }
+
+  async getAllProductsForModeration(status?: string, sort: string = 'newest'): Promise<any[]> {
+    let query = db.select({
+      id: digitalProducts.id,
+      title: digitalProducts.title,
+      description: digitalProducts.description,
+      price: digitalProducts.price,
+      sellerName: users.fullName,
+      sellerId: digitalProducts.sellerId,
+      status: digitalProducts.status,
+      moderationNotes: digitalProducts.moderationNotes,
+      createdAt: digitalProducts.createdAt,
+      image: digitalProducts.image,
+    })
+      .from(digitalProducts)
+      .leftJoin(users, eq(digitalProducts.sellerId, users.id));
+    
+    if (status && status !== 'all') {
+      query = query.where(eq(digitalProducts.status, status as any));
+    }
+
+    const sortOrder = sort === 'oldest' ? asc : desc;
+    const products = await query.orderBy(sortOrder(digitalProducts.createdAt || sql`now()`));
+    
+    return products;
+  }
+
+  async updateProductModeration(productId: string, status: 'approved' | 'rejected', notes?: string): Promise<void> {
+    await db.update(digitalProducts)
+      .set({ status, moderationNotes: notes })
+      .where(eq(digitalProducts.id, productId));
+  }
+
+  async getModerationStats(): Promise<any> {
+    const pending = await db.select({ count: count() }).from(digitalProducts).where(eq(digitalProducts.status, 'pending'));
+    const approved = await db.select({ count: count() }).from(digitalProducts).where(eq(digitalProducts.status, 'approved'));
+    const rejected = await db.select({ count: count() }).from(digitalProducts).where(eq(digitalProducts.status, 'rejected'));
+    
+    return {
+      pending: pending[0]?.count || 0,
+      approved: approved[0]?.count || 0,
+      rejected: rejected[0]?.count || 0,
+      total: (pending[0]?.count || 0) + (approved[0]?.count || 0) + (rejected[0]?.count || 0),
+    };
+  }
+
+  async getSellerModerationHistory(sellerId: string): Promise<any[]> {
+    const products = await db.select({
+      id: digitalProducts.id,
+      title: digitalProducts.title,
+      status: digitalProducts.status,
+      moderationNotes: digitalProducts.moderationNotes,
+      createdAt: digitalProducts.createdAt,
+      updatedAt: digitalProducts.updatedAt,
+    })
+      .from(digitalProducts)
+      .where(eq(digitalProducts.sellerId, sellerId))
+      .orderBy(desc(digitalProducts.updatedAt || sql`now()`));
+    
+    return products;
+  }
 }
 
 export const storage = new DatabaseStorage();

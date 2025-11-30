@@ -96,6 +96,7 @@ import shopAffiliateRoutes from './shop-affiliate-routes';
 import couponRoutes from './coupon-routes';
 import shopEmailRoutes from './shop-email-routes';
 import sellerStoreRoutes from './seller-store-routes';
+import shopModerationRoutes from './shop-moderation-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 import ragRoutes from './rag-routes';
 import voiceRoutes from './voice-routes';
@@ -183,6 +184,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup seller store routes
   app.use('/api/shop/seller', sellerStoreRoutes);
+
+  // Setup shop moderation routes
+  app.use('/api/shop/moderation', shopModerationRoutes);
   
   // Setup billing routes
   app.use('/api/billing', billingRoutes);
