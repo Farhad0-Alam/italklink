@@ -77,6 +77,7 @@ export default function NfcManagement() {
   const [, setLocation] = useLocation();
   const [selectedTag, setSelectedTag] = useState<NfcTag | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [nfcReading, setNfcReading] = useState(false);
   const [nfcWriting, setNfcWriting] = useState(false);
@@ -107,6 +108,16 @@ export default function NfcManagement() {
   });
 
   const form = useForm({
+    resolver: zodResolver(nfcTagSchema),
+    defaultValues: {
+      tagName: '',
+      tagType: 'NTAG216',
+      targetUrl: '',
+      cardId: '',
+    },
+  });
+
+  const editForm = useForm({
     resolver: zodResolver(nfcTagSchema),
     defaultValues: {
       tagName: '',
@@ -162,6 +173,28 @@ export default function NfcManagement() {
       toast({
         title: 'Error',
         description: error.message || 'Failed to create NFC tag',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Update NFC tag mutation
+  const updateTagMutation = useMutation({
+    mutationFn: (data: { tagId: string; updates: Partial<z.infer<typeof nfcTagSchema>> }) =>
+      apiRequest('PATCH', `/api/nfc/${data.tagId}`, data.updates),
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'NFC tag updated successfully!',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/nfc/user'] });
+      setShowEditDialog(false);
+      setSelectedTag(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update NFC tag',
         variant: 'destructive',
       });
     },
@@ -577,6 +610,9 @@ export default function NfcManagement() {
                             <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 flex-shrink-0" />
                           </div>
                           <div className="flex gap-1.5 sm:gap-2">
+                            <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={(e) => { e.stopPropagation(); editForm.reset({ tagName: tag.tagName, tagType: tag.tagType as any, targetUrl: tag.targetUrl, cardId: tag.cardId }); setSelectedTag(tag); setShowEditDialog(true); }}>
+                              Edit
+                            </Button>
                             <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={(e) => { e.stopPropagation(); downloadNdef(tag.id); }}>
                               <Download className="w-3 h-3 mr-0.5 sm:mr-1" />
                               <span className="hidden sm:inline">NDEF</span>
