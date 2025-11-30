@@ -138,7 +138,7 @@ function Router() {
       
       {/* Shop routes */}
       <Route path="/shop">{() => <PageSuspense><ShopBrowse /></PageSuspense>}</Route>
-      <Route path="/shop/product/:id">{(params) => <PageSuspense><ProductDetails {...params} /></PageSuspense>}</Route>
+      <Route path="/shop/product/:slug">{(params) => <PageSuspense><ProductDetails {...params} /></PageSuspense>}</Route>
       <Route path="/shop/seller">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
       <Route path="/shop/seller/products">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
       <Route path="/shop/seller/orders">{() => <PageSuspense><SellerOrders /></PageSuspense>}</Route>

@@ -8,10 +8,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { DigitalProduct } from "@shared/schema";
 
 export default function ProductDetails() {
-  const { id } = useParams();
+  const { slug } = useParams<{ slug: string }>();
 
   const { data: product, isLoading, error } = useQuery<DigitalProduct>({
-    queryKey: ["/api/shop/product", id],
+    queryKey: ["/api/shop/product", slug],
   });
 
   if (isLoading) return <LoadingSkeleton />;
@@ -29,19 +29,34 @@ export default function ProductDetails() {
     ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
     : 0;
 
+  // Safe numeric values with defaults
+  const price = product.price || 0;
+  const discountPrice = product.discountPrice || 0;
+  const purchases = product.purchases || 0;
+  const views = product.views || 0;
+  const rating = product.rating || 0;
+  const reviewCount = product.reviewCount || 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-900 dark:to-purple-900 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="grid md:grid-cols-2 gap-8">
           {/* Image Section */}
           <div className="flex flex-col gap-4">
-            {product.thumbnailUrl && (
-              <img
-                src={product.thumbnailUrl}
-                alt={product.title}
-                className="w-full h-96 object-cover rounded-xl shadow-lg"
-              />
-            )}
+            <div className="w-full h-96 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl shadow-lg flex items-center justify-center overflow-hidden">
+              {product.thumbnailUrl ? (
+                <img
+                  src={product.thumbnailUrl}
+                  alt={product.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="text-white text-center">
+                  <Package className="h-16 w-16 mx-auto mb-2" />
+                  <p className="text-sm">{product.title}</p>
+                </div>
+              )}
+            </div>
             {product.previewImages && Array.isArray(product.previewImages) && product.previewImages.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {(product.previewImages as string[]).slice(0, 3).map((img, idx) => (
@@ -73,13 +88,13 @@ export default function ProductDetails() {
               <div className="flex items-center gap-4">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Price</p>
-                  {product.discountPrice ? (
+                  {discountPrice ? (
                     <div className="flex items-center gap-3">
                       <span className="text-4xl font-bold text-emerald-600">
-                        ${(product.discountPrice / 100).toFixed(2)}
+                        ${(discountPrice / 100).toFixed(2)}
                       </span>
                       <span className="text-xl text-gray-400 line-through">
-                        ${(product.price / 100).toFixed(2)}
+                        ${(price / 100).toFixed(2)}
                       </span>
                       <span className="text-sm font-bold bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-200 px-2 py-1 rounded">
                         Save {discountPercent}%
@@ -87,7 +102,7 @@ export default function ProductDetails() {
                     </div>
                   ) : (
                     <span className="text-4xl font-bold text-emerald-600">
-                      ${(product.price / 100).toFixed(2)}
+                      ${(price / 100).toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -98,20 +113,20 @@ export default function ProductDetails() {
             <div className="grid grid-cols-3 gap-4">
               <Card className="bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-700">
                 <CardContent className="pt-6">
-                  <p className="text-3xl font-bold text-blue-600">{product.purchases}</p>
+                  <p className="text-3xl font-bold text-blue-600">{purchases}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Purchases</p>
                 </CardContent>
               </Card>
               <Card className="bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-700">
                 <CardContent className="pt-6">
-                  <p className="text-3xl font-bold text-purple-600">{product.views}</p>
+                  <p className="text-3xl font-bold text-purple-600">{views}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Views</p>
                 </CardContent>
               </Card>
               <Card className="bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-700">
                 <CardContent className="pt-6">
-                  <p className="text-3xl font-bold text-amber-600">⭐ {(product.rating / 100).toFixed(1)}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{product.reviewCount} reviews</p>
+                  <p className="text-3xl font-bold text-amber-600">⭐ {(rating / 100).toFixed(1)}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{reviewCount} reviews</p>
                 </CardContent>
               </Card>
             </div>
