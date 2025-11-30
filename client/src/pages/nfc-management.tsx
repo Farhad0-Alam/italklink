@@ -749,7 +749,7 @@ export default function NfcManagement() {
             ) : (
               <>
                 {/* Row 1: Read NFC Tag + Write to Tag - 2 Columns */}
-                <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 xs:gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
                   <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-2 border-blue-200 dark:border-blue-800">
                     <CardHeader className="pb-2 sm:pb-3">
                       <CardTitle className="flex items-center text-base sm:text-lg">
@@ -821,7 +821,7 @@ export default function NfcManagement() {
                 </div>
 
                 {/* Row 2: NDEF Payload + Export Config - 2 Columns */}
-                <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 xs:gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
                   <Card className="bg-white dark:bg-gray-800">
                     <CardHeader className="pb-2 sm:pb-3">
                       <CardTitle className="flex items-center text-base sm:text-lg">
