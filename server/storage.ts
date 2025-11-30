@@ -8,7 +8,7 @@ import {
   publicUploads, qrLinks, qrEvents, cardSubscriptions, coupons, userSubscriptions,
   bios, connections, subscriptions, analytics, affiliates, conversions, headerTemplates, icons, pageElementTypes,
   nfcTags, nfcTapEvents, nfcAnalytics,
-  digitalProducts, shopOrders, shopDownloads, shopCart, shopReviews,
+  digitalProducts, shopOrders, shopDownloads, shopCart, shopReviews, shopWishlists,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -6588,6 +6588,38 @@ export class DatabaseStorage implements IStorage {
       .limit(5);
     
     return results.map(r => r.title);
+  }
+
+  async getUserWishlist(userId: string): Promise<(ShopWishlist & { product: DigitalProduct })[]> {
+    const items = await db.select({
+      wishlist: shopWishlists,
+      product: digitalProducts,
+    })
+    .from(shopWishlists)
+    .innerJoin(digitalProducts, eq(shopWishlists.productId, digitalProducts.id))
+    .where(eq(shopWishlists.userId, userId))
+    .orderBy(desc(shopWishlists.createdAt));
+    
+    return items.map(item => ({ ...item.wishlist, product: item.product }));
+  }
+
+  async getWishlistItem(userId: string, productId: string): Promise<ShopWishlist | undefined> {
+    const [item] = await db.select().from(shopWishlists).where(and(eq(shopWishlists.userId, userId), eq(shopWishlists.productId, productId)));
+    return item;
+  }
+
+  async addToWishlist(userId: string, data: InsertShopWishlist): Promise<ShopWishlist> {
+    const [item] = await db.insert(shopWishlists).values({ userId, ...data }).returning();
+    return item;
+  }
+
+  async removeFromWishlist(userId: string, productId: string): Promise<void> {
+    await db.delete(shopWishlists).where(and(eq(shopWishlists.userId, userId), eq(shopWishlists.productId, productId)));
+  }
+
+  async updateWishlistItem(userId: string, productId: string, data: Partial<InsertShopWishlist>): Promise<ShopWishlist> {
+    const [item] = await db.update(shopWishlists).set({ ...data, updatedAt: new Date() }).where(and(eq(shopWishlists.userId, userId), eq(shopWishlists.productId, productId))).returning();
+    return item;
   }
 }
 
