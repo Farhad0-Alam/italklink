@@ -573,7 +573,81 @@ export default function NfcManagement() {
                 <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Select an NFC tag to access tools</p>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+              <>
+                {/* NFC Read/Write Tools - Top Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-2 border-blue-200 dark:border-blue-800">
+                    <CardHeader className="pb-2 sm:pb-3">
+                      <CardTitle className="flex items-center text-base sm:text-lg">
+                        <Scan className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-blue-600 flex-shrink-0" />
+                        <span>Read NFC Tag</span>
+                      </CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">Scan existing NFC tags</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                        Hold your phone near an NFC tag to read its contents.
+                      </p>
+                      {nfcReadResult && (
+                        <div className="bg-white dark:bg-gray-800 border border-green-200 dark:border-green-800 rounded p-2 sm:p-3">
+                          <p className="text-xs sm:text-sm text-green-700 dark:text-green-400 font-mono break-all">{nfcReadResult}</p>
+                        </div>
+                      )}
+                      <Button
+                        className="w-full text-sm h-9 bg-blue-600 hover:bg-blue-700"
+                        onClick={handleReadNFC}
+                        disabled={nfcReading}
+                      >
+                        {nfcReading ? (
+                          <>
+                            <Loader className="w-3 h-3 sm:w-4 sm:h-4 mr-2 animate-spin" />
+                            Scanning...
+                          </>
+                        ) : (
+                          <>
+                            <Scan className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                            Scan Tag
+                          </>
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 border-2 border-emerald-200 dark:border-emerald-800">
+                    <CardHeader className="pb-2 sm:pb-3">
+                      <CardTitle className="flex items-center text-base sm:text-lg">
+                        <Upload className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-emerald-600 flex-shrink-0" />
+                        <span>Write to Tag</span>
+                      </CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">Write card link to NFC chip</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                        Hold your phone near a blank NFC chip to write your card link: {selectedTag.targetUrl}
+                      </p>
+                      <Button
+                        className="w-full text-sm h-9 bg-emerald-600 hover:bg-emerald-700"
+                        onClick={handleWriteNFC}
+                        disabled={nfcWriting}
+                      >
+                        {nfcWriting ? (
+                          <>
+                            <Loader className="w-3 h-3 sm:w-4 sm:h-4 mr-2 animate-spin" />
+                            Writing...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                            Write Tag
+                          </>
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Existing Tools - Bottom Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 <Card className="bg-white dark:bg-gray-800">
                   <CardHeader className="pb-2 sm:pb-3">
                     <CardTitle className="flex items-center text-base sm:text-lg">
@@ -640,6 +714,7 @@ export default function NfcManagement() {
                   </CardContent>
                 </Card>
               </div>
+              </>
             )}
           </TabsContent>
         </Tabs>
