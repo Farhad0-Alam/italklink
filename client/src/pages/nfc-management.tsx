@@ -621,18 +621,18 @@ export default function NfcManagement() {
 
         {/* Tabs */}
         <Tabs defaultValue="tags" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 gap-1 bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-1 h-auto">
-            <TabsTrigger value="tags" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 text-xs sm:text-sm py-2 px-1 sm:px-3">
+          <TabsList className="grid w-full grid-cols-3 gap-2 bg-transparent p-0 h-auto">
+            <TabsTrigger value="tags" className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 border-2 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:shadow-md transition-all text-xs sm:text-sm py-3 px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-emerald-100 dark:data-[state=active]:from-emerald-900/60">
               <Radio className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">My NFC Tags</span>
               <span className="sm:hidden">Tags</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 text-xs sm:text-sm py-2 px-1 sm:px-3">
+            <TabsTrigger value="analytics" className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-2 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:shadow-md transition-all text-xs sm:text-sm py-3 px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-blue-100 dark:data-[state=active]:from-blue-900/60">
               <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Analytics</span>
               <span className="sm:hidden">Stats</span>
             </TabsTrigger>
-            <TabsTrigger value="tools" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 text-xs sm:text-sm py-2 px-1 sm:px-3">
+            <TabsTrigger value="tools" className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/40 border-2 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:shadow-md transition-all text-xs sm:text-sm py-3 px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-purple-100 dark:data-[state=active]:from-purple-900/60">
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Tools</span>
               <span className="sm:hidden">Tools</span>
