@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireAuth } from './auth';
-import asyncHandler from 'express-async-handler';
+import { asyncHandler } from './middleware/error-handling';
 import { storage } from './storage';
 
 const router = Router();
