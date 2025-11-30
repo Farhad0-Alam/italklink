@@ -7,6 +7,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Download, Package, ArrowLeft, Menu } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { useShopMenu } from '@/context/ShopMenuContext';
 
 interface Purchase {
   id: string;
@@ -32,7 +33,7 @@ interface User {
 
 export default function UserPurchases() {
   const [, setLocation] = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, setMobileMenuOpen } = useShopMenu();
 
   const { data: user } = useQuery<User>({
     queryKey: ['/api/auth/user'],

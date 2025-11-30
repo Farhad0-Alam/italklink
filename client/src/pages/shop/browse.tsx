@@ -9,6 +9,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Search, ShoppingCart, Star, Download, Filter, Package, TrendingUp, Menu } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { useShopMenu } from '@/context/ShopMenuContext';
 
 interface DigitalProduct {
   id: string;
@@ -47,7 +48,7 @@ export default function ShopBrowse() {
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, setMobileMenuOpen } = useShopMenu();
 
   const { data: user } = useQuery<User>({
     queryKey: ['/api/auth/user'],

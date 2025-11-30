@@ -13,6 +13,7 @@ import { useLocation } from 'wouter';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { useShopMenu } from '@/context/ShopMenuContext';
 
 interface ProductFormData {
   title: string;
@@ -65,7 +66,7 @@ export default function SellerDashboard() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [formData, setFormData] = useState<ProductFormData>(initialFormData);
   const [isUploading, setIsUploading] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, setMobileMenuOpen } = useShopMenu();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
