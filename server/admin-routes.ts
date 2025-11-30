@@ -6,7 +6,7 @@ import {
   links, countersDaily, headerTemplates, insertHeaderTemplateSchema, coupons, couponUsages,
   insertCouponSchema, insertCouponUsageSchema
 } from '@shared/schema';
-import { requireOwner } from './auth';
+import { requireOwner, requireAdmin } from './auth';
 import { eq, desc, count, sql, and, or, like, inArray } from 'drizzle-orm';
 import bcryptjs from 'bcryptjs';
 import { z } from 'zod';
@@ -1825,6 +1825,139 @@ router.delete('/profile/sessions/:sessionId', requireOwner, async (req, res) => 
   }
 });
 
+
+// ===== PLAN MANAGEMENT ENDPOINTS =====
+
+// Get all plans (admin only)
+router.get('/plans', requireOwner, async (req, res) => {
+  try {
+    const plans = await db.select().from(subscriptionPlans).orderBy(desc(subscriptionPlans.createdAt));
+    res.json({ data: plans });
+  } catch (error) {
+    console.error('Failed to get plans:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get single plan
+router.get('/plans/:id', requireOwner, async (req, res) => {
+  try {
+    const plan = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, parseInt(req.params.id)));
+    if (!plan[0]) {
+      return res.status(404).json({ message: 'Plan not found' });
+    }
+    res.json({ data: plan[0] });
+  } catch (error) {
+    console.error('Failed to get plan:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Create new plan
+router.post('/plans', requireOwner, async (req, res) => {
+  try {
+    const { name, planType, price, discount, interval, businessCardsLimit, baseUsers, pricePerUser, setupFee, allowUserSelection, minUsers, maxUsers, elementFeatures, moduleFeatures, templateIds, description, features } = req.body;
+
+    // Validate required fields
+    if (!name || !planType || !interval || businessCardsLimit === undefined) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const newPlan = await db.insert(subscriptionPlans).values({
+      name,
+      planType: planType as 'free' | 'paid',
+      price: price || 0,
+      discount: discount || 0,
+      currency: 'usd',
+      interval,
+      businessCardsLimit,
+      baseUsers: baseUsers || 1,
+      pricePerUser: pricePerUser || 0,
+      setupFee: setupFee || 0,
+      allowUserSelection: allowUserSelection || false,
+      minUsers: minUsers || 1,
+      maxUsers: maxUsers || null,
+      elementFeatures: elementFeatures || [],
+      moduleFeatures: moduleFeatures || {},
+      templateIds: templateIds || [],
+      description,
+      features: features || {},
+      isActive: true,
+    }).returning();
+
+    await logAdminAction(req.user!.id, 'create', 'plan', newPlan[0]?.id?.toString(), { name, planType });
+
+    res.json({ data: newPlan[0] });
+  } catch (error) {
+    console.error('Failed to create plan:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update plan
+router.put('/plans/:id', requireOwner, async (req, res) => {
+  try {
+    const planId = parseInt(req.params.id);
+    const { name, planType, price, discount, interval, businessCardsLimit, baseUsers, pricePerUser, setupFee, allowUserSelection, minUsers, maxUsers, elementFeatures, moduleFeatures, templateIds, description, features, isActive } = req.body;
+
+    const updated = await db.update(subscriptionPlans)
+      .set({
+        name,
+        planType,
+        price: price || 0,
+        discount: discount || 0,
+        interval,
+        businessCardsLimit,
+        baseUsers: baseUsers || 1,
+        pricePerUser: pricePerUser || 0,
+        setupFee: setupFee || 0,
+        allowUserSelection: allowUserSelection || false,
+        minUsers: minUsers || 1,
+        maxUsers: maxUsers || null,
+        elementFeatures: elementFeatures || [],
+        moduleFeatures: moduleFeatures || {},
+        templateIds: templateIds || [],
+        description,
+        features: features || {},
+        isActive: isActive !== undefined ? isActive : true,
+      })
+      .where(eq(subscriptionPlans.id, planId))
+      .returning();
+
+    if (!updated[0]) {
+      return res.status(404).json({ message: 'Plan not found' });
+    }
+
+    await logAdminAction(req.user!.id, 'update', 'plan', planId.toString(), { name });
+
+    res.json({ data: updated[0] });
+  } catch (error) {
+    console.error('Failed to update plan:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Delete plan
+router.delete('/plans/:id', requireOwner, async (req, res) => {
+  try {
+    const planId = parseInt(req.params.id);
+
+    const deleted = await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, planId)).returning();
+
+    if (!deleted[0]) {
+      return res.status(404).json({ message: 'Plan not found' });
+    }
+
+    await logAdminAction(req.user!.id, 'delete', 'plan', planId.toString(), {});
+
+    res.json({ message: 'Plan deleted successfully' });
+  } catch (error) {
+    console.error('Failed to delete plan:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// ===== END PLAN MANAGEMENT =====
 
 // Simple admin login for testing - only uses existing DB fields
 router.post('/login', async (req, res) => {

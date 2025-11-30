@@ -199,8 +199,14 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   //   apiAccess: boolean,
   //   visitorNotifications: boolean,
   //   prioritySupport: boolean,
-  //   whiteLabel: boolean
+  //   whiteLabel: boolean,
+  //   nfcManagement: boolean
   // }
+  
+  // Granular element/feature controls
+  elementFeatures: jsonb("element_features").default([]), // Array of element IDs: [1, 2, 3, 7, 900, etc]
+  moduleFeatures: jsonb("module_features").default({}), // Object: { analytics: true, crm: false, appointments: true, nfc: true, emailSignature: false, voiceConversation: false }
+  templateIds: jsonb("template_ids").default([]), // Array of allowed template IDs
   
   description: text("description"), // Plan description for customers
   createdAt: timestamp("created_at").defaultNow(),

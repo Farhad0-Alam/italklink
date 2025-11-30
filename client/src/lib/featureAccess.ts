@@ -15,7 +15,11 @@ interface UserSubscription {
     whiteLabel?: boolean;
     prioritySupport?: boolean;
     customDomain?: boolean;
+    nfcManagement?: boolean;
   };
+  elementFeatures?: number[];
+  moduleFeatures?: Record<string, boolean>;
+  templateIds?: number[];
   isActive: boolean;
   status: string;
 }
@@ -65,6 +69,58 @@ export function hasFeatureAccess(
   }
 
   return subscription.features?.[feature] === true;
+}
+
+/**
+ * Check if a module is available in user's plan
+ */
+export function hasModuleAccess(
+  subscription: UserSubscription | null | undefined,
+  module: 'analytics' | 'crm' | 'appointments' | 'nfc' | 'emailSignature' | 'voiceConversation'
+): boolean {
+  if (!subscription || !subscription.isActive) {
+    return false;
+  }
+
+  return subscription.moduleFeatures?.[module] === true;
+}
+
+/**
+ * Check if a card element is available in user's plan
+ */
+export function hasElementAccess(
+  subscription: UserSubscription | null | undefined,
+  elementId: number
+): boolean {
+  if (!subscription || !subscription.isActive) {
+    return false;
+  }
+
+  // If no element features specified, allow all elements (backward compatibility)
+  if (!subscription.elementFeatures || subscription.elementFeatures.length === 0) {
+    return true;
+  }
+
+  return subscription.elementFeatures.includes(elementId);
+}
+
+/**
+ * Check if a template is available in user's plan
+ */
+export function hasTemplateAccess(
+  subscription: UserSubscription | null | undefined,
+  templateId: number
+): boolean {
+  if (!subscription || !subscription.isActive) {
+    return false;
+  }
+
+  // If no template restrictions, allow all templates (backward compatibility)
+  if (!subscription.templateIds || subscription.templateIds.length === 0) {
+    return true;
+  }
+
+  return subscription.templateIds.includes(templateId);
 }
 
 export function getBusinessCardLimit(
