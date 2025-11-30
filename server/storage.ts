@@ -6291,6 +6291,68 @@ export class DatabaseStorage implements IStorage {
       orders,
     };
   }
+
+  // Shop categories
+  async getShopCategories(): Promise<any[]> {
+    const result = await db.execute(sql`SELECT * FROM shop_categories WHERE is_active = true ORDER BY sort_order`);
+    return result as any;
+  }
+
+  // Enhanced browse with search
+  async browseProducts(filters?: { category?: string; search?: string; limit?: number; offset?: number }): Promise<DigitalProduct[]> {
+    let query: any = db.select().from(digitalProducts).where(eq(digitalProducts.status, 'active'));
+    
+    if (filters?.category) {
+      query = query.where(eq(digitalProducts.category, filters.category));
+    }
+    
+    if (filters?.search) {
+      query = query.where(or(
+        like(digitalProducts.title, `%${filters.search}%`),
+        like(digitalProducts.description, `%${filters.search}%`)
+      ));
+    }
+    
+    query = query.orderBy(desc(digitalProducts.createdAt));
+    if (filters?.limit) query = query.limit(filters.limit);
+    if (filters?.offset) query = query.offset(filters.offset);
+    
+    return query;
+  }
+
+  async getAllProducts(): Promise<DigitalProduct[]> {
+    return db.select().from(digitalProducts).orderBy(desc(digitalProducts.createdAt));
+  }
+
+  async updateProductStatus(id: string, status: string): Promise<DigitalProduct> {
+    const [product] = await db.update(digitalProducts).set({ status: status as any }).where(eq(digitalProducts.id, id)).returning();
+    return product;
+  }
+
+  async getAllOrders(): Promise<ShopOrder[]> {
+    return db.select().from(shopOrders).orderBy(desc(shopOrders.createdAt));
+  }
+
+  async getDownloadByToken(token: string): Promise<ShopDownload | undefined> {
+    const [download] = await db.select().from(shopDownloads).where(sql`download_token = ${token}`);
+    return download;
+  }
+
+  async incrementDownloadCount(id: string): Promise<void> {
+    await db.update(shopDownloads).set({ downloadCount: sql`download_count + 1`, updatedAt: new Date() }).where(eq(shopDownloads.id, id));
+  }
+
+  async getShopAnalytics(): Promise<any> {
+    const products = await db.select().from(digitalProducts);
+    const orders = await db.select().from(shopOrders);
+    
+    const totalRevenue = orders.reduce((sum, order) => sum + (order.amount || 0), 0);
+    const totalSales = orders.length;
+    const totalProducts = products.filter(p => p.status === 'active').length;
+    const totalViews = products.reduce((sum, p) => sum + (p.views || 0), 0);
+
+    return { totalRevenue, totalSales, totalProducts, totalViews, products, orders };
+  }
 }
 
 export const storage = new DatabaseStorage();

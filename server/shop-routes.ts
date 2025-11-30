@@ -6,7 +6,6 @@ import { nanoid } from 'nanoid';
 import { requireAuth, requireAdmin } from './auth';
 import { asyncHandler } from './middleware/error-handling';
 import { storage } from './storage';
-import { z } from 'zod';
 import Stripe from 'stripe';
 
 const router = Router();
@@ -32,6 +31,37 @@ const storage_multer = multer.diskStorage({
 
 const upload = multer({ storage: storage_multer });
 
+// ===== PUBLIC ENDPOINTS =====
+
+// Get categories
+router.get('/categories', asyncHandler(async (req, res) => {
+  const categories = await storage.getShopCategories();
+  res.json({ success: true, data: categories });
+}));
+
+// Browse shop products
+router.get('/browse', asyncHandler(async (req, res) => {
+  const { category, search, limit = 12, offset = 0 } = req.query;
+  
+  const products = await storage.browseProducts({
+    category: category as string,
+    search: search as string,
+    limit: parseInt(limit as string) || 12,
+    offset: parseInt(offset as string) || 0,
+  });
+
+  res.json({ success: true, data: products });
+}));
+
+// Get product details
+router.get('/product/:slug', asyncHandler(async (req, res) => {
+  const product = await storage.getProductBySlug(req.params.slug);
+  if (!product) {
+    return res.status(404).json({ error: 'Product not found' });
+  }
+  res.json({ success: true, data: product });
+}));
+
 // ===== SELLER ROUTES =====
 
 // Upload product file
@@ -51,7 +81,7 @@ router.post('/upload', requireAuth, upload.single('file'), asyncHandler(async (r
 
 // Create product
 router.post('/products', requireAuth, asyncHandler(async (req, res) => {
-  const { title, slug, description, shortDescription, price, discountPrice, category, filePath, fileSize, fileType } = req.body;
+  const { title, slug, description, shortDescription, price, discountPrice, category, filePath, fileSize, fileType, thumbnailUrl } = req.body;
 
   if (!title || !slug || !price || !filePath) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -69,27 +99,27 @@ router.post('/products', requireAuth, asyncHandler(async (req, res) => {
     filePath,
     fileSize,
     fileType,
-    status: 'draft',
-    commissionPercentage: 20,
-  });
+    thumbnailUrl,
+    status: 'pending',
+  } as any);
 
   res.json({ success: true, data: product });
 }));
 
 // Get seller's products
-router.get('/products', requireAuth, asyncHandler(async (req, res) => {
+router.get('/seller/products', requireAuth, asyncHandler(async (req, res) => {
   const products = await storage.getSellerProducts(req.user.id);
   res.json({ success: true, data: products });
 }));
 
 // Update product
-router.patch('/products/:id', requireAuth, asyncHandler(async (req, res) => {
+router.patch('/seller/products/:id', requireAuth, asyncHandler(async (req, res) => {
   const product = await storage.updateDigitalProduct(req.params.id, req.body);
   res.json({ success: true, data: product });
 }));
 
 // Delete product
-router.delete('/products/:id', requireAuth, asyncHandler(async (req, res) => {
+router.delete('/seller/products/:id', requireAuth, asyncHandler(async (req, res) => {
   await storage.deleteDigitalProduct(req.params.id);
   res.json({ success: true, message: 'Product deleted' });
 }));
@@ -108,46 +138,30 @@ router.get('/seller/analytics', requireAuth, asyncHandler(async (req, res) => {
 
 // ===== BUYER ROUTES =====
 
-// Browse shop products
-router.get('/browse', asyncHandler(async (req, res) => {
-  const { category, search, limit = 12, offset = 0 } = req.query;
-  
-  const products = await storage.browseProducts({
-    category: category as string,
-    search: search as string,
-    limit: parseInt(limit as string),
-    offset: parseInt(offset as string),
-  });
-
-  res.json({ success: true, data: products });
-}));
-
-// Get product details
-router.get('/:slug', asyncHandler(async (req, res) => {
-  const product = await storage.getProductBySlug(req.params.slug);
-  if (!product) {
-    return res.status(404).json({ error: 'Product not found' });
-  }
-  res.json({ success: true, data: product });
-}));
-
 // Get buyer orders
 router.get('/buyer/orders', requireAuth, asyncHandler(async (req, res) => {
   const orders = await storage.getBuyerOrders(req.user.id);
   res.json({ success: true, data: orders });
 }));
 
+// Get buyer purchases
+router.get('/user/purchases', requireAuth, asyncHandler(async (req, res) => {
+  const purchases = await storage.getBuyerOrders(req.user.id);
+  res.json({ success: true, data: purchases });
+}));
+
 // ===== PAYMENT & CHECKOUT =====
 
 // Create checkout session
 router.post('/checkout', requireAuth, asyncHandler(async (req, res) => {
-  const { productId } = req.body;
+  const { productId, referrerId } = req.body;
 
   const product = await storage.getDigitalProduct(productId);
   if (!product) {
     return res.status(404).json({ error: 'Product not found' });
   }
 
+  const downloadToken = nanoid(32);
   const customer = await stripe.customers.create({
     email: req.user.email,
     metadata: { userId: req.user.id },
@@ -176,6 +190,8 @@ router.post('/checkout', requireAuth, asyncHandler(async (req, res) => {
       productId,
       buyerId: req.user.id,
       buyerEmail: req.user.email,
+      referrerId: referrerId || '',
+      downloadToken,
     },
   });
 
@@ -185,12 +201,12 @@ router.post('/checkout', requireAuth, asyncHandler(async (req, res) => {
 // ===== ADMIN ROUTES =====
 
 // Get all products (admin moderation)
-router.get('/admin/products-all', requireAdmin, asyncHandler(async (req, res) => {
+router.get('/admin/products', requireAdmin, asyncHandler(async (req, res) => {
   const products = await storage.getAllProducts();
   res.json({ success: true, data: products });
 }));
 
-// Approve/Reject product
+// Update product status
 router.patch('/admin/products/:id/status', requireAdmin, asyncHandler(async (req, res) => {
   const { status } = req.body;
   const product = await storage.updateProductStatus(req.params.id, status);
@@ -204,7 +220,7 @@ router.get('/admin/analytics', requireAdmin, asyncHandler(async (req, res) => {
 }));
 
 // Get all orders (admin)
-router.get('/admin/all-orders', requireAdmin, asyncHandler(async (req, res) => {
+router.get('/admin/orders', requireAdmin, asyncHandler(async (req, res) => {
   const orders = await storage.getAllOrders();
   res.json({ success: true, data: orders });
 }));
@@ -215,8 +231,12 @@ router.get('/download/:token', asyncHandler(async (req, res) => {
   const { token } = req.params;
 
   const download = await storage.getDownloadByToken(token);
-  if (!download || download.status === 'expired' || download.status === 'revoked') {
+  if (!download) {
     return res.status(401).json({ error: 'Invalid or expired download link' });
+  }
+
+  if (download.expiresAt && new Date() > download.expiresAt) {
+    return res.status(401).json({ error: 'Download link expired' });
   }
 
   if (download.downloadCount >= download.maxDownloads) {
