@@ -7,7 +7,7 @@ import { z } from 'zod';
 import {
   Smartphone, Plus, Download, BarChart3, Trash2, Copy, 
   ExternalLink, Sparkles, TrendingUp, Users, Globe, Grid3x3,
-  Check, AlertCircle, Loader, Zap, Radio, Menu
+  Check, AlertCircle, Loader, Zap, Radio, Menu, Scan, Upload
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -25,6 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { readNFCTag, writeNFCTag, getNFCSupportInfo, formatNFCData } from '@/lib/nfc-utils';
 
 interface NfcTag {
   id: string;
@@ -76,6 +77,9 @@ export default function NfcManagement() {
   const [selectedTag, setSelectedTag] = useState<NfcTag | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [nfcReading, setNfcReading] = useState(false);
+  const [nfcWriting, setNfcWriting] = useState(false);
+  const [nfcReadResult, setNfcReadResult] = useState<string | null>(null);
 
   // Fetch user data
   const { data: user, isLoading: userLoading } = useQuery<User>({
