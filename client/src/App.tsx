@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { AutoSaveProvider } from "@/contexts/AutoSaveContext";
+import { ShopMenuProvider } from "@/context/ShopMenuContext";
 import { CookieConsent } from "@/components/CookieConsent";
 import { initializeUsefulCookies } from "@/utils/cookies";
 import i18n from "./lib/i18n";
@@ -84,7 +85,8 @@ function Router() {
   }, []);
 
   return (
-    <Switch>
+    <ShopMenuProvider>
+      <Switch>
       {/* All pages lazy loaded for optimal initial bundle size */}
       <Route path="/">{() => <PageSuspense><Landing /></PageSuspense>}</Route>
       <Route path="/landing">{() => <PageSuspense><Landing /></PageSuspense>}</Route>
@@ -163,7 +165,8 @@ function Router() {
       {/* Catch-all route for sharing - must be LAST */}
       <Route path="/:shareSlug">{(params) => <PageSuspense><Share {...params} /></PageSuspense>}</Route>
       <Route>{() => <PageSuspense><NotFound /></PageSuspense>}</Route>
-    </Switch>
+      </Switch>
+    </ShopMenuProvider>
   );
 }
 
