@@ -57,6 +57,19 @@ router.post('/create', requireAuth, asyncHandler(async (req, res) => {
   res.json({ success: true, data: tag });
 }));
 
+// Get NFC Tags for current user
+router.get('/user/:userId', requireAuth, asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  
+  // Verify user is requesting their own tags
+  if (req.user.id !== userId) {
+    return res.status(403).json({ success: false, error: 'Unauthorized' });
+  }
+  
+  const tags = await storage.getNfcTagsByUser(userId);
+  res.json({ success: true, data: tags });
+}));
+
 // Get NFC Tags for a card
 router.get('/card/:cardId', optionalAuth, asyncHandler(async (req, res) => {
   const { cardId } = req.params;
