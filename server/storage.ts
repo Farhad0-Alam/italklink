@@ -6621,6 +6621,90 @@ export class DatabaseStorage implements IStorage {
     const [item] = await db.update(shopWishlists).set({ ...data, updatedAt: new Date() }).where(and(eq(shopWishlists.userId, userId), eq(shopWishlists.productId, productId))).returning();
     return item;
   }
+
+  async getSellerSalesByDateRange(sellerId: string, dateRange: string): Promise<any[]> {
+    const days = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : dateRange === '90d' ? 90 : 365;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const orders = await db.select().from(shopOrders)
+      .where(and(eq(shopOrders.sellerId, sellerId), gte(shopOrders.createdAt, startDate)))
+      .orderBy(shopOrders.createdAt);
+
+    const salesByDate: Record<string, { sales: number; revenue: number; date: string }> = {};
+    
+    orders.forEach(order => {
+      const dateKey = new Date(order.createdAt!).toISOString().split('T')[0];
+      if (!salesByDate[dateKey]) {
+        salesByDate[dateKey] = { sales: 0, revenue: 0, date: dateKey };
+      }
+      salesByDate[dateKey].sales++;
+      salesByDate[dateKey].revenue += order.sellerAmount || 0;
+    });
+
+    return Object.values(salesByDate).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }
+
+  async getSellerTopProducts(sellerId: string, limit: number = 10): Promise<any[]> {
+    const products = await db.select().from(digitalProducts).where(eq(digitalProducts.sellerId, sellerId));
+    const orders = await db.select().from(shopOrders).where(eq(shopOrders.sellerId, sellerId));
+
+    const productStats = products.map(product => {
+      const productOrders = orders.filter(o => o.productId === product.id);
+      const sales = productOrders.filter(o => o.paymentStatus === 'completed').length;
+      const revenue = productOrders.reduce((sum, o) => sum + (o.sellerAmount || 0), 0);
+
+      return {
+        id: product.id,
+        title: product.title,
+        sales,
+        revenue,
+        views: product.views || 0,
+      };
+    }).sort((a, b) => b.sales - a.sales).slice(0, limit);
+
+    return productStats;
+  }
+
+  async getSellerRevenueBreakdown(sellerId: string): Promise<any> {
+    const orders = await db.select().from(shopOrders).where(eq(shopOrders.sellerId, sellerId));
+    const completedOrders = orders.filter(o => o.paymentStatus === 'completed');
+    
+    const totalSellerRevenue = completedOrders.reduce((sum, o) => sum + (o.sellerAmount || 0), 0);
+    const totalCommission = completedOrders.reduce((sum, o) => sum + (o.commissionAmount || 0), 0);
+    const totalRefunded = orders.filter(o => o.paymentStatus === 'refunded').reduce((sum, o) => sum + (o.amount || 0), 0);
+
+    return {
+      breakdown: [
+        { name: 'Revenue', value: totalSellerRevenue },
+        { name: 'Commission', value: totalCommission },
+        { name: 'Refunded', value: totalRefunded },
+      ],
+      totalRevenue: totalSellerRevenue,
+      totalCommission,
+      totalRefunded,
+    };
+  }
+
+  async getSellerCustomerInsights(sellerId: string): Promise<any> {
+    const orders = await db.select().from(shopOrders).where(eq(shopOrders.sellerId, sellerId));
+    const uniqueCustomers = new Set(orders.map(o => o.buyerEmail)).size;
+    const completedOrders = orders.filter(o => o.paymentStatus === 'completed');
+    const avgOrderValue = completedOrders.length > 0 
+      ? completedOrders.reduce((sum, o) => sum + (o.amount || 0), 0) / completedOrders.length 
+      : 0;
+
+    return {
+      uniqueCustomers,
+      totalOrders: orders.length,
+      completedOrders: completedOrders.length,
+      avgOrderValue,
+      repeatCustomers: orders.reduce((acc: Record<string, number>, order) => {
+        acc[order.buyerEmail!] = (acc[order.buyerEmail!] || 0) + 1;
+        return acc;
+      }, {}),
+    };
+  }
 }
 
 export const storage = new DatabaseStorage();
