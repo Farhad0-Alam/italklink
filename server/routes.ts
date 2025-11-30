@@ -88,6 +88,7 @@ import cartRoutes from './cart-routes';
 import checkoutRoutes from './checkout-routes';
 import downloadsRoutes from './downloads-routes';
 import reviewsRoutes from './reviews-routes';
+import ordersRoutes from './orders-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 import ragRoutes from './rag-routes';
 import voiceRoutes from './voice-routes';
@@ -151,6 +152,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup reviews routes
   app.use('/api/reviews', reviewsRoutes);
+  
+  // Setup orders routes
+  app.use('/api/orders', ordersRoutes);
   
   // Setup billing routes
   app.use('/api/billing', billingRoutes);

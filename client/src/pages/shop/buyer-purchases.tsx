@@ -1,82 +1,85 @@
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { LoadingSkeleton } from "@/components/LoadingSkeleton";
-import { Download, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { formatDate } from "@/lib/utils";
-import type { ShopOrder } from "@shared/schema";
+import { useQuery } from '@tanstack/react-query';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Link } from 'wouter';
+import { Package, Download, FileText } from 'lucide-react';
+import { LoadingSkeleton } from '@/components/LoadingSkeleton';
 
 export default function BuyerPurchases() {
-  const { data: orders, isLoading, error } = useQuery<ShopOrder[]>({
-    queryKey: ["/api/shop/buyer/orders"],
+  const { data: ordersData, isLoading } = useQuery({
+    queryKey: ['/api/orders/buyer'],
+    queryFn: async () => {
+      const res = await fetch('/api/orders/buyer');
+      if (!res.ok) throw new Error('Failed to fetch orders');
+      const data = await res.json();
+      return data.data || {};
+    },
   });
 
   if (isLoading) return <LoadingSkeleton />;
 
-  if (error) {
+  const orders = ordersData?.orders || [];
+
+  if (orders.length === 0) {
     return (
-      <Alert variant="destructive" className="m-6">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>Failed to load your purchases</AlertDescription>
-      </Alert>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+        <div className="max-w-4xl mx-auto text-center py-16">
+          <Package className="w-16 h-16 mx-auto mb-4 text-slate-400" />
+          <h1 className="text-3xl font-bold mb-2">No purchases yet</h1>
+          <p className="text-slate-600 dark:text-slate-400 mb-8">Start shopping to see your purchases here</p>
+          <Link href="/shop">
+            <Button>Browse Products</Button>
+          </Link>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-900 dark:to-purple-900 p-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent mb-2">
-            My Purchases
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            Manage your downloaded digital products
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold mb-8">My Purchases</h1>
 
-        {!orders || orders.length === 0 ? (
-          <Card className="bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-700">
-            <CardContent className="pt-12 pb-12 text-center">
-              <Download className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">
-                You haven't purchased any digital products yet
-              </p>
-              <Button className="mt-4" variant="outline">
-                Browse the shop
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {orders.map((order) => (
-              <Card
-                key={order.id}
-                className="bg-white dark:bg-slate-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition"
-              >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">
-                      Product #{order.id.slice(0, 8)}
-                    </CardTitle>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Purchased on {formatDate(new Date(order.createdAt))}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-emerald-600">
-                      ${(order.amount / 100).toFixed(2)}
-                    </p>
-                    <span
-                      className={`text-xs font-medium px-2 py-1 rounded ${
-                        order.paymentStatus === 'completed'
-                          ? 'bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-200'
-                          : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200'
-                      }`}
-                    >
-                      {order.paymentStatus}
-                    </span>
-                  </div>
+        <div className="space-y-4">
+          {orders.map((order: any) => (
+            <Card key={order.id} className="p-6 border border-slate-200 dark:border-slate-700">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold mb-1">{order.product?.title}</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                    Order ID: {order.id}
+                  </p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    Purchased: {new Date(order.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold">${(order.amount / 100).toFixed(2)}</p>
+                  <span className="inline-block mt-2 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-semibold rounded-full">
+                    {order.paymentStatus === 'completed' ? 'Paid' : 'Pending'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Link href={`/user/downloads`}>
+                  <Button variant="outline" size="sm" data-testid="button-download">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download
+                  </Button>
+                </Link>
+                <Button variant="outline" size="sm" data-testid="button-invoice">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Invoice
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">

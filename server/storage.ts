@@ -8,7 +8,7 @@ import {
   publicUploads, qrLinks, qrEvents, cardSubscriptions, coupons, userSubscriptions,
   bios, connections, subscriptions, analytics, affiliates, conversions, headerTemplates, icons, pageElementTypes,
   nfcTags, nfcTapEvents, nfcAnalytics,
-  digitalProducts, shopOrders, shopDownloads, shopCart,
+  digitalProducts, shopOrders, shopDownloads, shopCart, shopReviews,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -6451,6 +6451,65 @@ export class DatabaseStorage implements IStorage {
       .from(shopCart)
       .where(eq(shopCart.userId, userId));
     return result[0]?.count || 0;
+  }
+
+  async getBuyerOrderCount(buyerId: string): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(shopOrders)
+      .where(eq(shopOrders.buyerId, buyerId));
+    return result[0]?.count || 0;
+  }
+
+  async getSellerOrderCount(sellerId: string): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(shopOrders)
+      .where(eq(shopOrders.sellerId, sellerId));
+    return result[0]?.count || 0;
+  }
+
+  async getUserDownloads(buyerId: string): Promise<ShopDownload[]> {
+    return db.select().from(shopDownloads).where(eq(shopDownloads.buyerId, buyerId)).orderBy(desc(shopDownloads.createdAt));
+  }
+
+  async getProductReviews(productId: string, opts?: { limit?: number; offset?: number }): Promise<any[]> {
+    let query = db.select().from(shopReviews).where(eq(shopReviews.productId, productId));
+    if (opts?.limit) query = query.limit(opts.limit);
+    if (opts?.offset) query = query.offset(opts.offset);
+    return query.orderBy(desc(shopReviews.createdAt));
+  }
+
+  async getProductReviewStats(productId: string): Promise<any> {
+    const reviews = await db.select().from(shopReviews).where(eq(shopReviews.productId, productId));
+    const totalReviews = reviews.length;
+    const avgRating = totalReviews > 0 ? Math.round((reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalReviews) * 10) / 10 : 0;
+    const ratingDistribution = {
+      5: reviews.filter(r => r.rating === 5).length,
+      4: reviews.filter(r => r.rating === 4).length,
+      3: reviews.filter(r => r.rating === 3).length,
+      2: reviews.filter(r => r.rating === 2).length,
+      1: reviews.filter(r => r.rating === 1).length,
+    };
+    return { totalReviews, avgRating, ratingDistribution };
+  }
+
+  async createShopReview(reviewData: any): Promise<any> {
+    const [review] = await db.insert(shopReviews).values(reviewData).returning();
+    return review;
+  }
+
+  async getShopReview(id: string): Promise<any> {
+    const [review] = await db.select().from(shopReviews).where(eq(shopReviews.id, id));
+    return review;
+  }
+
+  async updateShopReview(id: string, reviewData: any): Promise<any> {
+    const [review] = await db.update(shopReviews).set(reviewData).where(eq(shopReviews.id, id)).returning();
+    return review;
+  }
+
+  async getUserProductReview(buyerId: string, productId: string): Promise<any> {
+    const [review] = await db.select().from(shopReviews).where(and(eq(shopReviews.buyerId, buyerId), eq(shopReviews.productId, productId)));
+    return review;
   }
 }
 
