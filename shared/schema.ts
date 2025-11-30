@@ -5177,6 +5177,20 @@ export const shopDownloads = pgTable("shop_downloads", {
   index("idx_download_expires").on(table.expiresAt),
 ]);
 
+// Shopping Cart table
+export const shopCart = pgTable("shop_cart", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  
+  quantity: integer("quantity").default(1).notNull(),
+  addedAt: timestamp("added_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_cart_user").on(table.userId),
+  index("idx_cart_product").on(table.productId),
+]);
+
 // ===== DIGITAL SHOP TYPES & SCHEMAS =====
 
 export type DigitalProduct = typeof digitalProducts.$inferSelect;
@@ -5185,6 +5199,8 @@ export type ShopOrder = typeof shopOrders.$inferSelect;
 export type InsertShopOrder = typeof shopOrders.$inferInsert;
 export type ShopDownload = typeof shopDownloads.$inferSelect;
 export type InsertShopDownload = typeof shopDownloads.$inferInsert;
+export type ShopCartItem = typeof shopCart.$inferSelect;
+export type InsertShopCartItem = typeof shopCart.$inferInsert;
 
 // Validation schemas
 export const insertDigitalProductSchema = createInsertSchema(digitalProducts).omit({
@@ -5213,3 +5229,14 @@ export const insertShopOrderSchema = createInsertSchema(shopOrders).omit({
 
 export type DigitalProductForm = z.infer<typeof insertDigitalProductSchema>;
 export type ShopOrderForm = z.infer<typeof insertShopOrderSchema>;
+
+export const insertShopCartSchema = createInsertSchema(shopCart).omit({
+  id: true,
+  userId: true,
+  addedAt: true,
+  updatedAt: true,
+}).extend({
+  quantity: z.number().min(1).max(100),
+});
+
+export type ShopCartForm = z.infer<typeof insertShopCartSchema>;

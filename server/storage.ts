@@ -6394,6 +6394,70 @@ export class DatabaseStorage implements IStorage {
       VALUES (gen_random_uuid()::text, ${affiliateId}, ${amount}, ${type}, 'approved', NOW(), ${orderId}, '{}')
     `);
   }
+
+  // ===== SHOPPING CART OPERATIONS =====
+  
+  async addToCart(userId: string, productId: string, quantity: number = 1): Promise<ShopCartItem> {
+    const { shopCart } = await import('@shared/schema');
+    const existing = await db.select().from(shopCart)
+      .where(and(eq(shopCart.userId, userId), eq(shopCart.productId, productId)));
+    
+    if (existing.length > 0) {
+      const [updated] = await db.update(shopCart)
+        .set({ quantity: existing[0].quantity + quantity, updatedAt: new Date() })
+        .where(and(eq(shopCart.userId, userId), eq(shopCart.productId, productId)))
+        .returning();
+      return updated;
+    }
+    
+    const [item] = await db.insert(shopCart).values({
+      userId,
+      productId,
+      quantity,
+    }).returning();
+    return item;
+  }
+
+  async getCart(userId: string): Promise<(ShopCartItem & { product: DigitalProduct })[]> {
+    const { shopCart } = await import('@shared/schema');
+    const items = await db.select({
+      cart: shopCart,
+      product: digitalProducts,
+    })
+    .from(shopCart)
+    .innerJoin(digitalProducts, eq(shopCart.productId, digitalProducts.id))
+    .where(eq(shopCart.userId, userId));
+    
+    return items.map(item => ({ ...item.cart, product: item.product }));
+  }
+
+  async updateCartItem(userId: string, productId: string, quantity: number): Promise<ShopCartItem> {
+    const { shopCart } = await import('@shared/schema');
+    const [updated] = await db.update(shopCart)
+      .set({ quantity, updatedAt: new Date() })
+      .where(and(eq(shopCart.userId, userId), eq(shopCart.productId, productId)))
+      .returning();
+    return updated;
+  }
+
+  async removeFromCart(userId: string, productId: string): Promise<void> {
+    const { shopCart } = await import('@shared/schema');
+    await db.delete(shopCart)
+      .where(and(eq(shopCart.userId, userId), eq(shopCart.productId, productId)));
+  }
+
+  async clearCart(userId: string): Promise<void> {
+    const { shopCart } = await import('@shared/schema');
+    await db.delete(shopCart).where(eq(shopCart.userId, userId));
+  }
+
+  async getCartCount(userId: string): Promise<number> {
+    const { shopCart } = await import('@shared/schema');
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(shopCart)
+      .where(eq(shopCart.userId, userId));
+    return result[0]?.count || 0;
+  }
 }
 
 export const storage = new DatabaseStorage();
