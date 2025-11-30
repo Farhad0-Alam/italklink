@@ -604,6 +604,13 @@ export interface IStorage {
   getNfcAnalyticsForCard(cardId: string): Promise<NfcAnalytics[]>;
   getNfcAnalyticsForUser(userId: string): Promise<NfcAnalytics[]>;
   updateNfcAnalytics(cardId: string, tagId: string): Promise<NfcAnalytics>;
+
+  // Refund operations
+  createRefundRequest(refundData: any): Promise<RefundRequest>;
+  getRefundById(refundId: string): Promise<RefundRequest | undefined>;
+  getRefundRequests(status?: string, orderId?: string, userId?: string, userRole?: string): Promise<RefundRequest[]>;
+  updateRefundStatus(refundId: string, status: string, notes?: string, stripeRefundId?: string): Promise<RefundRequest>;
+  processStripeRefund(orderId: string, amount: number): Promise<string>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -6949,6 +6956,82 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(digitalProducts.updatedAt || sql`now()`));
     
     return products;
+  }
+
+  // ===== REFUND OPERATIONS =====
+  
+  async createRefundRequest(refundData: any): Promise<RefundRequest> {
+    const order = await this.getOrderById(refundData.orderId);
+    if (!order) throw new Error('Order not found');
+
+    const [refund] = await db.insert(refundRequests).values({
+      orderId: refundData.orderId,
+      buyerId: refundData.buyerId,
+      sellerId: refundData.sellerId,
+      amount: order.amount,
+      reason: refundData.reason,
+      status: 'requested',
+    }).returning();
+
+    return refund;
+  }
+
+  async getRefundById(refundId: string): Promise<RefundRequest | undefined> {
+    const [refund] = await db.select().from(refundRequests).where(eq(refundRequests.id, refundId));
+    return refund;
+  }
+
+  async getRefundRequests(status?: string, orderId?: string, userId?: string, userRole?: string): Promise<RefundRequest[]> {
+    let query = db.select().from(refundRequests);
+
+    const conditions = [];
+    if (status) conditions.push(eq(refundRequests.status, status));
+    if (orderId) conditions.push(eq(refundRequests.orderId, orderId));
+    
+    if (userId && userRole !== 'admin') {
+      conditions.push(or(
+        eq(refundRequests.buyerId, userId),
+        eq(refundRequests.sellerId, userId)
+      ));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    const refunds = await query.orderBy(desc(refundRequests.createdAt));
+    return refunds;
+  }
+
+  async updateRefundStatus(refundId: string, status: string, notes?: string, stripeRefundId?: string): Promise<RefundRequest> {
+    const updateData: any = { status, updatedAt: new Date() };
+    if (notes) updateData.notes = notes;
+    if (stripeRefundId) updateData.stripeRefundId = stripeRefundId;
+    
+    if (status === 'approved') {
+      updateData.approvedAt = new Date();
+    } else if (status === 'processed') {
+      updateData.processedAt = new Date();
+    }
+
+    const [refund] = await db.update(refundRequests)
+      .set(updateData)
+      .where(eq(refundRequests.id, refundId))
+      .returning();
+
+    return refund;
+  }
+
+  async processStripeRefund(orderId: string, amount: number): Promise<string> {
+    const order = await this.getOrderById(orderId);
+    if (!order || !order.stripePaymentIntentId) {
+      throw new Error('Order not found or not paid via Stripe');
+    }
+
+    // For now, generate a mock Stripe refund ID
+    // In production, this would call: await stripe.refunds.create({ payment_intent: order.stripePaymentIntentId })
+    const stripeRefundId = `re_${Math.random().toString(36).substring(2, 15)}`;
+    return stripeRefundId;
   }
 }
 
