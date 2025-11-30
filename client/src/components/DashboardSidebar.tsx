@@ -125,6 +125,8 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
         return <BarChart3 className="w-4 h-4" />;
       case 'account':
         return <Settings className="w-4 h-4" />;
+      case 'shop':
+        return <ShoppingBag className="w-4 h-4" />;
       default:
         return <Home className="w-4 h-4" />;
     }
@@ -148,6 +150,10 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
         return isExpanded 
           ? 'bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-950/40 dark:to-amber-950/40 text-orange-700 dark:text-orange-300' 
           : 'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 text-orange-600 dark:text-orange-400 hover:from-orange-100 hover:to-amber-100 dark:hover:from-orange-950/30 dark:hover:to-amber-950/30';
+      case 'shop':
+        return isExpanded 
+          ? 'bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-950/40 dark:to-emerald-950/40 text-green-700 dark:text-green-300' 
+          : 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 text-green-600 dark:text-green-400 hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-950/30 dark:hover:to-emerald-950/30';
       default:
         return '';
     }
@@ -163,6 +169,8 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
         return isExpanded ? 'text-purple-600 dark:text-purple-400' : 'text-purple-500 dark:text-purple-500';
       case 'account':
         return isExpanded ? 'text-orange-600 dark:text-orange-400' : 'text-orange-500 dark:text-orange-500';
+      case 'shop':
+        return isExpanded ? 'text-green-600 dark:text-green-400' : 'text-green-500 dark:text-green-500';
       default:
         return 'text-gray-400 dark:text-gray-600';
     }
