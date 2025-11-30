@@ -452,6 +452,69 @@ export default function NfcManagement() {
                 </Form>
               </DialogContent>
             </Dialog>
+
+            <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+              <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
+                <DialogHeader className="text-left">
+                  <DialogTitle className="text-xl">Edit NFC Tag</DialogTitle>
+                  <DialogDescription className="text-sm">
+                    Update your NFC tag details
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...editForm}>
+                  <form onSubmit={editForm.handleSubmit((data) => { if (selectedTag) updateTagMutation.mutate({ tagId: selectedTag.id, updates: data }); })} className="space-y-3 sm:space-y-4 mt-4">
+                    <FormField control={editForm.control} name="tagName" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm">Tag Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="My Business Card NFC" {...field} className="text-sm h-9" />
+                        </FormControl>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )} />
+                    <FormField control={editForm.control} name="tagType" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm">NFC Chip Type</FormLabel>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger className="text-sm h-9">
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="NTAG215">NTAG215</SelectItem>
+                            <SelectItem value="NTAG216">NTAG216</SelectItem>
+                            <SelectItem value="NTAG424">NTAG424</SelectItem>
+                            <SelectItem value="ICODE">ICODE</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )} />
+                    <FormField control={editForm.control} name="targetUrl" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm">Target URL</FormLabel>
+                        <FormControl>
+                          <Input type="url" placeholder="https://example.com" {...field} className="text-sm h-9" />
+                        </FormControl>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )} />
+                    <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-sm h-9" disabled={updateTagMutation.isPending}>
+                      {updateTagMutation.isPending ? (
+                        <>
+                          <Loader className="w-3 h-3 mr-2 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        'Update Tag'
+                      )}
+                    </Button>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           </div>
         </motion.div>
 
