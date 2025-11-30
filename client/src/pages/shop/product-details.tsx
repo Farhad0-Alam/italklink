@@ -11,7 +11,7 @@ export default function ProductDetails() {
   const { id } = useParams();
 
   const { data: product, isLoading, error } = useQuery<DigitalProduct>({
-    queryKey: ["/api/shop/products", id],
+    queryKey: ["/api/shop/product", id],
   });
 
   if (isLoading) return <LoadingSkeleton />;
