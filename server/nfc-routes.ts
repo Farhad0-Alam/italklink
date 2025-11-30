@@ -4,16 +4,36 @@ import { storage } from './storage';
 import { z } from 'zod';
 import { insertNfcTagSchema, insertNfcTapEventSchema } from '@shared/schema';
 import { asyncHandler } from './middleware/error-handling';
-import * as NDEF from 'ndef';
 
 const router = Router();
 
 // Generate NDEF encoded NFC payload
 function generateNdefPayload(url: string): string {
   try {
-    const uriRecord = NDEF.uri(url);
-    const message = NDEF.encodeMessage([uriRecord]);
-    return Buffer.from(message).toString('base64');
+    // Create a simplified NDEF message for URI records
+    // NDEF format: Message = [Records]
+    // URI Record: TNF(1 byte) + Type Length + Type + Length + Data
+    
+    // TNF = 0xD0 (MB=1, ME=1, SR=1, TNF=0) for first/only record
+    // Type = "U" (0x55) for URI
+    // Status byte for URI = 0x00 (no prefix)
+    
+    const uriPrefix = 0x00; // No URI prefix (full URL)
+    const uriData = Buffer.from(url, 'utf-8');
+    const payload = Buffer.concat([Buffer.from([uriPrefix]), uriData]);
+    
+    // Create NDEF record header
+    const typeBytes = Buffer.from('U', 'utf-8');
+    const payloadLength = payload.length;
+    
+    // Record header: TNF(3 bits) | Flags(5 bits)
+    const tnf = 0x01; // Well-known type
+    const flags = 0xD0; // MB, ME, SR flags set
+    const recordHeader = Buffer.from([flags, typeBytes.length, payloadLength]);
+    
+    // Full NDEF message
+    const ndefMessage = Buffer.concat([recordHeader, typeBytes, payload]);
+    return ndefMessage.toString('base64');
   } catch (error) {
     console.error('Error generating NDEF:', error);
     throw error;
