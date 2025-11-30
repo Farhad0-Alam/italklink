@@ -61,6 +61,8 @@ const PrivacyPolicy = lazy(() => import("./pages/privacy-policy"));
 const CookiePolicy = lazy(() => import("./pages/cookie-policy"));
 const ShopBrowse = lazy(() => import("./pages/shop/browse"));
 const SellerDashboard = lazy(() => import("./pages/shop/seller-dashboard"));
+const SellerOrders = lazy(() => import("./pages/shop/seller-orders"));
+const SellerAnalytics = lazy(() => import("./pages/shop/seller-analytics"));
 const ProductDetails = lazy(() => import("./pages/shop/product-details"));
 const BuyerPurchases = lazy(() => import("./pages/shop/buyer-purchases"));
 const UserPurchases = lazy(() => import("./pages/shop/user-purchases"));
@@ -139,8 +141,8 @@ function Router() {
       <Route path="/shop/product/:id">{(params) => <PageSuspense><ProductDetails {...params} /></PageSuspense>}</Route>
       <Route path="/shop/seller">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
       <Route path="/shop/seller/products">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
-      <Route path="/shop/seller/orders">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
-      <Route path="/shop/seller/analytics">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
+      <Route path="/shop/seller/orders">{() => <PageSuspense><SellerOrders /></PageSuspense>}</Route>
+      <Route path="/shop/seller/analytics">{() => <PageSuspense><SellerAnalytics /></PageSuspense>}</Route>
       <Route path="/shop/purchases">{() => <PageSuspense><BuyerPurchases /></PageSuspense>}</Route>
       <Route path="/user/purchases">{() => <PageSuspense><UserPurchases /></PageSuspense>}</Route>
       <Route path="/user/downloads">{() => <PageSuspense><UserDownloads /></PageSuspense>}</Route>
