@@ -373,9 +373,10 @@ export default function Pricing() {
         </div>
       </div>
       
-      <div className="py-16 px-4" id="plans-section">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <div className="py-20 px-4" id="plans-section" style={{ background: 'linear-gradient(135deg, rgba(249, 250, 251, 1) 0%, rgba(240, 249, 255, 1) 100%)' }}>
+        <div className="dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-800 dark:absolute dark:inset-0"></div>
+        <div className="container mx-auto relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             <AnimatePresence>
               {plans?.map((plan) => {
                 const userCount = getUserCount(plan.id);
@@ -390,83 +391,92 @@ export default function Pricing() {
                     key={plan.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
                     className="relative"
                   >
                     {popular && (
-                      <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white">
+                      <Badge className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg px-4 py-1 font-semibold">
                         Most Popular
                       </Badge>
                     )}
-                    <Card className={`border-2 hover:shadow-lg transition-all duration-200 ${
+                    <Card className={`h-full flex flex-col overflow-hidden transition-all duration-300 ${
+                      popular 
+                        ? 'border-0 shadow-2xl ring-1 ring-orange-200/20 dark:ring-orange-500/30 scale-105 md:scale-100 md:lg:scale-105' 
+                        : 'border border-gray-200 dark:border-gray-700/50 shadow-lg hover:shadow-xl'
+                    } ${
                       isSelected 
-                        ? 'border-orange-500 shadow-lg ring-2 ring-orange-200' 
-                        : 'border-gray-200 dark:border-gray-700'
-                    } bg-white dark:bg-slate-800 h-full flex flex-col text-gray-900 dark:text-gray-100`}
+                        ? 'ring-2 ring-orange-500/50' 
+                        : ''
+                    } bg-white dark:bg-slate-800/80 backdrop-blur-sm`}
                     data-testid={`plan-card-${plan.planType}`}
+                    style={popular ? { background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 248, 240, 0.95) 100%)' } : {}}
                     >
-                      <CardHeader className="pb-4">
+                      <div className={popular ? 'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 px-6 pt-6 pb-4' : 'px-6 pt-6 pb-4'}>
                         <div className="text-center">
-                          <CardTitle className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent mb-2">
                             {plan.name}
                           </CardTitle>
                           {plan.description && (
-                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
                               {plan.description}
                             </p>
                           )}
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                            {plan.price === 0 ? 'For Individuals' : 
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-500 mb-6 uppercase tracking-wide">
+                            {plan.price === 0 ? 'Get Started' : 
                              hasPerUserPricing ? `Base: ${plan.baseUsers} user${plan.baseUsers > 1 ? 's' : ''}` : 
-                             'For Individuals'}
+                             'Professional'}
                           </p>
                           
-                          <div className="mb-6">
-                            <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                              ${pricing.monthlyTotal.toFixed(2)}/month
+                          <div className="mb-8">
+                            <div className="inline-block">
+                              <span className="text-5xl font-black bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                                ${pricing.monthlyTotal.toFixed(2)}
+                              </span>
+                              <span className="text-lg text-gray-600 dark:text-gray-400 font-medium ml-1">/month</span>
                             </div>
                             {plan.price > 0 && (
-                              <div className="text-sm text-gray-500 dark:text-gray-400">
-                                {isYearly ? `Billed at $${pricing.yearlyTotal.toFixed(2)}/year` : `Billed monthly`}
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-3 space-y-1">
+                                <div>{isYearly ? `Billed at $${pricing.yearlyTotal.toFixed(2)}/year` : `Billed monthly`}</div>
                                 {pricing.setupFee > 0 && (
-                                  <div className="text-xs mt-1">+ ${pricing.setupFee.toFixed(2)} setup fee</div>
+                                  <div className="text-gray-600 dark:text-gray-300 font-medium">+ ${pricing.setupFee.toFixed(2)} setup</div>
                                 )}
                               </div>
                             )}
                             {isYearly && pricing.yearlySavings > 0 && (
-                              <Badge className="mt-2 bg-green-500 text-white">
+                              <Badge className="mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg font-semibold">
                                 Save ${pricing.yearlySavings.toFixed(2)} ({yearlyDiscountPercent}% off)
                               </Badge>
                             )}
                             {validatedCoupon?.valid && isSelected && validatedCoupon.discount && (
-                              <div className="mt-2 text-sm text-green-600 dark:text-green-400 font-semibold">
-                                Coupon applied: -${validatedCoupon.discount.toFixed(2)}
+                              <div className="mt-3 text-sm text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/20 py-2 rounded-lg">
+                                ✓ Coupon applied: -${validatedCoupon.discount.toFixed(2)}
                               </div>
                             )}
                           </div>
                           
                           {hasPerUserPricing && (
-                            <div className="mb-6 bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
-                              <Label className="text-sm text-gray-600 dark:text-gray-400 mb-2 block">
+                            <div className="mb-8 bg-gray-50 dark:bg-slate-700/50 p-5 rounded-xl border border-gray-100 dark:border-gray-700/50">
+                              <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-3 block uppercase tracking-wide">
                                 Number of users
                               </Label>
-                              <div className="flex items-center justify-center space-x-2 mb-2">
+                              <div className="flex items-center justify-center space-x-2 mb-3">
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="h-8 w-8 p-0 rounded-md"
+                                  className="h-9 w-9 p-0 rounded-lg border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                                   onClick={() => handleUserCountChange(plan.id, userCount - 1)}
                                   disabled={userCount <= (plan.minUsers || plan.baseUsers || 1)}
                                   data-testid={`decrease-users-${plan.id}`}
                                 >
                                   <Minus className="h-4 w-4" />
                                 </Button>
-                                <div className="bg-orange-500 text-white px-4 py-2 rounded-md font-bold min-w-[60px] text-center">
+                                <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2 rounded-lg font-bold min-w-[70px] text-center shadow-md">
                                   {userCount}
                                 </div>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="h-8 w-8 p-0 rounded-md"
+                                  className="h-9 w-9 p-0 rounded-lg border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                                   onClick={() => handleUserCountChange(plan.id, userCount + 1)}
                                   disabled={plan.maxUsers !== null && userCount >= plan.maxUsers}
                                   data-testid={`increase-users-${plan.id}`}
@@ -475,30 +485,31 @@ export default function Pricing() {
                                 </Button>
                               </div>
                               {userCount > (plan.baseUsers || 1) && (
-                                <div className="text-xs text-gray-600 dark:text-gray-400">
-                                  +${pricing.perUserPrice.toFixed(2)}/month for {userCount - (plan.baseUsers || 1)} additional user{userCount - (plan.baseUsers || 1) > 1 ? 's' : ''}
+                                <div className="text-xs text-gray-600 dark:text-gray-400 text-center">
+                                  +${pricing.perUserPrice.toFixed(2)}/mo per additional user
                                 </div>
                               )}
                             </div>
                           )}
                           
                           {plan.price > 0 && (
-                            <div className="mb-4 space-y-2">
+                            <div className="mb-6 space-y-2">
                               <div className="flex items-center space-x-2">
                                 <Input
-                                  placeholder="Enter coupon code"
+                                  placeholder="Coupon code"
                                   value={couponCode}
                                   onChange={(e) => {
                                     setCouponCode(e.target.value.toUpperCase());
                                     setValidatedCoupon(null);
                                   }}
                                   onFocus={() => setSelectedPlan(plan.id)}
-                                  className="text-sm"
+                                  className="text-sm rounded-lg border-gray-300 dark:border-gray-600 focus:ring-orange-500"
                                   data-testid={`input-coupon-${plan.id}`}
                                 />
                                 <Button
                                   variant="outline"
                                   size="sm"
+                                  className="h-9 px-3 rounded-lg border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                                   onClick={() => {
                                     setSelectedPlan(plan.id);
                                     handleApplyCoupon(plan.id);
@@ -517,7 +528,11 @@ export default function Pricing() {
                           )}
 
                           <Button
-                            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg"
+                            className={`w-full font-semibold py-3 rounded-lg transition-all duration-200 ${
+                              popular
+                                ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl'
+                                : 'bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-gray-900'
+                            }`}
                             onClick={() => {
                               setSelectedPlan(plan.id);
                               handleCheckout(plan.id);
@@ -535,11 +550,11 @@ export default function Pricing() {
                             )}
                           </Button>
                         </div>
-                      </CardHeader>
+                      </div>
                       
-                      <CardContent className="pt-0 flex-1 text-gray-900 dark:text-gray-100">
-                        <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Includes:</h4>
+                      <CardContent className="pt-6 px-6 pb-6 flex-1 text-gray-900 dark:text-gray-100">
+                        <div className="space-y-1">
+                          <h4 className="font-bold text-gray-900 dark:text-white mb-6 text-sm uppercase tracking-wide">What's Included</h4>
                           <div className="space-y-3">
                             {/* Business Cards - Always show first */}
                             <div className="flex items-start space-x-2">
