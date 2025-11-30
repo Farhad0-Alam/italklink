@@ -189,6 +189,7 @@ router.post('/products', requireAuth, asyncHandler(async (req, res) => {
 
   const product = await storage.createDigitalProduct({
     sellerId: req.user.id,
+    status: 'active',
     title,
     slug,
     description,
