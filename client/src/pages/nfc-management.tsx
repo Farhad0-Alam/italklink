@@ -181,6 +181,48 @@ export default function NfcManagement() {
     },
   });
 
+  // Handle NFC Read
+  const handleReadNFC = async () => {
+    setNfcReading(true);
+    try {
+      const data = await readNFCTag();
+      setNfcReadResult(formatNFCData(data));
+      toast({
+        title: 'Success',
+        description: 'NFC tag read successfully',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to read NFC tag',
+        variant: 'destructive',
+      });
+    } finally {
+      setNfcReading(false);
+    }
+  };
+
+  // Handle NFC Write
+  const handleWriteNFC = async () => {
+    if (!selectedTag) return;
+    setNfcWriting(true);
+    try {
+      await writeNFCTag(selectedTag.targetUrl);
+      toast({
+        title: 'Success',
+        description: 'NFC tag written successfully',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to write NFC tag',
+        variant: 'destructive',
+      });
+    } finally {
+      setNfcWriting(false);
+    }
+  };
+
   // Download NDEF payload
   const downloadNdef = async (tagId: string) => {
     try {
