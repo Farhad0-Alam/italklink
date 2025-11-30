@@ -110,6 +110,39 @@ export const downloadStatusEnum = pgEnum('download_status', ['active', 'expired'
 export const reviewStatusEnum = pgEnum('review_status', ['approved', 'pending', 'rejected']);
 export const refundStatusEnum = pgEnum('refund_status', ['requested', 'approved', 'rejected', 'processed', 'cancelled']);
 
+// Refund Requests table
+export const refundRequests = pgTable("refund_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderId: varchar("order_id").references(() => shopOrders.id, { onDelete: 'cascade' }).notNull(),
+  buyerId: varchar("buyer_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  sellerId: varchar("seller_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Refund details
+  amount: integer("amount").notNull(),
+  reason: text("reason").notNull(),
+  status: refundStatusEnum("status").default('requested'),
+  
+  // Stripe refund ID (set when processed)
+  stripeRefundId: varchar("stripe_refund_id"),
+  
+  // Seller/admin notes
+  notes: text("notes"),
+  
+  // Audit trail
+  approvedAt: timestamp("approved_at"),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  processedAt: timestamp("processed_at"),
+  processedBy: varchar("processed_by").references(() => users.id),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_refund_order").on(table.orderId),
+  index("idx_refund_buyer").on(table.buyerId),
+  index("idx_refund_seller").on(table.sellerId),
+  index("idx_refund_status").on(table.status),
+]);
+
 // Database Tables
 
 // Session storage table
@@ -5288,6 +5321,8 @@ export const shopAffiliateCommissions = pgTable("shop_affiliate_commissions", {
 
 export type ShopAffiliateCommission = typeof shopAffiliateCommissions.$inferSelect;
 export type InsertShopAffiliateCommission = typeof shopAffiliateCommissions.$inferInsert;
+export type RefundRequest = typeof refundRequests.$inferSelect;
+export type InsertRefundRequest = typeof refundRequests.$inferInsert;
 
 // Validation schemas
 export const insertDigitalProductSchema = createInsertSchema(digitalProducts).omit({
