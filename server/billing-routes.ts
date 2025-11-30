@@ -209,30 +209,7 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
 
   const session = await stripe.checkout.sessions.create({
     customer: stripeCustomerId,
-    payment_method_types: [
-      'card',
-      'paypal',
-      'klarna',
-      'affirm',
-      'afterpay_clearpay',
-      'acss_debit',
-      'au_becs_debit',
-      'bacs_debit',
-      'bancontact',
-      'boleto',
-      'eps',
-      'giropay',
-      'ideal',
-      'link',
-      'mobilepay',
-      'p24',
-      'pix',
-      'promptpay',
-      'sepa_debit',
-      'sofort',
-      'twint',
-      'us_bank_account',
-    ],
+    payment_method_types: ['card', 'paypal', 'klarna', 'affirm', 'link'],
     line_items: [
       {
         price_data: {
