@@ -7,7 +7,8 @@ import { z } from 'zod';
 import {
   Smartphone, Plus, Download, BarChart3, Trash2, Copy, 
   ExternalLink, Sparkles, TrendingUp, Users, Globe, Grid3x3,
-  Check, AlertCircle, Loader, Zap, Radio, Menu, Scan, Upload
+  Check, AlertCircle, Loader, Zap, Radio, Menu, Scan, Upload,
+  Smartphone as PhoneIcon, Chrome, Info, BookOpen, ArrowRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -374,6 +375,94 @@ export default function NfcManagement() {
                 </Form>
               </DialogContent>
             </Dialog>
+          </div>
+        </motion.div>
+
+        {/* Device Compatibility & Getting Started Guide */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-4">
+          {/* Device Requirements Banner */}
+          <Card className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-600 dark:via-purple-600 dark:to-pink-600 border-0 shadow-lg">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 flex-shrink-0">
+                  <Info className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-white font-bold text-sm sm:text-base mb-2">✅ Works Best On:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge className="bg-white/30 text-white hover:bg-white/40 border-white/50">
+                      <PhoneIcon className="w-3 h-3 mr-1" />
+                      Android
+                    </Badge>
+                    <Badge className="bg-white/30 text-white hover:bg-white/40 border-white/50">
+                      <Chrome className="w-3 h-3 mr-1" />
+                      Chrome/Edge
+                    </Badge>
+                  </div>
+                  <p className="text-white/80 text-xs sm:text-sm mt-3">Web NFC API works best on Android devices with Chrome or Edge browsers</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Getting Started Guide */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Step 1: Create */}
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
+              <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 border-2 border-emerald-200 dark:border-emerald-800 h-full hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg p-2 flex-shrink-0">
+                      <Plus className="w-4 h-4 text-white" />
+                    </div>
+                    <Badge className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs">Step 1</Badge>
+                  </div>
+                  <h4 className="font-bold text-sm mb-2 text-gray-900 dark:text-white">Create NFC Tag</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">Click "Create NFC Tag" button, select your business card, and choose chip type</p>
+                  <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
+                    Get Started <ArrowRight className="w-3 h-3" />
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Step 2: Write */}
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
+              <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-2 border-blue-200 dark:border-blue-800 h-full hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg p-2 flex-shrink-0">
+                      <Upload className="w-4 h-4 text-white" />
+                    </div>
+                    <Badge className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs">Step 2</Badge>
+                  </div>
+                  <h4 className="font-bold text-sm mb-2 text-gray-900 dark:text-white">Write to Chip</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">Click "Write Tag" and hold your Android phone near a blank NFC chip</p>
+                  <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs font-semibold">
+                    Write Data <ArrowRight className="w-3 h-3" />
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Step 3: Use */}
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
+              <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/40 border-2 border-purple-200 dark:border-purple-800 h-full hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg p-2 flex-shrink-0">
+                      <Scan className="w-4 h-4 text-white" />
+                    </div>
+                    <Badge className="bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs">Step 3</Badge>
+                  </div>
+                  <h4 className="font-bold text-sm mb-2 text-gray-900 dark:text-white">Share & Track</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">Distribute tags to customers. Taps are auto-tracked for analytics & affiliates</p>
+                  <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400 text-xs font-semibold">
+                    Track Taps <ArrowRight className="w-3 h-3" />
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
         </motion.div>
 
