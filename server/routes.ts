@@ -93,6 +93,7 @@ import searchRoutes from './search-routes';
 import wishlistRoutes from './wishlist-routes';
 import sellerAnalyticsRoutes from './seller-analytics-routes';
 import shopAffiliateRoutes from './shop-affiliate-routes';
+import couponRoutes from './coupon-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 import ragRoutes from './rag-routes';
 import voiceRoutes from './voice-routes';
@@ -171,6 +172,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup shop affiliate routes
   app.use('/api/shop/affiliate', shopAffiliateRoutes);
+
+  // Setup coupon routes
+  app.use('/api/coupons', couponRoutes);
   
   // Setup billing routes
   app.use('/api/billing', billingRoutes);

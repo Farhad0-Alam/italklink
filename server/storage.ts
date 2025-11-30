@@ -5,7 +5,7 @@ import {
   automations, automationRuns, appointmentEventTypes, appointments, teamMemberAvailability, appointmentNotifications, appointmentPayments,
   calendarConnections, videoMeetingProviders, externalCalendarEvents, meetingLinks, integrationLogs,
   teamAssignments, roundRobinState, leadRoutingRules, teamMemberSkills, teamMemberCapacity, teamAvailabilityPatterns, assignmentAnalytics, routingAnalytics,
-  publicUploads, qrLinks, qrEvents, cardSubscriptions, coupons, userSubscriptions,
+  publicUploads, qrLinks, qrEvents, cardSubscriptions, coupons, couponUsages, userSubscriptions,
   bios, connections, subscriptions, analytics, affiliates, conversions, headerTemplates, icons, pageElementTypes,
   nfcTags, nfcTapEvents, nfcAnalytics,
   digitalProducts, shopOrders, shopDownloads, shopCart, shopReviews, shopWishlists, shopAffiliateCommissions,
@@ -6779,6 +6779,54 @@ export class DatabaseStorage implements IStorage {
   async getProductById(productId: string): Promise<DigitalProduct | undefined> {
     const [product] = await db.select().from(digitalProducts).where(eq(digitalProducts.id, productId));
     return product;
+  }
+
+  async validateCoupon(code: string, userId: string | null): Promise<any> {
+    const [coupon] = await db.select().from(coupons).where(eq(coupons.code, code.toUpperCase()));
+    
+    if (!coupon) return null;
+    
+    // Check if active
+    if (!coupon.isActive || coupon.status !== 'active') return null;
+    
+    // Check expiration
+    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) return null;
+    
+    // Check start date
+    if (coupon.startsAt && new Date(coupon.startsAt) > new Date()) return null;
+    
+    // Check usage limit
+    if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) return null;
+    
+    // Check user usage limit
+    if (userId && coupon.userUsageLimit) {
+      const [usage] = await db.select({ count: count() })
+        .from(couponUsages)
+        .where(and(eq(couponUsages.couponId, coupon.id), eq(couponUsages.userId, userId)));
+      
+      if (usage && usage.count >= coupon.userUsageLimit) return null;
+    }
+    
+    return coupon;
+  }
+
+  async recordCouponUsage(couponCode: string, userId: string, originalAmount: number, discount: number): Promise<void> {
+    const [coupon] = await db.select().from(coupons).where(eq(coupons.code, couponCode.toUpperCase()));
+    if (!coupon) return;
+    
+    const finalAmount = originalAmount - discount;
+    
+    // Record usage
+    await db.insert(couponUsages).values({
+      couponId: coupon.id,
+      userId,
+      originalAmount,
+      discountAmount: discount,
+      finalAmount,
+    });
+    
+    // Increment coupon usage count
+    await db.update(coupons).set({ usageCount: (coupon.usageCount || 0) + 1 }).where(eq(coupons.id, coupon.id));
   }
 }
 
