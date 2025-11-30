@@ -714,9 +714,31 @@ export default function NfcManagement() {
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-3 sm:space-y-4">
             {!selectedTag ? (
-              <Card className="border-dashed text-center py-8 sm:py-12 bg-white/50 dark:bg-gray-800/50">
-                <BarChart3 className="w-8 sm:w-12 h-8 sm:h-12 mx-auto text-gray-400 mb-3 sm:mb-4" />
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Select an NFC tag to view analytics</p>
+              <Card className="border-dashed text-center py-8 sm:py-12 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-2 border-blue-200 dark:border-blue-800">
+                <BarChart3 className="w-8 sm:w-12 h-8 sm:h-12 mx-auto text-blue-400 mb-3 sm:mb-4" />
+                <p className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">View NFC Analytics</p>
+                <div className="max-w-md mx-auto space-y-3">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                    Select an NFC tag from the "My NFC Tags" tab to view real-time analytics including:
+                  </p>
+                  <div className="text-xs text-left space-y-1 bg-white dark:bg-gray-800 rounded p-3">
+                    <div className="flex items-start gap-2">
+                      <span className="text-blue-600 dark:text-blue-400 font-bold flex-shrink-0">•</span>
+                      <span className="text-gray-700 dark:text-gray-300">Total number of taps on your NFC tag</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-blue-600 dark:text-blue-400 font-bold flex-shrink-0">•</span>
+                      <span className="text-gray-700 dark:text-gray-300">Unique devices that scanned the tag</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-blue-600 dark:text-blue-400 font-bold flex-shrink-0">•</span>
+                      <span className="text-gray-700 dark:text-gray-300">Device breakdown (mobile, desktop, tablet)</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                    👉 Go to "My NFC Tags" tab and click on any tag to see its analytics
+                  </p>
+                </div>
               </Card>
             ) : (
               <div className="space-y-3 sm:space-y-4">
@@ -813,9 +835,35 @@ export default function NfcManagement() {
           {/* Tools Tab */}
           <TabsContent value="tools" className="space-y-3 sm:space-y-4">
             {!selectedTag ? (
-              <Card className="border-dashed text-center py-8 sm:py-12 bg-white/50 dark:bg-gray-800/50">
-                <Zap className="w-8 sm:w-12 h-8 sm:h-12 mx-auto text-gray-400 mb-3 sm:mb-4" />
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Select an NFC tag to access tools</p>
+              <Card className="border-dashed text-center py-8 sm:py-12 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border-2 border-purple-200 dark:border-purple-800">
+                <Zap className="w-8 sm:w-12 h-8 sm:h-12 mx-auto text-purple-400 mb-3 sm:mb-4" />
+                <p className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">NFC Tools & Utilities</p>
+                <div className="max-w-md mx-auto space-y-3">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                    Select an NFC tag from the "My NFC Tags" tab to access powerful tools:
+                  </p>
+                  <div className="text-xs text-left space-y-1 bg-white dark:bg-gray-800 rounded p-3">
+                    <div className="flex items-start gap-2">
+                      <span className="text-purple-600 dark:text-purple-400 font-bold flex-shrink-0">•</span>
+                      <span className="text-gray-700 dark:text-gray-300"><strong>Scan Tag:</strong> Read existing NFC tags to verify content</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-purple-600 dark:text-purple-400 font-bold flex-shrink-0">•</span>
+                      <span className="text-gray-700 dark:text-gray-300"><strong>Write to Chip:</strong> Write your card link to blank NFC chips</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-purple-600 dark:text-purple-400 font-bold flex-shrink-0">•</span>
+                      <span className="text-gray-700 dark:text-gray-300"><strong>Download NDEF:</strong> Export NDEF payload for chip programming</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-purple-600 dark:text-purple-400 font-bold flex-shrink-0">•</span>
+                      <span className="text-gray-700 dark:text-gray-300"><strong>Export Config:</strong> Download tag configuration as JSON</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                    👉 Go to "My NFC Tags" tab and click on any tag to unlock these tools
+                  </p>
+                </div>
               </Card>
             ) : (
               <>
