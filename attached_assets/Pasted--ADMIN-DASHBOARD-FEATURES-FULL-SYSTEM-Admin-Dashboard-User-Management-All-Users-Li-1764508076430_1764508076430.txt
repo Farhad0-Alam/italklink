@@ -1,0 +1,368 @@
+🟣 ADMIN DASHBOARD FEATURES (FULL SYSTEM)
+
+Admin Dashboard-এ থাকবে:
+
+✔ User Management
+
+All Users List
+
+Disable / Enable Account
+
+View their products
+
+View their orders
+
+✔ Product Moderation
+
+All Products
+
+Approve / Reject
+
+Disable / Delete
+
+✔ Global Orders
+
+All orders from all sellers
+
+Refund (optional)
+
+View download tokens
+
+✔ Platform Analytics
+
+Total Sales
+
+Total Revenue
+
+Top 10 Products
+
+Top 10 Sellers
+
+Active Users
+
+Downloads Count
+
+✔ Global Settings
+
+Platform Commission % (if needed later)
+
+File retention settings
+
+Download limit settings
+
+এই সবকিছু React + Tailwind + shadcn/ui দিয়ে modern SaaS UI হবে।
+
+🟦 File Structure
+/src/pages/admin
+    dashboard.tsx
+    users.tsx
+    products.tsx
+    orders.tsx
+    analytics.tsx
+
+/src/components/admin
+    AdminUserTable.tsx
+    AdminProductTable.tsx
+    AdminOrderTable.tsx
+    AdminAnalyticsCards.tsx
+
+🟥 1) ADMIN DASHBOARD HOME (admin/dashboard.tsx)
+// src/pages/admin/dashboard.tsx
+import { Link } from "wouter";
+import { Card, CardContent } from "@/components/ui/card";
+import { Users, Package, ShoppingCart, BarChart } from "lucide-react";
+
+export function AdminDashboard() {
+  const items = [
+    { title: "Users", icon: Users, link: "/admin/users" },
+    { title: "Products", icon: Package, link: "/admin/products" },
+    { title: "Orders", icon: ShoppingCart, link: "/admin/orders" },
+    { title: "Analytics", icon: BarChart, link: "/admin/analytics" },
+  ];
+
+  return (
+    <div className="p-6 space-y-6">
+      <h1 className="text-xl font-bold">Admin Dashboard</h1>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {items.map((item) => (
+          <Link href={item.link} key={item.title}>
+            <Card className="cursor-pointer hover:bg-muted/40 transition">
+              <CardContent className="flex flex-col items-center justify-center p-6 gap-2">
+                <item.icon className="h-8 w-8 text-primary" />
+                <p className="font-semibold">{item.title}</p>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+🟩 2) USER MANAGEMENT PAGE (admin/users.tsx)
+Backend (route):
+GET /api/admin/users
+POST /api/admin/users/disable
+POST /api/admin/users/enable
+
+Frontend:
+// src/pages/admin/users.tsx
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiGet, apiPost } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+
+export function AdminUsersPage() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-users"],
+    queryFn: () => apiGet("/api/admin/users"),
+  });
+
+  const disableMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiPost("/api/admin/users/disable", { id }),
+  });
+
+  const enableMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiPost("/api/admin/users/enable", { id }),
+  });
+
+  return (
+    <div className="p-6 space-y-4">
+      <h1 className="text-xl font-bold">All Users</h1>
+
+      {isLoading ? (
+        <p>Loading…</p>
+      ) : (
+        <table className="w-full border-collapse text-sm">
+          <thead className="bg-muted/40 text-xs text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3 text-left">Email</th>
+              <th className="px-4 py-3 text-left">Status</th>
+              <th className="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.map((u) => (
+              <tr key={u.id} className="border-t hover:bg-muted/20">
+                <td className="px-4 py-3">{u.email}</td>
+                <td className="px-4 py-3">
+                  {u.disabled ? "Disabled" : "Active"}
+                </td>
+                <td className="px-4 py-3 text-right space-x-2">
+                  {!u.disabled ? (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => disableMutation.mutate(u.id)}
+                    >
+                      Disable
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => enableMutation.mutate(u.id)}
+                    >
+                      Enable
+                    </Button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+🟦 3) PRODUCT MODERATION PAGE (admin/products.tsx)
+Backend
+GET /api/admin/products
+POST /api/admin/products/disable
+POST /api/admin/products/enable
+POST /api/admin/products/delete
+
+UI:
+// src/pages/admin/products.tsx
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiGet, apiPost } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Trash, Eye, EyeOff } from "lucide-react";
+
+export function AdminProductsPage() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-products"],
+    queryFn: () => apiGet("/api/admin/products"),
+  });
+
+  const disableMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiPost("/api/admin/products/disable", { id }),
+  });
+
+  const enableMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiPost("/api/admin/products/enable", { id }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiPost("/api/admin/products/delete", { id }),
+  });
+
+  return (
+    <div className="p-6 space-y-4">
+      <h1 className="text-xl font-bold">All Products</h1>
+
+      {isLoading ? (
+        <p>Loading…</p>
+      ) : (
+        <table className="w-full border-collapse text-sm">
+          <thead className="bg-muted/40 text-xs text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3 text-left">Title</th>
+              <th className="px-4 py-3 text-left">Seller</th>
+              <th className="px-4 py-3 text-left">Status</th>
+              <th className="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.map((p) => (
+              <tr key={p.id} className="border-t hover:bg-muted/20">
+                <td className="px-4 py-3">{p.title}</td>
+                <td className="px-4 py-3">{p.seller_email}</td>
+                <td className="px-4 py-3 capitalize">{p.status}</td>
+                <td className="px-4 py-3 text-right space-x-2">
+                  {p.status === "active" ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => disableMutation.mutate(p.id)}
+                    >
+                      <EyeOff className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => enableMutation.mutate(p.id)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
+
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => deleteMutation.mutate(p.id)}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+🟨 4) GLOBAL ORDERS PAGE (admin/orders.tsx)
+Backend
+GET /api/admin/orders
+
+UI:
+// src/pages/admin/orders.tsx
+import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/lib/api";
+
+export function AdminOrdersPage() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-orders"],
+    queryFn: () => apiGet("/api/admin/orders"),
+  });
+
+  return (
+    <div className="p-6 space-y-4">
+      <h1 className="text-xl font-bold">All Orders</h1>
+
+      {isLoading ? (
+        <p>Loading…</p>
+      ) : (
+        <table className="w-full border text-sm">
+          <thead className="bg-muted/40 text-xs text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3">Buyer</th>
+              <th className="px-4 py-3">Product</th>
+              <th className="px-4 py-3">Amount</th>
+              <th className="px-4 py-3">Seller</th>
+              <th className="px-4 py-3">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.map((o) => (
+              <tr key={o.id} className="border-t hover:bg-muted/20">
+                <td className="px-4 py-3">{o.buyer_email}</td>
+                <td className="px-4 py-3">{o.product_title}</td>
+                <td className="px-4 py-3">
+                  {o.amount} {o.currency}
+                </td>
+                <td className="px-4 py-3">{o.seller_email}</td>
+                <td className="px-4 py-3">
+                  {new Date(o.created_at).toLocaleDateString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+🟩 5) PLATFORM ANALYTICS (admin/analytics.tsx)
+// src/pages/admin/analytics.tsx
+import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/lib/api";
+
+export function AdminAnalyticsPage() {
+  const { data } = useQuery({
+    queryKey: ["admin-analytics"],
+    queryFn: () => apiGet("/api/admin/analytics"),
+  });
+
+  return (
+    <div className="p-6 space-y-6">
+      <h1 className="text-xl font-bold">Platform Analytics</h1>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <Stat label="Total Sales" value={data?.total_sales} />
+        <Stat label="Total Revenue" value={`$${data?.total_revenue}`} />
+        <Stat label="Active Products" value={data?.active_products} />
+        <Stat label="Total Users" value={data?.total_users} />
+      </div>
+
+      <h2 className="text-lg font-semibold mt-6">Top Products</h2>
+      <ul className="space-y-2">
+        {data?.top_products.map((p) => (
+          <li key={p.id}>
+            {p.title} — {p.total_sales} sales
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function Stat({ label, value }) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-background/80 p-4 shadow-sm">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="text-xl font-bold">{value}</p>
+    </div>
+  );
+}

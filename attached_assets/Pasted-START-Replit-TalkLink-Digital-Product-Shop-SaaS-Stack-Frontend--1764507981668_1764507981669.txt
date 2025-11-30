@@ -1,0 +1,269 @@
+START: Replit-এ TalkLink Digital Product Shop SaaS তৈরির জন্য সম্পূর্ণ নির্দেশনা
+
+Stack:
+
+Frontend: Vite + React (TS)
+
+Backend: Express.js
+
+UI: TailwindCSS + shadcn/ui
+
+Routing: Wouter
+
+State: React Query 5
+
+Database: Replit PostgreSQL
+
+File Storage: Replit filesystem (/server/uploads/)
+
+Checkout: Stripe (Only external API allowed, unavoidable)
+
+⚠️ NO external storage like Supabase, BunnyCDN, R2 — সব digital files server filesystem-এ থাকবে।
+
+🟦 1) Backend Structure (Replit filesystem-based digital file SaaS)
+/server
+  index.js
+  /routes
+    products.js
+    upload.js
+    checkout.js
+    webhook.js
+    download.js
+  /lib
+    db.js
+    stripe.js
+    utils.js
+  /uploads   ← digital product files stored here
+
+🟩 2) Database Schema (ONLY Replit PostgreSQL)
+
+Run these SQL commands:
+
+products table
+CREATE TABLE IF NOT EXISTS products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL,
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE,
+  short_description TEXT,
+  description TEXT,
+  price NUMERIC(10,2) NOT NULL,
+  discount_price NUMERIC(10,2),
+  currency TEXT DEFAULT 'USD',
+  category TEXT,
+  thumbnail_url TEXT,
+  preview_images JSONB,
+  file_url TEXT,              -- local file path (/uploads/file.pdf)
+  file_size INT,
+  status TEXT DEFAULT 'active',
+  views INT DEFAULT 0,
+  purchases INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+orders table
+CREATE TABLE IF NOT EXISTS orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id UUID NOT NULL,
+  seller_id UUID NOT NULL,
+  buyer_email TEXT NOT NULL,
+  buyer_name TEXT,
+  amount NUMERIC(10,2),
+  currency TEXT,
+  stripe_session_id TEXT,
+  payment_status TEXT,
+  download_token TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+downloads table
+CREATE TABLE IF NOT EXISTS downloads (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL,
+  buyer_email TEXT,
+  file_url TEXT,
+  expires_at TIMESTAMP,
+  download_count INT DEFAULT 0,
+  max_downloads INT DEFAULT 5
+);
+
+🟧 3) Express Backend — ONLY Internal Storage
+3.1 Static file serving
+
+Add to server/index.js:
+
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+
+👉 এখানে /uploads/file.pdf → public download URL
+👉 পুরো Replit filesystem-এর ভেতরেই থাকবে।
+
+3.2 File Upload Route (multer, stored locally)
+// server/routes/upload.js
+import express from "express";
+import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const router = express.Router();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "..", "uploads"));
+  },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage });
+
+router.post("/", upload.single("file"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+  const fileUrl = `/uploads/${req.file.filename}`;
+
+  res.json({
+    success: true,
+    file_url: fileUrl,
+    file_size: req.file.size,
+    original_name: req.file.originalname,
+  });
+});
+
+export default router;
+
+
+✔ ZERO cloud storage
+✔ File stays inside project
+✔ Download URL = backend-domain/uploads/...
+
+🟦 4) Product CRUD (file_url uses local path)
+
+products.js same like before BUT file_url = Replit filesystem path:
+/uploads/xxx.pdf
+
+🟨 5) Stripe Checkout (Only external API allowed)
+
+No change — Stripe unavoidable.
+
+🟥 6) Webhook → generate secure download token
+
+Mapped to local file:
+
+await query(
+  `INSERT INTO downloads (order_id, buyer_email, file_url, expires_at)
+   VALUES ((SELECT id FROM orders WHERE stripe_session_id=$1),$2,$3, NOW() + INTERVAL '30 days')`,
+  [session.id, buyer_email, p.file_url]   // ← local uploads path
+);
+
+🟩 7) Download Route → Serve File (NO external storage)
+router.get("/:token", async (req, res) => {
+  const { token } = req.params;
+
+  const result = await query(
+    `SELECT d.file_url, d.expires_at, d.download_count 
+     FROM downloads d 
+     JOIN orders o ON d.order_id=o.id
+     WHERE o.download_token=$1`,
+    [token]
+  );
+
+  if (!result.rows.length) return res.status(404).json({ error: "Invalid link" });
+
+  const row = result.rows[0];
+
+  const fullPath = path.join(__dirname, "..", row.file_url);
+
+  return res.download(fullPath);
+});
+
+
+👉 Buyer gets file directly from Replit filesystem
+👉 Zero external dependency
+
+🟦 8) Frontend (React + Vite)
+
+Already provided:
+
+ShopElement.tsx
+
+ProductModal.tsx
+
+ProductCard.tsx
+
+useShop.ts
+
+Seller Dashboard UI
+
+Create/Edit Product
+
+Orders Page
+
+Analytics
+
+All unchanged EXCEPT:
+✔ "Upload file" field becomes <input type="file">
+✔ On upload → /api/upload → save file_url
+
+🟫 9) Summary: FINAL SYSTEM (Only Replit DB & Filesystem)
+Feature	External API?	Used?
+Digital File Storage	❌	ONLY Replit filesystem
+Database	❌ External	✔ Replit PostgreSQL
+Storage Buckets	❌ Supabase/Bunny/R2	❌
+File URLs	✔ internal local path	/uploads/file.pdf
+Upload API	✔ internal	/api/upload
+Download API	✔ internal	/api/download/:token
+Checkout API	✔ Stripe only	Allowed
+Everything else	Internal	✔
+🚀 READY TO USE PROMPT (Copy/Paste for Replit Agent)
+
+এই prompt দিয়ে আপনার পুরো SaaS ১০০% Replit internal version হিসেবে তৈরি হবে:
+
+🔥 FINAL MASTER PROMPT (Copy this for Replit agent):
+
+**“Create a complete Digital Product Selling System inside a Vite + React + Tailwind + shadcn/ui + Express.js project WITHOUT using any external storage service (NO Supabase, NO BunnyCDN, NO R2). Use ONLY Replit PostgreSQL and Replit server filesystem for storing digital files.
+
+Backend features required:
+
+Replit PostgreSQL tables: products, orders, downloads, analytics
+
+File uploads stored in /server/uploads/ using multer
+
+Serve files using Express static /uploads
+
+Stripe checkout session & webhook
+
+Download token generator
+
+/api/download/:token returns file from local filesystem
+
+Frontend features:
+
+Product Shop Element
+
+Product Modal + Checkout
+
+Seller Dashboard (Products, Create, Edit, Orders, Analytics)
+
+File upload UI integrated with /api/upload
+
+Routes using Wouter
+
+State using React Query
+
+Modern UI using shadcn/ui
+
+DO NOT use any external storage or external API besides Stripe.
+All digital product files MUST stay inside Replit filesystem only.”**
