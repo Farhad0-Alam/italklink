@@ -10,6 +10,7 @@ import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { AutoSaveProvider } from "@/contexts/AutoSaveContext";
 import { ShopMenuProvider } from "@/context/ShopMenuContext";
+import { CartProvider } from "@/context/CartContext";
 import { CookieConsent } from "@/components/CookieConsent";
 import { initializeUsefulCookies } from "@/utils/cookies";
 import i18n from "./lib/i18n";
@@ -69,6 +70,9 @@ const UserPurchases = lazy(() => import("./pages/shop/user-purchases"));
 const UserDownloads = lazy(() => import("./pages/shop/user-downloads"));
 const AdminShop = lazy(() => import("./pages/shop/admin-moderation"));
 const AdminCommission = lazy(() => import("./pages/shop/admin-commission"));
+const Cart = lazy(() => import("./pages/shop/cart"));
+const Checkout = lazy(() => import("./pages/shop/checkout"));
+const CheckoutSuccess = lazy(() => import("./pages/shop/checkout-success"));
 
 // Lazy load CardRoutes to prevent loading multi-page module eagerly
 const LazyCardRoutes = lazy(() => import("@/modules/multi-page").then(module => ({ default: module.CardRoutes })));
@@ -138,7 +142,10 @@ function Router() {
       
       {/* Shop routes */}
       <Route path="/shop">{() => <PageSuspense><ShopBrowse /></PageSuspense>}</Route>
-      <Route path="/shop/product/:slug">{(params) => <PageSuspense><ProductDetails {...params} /></PageSuspense>}</Route>
+      <Route path="/product/:slug">{(params) => <PageSuspense><ProductDetails {...params} /></PageSuspense>}</Route>
+      <Route path="/cart">{() => <PageSuspense><Cart /></PageSuspense>}</Route>
+      <Route path="/checkout">{() => <PageSuspense><Checkout /></PageSuspense>}</Route>
+      <Route path="/checkout/success">{() => <PageSuspense><CheckoutSuccess /></PageSuspense>}</Route>
       <Route path="/shop/seller">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
       <Route path="/shop/seller/products">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
       <Route path="/shop/seller/orders">{() => <PageSuspense><SellerOrders /></PageSuspense>}</Route>
@@ -179,12 +186,14 @@ function App() {
         <ThemeProvider>
           <TooltipProvider>
             <AutoSaveProvider>
-              <div className="min-h-screen">
-                <ImpersonationBanner />
-                <Router />
-                <Toaster />
-                <CookieConsent />
-              </div>
+              <CartProvider>
+                <div className="min-h-screen">
+                  <ImpersonationBanner />
+                  <Router />
+                  <Toaster />
+                  <CookieConsent />
+                </div>
+              </CartProvider>
             </AutoSaveProvider>
           </TooltipProvider>
         </ThemeProvider>
