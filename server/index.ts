@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, log } from "./vite";
 import { notificationScheduler } from "./notification-scheduler";
+import { seedShopProducts } from "./seed-shop";
 import path from "path";
 import fs from "fs";
 
@@ -65,6 +66,9 @@ app.use((req, res, next) => {
   }
 
   const server = await registerRoutes(app);
+
+  // Seed shop products on startup
+  await seedShopProducts();
 
   // Serve uploaded files from local storage (development)
   app.use('/uploads', express.static('public/uploads'));
