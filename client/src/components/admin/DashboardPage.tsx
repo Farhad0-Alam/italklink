@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useQuery } from '@tanstack/react-query';
 import AdminBroadcastButton from '@/components/AdminBroadcastButton';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardMetrics {
   weeklyClicks: number;
@@ -31,6 +32,9 @@ interface LinkItem {
 }
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin' || user?.role === 'owner';
+  
   // Current time for greeting
   const currentHour = new Date().getHours();
   const greeting = currentHour < 12 ? 'Good Morning' : 
@@ -118,7 +122,7 @@ export default function DashboardPage() {
 
       {/* CRM Module Card - with lock overlay if not available */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <LockedFeature feature="analytics" premium={true}>
+        <LockedFeature feature="analytics" premium={true} showOverlay={!isAdmin}>
           <Card className="border-0 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 shadow-md">
             <CardHeader>
               <CardTitle className="text-lg">Analytics Dashboard</CardTitle>
@@ -130,7 +134,7 @@ export default function DashboardPage() {
           </Card>
         </LockedFeature>
 
-        <LockedFeature feature="crm" premium={true}>
+        <LockedFeature feature="crm" premium={true} showOverlay={!isAdmin}>
           <Card className="border-0 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 shadow-md">
             <CardHeader>
               <CardTitle className="text-lg">CRM & Lead Management</CardTitle>
@@ -142,7 +146,7 @@ export default function DashboardPage() {
           </Card>
         </LockedFeature>
 
-        <LockedFeature feature="appointments" premium={true}>
+        <LockedFeature feature="appointments" premium={true} showOverlay={!isAdmin}>
           <Card className="border-0 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 shadow-md">
             <CardHeader>
               <CardTitle className="text-lg">Appointment Booking</CardTitle>
@@ -154,7 +158,7 @@ export default function DashboardPage() {
           </Card>
         </LockedFeature>
 
-        <LockedFeature feature="nfc" premium={true}>
+        <LockedFeature feature="nfc" premium={true} showOverlay={!isAdmin}>
           <Card className="border-0 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 shadow-md">
             <CardHeader>
               <CardTitle className="text-lg">NFC Management</CardTitle>
