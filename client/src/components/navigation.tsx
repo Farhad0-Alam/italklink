@@ -3,11 +3,26 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import { storage } from "@/lib/storage";
+import { useQuery } from "@tanstack/react-query";
+import { ShoppingCart } from "lucide-react";
 
 export const Navigation = () => {
   const [location] = useLocation();
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
+
+  const { data: cartItems = [] } = useQuery({
+    queryKey: ['/api/cart'],
+    queryFn: async () => {
+      const res = await fetch('/api/cart');
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.data || [];
+    },
+    staleTime: 1000 * 60,
+  });
+
+  const cartCount = cartItems.length;
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "en" ? "bn" : "en";
@@ -40,6 +55,23 @@ export const Navigation = () => {
           </div>
           
           <div className="flex items-center space-x-4">
+            {location.includes('/shop') || location.includes('/product') || location.includes('/search') ? (
+              <Link href="/cart" data-testid="button-cart">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-orange-400 hover:bg-orange-300 border-orange-300 text-white relative"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            ) : null}
+
             <Button
               variant="outline"
               size="sm"
