@@ -5253,6 +5253,41 @@ export type InsertShopReview = typeof shopReviews.$inferInsert;
 export type ShopWishlist = typeof shopWishlists.$inferSelect;
 export type InsertShopWishlist = typeof shopWishlists.$inferInsert;
 
+// Shop Affiliate Commissions table (3-way split: seller 50%, affiliate 30%, platform 20%)
+export const shopAffiliateCommissions = pgTable("shop_affiliate_commissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderId: varchar("order_id").references(() => shopOrders.id, { onDelete: 'cascade' }).notNull(),
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  sellerId: varchar("seller_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  affiliateId: varchar("affiliate_id").references(() => affiliates.id, { onDelete: 'set null' }),
+  
+  // Affiliate link tracking
+  affiliateCode: varchar("affiliate_code"),
+  affiliateLink: varchar("affiliate_link"),
+  
+  // Order details
+  orderAmount: integer("order_amount").notNull(), // Total order amount in cents
+  
+  // 3-way commission split
+  sellerAmount: integer("seller_amount").notNull(), // 50% of order amount
+  affiliateAmount: integer("affiliate_amount").notNull(), // 30% of order amount
+  platformAmount: integer("platform_amount").notNull(), // 20% of order amount
+  
+  // Status tracking
+  status: varchar("status").default('completed').notNull(), // completed, refunded, pending
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_commission_order").on(table.orderId),
+  index("idx_commission_affiliate").on(table.affiliateId),
+  index("idx_commission_seller").on(table.sellerId),
+  index("idx_commission_status").on(table.status),
+]);
+
+export type ShopAffiliateCommission = typeof shopAffiliateCommissions.$inferSelect;
+export type InsertShopAffiliateCommission = typeof shopAffiliateCommissions.$inferInsert;
+
 // Validation schemas
 export const insertDigitalProductSchema = createInsertSchema(digitalProducts).omit({
   id: true,

@@ -8,7 +8,7 @@ import {
   publicUploads, qrLinks, qrEvents, cardSubscriptions, coupons, userSubscriptions,
   bios, connections, subscriptions, analytics, affiliates, conversions, headerTemplates, icons, pageElementTypes,
   nfcTags, nfcTapEvents, nfcAnalytics,
-  digitalProducts, shopOrders, shopDownloads, shopCart, shopReviews, shopWishlists,
+  digitalProducts, shopOrders, shopDownloads, shopCart, shopReviews, shopWishlists, shopAffiliateCommissions,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -6704,6 +6704,81 @@ export class DatabaseStorage implements IStorage {
         return acc;
       }, {}),
     };
+  }
+
+  async recordAffiliateCommission(orderId: string, affiliateCode: string | null): Promise<ShopAffiliateCommission | null> {
+    const order = await db.select().from(shopOrders).where(eq(shopOrders.id, orderId)).limit(1).then(r => r[0]);
+    if (!order) return null;
+
+    const amount = order.amount || 0;
+    const affiliateAmount = Math.floor(amount * 0.30); // 30% to affiliate
+    const sellerAmount = Math.floor(amount * 0.50); // 50% to seller
+    const platformAmount = amount - affiliateAmount - sellerAmount; // 20% to platform
+
+    const [commission] = await db.insert(shopAffiliateCommissions).values({
+      orderId,
+      productId: order.productId,
+      sellerId: order.sellerId,
+      affiliateCode: affiliateCode || null,
+      orderAmount: amount,
+      affiliateAmount,
+      sellerAmount,
+      platformAmount,
+      status: order.paymentStatus === 'completed' ? 'completed' : 'pending',
+    }).returning();
+
+    return commission;
+  }
+
+  async getAffiliateCommissionDashboard(userId: string): Promise<any> {
+    const commissions = await db.select().from(shopAffiliateCommissions)
+      .where(like(shopAffiliateCommissions.affiliateCode, `${userId.slice(0, 8)}%`));
+
+    const totalEarnings = commissions.reduce((sum, c) => sum + (c.affiliateAmount || 0), 0);
+    const totalConversions = commissions.filter(c => c.status === 'completed').length;
+
+    return {
+      totalEarnings,
+      totalConversions,
+      totalClicks: commissions.length,
+      commissionRate: 30,
+    };
+  }
+
+  async getAffiliateCommissionBreakdown(userId: string): Promise<any> {
+    const commissions = await db.select().from(shopAffiliateCommissions)
+      .where(like(shopAffiliateCommissions.affiliateCode, `${userId.slice(0, 8)}%`));
+
+    const affiliateAmount = commissions.reduce((sum, c) => sum + (c.affiliateAmount || 0), 0);
+    const sellerAmount = commissions.reduce((sum, c) => sum + (c.sellerAmount || 0), 0);
+    const platformAmount = commissions.reduce((sum, c) => sum + (c.platformAmount || 0), 0);
+    const totalSalesAmount = commissions.reduce((sum, c) => sum + (c.orderAmount || 0), 0);
+
+    return {
+      affiliateAmount,
+      sellerAmount,
+      platformAmount,
+      totalSalesAmount,
+    };
+  }
+
+  async getAffiliateCommissionHistory(userId: string): Promise<(ShopAffiliateCommission & { productTitle: string })[]> {
+    const commissions = await db.select({
+      commission: shopAffiliateCommissions,
+      product: digitalProducts,
+    })
+    .from(shopAffiliateCommissions)
+    .innerJoin(digitalProducts, eq(shopAffiliateCommissions.productId, digitalProducts.id))
+    .where(like(shopAffiliateCommissions.affiliateCode, `${userId.slice(0, 8)}%`))
+    .orderBy(desc(shopAffiliateCommissions.createdAt))
+    .limit(20);
+
+    return commissions.map(c => ({ ...c.commission, productTitle: c.product.title }));
+  }
+
+  async getProductById(productId: string): Promise<DigitalProduct | undefined> {
+    const [product] = await db.select().from(digitalProducts).where(eq(digitalProducts.id, productId));
+    return product;
   }
 }
 
