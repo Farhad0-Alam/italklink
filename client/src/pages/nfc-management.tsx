@@ -1195,6 +1195,113 @@ export default function NfcManagement() {
                     </ul>
                   </AccordionContent>
                 </AccordionItem>
+
+                {/* External App Reader/Writer */}
+                <AccordionItem value="external-apps">
+                  <AccordionTrigger className="text-base font-semibold hover:no-underline">🔗 Using External App Reader/Writer</AccordionTrigger>
+                  <AccordionContent className="text-sm text-gray-600 dark:text-gray-400 space-y-3">
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Popular NFC Reader/Writer Apps:</p>
+                      <ul className="space-y-2 ml-3">
+                        <li>
+                          <strong>TagWriter by NXP</strong> (Free)
+                          <ul className="ml-3 mt-1 space-y-1">
+                            <li>✓ Works on Android</li>
+                            <li>✓ Import NDEF data from TalkLink</li>
+                            <li>✓ Write to blank NFC chips</li>
+                            <li>✓ Read existing NFC tags</li>
+                          </ul>
+                        </li>
+                        <li>
+                          <strong>NFC Pro</strong> (Free/Paid)
+                          <ul className="ml-3 mt-1 space-y-1">
+                            <li>✓ Advanced NFC reading and writing</li>
+                            <li>✓ Support for multiple chip types</li>
+                            <li>✓ Custom NDEF payload creation</li>
+                          </ul>
+                        </li>
+                        <li>
+                          <strong>NXP's Speedway Mobile</strong> (Enterprise)
+                          <ul className="ml-3 mt-1 space-y-1">
+                            <li>✓ Professional NFC management</li>
+                            <li>✓ Batch processing capabilities</li>
+                            <li>✓ Advanced analytics integration</li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">How to Use External Apps:</p>
+                      <ol className="space-y-1 ml-3 list-decimal">
+                        <li>Download one of the recommended apps from Google Play Store</li>
+                        <li>Download NDEF payload from TalkLink Tools tab</li>
+                        <li>Open the NFC app and select "Import NDEF" or similar</li>
+                        <li>Choose the downloaded NDEF file</li>
+                        <li>Hold phone near blank NFC chip to write data</li>
+                        <li>Confirm successful write on your phone screen</li>
+                      </ol>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded p-3">
+                      <p className="text-xs text-blue-900 dark:text-blue-300"><strong>💡 Tip:</strong> External apps are useful for bulk programming multiple chips at once or if you prefer not to use web-based writing tools.</p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* iPhone Support */}
+                <AccordionItem value="iphone-support">
+                  <AccordionTrigger className="text-base font-semibold hover:no-underline">🍎 Using NFC Tags with iPhone</AccordionTrigger>
+                  <AccordionContent className="text-sm text-gray-600 dark:text-gray-400 space-y-3">
+                    <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded p-3 mb-3">
+                      <p className="text-xs text-orange-900 dark:text-orange-300"><strong>⚠️ Important:</strong> iPhone (iOS) has limited NFC support compared to Android. You can READ but CANNOT WRITE NFC tags using the built-in NFC capabilities.</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">iPhone NFC Capabilities:</p>
+                      <ul className="space-y-2 ml-3">
+                        <li>
+                          <strong>✓ Reading (iOS 13+):</strong>
+                          <ul className="ml-3 mt-1 space-y-1">
+                            <li>✓ iPhone can read NFC tags you've created and written on Android</li>
+                            <li>✓ Automatically opens the URL stored on the chip</li>
+                            <li>✓ Taps are tracked in your analytics</li>
+                            <li>✓ Works with NFC-enabled iPhones (XS and newer)</li>
+                          </ul>
+                        </li>
+                        <li>
+                          <strong>✗ Writing:</strong>
+                          <ul className="ml-3 mt-1 space-y-1">
+                            <li>✗ Apple does NOT allow iOS apps to write to NFC tags</li>
+                            <li>✗ You must use Android or external NFC writers</li>
+                            <li>✗ This is a hardware/OS limitation, not a TalkLink limitation</li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Best Workflow for iPhone Users:</p>
+                      <ol className="space-y-1 ml-3 list-decimal">
+                        <li>Create NFC tags in TalkLink (works on any device)</li>
+                        <li>Use Android device to write chips using our Tools tab</li>
+                        <li>Distribute chips to iPhone users</li>
+                        <li>iPhone users tap chips - they'll automatically open your business card URL</li>
+                        <li>All taps are tracked in analytics regardless of device</li>
+                      </ol>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">iPhone Models that Support NFC Reading:</p>
+                      <ul className="space-y-1 ml-3">
+                        <li>• iPhone XS, XS Max, XR (iOS 13+)</li>
+                        <li>• iPhone 11, 11 Pro, 11 Pro Max</li>
+                        <li>• iPhone 12, 12 mini, 12 Pro, 12 Pro Max</li>
+                        <li>• iPhone 13, 13 mini, 13 Pro, 13 Pro Max</li>
+                        <li>• iPhone 14, 14 Plus, 14 Pro, 14 Pro Max</li>
+                        <li>• iPhone 15 and newer (all models)</li>
+                      </ul>
+                    </div>
+                    <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded p-3">
+                      <p className="text-xs text-green-900 dark:text-green-300"><strong>✨ Good News:</strong> iPhone users can still tap and view your NFC tags! They just can't create or write new ones using their phone. This is a limitation of iOS, not our platform.</p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
               </Accordion>
             </CardContent>
           </Card>
