@@ -201,7 +201,6 @@ router.post('/products', requireAuth, asyncHandler(async (req, res) => {
     fileSize,
     fileType,
     thumbnailUrl,
-    status: 'pending',
   } as any);
 
   res.json({ success: true, data: product });

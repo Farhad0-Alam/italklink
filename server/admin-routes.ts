@@ -45,7 +45,7 @@ router.get('/metrics/summary', requireOwner, async (req, res) => {
       .from(countersDaily)
       .where(and(
         eq(countersDaily.metric, 'clicks'),
-        sql`${countersDaily.day} >= DATE('now', '-7 days')`
+        sql`${countersDaily.day} >= CURRENT_DATE - INTERVAL '7 days'`
       )),
       
       // Weekly visitors from last 7 days  
@@ -55,7 +55,7 @@ router.get('/metrics/summary', requireOwner, async (req, res) => {
       .from(countersDaily)
       .where(and(
         eq(countersDaily.metric, 'visits'),
-        sql`${countersDaily.day} >= DATE('now', '-7 days')`
+        sql`${countersDaily.day} >= CURRENT_DATE - INTERVAL '7 days'`
       )),
       
       // Monthly visitors from last 30 days
@@ -65,7 +65,7 @@ router.get('/metrics/summary', requireOwner, async (req, res) => {
       .from(countersDaily)
       .where(and(
         eq(countersDaily.metric, 'visits'),
-        sql`${countersDaily.day} >= DATE('now', '-30 days')`
+        sql`${countersDaily.day} >= CURRENT_DATE - INTERVAL '30 days'`
       ))
     ]);
 
@@ -99,7 +99,7 @@ router.get('/metrics/timeseries', requireOwner, async (req, res) => {
       value: countersDaily.value
     })
     .from(countersDaily)
-    .where(sql`${countersDaily.day} >= DATE('now', '-${days} days')`)
+    .where(sql`${countersDaily.day} >= CURRENT_DATE - INTERVAL '${days} days'`)
     .orderBy(countersDaily.day);
 
     // Group by day and metric for charting
