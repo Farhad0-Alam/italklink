@@ -377,6 +377,7 @@ export default function NfcManagement() {
 
                     <FormField control={form.control} name="cardId" render={({ field }) => {
                       const selectedCardValue = cards.find((c: any) => c.id === field.value);
+                      const selectedCardUrl = selectedCardValue ? `https://talkl.ink/${selectedCardValue.customUrl || selectedCardValue.shareSlug || selectedCardValue.id}` : '';
                       return (
                         <FormItem>
                           <FormLabel className="text-sm">Business Card</FormLabel>
@@ -384,7 +385,7 @@ export default function NfcManagement() {
                             <FormControl>
                               <SelectTrigger className="text-sm h-9">
                                 <SelectValue placeholder={cardsLoading ? 'Loading cards...' : cards.length === 0 ? 'No cards available' : 'Select a card'}>
-                                  {field.value && selectedCardValue ? (selectedCardValue.name || selectedCardValue.cardName) : ''}
+                                  {field.value && selectedCardValue ? `${selectedCardValue.name || selectedCardValue.cardName}` : ''}
                                 </SelectValue>
                               </SelectTrigger>
                             </FormControl>
@@ -392,15 +393,26 @@ export default function NfcManagement() {
                               {cards.length === 0 ? (
                                 <div className="text-sm p-2 text-gray-500">No business cards found. Create one first.</div>
                               ) : (
-                                cards.map((card: any) => (
-                                  <SelectItem key={card.id} value={card.id} className="text-sm">
-                                    {card.name || card.cardName}
-                                  </SelectItem>
-                                ))
+                                cards.map((card: any) => {
+                                  const cardUrl = `https://talkl.ink/${card.customUrl || card.shareSlug || card.id}`;
+                                  return (
+                                    <SelectItem key={card.id} value={card.id} className="text-sm">
+                                      <div className="flex flex-col">
+                                        <span className="font-semibold">{card.name || card.cardName}</span>
+                                        <span className="text-xs text-gray-500">{cardUrl}</span>
+                                      </div>
+                                    </SelectItem>
+                                  );
+                                })
                               )}
                             </SelectContent>
                           </Select>
-                          <FormDescription className="text-xs">Choose which card this NFC tag links to</FormDescription>
+                          <FormDescription className="text-xs">Select a card - Target URL will auto-populate with its link</FormDescription>
+                          {selectedCardUrl && (
+                            <div className="text-xs bg-blue-50 dark:bg-blue-950/30 p-2 rounded mt-2 text-blue-700 dark:text-blue-300 break-all">
+                              Card URL: {selectedCardUrl}
+                            </div>
+                          )}
                           <FormMessage className="text-xs" />
                         </FormItem>
                       );
@@ -433,7 +445,7 @@ export default function NfcManagement() {
                         <FormControl>
                           <Input placeholder="https://talkl.ink/yourcard" {...field} className="text-sm h-9" />
                         </FormControl>
-                        <FormDescription className="text-xs">Where the NFC tap will redirect</FormDescription>
+                        <FormDescription className="text-xs">Where the NFC tap will redirect (optional - can override the Business Card URL)</FormDescription>
                         <FormMessage className="text-xs" />
                       </FormItem>
                     )} />
@@ -498,6 +510,7 @@ export default function NfcManagement() {
                         <FormControl>
                           <Input type="url" placeholder="https://example.com" {...field} className="text-sm h-9" />
                         </FormControl>
+                        <FormDescription className="text-xs">The URL that NFC taps redirect to (can be different from Business Card URL)</FormDescription>
                         <FormMessage className="text-xs" />
                       </FormItem>
                     )} />
