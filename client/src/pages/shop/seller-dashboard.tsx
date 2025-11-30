@@ -102,52 +102,6 @@ export default function SellerDashboard() {
   const analytics = analyticsResponse?.data || {};
   const businessCards = businessCardsData || [];
 
-  if (!user) {
-    return null;
-  }
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-
-    try {
-      const response = await fetch('/api/shop/upload', {
-        method: 'POST',
-        body: formDataUpload,
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      const data = await response.json();
-      setFormData(prev => ({
-        ...prev,
-        filePath: data.filePath,
-        fileSize: data.fileSize,
-        fileType: data.fileType,
-      }));
-
-      toast({
-        title: 'File uploaded',
-        description: `${file.name} uploaded successfully`,
-      });
-    } catch (error) {
-      toast({
-        title: 'Upload failed',
-        description: 'Please try again',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const createProductMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
       const productData = {
@@ -193,6 +147,52 @@ export default function SellerDashboard() {
       });
     },
   });
+
+  if (!user) {
+    return null;
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formDataUpload = new FormData();
+    formDataUpload.append('file', file);
+
+    try {
+      const response = await fetch('/api/shop/upload', {
+        method: 'POST',
+        body: formDataUpload,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      setFormData(prev => ({
+        ...prev,
+        filePath: data.filePath,
+        fileSize: data.fileSize,
+        fileType: data.fileType,
+      }));
+
+      toast({
+        title: 'File uploaded',
+        description: `${file.name} uploaded successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Upload failed',
+        description: 'Please try again',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const getFileIcon = (fileType: string) => {
     if (fileType?.includes('image')) return <Image className="h-5 w-5" />;
