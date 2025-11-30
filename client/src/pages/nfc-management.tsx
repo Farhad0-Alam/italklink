@@ -748,8 +748,8 @@ export default function NfcManagement() {
               </Card>
             ) : (
               <>
-                {/* NFC Read/Write Tools - Top Section */}
-                <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 xs:gap-3 sm:gap-4">
+                {/* Read NFC Tag - Full Width Top */}
+                <div className="grid grid-cols-1 gap-2 xs:gap-3 sm:gap-4">
                   <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-2 border-blue-200 dark:border-blue-800">
                     <CardHeader className="pb-2 sm:pb-3">
                       <CardTitle className="flex items-center text-base sm:text-lg">
@@ -786,7 +786,10 @@ export default function NfcManagement() {
                       </Button>
                     </CardContent>
                   </Card>
+                </div>
 
+                {/* Write to Tag + NDEF Payload - 2 Columns */}
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 xs:gap-3 sm:gap-4">
                   <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 border-2 border-emerald-200 dark:border-emerald-800">
                     <CardHeader className="pb-2 sm:pb-3">
                       <CardTitle className="flex items-center text-base sm:text-lg">
@@ -818,10 +821,7 @@ export default function NfcManagement() {
                       </Button>
                     </CardContent>
                   </Card>
-                </div>
 
-                {/* Existing Tools - Bottom Section */}
-                <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 xs:gap-3 sm:gap-4">
                   <Card className="bg-white dark:bg-gray-800">
                     <CardHeader className="pb-2 sm:pb-3">
                       <CardTitle className="flex items-center text-base sm:text-lg">
@@ -843,7 +843,10 @@ export default function NfcManagement() {
                       </Button>
                     </CardContent>
                   </Card>
+                </div>
 
+                {/* Export Config - Full Width */}
+                <div className="grid grid-cols-1 gap-2 xs:gap-3 sm:gap-4">
                   <Card className="bg-white dark:bg-gray-800">
                     <CardHeader className="pb-2 sm:pb-3">
                       <CardTitle className="flex items-center text-base sm:text-lg">
@@ -868,6 +871,7 @@ export default function NfcManagement() {
                   </Card>
                 </div>
 
+                {/* Affiliate Tracking - Full Width */}
                 <Card className="bg-white dark:bg-gray-800">
                   <CardHeader className="pb-2 sm:pb-3">
                     <CardTitle className="flex items-center text-base sm:text-lg">
