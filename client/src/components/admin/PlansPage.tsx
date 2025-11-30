@@ -127,7 +127,6 @@ interface PlanFormData {
   // Granular feature controls
   elementFeatures: number[];
   moduleFeatures: Record<string, boolean>;
-  templateIds: string[];
   // Card pricing options
   baseUsers: number;
   pricePerUser: number;
@@ -249,7 +248,6 @@ export default function PlansPage() {
     description: '',
     elementFeatures: [],
     moduleFeatures: { analytics: false, crm: false, appointments: false, nfc: false, emailSignature: false, voiceConversation: false },
-    templateIds: [],
     baseUsers: 1,
     pricePerUser: 0,
     setupFee: 0,
@@ -354,7 +352,6 @@ export default function PlansPage() {
       description: '',
       elementFeatures: [],
       moduleFeatures: { analytics: false, crm: false, appointments: false, nfc: false, emailSignature: false, voiceConversation: false },
-      templateIds: [],
       baseUsers: 1,
       pricePerUser: 0,
       setupFee: 0,
@@ -580,7 +577,6 @@ export default function PlansPage() {
       description: (plan as any).description || '',
       elementFeatures: (plan as any).elementFeatures || [],
       moduleFeatures: (plan as any).moduleFeatures || { analytics: false, crm: false, appointments: false, nfc: false, emailSignature: false, voiceConversation: false },
-      templateIds: (plan as any).templateIds || [],
       baseUsers: (plan as any).baseUsers || 1,
       pricePerUser: ((plan as any).pricePerUser || 0) / 100,
       setupFee: ((plan as any).setupFee || 0) / 100,
@@ -640,7 +636,6 @@ export default function PlansPage() {
       description: (plan as any).description || '',
       elementFeatures: (plan as any).elementFeatures || [],
       moduleFeatures: (plan as any).moduleFeatures || { analytics: false, crm: false, appointments: false, nfc: false, emailSignature: false, voiceConversation: false },
-      templateIds: (plan as any).templateIds || [],
       baseUsers: (plan as any).baseUsers || 1,
       pricePerUser: ((plan as any).pricePerUser || 0) / 100,
       setupFee: ((plan as any).setupFee || 0) / 100,
