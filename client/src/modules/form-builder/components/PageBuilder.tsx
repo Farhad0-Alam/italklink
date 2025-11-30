@@ -24,6 +24,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { PageElement } from '@shared/schema';
 import { PageElementRenderer } from '@/components/page-element';
 import { ElementSelector } from '@/components/element-selector';
+import { LockedFeature } from '@/components/LockedFeature';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
@@ -36,6 +37,20 @@ interface SortableElementProps {
   onToggleVisibility: (elementId: string) => void;
   cardData?: any;
 }
+
+// Map element types to their element IDs for access control
+const elementTypeToId: Record<string, number> = {
+  qrcode: 7,
+  contactForm: 900,
+  aiChatbot: 901,
+  voiceAgent: 902,
+  voiceAssistant: 903,
+  ragKnowledge: 904,
+  googleMaps: 905,
+  accordionSection: 906,
+  testimonials: 907,
+  videoEmbed: 908,
+};
 
 function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibility, cardData }: SortableElementProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -78,78 +93,83 @@ function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibil
     }
   };
 
+  // Check if this is a premium element
+  const isPremiumElement = elementTypeToId[element.type] !== undefined;
+
   return (
     <div ref={setNodeRef} style={style} className="relative group">
       <div className="bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
-        <Collapsible open={isExpanded}>
-          <div className="flex items-center p-3 bg-slate-100 border-b border-slate-200">
-            <div
-              {...attributes}
-              {...listeners}
-              className="flex-shrink-0 w-6 h-6 bg-slate-300 rounded cursor-grab active:cursor-grabbing flex items-center justify-center mr-3"
-            >
-              <i className="fas fa-grip-vertical text-xs text-slate-600"></i>
-            </div>
-            <CollapsibleTrigger 
-              onClick={toggleExpanded}
-              className="flex-1 flex items-center justify-between text-left hover:bg-slate-200 rounded px-2 py-1 transition-colors"
-              data-testid={`toggle-editor-${element.type}-${element.id}`}
-            >
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-slate-700">
-                  {getElementTitle()}
-                </span>
-                <span className="text-xs text-slate-500 bg-slate-200 px-2 py-1 rounded">
-                  {element.type}
-                </span>
+        <LockedFeature feature={element.type as any} premium={isPremiumElement}>
+          <Collapsible open={isExpanded}>
+            <div className="flex items-center p-3 bg-slate-100 border-b border-slate-200">
+              <div
+                {...attributes}
+                {...listeners}
+                className="flex-shrink-0 w-6 h-6 bg-slate-300 rounded cursor-grab active:cursor-grabbing flex items-center justify-center mr-3"
+              >
+                <i className="fas fa-grip-vertical text-xs text-slate-600"></i>
               </div>
-              <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-xs text-slate-500`}></i>
-            </CollapsibleTrigger>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onClone(element.id);
-              }}
-              className="ml-2 px-2 py-1 text-xs text-slate-600 hover:text-talklink-600 hover:bg-slate-200 rounded transition-colors"
-              title="Clone element"
-              data-testid={`btn-clone-${element.type}-${element.id}`}
-            >
-              <i className="fas fa-clone"></i>
-            </button>
-            <Switch
-              checked={element.visible !== false}
-              onCheckedChange={(e) => {
-                e.stopPropagation?.();
-                onToggleVisibility(element.id);
-              }}
-              className="ml-2"
-              title={element.visible !== false ? "Hide element" : "Show element"}
-              data-testid={`switch-visibility-${element.type}-${element.id}`}
-            />
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(element.id);
-              }}
-              className="ml-2 px-2 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
-              title="Delete element"
-              data-testid={`btn-delete-${element.type}-${element.id}`}
-            >
-              <i className="fas fa-trash"></i>
-            </button>
-          </div>
-          <CollapsibleContent>
-            <div className="p-3">
-              <PageElementRenderer
-                element={element}
-                isEditing={true}
-                onUpdate={onUpdate}
-                onDelete={onDelete}
-                cardData={cardData}
+              <CollapsibleTrigger 
+                onClick={toggleExpanded}
+                className="flex-1 flex items-center justify-between text-left hover:bg-slate-200 rounded px-2 py-1 transition-colors"
+                data-testid={`toggle-editor-${element.type}-${element.id}`}
+              >
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-slate-700">
+                    {getElementTitle()}
+                  </span>
+                  <span className="text-xs text-slate-500 bg-slate-200 px-2 py-1 rounded">
+                    {element.type}
+                  </span>
+                </div>
+                <i className={`fas fa-chevron-${isExpanded ? 'up' : 'down'} text-xs text-slate-500`}></i>
+              </CollapsibleTrigger>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClone(element.id);
+                }}
+                className="ml-2 px-2 py-1 text-xs text-slate-600 hover:text-talklink-600 hover:bg-slate-200 rounded transition-colors"
+                title="Clone element"
+                data-testid={`btn-clone-${element.type}-${element.id}`}
+              >
+                <i className="fas fa-clone"></i>
+              </button>
+              <Switch
+                checked={element.visible !== false}
+                onCheckedChange={(e) => {
+                  e.stopPropagation?.();
+                  onToggleVisibility(element.id);
+                }}
+                className="ml-2"
+                title={element.visible !== false ? "Hide element" : "Show element"}
+                data-testid={`switch-visibility-${element.type}-${element.id}`}
               />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(element.id);
+                }}
+                className="ml-2 px-2 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                title="Delete element"
+                data-testid={`btn-delete-${element.type}-${element.id}`}
+              >
+                <i className="fas fa-trash"></i>
+              </button>
             </div>
-          </CollapsibleContent>
-        </Collapsible>
+            <CollapsibleContent>
+              <div className="p-3">
+                <PageElementRenderer
+                  element={element}
+                  isEditing={true}
+                  onUpdate={onUpdate}
+                  onDelete={onDelete}
+                  cardData={cardData}
+                />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </LockedFeature>
       </div>
     </div>
   );

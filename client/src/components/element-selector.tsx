@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { PageElement } from "@shared/schema";
 import { generateFieldId } from "@/lib/card-data";
 import { useQuery } from "@tanstack/react-query";
+import { LockedFeature } from "@/components/LockedFeature";
 
 interface ElementType {
   type: string;
