@@ -119,6 +119,11 @@ export default function ShopBrowse() {
             businessCardsCount={businessCards.length}
             affiliate={affiliate}
             onLogout={() => setLocation('/')}
+            onNavigate={(href) => {
+              if (!href.startsWith('/shop')) {
+                setMobileMenuOpen(false);
+              }
+            }}
           />
         </SheetContent>
       </Sheet>

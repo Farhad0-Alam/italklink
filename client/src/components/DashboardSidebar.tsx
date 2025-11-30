@@ -24,9 +24,10 @@ interface DashboardSidebarProps {
   businessCardsCount: number;
   affiliate?: { status: string };
   onLogout?: () => void;
+  onNavigate?: (href: string) => void;
 }
 
-export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout }: DashboardSidebarProps) {
+export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout, onNavigate }: DashboardSidebarProps) {
   const [, setLocation] = useLocation();
   const [location] = useLocation();
   const { toast } = useToast();
@@ -254,6 +255,7 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
                     <Link
                       key={item.href}
                       href={item.href}
+                      onClick={() => onNavigate?.(item.href)}
                       className={`group flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 border-l-3 ${
                         active
                           ? 'border-l-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-100'

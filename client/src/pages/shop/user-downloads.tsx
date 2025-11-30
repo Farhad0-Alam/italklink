@@ -78,6 +78,11 @@ export default function UserDownloads() {
             businessCardsCount={businessCards.length}
             affiliate={affiliate}
             onLogout={() => setLocation('/')}
+            onNavigate={(href) => {
+              if (!href.startsWith('/shop') && !href.startsWith('/user')) {
+                setMobileMenuOpen(false);
+              }
+            }}
           />
         </SheetContent>
       </Sheet>

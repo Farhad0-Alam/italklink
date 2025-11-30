@@ -229,6 +229,11 @@ export default function SellerDashboard() {
             businessCardsCount={businessCards.length}
             affiliate={affiliate}
             onLogout={() => setLocation('/')}
+            onNavigate={(href) => {
+              if (!href.startsWith('/shop')) {
+                setMobileMenuOpen(false);
+              }
+            }}
           />
         </SheetContent>
       </Sheet>
