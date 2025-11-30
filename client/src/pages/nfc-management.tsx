@@ -1150,6 +1150,78 @@ export default function NfcManagement() {
                   </AccordionContent>
                 </AccordionItem>
 
+                {/* Affiliate Tracking Details */}
+                <AccordionItem value="affiliate-tracking">
+                  <AccordionTrigger className="text-base font-semibold hover:no-underline">💰 Affiliate Tracking Details</AccordionTrigger>
+                  <AccordionContent className="text-sm text-gray-600 dark:text-gray-400 space-y-3">
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">What is NFC Affiliate Tracking?</p>
+                      <p>Every tap on your NFC tag is automatically tracked as an affiliate conversion with the platform identifier "nfc". This allows you to measure the effectiveness of your NFC campaigns and attribute sales or leads to your physical tags.</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">What Data is Tracked?</p>
+                      <ul className="space-y-1 ml-3">
+                        <li>• <strong>Tap Count:</strong> Each time someone scans your NFC tag</li>
+                        <li>• <strong>Unique Devices:</strong> How many different phones/devices scanned the tag</li>
+                        <li>• <strong>Device Type:</strong> Mobile, desktop, or tablet</li>
+                        <li>• <strong>Timestamp:</strong> When each tap occurred</li>
+                        <li>• <strong>Platform:</strong> Automatically tagged as "nfc" for easy filtering</li>
+                        <li>• <strong>Conversion Attribution:</strong> Linked to affiliate program if enabled</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">How Conversions are Attributed</p>
+                      <ul className="space-y-1 ml-3">
+                        <li>• When someone taps your NFC tag, they're redirected to your target URL</li>
+                        <li>• If you have affiliate tracking enabled, the tap is recorded as platform: "nfc"</li>
+                        <li>• The conversion is linked to that specific NFC tag</li>
+                        <li>• If a purchase/lead happens after the tap, it's attributed to your NFC channel</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Viewing Your Affiliate Data</p>
+                      <ol className="space-y-1 ml-3 list-decimal">
+                        <li>Go to "Stats" tab to see tap counts and device breakdown</li>
+                        <li>Each tag shows total taps and unique device data</li>
+                        <li>Check your affiliate dashboard for conversion tracking</li>
+                        <li>Compare different NFC tags to see which campaigns perform best</li>
+                      </ol>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Best Practices for Affiliate Campaigns</p>
+                      <ul className="space-y-2 ml-3">
+                        <li>✨ <strong>Create Multiple Tags:</strong> Use different NFC tags for different products/campaigns to track performance individually</li>
+                        <li>✨ <strong>Unique URLs:</strong> Point each tag to a unique landing page or with UTM parameters for better tracking</li>
+                        <li>✨ <strong>Monitor Analytics:</strong> Check your Stats tab regularly to see which tags get the most engagement</li>
+                        <li>✨ <strong>Test & Optimize:</strong> A/B test different placement strategies (business cards, packaging, events)</li>
+                        <li>✨ <strong>Track Conversions:</strong> Link NFC taps to actual sales/leads in your CRM or affiliate platform</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Real-World Example</p>
+                      <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded p-3">
+                        <p className="text-xs text-blue-900 dark:text-blue-300 mb-2"><strong>Scenario:</strong> You place NFC tags in your product packaging linking to a special discount code.</p>
+                        <ul className="space-y-1 ml-3 text-xs text-blue-900 dark:text-blue-300">
+                          <li>• Customer receives product and scans the NFC tag</li>
+                          <li>• Tag records: 1 tap, device type (mobile), timestamp</li>
+                          <li>• Customer sees your discount and makes a purchase</li>
+                          <li>• Conversion is tracked as "nfc" platform in affiliate system</li>
+                          <li>• You earn commission/revenue credit for that sale</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">ROI Calculation Tips</p>
+                      <ul className="space-y-1 ml-3">
+                        <li>📊 <strong>Cost per Tap:</strong> Divide total NFC chip cost by total taps</li>
+                        <li>📊 <strong>Conversion Rate:</strong> (Total Conversions / Total Taps) × 100%</li>
+                        <li>📊 <strong>Revenue per Tag:</strong> Track which tags generate the most conversions</li>
+                        <li>📊 <strong>Compare Channels:</strong> Use NFC platform identifier to compare with other marketing channels</li>
+                      </ul>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
                 {/* Troubleshooting */}
                 <AccordionItem value="troubleshooting">
                   <AccordionTrigger className="text-base font-semibold hover:no-underline">🔧 Troubleshooting</AccordionTrigger>
