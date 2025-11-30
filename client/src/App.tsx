@@ -62,6 +62,8 @@ const ShopBrowse = lazy(() => import("./pages/shop/browse"));
 const SellerDashboard = lazy(() => import("./pages/shop/seller-dashboard"));
 const ProductDetails = lazy(() => import("./pages/shop/product-details"));
 const BuyerPurchases = lazy(() => import("./pages/shop/buyer-purchases"));
+const UserPurchases = lazy(() => import("./pages/shop/user-purchases"));
+const UserDownloads = lazy(() => import("./pages/shop/user-downloads"));
 const AdminShop = lazy(() => import("./pages/shop/admin-moderation"));
 
 // Lazy load CardRoutes to prevent loading multi-page module eagerly
@@ -133,7 +135,12 @@ function Router() {
       <Route path="/shop">{() => <PageSuspense><ShopBrowse /></PageSuspense>}</Route>
       <Route path="/shop/product/:id">{(params) => <PageSuspense><ProductDetails {...params} /></PageSuspense>}</Route>
       <Route path="/shop/seller">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
+      <Route path="/shop/seller/products">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
+      <Route path="/shop/seller/orders">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
+      <Route path="/shop/seller/analytics">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
       <Route path="/shop/purchases">{() => <PageSuspense><BuyerPurchases /></PageSuspense>}</Route>
+      <Route path="/user/purchases">{() => <PageSuspense><UserPurchases /></PageSuspense>}</Route>
+      <Route path="/user/downloads">{() => <PageSuspense><UserDownloads /></PageSuspense>}</Route>
       <Route path="/admin/shop">{() => <PageSuspense><AdminShop /></PageSuspense>}</Route>
       <Route path="/admin/coupons">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/templates">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
