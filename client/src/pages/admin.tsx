@@ -14,6 +14,7 @@ import IconsPage from '@/components/admin/IconsPage';
 import ElementTypesPage from '@/components/admin/ElementTypesPage';
 import AdminProfilePage from '@/components/admin/AdminProfilePage';
 import AdminLogin from '@/components/admin/AdminLogin';
+import { ModerationQueuePage } from '@/components/admin/ModerationQueuePage';
 
 export default function Admin() {
   const [location] = useLocation();
@@ -84,6 +85,8 @@ export default function Admin() {
         return <AffiliateConversionsPage />;
       case '/admin/payouts':
         return <AffiliatePayoutsPage />;
+      case '/admin/shop/moderation':
+        return <ModerationQueuePage />;
       case '/admin/profile':
         return <AdminProfilePage />;
       case '/admin':
