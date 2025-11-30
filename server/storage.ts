@@ -6511,6 +6511,84 @@ export class DatabaseStorage implements IStorage {
     const [review] = await db.select().from(shopReviews).where(and(eq(shopReviews.buyerId, buyerId), eq(shopReviews.productId, productId)));
     return review;
   }
+
+  async searchProducts(filters: { query?: string; category?: string; minPrice?: number; maxPrice?: number; sortBy?: string; limit?: number; offset?: number }): Promise<DigitalProduct[]> {
+    let query: any = db.select().from(digitalProducts).where(eq(digitalProducts.status, 'active'));
+    
+    if (filters.query) {
+      query = query.where(or(
+        like(digitalProducts.title, `%${filters.query}%`),
+        like(digitalProducts.description, `%${filters.query}%`)
+      ));
+    }
+    
+    if (filters.category) {
+      query = query.where(eq(digitalProducts.category, filters.category));
+    }
+    
+    if (filters.minPrice !== undefined) {
+      query = query.where(gte(digitalProducts.price, filters.minPrice));
+    }
+    
+    if (filters.maxPrice !== undefined) {
+      query = query.where(lte(digitalProducts.price, filters.maxPrice));
+    }
+    
+    // Sorting
+    switch (filters.sortBy) {
+      case 'popular':
+        query = query.orderBy(desc(digitalProducts.purchases));
+        break;
+      case 'price_low':
+        query = query.orderBy(digitalProducts.price);
+        break;
+      case 'price_high':
+        query = query.orderBy(desc(digitalProducts.price));
+        break;
+      case 'rating':
+        query = query.orderBy(desc(digitalProducts.rating));
+        break;
+      default:
+        query = query.orderBy(desc(digitalProducts.createdAt));
+    }
+    
+    if (filters.limit) query = query.limit(filters.limit);
+    if (filters.offset) query = query.offset(filters.offset);
+    
+    return query;
+  }
+
+  async getProductCategories(): Promise<string[]> {
+    const results = await db.select({ category: digitalProducts.category })
+      .from(digitalProducts)
+      .where(eq(digitalProducts.status, 'active'))
+      .groupBy(digitalProducts.category);
+    return results.map(r => r.category).filter(Boolean) as string[];
+  }
+
+  async getProductPriceRange(): Promise<{ min: number; max: number }> {
+    const result = await db.select({
+      min: sql<number>`MIN(price)`,
+      max: sql<number>`MAX(price)`,
+    }).from(digitalProducts).where(eq(digitalProducts.status, 'active'));
+    
+    return {
+      min: result[0]?.min || 0,
+      max: result[0]?.max || 1000000,
+    };
+  }
+
+  async getSearchSuggestions(query: string): Promise<string[]> {
+    const results = await db.select({ title: digitalProducts.title })
+      .from(digitalProducts)
+      .where(and(
+        eq(digitalProducts.status, 'active'),
+        like(digitalProducts.title, `%${query}%`)
+      ))
+      .limit(5);
+    
+    return results.map(r => r.title);
+  }
 }
 
 export const storage = new DatabaseStorage();
