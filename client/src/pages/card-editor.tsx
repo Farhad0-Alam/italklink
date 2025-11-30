@@ -12,7 +12,6 @@ import { FormBuilder } from "@/components/form-builder";
 import { AutoSaveIndicator } from "@/components/AutoSaveIndicator";
 import { useAutoSave } from "@/contexts/AutoSaveContext";
 import { LockedFeature } from "@/components/LockedFeature";
-import { useQuery } from "@tanstack/react-query";
 import { Copy, Share2, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import type { BusinessCard } from "@shared/schema";
