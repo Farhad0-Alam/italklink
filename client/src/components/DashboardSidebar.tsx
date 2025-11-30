@@ -52,7 +52,16 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
     },
   });
 
-  const isActive = (href: string) => location === href || location.startsWith(href + '/');
+  const isActive = (href: string) => {
+    // Exact match for specific routes
+    if (href === location) return true;
+    // For parent routes, only match if it's a direct child, not a nested route
+    if (href === '/shop' && location.startsWith('/shop')) {
+      // Only active if directly on /shop or /shop/* but not /shop/seller or /shop/user subpaths for other items
+      return location === '/shop';
+    }
+    return false;
+  };
 
   const menuSections = [
     {
