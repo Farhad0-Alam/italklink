@@ -664,7 +664,7 @@ export default function NfcManagement() {
                       exit={{ opacity: 0, scale: 0.9 }}
                       onClick={() => setSelectedTag(tag)}
                     >
-                      <Card className="cursor-pointer hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-2 border-transparent hover:border-blue-500 h-full">
+                      <Card className={`cursor-pointer hover:shadow-lg transition-all h-full bg-white dark:bg-gray-800 border-2 ${selectedTag?.id === tag.id ? 'border-blue-500 shadow-lg bg-blue-50 dark:bg-blue-950/30' : 'border-transparent hover:border-blue-500'}`}>
                         <CardHeader className="pb-2 sm:pb-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
