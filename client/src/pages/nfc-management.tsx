@@ -821,53 +821,54 @@ export default function NfcManagement() {
                 </div>
 
                 {/* Existing Tools - Bottom Section */}
-                <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-2 gap-2 xs:gap-3 sm:gap-4">
-                <Card className="bg-white dark:bg-gray-800">
-                  <CardHeader className="pb-2 sm:pb-3">
-                    <CardTitle className="flex items-center text-base sm:text-lg">
-                      <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-blue-600 flex-shrink-0" />
-                      <span>NDEF Payload</span>
-                    </CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">NDEF data for NFC programming</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                      Export NDEF-encoded data to program physical NFC chips.
-                    </p>
-                    <Button
-                      className="w-full text-sm h-9"
-                      onClick={() => downloadNdef(selectedTag.id)}
-                    >
-                      <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                      Download NDEF
-                    </Button>
-                  </CardContent>
-                </Card>
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 xs:gap-3 sm:gap-4">
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader className="pb-2 sm:pb-3">
+                      <CardTitle className="flex items-center text-base sm:text-lg">
+                        <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-blue-600 flex-shrink-0" />
+                        <span>NDEF Payload</span>
+                      </CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">NDEF data for NFC programming</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                        Export NDEF-encoded data to program physical NFC chips.
+                      </p>
+                      <Button
+                        className="w-full text-sm h-9"
+                        onClick={() => downloadNdef(selectedTag.id)}
+                      >
+                        <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                        Download NDEF
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader className="pb-2 sm:pb-3">
+                      <CardTitle className="flex items-center text-base sm:text-lg">
+                        <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-purple-600 flex-shrink-0" />
+                        <span>Export Config</span>
+                      </CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">JSON configuration</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                        Export NFC config as JSON for integrations.
+                      </p>
+                      <Button
+                        className="w-full text-sm h-9"
+                        variant="outline"
+                        onClick={() => exportConfig(selectedTag.id)}
+                      >
+                        <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                        Export JSON
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
 
                 <Card className="bg-white dark:bg-gray-800">
-                  <CardHeader className="pb-2 sm:pb-3">
-                    <CardTitle className="flex items-center text-base sm:text-lg">
-                      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-purple-600 flex-shrink-0" />
-                      <span>Export Config</span>
-                    </CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">JSON configuration</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                      Export NFC config as JSON for integrations.
-                    </p>
-                    <Button
-                      className="w-full text-sm h-9"
-                      variant="outline"
-                      onClick={() => exportConfig(selectedTag.id)}
-                    >
-                      <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                      Export JSON
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white dark:bg-gray-800 col-span-1 md:col-span-2">
                   <CardHeader className="pb-2 sm:pb-3">
                     <CardTitle className="flex items-center text-base sm:text-lg">
                       <Globe className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 text-green-600 flex-shrink-0" />
@@ -887,7 +888,6 @@ export default function NfcManagement() {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
               </>
             )}
           </TabsContent>
