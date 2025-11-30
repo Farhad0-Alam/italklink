@@ -31,16 +31,16 @@ const storage_multer = multer.diskStorage({
 
 const upload = multer({ storage: storage_multer });
 
-// ===== PUBLIC ENDPOINTS =====
+// ===== BYPASS AUTH MIDDLEWARE FOR PUBLIC ROUTES =====
+// Create a sub-router for public endpoints that skips authentication
+const publicRouter = Router();
 
-// Get categories
-router.get('/categories', asyncHandler(async (req, res) => {
+publicRouter.get('/categories', asyncHandler(async (req, res) => {
   const categories = await storage.getShopCategories();
   res.json({ success: true, data: categories });
 }));
 
-// Browse shop products
-router.get('/browse', asyncHandler(async (req, res) => {
+publicRouter.get('/browse', asyncHandler(async (req, res) => {
   const { category, search, limit = 12, offset = 0 } = req.query;
   
   const products = await storage.browseProducts({
@@ -53,14 +53,16 @@ router.get('/browse', asyncHandler(async (req, res) => {
   res.json({ success: true, data: products });
 }));
 
-// Get product details
-router.get('/product/:slug', asyncHandler(async (req, res) => {
+publicRouter.get('/product/:slug', asyncHandler(async (req, res) => {
   const product = await storage.getProductBySlug(req.params.slug);
   if (!product) {
     return res.status(404).json({ error: 'Product not found' });
   }
   res.json({ success: true, data: product });
 }));
+
+// Mount public endpoints on main router
+router.use(publicRouter);
 
 // ===== SELLER ROUTES =====
 
