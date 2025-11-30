@@ -97,11 +97,13 @@ export default function NfcManagement() {
   const { data: nfcTags = [], isLoading: tagsLoading } = useQuery({
     queryKey: ['/api/nfc/user', user?.id],
     enabled: !!user?.id,
+    select: (response: any) => response?.data || [],
   });
 
   // Fetch analytics for selected tag
   const { data: analytics } = useQuery({
     queryKey: selectedTag ? ['/api/nfc/analytics', selectedTag.id] : null,
+    select: (response: any) => response?.data || null,
   });
 
   const form = useForm({
