@@ -98,6 +98,7 @@ import shopEmailRoutes from './shop-email-routes';
 import sellerStoreRoutes from './seller-store-routes';
 import shopModerationRoutes from './shop-moderation-routes';
 import refundRoutes from './refund-routes';
+import bundleRoutes from './bundle-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 import ragRoutes from './rag-routes';
 import voiceRoutes from './voice-routes';
@@ -191,6 +192,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup refund routes
   app.use('/api/refunds', refundRoutes);
+
+  // Setup bundle routes
+  app.use('/api/bundles', bundleRoutes);
   
   // Setup billing routes
   app.use('/api/billing', billingRoutes);

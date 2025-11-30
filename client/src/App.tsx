@@ -77,6 +77,8 @@ const ShopSearch = lazy(() => import("./pages/shop/search"));
 const Wishlist = lazy(() => import("./pages/shop/wishlist"));
 const AffiliateDashboard = lazy(() => import("./pages/shop/affiliate-dashboard"));
 const SellerStore = lazy(() => import("./pages/shop/seller-store"));
+const BundlesBrowse = lazy(() => import("./pages/shop/bundles-browse").then(m => ({ default: m.BundlesBrowse })));
+const BundleDetails = lazy(() => import("./pages/shop/bundle-details").then(m => ({ default: m.BundleDetails })));
 
 // Lazy load CardRoutes to prevent loading multi-page module eagerly
 const LazyCardRoutes = lazy(() => import("@/modules/multi-page").then(module => ({ default: module.CardRoutes })));

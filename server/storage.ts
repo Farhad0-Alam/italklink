@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -611,6 +611,15 @@ export interface IStorage {
   getRefundRequests(status?: string, orderId?: string, userId?: string, userRole?: string): Promise<RefundRequest[]>;
   updateRefundStatus(refundId: string, status: string, notes?: string, stripeRefundId?: string): Promise<RefundRequest>;
   processStripeRefund(orderId: string, amount: number): Promise<string>;
+
+  // Bundle operations
+  createBundle(bundleData: any, productIds: string[]): Promise<ProductBundle>;
+  getBundleById(bundleId: string): Promise<ProductBundle | undefined>;
+  getActiveBundles(): Promise<(ProductBundle & { items: (BundleItem & { product: DigitalProduct })[] })[]>;
+  getSellerBundles(sellerId: string): Promise<ProductBundle[]>;
+  getBundleItems(bundleId: string): Promise<(BundleItem & { product: DigitalProduct })[]>;
+  updateBundle(bundleId: string, bundleData: Partial<any>): Promise<ProductBundle>;
+  deleteBundle(bundleId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -7032,6 +7041,89 @@ export class DatabaseStorage implements IStorage {
     // In production, this would call: await stripe.refunds.create({ payment_intent: order.stripePaymentIntentId })
     const stripeRefundId = `re_${Math.random().toString(36).substring(2, 15)}`;
     return stripeRefundId;
+  }
+
+  // ===== BUNDLE OPERATIONS =====
+  
+  async createBundle(bundleData: any, productIds: string[]): Promise<ProductBundle> {
+    const [bundle] = await db.insert(productBundles).values({
+      sellerId: bundleData.sellerId,
+      title: bundleData.title,
+      description: bundleData.description,
+      slug: bundleData.slug,
+      originalPrice: bundleData.originalPrice,
+      bundlePrice: bundleData.bundlePrice,
+      discountPercentage: bundleData.discountPercentage,
+    }).returning();
+
+    // Add bundle items
+    for (const productId of productIds) {
+      await db.insert(bundleItems).values({
+        bundleId: bundle.id,
+        productId,
+        quantity: 1,
+      });
+    }
+
+    return bundle;
+  }
+
+  async getBundleById(bundleId: string): Promise<ProductBundle | undefined> {
+    const [bundle] = await db.select().from(productBundles).where(eq(productBundles.id, bundleId));
+    return bundle;
+  }
+
+  async getActiveBundles(): Promise<(ProductBundle & { items: (BundleItem & { product: DigitalProduct })[] })[]> {
+    const bundles = await db.select().from(productBundles)
+      .where(eq(productBundles.status, 'active'))
+      .orderBy(desc(productBundles.createdAt));
+
+    const result = [];
+    for (const bundle of bundles) {
+      const items = await db.select({
+        bundleItem: bundleItems,
+        product: digitalProducts,
+      }).from(bundleItems)
+        .innerJoin(digitalProducts, eq(bundleItems.productId, digitalProducts.id))
+        .where(eq(bundleItems.bundleId, bundle.id));
+
+      result.push({
+        ...bundle,
+        items: items.map(i => ({ ...i.bundleItem, product: i.product })),
+      });
+    }
+
+    return result;
+  }
+
+  async getSellerBundles(sellerId: string): Promise<ProductBundle[]> {
+    return await db.select().from(productBundles)
+      .where(eq(productBundles.sellerId, sellerId))
+      .orderBy(desc(productBundles.createdAt));
+  }
+
+  async getBundleItems(bundleId: string): Promise<(BundleItem & { product: DigitalProduct })[]> {
+    const items = await db.select({
+      bundleItem: bundleItems,
+      product: digitalProducts,
+    }).from(bundleItems)
+      .innerJoin(digitalProducts, eq(bundleItems.productId, digitalProducts.id))
+      .where(eq(bundleItems.bundleId, bundleId));
+
+    return items.map(i => ({ ...i.bundleItem, product: i.product }));
+  }
+
+  async updateBundle(bundleId: string, bundleData: Partial<any>): Promise<ProductBundle> {
+    const [bundle] = await db.update(productBundles)
+      .set({ ...bundleData, updatedAt: new Date() })
+      .where(eq(productBundles.id, bundleId))
+      .returning();
+
+    return bundle;
+  }
+
+  async deleteBundle(bundleId: string): Promise<void> {
+    await db.delete(productBundles).where(eq(productBundles.id, bundleId));
   }
 }
 
