@@ -3,7 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { 
   BarChart3, Users, FileText, LogOut, Settings, HelpCircle, Zap, 
   CalendarDays, QrCode, Mail, Phone, DollarSign, ChevronDown,
-  Home, ChevronRight, Sparkles, Workflow
+  Home, ChevronRight, Sparkles, Workflow, ShoppingBag
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -84,6 +84,18 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
         { href: '/card-analytics', label: 'Analytics', icon: BarChart3, testId: 'link-card-analytics' },
         { href: '/affiliate', label: 'Affiliate', icon: DollarSign, testId: 'link-affiliate' },
         { href: '/uploads', label: 'Uploads', icon: FileText, testId: 'link-uploads' },
+      ],
+    },
+    {
+      id: 'shop',
+      label: 'Shop',
+      items: [
+        { href: '/shop', label: 'Browse Shop', icon: ShoppingBag, testId: 'link-shop-browse' },
+        { href: '/shop/seller/products', label: 'My Products', icon: ShoppingBag, testId: 'link-seller-products' },
+        { href: '/shop/seller/orders', label: 'Orders', icon: BarChart3, testId: 'link-seller-orders' },
+        { href: '/shop/seller/analytics', label: 'Sales', icon: DollarSign, testId: 'link-seller-analytics' },
+        { href: '/user/purchases', label: 'Purchases', icon: ShoppingBag, testId: 'link-user-purchases' },
+        { href: '/user/downloads', label: 'Downloads', icon: FileText, testId: 'link-user-downloads' },
       ],
     },
     {
