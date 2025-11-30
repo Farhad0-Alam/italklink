@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -619,169 +620,6 @@ export default function NfcManagement() {
           </div>
         </motion.div>
 
-        {/* Complete Setup & FAQ Guide */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="space-y-4">
-          <Card className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border-2 border-orange-200 dark:border-orange-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                <BookOpen className="w-5 h-5 text-orange-600" />
-                Complete NFC Setup Guide
-              </CardTitle>
-              <CardDescription>Everything you need to know to get started with NFC tags</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* What is NFC? */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-base text-gray-900 dark:text-white">📱 What is NFC?</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  NFC (Near Field Communication) is a wireless technology that lets your phone read data from NFC chips by tapping them together. Think of it like a digital business card that someone can tap with their phone to instantly open your profile, contact info, or website.
-                </p>
-              </div>
-
-              {/* Where to Buy NFC Chips */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-base text-gray-900 dark:text-white">🛒 Where to Buy NFC Chips?</h4>
-                <div className="bg-white dark:bg-gray-800 rounded p-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <p><strong>Popular NFC Chip Types:</strong></p>
-                  <ul className="space-y-1 ml-3">
-                    <li>• <strong>NTAG215/216:</strong> Most common, affordable ($0.10-0.50 each). Great for beginners</li>
-                    <li>• <strong>NTAG424:</strong> Larger storage, better security ($0.30-0.80 each)</li>
-                    <li>• <strong>ISO15693:</strong> Longer read distance, premium option</li>
-                  </ul>
-                  <p className="mt-3"><strong>Where to Buy:</strong></p>
-                  <ul className="space-y-1 ml-3">
-                    <li>• Amazon: Search "NTAG215 NFC chips" or "NFC tag stickers"</li>
-                    <li>• eBay: Bulk options available at wholesale prices</li>
-                    <li>• Aliexpress: Budget-friendly for bulk orders</li>
-                    <li>• Local electronics suppliers: Digi-Key, Mouser Electronics</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Step-by-Step Setup Instructions */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-base text-gray-900 dark:text-white">⚙️ Step-by-Step Setup Instructions</h4>
-                <div className="bg-white dark:bg-gray-800 rounded p-3 space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                  <div className="flex gap-3">
-                    <div className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full w-7 h-7 flex items-center justify-center font-bold flex-shrink-0">1</div>
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">Create a Business Card</p>
-                      <p className="text-xs mt-1">Go to your Business Card Builder and create or select a card you want to link to the NFC tag</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full w-7 h-7 flex items-center justify-center font-bold flex-shrink-0">2</div>
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">Create an NFC Tag</p>
-                      <p className="text-xs mt-1">Click "Create NFC Tag" above, give it a name, select your business card, choose chip type, and set the target URL</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full w-7 h-7 flex items-center justify-center font-bold flex-shrink-0">3</div>
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">Download NDEF Data (Optional)</p>
-                      <p className="text-xs mt-1">You can download the NDEF payload to program your chips using specialized NFC programming apps or devices</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 rounded-full w-7 h-7 flex items-center justify-center font-bold flex-shrink-0">4</div>
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">Write to NFC Chip (Android Only)</p>
-                      <p className="text-xs mt-1">On Android with Chrome/Edge, click "Write Tag" in the Tools tab and hold your phone near a blank NFC chip. The app will write your tag data to it</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-full w-7 h-7 flex items-center justify-center font-bold flex-shrink-0">5</div>
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">Share & Track</p>
-                      <p className="text-xs mt-1">Hand out your NFC tags to customers, partners, or place them in physical locations. Every tap is automatically tracked in Analytics!</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* How to Program NFC Chips */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-base text-gray-900 dark:text-white">💻 How to Program Physical NFC Chips?</h4>
-                <div className="bg-white dark:bg-gray-800 rounded p-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <p><strong>Option 1: Using This App (Android Only)</strong></p>
-                  <ul className="space-y-1 ml-3 mb-3">
-                    <li>✓ Select a tag in "My NFC Tags"</li>
-                    <li>✓ Go to "Tools" tab</li>
-                    <li>✓ Click "Write Tag" button</li>
-                    <li>✓ Hold Android phone near blank chip</li>
-                  </ul>
-                  <p><strong>Option 2: Using NDEF Data</strong></p>
-                  <ul className="space-y-1 ml-3 mb-3">
-                    <li>• Download NDEF payload from "Tools" tab</li>
-                    <li>• Use NFC Pro app, TagWriter by NXP, or similar tools</li>
-                    <li>• Import NDEF file and write to chips</li>
-                  </ul>
-                  <p><strong>Option 3: Manual Programming with Mobile Apps</strong></p>
-                  <ul className="space-y-1 ml-3">
-                    <li>• Download "TagWriter by NXP" (free)</li>
-                    <li>• Enter your target URL manually</li>
-                    <li>• Follow app instructions to write to chips</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Analytics & Tracking */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-base text-gray-900 dark:text-white">📊 Understanding Your Analytics</h4>
-                <div className="bg-white dark:bg-gray-800 rounded p-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <p><strong>Metrics Explained:</strong></p>
-                  <ul className="space-y-1 ml-3">
-                    <li>• <strong>Total Taps:</strong> How many times your NFC tag was scanned</li>
-                    <li>• <strong>Unique Devices:</strong> How many different phones tapped your tag</li>
-                    <li>• <strong>Device Breakdown:</strong> Taps on mobile, desktop, and tablets</li>
-                    <li>• <strong>Affiliate Attribution:</strong> Conversions are automatically tagged as "nfc" platform</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Troubleshooting */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-base text-gray-900 dark:text-white">🔧 Troubleshooting</h4>
-                <div className="bg-white dark:bg-gray-800 rounded p-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <p><strong>Write Tag not working?</strong></p>
-                  <ul className="space-y-1 ml-3 mb-3">
-                    <li>✓ Ensure you're on Android with Chrome or Edge</li>
-                    <li>✓ Make sure your chip is blank and compatible</li>
-                    <li>✓ Hold phone steady against the chip for 2-3 seconds</li>
-                    <li>✓ Try a different NFC chip if one fails</li>
-                  </ul>
-                  <p><strong>Tag not being scanned?</strong></p>
-                  <ul className="space-y-1 ml-3 mb-3">
-                    <li>✓ Check that NFC is enabled on the phone</li>
-                    <li>✓ Make sure chip was written successfully</li>
-                    <li>✓ Try scanning with different phones</li>
-                  </ul>
-                  <p><strong>No analytics data?</strong></p>
-                  <ul className="space-y-1 ml-3">
-                    <li>✓ Analytics update every time someone taps the tag</li>
-                    <li>✓ Make sure you've distributed the physical chip first</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Pro Tips */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-base text-gray-900 dark:text-white">💡 Pro Tips</h4>
-                <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded p-3 space-y-2 text-sm text-gray-700 dark:text-gray-300">
-                  <ul className="space-y-1 ml-3">
-                    <li>✨ <strong>Test First:</strong> Always test writing to a chip before mass ordering</li>
-                    <li>✨ <strong>Use Stickers:</strong> NFC sticker chips are easier to distribute than bare chips</li>
-                    <li>✨ <strong>Embed in Products:</strong> Place chips inside product packaging for unboxing experiences</li>
-                    <li>✨ <strong>Business Cards:</strong> Include chips in physical business cards for a premium touch</li>
-                    <li>✨ <strong>Multiple Tags:</strong> Create different tags for different campaigns to track which performs best</li>
-                    <li>✨ <strong>Target URLs:</strong> Point tags to different landing pages to measure campaign effectiveness</li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
 
         {/* Tabs */}
         <Tabs defaultValue="tags" className="w-full">
@@ -1175,6 +1013,192 @@ export default function NfcManagement() {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Complete NFC Setup Guide - Collapsible FAQ */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="mt-8">
+          <Card className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border-2 border-orange-200 dark:border-orange-800">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <BookOpen className="w-5 h-5 text-orange-600" />
+                Complete NFC Setup Guide & FAQ
+              </CardTitle>
+              <CardDescription>Click on any section to expand and learn more</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="single" collapsible className="w-full">
+                {/* What is NFC? */}
+                <AccordionItem value="what-is-nfc">
+                  <AccordionTrigger className="text-base font-semibold hover:no-underline">📱 What is NFC?</AccordionTrigger>
+                  <AccordionContent className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                    <p>
+                      NFC (Near Field Communication) is a wireless technology that lets your phone read data from NFC chips by tapping them together. Think of it like a digital business card that someone can tap with their phone to instantly open your profile, contact info, or website.
+                    </p>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Where to Buy */}
+                <AccordionItem value="where-to-buy">
+                  <AccordionTrigger className="text-base font-semibold hover:no-underline">🛒 Where to Buy NFC Chips?</AccordionTrigger>
+                  <AccordionContent className="text-sm text-gray-600 dark:text-gray-400 space-y-3">
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Popular NFC Chip Types:</p>
+                      <ul className="space-y-1 ml-3">
+                        <li>• <strong>NTAG215/216:</strong> Most common, affordable ($0.10-0.50 each). Great for beginners</li>
+                        <li>• <strong>NTAG424:</strong> Larger storage, better security ($0.30-0.80 each)</li>
+                        <li>• <strong>ISO15693:</strong> Longer read distance, premium option</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Where to Buy:</p>
+                      <ul className="space-y-1 ml-3">
+                        <li>• Amazon: Search "NTAG215 NFC chips" or "NFC tag stickers"</li>
+                        <li>• eBay: Bulk options available at wholesale prices</li>
+                        <li>• AliExpress: Budget-friendly for bulk orders</li>
+                        <li>• Local electronics suppliers: Digi-Key, Mouser Electronics</li>
+                      </ul>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Step-by-Step Setup */}
+                <AccordionItem value="setup-steps">
+                  <AccordionTrigger className="text-base font-semibold hover:no-underline">⚙️ Step-by-Step Setup Instructions</AccordionTrigger>
+                  <AccordionContent className="text-sm text-gray-600 dark:text-gray-400 space-y-3">
+                    <div className="space-y-3">
+                      <div className="flex gap-3">
+                        <div className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full w-7 h-7 flex items-center justify-center font-bold flex-shrink-0 text-xs">1</div>
+                        <div>
+                          <p className="font-semibold text-gray-900 dark:text-white">Create a Business Card</p>
+                          <p className="text-xs mt-1">Go to your Business Card Builder and create or select a card you want to link to the NFC tag</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full w-7 h-7 flex items-center justify-center font-bold flex-shrink-0 text-xs">2</div>
+                        <div>
+                          <p className="font-semibold text-gray-900 dark:text-white">Create an NFC Tag</p>
+                          <p className="text-xs mt-1">Click "Create NFC Tag" above, give it a name, select your business card, choose chip type, and set the target URL</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full w-7 h-7 flex items-center justify-center font-bold flex-shrink-0 text-xs">3</div>
+                        <div>
+                          <p className="font-semibold text-gray-900 dark:text-white">Download NDEF Data (Optional)</p>
+                          <p className="text-xs mt-1">You can download the NDEF payload to program your chips using specialized NFC programming apps or devices</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 rounded-full w-7 h-7 flex items-center justify-center font-bold flex-shrink-0 text-xs">4</div>
+                        <div>
+                          <p className="font-semibold text-gray-900 dark:text-white">Write to NFC Chip (Android Only)</p>
+                          <p className="text-xs mt-1">On Android with Chrome/Edge, click "Write Tag" in the Tools tab and hold your phone near a blank NFC chip. The app will write your tag data to it</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-full w-7 h-7 flex items-center justify-center font-bold flex-shrink-0 text-xs">5</div>
+                        <div>
+                          <p className="font-semibold text-gray-900 dark:text-white">Share & Track</p>
+                          <p className="text-xs mt-1">Hand out your NFC tags to customers, partners, or place them in physical locations. Every tap is automatically tracked in Analytics!</p>
+                        </div>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* How to Program */}
+                <AccordionItem value="how-to-program">
+                  <AccordionTrigger className="text-base font-semibold hover:no-underline">💻 How to Program Physical NFC Chips?</AccordionTrigger>
+                  <AccordionContent className="text-sm text-gray-600 dark:text-gray-400 space-y-3">
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Option 1: Using This App (Android Only)</p>
+                      <ul className="space-y-1 ml-3">
+                        <li>✓ Select a tag in "My NFC Tags"</li>
+                        <li>✓ Go to "Tools" tab</li>
+                        <li>✓ Click "Write Tag" button</li>
+                        <li>✓ Hold Android phone near blank chip</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Option 2: Using NDEF Data</p>
+                      <ul className="space-y-1 ml-3">
+                        <li>• Download NDEF payload from "Tools" tab</li>
+                        <li>• Use NFC Pro app, TagWriter by NXP, or similar tools</li>
+                        <li>• Import NDEF file and write to chips</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Option 3: Manual Programming with Mobile Apps</p>
+                      <ul className="space-y-1 ml-3">
+                        <li>• Download "TagWriter by NXP" (free)</li>
+                        <li>• Enter your target URL manually</li>
+                        <li>• Follow app instructions to write to chips</li>
+                      </ul>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Analytics */}
+                <AccordionItem value="analytics">
+                  <AccordionTrigger className="text-base font-semibold hover:no-underline">📊 Understanding Your Analytics</AccordionTrigger>
+                  <AccordionContent className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                    <p className="font-semibold text-gray-900 dark:text-white">Metrics Explained:</p>
+                    <ul className="space-y-1 ml-3">
+                      <li>• <strong>Total Taps:</strong> How many times your NFC tag was scanned</li>
+                      <li>• <strong>Unique Devices:</strong> How many different phones tapped your tag</li>
+                      <li>• <strong>Device Breakdown:</strong> Taps on mobile, desktop, and tablets</li>
+                      <li>• <strong>Affiliate Attribution:</strong> Conversions are automatically tagged as "nfc" platform</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Troubleshooting */}
+                <AccordionItem value="troubleshooting">
+                  <AccordionTrigger className="text-base font-semibold hover:no-underline">🔧 Troubleshooting</AccordionTrigger>
+                  <AccordionContent className="text-sm text-gray-600 dark:text-gray-400 space-y-3">
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Write Tag not working?</p>
+                      <ul className="space-y-1 ml-3">
+                        <li>✓ Ensure you're on Android with Chrome or Edge</li>
+                        <li>✓ Make sure your chip is blank and compatible</li>
+                        <li>✓ Hold phone steady against the chip for 2-3 seconds</li>
+                        <li>✓ Try a different NFC chip if one fails</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">Tag not being scanned?</p>
+                      <ul className="space-y-1 ml-3">
+                        <li>✓ Check that NFC is enabled on the phone</li>
+                        <li>✓ Make sure chip was written successfully</li>
+                        <li>✓ Try scanning with different phones</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white mb-2">No analytics data?</p>
+                      <ul className="space-y-1 ml-3">
+                        <li>✓ Analytics update every time someone taps the tag</li>
+                        <li>✓ Make sure you've distributed the physical chip first</li>
+                      </ul>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* Pro Tips */}
+                <AccordionItem value="pro-tips">
+                  <AccordionTrigger className="text-base font-semibold hover:no-underline">💡 Pro Tips & Best Practices</AccordionTrigger>
+                  <AccordionContent className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                    <ul className="space-y-2 ml-3">
+                      <li>✨ <strong>Test First:</strong> Always test writing to a chip before mass ordering</li>
+                      <li>✨ <strong>Use Stickers:</strong> NFC sticker chips are easier to distribute than bare chips</li>
+                      <li>✨ <strong>Embed in Products:</strong> Place chips inside product packaging for unboxing experiences</li>
+                      <li>✨ <strong>Business Cards:</strong> Include chips in physical business cards for a premium touch</li>
+                      <li>✨ <strong>Multiple Tags:</strong> Create different tags for different campaigns to track which performs best</li>
+                      <li>✨ <strong>Target URLs:</strong> Point tags to different landing pages to measure campaign effectiveness</li>
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </CardContent>
+          </Card>
+        </motion.div>
         </div>
         </div>
       </div>
