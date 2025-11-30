@@ -337,24 +337,25 @@ export default function NfcManagement() {
           </Sheet>
         </div>
 
-        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-6 md:py-8">
-        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+        <div className="w-full px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-4 xs:py-5 sm:py-6 md:py-8">
+        <div className="max-w-7xl mx-auto space-y-4 xs:space-y-5 sm:space-y-6 md:space-y-8">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 sm:space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col xs:gap-3 sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
                 NFC Management
               </h1>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 sm:mt-2">
+              <p className="text-xs xs:text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 xs:mt-1.5 sm:mt-2">
                 Create and manage NFC tags for your business cards
               </p>
             </div>
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
               <DialogTrigger asChild>
-                <Button size="sm" sm:size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 w-full sm:w-auto flex-shrink-0">
-                  <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                  <span className="text-sm sm:text-base">Create NFC Tag</span>
+                <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 w-full xs:w-auto sm:w-auto flex-shrink-0 text-xs xs:text-sm sm:text-base h-9 xs:h-10">
+                  <Plus className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 mr-1 xs:mr-2" />
+                  <span className="hidden xs:inline">Create NFC Tag</span>
+                  <span className="xs:hidden">Create</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
@@ -560,7 +561,7 @@ export default function NfcManagement() {
           </Card>
 
           {/* Getting Started Guide */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 xs:gap-3">
             {/* Step 1: Create */}
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
               <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 border-2 border-emerald-200 dark:border-emerald-800 h-full hover:shadow-lg transition-shadow">
@@ -571,8 +572,8 @@ export default function NfcManagement() {
                     </div>
                     <Badge className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs">Step 1</Badge>
                   </div>
-                  <h4 className="font-bold text-sm mb-2 text-gray-900 dark:text-white">Create NFC Tag</h4>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">Click "Create NFC Tag" button, select your business card, and choose chip type</p>
+                  <h4 className="font-bold text-xs xs:text-sm mb-2 text-gray-900 dark:text-white">Create NFC Tag</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 xs:line-clamp-none">Click "Create NFC Tag" button, select your business card, and choose chip type</p>
                   <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
                     Get Started <ArrowRight className="w-3 h-3" />
                   </div>
@@ -624,20 +625,20 @@ export default function NfcManagement() {
         {/* Tabs */}
         <Tabs defaultValue="tags" className="w-full">
           <TabsList className="grid w-full grid-cols-3 gap-2 bg-transparent p-0 h-auto">
-            <TabsTrigger value="tags" className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 border-2 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:shadow-md transition-all text-xs sm:text-sm py-3 px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-emerald-100 dark:data-[state=active]:from-emerald-900/60">
-              <Radio className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">My NFC Tags</span>
-              <span className="sm:hidden">Tags</span>
+            <TabsTrigger value="tags" className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 border-2 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:shadow-md transition-all text-xs py-2 xs:py-3 px-1.5 xs:px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-emerald-100 dark:data-[state=active]:from-emerald-900/60">
+              <Radio className="w-3 h-3 xs:w-4 xs:h-4 mr-0.5 xs:mr-1 sm:mr-2 flex-shrink-0" />
+              <span className="hidden xs:inline">My NFC Tags</span>
+              <span className="xs:hidden">Tags</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-2 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:shadow-md transition-all text-xs sm:text-sm py-3 px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-blue-100 dark:data-[state=active]:from-blue-900/60">
-              <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Analytics</span>
-              <span className="sm:hidden">Stats</span>
+            <TabsTrigger value="analytics" className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-2 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:shadow-md transition-all text-xs py-2 xs:py-3 px-1.5 xs:px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-blue-100 dark:data-[state=active]:from-blue-900/60">
+              <BarChart3 className="w-3 h-3 xs:w-4 xs:h-4 mr-0.5 xs:mr-1 sm:mr-2 flex-shrink-0" />
+              <span className="hidden xs:inline">Analytics</span>
+              <span className="xs:hidden">Stats</span>
             </TabsTrigger>
-            <TabsTrigger value="tools" className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/40 border-2 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:shadow-md transition-all text-xs sm:text-sm py-3 px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-purple-100 dark:data-[state=active]:from-purple-900/60">
-              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Tools</span>
-              <span className="sm:hidden">Tools</span>
+            <TabsTrigger value="tools" className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/40 border-2 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:shadow-md transition-all text-xs py-2 xs:py-3 px-1.5 xs:px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-purple-100 dark:data-[state=active]:from-purple-900/60">
+              <Sparkles className="w-3 h-3 xs:w-4 xs:h-4 mr-0.5 xs:mr-1 sm:mr-2 flex-shrink-0" />
+              <span className="hidden xs:inline">Tools</span>
+              <span className="xs:hidden">⚙️</span>
             </TabsTrigger>
           </TabsList>
 
@@ -751,22 +752,22 @@ export default function NfcManagement() {
                   </CardHeader>
                   <CardContent>
                     {analytics ? (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
-                        <div className="bg-white dark:bg-gray-800 p-2 sm:p-4 rounded-lg">
-                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total Taps</p>
-                          <p className="text-2xl sm:text-3xl font-bold text-blue-600">{analytics[0]?.totalTaps || 0}</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 xs:gap-2 sm:gap-4">
+                        <div className="bg-white dark:bg-gray-800 p-1.5 xs:p-2 sm:p-4 rounded-lg">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">Total Taps</p>
+                          <p className="text-lg xs:text-2xl sm:text-3xl font-bold text-blue-600 mt-1">{analytics[0]?.totalTaps || 0}</p>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 p-2 sm:p-4 rounded-lg">
-                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Unique</p>
-                          <p className="text-2xl sm:text-3xl font-bold text-purple-600">{analytics[0]?.uniqueDevices || 0}</p>
+                        <div className="bg-white dark:bg-gray-800 p-1.5 xs:p-2 sm:p-4 rounded-lg">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">Unique</p>
+                          <p className="text-lg xs:text-2xl sm:text-3xl font-bold text-purple-600 mt-1">{analytics[0]?.uniqueDevices || 0}</p>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 p-2 sm:p-4 rounded-lg">
-                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Mobile</p>
-                          <p className="text-2xl sm:text-3xl font-bold text-green-600">{analytics[0]?.mobileTaps || 0}</p>
+                        <div className="bg-white dark:bg-gray-800 p-1.5 xs:p-2 sm:p-4 rounded-lg">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">Mobile</p>
+                          <p className="text-lg xs:text-2xl sm:text-3xl font-bold text-green-600 mt-1">{analytics[0]?.mobileTaps || 0}</p>
                         </div>
-                        <div className="bg-white dark:bg-gray-800 p-2 sm:p-4 rounded-lg">
-                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Desktop</p>
-                          <p className="text-2xl sm:text-3xl font-bold text-orange-600">{analytics[0]?.desktopTaps || 0}</p>
+                        <div className="bg-white dark:bg-gray-800 p-1.5 xs:p-2 sm:p-4 rounded-lg hidden sm:block">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">Desktop</p>
+                          <p className="text-lg xs:text-2xl sm:text-3xl font-bold text-orange-600 mt-1">{analytics[0]?.desktopTaps || 0}</p>
                         </div>
                       </div>
                     ) : (
@@ -870,7 +871,7 @@ export default function NfcManagement() {
             ) : (
               <>
                 {/* NFC Read/Write Tools - Top Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 xs:gap-3 sm:gap-4">
                   <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-2 border-blue-200 dark:border-blue-800">
                     <CardHeader className="pb-2 sm:pb-3">
                       <CardTitle className="flex items-center text-base sm:text-lg">
@@ -942,7 +943,7 @@ export default function NfcManagement() {
                 </div>
 
                 {/* Existing Tools - Bottom Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-2 gap-2 xs:gap-3 sm:gap-4">
                 <Card className="bg-white dark:bg-gray-800">
                   <CardHeader className="pb-2 sm:pb-3">
                     <CardTitle className="flex items-center text-base sm:text-lg">
@@ -1024,11 +1025,11 @@ export default function NfcManagement() {
               </CardTitle>
               <CardDescription>Click on any section to expand and learn more</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-2 xs:p-4 sm:p-6">
               <Accordion type="single" collapsible className="w-full">
                 {/* What is NFC? */}
                 <AccordionItem value="what-is-nfc">
-                  <AccordionTrigger className="text-base font-semibold hover:no-underline">📱 What is NFC?</AccordionTrigger>
+                  <AccordionTrigger className="text-xs xs:text-sm sm:text-base font-semibold hover:no-underline py-2 xs:py-3">📱 What is NFC?</AccordionTrigger>
                   <AccordionContent className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
                     <p>
                       NFC (Near Field Communication) is a wireless technology that lets your phone read data from NFC chips by tapping them together. Think of it like a digital business card that someone can tap with their phone to instantly open your profile, contact info, or website.
