@@ -35,7 +35,7 @@ const vector = customType<{ data: number[] | null; driverData: string | null }>(
 // Database Enums
 export const subscriptionStatusEnum = pgEnum('subscription_status', ['active', 'canceled', 'past_due', 'incomplete']);
 export const planTypeEnum = pgEnum('plan_type', ['free', 'paid']);
-export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'super_admin', 'owner']);
+export const userRoleEnum = pgEnum('user_role', ['user', 'admin', 'super_admin', 'owner', 'seller']);
 export const teamRoleEnum = pgEnum('team_role', ['owner', 'admin', 'member']);
 export const teamMemberStatusEnum = pgEnum('team_member_status', ['active', 'invited', 'suspended']);
 export const frequencyEnum = pgEnum('frequency', ['monthly', 'yearly', 'custom']);
@@ -102,6 +102,11 @@ export const callDirectionEnum = pgEnum('call_direction', ['inbound', 'outbound'
 export const callOutcomeEnum = pgEnum('call_outcome', ['qualified', 'not_qualified', 'appointment_booked', 'follow_up', 'no_answer', 'voicemail', 'not_interested']);
 export const voiceProviderEnum = pgEnum('voice_provider', ['openai', 'elevenlabs', 'google', 'azure']);
 export const agentModeEnum = pgEnum('agent_mode', ['answering', 'qualification', 'booking', 'custom']);
+
+// Digital Shop enums
+export const productStatusEnum = pgEnum('product_status', ['draft', 'active', 'inactive', 'archived']);
+export const orderStatusEnum = pgEnum('order_status', ['pending', 'completed', 'failed', 'refunded']);
+export const downloadStatusEnum = pgEnum('download_status', ['active', 'expired', 'revoked']);
 
 // Database Tables
 
