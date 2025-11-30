@@ -84,13 +84,13 @@ router.get('/products', requireAuth, asyncHandler(async (req, res) => {
 
 // Update product
 router.patch('/products/:id', requireAuth, asyncHandler(async (req, res) => {
-  const product = await storage.updateDigitalProduct(req.params.id, req.user.id, req.body);
+  const product = await storage.updateDigitalProduct(req.params.id, req.body);
   res.json({ success: true, data: product });
 }));
 
 // Delete product
 router.delete('/products/:id', requireAuth, asyncHandler(async (req, res) => {
-  await storage.deleteDigitalProduct(req.params.id, req.user.id);
+  await storage.deleteDigitalProduct(req.params.id);
   res.json({ success: true, message: 'Product deleted' });
 }));
 

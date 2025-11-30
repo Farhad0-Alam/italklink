@@ -6267,6 +6267,30 @@ export class DatabaseStorage implements IStorage {
     const [download] = await db.update(shopDownloads).set(downloadData).where(eq(shopDownloads.id, id)).returning();
     return download;
   }
+
+  async getProductBySlug(slug: string): Promise<DigitalProduct | undefined> {
+    const [product] = await db.select().from(digitalProducts).where(eq(digitalProducts.slug, slug));
+    return product;
+  }
+
+  async getSellerAnalytics(sellerId: string): Promise<any> {
+    const products = await db.select().from(digitalProducts).where(eq(digitalProducts.sellerId, sellerId));
+    const orders = await db.select().from(shopOrders).where(eq(shopOrders.sellerId, sellerId));
+    
+    const totalRevenue = orders.reduce((sum, order) => sum + (order.sellerAmount || 0), 0);
+    const totalSales = orders.filter(o => o.paymentStatus === 'completed').length;
+    const totalViews = products.reduce((sum, p) => sum + (p.views || 0), 0);
+    const totalProducts = products.length;
+
+    return {
+      totalRevenue,
+      totalSales,
+      totalViews,
+      totalProducts,
+      products,
+      orders,
+    };
+  }
 }
 
 export const storage = new DatabaseStorage();
