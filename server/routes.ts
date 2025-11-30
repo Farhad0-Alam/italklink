@@ -957,7 +957,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // The optionalAuth middleware already handles impersonation
       const user = req.user as any;
       const { password, ...userProfile } = user;
-      res.json(userProfile);
+      
+      // Fetch active subscription if user exists
+      try {
+        const subscription = await storage.getUserSubscription(user.id);
+        res.json({ ...userProfile, subscription });
+      } catch (error) {
+        console.error('Error fetching subscription:', error);
+        res.json(userProfile);
+      }
     } else {
       res.status(401).json({ message: 'Not authenticated' });
     }
