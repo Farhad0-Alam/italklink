@@ -57,17 +57,21 @@ export default function SellerDashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const { data: products, isLoading: productsLoading } = useQuery<any[]>({
+  const { data: productsResponse, isLoading: productsLoading } = useQuery<{ success: boolean; data: any[] }>({
     queryKey: ['/api/shop/seller/products'],
   });
 
-  const { data: orders } = useQuery<any[]>({
+  const { data: ordersResponse } = useQuery<{ success: boolean; data: any[] }>({
     queryKey: ['/api/shop/seller/orders'],
   });
 
-  const { data: analytics } = useQuery<any>({
+  const { data: analyticsResponse } = useQuery<{ success: boolean; data: any }>({
     queryKey: ['/api/shop/seller/analytics'],
   });
+
+  const products = (productsResponse?.data && Array.isArray(productsResponse.data)) ? productsResponse.data : [];
+  const orders = (ordersResponse?.data && Array.isArray(ordersResponse.data)) ? ordersResponse.data : [];
+  const analytics = analyticsResponse?.data || {};
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
