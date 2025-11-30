@@ -8,7 +8,7 @@ import {
   publicUploads, qrLinks, qrEvents, cardSubscriptions, coupons, userSubscriptions,
   bios, connections, subscriptions, analytics, affiliates, conversions, headerTemplates, icons, pageElementTypes,
   nfcTags, nfcTapEvents, nfcAnalytics,
-  digitalProducts, shopOrders, shopDownloads,
+  digitalProducts, shopOrders, shopDownloads, shopCart,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -6398,7 +6398,6 @@ export class DatabaseStorage implements IStorage {
   // ===== SHOPPING CART OPERATIONS =====
   
   async addToCart(userId: string, productId: string, quantity: number = 1): Promise<ShopCartItem> {
-    const { shopCart } = await import('@shared/schema');
     const existing = await db.select().from(shopCart)
       .where(and(eq(shopCart.userId, userId), eq(shopCart.productId, productId)));
     
@@ -6419,7 +6418,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCart(userId: string): Promise<(ShopCartItem & { product: DigitalProduct })[]> {
-    const { shopCart } = await import('@shared/schema');
     const items = await db.select({
       cart: shopCart,
       product: digitalProducts,
@@ -6432,7 +6430,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateCartItem(userId: string, productId: string, quantity: number): Promise<ShopCartItem> {
-    const { shopCart } = await import('@shared/schema');
     const [updated] = await db.update(shopCart)
       .set({ quantity, updatedAt: new Date() })
       .where(and(eq(shopCart.userId, userId), eq(shopCart.productId, productId)))
@@ -6441,18 +6438,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async removeFromCart(userId: string, productId: string): Promise<void> {
-    const { shopCart } = await import('@shared/schema');
     await db.delete(shopCart)
       .where(and(eq(shopCart.userId, userId), eq(shopCart.productId, productId)));
   }
 
   async clearCart(userId: string): Promise<void> {
-    const { shopCart } = await import('@shared/schema');
     await db.delete(shopCart).where(eq(shopCart.userId, userId));
   }
 
   async getCartCount(userId: string): Promise<number> {
-    const { shopCart } = await import('@shared/schema');
     const result = await db.select({ count: sql<number>`count(*)` })
       .from(shopCart)
       .where(eq(shopCart.userId, userId));

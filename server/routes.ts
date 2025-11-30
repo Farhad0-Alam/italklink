@@ -84,6 +84,7 @@ import adminRoutes from './admin-routes';
 import billingRoutes from './billing-routes';
 import { templateCollectionsRoutes } from './template-collections-routes';
 import shopRoutes from './shop-routes';
+import cartRoutes from './cart-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 import ragRoutes from './rag-routes';
 import voiceRoutes from './voice-routes';
@@ -135,6 +136,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup shop routes
   app.use('/api/shop', shopRoutes);
+
+  // Setup shopping cart routes
+  app.use('/api/cart', cartRoutes);
   
   // Setup billing routes
   app.use('/api/billing', billingRoutes);
