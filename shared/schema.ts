@@ -5324,6 +5324,55 @@ export type InsertShopAffiliateCommission = typeof shopAffiliateCommissions.$inf
 export type RefundRequest = typeof refundRequests.$inferSelect;
 export type InsertRefundRequest = typeof refundRequests.$inferInsert;
 
+// Product Bundles table
+export const productBundles = pgTable("product_bundles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Bundle info
+  title: varchar("title").notNull(),
+  description: text("description"),
+  slug: varchar("slug").unique().notNull(),
+  
+  // Pricing
+  originalPrice: integer("original_price").notNull(), // Sum of bundle items
+  bundlePrice: integer("bundle_price").notNull(), // Discounted price
+  discountPercentage: integer("discount_percentage").notNull(), // Discount %
+  
+  // Status
+  status: productStatusEnum("status").default('active'),
+  
+  // Metadata
+  views: integer("views").default(0),
+  purchases: integer("purchases").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_bundle_seller").on(table.sellerId),
+  index("idx_bundle_status").on(table.status),
+  index("idx_bundle_created").on(table.createdAt),
+]);
+
+// Bundle Items table
+export const bundleItems = pgTable("bundle_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bundleId: varchar("bundle_id").references(() => productBundles.id, { onDelete: 'cascade' }).notNull(),
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  
+  quantity: integer("quantity").default(1),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_bundle_item_bundle").on(table.bundleId),
+  index("idx_bundle_item_product").on(table.productId),
+]);
+
+export type ProductBundle = typeof productBundles.$inferSelect;
+export type InsertProductBundle = typeof productBundles.$inferInsert;
+export type BundleItem = typeof bundleItems.$inferSelect;
+export type InsertBundleItem = typeof bundleItems.$inferInsert;
+
 // Validation schemas
 export const insertDigitalProductSchema = createInsertSchema(digitalProducts).omit({
   id: true,
@@ -5391,3 +5440,19 @@ export const insertShopWishlistSchema = createInsertSchema(shopWishlists).omit({
 });
 
 export type ShopWishlistForm = z.infer<typeof insertShopWishlistSchema>;
+
+export const insertProductBundleSchema = createInsertSchema(productBundles).omit({
+  id: true,
+  sellerId: true,
+  views: true,
+  purchases: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  title: z.string().min(3).max(200),
+  slug: z.string().min(3).max(200),
+  bundlePrice: z.number().min(0),
+  discountPercentage: z.number().min(0).max(100),
+});
+
+export type ProductBundleForm = z.infer<typeof insertProductBundleSchema>;
