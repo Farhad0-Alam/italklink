@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { LockedFeature } from '@/components/LockedFeature';
 import { MoreHorizontal, ExternalLink, Copy, Eye } from 'lucide-react';
 import {
   DropdownMenu,
@@ -113,6 +114,57 @@ export default function DashboardPage() {
           description="Visitors in the last 30 days" 
           isLoading={metricsLoading}
         />
+      </div>
+
+      {/* CRM Module Card - with lock overlay if not available */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <LockedFeature feature="analytics" premium={true}>
+          <Card className="border-0 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg">Analytics Dashboard</CardTitle>
+              <CardDescription>View detailed visitor stats and engagement metrics</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700">Open Analytics</Button>
+            </CardContent>
+          </Card>
+        </LockedFeature>
+
+        <LockedFeature feature="crm" premium={true}>
+          <Card className="border-0 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg">CRM & Lead Management</CardTitle>
+              <CardDescription>Manage contacts and track leads</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full bg-emerald-600 hover:bg-emerald-700">Open CRM</Button>
+            </CardContent>
+          </Card>
+        </LockedFeature>
+
+        <LockedFeature feature="appointments" premium={true}>
+          <Card className="border-0 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg">Appointment Booking</CardTitle>
+              <CardDescription>Manage calendars and schedule meetings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full bg-purple-600 hover:bg-purple-700">Open Appointments</Button>
+            </CardContent>
+          </Card>
+        </LockedFeature>
+
+        <LockedFeature feature="nfc" premium={true}>
+          <Card className="border-0 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg">NFC Management</CardTitle>
+              <CardDescription>Manage NFC tags and digital cards</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full bg-orange-600 hover:bg-orange-700">Open NFC</Button>
+            </CardContent>
+          </Card>
+        </LockedFeature>
       </div>
 
       {/* All Links Section - Premium Design */}

@@ -577,7 +577,16 @@ export default function PlansPage() {
       stripePriceId: '',
       pricingFeatures: (plan as any).pricingFeatures || [],
       templateLimit: (plan.features as any)?.templateLimit || -1,
-      description: (plan as any).description || ''
+      description: (plan as any).description || '',
+      elementFeatures: (plan as any).elementFeatures || [],
+      moduleFeatures: (plan as any).moduleFeatures || { analytics: false, crm: false, appointments: false, nfc: false, emailSignature: false, voiceConversation: false },
+      templateIds: (plan as any).templateIds || [],
+      baseUsers: (plan as any).baseUsers || 1,
+      pricePerUser: ((plan as any).pricePerUser || 0) / 100,
+      setupFee: ((plan as any).setupFee || 0) / 100,
+      allowUserSelection: (plan as any).allowUserSelection || false,
+      minUsers: (plan as any).minUsers || 1,
+      maxUsers: (plan as any).maxUsers || null
     });
     setAddPlanOpen(true);
   };
@@ -628,7 +637,16 @@ export default function PlansPage() {
       stripePriceId: plan.stripePriceId || '',
       pricingFeatures: (plan as any).pricingFeatures || [],
       templateLimit: (plan.features as any)?.templateLimit || -1,
-      description: (plan as any).description || ''
+      description: (plan as any).description || '',
+      elementFeatures: (plan as any).elementFeatures || [],
+      moduleFeatures: (plan as any).moduleFeatures || { analytics: false, crm: false, appointments: false, nfc: false, emailSignature: false, voiceConversation: false },
+      templateIds: (plan as any).templateIds || [],
+      baseUsers: (plan as any).baseUsers || 1,
+      pricePerUser: ((plan as any).pricePerUser || 0) / 100,
+      setupFee: ((plan as any).setupFee || 0) / 100,
+      allowUserSelection: (plan as any).allowUserSelection || false,
+      minUsers: (plan as any).minUsers || 1,
+      maxUsers: (plan as any).maxUsers || null
     });
     setEditPlanOpen(true);
   };
