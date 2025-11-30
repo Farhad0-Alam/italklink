@@ -107,6 +107,7 @@ export const agentModeEnum = pgEnum('agent_mode', ['answering', 'qualification',
 export const productStatusEnum = pgEnum('product_status', ['draft', 'active', 'inactive', 'archived']);
 export const orderStatusEnum = pgEnum('order_status', ['pending', 'completed', 'failed', 'refunded']);
 export const downloadStatusEnum = pgEnum('download_status', ['active', 'expired', 'revoked']);
+export const reviewStatusEnum = pgEnum('review_status', ['approved', 'pending', 'rejected']);
 
 // Database Tables
 
@@ -5191,6 +5192,36 @@ export const shopCart = pgTable("shop_cart", {
   index("idx_cart_product").on(table.productId),
 ]);
 
+// Shop Reviews table
+export const shopReviews = pgTable("shop_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  buyerId: varchar("buyer_id").references(() => users.id, { onDelete: 'set null' }),
+  orderId: varchar("order_id").references(() => shopOrders.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Review content
+  rating: integer("rating").notNull(),
+  title: varchar("title").notNull(),
+  comment: text("comment"),
+  
+  // Seller response
+  sellerResponse: text("seller_response"),
+  sellerResponseAt: timestamp("seller_response_at"),
+  
+  // Metadata
+  helpfulCount: integer("helpful_count").default(0),
+  status: reviewStatusEnum("status").default('approved'),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_review_product").on(table.productId),
+  index("idx_review_buyer").on(table.buyerId),
+  index("idx_review_order").on(table.orderId),
+  index("idx_review_status").on(table.status),
+  index("idx_review_created").on(table.createdAt),
+]);
+
 // ===== DIGITAL SHOP TYPES & SCHEMAS =====
 
 export type DigitalProduct = typeof digitalProducts.$inferSelect;
@@ -5201,6 +5232,8 @@ export type ShopDownload = typeof shopDownloads.$inferSelect;
 export type InsertShopDownload = typeof shopDownloads.$inferInsert;
 export type ShopCartItem = typeof shopCart.$inferSelect;
 export type InsertShopCartItem = typeof shopCart.$inferInsert;
+export type ShopReview = typeof shopReviews.$inferSelect;
+export type InsertShopReview = typeof shopReviews.$inferInsert;
 
 // Validation schemas
 export const insertDigitalProductSchema = createInsertSchema(digitalProducts).omit({
@@ -5240,3 +5273,20 @@ export const insertShopCartSchema = createInsertSchema(shopCart).omit({
 });
 
 export type ShopCartForm = z.infer<typeof insertShopCartSchema>;
+
+export const insertShopReviewSchema = createInsertSchema(shopReviews).omit({
+  id: true,
+  buyerId: true,
+  helpfulCount: true,
+  status: true,
+  sellerResponse: true,
+  sellerResponseAt: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  rating: z.number().min(1).max(5),
+  title: z.string().min(3).max(100),
+  comment: z.string().min(10).max(1000).optional(),
+});
+
+export type ShopReviewForm = z.infer<typeof insertShopReviewSchema>;
