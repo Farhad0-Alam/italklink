@@ -56,10 +56,15 @@ export default function ShopBrowse() {
 
   const { data: categoriesData } = useQuery<{ success: boolean; data: Category[] }>({
     queryKey: ['/api/shop/categories'],
+    queryFn: async () => {
+      const response = await fetch('/api/shop/categories');
+      if (!response.ok) throw new Error('Failed to fetch categories');
+      return response.json();
+    },
   });
 
   const products = productsData?.data || [];
-  const categories = categoriesData?.data || [];
+  const categories = (categoriesData?.data && Array.isArray(categoriesData.data)) ? categoriesData.data : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
