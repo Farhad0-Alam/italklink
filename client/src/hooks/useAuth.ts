@@ -12,6 +12,7 @@ export interface User {
   businessCardsLimit: number;
   createdAt: string;
   updatedAt: string;
+  subscription?: any;
 }
 
 export function useAuth() {

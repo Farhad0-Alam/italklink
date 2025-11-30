@@ -19,7 +19,7 @@ interface UserSubscription {
   };
   elementFeatures?: number[];
   moduleFeatures?: Record<string, boolean>;
-  templateIds?: number[];
+  templateIds?: string[];
   isActive: boolean;
   status: string;
 }
