@@ -630,15 +630,15 @@ export default function NfcManagement() {
               <span className="hidden xs:inline">My NFC Tags</span>
               <span className="xs:hidden">Tags</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-2 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:shadow-md transition-all text-xs py-2 xs:py-3 px-1.5 xs:px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-blue-100 dark:data-[state=active]:from-blue-900/60">
-              <BarChart3 className="w-3 h-3 xs:w-4 xs:h-4 mr-0.5 xs:mr-1 sm:mr-2 flex-shrink-0" />
-              <span className="hidden xs:inline">Analytics</span>
-              <span className="xs:hidden">Stats</span>
-            </TabsTrigger>
             <TabsTrigger value="tools" className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/40 border-2 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:shadow-md transition-all text-xs py-2 xs:py-3 px-1.5 xs:px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-purple-100 dark:data-[state=active]:from-purple-900/60">
               <Sparkles className="w-3 h-3 xs:w-4 xs:h-4 mr-0.5 xs:mr-1 sm:mr-2 flex-shrink-0" />
               <span className="hidden xs:inline">Tools</span>
               <span className="xs:hidden">⚙️</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-2 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:shadow-md transition-all text-xs py-2 xs:py-3 px-1.5 xs:px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-blue-100 dark:data-[state=active]:from-blue-900/60">
+              <BarChart3 className="w-3 h-3 xs:w-4 xs:h-4 mr-0.5 xs:mr-1 sm:mr-2 flex-shrink-0" />
+              <span className="hidden xs:inline">Analytics</span>
+              <span className="xs:hidden">Stats</span>
             </TabsTrigger>
           </TabsList>
 
@@ -710,127 +710,6 @@ export default function NfcManagement() {
                     </motion.div>
                   ))}
                 </AnimatePresence>
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-3 sm:space-y-4">
-            {!selectedTag ? (
-              <Card className="border-dashed text-center py-8 sm:py-12 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-2 border-blue-200 dark:border-blue-800">
-                <BarChart3 className="w-8 sm:w-12 h-8 sm:h-12 mx-auto text-blue-400 mb-3 sm:mb-4" />
-                <p className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">View NFC Analytics</p>
-                <div className="max-w-md mx-auto space-y-3">
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                    Select an NFC tag from the "My NFC Tags" tab to view real-time analytics including:
-                  </p>
-                  <div className="text-xs text-left space-y-1 bg-white dark:bg-gray-800 rounded p-3">
-                    <div className="flex items-start gap-2">
-                      <span className="text-blue-600 dark:text-blue-400 font-bold flex-shrink-0">•</span>
-                      <span className="text-gray-700 dark:text-gray-300">Total number of taps on your NFC tag</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-blue-600 dark:text-blue-400 font-bold flex-shrink-0">•</span>
-                      <span className="text-gray-700 dark:text-gray-300">Unique devices that scanned the tag</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-blue-600 dark:text-blue-400 font-bold flex-shrink-0">•</span>
-                      <span className="text-gray-700 dark:text-gray-300">Device breakdown (mobile, desktop, tablet)</span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                    👉 Go to "My NFC Tags" tab and click on any tag to see its analytics
-                  </p>
-                </div>
-              </Card>
-            ) : (
-              <div className="space-y-3 sm:space-y-4">
-                <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-blue-200 dark:border-blue-900">
-                  <CardHeader className="pb-2 sm:pb-4">
-                    <CardTitle className="text-lg sm:text-xl truncate">{selectedTag.tagName}</CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">Real-time tap and engagement data</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {analytics ? (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 xs:gap-2 sm:gap-4">
-                        <div className="bg-white dark:bg-gray-800 p-1.5 xs:p-2 sm:p-4 rounded-lg">
-                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">Total Taps</p>
-                          <p className="text-lg xs:text-2xl sm:text-3xl font-bold text-blue-600 mt-1">{analytics[0]?.totalTaps || 0}</p>
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-1.5 xs:p-2 sm:p-4 rounded-lg">
-                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">Unique</p>
-                          <p className="text-lg xs:text-2xl sm:text-3xl font-bold text-purple-600 mt-1">{analytics[0]?.uniqueDevices || 0}</p>
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-1.5 xs:p-2 sm:p-4 rounded-lg">
-                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">Mobile</p>
-                          <p className="text-lg xs:text-2xl sm:text-3xl font-bold text-green-600 mt-1">{analytics[0]?.mobileTaps || 0}</p>
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-1.5 xs:p-2 sm:p-4 rounded-lg hidden sm:block">
-                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">Desktop</p>
-                          <p className="text-lg xs:text-2xl sm:text-3xl font-bold text-orange-600 mt-1">{analytics[0]?.desktopTaps || 0}</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-center text-gray-500 py-8">No tap data yet</p>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white dark:bg-gray-800">
-                  <CardHeader className="pb-2 sm:pb-3">
-                    <CardTitle className="text-lg sm:text-xl">Device Breakdown</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-1.5 sm:space-y-2">
-                    <div className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded gap-2">
-                      <span className="text-xs sm:text-sm flex-shrink-0">Mobile</span>
-                      <div className="h-2 flex-1 bg-gray-200 dark:bg-gray-600 rounded min-w-[60px]">
-                        <div
-                          className="h-full bg-green-500 rounded"
-                          style={{
-                            width: `${
-                              ((analytics?.[0]?.mobileTaps || 0) /
-                                (analytics?.[0]?.totalTaps || 1)) *
-                              100
-                            }%`,
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs sm:text-sm font-semibold flex-shrink-0">{analytics?.[0]?.mobileTaps || 0}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded gap-2">
-                      <span className="text-xs sm:text-sm flex-shrink-0">Desktop</span>
-                      <div className="h-2 flex-1 bg-gray-200 dark:bg-gray-600 rounded min-w-[60px]">
-                        <div
-                          className="h-full bg-orange-500 rounded"
-                          style={{
-                            width: `${
-                              ((analytics?.[0]?.desktopTaps || 0) /
-                                (analytics?.[0]?.totalTaps || 1)) *
-                              100
-                            }%`,
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs sm:text-sm font-semibold flex-shrink-0">{analytics?.[0]?.desktopTaps || 0}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded gap-2">
-                      <span className="text-xs sm:text-sm flex-shrink-0">Tablet</span>
-                      <div className="h-2 flex-1 bg-gray-200 dark:bg-gray-600 rounded min-w-[60px]">
-                        <div
-                          className="h-full bg-blue-500 rounded"
-                          style={{
-                            width: `${
-                              ((analytics?.[0]?.tabletTaps || 0) /
-                                (analytics?.[0]?.totalTaps || 1)) *
-                              100
-                            }%`,
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs sm:text-sm font-semibold flex-shrink-0">{analytics?.[0]?.tabletTaps || 0}</span>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
             )}
           </TabsContent>
@@ -1011,6 +890,127 @@ export default function NfcManagement() {
                 </Card>
               </div>
               </>
+            )}
+          </TabsContent>
+
+          {/* Analytics Tab (Stats) */}
+          <TabsContent value="analytics" className="space-y-3 sm:space-y-4">
+            {!selectedTag ? (
+              <Card className="border-dashed text-center py-8 sm:py-12 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-2 border-blue-200 dark:border-blue-800">
+                <BarChart3 className="w-8 sm:w-12 h-8 sm:h-12 mx-auto text-blue-400 mb-3 sm:mb-4" />
+                <p className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">View NFC Analytics</p>
+                <div className="max-w-md mx-auto space-y-3">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                    Select an NFC tag from the "My NFC Tags" tab to view real-time analytics including:
+                  </p>
+                  <div className="text-xs text-left space-y-1 bg-white dark:bg-gray-800 rounded p-3">
+                    <div className="flex items-start gap-2">
+                      <span className="text-blue-600 dark:text-blue-400 font-bold flex-shrink-0">•</span>
+                      <span className="text-gray-700 dark:text-gray-300">Total number of taps on your NFC tag</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-blue-600 dark:text-blue-400 font-bold flex-shrink-0">•</span>
+                      <span className="text-gray-700 dark:text-gray-300">Unique devices that scanned the tag</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-blue-600 dark:text-blue-400 font-bold flex-shrink-0">•</span>
+                      <span className="text-gray-700 dark:text-gray-300">Device breakdown (mobile, desktop, tablet)</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                    👉 Go to "My NFC Tags" tab and click on any tag to see its analytics
+                  </p>
+                </div>
+              </Card>
+            ) : (
+              <div className="space-y-3 sm:space-y-4">
+                <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-blue-200 dark:border-blue-900">
+                  <CardHeader className="pb-2 sm:pb-4">
+                    <CardTitle className="text-lg sm:text-xl truncate">{selectedTag.tagName}</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">Real-time tap and engagement data</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {analytics ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 xs:gap-2 sm:gap-4">
+                        <div className="bg-white dark:bg-gray-800 p-1.5 xs:p-2 sm:p-4 rounded-lg">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">Total Taps</p>
+                          <p className="text-lg xs:text-2xl sm:text-3xl font-bold text-blue-600 mt-1">{analytics[0]?.totalTaps || 0}</p>
+                        </div>
+                        <div className="bg-white dark:bg-gray-800 p-1.5 xs:p-2 sm:p-4 rounded-lg">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">Unique</p>
+                          <p className="text-lg xs:text-2xl sm:text-3xl font-bold text-purple-600 mt-1">{analytics[0]?.uniqueDevices || 0}</p>
+                        </div>
+                        <div className="bg-white dark:bg-gray-800 p-1.5 xs:p-2 sm:p-4 rounded-lg">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">Mobile</p>
+                          <p className="text-lg xs:text-2xl sm:text-3xl font-bold text-green-600 mt-1">{analytics[0]?.mobileTaps || 0}</p>
+                        </div>
+                        <div className="bg-white dark:bg-gray-800 p-1.5 xs:p-2 sm:p-4 rounded-lg hidden sm:block">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">Desktop</p>
+                          <p className="text-lg xs:text-2xl sm:text-3xl font-bold text-orange-600 mt-1">{analytics[0]?.desktopTaps || 0}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-center text-gray-500 py-8">No tap data yet</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-2 sm:pb-3">
+                    <CardTitle className="text-lg sm:text-xl">Device Breakdown</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-1.5 sm:space-y-2">
+                    <div className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded gap-2">
+                      <span className="text-xs sm:text-sm flex-shrink-0">Mobile</span>
+                      <div className="h-2 flex-1 bg-gray-200 dark:bg-gray-600 rounded min-w-[60px]">
+                        <div
+                          className="h-full bg-green-500 rounded"
+                          style={{
+                            width: `${
+                              ((analytics?.[0]?.mobileTaps || 0) /
+                                (analytics?.[0]?.totalTaps || 1)) *
+                              100
+                            }%`,
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs sm:text-sm font-semibold flex-shrink-0">{analytics?.[0]?.mobileTaps || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded gap-2">
+                      <span className="text-xs sm:text-sm flex-shrink-0">Desktop</span>
+                      <div className="h-2 flex-1 bg-gray-200 dark:bg-gray-600 rounded min-w-[60px]">
+                        <div
+                          className="h-full bg-orange-500 rounded"
+                          style={{
+                            width: `${
+                              ((analytics?.[0]?.desktopTaps || 0) /
+                                (analytics?.[0]?.totalTaps || 1)) *
+                              100
+                            }%`,
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs sm:text-sm font-semibold flex-shrink-0">{analytics?.[0]?.desktopTaps || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded gap-2">
+                      <span className="text-xs sm:text-sm flex-shrink-0">Tablet</span>
+                      <div className="h-2 flex-1 bg-gray-200 dark:bg-gray-600 rounded min-w-[60px]">
+                        <div
+                          className="h-full bg-blue-500 rounded"
+                          style={{
+                            width: `${
+                              ((analytics?.[0]?.tabletTaps || 0) /
+                                (analytics?.[0]?.totalTaps || 1)) *
+                              100
+                            }%`,
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs sm:text-sm font-semibold flex-shrink-0">{analytics?.[0]?.tabletTaps || 0}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </TabsContent>
         </Tabs>
