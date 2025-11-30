@@ -124,6 +124,17 @@ interface PlanFormData {
   pricingFeatures: PricingFeature[];
   templateLimit: number;
   description: string;
+  // Granular feature controls
+  elementFeatures: number[];
+  moduleFeatures: Record<string, boolean>;
+  templateIds: string[];
+  // Card pricing options
+  baseUsers: number;
+  pricePerUser: number;
+  setupFee: number;
+  allowUserSelection: boolean;
+  minUsers: number;
+  maxUsers: number | null;
 }
 
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'BDT'];
@@ -235,7 +246,16 @@ export default function PlansPage() {
     stripePriceId: '',
     pricingFeatures: [],
     templateLimit: -1,
-    description: ''
+    description: '',
+    elementFeatures: [],
+    moduleFeatures: { analytics: false, crm: false, appointments: false, nfc: false, emailSignature: false, voiceConversation: false },
+    templateIds: [],
+    baseUsers: 1,
+    pricePerUser: 0,
+    setupFee: 0,
+    allowUserSelection: false,
+    minUsers: 1,
+    maxUsers: null
   });
 
   const queryClient = useQueryClient();
@@ -331,7 +351,16 @@ export default function PlansPage() {
       stripePriceId: '',
       pricingFeatures: [],
       templateLimit: -1,
-      description: ''
+      description: '',
+      elementFeatures: [],
+      moduleFeatures: { analytics: false, crm: false, appointments: false, nfc: false, emailSignature: false, voiceConversation: false },
+      templateIds: [],
+      baseUsers: 1,
+      pricePerUser: 0,
+      setupFee: 0,
+      allowUserSelection: false,
+      minUsers: 1,
+      maxUsers: null
     });
   };
 
@@ -370,7 +399,16 @@ export default function PlansPage() {
       const dataToSend = {
         ...formData,
         price: finalPriceCents,
-        features: formData.features
+        features: formData.features,
+        elementFeatures: formData.elementFeatures,
+        moduleFeatures: formData.moduleFeatures,
+        templateIds: formData.templateIds,
+        baseUsers: formData.baseUsers,
+        pricePerUser: Math.round(formData.pricePerUser * 100),
+        setupFee: Math.round(formData.setupFee * 100),
+        allowUserSelection: formData.allowUserSelection,
+        minUsers: formData.minUsers,
+        maxUsers: formData.maxUsers
       };
       
       const response = await fetch('/api/billing/admin/plans', {
@@ -423,7 +461,16 @@ export default function PlansPage() {
       const dataToSend = {
         ...formData,
         price: finalPriceCents,
-        features: formData.features
+        features: formData.features,
+        elementFeatures: formData.elementFeatures,
+        moduleFeatures: formData.moduleFeatures,
+        templateIds: formData.templateIds,
+        baseUsers: formData.baseUsers,
+        pricePerUser: Math.round(formData.pricePerUser * 100),
+        setupFee: Math.round(formData.setupFee * 100),
+        allowUserSelection: formData.allowUserSelection,
+        minUsers: formData.minUsers,
+        maxUsers: formData.maxUsers
       };
       
       const response = await fetch(`/api/billing/admin/plans/${selectedPlan.id}`, {
@@ -959,6 +1006,102 @@ export default function PlansPage() {
         </div>
       </div>
 
+
+      {/* Module Features */}
+      <div className="space-y-3">
+        <Label className="text-base font-medium">Module Features</Label>
+        <p className="text-sm text-gray-500">Select which modules are available in this plan</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 border rounded-lg p-4">
+          {['analytics', 'crm', 'appointments', 'nfc', 'emailSignature', 'voiceConversation'].map(module => (
+            <div key={module} className="flex items-center space-x-2">
+              <Checkbox
+                id={`module-${module}`}
+                checked={formData.moduleFeatures[module] || false}
+                onCheckedChange={() => {
+                  setFormData(prev => ({
+                    ...prev,
+                    moduleFeatures: {
+                      ...prev.moduleFeatures,
+                      [module]: !prev.moduleFeatures[module]
+                    }
+                  }));
+                }}
+              />
+              <Label htmlFor={`module-${module}`} className="text-sm capitalize cursor-pointer">
+                {module === 'nfc' ? 'NFC Management' : module === 'emailSignature' ? 'Email Signature' : module === 'voiceConversation' ? 'Voice Conversation' : module.charAt(0).toUpperCase() + module.slice(1)}
+              </Label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Card Pricing Options */}
+      <div className="space-y-3">
+        <Label className="text-base font-medium">Card Pricing Options</Label>
+        <p className="text-sm text-gray-500">Configure per-card pricing and user selection</p>
+        <div className="grid grid-cols-2 gap-4 border rounded-lg p-4">
+          <div className="space-y-2">
+            <Label className="text-sm">Base Users/Cards Included</Label>
+            <Input
+              type="number"
+              min="1"
+              value={formData.baseUsers}
+              onChange={(e) => setFormData(prev => ({ ...prev, baseUsers: Math.max(1, Number(e.target.value)) }))}
+              className="text-sm"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm">Price Per Additional User ($)</Label>
+            <Input
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.pricePerUser}
+              onChange={(e) => setFormData(prev => ({ ...prev, pricePerUser: Number(e.target.value) }))}
+              className="text-sm"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm">Setup Fee ($)</Label>
+            <Input
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.setupFee}
+              onChange={(e) => setFormData(prev => ({ ...prev, setupFee: Number(e.target.value) }))}
+              className="text-sm"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm">Min Users</Label>
+            <Input
+              type="number"
+              min="1"
+              value={formData.minUsers}
+              onChange={(e) => setFormData(prev => ({ ...prev, minUsers: Math.max(1, Number(e.target.value)) }))}
+              className="text-sm"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm">Max Users (blank = unlimited)</Label>
+            <Input
+              type="number"
+              min="1"
+              value={formData.maxUsers || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, maxUsers: e.target.value ? Number(e.target.value) : null }))}
+              className="text-sm"
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="allowUserSelection"
+              checked={formData.allowUserSelection}
+              onCheckedChange={() => setFormData(prev => ({ ...prev, allowUserSelection: !prev.allowUserSelection }))}
+            />
+            <Label htmlFor="allowUserSelection" className="text-sm cursor-pointer">Show Counter on Pricing Page</Label>
+          </div>
+        </div>
+      </div>
 
       {/* Templates Selection */}
       <div className="space-y-3">
