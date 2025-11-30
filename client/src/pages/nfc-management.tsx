@@ -632,8 +632,7 @@ export default function NfcManagement() {
             </TabsTrigger>
             <TabsTrigger value="tools" className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/40 border-2 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:shadow-md transition-all text-xs py-2 xs:py-3 px-1.5 xs:px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-purple-100 dark:data-[state=active]:from-purple-900/60">
               <Sparkles className="w-3 h-3 xs:w-4 xs:h-4 mr-0.5 xs:mr-1 sm:mr-2 flex-shrink-0" />
-              <span className="hidden xs:inline">Tools</span>
-              <span className="xs:hidden">⚙️</span>
+              <span>Tools</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-2 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:shadow-md transition-all text-xs py-2 xs:py-3 px-1.5 xs:px-2 sm:px-3 data-[state=active]:shadow-lg data-[state=active]:from-blue-100 dark:data-[state=active]:from-blue-900/60">
               <BarChart3 className="w-3 h-3 xs:w-4 xs:h-4 mr-0.5 xs:mr-1 sm:mr-2 flex-shrink-0" />
