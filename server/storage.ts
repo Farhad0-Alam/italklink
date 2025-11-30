@@ -6781,6 +6781,11 @@ export class DatabaseStorage implements IStorage {
     return product;
   }
 
+  async getOrderById(orderId: string): Promise<ShopOrder | undefined> {
+    const [order] = await db.select().from(shopOrders).where(eq(shopOrders.id, orderId));
+    return order;
+  }
+
   async validateCoupon(code: string, userId: string | null): Promise<any> {
     const [coupon] = await db.select().from(coupons).where(eq(coupons.code, code.toUpperCase()));
     
