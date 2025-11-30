@@ -572,7 +572,7 @@ export default function PlansPage() {
       trialDays: plan.trialDays,
       customDurationDays: plan.customDurationDays,
       features: planFeatures,
-      templates: [], // Will be populated from API
+      templates: (plan as any).templateIds || [],
       isActive: true,
       stripePriceId: '',
       pricingFeatures: (plan as any).pricingFeatures || [],
@@ -632,7 +632,7 @@ export default function PlansPage() {
       trialDays: plan.trialDays,
       customDurationDays: plan.customDurationDays,
       features: planFeatures,
-      templates: [], // Will be populated from API
+      templates: (plan as any).templateIds || [],
       isActive: plan.isActive,
       stripePriceId: plan.stripePriceId || '',
       pricingFeatures: (plan as any).pricingFeatures || [],
