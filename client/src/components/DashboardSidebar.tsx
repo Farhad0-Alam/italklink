@@ -245,15 +245,15 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`group flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                      className={`group flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 border-l-3 ${
                         active
-                          ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                          ? 'border-l-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-100'
+                          : 'border-l-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
                       }`}
                       data-testid={item.testId}
                     >
                       <item.icon className={`w-5 h-5 transition-transform group-hover:scale-110 mt-0.5 flex-shrink-0 ${
-                        active ? 'text-white' : 'text-gray-600 dark:text-gray-400'
+                        active ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-600 dark:text-gray-400'
                       }`} />
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium">{item.label}</div>
