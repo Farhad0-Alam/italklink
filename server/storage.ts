@@ -6248,6 +6248,10 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(shopOrders).where(eq(shopOrders.buyerId, buyerId)).orderBy(desc(shopOrders.createdAt));
   }
 
+  async getBuyerDownloads(buyerId: string): Promise<ShopDownload[]> {
+    return db.select().from(shopDownloads).where(eq(shopDownloads.buyerId, buyerId)).orderBy(desc(shopDownloads.createdAt));
+  }
+
   async updateShopOrder(id: string, orderData: Partial<InsertShopOrder>): Promise<ShopOrder> {
     const [order] = await db.update(shopOrders).set(orderData).where(eq(shopOrders.id, id)).returning();
     return order;

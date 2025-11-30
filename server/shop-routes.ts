@@ -150,6 +150,12 @@ router.get('/user/purchases', requireAuth, asyncHandler(async (req, res) => {
   res.json({ success: true, data: purchases });
 }));
 
+// Get buyer downloads
+router.get('/user/downloads', requireAuth, asyncHandler(async (req, res) => {
+  const downloads = await storage.getBuyerDownloads(req.user.id);
+  res.json({ success: true, data: downloads });
+}));
+
 // ===== PAYMENT & CHECKOUT =====
 
 // Create checkout session
