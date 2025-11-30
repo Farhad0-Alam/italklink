@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, ShoppingCart, Star, Download, Filter, Package, TrendingUp } from 'lucide-react';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Search, ShoppingCart, Star, Download, Filter, Package, TrendingUp, Menu } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
 
 interface DigitalProduct {
   id: string;
@@ -32,10 +34,36 @@ interface Category {
   slug: string;
 }
 
+interface User {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  profileImageUrl?: string;
+  planType: 'free' | 'paid';
+}
+
 export default function ShopBrowse() {
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const { data: user } = useQuery<User>({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+  });
+
+  const { data: businessCards = [] } = useQuery<any[]>({
+    queryKey: ['/api/business-cards'],
+    enabled: !!user,
+  });
+
+  const { data: affiliate } = useQuery<any>({
+    queryKey: ['/api/affiliate/me'],
+    enabled: !!user,
+    retry: false,
+  });
 
   // Build query string
   const queryString = new URLSearchParams();
@@ -66,8 +94,50 @@ export default function ShopBrowse() {
   const products = productsData?.data || [];
   const categories = (categoriesData?.data && Array.isArray(categoriesData.data)) ? categoriesData.data : [];
 
+  if (!user) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block w-64 fixed h-screen">
+        <DashboardSidebar 
+          user={user}
+          businessCardsCount={businessCards.length}
+          affiliate={affiliate}
+          onLogout={() => setLocation('/')}
+        />
+      </div>
+
+      {/* Mobile Sidebar */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent side="left" className="w-64 p-0 md:hidden">
+          <DashboardSidebar 
+            user={user}
+            businessCardsCount={businessCards.length}
+            affiliate={affiliate}
+            onLogout={() => setLocation('/')}
+          />
+        </SheetContent>
+      </Sheet>
+
+      {/* Main Content */}
+      <div className="flex-1 md:ml-64 overflow-y-auto">
+        {/* Top Bar for Mobile */}
+        <div className="md:hidden sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm h-16">
+          <div className="flex items-center h-full px-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <div className="container mx-auto px-4 py-12">
         <div className="mb-12">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
@@ -211,6 +281,8 @@ export default function ShopBrowse() {
               <p className="text-gray-600 dark:text-gray-400">No products found. Try a different search.</p>
             </div>
           )}
+        </div>
+      </div>
         </div>
       </div>
     </div>

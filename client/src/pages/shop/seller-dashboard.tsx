@@ -7,10 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Upload, FileText, Image, Archive, Loader2 } from 'lucide-react';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Plus, Edit, Trash2, Upload, FileText, Image, Archive, Loader2, Menu } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
 
 interface ProductFormData {
   title: string;
@@ -49,13 +51,39 @@ const categories = [
   { value: 'other', label: 'Other' },
 ];
 
+interface User {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  profileImageUrl?: string;
+  planType: 'free' | 'paid';
+}
+
 export default function SellerDashboard() {
   const [, setLocation] = useLocation();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [formData, setFormData] = useState<ProductFormData>(initialFormData);
   const [isUploading, setIsUploading] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const { data: user } = useQuery<User>({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+  });
+
+  const { data: businessCardsData = [] } = useQuery<any[]>({
+    queryKey: ['/api/business-cards'],
+    enabled: !!user,
+  });
+
+  const { data: affiliate } = useQuery<any>({
+    queryKey: ['/api/affiliate/me'],
+    enabled: !!user,
+    retry: false,
+  });
 
   const { data: productsResponse, isLoading: productsLoading } = useQuery<{ success: boolean; data: any[] }>({
     queryKey: ['/api/shop/seller/products'],
@@ -72,6 +100,11 @@ export default function SellerDashboard() {
   const products = (productsResponse?.data && Array.isArray(productsResponse.data)) ? productsResponse.data : [];
   const orders = (ordersResponse?.data && Array.isArray(ordersResponse.data)) ? ordersResponse.data : [];
   const analytics = analyticsResponse?.data || {};
+  const businessCards = businessCardsData || [];
+
+  if (!user) {
+    return null;
+  }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -176,7 +209,45 @@ export default function SellerDashboard() {
   const isFormValid = formData.title && formData.price && formData.filePath;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block w-64 fixed h-screen">
+        <DashboardSidebar 
+          user={user}
+          businessCardsCount={businessCards.length}
+          affiliate={affiliate}
+          onLogout={() => setLocation('/')}
+        />
+      </div>
+
+      {/* Mobile Sidebar */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent side="left" className="w-64 p-0 md:hidden">
+          <DashboardSidebar 
+            user={user}
+            businessCardsCount={businessCards.length}
+            affiliate={affiliate}
+            onLogout={() => setLocation('/')}
+          />
+        </SheetContent>
+      </Sheet>
+
+      {/* Main Content */}
+      <div className="flex-1 md:ml-64 overflow-y-auto">
+        {/* Top Bar for Mobile */}
+        <div className="md:hidden sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm h-16">
+          <div className="flex items-center h-full px-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto px-4 py-12">
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -538,6 +609,8 @@ export default function SellerDashboard() {
             )}
           </CardContent>
         </Card>
+      </div>
+        </div>
       </div>
     </div>
   );

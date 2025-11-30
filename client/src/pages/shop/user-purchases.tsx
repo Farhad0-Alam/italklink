@@ -3,8 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Download, Package, ArrowLeft } from 'lucide-react';
-import { Link } from 'wouter';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Download, Package, ArrowLeft, Menu } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
 
 interface Purchase {
   id: string;
@@ -19,15 +21,86 @@ interface Purchase {
   };
 }
 
+interface User {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  profileImageUrl?: string;
+  planType: 'free' | 'paid';
+}
+
 export default function UserPurchases() {
+  const [, setLocation] = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const { data: user } = useQuery<User>({
+    queryKey: ['/api/auth/user'],
+    retry: false,
+  });
+
+  const { data: businessCardsData = [] } = useQuery<any[]>({
+    queryKey: ['/api/business-cards'],
+    enabled: !!user,
+  });
+
+  const { data: affiliate } = useQuery<any>({
+    queryKey: ['/api/affiliate/me'],
+    enabled: !!user,
+    retry: false,
+  });
+
   const { data: purchasesData, isLoading } = useQuery<{ success: boolean; data: Purchase[] }>({
     queryKey: ['/api/shop/user/purchases'],
   });
 
   const purchases = purchasesData?.data || [];
+  const businessCards = businessCardsData || [];
+
+  if (!user) {
+    return null;
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 py-12">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block w-64 fixed h-screen">
+        <DashboardSidebar 
+          user={user}
+          businessCardsCount={businessCards.length}
+          affiliate={affiliate}
+          onLogout={() => setLocation('/')}
+        />
+      </div>
+
+      {/* Mobile Sidebar */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent side="left" className="w-64 p-0 md:hidden">
+          <DashboardSidebar 
+            user={user}
+            businessCardsCount={businessCards.length}
+            affiliate={affiliate}
+            onLogout={() => setLocation('/')}
+          />
+        </SheetContent>
+      </Sheet>
+
+      {/* Main Content */}
+      <div className="flex-1 md:ml-64 overflow-y-auto">
+        {/* Top Bar for Mobile */}
+        <div className="md:hidden sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm h-16">
+          <div className="flex items-center h-full px-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 py-12">
       <div className="container mx-auto px-4">
         <div className="mb-8">
           <Link href="/dashboard" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4">
@@ -99,6 +172,8 @@ export default function UserPurchases() {
               </CardContent>
             </Card>
           )}
+        </div>
+      </div>
         </div>
       </div>
     </div>
