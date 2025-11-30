@@ -225,6 +225,36 @@ router.get('/admin/orders', requireAdmin, asyncHandler(async (req, res) => {
   res.json({ success: true, data: orders });
 }));
 
+// Get commission settings (admin)
+router.get('/admin/commission-settings', requireAdmin, asyncHandler(async (req, res) => {
+  const settings = await storage.getPlatformSettings();
+  res.json({ 
+    success: true, 
+    data: settings || {
+      ownerCommission: 50,
+      sellerCommission: 30,
+      platformCommission: 20,
+    }
+  });
+}));
+
+// Update commission settings (admin)
+router.patch('/admin/commission-settings', requireAdmin, asyncHandler(async (req, res) => {
+  const { ownerCommission, sellerCommission, platformCommission } = req.body;
+  
+  if (ownerCommission + sellerCommission + platformCommission !== 100) {
+    return res.status(400).json({ error: 'Commission percentages must total 100%' });
+  }
+  
+  const settings = await storage.updatePlatformSettings({
+    defaultOwnerCommission: ownerCommission,
+    defaultSellerCommission: sellerCommission,
+    defaultPlatformCommission: platformCommission,
+  });
+  
+  res.json({ success: true, data: settings });
+}));
+
 // ===== SECURE DOWNLOAD =====
 
 router.get('/download/:token', asyncHandler(async (req, res) => {

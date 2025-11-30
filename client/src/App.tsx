@@ -65,6 +65,7 @@ const BuyerPurchases = lazy(() => import("./pages/shop/buyer-purchases"));
 const UserPurchases = lazy(() => import("./pages/shop/user-purchases"));
 const UserDownloads = lazy(() => import("./pages/shop/user-downloads"));
 const AdminShop = lazy(() => import("./pages/shop/admin-moderation"));
+const AdminCommission = lazy(() => import("./pages/shop/admin-commission"));
 
 // Lazy load CardRoutes to prevent loading multi-page module eagerly
 const LazyCardRoutes = lazy(() => import("@/modules/multi-page").then(module => ({ default: module.CardRoutes })));
@@ -142,6 +143,7 @@ function Router() {
       <Route path="/user/purchases">{() => <PageSuspense><UserPurchases /></PageSuspense>}</Route>
       <Route path="/user/downloads">{() => <PageSuspense><UserDownloads /></PageSuspense>}</Route>
       <Route path="/admin/shop">{() => <PageSuspense><AdminShop /></PageSuspense>}</Route>
+      <Route path="/admin/shop/commission">{() => <PageSuspense><AdminCommission /></PageSuspense>}</Route>
       <Route path="/admin/coupons">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/templates">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/affiliates">{() => <PageSuspense><Admin /></PageSuspense>}</Route>

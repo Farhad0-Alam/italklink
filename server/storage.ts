@@ -6353,6 +6353,43 @@ export class DatabaseStorage implements IStorage {
 
     return { totalRevenue, totalSales, totalProducts, totalViews, products, orders };
   }
+
+  async getPlatformSettings(): Promise<any> {
+    const settings = await db.execute(sql`SELECT setting_key, setting_value FROM platform_settings`);
+    const result: Record<string, any> = {
+      ownerCommission: 50,
+      sellerCommission: 30,
+      platformCommission: 20,
+    };
+    
+    for (const row of settings as any[]) {
+      if (row.setting_key === 'default_owner_commission') result.ownerCommission = parseInt(row.setting_value);
+      if (row.setting_key === 'default_seller_commission') result.sellerCommission = parseInt(row.setting_value);
+      if (row.setting_key === 'default_platform_commission') result.platformCommission = parseInt(row.setting_value);
+    }
+    
+    return result;
+  }
+
+  async updatePlatformSettings(settings: { defaultOwnerCommission: number; defaultSellerCommission: number; defaultPlatformCommission: number }): Promise<any> {
+    await db.execute(sql`
+      INSERT INTO platform_settings (id, setting_key, setting_value, setting_type, updated_at)
+      VALUES 
+        (gen_random_uuid()::text, 'default_owner_commission', ${settings.defaultOwnerCommission.toString()}, 'number', NOW()),
+        (gen_random_uuid()::text, 'default_seller_commission', ${settings.defaultSellerCommission.toString()}, 'number', NOW()),
+        (gen_random_uuid()::text, 'default_platform_commission', ${settings.defaultPlatformCommission.toString()}, 'number', NOW())
+      ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value, updated_at = NOW()
+    `);
+    
+    return this.getPlatformSettings();
+  }
+
+  async createShopEarning(affiliateId: string, amount: number, type: string, orderId: string): Promise<void> {
+    await db.execute(sql`
+      INSERT INTO conversions (id, affiliate_id, amount, type, status, created_at, order_id, metadata)
+      VALUES (gen_random_uuid()::text, ${affiliateId}, ${amount}, ${type}, 'approved', NOW(), ${orderId}, '{}')
+    `);
+  }
 }
 
 export const storage = new DatabaseStorage();

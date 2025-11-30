@@ -20,7 +20,7 @@ export async function seedShopProducts() {
       return;
     }
 
-    console.log('[Shop Seed] ✅ Seeding shop products for user:', user.email);
+    console.log('[Shop Seed] Seeding shop products for user:', user.email);
 
     const sampleProducts = [
       {
@@ -139,7 +139,7 @@ export async function seedShopProducts() {
       await db.insert(digitalProducts).values(product);
     }
 
-    console.log(`[Shop Seed] ✅ Created ${sampleProducts.length} sample products`);
+    console.log(`[Shop Seed] Created ${sampleProducts.length} sample products`);
   } catch (error) {
     console.error('[Shop Seed] Error:', error);
   }
