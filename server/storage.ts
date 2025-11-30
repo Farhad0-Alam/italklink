@@ -8,6 +8,7 @@ import {
   publicUploads, qrLinks, qrEvents, cardSubscriptions, coupons, userSubscriptions,
   bios, connections, subscriptions, analytics, affiliates, conversions, headerTemplates, icons, pageElementTypes,
   nfcTags, nfcTapEvents, nfcAnalytics,
+  digitalProducts, shopOrders, shopDownloads,
   type User, type InsertUser, type DbBusinessCard, type InsertDbBusinessCard,
   type Team, type InsertTeam, type TeamMember, type InsertTeamMember,
   type BulkGenerationJob, type InsertBulkGenerationJob, type SubscriptionPlan, type GlobalTemplate,
@@ -37,7 +38,8 @@ import {
   type QrLink, type InsertQrLink, type QrEvent, type InsertQrEvent,
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
-  type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics
+  type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -6177,6 +6179,93 @@ export class DatabaseStorage implements IStorage {
     }).where(and(eq(nfcAnalytics.cardId, cardId), eq(nfcAnalytics.nfcTagId, tagId))).returning();
     
     return updated;
+  }
+
+  // ===== DIGITAL SHOP OPERATIONS =====
+  
+  async createDigitalProduct(productData: InsertDigitalProduct): Promise<DigitalProduct> {
+    const [product] = await db.insert(digitalProducts).values(productData).returning();
+    return product;
+  }
+
+  async getDigitalProduct(id: string): Promise<DigitalProduct | undefined> {
+    const [product] = await db.select().from(digitalProducts).where(eq(digitalProducts.id, id));
+    return product;
+  }
+
+  async getSellerProducts(sellerId: string, status?: string): Promise<DigitalProduct[]> {
+    let query = db.select().from(digitalProducts).where(eq(digitalProducts.sellerId, sellerId));
+    if (status) {
+      query = query.where(eq(digitalProducts.status, status as any));
+    }
+    return query;
+  }
+
+  async updateDigitalProduct(id: string, productData: Partial<InsertDigitalProduct>): Promise<DigitalProduct> {
+    const [product] = await db.update(digitalProducts).set(productData).where(eq(digitalProducts.id, id)).returning();
+    return product;
+  }
+
+  async deleteDigitalProduct(id: string): Promise<void> {
+    await db.delete(digitalProducts).where(eq(digitalProducts.id, id));
+  }
+
+  async browseProducts(filters?: { category?: string; limit?: number; offset?: number }): Promise<DigitalProduct[]> {
+    let query = db.select().from(digitalProducts).where(eq(digitalProducts.status, 'active'));
+    if (filters?.category) {
+      query = query.where(eq(digitalProducts.category, filters.category));
+    }
+    query = query.orderBy(desc(digitalProducts.createdAt));
+    if (filters?.limit) query = query.limit(filters.limit);
+    if (filters?.offset) query = query.offset(filters.offset);
+    return query;
+  }
+
+  async createShopOrder(orderData: InsertShopOrder): Promise<ShopOrder> {
+    const [order] = await db.insert(shopOrders).values(orderData).returning();
+    return order;
+  }
+
+  async getShopOrder(id: string): Promise<ShopOrder | undefined> {
+    const [order] = await db.select().from(shopOrders).where(eq(shopOrders.id, id));
+    return order;
+  }
+
+  async getOrderByToken(token: string): Promise<ShopOrder | undefined> {
+    const [order] = await db.select().from(shopOrders).where(eq(shopOrders.downloadToken, token));
+    return order;
+  }
+
+  async getSellerOrders(sellerId: string, status?: string): Promise<ShopOrder[]> {
+    let query = db.select().from(shopOrders).where(eq(shopOrders.sellerId, sellerId));
+    if (status) {
+      query = query.where(eq(shopOrders.paymentStatus, status as any));
+    }
+    return query.orderBy(desc(shopOrders.createdAt));
+  }
+
+  async getBuyerOrders(buyerId: string): Promise<ShopOrder[]> {
+    return db.select().from(shopOrders).where(eq(shopOrders.buyerId, buyerId)).orderBy(desc(shopOrders.createdAt));
+  }
+
+  async updateShopOrder(id: string, orderData: Partial<InsertShopOrder>): Promise<ShopOrder> {
+    const [order] = await db.update(shopOrders).set(orderData).where(eq(shopOrders.id, id)).returning();
+    return order;
+  }
+
+  async createShopDownload(downloadData: InsertShopDownload): Promise<ShopDownload> {
+    const [download] = await db.insert(shopDownloads).values(downloadData).returning();
+    return download;
+  }
+
+  async getShopDownload(id: string): Promise<ShopDownload | undefined> {
+    const [download] = await db.select().from(shopDownloads).where(eq(shopDownloads.id, id));
+    return download;
+  }
+
+  async updateShopDownload(id: string, downloadData: Partial<InsertShopDownload>): Promise<ShopDownload> {
+    const [download] = await db.update(shopDownloads).set(downloadData).where(eq(shopDownloads.id, id)).returning();
+    return download;
   }
 }
 

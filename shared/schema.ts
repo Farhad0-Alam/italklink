@@ -5066,3 +5066,150 @@ export const insertNfcTapEventSchema = createInsertSchema(nfcTapEvents).omit({
 });
 
 export type NfcTapEventForm = z.infer<typeof insertNfcTapEventSchema>;
+
+// ===== DIGITAL PRODUCT SHOP TABLES =====
+
+// Digital Products table
+export const digitalProducts = pgTable("digital_products", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Product info
+  title: varchar("title").notNull(),
+  slug: varchar("slug").unique().notNull(),
+  shortDescription: text("short_description"),
+  description: text("description"),
+  category: varchar("category"),
+  
+  // Pricing
+  price: integer("price").notNull(),
+  discountPrice: integer("discount_price"),
+  currency: varchar("currency").default('usd'),
+  
+  // Media
+  thumbnailUrl: varchar("thumbnail_url"),
+  previewImages: jsonb("preview_images").default([]),
+  
+  // File storage
+  filePath: varchar("file_path").notNull(),
+  fileSize: integer("file_size"),
+  fileType: varchar("file_type"),
+  
+  // Metadata
+  status: productStatusEnum("status").default('draft'),
+  views: integer("views").default(0),
+  purchases: integer("purchases").default(0),
+  rating: integer("rating").default(0),
+  reviewCount: integer("review_count").default(0),
+  
+  // Commission
+  commissionPercentage: integer("commission_percentage").default(20),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_product_seller").on(table.sellerId),
+  index("idx_product_status").on(table.status),
+  index("idx_product_category").on(table.category),
+  index("idx_product_created").on(table.createdAt),
+]);
+
+// Orders table
+export const shopOrders = pgTable("shop_orders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  sellerId: varchar("seller_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  buyerId: varchar("buyer_id").references(() => users.id, { onDelete: 'set null' }),
+  
+  // Buyer details
+  buyerEmail: varchar("buyer_email").notNull(),
+  buyerName: varchar("buyer_name"),
+  
+  // Payment
+  amount: integer("amount").notNull(),
+  sellerAmount: integer("seller_amount").notNull(),
+  commissionAmount: integer("commission_amount").notNull(),
+  currency: varchar("currency").default('usd'),
+  
+  // Stripe integration
+  stripeSessionId: varchar("stripe_session_id").unique(),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  paymentStatus: orderStatusEnum("payment_status").default('pending'),
+  
+  // Download token
+  downloadToken: varchar("download_token").unique().notNull(),
+  
+  // Metadata
+  metadata: jsonb("metadata"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_order_product").on(table.productId),
+  index("idx_order_seller").on(table.sellerId),
+  index("idx_order_buyer").on(table.buyerId),
+  index("idx_order_status").on(table.paymentStatus),
+  index("idx_order_token").on(table.downloadToken),
+  index("idx_order_created").on(table.createdAt),
+]);
+
+// Downloads table
+export const shopDownloads = pgTable("shop_downloads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderId: varchar("order_id").references(() => shopOrders.id, { onDelete: 'cascade' }).notNull(),
+  buyerId: varchar("buyer_id").references(() => users.id, { onDelete: 'cascade' }),
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  
+  filePath: varchar("file_path").notNull(),
+  downloadCount: integer("download_count").default(0),
+  maxDownloads: integer("max_downloads").default(5),
+  status: downloadStatusEnum("status").default('active'),
+  
+  expiresAt: timestamp("expires_at"),
+  revokedAt: timestamp("revoked_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_download_order").on(table.orderId),
+  index("idx_download_buyer").on(table.buyerId),
+  index("idx_download_product").on(table.productId),
+  index("idx_download_expires").on(table.expiresAt),
+]);
+
+// ===== DIGITAL SHOP TYPES & SCHEMAS =====
+
+export type DigitalProduct = typeof digitalProducts.$inferSelect;
+export type InsertDigitalProduct = typeof digitalProducts.$inferInsert;
+export type ShopOrder = typeof shopOrders.$inferSelect;
+export type InsertShopOrder = typeof shopOrders.$inferInsert;
+export type ShopDownload = typeof shopDownloads.$inferSelect;
+export type InsertShopDownload = typeof shopDownloads.$inferInsert;
+
+// Validation schemas
+export const insertDigitalProductSchema = createInsertSchema(digitalProducts).omit({
+  id: true,
+  sellerId: true,
+  views: true,
+  purchases: true,
+  rating: true,
+  reviewCount: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  title: z.string().min(3).max(200),
+  slug: z.string().min(3).max(200),
+  description: z.string().min(10).max(5000),
+  price: z.number().min(0),
+});
+
+export const insertShopOrderSchema = createInsertSchema(shopOrders).omit({
+  id: true,
+  sellerId: true,
+  paymentStatus: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type DigitalProductForm = z.infer<typeof insertDigitalProductSchema>;
+export type ShopOrderForm = z.infer<typeof insertShopOrderSchema>;
