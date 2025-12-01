@@ -9,21 +9,21 @@ import type { DigitalProduct } from "@shared/schema";
 
 export default function AdminShopModeration() {
   const { data: response, isLoading, error } = useQuery<{ success: boolean; data: DigitalProduct[] }>({
-    queryKey: ["/api/shop/admin/products"],
+    queryKey: ["/admin/products"],
   });
 
   const products = response?.data;
 
   const approveMutation = useMutation({
     mutationFn: async (productId: string) =>
-      apiRequest("POST", `/api/shop/admin/products/${productId}/approve`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/shop/admin/products"] }),
+      apiRequest("PATCH", `/admin/products/${productId}/status`, { status: 'approved' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/admin/products"] }),
   });
 
   const rejectMutation = useMutation({
     mutationFn: async (productId: string) =>
-      apiRequest("POST", `/api/shop/admin/products/${productId}/reject`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/shop/admin/products"] }),
+      apiRequest("PATCH", `/admin/products/${productId}/status`, { status: 'rejected' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/admin/products"] }),
   });
 
   if (isLoading) return <LoadingSkeleton />;
