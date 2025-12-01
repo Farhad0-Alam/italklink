@@ -1157,12 +1157,12 @@ export default function PlansPage() {
                     <Checkbox
                       id={`template-${template.id}`}
                       checked={formData.templates.includes(template.id)}
-                      onCheckedChange={() => {
+                      onCheckedChange={(checked) => {
                         setFormData(prev => ({
                           ...prev,
-                          templates: prev.templates.includes(template.id)
-                            ? prev.templates.filter(id => id !== template.id)
-                            : [...prev.templates, template.id]
+                          templates: checked
+                            ? [...prev.templates, template.id]
+                            : prev.templates.filter(id => id !== template.id)
                         }));
                       }}
                     />
