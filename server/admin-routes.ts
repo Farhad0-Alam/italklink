@@ -245,29 +245,31 @@ router.get('/users', requireOwner, async (req, res) => {
       let planValidityStr = '-';
       let isActive = false;
       
-      if (user.planStartsAt && user.planInterval) {
+      if (user.planId && user.planStartsAt) {
         // If planEndsAt is explicitly set, use that
         if (user.planEndsAt) {
           planValidityStr = formatDateDDMMMYYYY(user.planEndsAt);
           isActive = user.planEndsAt > new Date();
         } else {
-          // Calculate based on interval
-          const calculatedEndDate = calculatePlanValidity(user.planStartsAt, user.planInterval);
+          // planEndsAt is null - this means unlimited (no expiry)
+          planValidityStr = 'No Expiry';
+          isActive = true; // Unlimited plans are always active
+        }
+      } else if (user.planId) {
+        // Has a plan but no startsAt - check if planEndsAt is explicitly null (unlimited)
+        if (user.planEndsAt === null) {
+          planValidityStr = 'No Expiry';
+          isActive = true;
+        } else if (user.planEndsAt) {
+          planValidityStr = formatDateDDMMMYYYY(user.planEndsAt);
+          isActive = user.planEndsAt > new Date();
+        } else {
+          // Fallback: calculate based on interval
+          const calculatedEndDate = calculatePlanValidity(user.createdAt, user.planInterval);
           if (calculatedEndDate) {
             planValidityStr = formatDateDDMMMYYYY(calculatedEndDate);
             isActive = calculatedEndDate > new Date();
-          } else {
-            // Free plan or no interval
-            planValidityStr = '-';
-            isActive = true; // Free plans are always active
           }
-        }
-      } else if (user.planId) {
-        // Has a plan but no startsAt - use createdAt as fallback
-        const calculatedEndDate = calculatePlanValidity(user.createdAt, user.planInterval);
-        if (calculatedEndDate) {
-          planValidityStr = formatDateDDMMMYYYY(calculatedEndDate);
-          isActive = calculatedEndDate > new Date();
         }
       }
       
