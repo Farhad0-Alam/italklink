@@ -17,7 +17,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -28,6 +28,48 @@ import { LockedFeature } from '@/components/LockedFeature';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { useUserPlan } from '@/hooks/useUserPlan';
+import { useQuery } from '@tanstack/react-query';
+
+interface ElementTypeFromAPI {
+  type: string;
+  elementId?: number;
+}
+
+// Fallback element type to ID mapping (matches database page_element_types)
+const FALLBACK_ELEMENT_TYPE_TO_ID: Record<string, number> = {
+  heading: 1,
+  paragraph: 2,
+  contactSection: 3,
+  socialSection: 4,
+  actionButtons: 5,
+  link: 6,
+  image: 7,
+  qrcode: 8,
+  video: 9,
+  contactForm: 10,
+  accordion: 11,
+  imageSlider: 12,
+  testimonials: 13,
+  googleMaps: 14,
+  aiChatbot: 15,
+  ragKnowledge: 16,
+  voiceAgent: 17,
+  voiceAssistant: 18,
+  digitalWallet: 19,
+  navigationMenu: 20,
+  arPreviewMindAR: 21,
+  pdfViewer: 22,
+  html: 23,
+  subscribeForm: 24,
+  installButton: 25,
+  profile: 26,
+  bookAppointment: 27,
+  scheduleCall: 28,
+  meetingRequest: 29,
+  availabilityDisplay: 30,
+  shop: 31,
+};
 
 interface SortableElementProps {
   element: PageElement;
@@ -36,23 +78,11 @@ interface SortableElementProps {
   onClone: (elementId: string) => void;
   onToggleVisibility: (elementId: string) => void;
   cardData?: any;
+  isElementLocked: (elementType: string) => boolean;
+  getElementTitle: (element: PageElement) => string;
 }
 
-// Map element types to their element IDs for access control
-const elementTypeToId: Record<string, number> = {
-  qrcode: 7,
-  contactForm: 900,
-  aiChatbot: 901,
-  voiceAgent: 902,
-  voiceAssistant: 903,
-  ragKnowledge: 904,
-  googleMaps: 905,
-  accordionSection: 906,
-  testimonials: 907,
-  videoEmbed: 908,
-};
-
-function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibility, cardData }: SortableElementProps) {
+function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibility, cardData, isElementLocked, getElementTitle }: SortableElementProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const {
     attributes,
@@ -73,33 +103,14 @@ function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibil
     setIsExpanded(!isExpanded);
   };
 
-  const getElementTitle = () => {
-    switch (element.type) {
-      case "profile": return "Profile Section";
-      case "heading": return element.data.text || "Heading";
-      case "paragraph": return "Paragraph";
-      case "link": return element.data.text || "Link";
-      case "image": return "Image";
-      case "qrcode": return "QR Code";
-      case "contactSection": return "Contact Section";
-      case "socialSection": return "Social Section";
-      case "video": return "Video";
-      case "contactForm": return element.data.title || "Contact Form";
-      case "accordion": return "Accordion";
-      case "testimonials": return element.data.title || "Testimonials";
-      case "googleMaps": return element.data.title || "Google Maps";
-      case "aiChatbot": return element.data.title || "AI Chatbot";
-      default: return "Page Element";
-    }
-  };
-
-  // Check if this is a premium element
-  const isPremiumElement = elementTypeToId[element.type] !== undefined;
+  // Check if this element is locked based on user's plan
+  const isLocked = isElementLocked(element.type);
+  const elementTitle = getElementTitle(element);
 
   return (
     <div ref={setNodeRef} style={style} className="relative group">
       <div className="bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
-        <LockedFeature feature={element.type as any} premium={isPremiumElement}>
+        <LockedFeature featureName={elementTitle} showOverlay={isLocked}>
           <Collapsible open={isExpanded}>
             <div className="flex items-center p-3 bg-slate-100 border-b border-slate-200">
               <div
@@ -116,7 +127,7 @@ function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibil
               >
                 <div className="flex items-center space-x-2">
                   <span className="text-sm font-medium text-slate-700">
-                    {getElementTitle()}
+                    {elementTitle}
                   </span>
                   <span className="text-xs text-slate-500 bg-slate-200 px-2 py-1 rounded">
                     {element.type}
@@ -187,6 +198,59 @@ interface PageBuilderProps {
 export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, onElementSpacingChange, cardData, onNavigatePage }: PageBuilderProps) {
   const [showElementSelector, setShowElementSelector] = useState(false);
   
+  // Fetch element types from API for accurate ID mapping
+  const { data: apiElementTypes } = useQuery<ElementTypeFromAPI[]>({
+    queryKey: ['/api/element-types'],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Get user plan for element access control
+  const { hasElement, isAdmin, isLoading: planLoading, isPlanLoaded } = useUserPlan();
+
+  // Build element type to ID map from API (with fallback)
+  const elementIdMap = useMemo(() => {
+    const map: Record<string, number> = { ...FALLBACK_ELEMENT_TYPE_TO_ID };
+    if (apiElementTypes && apiElementTypes.length > 0) {
+      apiElementTypes.forEach(et => {
+        if (et.elementId) {
+          map[et.type] = et.elementId;
+        }
+      });
+    }
+    return map;
+  }, [apiElementTypes]);
+
+  // Check if an element type is locked based on user's plan
+  const isElementLocked = (elementType: string): boolean => {
+    if (planLoading) return true;
+    if (!isPlanLoaded) return true;
+    if (isAdmin) return false;
+    const elementId = elementIdMap[elementType];
+    if (!elementId) return true; // Lock elements without ID mapping
+    return !hasElement(elementId);
+  };
+
+  // Get element title for display
+  const getElementTitle = (element: PageElement): string => {
+    switch (element.type) {
+      case "profile": return "Profile Section";
+      case "heading": return element.data.text || "Heading";
+      case "paragraph": return "Paragraph";
+      case "link": return element.data.text || "Link";
+      case "image": return "Image";
+      case "qrcode": return "QR Code";
+      case "contactSection": return "Contact Section";
+      case "socialSection": return "Social Section";
+      case "video": return "Video";
+      case "contactForm": return element.data.title || "Contact Form";
+      case "accordion": return "Accordion";
+      case "testimonials": return element.data.title || "Testimonials";
+      case "googleMaps": return element.data.title || "Google Maps";
+      case "aiChatbot": return element.data.title || "AI Chatbot";
+      default: return "Page Element";
+    }
+  };
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -301,6 +365,8 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
                   onClone={handleCloneElement}
                   onToggleVisibility={handleToggleVisibility}
                   cardData={cardData}
+                  isElementLocked={isElementLocked}
+                  getElementTitle={getElementTitle}
                 />
               ))}
             </div>

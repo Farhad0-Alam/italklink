@@ -18,38 +18,40 @@ interface ElementType {
   defaultConfig?: any;
 }
 
+// Fallback mapping - should match database page_element_types IDs
+// This is used when API doesn't return elementId (legacy support)
 const ELEMENT_TYPE_TO_ID: Record<string, number> = {
   heading: 1,
   paragraph: 2,
-  link: 3,
-  image: 4,
-  contactSection: 5,
-  socialSection: 6,
-  qrcode: 7,
-  video: 8,
-  actionButtons: 9,
-  contactForm: 900,
-  accordion: 2012,
-  imageSlider: 2024,
-  testimonials: 10,
-  googleMaps: 11,
-  aiChatbot: 12,
-  ragKnowledge: 13,
-  voiceAgent: 14,
-  voiceAssistant: 15,
-  digitalWallet: 16,
-  profile: 17,
-  navigationMenu: 18,
-  arPreviewMindAR: 19,
-  pdfViewer: 20,
-  html: 21,
-  bookAppointment: 22,
-  scheduleCall: 23,
-  meetingRequest: 24,
-  availabilityDisplay: 25,
-  subscribeForm: 26,
-  installButton: 27,
-  shop: 28,
+  contactSection: 3,
+  socialSection: 4,
+  actionButtons: 5,
+  link: 6,
+  image: 7,
+  qrcode: 8,
+  video: 9,
+  contactForm: 10,
+  accordion: 11,
+  imageSlider: 12,
+  testimonials: 13,
+  googleMaps: 14,
+  aiChatbot: 15,
+  ragKnowledge: 16,
+  voiceAgent: 17,
+  voiceAssistant: 18,
+  digitalWallet: 19,
+  navigationMenu: 20,
+  arPreviewMindAR: 21,
+  pdfViewer: 22,
+  html: 23,
+  subscribeForm: 24,
+  installButton: 25,
+  profile: 26,
+  bookAppointment: 27,
+  scheduleCall: 28,
+  meetingRequest: 29,
+  availabilityDisplay: 30,
+  shop: 31,
 };
 
 const fallbackElementTypes: ElementType[] = [
@@ -104,12 +106,26 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
     return apiElementTypes && apiElementTypes.length > 0 ? apiElementTypes : fallbackElementTypes;
   }, [apiElementTypes]);
 
+  // Build a map of element type to ID from API data (more reliable than hardcoded map)
+  const apiElementIdMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    if (apiElementTypes && apiElementTypes.length > 0) {
+      apiElementTypes.forEach(et => {
+        if (et.elementId) {
+          map[et.type] = et.elementId;
+        }
+      });
+    }
+    return map;
+  }, [apiElementTypes]);
+
   const isElementLocked = (elementType: string): boolean => {
     if (planLoading) return true;
     if (!isPlanLoaded) return true;
     if (isAdmin) return false;
-    const elementId = ELEMENT_TYPE_TO_ID[elementType];
-    if (!elementId) return false;
+    // Prefer API-provided elementId, fall back to hardcoded map
+    const elementId = apiElementIdMap[elementType] || ELEMENT_TYPE_TO_ID[elementType];
+    if (!elementId) return true; // Lock elements without ID mapping (safer default)
     return !hasElement(elementId);
   };
 

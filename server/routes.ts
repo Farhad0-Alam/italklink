@@ -932,7 +932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const elementTypes = await storage.getPageElementTypes({ isActive: true });
       
-      // Map to frontend format
+      // Map to frontend format - include elementId for feature gating
       const publicElementTypes = elementTypes.map(et => ({
         type: et.type,
         title: et.title,
@@ -940,7 +940,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         color: et.color,
         description: et.description,
         isPremium: et.isPremium,
-        defaultConfig: et.defaultConfig
+        defaultConfig: et.defaultConfig,
+        elementId: et.id  // Include database ID for plan-based feature gating
       }));
       
       // Essential element types that must always be available (if missing from database)
