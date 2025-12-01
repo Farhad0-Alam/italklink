@@ -56,15 +56,30 @@ interface ElementSelectorProps {
   onAddElement: (element: PageElement) => void;
 }
 
+interface CurrentUser {
+  id: string;
+  email: string;
+  plan_type?: string;
+  planType?: string;
+}
+
 export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSelectorProps) {
   const { data: apiElementTypes } = useQuery<ElementType[]>({
     queryKey: ['/api/element-types'],
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: currentUser } = useQuery<CurrentUser>({
+    queryKey: ['/api/auth/user'],
+    staleTime: 5 * 60 * 1000,
+  });
+
   const elementTypes = useMemo(() => {
     return apiElementTypes && apiElementTypes.length > 0 ? apiElementTypes : fallbackElementTypes;
   }, [apiElementTypes]);
+
+  // Check if user is premium
+  const isPremiumUser = currentUser?.plan_type === 'paid' || currentUser?.planType === 'paid';
 
   const handleAddElement = (type: string) => {
     const id = generateFieldId();
@@ -640,19 +655,40 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         
         <div className="flex-1 overflow-y-auto px-4 pb-4">
           <div className="grid grid-cols-3 gap-4 py-4">
-            {elementTypes.map((elementType) => (
-              <Button
-                key={elementType.type}
-                onClick={() => handleAddElement(elementType.type)}
-                variant="ghost"
-                className="h-auto p-4 flex flex-col items-center space-y-2 hover:bg-slate-50 border border-slate-200 rounded-lg"
-              >
-                <div className={`w-12 h-12 rounded-lg ${elementType.color} flex items-center justify-center`}>
-                  <i className={`${elementType.icon} text-lg text-slate-700`}></i>
-                </div>
-                <span className="font-medium text-slate-800">{elementType.title}</span>
-              </Button>
-            ))}
+            {elementTypes.map((elementType) => {
+              const isLocked = elementType.isPremium && !isPremiumUser;
+              
+              return isLocked ? (
+                <LockedFeature
+                  key={elementType.type}
+                  featureName={elementType.title}
+                  showOverlay={true}
+                >
+                  <Button
+                    disabled
+                    variant="ghost"
+                    className="h-auto p-4 flex flex-col items-center space-y-2 opacity-50 border border-slate-200 rounded-lg"
+                  >
+                    <div className={`w-12 h-12 rounded-lg ${elementType.color} flex items-center justify-center`}>
+                      <i className={`${elementType.icon} text-lg text-slate-700`}></i>
+                    </div>
+                    <span className="font-medium text-slate-800">{elementType.title}</span>
+                  </Button>
+                </LockedFeature>
+              ) : (
+                <Button
+                  key={elementType.type}
+                  onClick={() => handleAddElement(elementType.type)}
+                  variant="ghost"
+                  className="h-auto p-4 flex flex-col items-center space-y-2 hover:bg-slate-50 border border-slate-200 rounded-lg"
+                >
+                  <div className={`w-12 h-12 rounded-lg ${elementType.color} flex items-center justify-center`}>
+                    <i className={`${elementType.icon} text-lg text-slate-700`}></i>
+                  </div>
+                  <span className="font-medium text-slate-800">{elementType.title}</span>
+                </Button>
+              );
+            })}
           </div>
         </div>
       </DialogContent>
