@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -620,6 +620,24 @@ export interface IStorage {
   getBundleItems(bundleId: string): Promise<(BundleItem & { product: DigitalProduct })[]>;
   updateBundle(bundleId: string, bundleData: Partial<any>): Promise<ProductBundle>;
   deleteBundle(bundleId: string): Promise<void>;
+
+  // Category operations
+  createCategory(categoryData: any, sellerId: string): Promise<ProductCategory>;
+  getCategoryById(categoryId: string): Promise<ProductCategory | undefined>;
+  getCategoryBySlug(slug: string): Promise<ProductCategory | undefined>;
+  getSellerCategories(sellerId: string): Promise<ProductCategory[]>;
+  getCategoriesForProduct(productId: string): Promise<ProductCategory[]>;
+  updateCategory(categoryId: string, categoryData: Partial<any>): Promise<ProductCategory>;
+  deleteCategory(categoryId: string): Promise<void>;
+  addProductToCategory(productId: string, categoryId: string): Promise<void>;
+  removeProductFromCategory(productId: string, categoryId: string): Promise<void>;
+
+  // Tag operations
+  getAllTags(): Promise<ProductTag[]>;
+  getOrCreateTag(name: string): Promise<ProductTag>;
+  getTagsForProduct(productId: string): Promise<ProductTag[]>;
+  addTagToProduct(productId: string, tagId: string): Promise<void>;
+  removeTagFromProduct(productId: string, tagId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -7124,6 +7142,96 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBundle(bundleId: string): Promise<void> {
     await db.delete(productBundles).where(eq(productBundles.id, bundleId));
+  }
+
+  // ===== CATEGORY OPERATIONS =====
+
+  async createCategory(categoryData: any, sellerId: string): Promise<ProductCategory> {
+    const [category] = await db.insert(productCategories).values({
+      sellerId,
+      name: categoryData.name,
+      slug: categoryData.slug,
+      description: categoryData.description,
+      icon: categoryData.icon,
+    }).returning();
+    return category;
+  }
+
+  async getCategoryById(categoryId: string): Promise<ProductCategory | undefined> {
+    const [category] = await db.select().from(productCategories).where(eq(productCategories.id, categoryId));
+    return category;
+  }
+
+  async getCategoryBySlug(slug: string): Promise<ProductCategory | undefined> {
+    const [category] = await db.select().from(productCategories).where(eq(productCategories.slug, slug));
+    return category;
+  }
+
+  async getSellerCategories(sellerId: string): Promise<ProductCategory[]> {
+    return await db.select().from(productCategories)
+      .where(and(eq(productCategories.sellerId, sellerId), eq(productCategories.status, 'active')))
+      .orderBy(productCategories.name);
+  }
+
+  async getCategoriesForProduct(productId: string): Promise<ProductCategory[]> {
+    const results = await db.select({ category: productCategories })
+      .from(productCategoriesToProducts)
+      .innerJoin(productCategories, eq(productCategoriesToProducts.categoryId, productCategories.id))
+      .where(eq(productCategoriesToProducts.productId, productId));
+    return results.map(r => r.category);
+  }
+
+  async updateCategory(categoryId: string, categoryData: Partial<any>): Promise<ProductCategory> {
+    const [category] = await db.update(productCategories)
+      .set({ ...categoryData, updatedAt: new Date() })
+      .where(eq(productCategories.id, categoryId))
+      .returning();
+    return category;
+  }
+
+  async deleteCategory(categoryId: string): Promise<void> {
+    await db.delete(productCategories).where(eq(productCategories.id, categoryId));
+  }
+
+  async addProductToCategory(productId: string, categoryId: string): Promise<void> {
+    await db.insert(productCategoriesToProducts).values({ productId, categoryId }).onConflictDoNothing();
+  }
+
+  async removeProductFromCategory(productId: string, categoryId: string): Promise<void> {
+    await db.delete(productCategoriesToProducts)
+      .where(and(eq(productCategoriesToProducts.productId, productId), eq(productCategoriesToProducts.categoryId, categoryId)));
+  }
+
+  // ===== TAG OPERATIONS =====
+
+  async getAllTags(): Promise<ProductTag[]> {
+    return await db.select().from(productTags).orderBy(productTags.name);
+  }
+
+  async getOrCreateTag(name: string): Promise<ProductTag> {
+    const slug = name.toLowerCase().replace(/\s+/g, '-');
+    const existing = await db.select().from(productTags).where(eq(productTags.slug, slug));
+    if (existing.length > 0) return existing[0];
+    
+    const [tag] = await db.insert(productTags).values({ name, slug }).returning();
+    return tag;
+  }
+
+  async getTagsForProduct(productId: string): Promise<ProductTag[]> {
+    const results = await db.select({ tag: productTags })
+      .from(productTagsToProducts)
+      .innerJoin(productTags, eq(productTagsToProducts.tagId, productTags.id))
+      .where(eq(productTagsToProducts.productId, productId));
+    return results.map(r => r.tag);
+  }
+
+  async addTagToProduct(productId: string, tagId: string): Promise<void> {
+    await db.insert(productTagsToProducts).values({ productId, tagId }).onConflictDoNothing();
+  }
+
+  async removeTagFromProduct(productId: string, tagId: string): Promise<void> {
+    await db.delete(productTagsToProducts)
+      .where(and(eq(productTagsToProducts.productId, productId), eq(productTagsToProducts.tagId, tagId)));
   }
 }
 

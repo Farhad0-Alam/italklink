@@ -5456,3 +5456,75 @@ export const insertProductBundleSchema = createInsertSchema(productBundles).omit
 });
 
 export type ProductBundleForm = z.infer<typeof insertProductBundleSchema>;
+
+// Product Categories table
+export const productCategories = pgTable("product_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  name: varchar("name").notNull(),
+  slug: varchar("slug").unique().notNull(),
+  description: text("description"),
+  icon: varchar("icon"),
+  
+  status: productStatusEnum("status").default('active'),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_category_seller").on(table.sellerId),
+  index("idx_category_slug").on(table.slug),
+]);
+
+// Product Tags table (global)
+export const productTags = pgTable("product_tags", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  name: varchar("name").unique().notNull(),
+  slug: varchar("slug").unique().notNull(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_tag_slug").on(table.slug),
+]);
+
+// Product-Category relation table
+export const productCategoriesToProducts = pgTable("product_categories_to_products", {
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  categoryId: varchar("category_id").references(() => productCategories.id, { onDelete: 'cascade' }).notNull(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_prod_cat_product").on(table.productId),
+  index("idx_prod_cat_category").on(table.categoryId),
+]);
+
+// Product-Tag relation table
+export const productTagsToProducts = pgTable("product_tags_to_products", {
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  tagId: varchar("tag_id").references(() => productTags.id, { onDelete: 'cascade' }).notNull(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_prod_tag_product").on(table.productId),
+  index("idx_prod_tag_tag").on(table.tagId),
+]);
+
+export type ProductCategory = typeof productCategories.$inferSelect;
+export type InsertProductCategory = typeof productCategories.$inferInsert;
+export type ProductTag = typeof productTags.$inferSelect;
+export type InsertProductTag = typeof productTags.$inferInsert;
+export type ProductCategoryToProduct = typeof productCategoriesToProducts.$inferSelect;
+export type ProductTagToProduct = typeof productTagsToProducts.$inferSelect;
+
+export const insertProductCategorySchema = createInsertSchema(productCategories).omit({
+  id: true,
+  sellerId: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  name: z.string().min(2).max(100),
+  slug: z.string().min(2).max(100),
+});
+
+export type ProductCategoryForm = z.infer<typeof insertProductCategorySchema>;

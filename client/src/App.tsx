@@ -79,6 +79,8 @@ const AffiliateDashboard = lazy(() => import("./pages/shop/affiliate-dashboard")
 const SellerStore = lazy(() => import("./pages/shop/seller-store"));
 const BundlesBrowse = lazy(() => import("./pages/shop/bundles-browse").then(m => ({ default: m.BundlesBrowse })));
 const BundleDetails = lazy(() => import("./pages/shop/bundle-details").then(m => ({ default: m.BundleDetails })));
+const CategoriesBrowse = lazy(() => import("./pages/shop/categories-browse").then(m => ({ default: m.CategoriesBrowse })));
+const CategoryProducts = lazy(() => import("./pages/shop/category-products").then(m => ({ default: m.CategoryProducts })));
 
 // Lazy load CardRoutes to prevent loading multi-page module eagerly
 const LazyCardRoutes = lazy(() => import("@/modules/multi-page").then(module => ({ default: module.CardRoutes })));
@@ -157,6 +159,8 @@ function Router() {
       <Route path="/shop/affiliate">{() => <PageSuspense><AffiliateDashboard /></PageSuspense>}</Route>
       <Route path="/shop/bundles">{() => <PageSuspense><BundlesBrowse /></PageSuspense>}</Route>
       <Route path="/shop/bundles/:bundleId">{() => <PageSuspense><BundleDetails /></PageSuspense>}</Route>
+      <Route path="/shop/categories">{() => <PageSuspense><CategoriesBrowse /></PageSuspense>}</Route>
+      <Route path="/shop/categories/:categorySlug">{() => <PageSuspense><CategoryProducts /></PageSuspense>}</Route>
       <Route path="/seller/:sellerId">{(params) => <PageSuspense><SellerStore {...params} /></PageSuspense>}</Route>
       <Route path="/shop/seller">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
       <Route path="/shop/seller/products">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
