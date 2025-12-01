@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
-import { fileToBase64, validateImageFile } from "@/lib/card-data";
+import { fileToBase64, validateImageFile } from "@/lib/storage";
 
 interface ProfileSectionEditorProps {
   data: any;
