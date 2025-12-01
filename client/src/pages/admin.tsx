@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { ShieldCheck } from 'lucide-react';
-import AdminLayout from '@/components/admin/AdminLayout';
+import AdminLayout from '@/modules/admin-panel/components/AdminLayout';
 import DashboardPage from '@/components/admin/DashboardPage';
 import UsersPage from '@/components/admin/UsersPage';
 import PlansPage from '@/components/admin/PlansPage';
@@ -15,6 +15,9 @@ import ElementTypesPage from '@/components/admin/ElementTypesPage';
 import AdminProfilePage from '@/components/admin/AdminProfilePage';
 import AdminLogin from '@/components/admin/AdminLogin';
 import { ModerationQueuePage } from '@/components/admin/ModerationQueuePage';
+import AdminShopModeration from '@/pages/shop/admin-moderation';
+import AdminCommission from '@/pages/shop/admin-commission';
+import { AdminReviewModeration } from '@/pages/shop/admin-review-moderation';
 
 export default function Admin() {
   const [location] = useLocation();
@@ -85,6 +88,12 @@ export default function Admin() {
         return <AffiliateConversionsPage />;
       case '/admin/payouts':
         return <AffiliatePayoutsPage />;
+      case '/admin/shop':
+        return <AdminShopModeration />;
+      case '/admin/shop/commission':
+        return <AdminCommission />;
+      case '/admin/reviews':
+        return <AdminReviewModeration />;
       case '/admin/shop/moderation':
         return <ModerationQueuePage />;
       case '/admin/profile':
