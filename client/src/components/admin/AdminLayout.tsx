@@ -132,8 +132,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         
         if (hasSubmenu) {
           return (
-            <div key={item.href} className="flex items-center gap-1">
-              {(item as any).submenu.map((subitem: any) => {
+            <div key={item.href} className="flex items-center gap-0.5 px-2 py-1 rounded-xl bg-gradient-to-r from-orange-50/30 to-orange-50/10 dark:from-orange-950/20 dark:to-orange-950/10 border border-orange-200/40 dark:border-orange-800/40 backdrop-blur-xs">
+              {(item as any).submenu.map((subitem: any, idx: number) => {
                 const SubIcon = subitem.icon;
                 const isSubActive = location === subitem.href;
                 return (
@@ -142,22 +142,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     href={subitem.href} 
                     data-testid={`nav-${subitem.title.toLowerCase().replace(/\s+/g, '-')}`}
                     className={`
-                      group relative flex items-center gap-2 px-4 py-2.5 
-                      text-sm font-medium rounded-xl whitespace-nowrap 
+                      group relative flex items-center gap-2 px-3 py-2 
+                      text-sm font-medium rounded-lg whitespace-nowrap 
                       transition-all duration-200 ease-in-out
                       ${isSubActive 
-                        ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 scale-105' 
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700/50'
+                        ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-700/30'
                       }
                     `}
                   >
-                    <SubIcon className={`w-4 h-4 transition-transform duration-200 ${
+                    <SubIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${
                       isSubActive ? 'text-white' : 'group-hover:scale-110'
                     }`} />
                     <span className="hidden sm:inline">{subitem.title}</span>
-                    {isSubActive && (
-                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-white rounded-full" />
-                    )}
                   </Link>
                 );
               })}
@@ -284,23 +281,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                         
                         if (hasSubmenu) {
                           return (
-                            <div key={item.href}>
+                            <div key={item.href} className="space-y-1">
                               <button
                                 onClick={() => setExpandedSection(isExpanded ? null : item.title)}
                                 className={`
                                   w-full group flex items-center justify-between gap-3 px-4 py-3 
                                   rounded-xl font-medium transition-all duration-200
-                                  text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50
+                                  ${isExpanded 
+                                    ? 'bg-gradient-to-r from-orange-50 to-orange-50/50 dark:from-orange-950/30 dark:to-orange-950/10 border border-orange-200/60 dark:border-orange-800/40' 
+                                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                  }
                                 `}
                               >
                                 <div className="flex items-center gap-3">
-                                  <Icon className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:scale-110" />
-                                  <span>{item.title}</span>
+                                  <Icon className={`w-5 h-5 transition-all ${isExpanded ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-gray-400'} group-hover:scale-110`} />
+                                  <span className={isExpanded ? 'text-orange-900 dark:text-orange-100 font-semibold' : ''}>{item.title}</span>
                                 </div>
-                                <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                <ChevronDown className={`w-4 h-4 transition-all duration-300 ${isExpanded ? 'rotate-180 text-orange-600 dark:text-orange-400' : 'text-gray-500'}`} />
                               </button>
                               {isExpanded && (
-                                <div className="pl-6 space-y-1">
+                                <div className="px-2 py-1 space-y-0.5 bg-gradient-to-b from-orange-50/40 to-transparent dark:from-orange-950/10 rounded-lg">
                                   {(item as any).submenu.map((subitem: any) => {
                                     const SubIcon = subitem.icon;
                                     const isSubActive = location === subitem.href;
@@ -310,11 +310,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                         href={subitem.href}
                                         onClick={() => setSidebarOpen(false)}
                                         className={`
-                                          group flex items-center gap-3 px-4 py-2 
+                                          group flex items-center gap-3 px-3 py-2.5 
                                           rounded-lg font-medium transition-all duration-200
                                           ${isSubActive 
-                                            ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30' 
-                                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                            ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25' 
+                                            : 'text-gray-700 hover:bg-white/50 dark:text-gray-300 dark:hover:bg-gray-700/30'
                                           }
                                         `}
                                       >
