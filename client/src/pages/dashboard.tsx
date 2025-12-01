@@ -26,6 +26,8 @@ import { ContactSupportModal } from "@/components/contact-support-modal";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import NotifyCardButton from "@/components/NotifyCardButton";
 import NotifyAllCardsButton from "@/components/NotifyAllCardsButton";
+import { useUserPlan } from "@/hooks/useUserPlan";
+import { PlanRequiredOverlay } from "@/components/PlanRequiredOverlay";
 
 interface User {
   id: string;
@@ -79,6 +81,9 @@ export default function Dashboard() {
   const [showContactModal, setShowContactModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showPayoutSettings, setShowPayoutSettings] = useState(false);
+
+  // Plan access check - mandatory plan selection
+  const { isPlanAssigned, isAdmin, isLoading: planLoading } = useUserPlan();
 
   // All hooks must be called unconditionally at the top level
   const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
@@ -219,6 +224,11 @@ export default function Dashboard() {
 
   if (!user) {
     return null; // Will redirect to login
+  }
+
+  // Show plan selection overlay if user has no plan assigned (admins bypass this)
+  if (!planLoading && !isAdmin && !isPlanAssigned) {
+    return <PlanRequiredOverlay />;
   }
 
   // Calculate pagination after ensuring we have data

@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { defaultCardData } from "@/lib/card-data";
 import { WalletButtons } from "@/components/WalletButtons";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useUserPlan } from "@/hooks/useUserPlan";
+import { PlanRequiredOverlay } from "@/components/PlanRequiredOverlay";
 
 interface BuilderProps {
   cardId?: string;
@@ -26,6 +28,9 @@ export const Builder = ({ cardId }: BuilderProps) => {
   const [showQR, setShowQR] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Plan access check - mandatory plan selection
+  const { isPlanAssigned, isAdmin, isLoading: planLoading } = useUserPlan();
 
   // Load card data from database if cardId is provided
   const { data: loadedCard, isLoading } = useQuery<BusinessCard>({
@@ -89,7 +94,7 @@ export const Builder = ({ cardId }: BuilderProps) => {
     logEvent("generate_qr");
   };
 
-  if (isLoading) {
+  if (isLoading || planLoading) {
     return (
       <div className="min-h-screen bg-slate-900 text-slate-50 flex items-center justify-center">
         <div className="text-center">
@@ -98,6 +103,11 @@ export const Builder = ({ cardId }: BuilderProps) => {
         </div>
       </div>
     );
+  }
+
+  // Show plan selection overlay if user has no plan assigned (admins bypass this)
+  if (!isAdmin && !isPlanAssigned) {
+    return <PlanRequiredOverlay />;
   }
 
   const handleExportPNG = async () => {
