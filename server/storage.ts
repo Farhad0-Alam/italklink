@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate, productSocialShares, type ProductSocialShare, type InsertProductSocialShare, abandonedCarts, type AbandonedCart, type InsertAbandonedCart
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate, productSocialShares, type ProductSocialShare, type InsertProductSocialShare, abandonedCarts, type AbandonedCart, type InsertAbandonedCart, sellerSubscriptionPlans, sellerSubscriptions, type SellerSubscriptionPlan, type InsertSellerSubscriptionPlan, type SellerSubscription, type InsertSellerSubscription
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -689,6 +689,16 @@ export interface IStorage {
   getAbandonedCartsNotRecovered(): Promise<AbandonedCart[]>;
   updateAbandonedCart(cartId: string, cartData: Partial<any>): Promise<AbandonedCart>;
   markAbandonedCartRecovered(cartId: string, orderId: string): Promise<AbandonedCart>;
+
+  // Seller subscription plan operations
+  getAllSubscriptionPlans(): Promise<SellerSubscriptionPlan[]>;
+  getSubscriptionPlanById(planId: string): Promise<SellerSubscriptionPlan | undefined>;
+  createSubscriptionPlan(planData: any): Promise<SellerSubscriptionPlan>;
+  updateSubscriptionPlan(planId: string, planData: Partial<any>): Promise<SellerSubscriptionPlan>;
+  getSellerSubscription(sellerId: string): Promise<(SellerSubscription & { plan: SellerSubscriptionPlan }) | undefined>;
+  createSellerSubscription(subData: any): Promise<SellerSubscription>;
+  updateSellerSubscription(subscriptionId: string, subData: Partial<any>): Promise<SellerSubscription>;
+  cancelSellerSubscription(subscriptionId: string): Promise<SellerSubscription>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -7631,6 +7641,90 @@ export class DatabaseStorage implements IStorage {
       .where(eq(abandonedCarts.id, cartId))
       .returning();
     return cart;
+  }
+
+  // ===== SELLER SUBSCRIPTION OPERATIONS =====
+
+  async getAllSubscriptionPlans(): Promise<SellerSubscriptionPlan[]> {
+    return await db.select().from(sellerSubscriptionPlans)
+      .where(eq(sellerSubscriptionPlans.isActive, true))
+      .orderBy(sellerSubscriptionPlans.displayOrder);
+  }
+
+  async getSubscriptionPlanById(planId: string): Promise<SellerSubscriptionPlan | undefined> {
+    const [plan] = await db.select().from(sellerSubscriptionPlans).where(eq(sellerSubscriptionPlans.id, planId));
+    return plan;
+  }
+
+  async createSubscriptionPlan(planData: any): Promise<SellerSubscriptionPlan> {
+    const [plan] = await db.insert(sellerSubscriptionPlans).values({
+      name: planData.name,
+      slug: planData.slug,
+      description: planData.description,
+      monthlyPrice: planData.monthlyPrice,
+      yearlyPrice: planData.yearlyPrice,
+      maxProducts: planData.maxProducts,
+      maxCategories: planData.maxCategories,
+      maxBundles: planData.maxBundles,
+      maxVariantsPerProduct: planData.maxVariantsPerProduct,
+      hasAdvancedAnalytics: planData.hasAdvancedAnalytics,
+      hasEmailMarketing: planData.hasEmailMarketing,
+      hasAffiliateTool: planData.hasAffiliateTool,
+      commissionFeePercentage: planData.commissionFeePercentage,
+    }).returning();
+    return plan;
+  }
+
+  async updateSubscriptionPlan(planId: string, planData: Partial<any>): Promise<SellerSubscriptionPlan> {
+    const [plan] = await db.update(sellerSubscriptionPlans)
+      .set({ ...planData, updatedAt: new Date() })
+      .where(eq(sellerSubscriptionPlans.id, planId))
+      .returning();
+    return plan;
+  }
+
+  async getSellerSubscription(sellerId: string): Promise<(SellerSubscription & { plan: SellerSubscriptionPlan }) | undefined> {
+    const result = await db.select({
+      subscription: sellerSubscriptions,
+      plan: sellerSubscriptionPlans,
+    }).from(sellerSubscriptions)
+      .innerJoin(sellerSubscriptionPlans, eq(sellerSubscriptions.planId, sellerSubscriptionPlans.id))
+      .where(eq(sellerSubscriptions.sellerId, sellerId));
+    
+    if (!result[0]) return undefined;
+    return { ...result[0].subscription, plan: result[0].plan };
+  }
+
+  async createSellerSubscription(subData: any): Promise<SellerSubscription> {
+    const [sub] = await db.insert(sellerSubscriptions).values({
+      sellerId: subData.sellerId,
+      planId: subData.planId,
+      billingCycle: subData.billingCycle || 'monthly',
+      stripeSubscriptionId: subData.stripeSubscriptionId,
+      stripeCustomerId: subData.stripeCustomerId,
+      nextBillingDate: subData.nextBillingDate,
+    }).returning();
+    return sub;
+  }
+
+  async updateSellerSubscription(subscriptionId: string, subData: Partial<any>): Promise<SellerSubscription> {
+    const [sub] = await db.update(sellerSubscriptions)
+      .set({ ...subData, updatedAt: new Date() })
+      .where(eq(sellerSubscriptions.id, subscriptionId))
+      .returning();
+    return sub;
+  }
+
+  async cancelSellerSubscription(subscriptionId: string): Promise<SellerSubscription> {
+    const [sub] = await db.update(sellerSubscriptions)
+      .set({ 
+        status: 'canceled', 
+        canceledAt: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(sellerSubscriptions.id, subscriptionId))
+      .returning();
+    return sub;
   }
 }
 

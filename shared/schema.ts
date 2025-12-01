@@ -5805,3 +5805,73 @@ export const abandonedCarts = pgTable("abandoned_carts", {
 
 export type AbandonedCart = typeof abandonedCarts.$inferSelect;
 export type InsertAbandonedCart = typeof abandonedCarts.$inferInsert;
+
+// Seller Subscription Plans table (tiered seller feature access)
+export const sellerSubscriptionPlans = pgTable("seller_subscription_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Plan info
+  name: varchar("name").notNull(), // Free, Pro, Elite
+  slug: varchar("slug").unique().notNull(),
+  description: text("description"),
+  
+  // Pricing
+  monthlyPrice: integer("monthly_price").default(0), // in cents
+  yearlyPrice: integer("yearly_price"),
+  
+  // Features
+  maxProducts: integer("max_products").default(10),
+  maxCategories: integer("max_categories").default(3),
+  maxBundles: integer("max_bundles").default(0),
+  maxVariantsPerProduct: integer("max_variants_per_product").default(5),
+  hasAdvancedAnalytics: boolean("has_advanced_analytics").default(false),
+  hasEmailMarketing: boolean("has_email_marketing").default(false),
+  hasAffiliateTool: boolean("has_affiliate_tool").default(false),
+  commissionFeePercentage: integer("commission_fee_percentage").default(20), // Platform takes this %
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_plan_active").on(table.isActive),
+  index("idx_plan_order").on(table.displayOrder),
+]);
+
+// Seller Subscriptions table (tracks which seller is on which plan)
+export const sellerSubscriptions = pgTable("seller_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => users.id, { onDelete: 'cascade' }).notNull().unique(),
+  planId: varchar("plan_id").references(() => sellerSubscriptionPlans.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Subscription details
+  status: varchar("status").default('active'), // active, canceled, past_due
+  billingCycle: varchar("billing_cycle").default('monthly'), // monthly, yearly
+  
+  // Stripe integration
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  
+  // Dates
+  currentPeriodStart: timestamp("current_period_start").defaultNow(),
+  currentPeriodEnd: timestamp("current_period_end"),
+  canceledAt: timestamp("canceled_at"),
+  
+  // Tracking
+  nextBillingDate: timestamp("next_billing_date"),
+  lastPaymentDate: timestamp("last_payment_date"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_subscription_seller").on(table.sellerId),
+  index("idx_subscription_plan").on(table.planId),
+  index("idx_subscription_status").on(table.status),
+]);
+
+export type SellerSubscriptionPlan = typeof sellerSubscriptionPlans.$inferSelect;
+export type InsertSellerSubscriptionPlan = typeof sellerSubscriptionPlans.$inferInsert;
+export type SellerSubscription = typeof sellerSubscriptions.$inferSelect;
+export type InsertSellerSubscription = typeof sellerSubscriptions.$inferInsert;
