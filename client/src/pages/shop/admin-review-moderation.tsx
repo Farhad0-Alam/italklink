@@ -17,6 +17,7 @@ export function AdminReviewModeration() {
 
   const { data: reviews = [], isLoading } = useQuery({
     queryKey: ['/api/review-moderation/pending'],
+    select: (response: any) => Array.isArray(response) ? response : (response?.data || []),
   });
 
   const approveMutation = useMutation({
