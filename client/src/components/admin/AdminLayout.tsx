@@ -70,16 +70,6 @@ const sidebarNavItems = [
     icon: Layout,
   },
   {
-    title: 'Icons',
-    href: '/admin/icons',
-    icon: Palette,
-  },
-  {
-    title: 'Elements',
-    href: '/admin/elements',
-    icon: Layers,
-  },
-  {
     title: 'Affiliates',
     href: '/admin/affiliates',
     icon: UserPlus,
