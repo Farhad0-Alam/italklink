@@ -9,7 +9,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { fileToBase64, validateImageFile } from "@/lib/card-data";
-import { GradientBuilder, GradientConfig } from "@/components/gradient-builder";
 
 interface ProfileSectionEditorProps {
   data: any;
@@ -322,23 +321,42 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
                   />
                 </div>
 
-                {["instagram", "wave", "gradient-slide", "shimmer"].includes(profileImageStyles.animation) && (
-                  <GradientBuilder
-                    value={{
-                      type: profileImageStyles.animationGradient?.type || 'linear',
-                      angle: profileImageStyles.animationGradient?.angle || 90,
-                      stops: profileImageStyles.animationGradient?.stops || [
-                        { color: brandColor, stop: 0 },
-                        { color: accentColor, stop: 100 }
-                      ]
-                    }}
-                    onChange={(gradient: GradientConfig) => {
-                      handleNestedUpdate("profileImageStyles.animationGradient", gradient);
-                    }}
-                    useBrandColors={profileImageStyles.useBrandColor !== false}
-                    brandColor={brandColor}
-                    accentColor={accentColor}
-                  />
+                {["instagram", "wave", "gradient-slide", "shimmer"].includes(profileImageStyles.animation) && 
+                 profileImageStyles.useBrandColor === false && (
+                  <div className="space-y-2 p-3 bg-white rounded border border-slate-200">
+                    <Label className="text-xs text-slate-500">Start Color</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="color"
+                        value={profileImageStyles.animationColors?.start || brandColor}
+                        onChange={(e) => {
+                          const currentColors = profileImageStyles.animationColors || {};
+                          handleNestedUpdate("profileImageStyles.animationColors", { 
+                            ...currentColors, 
+                            start: e.target.value 
+                          });
+                        }}
+                        className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                      />
+                      <span className="text-xs text-slate-500">{profileImageStyles.animationColors?.start || brandColor}</span>
+                    </div>
+                    <Label className="text-xs text-slate-500">End Color</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="color"
+                        value={profileImageStyles.animationColors?.end || accentColor}
+                        onChange={(e) => {
+                          const currentColors = profileImageStyles.animationColors || {};
+                          handleNestedUpdate("profileImageStyles.animationColors", { 
+                            ...currentColors, 
+                            end: e.target.value 
+                          });
+                        }}
+                        className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                      />
+                      <span className="text-xs text-slate-500">{profileImageStyles.animationColors?.end || accentColor}</span>
+                    </div>
+                  </div>
                 )}
 
                 {profileImageStyles.animation === "neon" && profileImageStyles.useBrandColor === false && (
@@ -348,10 +366,13 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
                       <Input
                         type="color"
                         value={profileImageStyles.animationColors?.primary || brandColor}
-                        onChange={(e) => handleNestedUpdate("profileImageStyles.animationColors", { 
-                          ...profileImageStyles.animationColors, 
-                          primary: e.target.value 
-                        })}
+                        onChange={(e) => {
+                          const currentColors = profileImageStyles.animationColors || {};
+                          handleNestedUpdate("profileImageStyles.animationColors", { 
+                            ...currentColors, 
+                            primary: e.target.value 
+                          });
+                        }}
                         className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
                       />
                     </div>

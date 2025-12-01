@@ -40,11 +40,15 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
   const getAnimationCSS = () => {
     if (profileAnimation === "none") return {};
     
-    const gradientStops = profileImageStyles.animationGradient?.stops || [
-      { color: brandColor, stop: 0 },
-      { color: accentColor, stop: 100 }
-    ];
-    const gradientColors = gradientStops.map((s: any) => s.color).join(', ');
+    // Use animationColors (start/end) if set, otherwise fall back to brand colors
+    const useBrandColors = profileImageStyles.useBrandColor !== false;
+    const startColor = useBrandColors 
+      ? brandColor 
+      : (profileImageStyles.animationColors?.start || brandColor);
+    const endColor = useBrandColors 
+      ? accentColor 
+      : (profileImageStyles.animationColors?.end || accentColor);
+    const gradientColors = `${startColor}, ${endColor}`;
 
     switch (profileAnimation) {
       case "instagram":
@@ -54,9 +58,9 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
           animation: "gradient-spin 3s ease infinite"
         };
       case "neon":
-        const glowColor = profileImageStyles.useBrandColor !== false 
+        const glowColor = useBrandColors 
           ? brandColor 
-          : profileImageStyles.animationColors?.primary || brandColor;
+          : profileImageStyles.animationColors?.primary || startColor;
         return {
           boxShadow: `0 0 10px ${glowColor}, 0 0 20px ${glowColor}, 0 0 30px ${glowColor}`,
           animation: "neon-pulse 2s ease-in-out infinite"
