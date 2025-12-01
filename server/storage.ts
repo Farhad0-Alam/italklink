@@ -1124,36 +1124,7 @@ export class DatabaseStorage implements IStorage {
   // Plans operations
   async getPlans(): Promise<SubscriptionPlan[]> {
     return await db
-      .select({
-        id: subscriptionPlans.id,
-        name: subscriptionPlans.name,
-        planType: subscriptionPlans.planType,
-        price: subscriptionPlans.price,
-        currency: subscriptionPlans.currency,
-        interval: subscriptionPlans.interval,
-        frequency: subscriptionPlans.frequency,
-        businessCardsLimit: subscriptionPlans.businessCardsLimit,
-        cardLabel: subscriptionPlans.cardLabel,
-        features: subscriptionPlans.features,
-        templateIds: subscriptionPlans.templateIds,
-        isActive: subscriptionPlans.isActive,
-        stripePriceId: subscriptionPlans.stripePriceId,
-        trialDays: subscriptionPlans.trialDays,
-        customDurationDays: subscriptionPlans.customDurationDays,
-        discount: subscriptionPlans.discount,
-        description: subscriptionPlans.description,
-        createdAt: subscriptionPlans.createdAt,
-        elementFeatures: subscriptionPlans.elementFeatures,
-        moduleFeatures: subscriptionPlans.moduleFeatures,
-        pricingFeatures: subscriptionPlans.pricingFeatures,
-        templateLimit: subscriptionPlans.templateLimit,
-        baseUsers: subscriptionPlans.baseUsers,
-        pricePerUser: subscriptionPlans.pricePerUser,
-        setupFee: subscriptionPlans.setupFee,
-        allowUserSelection: subscriptionPlans.allowUserSelection,
-        minUsers: subscriptionPlans.minUsers,
-        maxUsers: subscriptionPlans.maxUsers
-      })
+      .select()
       .from(subscriptionPlans)
       .where(eq(subscriptionPlans.isActive, true))
       .orderBy(subscriptionPlans.price);
@@ -1161,36 +1132,7 @@ export class DatabaseStorage implements IStorage {
 
   async getAllPlans(): Promise<SubscriptionPlan[]> {
     return await db
-      .select({
-        id: subscriptionPlans.id,
-        name: subscriptionPlans.name,
-        planType: subscriptionPlans.planType,
-        price: subscriptionPlans.price,
-        currency: subscriptionPlans.currency,
-        interval: subscriptionPlans.interval,
-        frequency: subscriptionPlans.frequency,
-        businessCardsLimit: subscriptionPlans.businessCardsLimit,
-        cardLabel: subscriptionPlans.cardLabel,
-        features: subscriptionPlans.features,
-        templateIds: subscriptionPlans.templateIds,
-        isActive: subscriptionPlans.isActive,
-        stripePriceId: subscriptionPlans.stripePriceId,
-        trialDays: subscriptionPlans.trialDays,
-        customDurationDays: subscriptionPlans.customDurationDays,
-        discount: subscriptionPlans.discount,
-        description: subscriptionPlans.description,
-        createdAt: subscriptionPlans.createdAt,
-        elementFeatures: subscriptionPlans.elementFeatures,
-        moduleFeatures: subscriptionPlans.moduleFeatures,
-        pricingFeatures: subscriptionPlans.pricingFeatures,
-        templateLimit: subscriptionPlans.templateLimit,
-        baseUsers: subscriptionPlans.baseUsers,
-        pricePerUser: subscriptionPlans.pricePerUser,
-        setupFee: subscriptionPlans.setupFee,
-        allowUserSelection: subscriptionPlans.allowUserSelection,
-        minUsers: subscriptionPlans.minUsers,
-        maxUsers: subscriptionPlans.maxUsers
-      })
+      .select()
       .from(subscriptionPlans)
       .orderBy(subscriptionPlans.price);
   }
