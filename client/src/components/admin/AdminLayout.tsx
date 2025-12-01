@@ -19,7 +19,12 @@ import {
   TrendingUp,
   Palette,
   Layers,
-  Percent
+  Percent,
+  ShoppingCart,
+  Package,
+  Star,
+  BarChart3,
+  Archive
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -78,6 +83,31 @@ const sidebarNavItems = [
     title: 'Affiliates',
     href: '/admin/affiliates',
     icon: UserPlus,
+  },
+  {
+    title: '━━━ SHOP MANAGEMENT ━━━',
+    href: '#',
+    icon: ShoppingCart,
+  },
+  {
+    title: 'Products',
+    href: '/admin/shop/products',
+    icon: Package,
+  },
+  {
+    title: 'Commissions',
+    href: '/admin/shop/commissions',
+    icon: Percent,
+  },
+  {
+    title: 'Reviews',
+    href: '/admin/shop/reviews',
+    icon: Star,
+  },
+  {
+    title: 'Inventory',
+    href: '/admin/shop/inventory',
+    icon: Archive,
   },
 ];
 
