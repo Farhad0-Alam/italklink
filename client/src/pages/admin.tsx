@@ -90,12 +90,6 @@ export default function Admin() {
         return <AffiliatePayoutsPage />;
       case '/admin/shop/moderation':
         return <ModerationQueuePage />;
-      case '/admin/shop/products':
-        return <AdminShopModeration />;
-      case '/admin/shop/commissions':
-        return <AdminCommission />;
-      case '/admin/shop/reviews':
-        return <AdminReviewModeration />;
       case '/admin/profile':
         return <AdminProfilePage />;
       case '/admin':

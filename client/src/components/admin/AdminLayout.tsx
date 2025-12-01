@@ -91,23 +91,18 @@ const sidebarNavItems = [
   },
   {
     title: 'Products',
-    href: '/admin/shop/products',
+    href: '/admin/shop',
     icon: Package,
   },
   {
     title: 'Commissions',
-    href: '/admin/shop/commissions',
+    href: '/admin/shop/commission',
     icon: Percent,
   },
   {
     title: 'Reviews',
-    href: '/admin/shop/reviews',
+    href: '/admin/reviews',
     icon: Star,
-  },
-  {
-    title: 'Inventory',
-    href: '/admin/shop/inventory',
-    icon: Archive,
   },
 ];
 
