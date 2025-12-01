@@ -9,7 +9,7 @@ import TemplatesPage from '@/components/admin/TemplatesPage';
 import TemplateImportPage from '@/components/admin/TemplateImportPage';
 import TemplateBuilder from '@/components/admin/TemplateBuilder';
 import HeaderBuilder from './HeaderBuilder';
-import IconPacksPage from '@/components/admin/IconPacksPage';
+import IconPacksPage from './IconPacksPage';
 import AffiliatesPage from '@/components/admin/AffiliatesPage';
 import AffiliateConversionsPage from '@/components/admin/AffiliateConversionsPage';
 import AdminProfilePage from '@/components/admin/AdminProfilePage';
