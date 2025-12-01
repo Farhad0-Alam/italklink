@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -663,6 +663,20 @@ export interface IStorage {
   deleteVariantOption(optionId: string): Promise<void>;
   addVariantAttribute(attributeData: any): Promise<ProductVariantAttribute>;
   getVariationAttributes(variationId: string): Promise<(ProductVariantAttribute & { option: ProductVariantOption })[]>;
+
+  // Commission settings operations
+  getCommissionSettings(): Promise<CommissionSettings | undefined>;
+  updateCommissionSettings(settingsData: Partial<any>): Promise<CommissionSettings>;
+  createCategoryCommissionRate(rateData: any): Promise<CategoryCommissionRate>;
+  getCategoryCommissionRate(categoryId: string): Promise<CategoryCommissionRate | undefined>;
+  getAllCategoryCommissionRates(): Promise<CategoryCommissionRate[]>;
+  updateCategoryCommissionRate(rateId: string, rateData: Partial<any>): Promise<CategoryCommissionRate>;
+  deleteCategoryCommissionRate(rateId: string): Promise<void>;
+  createPromotionalRate(rateData: any): Promise<PromotionalCommissionRate>;
+  getActivePromotionalRate(categoryId?: string): Promise<PromotionalCommissionRate | undefined>;
+  getAllPromotionalRates(): Promise<PromotionalCommissionRate[]>;
+  updatePromotionalRate(rateId: string, rateData: Partial<any>): Promise<PromotionalCommissionRate>;
+  deletePromotionalRate(rateId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -7423,6 +7437,107 @@ export class DatabaseStorage implements IStorage {
       .where(eq(productVariantAttributes.variationId, variationId));
 
     return attributes.map(a => ({ ...a.attribute, option: a.option }));
+  }
+
+  // ===== COMMISSION SETTINGS OPERATIONS =====
+
+  async getCommissionSettings(): Promise<CommissionSettings | undefined> {
+    const [settings] = await db.select().from(commissionSettings).where(eq(commissionSettings.isActive, true));
+    return settings;
+  }
+
+  async updateCommissionSettings(settingsData: Partial<any>): Promise<CommissionSettings> {
+    let [settings] = await db.select().from(commissionSettings);
+    
+    if (!settings) {
+      const [newSettings] = await db.insert(commissionSettings).values({
+        sellerPercentage: settingsData.sellerPercentage || 50,
+        affiliatePercentage: settingsData.affiliatePercentage || 30,
+        platformPercentage: settingsData.platformPercentage || 20,
+      }).returning();
+      return newSettings;
+    }
+
+    const [updated] = await db.update(commissionSettings)
+      .set({ ...settingsData, updatedAt: new Date() })
+      .where(eq(commissionSettings.id, settings.id))
+      .returning();
+    return updated;
+  }
+
+  async createCategoryCommissionRate(rateData: any): Promise<CategoryCommissionRate> {
+    const [rate] = await db.insert(categoryCommissionRates).values({
+      categoryId: rateData.categoryId,
+      sellerPercentage: rateData.sellerPercentage,
+      affiliatePercentage: rateData.affiliatePercentage,
+      platformPercentage: rateData.platformPercentage,
+    }).returning();
+    return rate;
+  }
+
+  async getCategoryCommissionRate(categoryId: string): Promise<CategoryCommissionRate | undefined> {
+    const [rate] = await db.select().from(categoryCommissionRates)
+      .where(and(eq(categoryCommissionRates.categoryId, categoryId), eq(categoryCommissionRates.isActive, true)));
+    return rate;
+  }
+
+  async getAllCategoryCommissionRates(): Promise<CategoryCommissionRate[]> {
+    return await db.select().from(categoryCommissionRates).where(eq(categoryCommissionRates.isActive, true));
+  }
+
+  async updateCategoryCommissionRate(rateId: string, rateData: Partial<any>): Promise<CategoryCommissionRate> {
+    const [rate] = await db.update(categoryCommissionRates)
+      .set({ ...rateData, updatedAt: new Date() })
+      .where(eq(categoryCommissionRates.id, rateId))
+      .returning();
+    return rate;
+  }
+
+  async deleteCategoryCommissionRate(rateId: string): Promise<void> {
+    await db.delete(categoryCommissionRates).where(eq(categoryCommissionRates.id, rateId));
+  }
+
+  async createPromotionalRate(rateData: any): Promise<PromotionalCommissionRate> {
+    const [rate] = await db.insert(promotionalCommissionRates).values({
+      name: rateData.name,
+      description: rateData.description,
+      sellerPercentage: rateData.sellerPercentage,
+      affiliatePercentage: rateData.affiliatePercentage,
+      platformPercentage: rateData.platformPercentage,
+      categoryId: rateData.categoryId,
+      startDate: rateData.startDate,
+      endDate: rateData.endDate,
+    }).returning();
+    return rate;
+  }
+
+  async getActivePromotionalRate(categoryId?: string): Promise<PromotionalCommissionRate | undefined> {
+    const now = new Date();
+    const query = db.select().from(promotionalCommissionRates)
+      .where(and(
+        eq(promotionalCommissionRates.isActive, true),
+        lte(promotionalCommissionRates.startDate, now),
+        gte(promotionalCommissionRates.endDate, now),
+        categoryId ? eq(promotionalCommissionRates.categoryId, categoryId) : undefined,
+      ));
+    const [rate] = await query;
+    return rate;
+  }
+
+  async getAllPromotionalRates(): Promise<PromotionalCommissionRate[]> {
+    return await db.select().from(promotionalCommissionRates).orderBy(desc(promotionalCommissionRates.startDate));
+  }
+
+  async updatePromotionalRate(rateId: string, rateData: Partial<any>): Promise<PromotionalCommissionRate> {
+    const [rate] = await db.update(promotionalCommissionRates)
+      .set({ ...rateData, updatedAt: new Date() })
+      .where(eq(promotionalCommissionRates.id, rateId))
+      .returning();
+    return rate;
+  }
+
+  async deletePromotionalRate(rateId: string): Promise<void> {
+    await db.delete(promotionalCommissionRates).where(eq(promotionalCommissionRates.id, rateId));
   }
 }
 

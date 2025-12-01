@@ -5671,3 +5671,76 @@ export const insertProductVariationSchema = createInsertSchema(productVariations
 });
 
 export type ProductVariationForm = z.infer<typeof insertProductVariationSchema>;
+
+// Commission Settings table (global defaults)
+export const commissionSettings = pgTable("commission_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Default commission rates (percentage 0-100)
+  sellerPercentage: integer("seller_percentage").default(50),
+  affiliatePercentage: integer("affiliate_percentage").default(30),
+  platformPercentage: integer("platform_percentage").default(20),
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Category Commission Rates table (per-category overrides)
+export const categoryCommissionRates = pgTable("category_commission_rates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoryId: varchar("category_id").references(() => productCategories.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Override commission rates for this category
+  sellerPercentage: integer("seller_percentage").notNull(),
+  affiliatePercentage: integer("affiliate_percentage").notNull(),
+  platformPercentage: integer("platform_percentage").notNull(),
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_cat_rate_category").on(table.categoryId),
+]);
+
+// Promotional Commission Rates table (time-based promotions)
+export const promotionalCommissionRates = pgTable("promotional_commission_rates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Promotion details
+  name: varchar("name").notNull(),
+  description: text("description"),
+  
+  // Commission override
+  sellerPercentage: integer("seller_percentage").notNull(),
+  affiliatePercentage: integer("affiliate_percentage").notNull(),
+  platformPercentage: integer("platform_percentage").notNull(),
+  
+  // Optional: category-specific (null = applies to all)
+  categoryId: varchar("category_id").references(() => productCategories.id, { onDelete: 'set null' }),
+  
+  // Time window
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_promo_active").on(table.isActive),
+  index("idx_promo_start").on(table.startDate),
+  index("idx_promo_end").on(table.endDate),
+]);
+
+export type CommissionSettings = typeof commissionSettings.$inferSelect;
+export type InsertCommissionSettings = typeof commissionSettings.$inferInsert;
+export type CategoryCommissionRate = typeof categoryCommissionRates.$inferSelect;
+export type InsertCategoryCommissionRate = typeof categoryCommissionRates.$inferInsert;
+export type PromotionalCommissionRate = typeof promotionalCommissionRates.$inferSelect;
+export type InsertPromotionalCommissionRate = typeof promotionalCommissionRates.$inferInsert;
