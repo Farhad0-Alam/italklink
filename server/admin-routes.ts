@@ -482,9 +482,10 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
       note
     });
     
-    // Update user's subscription info, plan type, and limits
+    // Update user's subscription info, plan type, limits, and planId
     await db.update(users)
       .set({ 
+        planId: Number(planId), // Critical: set planId for mandatory plan selection system
         planType: selectedPlan.planType,
         businessCardsLimit: selectedPlan.businessCardsLimit === -1 ? 999999 : selectedPlan.businessCardsLimit,
         subscriptionEndsAt: endsAt ? new Date(endsAt) : null,
