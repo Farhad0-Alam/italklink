@@ -3,10 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
-import { Download, ShoppingCart, AlertCircle, Package, Star, Heart, Share2, Shield, Truck, RotateCcw, MessageCircle } from "lucide-react";
+import { Download, ShoppingCart, AlertCircle, Package, Star, Heart, Share2, Shield, Truck, RotateCcw, MessageCircle, Twitter, Facebook, Linkedin } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import type { DigitalProduct } from "@shared/schema";
+import { getTwitterShareUrl, getFacebookShareUrl, getLinkedInShareUrl, trackShare } from "@/lib/sharing";
 
 export default function ProductDetails() {
   const { slug } = useParams<{ slug: string }>();

@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate, productSocialShares, type ProductSocialShare, type InsertProductSocialShare
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -677,6 +677,11 @@ export interface IStorage {
   getAllPromotionalRates(): Promise<PromotionalCommissionRate[]>;
   updatePromotionalRate(rateId: string, rateData: Partial<any>): Promise<PromotionalCommissionRate>;
   deletePromotionalRate(rateId: string): Promise<void>;
+
+  // Product social share operations
+  createSocialShare(shareData: any): Promise<ProductSocialShare>;
+  getProductShareCount(productId: string, platform?: string): Promise<number>;
+  getProductShareStats(productId: string): Promise<{ platform: string; count: number }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -7538,6 +7543,41 @@ export class DatabaseStorage implements IStorage {
 
   async deletePromotionalRate(rateId: string): Promise<void> {
     await db.delete(promotionalCommissionRates).where(eq(promotionalCommissionRates.id, rateId));
+  }
+
+  // ===== PRODUCT SOCIAL SHARE OPERATIONS =====
+
+  async createSocialShare(shareData: any): Promise<ProductSocialShare> {
+    const [share] = await db.insert(productSocialShares).values({
+      productId: shareData.productId,
+      platform: shareData.platform,
+      sharedBy: shareData.sharedBy,
+      shareLink: shareData.shareLink,
+      ipAddress: shareData.ipAddress,
+    }).returning();
+    return share;
+  }
+
+  async getProductShareCount(productId: string, platform?: string): Promise<number> {
+    const query = db.select({ count: sql<number>`COUNT(*)` })
+      .from(productSocialShares)
+      .where(and(
+        eq(productSocialShares.productId, productId),
+        platform ? eq(productSocialShares.platform, platform) : undefined,
+      ));
+    const result = await query;
+    return result[0]?.count || 0;
+  }
+
+  async getProductShareStats(productId: string): Promise<{ platform: string; count: number }[]> {
+    const stats = await db.select({
+      platform: productSocialShares.platform,
+      count: sql<number>`COUNT(*)`.as('count'),
+    }).from(productSocialShares)
+      .where(eq(productSocialShares.productId, productId))
+      .groupBy(productSocialShares.platform);
+    
+    return stats;
   }
 }
 

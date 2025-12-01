@@ -5744,3 +5744,25 @@ export type CategoryCommissionRate = typeof categoryCommissionRates.$inferSelect
 export type InsertCategoryCommissionRate = typeof categoryCommissionRates.$inferInsert;
 export type PromotionalCommissionRate = typeof promotionalCommissionRates.$inferSelect;
 export type InsertPromotionalCommissionRate = typeof promotionalCommissionRates.$inferInsert;
+
+// Product Social Shares table (track shares for analytics)
+export const productSocialShares = pgTable("product_social_shares", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Share source
+  platform: varchar("platform").notNull(), // twitter, facebook, linkedin
+  sharedBy: varchar("shared_by"), // User ID if logged in
+  
+  // Metadata
+  shareLink: varchar("share_link").notNull(),
+  ipAddress: varchar("ip_address"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_share_product").on(table.productId),
+  index("idx_share_platform").on(table.platform),
+]);
+
+export type ProductSocialShare = typeof productSocialShares.$inferSelect;
+export type InsertProductSocialShare = typeof productSocialShares.$inferInsert;

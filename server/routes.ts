@@ -104,6 +104,7 @@ import tagRoutes from './tag-routes';
 import payoutRoutes from './payout-routes';
 import variationRoutes from './variation-routes';
 import commissionRoutes from './commission-routes';
+import shareRoutes from './share-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 import ragRoutes from './rag-routes';
 import voiceRoutes from './voice-routes';
@@ -213,6 +214,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup commission routes
   app.use('/api/commissions', commissionRoutes);
+
+  // Setup share tracking routes
+  app.use('/api/shares', shareRoutes);
   
   // Setup billing routes
   app.use('/api/billing', billingRoutes);
