@@ -35,15 +35,7 @@ export function LockedFeature({
       {/* Lock overlay - contained within parent bounds */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-purple-500/10 backdrop-blur-[2px] rounded-lg flex items-center justify-center overflow-hidden">
         <div className="text-center">
-          <div className="relative inline-block">
-            {/* Animated lock icon */}
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-purple-500 rounded-full opacity-20 animate-pulse blur-xl" />
-            <div className="relative bg-white dark:bg-slate-900 rounded-full p-3 shadow-lg transform transition-transform group-hover:scale-110">
-              <Lock className="h-6 w-6 text-orange-500" />
-            </div>
-          </div>
-
-          <h3 className="mt-4 font-bold text-gray-900 dark:text-white text-sm">
+          <h3 className="font-bold text-gray-900 dark:text-white text-sm">
             {featureName}
           </h3>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 mb-3">
