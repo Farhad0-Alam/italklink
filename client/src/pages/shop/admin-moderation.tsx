@@ -8,9 +8,11 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { DigitalProduct } from "@shared/schema";
 
 export default function AdminShopModeration() {
-  const { data: products, isLoading, error } = useQuery<DigitalProduct[]>({
+  const { data: response, isLoading, error } = useQuery<{ success: boolean; data: DigitalProduct[] }>({
     queryKey: ["/api/shop/admin/products"],
   });
+
+  const products = response?.data;
 
   const approveMutation = useMutation({
     mutationFn: async (productId: string) =>
