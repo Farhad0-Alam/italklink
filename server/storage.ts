@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -638,6 +638,19 @@ export interface IStorage {
   getTagsForProduct(productId: string): Promise<ProductTag[]>;
   addTagToProduct(productId: string, tagId: string): Promise<void>;
   removeTagFromProduct(productId: string, tagId: string): Promise<void>;
+
+  // Payout operations
+  createPayoutMethod(methodData: any): Promise<SellerPayoutMethod>;
+  getPayoutMethodById(methodId: string): Promise<SellerPayoutMethod | undefined>;
+  getSellerPayoutMethods(sellerId: string): Promise<SellerPayoutMethod[]>;
+  getSellerPrimaryPayoutMethod(sellerId: string): Promise<SellerPayoutMethod | undefined>;
+  updatePayoutMethod(methodId: string, methodData: Partial<any>): Promise<SellerPayoutMethod>;
+  deletePayoutMethod(methodId: string): Promise<void>;
+  createPayout(payoutData: any): Promise<SellerPayout>;
+  getPayoutById(payoutId: string): Promise<SellerPayout | undefined>;
+  getSellerPayouts(sellerId: string): Promise<SellerPayout[]>;
+  updatePayoutStatus(payoutId: string, status: string, stripeTransferId?: string, failureReason?: string): Promise<SellerPayout>;
+  calculateSellerEarnings(sellerId: string, startDate?: Date, endDate?: Date): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -7232,6 +7245,96 @@ export class DatabaseStorage implements IStorage {
   async removeTagFromProduct(productId: string, tagId: string): Promise<void> {
     await db.delete(productTagsToProducts)
       .where(and(eq(productTagsToProducts.productId, productId), eq(productTagsToProducts.tagId, tagId)));
+  }
+
+  // ===== PAYOUT OPERATIONS =====
+
+  async createPayoutMethod(methodData: any): Promise<SellerPayoutMethod> {
+    const [method] = await db.insert(sellerPayoutMethods).values({
+      sellerId: methodData.sellerId,
+      stripeConnectAccountId: methodData.stripeConnectAccountId,
+      payoutMethod: methodData.payoutMethod,
+      accountHolderName: methodData.accountHolderName,
+      bankCountry: methodData.bankCountry,
+      bankCurrency: methodData.bankCurrency,
+    }).returning();
+    return method;
+  }
+
+  async getPayoutMethodById(methodId: string): Promise<SellerPayoutMethod | undefined> {
+    const [method] = await db.select().from(sellerPayoutMethods).where(eq(sellerPayoutMethods.id, methodId));
+    return method;
+  }
+
+  async getSellerPayoutMethods(sellerId: string): Promise<SellerPayoutMethod[]> {
+    return await db.select().from(sellerPayoutMethods)
+      .where(eq(sellerPayoutMethods.sellerId, sellerId))
+      .orderBy(desc(sellerPayoutMethods.createdAt));
+  }
+
+  async getSellerPrimaryPayoutMethod(sellerId: string): Promise<SellerPayoutMethod | undefined> {
+    const methods = await db.select().from(sellerPayoutMethods)
+      .where(and(eq(sellerPayoutMethods.sellerId, sellerId), eq(sellerPayoutMethods.isVerified, true)))
+      .orderBy(desc(sellerPayoutMethods.createdAt));
+    return methods[0];
+  }
+
+  async updatePayoutMethod(methodId: string, methodData: Partial<any>): Promise<SellerPayoutMethod> {
+    const [method] = await db.update(sellerPayoutMethods)
+      .set({ ...methodData, updatedAt: new Date() })
+      .where(eq(sellerPayoutMethods.id, methodId))
+      .returning();
+    return method;
+  }
+
+  async deletePayoutMethod(methodId: string): Promise<void> {
+    await db.delete(sellerPayoutMethods).where(eq(sellerPayoutMethods.id, methodId));
+  }
+
+  async createPayout(payoutData: any): Promise<SellerPayout> {
+    const [payout] = await db.insert(sellerPayouts).values({
+      sellerId: payoutData.sellerId,
+      payoutMethodId: payoutData.payoutMethodId,
+      amount: payoutData.amount,
+      currency: payoutData.currency,
+      status: 'pending',
+      periodStartDate: payoutData.periodStartDate,
+      periodEndDate: payoutData.periodEndDate,
+    }).returning();
+    return payout;
+  }
+
+  async getPayoutById(payoutId: string): Promise<SellerPayout | undefined> {
+    const [payout] = await db.select().from(sellerPayouts).where(eq(sellerPayouts.id, payoutId));
+    return payout;
+  }
+
+  async getSellerPayouts(sellerId: string): Promise<SellerPayout[]> {
+    return await db.select().from(sellerPayouts)
+      .where(eq(sellerPayouts.sellerId, sellerId))
+      .orderBy(desc(sellerPayouts.createdAt));
+  }
+
+  async updatePayoutStatus(payoutId: string, status: string, stripeTransferId?: string, failureReason?: string): Promise<SellerPayout> {
+    const [payout] = await db.update(sellerPayouts)
+      .set({ status, stripeTransferId, failureReason, updatedAt: new Date() })
+      .where(eq(sellerPayouts.id, payoutId))
+      .returning();
+    return payout;
+  }
+
+  async calculateSellerEarnings(sellerId: string, startDate?: Date, endDate?: Date): Promise<number> {
+    const query = db.select({ totalAmount: sql<number>`SUM(${shopAffiliateCommissions.sellerAmount})` })
+      .from(shopAffiliateCommissions)
+      .where(and(
+        eq(shopAffiliateCommissions.sellerId, sellerId),
+        eq(shopAffiliateCommissions.status, 'completed'),
+        startDate ? gte(shopAffiliateCommissions.createdAt, startDate) : undefined,
+        endDate ? lte(shopAffiliateCommissions.createdAt, endDate) : undefined,
+      ));
+
+    const result = await query;
+    return result[0]?.totalAmount || 0;
   }
 }
 

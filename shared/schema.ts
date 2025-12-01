@@ -5528,3 +5528,71 @@ export const insertProductCategorySchema = createInsertSchema(productCategories)
 });
 
 export type ProductCategoryForm = z.infer<typeof insertProductCategorySchema>;
+
+// Seller Payout Methods table (for Stripe Connect)
+export const sellerPayoutMethods = pgTable("seller_payout_methods", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Stripe Connect details
+  stripeConnectAccountId: varchar("stripe_connect_account_id").unique().notNull(),
+  stripeConnectStatus: varchar("stripe_connect_status").default('pending').notNull(), // pending, active, restricted
+  
+  // Payout method details
+  payoutMethod: varchar("payout_method").notNull(), // 'bank_transfer', 'debit_card'
+  accountHolderName: varchar("account_holder_name"),
+  bankCountry: varchar("bank_country"),
+  bankCurrency: varchar("bank_currency").default('usd'),
+  
+  // Status
+  isVerified: boolean("is_verified").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_payout_seller").on(table.sellerId),
+  index("idx_payout_status").on(table.stripeConnectStatus),
+]);
+
+// Seller Payouts table
+export const sellerPayouts = pgTable("seller_payouts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  payoutMethodId: varchar("payout_method_id").references(() => sellerPayoutMethods.id, { onDelete: 'set null' }),
+  
+  // Payout details
+  amount: integer("amount").notNull(), // Amount in cents
+  currency: varchar("currency").default('usd'),
+  
+  // Stripe transfer details
+  stripeTransferId: varchar("stripe_transfer_id").unique(),
+  
+  // Status
+  status: varchar("status").default('pending').notNull(), // pending, in_transit, paid, failed
+  failureReason: text("failure_reason"),
+  
+  // Metadata
+  periodStartDate: timestamp("period_start_date"),
+  periodEndDate: timestamp("period_end_date"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_payout_seller").on(table.sellerId),
+  index("idx_payout_status").on(table.status),
+  index("idx_payout_created").on(table.createdAt),
+]);
+
+export type SellerPayoutMethod = typeof sellerPayoutMethods.$inferSelect;
+export type InsertSellerPayoutMethod = typeof sellerPayoutMethods.$inferInsert;
+export type SellerPayout = typeof sellerPayouts.$inferSelect;
+export type InsertSellerPayout = typeof sellerPayouts.$inferInsert;
+
+export const insertSellerPayoutMethodSchema = createInsertSchema(sellerPayoutMethods).omit({
+  id: true,
+  sellerId: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type SellerPayoutMethodForm = z.infer<typeof insertSellerPayoutMethodSchema>;
