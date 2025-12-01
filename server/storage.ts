@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -651,6 +651,18 @@ export interface IStorage {
   getSellerPayouts(sellerId: string): Promise<SellerPayout[]>;
   updatePayoutStatus(payoutId: string, status: string, stripeTransferId?: string, failureReason?: string): Promise<SellerPayout>;
   calculateSellerEarnings(sellerId: string, startDate?: Date, endDate?: Date): Promise<number>;
+
+  // Product variation operations
+  createVariation(variationData: any): Promise<ProductVariation>;
+  getProductVariations(productId: string): Promise<ProductVariation[]>;
+  getVariationById(variationId: string): Promise<ProductVariation | undefined>;
+  updateVariation(variationId: string, variationData: Partial<any>): Promise<ProductVariation>;
+  deleteVariation(variationId: string): Promise<void>;
+  createVariantOption(optionData: any): Promise<ProductVariantOption>;
+  getProductVariantOptions(productId: string): Promise<ProductVariantOption[]>;
+  deleteVariantOption(optionId: string): Promise<void>;
+  addVariantAttribute(attributeData: any): Promise<ProductVariantAttribute>;
+  getVariationAttributes(variationId: string): Promise<(ProductVariantAttribute & { option: ProductVariantOption })[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -7335,6 +7347,82 @@ export class DatabaseStorage implements IStorage {
 
     const result = await query;
     return result[0]?.totalAmount || 0;
+  }
+
+  // ===== PRODUCT VARIATION OPERATIONS =====
+
+  async createVariation(variationData: any): Promise<ProductVariation> {
+    const [variation] = await db.insert(productVariations).values({
+      productId: variationData.productId,
+      sku: variationData.sku,
+      title: variationData.title,
+      price: variationData.price,
+      discountPrice: variationData.discountPrice,
+      stock: variationData.stock,
+    }).returning();
+    return variation;
+  }
+
+  async getProductVariations(productId: string): Promise<ProductVariation[]> {
+    return await db.select().from(productVariations)
+      .where(eq(productVariations.productId, productId))
+      .orderBy(productVariations.createdAt);
+  }
+
+  async getVariationById(variationId: string): Promise<ProductVariation | undefined> {
+    const [variation] = await db.select().from(productVariations).where(eq(productVariations.id, variationId));
+    return variation;
+  }
+
+  async updateVariation(variationId: string, variationData: Partial<any>): Promise<ProductVariation> {
+    const [variation] = await db.update(productVariations)
+      .set({ ...variationData, updatedAt: new Date() })
+      .where(eq(productVariations.id, variationId))
+      .returning();
+    return variation;
+  }
+
+  async deleteVariation(variationId: string): Promise<void> {
+    await db.delete(productVariations).where(eq(productVariations.id, variationId));
+  }
+
+  async createVariantOption(optionData: any): Promise<ProductVariantOption> {
+    const [option] = await db.insert(productVariantOptions).values({
+      productId: optionData.productId,
+      name: optionData.name,
+      type: optionData.type,
+      values: optionData.values,
+    }).returning();
+    return option;
+  }
+
+  async getProductVariantOptions(productId: string): Promise<ProductVariantOption[]> {
+    return await db.select().from(productVariantOptions)
+      .where(eq(productVariantOptions.productId, productId));
+  }
+
+  async deleteVariantOption(optionId: string): Promise<void> {
+    await db.delete(productVariantOptions).where(eq(productVariantOptions.id, optionId));
+  }
+
+  async addVariantAttribute(attributeData: any): Promise<ProductVariantAttribute> {
+    const [attribute] = await db.insert(productVariantAttributes).values({
+      variationId: attributeData.variationId,
+      optionId: attributeData.optionId,
+      value: attributeData.value,
+    }).returning();
+    return attribute;
+  }
+
+  async getVariationAttributes(variationId: string): Promise<(ProductVariantAttribute & { option: ProductVariantOption })[]> {
+    const attributes = await db.select({
+      attribute: productVariantAttributes,
+      option: productVariantOptions,
+    }).from(productVariantAttributes)
+      .innerJoin(productVariantOptions, eq(productVariantAttributes.optionId, productVariantOptions.id))
+      .where(eq(productVariantAttributes.variationId, variationId));
+
+    return attributes.map(a => ({ ...a.attribute, option: a.option }));
   }
 }
 

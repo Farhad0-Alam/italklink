@@ -82,6 +82,7 @@ const BundleDetails = lazy(() => import("./pages/shop/bundle-details").then(m =>
 const CategoriesBrowse = lazy(() => import("./pages/shop/categories-browse").then(m => ({ default: m.CategoriesBrowse })));
 const CategoryProducts = lazy(() => import("./pages/shop/category-products").then(m => ({ default: m.CategoryProducts })));
 const SellerPayouts = lazy(() => import("./pages/shop/seller-payouts").then(m => ({ default: m.SellerPayouts })));
+const ProductVariations = lazy(() => import("./pages/shop/product-variations").then(m => ({ default: m.ProductVariations })));
 
 // Lazy load CardRoutes to prevent loading multi-page module eagerly
 const LazyCardRoutes = lazy(() => import("@/modules/multi-page").then(module => ({ default: module.CardRoutes })));
@@ -168,6 +169,7 @@ function Router() {
       <Route path="/shop/seller/orders">{() => <PageSuspense><SellerOrders /></PageSuspense>}</Route>
       <Route path="/shop/seller/analytics">{() => <PageSuspense><SellerAnalytics /></PageSuspense>}</Route>
       <Route path="/shop/seller/payouts">{() => <PageSuspense><SellerPayouts /></PageSuspense>}</Route>
+      <Route path="/product/:productId/variations">{() => <PageSuspense><ProductVariations /></PageSuspense>}</Route>
       <Route path="/shop/purchases">{() => <PageSuspense><BuyerPurchases /></PageSuspense>}</Route>
       <Route path="/user/purchases">{() => <PageSuspense><UserPurchases /></PageSuspense>}</Route>
       <Route path="/user/downloads">{() => <PageSuspense><UserDownloads /></PageSuspense>}</Route>

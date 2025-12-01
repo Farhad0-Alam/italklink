@@ -5596,3 +5596,78 @@ export const insertSellerPayoutMethodSchema = createInsertSchema(sellerPayoutMet
 });
 
 export type SellerPayoutMethodForm = z.infer<typeof insertSellerPayoutMethodSchema>;
+
+// Product Variations table
+export const productVariations = pgTable("product_variations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Variant info
+  sku: varchar("sku").unique(),
+  title: varchar("title").notNull(), // e.g., "Red Size M"
+  
+  // Pricing
+  price: integer("price").notNull(), // Can override base product price
+  discountPrice: integer("discount_price"),
+  
+  // Inventory
+  stock: integer("stock").default(0),
+  
+  // Status
+  status: productStatusEnum("status").default('active'),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_variation_product").on(table.productId),
+  index("idx_variation_sku").on(table.sku),
+]);
+
+// Product Variant Options Definition table
+export const productVariantOptions = pgTable("product_variant_options", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Option type
+  name: varchar("name").notNull(), // e.g., "Size", "Color"
+  type: varchar("type").notNull(), // e.g., "dropdown", "swatch"
+  
+  // Allowed values (stored as JSON array)
+  values: varchar("values").array(), // e.g., ["S", "M", "L", "XL"]
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_option_product").on(table.productId),
+]);
+
+// Product Variant Attributes table (maps variations to specific option values)
+export const productVariantAttributes = pgTable("product_variant_attributes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  variationId: varchar("variation_id").references(() => productVariations.id, { onDelete: 'cascade' }).notNull(),
+  optionId: varchar("option_id").references(() => productVariantOptions.id, { onDelete: 'cascade' }).notNull(),
+  
+  // The selected value for this option
+  value: varchar("value").notNull(),
+}, (table) => [
+  index("idx_attr_variation").on(table.variationId),
+  index("idx_attr_option").on(table.optionId),
+]);
+
+export type ProductVariation = typeof productVariations.$inferSelect;
+export type InsertProductVariation = typeof productVariations.$inferInsert;
+export type ProductVariantOption = typeof productVariantOptions.$inferSelect;
+export type InsertProductVariantOption = typeof productVariantOptions.$inferInsert;
+export type ProductVariantAttribute = typeof productVariantAttributes.$inferSelect;
+export type InsertProductVariantAttribute = typeof productVariantAttributes.$inferInsert;
+
+export const insertProductVariationSchema = createInsertSchema(productVariations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  title: z.string().min(1).max(200),
+  price: z.number().min(0),
+  stock: z.number().min(0),
+});
+
+export type ProductVariationForm = z.infer<typeof insertProductVariationSchema>;
