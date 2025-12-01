@@ -107,6 +107,7 @@ import commissionRoutes from './commission-routes';
 import shareRoutes from './share-routes';
 import abandonedCartRoutes from './abandoned-cart-routes';
 import sellerSubscriptionRoutes from './seller-subscription-routes';
+import reviewModerationRoutes from './review-moderation-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 import ragRoutes from './rag-routes';
 import voiceRoutes from './voice-routes';
@@ -225,6 +226,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup seller subscription routes
   app.use('/api/seller-subscriptions', sellerSubscriptionRoutes);
+
+  // Setup review moderation routes
+  app.use('/api/review-moderation', reviewModerationRoutes);
   
   // Setup billing routes
   app.use('/api/billing', billingRoutes);

@@ -699,6 +699,13 @@ export interface IStorage {
   createSellerSubscription(subData: any): Promise<SellerSubscription>;
   updateSellerSubscription(subscriptionId: string, subData: Partial<any>): Promise<SellerSubscription>;
   cancelSellerSubscription(subscriptionId: string): Promise<SellerSubscription>;
+
+  // Review moderation operations
+  getPendingReviews(): Promise<ShopReview[]>;
+  approveReview(reviewId: string, adminId: string): Promise<ShopReview>;
+  rejectReview(reviewId: string, adminId: string, reason: string): Promise<ShopReview>;
+  flagReview(reviewId: string, reason: string): Promise<ShopReview>;
+  getAllReviewsForProduct(productId: string): Promise<ShopReview[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -7725,6 +7732,59 @@ export class DatabaseStorage implements IStorage {
       .where(eq(sellerSubscriptions.id, subscriptionId))
       .returning();
     return sub;
+  }
+
+  // ===== REVIEW MODERATION OPERATIONS =====
+
+  async getPendingReviews(): Promise<ShopReview[]> {
+    return await db.select().from(shopReviews)
+      .where(eq(shopReviews.status, 'pending'))
+      .orderBy(desc(shopReviews.createdAt));
+  }
+
+  async approveReview(reviewId: string, adminId: string): Promise<ShopReview> {
+    const [review] = await db.update(shopReviews)
+      .set({ 
+        status: 'approved',
+        moderatedAt: new Date(),
+        moderatedBy: adminId,
+        updatedAt: new Date() 
+      })
+      .where(eq(shopReviews.id, reviewId))
+      .returning();
+    return review;
+  }
+
+  async rejectReview(reviewId: string, adminId: string, reason: string): Promise<ShopReview> {
+    const [review] = await db.update(shopReviews)
+      .set({ 
+        status: 'rejected',
+        rejectionReason: reason,
+        moderatedAt: new Date(),
+        moderatedBy: adminId,
+        updatedAt: new Date() 
+      })
+      .where(eq(shopReviews.id, reviewId))
+      .returning();
+    return review;
+  }
+
+  async flagReview(reviewId: string, reason: string): Promise<ShopReview> {
+    const [review] = await db.update(shopReviews)
+      .set({ 
+        flagReason: reason,
+        flaggedAt: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(shopReviews.id, reviewId))
+      .returning();
+    return review;
+  }
+
+  async getAllReviewsForProduct(productId: string): Promise<ShopReview[]> {
+    return await db.select().from(shopReviews)
+      .where(eq(shopReviews.productId, productId))
+      .orderBy(desc(shopReviews.createdAt));
   }
 }
 

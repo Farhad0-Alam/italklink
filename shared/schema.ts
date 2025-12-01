@@ -5244,7 +5244,14 @@ export const shopReviews = pgTable("shop_reviews", {
   
   // Metadata
   helpfulCount: integer("helpful_count").default(0),
-  status: reviewStatusEnum("status").default('approved'),
+  status: reviewStatusEnum("status").default('pending'),
+  
+  // Moderation fields
+  flagReason: text("flag_reason"), // Spam, inappropriate, fake review, etc.
+  flaggedAt: timestamp("flagged_at"),
+  moderatedAt: timestamp("moderated_at"),
+  moderatedBy: varchar("moderated_by").references(() => users.id, { onDelete: 'set null' }),
+  rejectionReason: text("rejection_reason"),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
