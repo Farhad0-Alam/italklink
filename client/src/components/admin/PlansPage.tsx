@@ -164,18 +164,22 @@ const AVAILABLE_FEATURES = [
   // Page Elements - Basic
   { key: 'heading', label: 'Heading', category: 'Page Elements' },
   { key: 'paragraph', label: 'Paragraph', category: 'Page Elements' },
-  { key: 'link', label: 'Link', category: 'Page Elements' },
+  { key: 'link', label: '3D Button', category: 'Page Elements' },
   { key: 'image', label: 'Image', category: 'Page Elements' },
   { key: 'video', label: 'Video', category: 'Page Elements' },
   { key: 'html', label: 'Custom HTML', category: 'Page Elements' },
+  { key: 'qrcode', label: 'QR Code', category: 'Page Elements' },
+  { key: 'profile', label: 'Profile Section', category: 'Page Elements' },
+  { key: 'installButton', label: 'Install Button', category: 'Page Elements' },
   
   // Contact & Social
-  { key: 'contactSection', label: 'Contact Section', category: 'Contact' },
-  { key: 'socialLinks', label: 'Social Links', category: 'Contact' },
+  { key: 'contactSection', label: 'Contact Info', category: 'Contact' },
+  { key: 'socialSection', label: 'Social Media', category: 'Contact' },
+  { key: 'actionButtons', label: 'Save & Share Button', category: 'Contact' },
   
   // Forms
   { key: 'contactForm', label: 'Contact Form', category: 'Forms' },
-  { key: 'subscribeForm', label: 'Subscribe Form', category: 'Forms' },
+  { key: 'subscribeForm', label: 'Subscribe to Updates', category: 'Forms' },
   
   // Interactive Elements
   { key: 'accordion', label: 'Accordion', category: 'Interactive' },
@@ -188,15 +192,13 @@ const AVAILABLE_FEATURES = [
   { key: 'googleMaps', label: 'Google Maps', category: 'Advanced' },
   { key: 'digitalWallet', label: 'Digital Wallet (Apple/Google)', category: 'Advanced' },
   { key: 'arPreview', label: 'AR Preview', category: 'Advanced' },
-  { key: 'qrcode', label: 'QR Code Generator', category: 'Advanced' },
-  
-  // Content Management
-  { key: 'documentManager', label: 'Document Manager', category: 'Content' },
-  { key: 'urlManager', label: 'URL Manager', category: 'Content' },
+  { key: 'shop', label: 'Digital Shop', category: 'Advanced' },
   
   // AI Features
   { key: 'aiChatbot', label: 'AI Chatbot', category: 'AI Features' },
   { key: 'ragKnowledge', label: 'RAG Knowledge Base', category: 'AI Features' },
+  { key: 'voiceAgent', label: 'AI Voice Agent', category: 'AI Features' },
+  { key: 'voiceAssistant', label: 'Voice Chat Assistant', category: 'AI Features' },
   
   // Appointment & Booking
   { key: 'bookAppointment', label: 'Book Appointment', category: 'Appointments' },
@@ -221,7 +223,8 @@ const FEATURE_TO_ELEMENT_ID: Record<string, number> = {
   'heading': 1,
   'paragraph': 2,
   'contactSection': 3,
-  'socialLinks': 4,
+  'socialSection': 4,
+  'actionButtons': 5,
   'link': 6,
   'image': 7,
   'qrcode': 8,
@@ -233,12 +236,21 @@ const FEATURE_TO_ELEMENT_ID: Record<string, number> = {
   'googleMaps': 14,
   'aiChatbot': 15,
   'ragKnowledge': 16,
+  'voiceAgent': 17,
+  'voiceAssistant': 18,
   'digitalWallet': 19,
   'navigationMenu': 20,
   'arPreview': 21,
   'pdfViewer': 22,
   'html': 23,
   'subscribeForm': 24,
+  'installButton': 25,
+  'profile': 26,
+  'bookAppointment': 27,
+  'scheduleCall': 28,
+  'meetingRequest': 29,
+  'availabilityDisplay': 30,
+  'shop': 31,
 };
 
 const FEATURE_TO_MODULE: Record<string, string> = {
