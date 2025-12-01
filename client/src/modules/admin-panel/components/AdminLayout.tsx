@@ -16,7 +16,11 @@ import {
   Layout,
   Ticket,
   UserPlus,
-  TrendingUp
+  TrendingUp,
+  ShoppingCart,
+  Package,
+  Percent,
+  Star
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -81,11 +85,34 @@ const sidebarNavItems = [
     href: '/admin/icon-packs',
     icon: Image,
   },
+  {
+    title: 'Shop Management',
+    href: '/admin/shop',
+    icon: ShoppingCart,
+    submenu: [
+      {
+        title: 'Products',
+        href: '/admin/shop',
+        icon: Package,
+      },
+      {
+        title: 'Commissions',
+        href: '/admin/shop/commission',
+        icon: Percent,
+      },
+      {
+        title: 'Reviews',
+        href: '/admin/reviews',
+        icon: Star,
+      },
+    ],
+  },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<string | null>('Shop Management');
 
   const handleLogout = async () => {
     try {
@@ -104,6 +131,32 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {sidebarNavItems.map((item) => {
         const Icon = item.icon;
         const isActive = location === item.href;
+        const hasSubmenu = (item as any).submenu?.length > 0;
+        
+        if (hasSubmenu) {
+          return (
+            <div key={item.href} className="flex items-center gap-0.5 px-2 py-1 rounded-lg bg-gradient-to-r from-orange-50/30 to-orange-50/10 dark:from-orange-950/20 dark:to-orange-950/10 border border-orange-200/40 dark:border-orange-800/40">
+              {(item as any).submenu.map((subitem: any) => {
+                const SubIcon = subitem.icon;
+                const isSubActive = location === subitem.href;
+                return (
+                  <Link 
+                    key={subitem.href} 
+                    href={subitem.href}
+                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
+                      isSubActive
+                        ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-700/30'
+                    }`}
+                  >
+                    <SubIcon className={`w-3.5 h-3.5 mr-2 ${isSubActive ? 'text-white' : ''}`} />
+                    {subitem.title}
+                  </Link>
+                );
+              })}
+            </div>
+          );
+        }
         
         return (
           <Link key={item.href} href={item.href} className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
@@ -196,6 +249,47 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       {sidebarNavItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = location === item.href;
+                        const hasSubmenu = (item as any).submenu?.length > 0;
+                        const isExpanded = expandedSection === item.title;
+                        
+                        if (hasSubmenu) {
+                          return (
+                            <li key={item.href}>
+                              <button
+                                onClick={() => setExpandedSection(isExpanded ? null : item.title)}
+                                className={`w-full flex items-center justify-between p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ${
+                                  isExpanded ? 'bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800' : ''
+                                }`}
+                              >
+                                <div className="flex items-center">
+                                  <Icon className={`w-5 h-5 transition duration-75 ${
+                                    isExpanded ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-gray-400'
+                                  }`} />
+                                  <span className={`ms-3 ${isExpanded ? 'font-semibold text-orange-900 dark:text-orange-100' : ''}`}>{item.title}</span>
+                                </div>
+                                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-orange-600 dark:text-orange-400' : 'text-gray-500'}`} />
+                              </button>
+                              {isExpanded && (
+                                <ul className="space-y-1 pl-4 mt-1">
+                                  {(item as any).submenu.map((subitem: any) => {
+                                    const SubIcon = subitem.icon;
+                                    const isSubActive = location === subitem.href;
+                                    return (
+                                      <li key={subitem.href}>
+                                        <Link href={subitem.href} className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ${
+                                          isSubActive ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white' : ''
+                                        }`}>
+                                          <SubIcon className={`w-4 h-4 ${isSubActive ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`} />
+                                          <span className={`ms-3 ${isSubActive ? 'text-white' : ''}`}>{subitem.title}</span>
+                                        </Link>
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              )}
+                            </li>
+                          );
+                        }
                         
                         return (
                           <li key={item.href}>
