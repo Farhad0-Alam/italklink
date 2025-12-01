@@ -1350,9 +1350,6 @@ export type InsertBulkGenerationJob = typeof bulkGenerationJobs.$inferInsert;
 export type AdminLog = typeof adminLogs.$inferSelect;
 export type InsertAdminLog = typeof adminLogs.$inferInsert;
 
-export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
-export type InsertAnalyticsEvent = typeof analyticsEvents.$inferInsert;
-
 export type Bio = typeof bios.$inferSelect;
 export type InsertBio = typeof bios.$inferInsert;
 
@@ -1427,7 +1424,6 @@ export const insertTeamSchema = createInsertSchema(teams);
 export const insertTeamMemberSchema = createInsertSchema(teamMembers);
 export const insertBulkGenerationJobSchema = createInsertSchema(bulkGenerationJobs);
 export const insertAdminLogSchema = createInsertSchema(adminLogs);
-export const insertAnalyticsEventSchema = createInsertSchema(analyticsEvents);
 export const insertBioSchema = createInsertSchema(bios);
 export const insertConnectionSchema = createInsertSchema(connections);
 export const insertSubscriptionSchema = createInsertSchema(subscriptions);
