@@ -998,6 +998,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: "Add profile with cover image, photo, name, title, company",
           isPremium: false,
           defaultConfig: {}
+        },
+        {
+          type: "shop",
+          title: "Digital Shop",
+          icon: "fas fa-shopping-bag",
+          color: "bg-gradient-to-r from-green-500 to-emerald-600",
+          description: "Showcase your digital products",
+          isPremium: false,
+          defaultConfig: {}
         }
       ];
       
