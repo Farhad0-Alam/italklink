@@ -5604,7 +5604,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
             ) : (
               <div className="shop-element w-full" data-testid="shop-element">
                 <ShopElement
-                  sellerId=""
+                  sellerId={cardData?.userId || ""}
                   title={element.data.title || "My Digital Products"}
                   description={element.data.description}
                   maxItems={element.data.maxItems || 6}
