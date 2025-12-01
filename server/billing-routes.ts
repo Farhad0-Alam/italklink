@@ -440,20 +440,19 @@ router.get('/user/plan', requireAuth, asyncHandler(async (req, res) => {
     userPlan = plans.find(p => p.id === user.planId);
   }
   
-  // If no plan found, return default free plan access
+  // If no plan found, return locked state - user must select a plan
+  // No default free plan fallback - mandatory plan selection system
   if (!userPlan) {
-    // Return a default free plan with limited features
-    const freePlan = plans.find(p => p.planType === 'free');
-    
     return res.json({
       success: true,
       data: {
         hasPlan: false,
-        plan: freePlan || null,
-        elementFeatures: freePlan?.elementFeatures || [],
-        templateIds: freePlan?.templateIds || [],
-        moduleFeatures: freePlan?.moduleFeatures || {},
-        businessCardsLimit: freePlan?.businessCardsLimit || 1,
+        isPlanAssigned: false, // Explicit flag for mandatory plan selection
+        plan: null,
+        elementFeatures: [], // No features without a plan
+        templateIds: [], // No templates without a plan
+        moduleFeatures: {}, // No modules without a plan
+        businessCardsLimit: 0, // Cannot create cards without a plan
         isAdmin: user.role === 'admin',
         unlimitedElements: false,
         unlimitedTemplates: false,
@@ -474,6 +473,7 @@ router.get('/user/plan', requireAuth, asyncHandler(async (req, res) => {
     success: true,
     data: {
       hasPlan: true,
+      isPlanAssigned: true, // User has an assigned plan
       plan: userPlan,
       elementFeatures: userPlan.elementFeatures || [],
       templateIds: userPlan.templateIds || [],
