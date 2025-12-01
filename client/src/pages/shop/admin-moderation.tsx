@@ -9,11 +9,10 @@ import { Link } from "wouter";
 import type { DigitalProduct } from "@shared/schema";
 
 export default function AdminShopModeration() {
-  const { data: response, isLoading, error } = useQuery<{ success: boolean; data: DigitalProduct[] }>({
+  const { data: products = [], isLoading, error } = useQuery<DigitalProduct[]>({
     queryKey: ["/shop/admin/products"],
+    select: (response: any) => Array.isArray(response) ? response : (response?.data || []),
   });
-
-  const products = response?.data;
 
   const approveMutation = useMutation({
     mutationFn: async (productId: string) =>
