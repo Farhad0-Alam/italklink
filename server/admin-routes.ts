@@ -245,46 +245,29 @@ router.get('/users', requireOwner, async (req, res) => {
       let planValidityStr = '-';
       let isActive = false;
       
-      if (user.planId && user.planStartsAt) {
-        // If planEndsAt is explicitly set, use that date
+      if (user.planStartsAt && user.planInterval) {
+        // If planEndsAt is explicitly set, use that
         if (user.planEndsAt) {
           planValidityStr = formatDateDDMMMYYYY(user.planEndsAt);
           isActive = user.planEndsAt > new Date();
-        } else if (user.planInterval && user.planInterval !== 'free' && user.planInterval !== 'custom') {
-          // planEndsAt is null but has a calculable interval (monthly/yearly)
-          // Calculate end date from startsAt + interval
+        } else {
+          // Calculate based on interval
           const calculatedEndDate = calculatePlanValidity(user.planStartsAt, user.planInterval);
           if (calculatedEndDate) {
             planValidityStr = formatDateDDMMMYYYY(calculatedEndDate);
             isActive = calculatedEndDate > new Date();
           } else {
-            planValidityStr = 'No Expiry';
-            isActive = true;
+            // Free plan or no interval
+            planValidityStr = '-';
+            isActive = true; // Free plans are always active
           }
-        } else {
-          // planEndsAt is null AND no calculable interval - truly unlimited
-          planValidityStr = 'No Expiry';
-          isActive = true;
         }
       } else if (user.planId) {
-        // Has a plan but no startsAt - use planEndsAt if available, otherwise calculate
-        if (user.planEndsAt) {
-          planValidityStr = formatDateDDMMMYYYY(user.planEndsAt);
-          isActive = user.planEndsAt > new Date();
-        } else if (user.planInterval && user.planInterval !== 'free' && user.planInterval !== 'custom') {
-          // Calculate based on createdAt + interval
-          const calculatedEndDate = calculatePlanValidity(user.createdAt, user.planInterval);
-          if (calculatedEndDate) {
-            planValidityStr = formatDateDDMMMYYYY(calculatedEndDate);
-            isActive = calculatedEndDate > new Date();
-          } else {
-            planValidityStr = 'No Expiry';
-            isActive = true;
-          }
-        } else {
-          // No end date, no calculable interval - unlimited or free
-          planValidityStr = 'No Expiry';
-          isActive = true;
+        // Has a plan but no startsAt - use createdAt as fallback
+        const calculatedEndDate = calculatePlanValidity(user.createdAt, user.planInterval);
+        if (calculatedEndDate) {
+          planValidityStr = formatDateDDMMMYYYY(calculatedEndDate);
+          isActive = calculatedEndDate > new Date();
         }
       }
       
