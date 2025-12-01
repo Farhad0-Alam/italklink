@@ -159,13 +159,38 @@ router.get('/links', requireOwner, async (req, res) => {
 
 // === USERS MANAGEMENT ENDPOINTS ===
 
+// Helper function to format date as DD-MMM-YYYY (e.g., "25-Oct-2026")
+const formatDateDDMMMYYYY = (date: Date): string => {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
+
+// Helper function to calculate plan validity end date
+const calculatePlanValidity = (startDate: Date, interval: string | null): Date | null => {
+  if (!interval || interval === 'free' || interval === 'custom') {
+    return null;
+  }
+  const endDate = new Date(startDate);
+  if (interval === 'yearly') {
+    endDate.setDate(endDate.getDate() + 365);
+  } else {
+    // monthly or any other interval defaults to 30 days
+    endDate.setDate(endDate.getDate() + 30);
+  }
+  return endDate;
+};
+
 // Get users with search, filters, pagination
 router.get('/users', requireOwner, async (req, res) => {
   try {
     const { search, status, plan, page = 1, size = 50 } = req.query;
     const offset = (Number(page) - 1) * Number(size);
     
-    let query = db.select({
+    // Query users with their active plan from userPlans table
+    const usersList = await db.select({
       id: users.id,
       email: users.email,
       firstName: users.firstName,
@@ -174,62 +199,97 @@ router.get('/users', requireOwner, async (req, res) => {
       planType: users.planType,
       businessCardsCount: users.businessCardsCount,
       createdAt: users.createdAt,
-      subscriptionEndsAt: users.subscriptionEndsAt
-    }).from(users);
+      subscriptionEndsAt: users.subscriptionEndsAt,
+      // Join userPlans for the active plan
+      planStartsAt: userPlans.startsAt,
+      planEndsAt: userPlans.endsAt,
+      planId: userPlans.planId,
+      // Join subscriptionPlans for interval
+      planInterval: subscriptionPlans.interval,
+      planName: subscriptionPlans.name,
+    })
+    .from(users)
+    .leftJoin(userPlans, eq(users.id, userPlans.userId))
+    .leftJoin(subscriptionPlans, eq(userPlans.planId, subscriptionPlans.id))
+    .orderBy(desc(users.createdAt))
+    .limit(Number(size))
+    .offset(offset);
     
-    const conditions = [];
-    
-    if (search) {
-      conditions.push(
-        or(
-          like(users.email, `%${search}%`),
-          like(users.firstName, `%${search}%`),
-          like(users.lastName, `%${search}%`)
-        )
-      );
-    }
-    
-    if (status) {
-      // Assume active means subscriptionEndsAt is null or in future
-      if (status === 'active') {
-        conditions.push(
-          or(
-            sql`${users.subscriptionEndsAt} IS NULL`,
-            sql`${users.subscriptionEndsAt} > NOW()`
-          )
-        );
-      } else {
-        conditions.push(sql`${users.subscriptionEndsAt} <= NOW()`);
+    // Group by user ID to get unique users (in case of multiple plan assignments)
+    const userMap = new Map<string, typeof usersList[0]>();
+    for (const row of usersList) {
+      // Keep the most recent plan assignment for each user
+      if (!userMap.has(row.id) || (row.planStartsAt && userMap.get(row.id)?.planStartsAt && row.planStartsAt > userMap.get(row.id)!.planStartsAt!)) {
+        userMap.set(row.id, row);
       }
     }
     
+    let filteredUsers = Array.from(userMap.values());
+    
+    // Apply filters
+    if (search) {
+      const searchLower = (search as string).toLowerCase();
+      filteredUsers = filteredUsers.filter(user => 
+        user.email.toLowerCase().includes(searchLower) ||
+        (user.firstName || '').toLowerCase().includes(searchLower) ||
+        (user.lastName || '').toLowerCase().includes(searchLower)
+      );
+    }
+    
     if (plan && plan !== 'all') {
-      conditions.push(eq(users.planType, plan as any));
+      filteredUsers = filteredUsers.filter(user => user.planType === plan);
     }
-    
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
-    
-    const usersList = await query
-      .orderBy(desc(users.createdAt))
-      .limit(Number(size))
-      .offset(offset);
 
-    const formattedUsers = usersList.map((user, index) => ({
-      id: user.id,
-      sn: offset + index + 1,
-      name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown User',
-      initials: user.firstName && user.lastName ? 
-        `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : 
-        user.email.substring(0, 2).toUpperCase(),
-      email: user.email,
-      registrationDate: user.createdAt.toISOString().split('T')[0],
-      planValidity: user.subscriptionEndsAt ? 
-        user.subscriptionEndsAt.toISOString().split('T')[0] : 
-        '-',
-      status: !user.subscriptionEndsAt || user.subscriptionEndsAt > new Date() ? 'active' : 'inactive'
-    }));
+    const formattedUsers = filteredUsers.map((user, index) => {
+      // Calculate plan validity based on startsAt and interval
+      let planValidityStr = '-';
+      let isActive = false;
+      
+      if (user.planStartsAt && user.planInterval) {
+        // If planEndsAt is explicitly set, use that
+        if (user.planEndsAt) {
+          planValidityStr = formatDateDDMMMYYYY(user.planEndsAt);
+          isActive = user.planEndsAt > new Date();
+        } else {
+          // Calculate based on interval
+          const calculatedEndDate = calculatePlanValidity(user.planStartsAt, user.planInterval);
+          if (calculatedEndDate) {
+            planValidityStr = formatDateDDMMMYYYY(calculatedEndDate);
+            isActive = calculatedEndDate > new Date();
+          } else {
+            // Free plan or no interval
+            planValidityStr = '-';
+            isActive = true; // Free plans are always active
+          }
+        }
+      } else if (user.planId) {
+        // Has a plan but no startsAt - use createdAt as fallback
+        const calculatedEndDate = calculatePlanValidity(user.createdAt, user.planInterval);
+        if (calculatedEndDate) {
+          planValidityStr = formatDateDDMMMYYYY(calculatedEndDate);
+          isActive = calculatedEndDate > new Date();
+        }
+      }
+      
+      // Apply status filter if provided
+      if (status === 'active' && !isActive) return null;
+      if (status === 'inactive' && isActive) return null;
+      
+      return {
+        id: user.id,
+        sn: offset + index + 1,
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown User',
+        initials: user.firstName && user.lastName ? 
+          `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : 
+          user.email.substring(0, 2).toUpperCase(),
+        email: user.email,
+        registrationDate: user.createdAt.toISOString().split('T')[0],
+        planValidity: planValidityStr,
+        planName: user.planName || null,
+        hasPlan: !!user.planId,
+        status: isActive || !user.planId ? 'active' : 'inactive'
+      };
+    }).filter(Boolean);
 
     res.json({ success: true, data: formattedUsers });
   } catch (error) {
