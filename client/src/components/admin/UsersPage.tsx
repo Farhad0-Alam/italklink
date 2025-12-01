@@ -316,7 +316,21 @@ export default function UsersPage() {
 
   const handleAddUser = async () => {
     if (!firstName.trim() || !lastName.trim() || !email.trim() || !password.trim()) {
-      alert('Please fill in all required fields');
+      toast({
+        title: 'Required Fields Missing',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // Mandatory plan selection - no default plan
+    if (!plan) {
+      toast({
+        title: 'Plan Required',
+        description: 'Please select a plan for the new user. All users must have a plan assigned.',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -327,7 +341,7 @@ export default function UsersPage() {
         lastName: lastName.trim(),
         email: email.trim(),
         password: password.trim(),
-        planId: plan || '1' // Default to first plan if none selected
+        planId: plan,
       };
 
       const response = await fetch('/api/admin/users', {

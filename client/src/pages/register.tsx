@@ -73,10 +73,11 @@ export default function Register() {
     onSuccess: () => {
       toast({
         title: 'Account Created Successfully!',
-        description: 'Welcome to TalkLink! You can now start creating digital business cards.',
+        description: 'Please select a plan to start using TalkLink.',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      setLocation(getRedirectPath());
+      // Redirect to pricing page for new users to select a plan (mandatory plan selection)
+      setLocation('/pricing');
     },
     onError: (error: any) => {
       toast({

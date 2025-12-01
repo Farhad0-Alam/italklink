@@ -303,6 +303,14 @@ router.post('/users', requireOwner, async (req, res) => {
   try {
     const { email, firstName, lastName, password, planId } = req.body;
     
+    // Mandatory plan selection - planId is required
+    if (!planId) {
+      return res.status(400).json({ 
+        message: 'Plan selection is required',
+        error: 'PLAN_REQUIRED' 
+      });
+    }
+    
     // Check if user with this email already exists
     const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
     
@@ -313,24 +321,25 @@ router.post('/users', requireOwner, async (req, res) => {
       });
     }
     
-    // Get plan details if planId is provided
-    let planType: 'free' | 'pro' | 'enterprise' = 'free';
-    let businessCardsLimit = 1;
+    // Get plan details
+    const [selectedPlan] = await db.select()
+      .from(subscriptionPlans)
+      .where(eq(subscriptionPlans.id, Number(planId)))
+      .limit(1);
     
-    if (planId) {
-      const [selectedPlan] = await db.select()
-        .from(subscriptionPlans)
-        .where(eq(subscriptionPlans.id, Number(planId)))
-        .limit(1);
-      
-      if (selectedPlan) {
-        planType = selectedPlan.planType;
-        businessCardsLimit = selectedPlan.businessCardsLimit === -1 ? 999999 : selectedPlan.businessCardsLimit;
-      }
+    if (!selectedPlan) {
+      return res.status(400).json({ 
+        message: 'Invalid plan selected',
+        error: 'INVALID_PLAN' 
+      });
     }
+    
+    const planType = selectedPlan.planType;
+    const businessCardsLimit = selectedPlan.businessCardsLimit === -1 ? 999999 : selectedPlan.businessCardsLimit;
     
     const hashedPassword = await bcryptjs.hash(password, 12);
     
+    // Create the user
     const [newUser] = await db.insert(users).values({
       email,
       firstName,
@@ -338,12 +347,21 @@ router.post('/users', requireOwner, async (req, res) => {
       password: hashedPassword,
       role: 'user',
       planType,
-      businessCardsLimit
+      businessCardsLimit,
+      planId: Number(planId), // Store planId in users table too
     }).returning();
+    
+    // Create userPlans entry for mandatory plan assignment
+    await db.insert(userPlans).values({
+      userId: newUser.id,
+      planId: Number(planId),
+      startsAt: new Date(),
+      note: 'Assigned by admin during user creation',
+    });
     
     await logAdminAction(req.user!.id, 'create', 'user', newUser.id, { email, planId, planType, businessCardsLimit });
     
-    res.json({ success: true, message: 'User created successfully', data: newUser });
+    res.json({ success: true, message: 'User created successfully with plan assigned', data: newUser });
   } catch (error) {
     console.error('Failed to create user:', error);
     
