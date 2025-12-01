@@ -26,14 +26,14 @@ export function LockedFeature({
   }
 
   return (
-    <div className={`relative group ${className}`}>
+    <div className={`relative group overflow-hidden ${className}`}>
       {/* Blurred content */}
       <div className="blur-sm pointer-events-none opacity-60">
         {children}
       </div>
 
-      {/* Lock overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-purple-500/10 backdrop-blur-[2px] rounded-lg flex items-center justify-center">
+      {/* Lock overlay - contained within parent bounds */}
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-purple-500/10 backdrop-blur-[2px] rounded-lg flex items-center justify-center overflow-hidden">
         <div className="text-center">
           <div className="relative inline-block">
             {/* Animated lock icon */}
