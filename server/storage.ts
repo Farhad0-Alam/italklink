@@ -1139,14 +1139,16 @@ export class DatabaseStorage implements IStorage {
 
   async createPlan(planData: any): Promise<SubscriptionPlan> {
     // Map frontend field names to database column names
-    const { frequency, templateIds, ...rest } = planData;
+    // Remove templates (frontend form field) and templateIds (sent separately) from rest
+    const { frequency, templateIds, templates, ...rest } = planData;
     const dbData: any = {
       ...rest,
       interval: frequency,
     };
-    // Only include templateIds if provided
-    if (templateIds !== undefined && templateIds !== null) {
-      dbData.templateIds = templateIds;
+    // Include templateIds if provided (use the explicitly sent templateIds or fall back to templates)
+    const templateArray = templateIds || templates || [];
+    if (templateArray && templateArray.length > 0) {
+      dbData.templateIds = templateArray;
     }
     const [plan] = await db.insert(subscriptionPlans).values(dbData).returning();
     return plan;
@@ -1154,10 +1156,15 @@ export class DatabaseStorage implements IStorage {
 
   async updatePlan(id: number, planData: any): Promise<SubscriptionPlan> {
     // Map frontend field names to database column names
-    const { frequency, templateIds, ...rest } = planData;
+    // Remove templates (frontend form field) and templateIds (sent separately) from rest
+    const { frequency, templateIds, templates, ...rest } = planData;
     const dbData: any = { ...rest };
     if (frequency !== undefined) dbData.interval = frequency;
-    if (templateIds !== undefined && templateIds !== null) dbData.templateIds = templateIds;
+    // Include templateIds if provided (use the explicitly sent templateIds or fall back to templates)
+    const templateArray = templateIds || templates;
+    if (templateArray !== undefined && templateArray !== null) {
+      dbData.templateIds = templateArray;
+    }
     
     const [plan] = await db
       .update(subscriptionPlans)
