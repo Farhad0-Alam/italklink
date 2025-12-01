@@ -85,30 +85,33 @@ const sidebarNavItems = [
     icon: UserPlus,
   },
   {
-    title: '━━━ SHOP MANAGEMENT ━━━',
-    href: '#',
-    icon: ShoppingCart,
-  },
-  {
-    title: 'Products',
+    title: 'Shop Management',
     href: '/admin/shop',
-    icon: Package,
-  },
-  {
-    title: 'Commissions',
-    href: '/admin/shop/commission',
-    icon: Percent,
-  },
-  {
-    title: 'Reviews',
-    href: '/admin/reviews',
-    icon: Star,
+    icon: ShoppingCart,
+    submenu: [
+      {
+        title: 'Products',
+        href: '/admin/shop',
+        icon: Package,
+      },
+      {
+        title: 'Commissions',
+        href: '/admin/shop/commission',
+        icon: Percent,
+      },
+      {
+        title: 'Reviews',
+        href: '/admin/reviews',
+        icon: Star,
+      },
+    ],
   },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<string | null>('Shop Management');
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
