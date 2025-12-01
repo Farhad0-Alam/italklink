@@ -155,6 +155,8 @@ function Router() {
       <Route path="/search">{() => <PageSuspense><ShopSearch /></PageSuspense>}</Route>
       <Route path="/wishlist">{() => <PageSuspense><Wishlist /></PageSuspense>}</Route>
       <Route path="/shop/affiliate">{() => <PageSuspense><AffiliateDashboard /></PageSuspense>}</Route>
+      <Route path="/shop/bundles">{() => <PageSuspense><BundlesBrowse /></PageSuspense>}</Route>
+      <Route path="/shop/bundles/:bundleId">{() => <PageSuspense><BundleDetails /></PageSuspense>}</Route>
       <Route path="/seller/:sellerId">{(params) => <PageSuspense><SellerStore {...params} /></PageSuspense>}</Route>
       <Route path="/shop/seller">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
       <Route path="/shop/seller/products">{() => <PageSuspense><SellerDashboard /></PageSuspense>}</Route>
