@@ -3641,6 +3641,17 @@ export const profileElementSchema = baseElementSchema.extend({
   }),
 });
 
+// Shop element - display digital products on business card
+export const shopElementSchema = baseElementSchema.extend({
+  type: z.literal("shop"),
+  data: z.object({
+    title: z.string().default("My Digital Products"),
+    description: z.string().optional(),
+    maxItems: z.number().min(1).max(12).default(6),
+    displayStyle: z.enum(["grid", "list"]).default("grid"),
+  }),
+});
+
 // Union type for all elements
 export const pageElementSchema = z.discriminatedUnion("type", [
   profileElementSchema,
@@ -3672,6 +3683,7 @@ export const pageElementSchema = z.discriminatedUnion("type", [
   subscribeElementSchema,
   actionButtonsElementSchema,
   installButtonElementSchema,
+  shopElementSchema,
 ]);
 
 export type PageElement = z.infer<typeof pageElementSchema>;
