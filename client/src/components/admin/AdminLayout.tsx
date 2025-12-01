@@ -132,37 +132,36 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         
         if (hasSubmenu) {
           return (
-            <div key={item.href} className="flex items-center gap-1 px-3 py-1 rounded-xl bg-gradient-to-r from-orange-50/40 to-orange-50/20 dark:from-orange-950/30 dark:to-orange-950/20 border border-orange-200/50 dark:border-orange-800/50 backdrop-blur-sm">
-              <span className="text-xs font-semibold text-orange-700 dark:text-orange-300 px-2 border-r border-orange-200/40 dark:border-orange-800/40">
+            <div key={item.href} className="flex items-center gap-0.5 px-2 py-1 rounded-xl bg-gradient-to-r from-orange-50/40 to-orange-50/20 dark:from-orange-950/30 dark:to-orange-950/20 border border-orange-200/50 dark:border-orange-800/50 backdrop-blur-sm" style={{ pointerEvents: 'auto' }}>
+              <span className="text-xs font-semibold text-orange-700 dark:text-orange-300 px-1.5 pointer-events-none select-none">
                 {item.title}
               </span>
-              <div className="flex items-center gap-0.5">
-                {(item as any).submenu.map((subitem: any, idx: number) => {
-                  const SubIcon = subitem.icon;
-                  const isSubActive = location === subitem.href;
-                  return (
-                    <Link 
-                      key={subitem.href} 
-                      href={subitem.href} 
-                      data-testid={`nav-${subitem.title.toLowerCase().replace(/\s+/g, '-')}`}
-                      className={`
-                        group relative flex items-center gap-1.5 px-2.5 py-1.5 
-                        text-xs font-medium rounded-lg whitespace-nowrap 
-                        transition-all duration-200 ease-in-out
-                        ${isSubActive 
-                          ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25' 
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-700/30'
-                        }
-                      `}
-                    >
-                      <SubIcon className={`w-3 h-3 transition-transform duration-200 ${
-                        isSubActive ? 'text-white' : 'group-hover:scale-110'
-                      }`} />
-                      <span className="hidden sm:inline">{subitem.title}</span>
-                    </Link>
-                  );
-                })}
-              </div>
+              {(item as any).submenu.map((subitem: any) => {
+                const SubIcon = subitem.icon;
+                const isSubActive = location === subitem.href;
+                return (
+                  <Link 
+                    key={subitem.href} 
+                    href={subitem.href} 
+                    data-testid={`nav-${subitem.title.toLowerCase().replace(/\s+/g, '-')}`}
+                    className={`
+                      group relative inline-flex items-center gap-1 px-2 py-1.5 
+                      text-xs font-medium rounded-lg whitespace-nowrap 
+                      transition-all duration-200 ease-in-out cursor-pointer
+                      ${isSubActive 
+                        ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-700/30'
+                      }
+                    `}
+                    style={{ pointerEvents: 'auto' }}
+                  >
+                    <SubIcon className={`w-3 h-3 transition-transform duration-200 flex-shrink-0 ${
+                      isSubActive ? 'text-white' : 'group-hover:scale-110'
+                    }`} />
+                    <span className="hidden sm:inline text-xs">{subitem.title}</span>
+                  </Link>
+                );
+              })}
             </div>
           );
         }
