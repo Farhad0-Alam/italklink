@@ -580,17 +580,6 @@ export const adminLogs = pgTable("admin_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Analytics events table
-export const analyticsEvents = pgTable("analytics_events", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  cardId: varchar("card_id").references(() => businessCards.id, { onDelete: 'cascade' }),
-  type: varchar("type").notNull(), // view, click, qr_scan, share
-  metadata: jsonb("metadata"), // device info, utm params, etc.
-  ipAddress: varchar("ip_address"),
-  userAgent: text("user_agent"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
 // Bios table - User professional bios linked to their profile
 export const bios = pgTable("bios", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -2959,9 +2948,6 @@ export type InsertCrmDeal = typeof crmDeals.$inferInsert;
 
 export type CrmSequence = typeof crmSequences.$inferSelect;
 export type InsertCrmSequence = typeof crmSequences.$inferInsert;
-
-export type EmailTemplate = typeof emailTemplates.$inferSelect;
-export type InsertEmailTemplate = typeof emailTemplates.$inferInsert;
 
 // Appointment Booking System Types
 export type AppointmentEventType = typeof appointmentEventTypes.$inferSelect;
@@ -6015,20 +6001,111 @@ export const platformSettings = pgTable("platform_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Email Templates table
-export const emailTemplates = pgTable("email_templates", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: varchar("name").notNull(),
-  slug: varchar("slug").unique().notNull(),
-  subject: varchar("subject").notNull(),
-  template: text("template").notNull(),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
 export type BulkUploadJob = typeof bulkUploadJobs.$inferSelect;
 export type ProductApproval = typeof productApprovals.$inferSelect;
 export type Webhook = typeof webhooks.$inferSelect;
 export type ShippingMethod = typeof shippingMethods.$inferSelect;
 export type PlatformSettings = typeof platformSettings.$inferSelect;
-export type EmailTemplate = typeof emailTemplates.$inferSelect;
+
+// Customer Support Tickets table
+export const supportTickets = pgTable("support_tickets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  subject: varchar("subject").notNull(),
+  description: text("description").notNull(),
+  status: varchar("status").default('open'), // open, in_progress, resolved, closed
+  priority: varchar("priority").default('normal'), // low, normal, high, urgent
+  assignedTo: varchar("assigned_to").references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp("created_at").defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+}, (table) => [
+  index("idx_ticket_user").on(table.userId),
+  index("idx_ticket_status").on(table.status),
+]);
+
+// Product Recommendations table
+export const productRecommendations = pgTable("product_recommendations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  recommendedProductId: varchar("recommended_product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull(),
+  score: integer("score").default(0), // 1-100 similarity score
+  reason: varchar("reason").default('similar'), // similar, frequently_bought, trending
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_rec_product").on(table.productId),
+  index("idx_rec_recommended").on(table.recommendedProductId),
+]);
+
+// Tax Rates table
+export const taxRates = pgTable("tax_rates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  countryCode: varchar("country_code").notNull(),
+  state: varchar("state"),
+  rate: integer("rate").notNull(), // percentage in basis points (e.g., 825 = 8.25%)
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_tax_country").on(table.countryCode),
+]);
+
+// Analytics Events table
+export const analyticsEvents = pgTable("analytics_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'set null' }),
+  eventType: varchar("event_type").notNull(), // page_view, product_click, checkout_start, etc
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'set null' }),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_event_user").on(table.userId),
+  index("idx_event_type").on(table.eventType),
+]);
+
+// Localization table (multi-language support)
+export const translations = pgTable("translations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: varchar("key").notNull(),
+  language: varchar("language").notNull(), // en, bn, es, fr, etc
+  value: text("value").notNull(),
+  context: varchar("context"), // product, email, ui, etc
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_translation_key").on(table.key),
+  index("idx_translation_lang").on(table.language),
+]);
+
+// API Keys table (for developer access)
+export const apiKeys = pgTable("api_keys", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  key: varchar("key").unique().notNull(),
+  name: varchar("name").notNull(),
+  permissions: text("permissions").array(),
+  lastUsedAt: timestamp("last_used_at"),
+  expiresAt: timestamp("expires_at"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_api_user").on(table.userId),
+  index("idx_api_key").on(table.key),
+]);
+
+// Cache table (for performance optimization)
+export const cacheData = pgTable("cache_data", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: varchar("key").unique().notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_cache_key").on(table.key),
+  index("idx_cache_expires").on(table.expiresAt),
+]);
+
+export type SupportTicket = typeof supportTickets.$inferSelect;
+export type ProductRecommendation = typeof productRecommendations.$inferSelect;
+export type TaxRate = typeof taxRates.$inferSelect;
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+export type Translation = typeof translations.$inferSelect;
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type CacheData = typeof cacheData.$inferSelect;

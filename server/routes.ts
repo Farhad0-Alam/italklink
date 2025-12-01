@@ -110,6 +110,7 @@ import sellerSubscriptionRoutes from './seller-subscription-routes';
 import reviewModerationRoutes from './review-moderation-routes';
 import giftcardInventoryRoutes from './giftcard-inventory-routes';
 import advancedFeaturesRoutes from './advanced-features-routes';
+import finalFeaturesRoutes from './final-features-routes';
 import { addToGoogleSheet, isGoogleSheetsConfigured } from './google-sheets';
 import ragRoutes from './rag-routes';
 import voiceRoutes from './voice-routes';
@@ -237,6 +238,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup advanced features (bulk upload, approvals, webhooks, settings)
   app.use('/api/features', advancedFeaturesRoutes);
+
+  // Setup final features (support, recommendations, tax, analytics, translations, api-keys)
+  app.use('/api', finalFeaturesRoutes);
   
   // Setup billing routes
   app.use('/api/billing', billingRoutes);

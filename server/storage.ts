@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate, productSocialShares, type ProductSocialShare, type InsertProductSocialShare, abandonedCarts, type AbandonedCart, type InsertAbandonedCart, sellerSubscriptionPlans, sellerSubscriptions, type SellerSubscriptionPlan, type InsertSellerSubscriptionPlan, type SellerSubscription, type InsertSellerSubscription, giftCards, type GiftCard, type InsertGiftCard, productInventory, type ProductInventory, type InsertProductInventory, bulkUploadJobs, productApprovals, webhooks, shippingMethods, platformSettings, emailTemplates
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate, productSocialShares, type ProductSocialShare, type InsertProductSocialShare, abandonedCarts, type AbandonedCart, type InsertAbandonedCart, sellerSubscriptionPlans, sellerSubscriptions, type SellerSubscriptionPlan, type InsertSellerSubscriptionPlan, type SellerSubscription, type InsertSellerSubscription, giftCards, type GiftCard, type InsertGiftCard, productInventory, type ProductInventory, type InsertProductInventory, bulkUploadJobs, productApprovals, webhooks, shippingMethods, platformSettings, supportTickets, productRecommendations, taxRates, analyticsEvents, translations, apiKeys, cacheData
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -741,6 +741,38 @@ export interface IStorage {
   // Email template operations
   getEmailTemplate(slug: string): Promise<any>;
   getAllEmailTemplates(): Promise<any[]>;
+
+  // Support ticket operations
+  createTicket(ticketData: any): Promise<any>;
+  getTicketsByUser(userId: string): Promise<any[]>;
+  getOpenTickets(): Promise<any[]>;
+  updateTicket(ticketId: string, data: any): Promise<any>;
+
+  // Recommendations operations
+  getProductRecommendations(productId: string): Promise<any[]>;
+  createRecommendation(recData: any): Promise<any>;
+
+  // Tax operations
+  getTaxRate(countryCode: string, state?: string): Promise<any>;
+  createTaxRate(taxData: any): Promise<any>;
+
+  // Analytics operations
+  logEvent(eventData: any): Promise<any>;
+  getEventAnalytics(userId: string, days?: number): Promise<any[]>;
+
+  // Translation operations
+  getTranslation(key: string, language: string): Promise<any>;
+  getAllTranslations(language: string): Promise<any[]>;
+
+  // API Key operations
+  createApiKey(keyData: any): Promise<any>;
+  getApiKeyByKey(key: string): Promise<any>;
+  getUserApiKeys(userId: string): Promise<any[]>;
+
+  // Cache operations
+  getCache(key: string): Promise<any>;
+  setCache(key: string, value: string, expiresAt: Date): Promise<any>;
+  deleteCache(key: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -7949,6 +7981,91 @@ export class DatabaseStorage implements IStorage {
   }
   async getAllEmailTemplates(): Promise<any[]> {
     return await db.select().from(emailTemplates).where(eq(emailTemplates.isActive, true));
+  }
+
+  // ===== SUPPORT TICKET OPERATIONS =====
+  async createTicket(ticketData: any): Promise<any> {
+    const [ticket] = await db.insert(supportTickets).values(ticketData).returning();
+    return ticket;
+  }
+  async getTicketsByUser(userId: string): Promise<any[]> {
+    return await db.select().from(supportTickets).where(eq(supportTickets.userId, userId)).orderBy(desc(supportTickets.createdAt));
+  }
+  async getOpenTickets(): Promise<any[]> {
+    return await db.select().from(supportTickets).where(eq(supportTickets.status, 'open')).orderBy(desc(supportTickets.createdAt));
+  }
+  async updateTicket(ticketId: string, data: any): Promise<any> {
+    const [ticket] = await db.update(supportTickets).set(data).where(eq(supportTickets.id, ticketId)).returning();
+    return ticket;
+  }
+
+  // ===== RECOMMENDATIONS OPERATIONS =====
+  async getProductRecommendations(productId: string): Promise<any[]> {
+    return await db.select().from(productRecommendations).where(eq(productRecommendations.productId, productId)).orderBy(desc(productRecommendations.score));
+  }
+  async createRecommendation(recData: any): Promise<any> {
+    const [rec] = await db.insert(productRecommendations).values(recData).returning();
+    return rec;
+  }
+
+  // ===== TAX OPERATIONS =====
+  async getTaxRate(countryCode: string, state?: string): Promise<any> {
+    const query = state ? and(eq(taxRates.countryCode, countryCode), eq(taxRates.state, state)) : eq(taxRates.countryCode, countryCode);
+    const [rate] = await db.select().from(taxRates).where(query);
+    return rate;
+  }
+  async createTaxRate(taxData: any): Promise<any> {
+    const [rate] = await db.insert(taxRates).values(taxData).returning();
+    return rate;
+  }
+
+  // ===== ANALYTICS OPERATIONS =====
+  async logEvent(eventData: any): Promise<any> {
+    const [event] = await db.insert(analyticsEvents).values(eventData).returning();
+    return event;
+  }
+  async getEventAnalytics(userId: string, days?: number): Promise<any[]> {
+    const fromDate = days ? new Date(Date.now() - days * 24 * 60 * 60 * 1000) : new Date(0);
+    return await db.select().from(analyticsEvents).where(and(eq(analyticsEvents.userId, userId), gte(analyticsEvents.createdAt, fromDate))).orderBy(desc(analyticsEvents.createdAt));
+  }
+
+  // ===== TRANSLATION OPERATIONS =====
+  async getTranslation(key: string, language: string): Promise<any> {
+    const [trans] = await db.select().from(translations).where(and(eq(translations.key, key), eq(translations.language, language)));
+    return trans?.value;
+  }
+  async getAllTranslations(language: string): Promise<any[]> {
+    return await db.select().from(translations).where(eq(translations.language, language));
+  }
+
+  // ===== API KEY OPERATIONS =====
+  async createApiKey(keyData: any): Promise<any> {
+    const [apiKey] = await db.insert(apiKeys).values(keyData).returning();
+    return apiKey;
+  }
+  async getApiKeyByKey(key: string): Promise<any> {
+    const [apiKey] = await db.select().from(apiKeys).where(eq(apiKeys.key, key));
+    return apiKey;
+  }
+  async getUserApiKeys(userId: string): Promise<any[]> {
+    return await db.select().from(apiKeys).where(eq(apiKeys.userId, userId)).orderBy(desc(apiKeys.createdAt));
+  }
+
+  // ===== CACHE OPERATIONS =====
+  async getCache(key: string): Promise<any> {
+    const [cache] = await db.select().from(cacheData).where(eq(cacheData.key, key));
+    if (cache && cache.expiresAt < new Date()) {
+      await this.deleteCache(key);
+      return null;
+    }
+    return cache?.value;
+  }
+  async setCache(key: string, value: string, expiresAt: Date): Promise<any> {
+    const [cache] = await db.insert(cacheData).values({ key, value, expiresAt }).onConflictDoUpdate({ target: cacheData.key, set: { value, expiresAt } }).returning();
+    return cache;
+  }
+  async deleteCache(key: string): Promise<void> {
+    await db.delete(cacheData).where(eq(cacheData.key, key));
   }
 }
 
