@@ -217,6 +217,61 @@ const AVAILABLE_FEATURES = [
   { key: 'apiAccess', label: 'API Access', category: 'Tools' },
 ];
 
+const FEATURE_TO_ELEMENT_ID: Record<string, number> = {
+  'heading': 1,
+  'paragraph': 2,
+  'contactSection': 3,
+  'socialLinks': 4,
+  'link': 6,
+  'image': 7,
+  'qrcode': 8,
+  'video': 9,
+  'contactForm': 10,
+  'accordion': 11,
+  'imageSlider': 12,
+  'testimonials': 13,
+  'googleMaps': 14,
+  'aiChatbot': 15,
+  'ragKnowledge': 16,
+  'digitalWallet': 19,
+  'navigationMenu': 20,
+  'arPreview': 21,
+  'pdfViewer': 22,
+  'html': 23,
+  'subscribeForm': 24,
+};
+
+const FEATURE_TO_MODULE: Record<string, string> = {
+  'crm': 'crm',
+  'analytics': 'analytics',
+  'emailSignature': 'emailSignature',
+  'bookAppointment': 'appointments',
+  'scheduleCall': 'appointments',
+  'meetingRequest': 'appointments',
+  'availabilityDisplay': 'appointments',
+};
+
+const computeFeaturesFromElementsAndModules = (
+  elementFeatures: number[],
+  moduleFeatures: Record<string, boolean>
+): number[] => {
+  const features: number[] = [];
+  
+  AVAILABLE_FEATURES.forEach((feature, index) => {
+    const featureId = index + 1;
+    const elementId = FEATURE_TO_ELEMENT_ID[feature.key];
+    const moduleKey = FEATURE_TO_MODULE[feature.key];
+    
+    if (elementId && elementFeatures.includes(elementId)) {
+      features.push(featureId);
+    } else if (moduleKey && moduleFeatures[moduleKey]) {
+      features.push(featureId);
+    }
+  });
+  
+  return features;
+};
+
 export default function PlansPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -565,8 +620,16 @@ export default function PlansPage() {
       }
     }
     
-    // Extract feature IDs from plan.features if it's an array
+    // Get stored elementFeatures and moduleFeatures
+    const storedElementFeatures = (plan as any).elementFeatures || [];
+    const storedModuleFeatures = (plan as any).moduleFeatures || { analytics: false, crm: false, appointments: false, nfc: false, emailSignature: false, voiceConversation: false };
+    
+    // Compute features array from elementFeatures and moduleFeatures for checkbox display
+    const computedFeatures = computeFeaturesFromElementsAndModules(storedElementFeatures, storedModuleFeatures);
+    
+    // Merge with any existing plan features that aren't covered by elementFeatures/moduleFeatures
     const planFeatures = Array.isArray(plan.features) ? plan.features : [];
+    const mergedFeatures = [...new Set([...computedFeatures, ...planFeatures])];
     
     setFormData({
       name: `${plan.name} (Copy)`,
@@ -579,15 +642,15 @@ export default function PlansPage() {
       cardLabel: plan.cardLabel || '',
       trialDays: plan.trialDays,
       customDurationDays: plan.customDurationDays,
-      features: planFeatures,
+      features: mergedFeatures,
       templates: (plan as any).templateIds || [],
       isActive: true,
       stripePriceId: '',
       pricingFeatures: (plan as any).pricingFeatures || [],
       templateLimit: (plan.features as any)?.templateLimit || -1,
       description: (plan as any).description || '',
-      elementFeatures: (plan as any).elementFeatures || [],
-      moduleFeatures: (plan as any).moduleFeatures || { analytics: false, crm: false, appointments: false, nfc: false, emailSignature: false, voiceConversation: false },
+      elementFeatures: storedElementFeatures,
+      moduleFeatures: storedModuleFeatures,
       baseUsers: (plan as any).baseUsers || 1,
       pricePerUser: ((plan as any).pricePerUser || 0) / 100,
       setupFee: ((plan as any).setupFee || 0) / 100,
@@ -624,8 +687,16 @@ export default function PlansPage() {
       }
     }
     
-    // Extract feature IDs from plan.features if it's an array
+    // Get stored elementFeatures and moduleFeatures
+    const storedElementFeatures = (plan as any).elementFeatures || [];
+    const storedModuleFeatures = (plan as any).moduleFeatures || { analytics: false, crm: false, appointments: false, nfc: false, emailSignature: false, voiceConversation: false };
+    
+    // Compute features array from elementFeatures and moduleFeatures for checkbox display
+    const computedFeatures = computeFeaturesFromElementsAndModules(storedElementFeatures, storedModuleFeatures);
+    
+    // Merge with any existing plan features that aren't covered by elementFeatures/moduleFeatures
     const planFeatures = Array.isArray(plan.features) ? plan.features : [];
+    const mergedFeatures = [...new Set([...computedFeatures, ...planFeatures])];
     
     setFormData({
       name: plan.name,
@@ -638,15 +709,15 @@ export default function PlansPage() {
       cardLabel: plan.cardLabel || '',
       trialDays: plan.trialDays,
       customDurationDays: plan.customDurationDays,
-      features: planFeatures,
+      features: mergedFeatures,
       templates: (plan as any).templateIds || [],
       isActive: plan.isActive,
       stripePriceId: plan.stripePriceId || '',
       pricingFeatures: (plan as any).pricingFeatures || [],
       templateLimit: (plan.features as any)?.templateLimit || -1,
       description: (plan as any).description || '',
-      elementFeatures: (plan as any).elementFeatures || [],
-      moduleFeatures: (plan as any).moduleFeatures || { analytics: false, crm: false, appointments: false, nfc: false, emailSignature: false, voiceConversation: false },
+      elementFeatures: storedElementFeatures,
+      moduleFeatures: storedModuleFeatures,
       baseUsers: (plan as any).baseUsers || 1,
       pricePerUser: ((plan as any).pricePerUser || 0) / 100,
       setupFee: ((plan as any).setupFee || 0) / 100,
@@ -658,19 +729,75 @@ export default function PlansPage() {
   };
 
   const toggleFeature = (featureId: number) => {
-    setFormData(prev => ({
-      ...prev,
-      features: prev.features.includes(featureId)
+    const featureKey = AVAILABLE_FEATURES[featureId - 1]?.key;
+    const elementId = featureKey ? FEATURE_TO_ELEMENT_ID[featureKey] : undefined;
+    const moduleKey = featureKey ? FEATURE_TO_MODULE[featureKey] : undefined;
+    
+    setFormData(prev => {
+      const isCurrentlySelected = prev.features.includes(featureId);
+      const newFeatures = isCurrentlySelected
         ? prev.features.filter(id => id !== featureId)
-        : [...prev.features, featureId]
-    }));
+        : [...prev.features, featureId];
+      
+      let newElementFeatures = [...prev.elementFeatures];
+      if (elementId) {
+        if (isCurrentlySelected) {
+          newElementFeatures = newElementFeatures.filter(id => id !== elementId);
+        } else if (!newElementFeatures.includes(elementId)) {
+          newElementFeatures = [...newElementFeatures, elementId];
+        }
+      }
+      
+      // For module features, check if ANY feature with the same moduleKey is still selected
+      let newModuleFeatures = { ...prev.moduleFeatures };
+      if (moduleKey) {
+        // Find all feature IDs that map to the same module
+        const siblingFeatureIds = AVAILABLE_FEATURES
+          .map((f, idx) => ({ key: f.key, id: idx + 1 }))
+          .filter(f => FEATURE_TO_MODULE[f.key] === moduleKey)
+          .map(f => f.id);
+        
+        // Module should be enabled if ANY sibling feature is selected in newFeatures
+        const anySelected = siblingFeatureIds.some(id => newFeatures.includes(id));
+        newModuleFeatures[moduleKey] = anySelected;
+      }
+      
+      return {
+        ...prev,
+        features: newFeatures,
+        elementFeatures: newElementFeatures,
+        moduleFeatures: newModuleFeatures
+      };
+    });
   };
 
   const toggleAllFeatures = () => {
     const allFeatureIds = AVAILABLE_FEATURES.map((_, index) => index + 1);
+    const selectAll = formData.features.length !== allFeatureIds.length;
+    
+    const allElementIds = Object.values(FEATURE_TO_ELEMENT_ID);
+    
+    // Get all unique module keys and set them all to the selectAll value
+    const uniqueModuleKeys = [...new Set(Object.values(FEATURE_TO_MODULE))];
+    const newModuleFeatures: Record<string, boolean> = { ...formData.moduleFeatures };
+    
+    // Set all module-mapped features
+    uniqueModuleKeys.forEach(moduleKey => {
+      newModuleFeatures[moduleKey] = selectAll;
+    });
+    
+    // Also set any existing module features that aren't mapped to AVAILABLE_FEATURES
+    Object.keys(formData.moduleFeatures).forEach(key => {
+      if (!uniqueModuleKeys.includes(key)) {
+        newModuleFeatures[key] = selectAll;
+      }
+    });
+    
     setFormData(prev => ({
       ...prev,
-      features: prev.features.length === allFeatureIds.length ? [] : allFeatureIds
+      features: selectAll ? allFeatureIds : [],
+      elementFeatures: selectAll ? allElementIds : [],
+      moduleFeatures: newModuleFeatures
     }));
   };
 
