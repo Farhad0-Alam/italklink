@@ -5539,8 +5539,8 @@ export const sellerPayoutMethods = pgTable("seller_payout_methods", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
-  index("idx_payout_seller").on(table.sellerId),
-  index("idx_payout_status").on(table.stripeConnectStatus),
+  index("idx_payout_method_seller").on(table.sellerId),
+  index("idx_payout_method_status").on(table.stripeConnectStatus),
 ]);
 
 // Seller Payouts table
