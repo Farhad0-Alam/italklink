@@ -1140,7 +1140,7 @@ export class DatabaseStorage implements IStorage {
   async createPlan(planData: any): Promise<SubscriptionPlan> {
     // Map frontend field names to database column names
     // Remove templates (frontend form field) and templateIds (sent separately) from rest
-    const { frequency, templateIds, templates, ...rest } = planData;
+    const { frequency, templateIds, templates, moduleFeatures, ...rest } = planData;
     const dbData: any = {
       ...rest,
       interval: frequency,
@@ -1150,6 +1150,10 @@ export class DatabaseStorage implements IStorage {
     if (templateArray && templateArray.length > 0) {
       dbData.templateIds = templateArray;
     }
+    // Include moduleFeatures if provided
+    if (moduleFeatures !== undefined && moduleFeatures !== null) {
+      dbData.moduleFeatures = moduleFeatures;
+    }
     const [plan] = await db.insert(subscriptionPlans).values(dbData).returning();
     return plan;
   }
@@ -1157,13 +1161,17 @@ export class DatabaseStorage implements IStorage {
   async updatePlan(id: number, planData: any): Promise<SubscriptionPlan> {
     // Map frontend field names to database column names
     // Remove templates (frontend form field) and templateIds (sent separately) from rest
-    const { frequency, templateIds, templates, ...rest } = planData;
+    const { frequency, templateIds, templates, moduleFeatures, ...rest } = planData;
     const dbData: any = { ...rest };
     if (frequency !== undefined) dbData.interval = frequency;
     // Include templateIds if provided (use the explicitly sent templateIds or fall back to templates)
     const templateArray = templateIds || templates;
     if (templateArray !== undefined && templateArray !== null) {
       dbData.templateIds = templateArray;
+    }
+    // Include moduleFeatures if provided
+    if (moduleFeatures !== undefined && moduleFeatures !== null) {
+      dbData.moduleFeatures = moduleFeatures;
     }
     
     const [plan] = await db
