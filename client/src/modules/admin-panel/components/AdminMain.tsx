@@ -14,6 +14,9 @@ import AffiliatesPage from '@/components/admin/AffiliatesPage';
 import AffiliateConversionsPage from '@/components/admin/AffiliateConversionsPage';
 import AdminProfilePage from '@/components/admin/AdminProfilePage';
 import AdminLogin from '@/components/admin/AdminLogin';
+import AdminShopModeration from '@/pages/shop/admin-moderation';
+import AdminCommission from '@/pages/shop/admin-commission';
+import { AdminReviewModeration } from '@/pages/shop/admin-review-moderation';
 
 export default function Admin() {
   const [location] = useLocation();
@@ -85,6 +88,12 @@ export default function Admin() {
         return <AffiliatesPage />;
       case '/admin/conversions':
         return <AffiliateConversionsPage />;
+      case '/admin/shop':
+        return <AdminShopModeration />;
+      case '/admin/shop/commission':
+        return <AdminCommission />;
+      case '/admin/reviews':
+        return <AdminReviewModeration />;
       case '/admin/profile':
         return <AdminProfilePage />;
       case '/admin':
