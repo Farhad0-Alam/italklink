@@ -13,6 +13,7 @@ import { ShopMenuProvider } from "@/context/ShopMenuContext";
 import { CartProvider } from "@/context/CartContext";
 import { CookieConsent } from "@/components/CookieConsent";
 import { initializeUsefulCookies } from "@/utils/cookies";
+import { ModuleProtectedRoute } from "@/components/ModuleProtectedRoute";
 import i18n from "./lib/i18n";
 
 // Lazy load Landing to reduce initial bundle size (it imports framer-motion + 30+ icons)
@@ -120,8 +121,8 @@ function Router() {
       <Route path="/my-links">{() => <PageSuspense><MyLinks /></PageSuspense>}</Route>
       <Route path="/pricing">{() => <PageSuspense><Pricing /></PageSuspense>}</Route>
       <Route path="/templates">{() => <PageSuspense><Templates /></PageSuspense>}</Route>
-      <Route path="/appointments/:rest*">{(params) => <PageSuspense><Appointments {...params} /></PageSuspense>}</Route>
-      <Route path="/appointments">{() => <PageSuspense><Appointments /></PageSuspense>}</Route>
+      <Route path="/appointments/:rest*">{(params) => <PageSuspense><ModuleProtectedRoute module="appointments" redirectOnUnauthorized={true}><Appointments {...params} /></ModuleProtectedRoute></PageSuspense>}</Route>
+      <Route path="/appointments">{() => <PageSuspense><ModuleProtectedRoute module="appointments" redirectOnUnauthorized={true}><Appointments /></ModuleProtectedRoute></PageSuspense>}</Route>
       <Route path="/card-editor/:id?">{(params) => <PageSuspense><CardEditor {...params} /></PageSuspense>}</Route>
       <Route path="/card-editor">{() => <PageSuspense><CardEditor /></PageSuspense>}</Route>
       <Route path="/share">{() => <PageSuspense><Share /></PageSuspense>}</Route>
@@ -137,15 +138,15 @@ function Router() {
       <Route path="/email-templates">{() => <PageSuspense><EmailTemplatesPage /></PageSuspense>}</Route>
       <Route path="/uploads">{() => <PageSuspense><Uploads /></PageSuspense>}</Route>
       <Route path="/qr-codes">{() => <PageSuspense><QrCodes /></PageSuspense>}</Route>
-      <Route path="/nfc-management">{() => <PageSuspense><NfcManagement /></PageSuspense>}</Route>
-      <Route path="/crm">{() => <PageSuspense><CRM /></PageSuspense>}</Route>
-      <Route path="/analytics">{() => <PageSuspense><Analytics /></PageSuspense>}</Route>
-      <Route path="/card-analytics">{() => <PageSuspense><CardAnalytics /></PageSuspense>}</Route>
-      <Route path="/voice-analytics">{() => <PageSuspense><VoiceAnalytics /></PageSuspense>}</Route>
-      <Route path="/voice-test">{() => <PageSuspense><VoiceAgentTest /></PageSuspense>}</Route>
+      <Route path="/nfc-management">{() => <PageSuspense><ModuleProtectedRoute module="nfc" redirectOnUnauthorized={true}><NfcManagement /></ModuleProtectedRoute></PageSuspense>}</Route>
+      <Route path="/crm">{() => <PageSuspense><ModuleProtectedRoute module="crm" redirectOnUnauthorized={true}><CRM /></ModuleProtectedRoute></PageSuspense>}</Route>
+      <Route path="/analytics">{() => <PageSuspense><ModuleProtectedRoute module="analytics" redirectOnUnauthorized={true}><Analytics /></ModuleProtectedRoute></PageSuspense>}</Route>
+      <Route path="/card-analytics">{() => <PageSuspense><ModuleProtectedRoute module="analytics" redirectOnUnauthorized={true}><CardAnalytics /></ModuleProtectedRoute></PageSuspense>}</Route>
+      <Route path="/voice-analytics">{() => <PageSuspense><ModuleProtectedRoute module="voiceConversation" redirectOnUnauthorized={true}><VoiceAnalytics /></ModuleProtectedRoute></PageSuspense>}</Route>
+      <Route path="/voice-test">{() => <PageSuspense><ModuleProtectedRoute module="voiceConversation" redirectOnUnauthorized={true}><VoiceAgentTest /></ModuleProtectedRoute></PageSuspense>}</Route>
       <Route path="/teams">{() => <PageSuspense><TeamDashboard /></PageSuspense>}</Route>
       <Route path="/help">{() => <PageSuspense><Help /></PageSuspense>}</Route>
-      <Route path="/email-signature">{() => <PageSuspense><EmailSignature /></PageSuspense>}</Route>
+      <Route path="/email-signature">{() => <PageSuspense><ModuleProtectedRoute module="emailSignature" redirectOnUnauthorized={true}><EmailSignature /></ModuleProtectedRoute></PageSuspense>}</Route>
       <Route path="/terms-of-service">{() => <PageSuspense><TermsOfService /></PageSuspense>}</Route>
       <Route path="/privacy-policy">{() => <PageSuspense><PrivacyPolicy /></PageSuspense>}</Route>
       <Route path="/cookie-policy">{() => <PageSuspense><CookiePolicy /></PageSuspense>}</Route>

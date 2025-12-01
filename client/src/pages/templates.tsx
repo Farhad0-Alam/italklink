@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, Filter, X, Menu } from "lucide-react";
+import { Search, Filter, X, Menu, Lock, Crown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +27,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { useUserPlan } from "@/hooks/useUserPlan";
 
 interface User {
   id: string;
@@ -63,6 +64,15 @@ export default function Templates() {
     queryKey: ['/api/auth/user'],
     retry: false,
   });
+
+  const { hasTemplate, isAdmin, templateIds, isLoading: planLoading, isPlanLoaded } = useUserPlan();
+
+  const isTemplateLocked = (templateId: string): boolean => {
+    if (planLoading) return true;
+    if (!isPlanLoaded) return true;
+    if (isAdmin) return false;
+    return !hasTemplate(templateId);
+  };
 
   // Fetch templates from API with fallback
   const { data: apiTemplates, isLoading: templatesLoading, isError: templatesError } = useQuery<Template[]>({
@@ -153,6 +163,15 @@ export default function Templates() {
   });
 
   const handleTemplateSelect = (template: Template) => {
+    if (isTemplateLocked(template.id)) {
+      toast({
+        title: "Premium Template",
+        description: "Upgrade your plan to access this template.",
+        variant: "destructive",
+      });
+      setLocation('/pricing');
+      return;
+    }
     setSelectedTemplate(template);
     setShowUrlModal(true);
   };
@@ -351,52 +370,88 @@ export default function Templates() {
 
         {/* Templates Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredTemplates.map((template) => (
-            <Card 
-              key={template.id} 
-              className="bg-white shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-              data-testid={`template-${template.id}`}
-            >
-              <CardContent className="p-0">
-                {/* Template Preview */}
-                <div className="aspect-[3/4] relative overflow-hidden rounded-t-lg">
-                  {renderTemplatePreview(template)}
-                </div>
-                
-                {/* Template Info */}
-                <div className="p-4">
-                  <h3 className="font-medium text-gray-900 text-sm mb-3">{template.name}</h3>
-                  
-                  {/* Action Buttons */}
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleTemplatePreview(template);
-                      }}
-                      data-testid={`button-preview-${template.id}`}
-                    >
-                      Preview
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleTemplateSelect(template);
-                      }}
-                      data-testid={`button-select-${template.id}`}
-                    >
-                      Select
-                    </Button>
+          {filteredTemplates.map((template) => {
+            const locked = isTemplateLocked(template.id);
+            
+            return (
+              <Card 
+                key={template.id} 
+                className={`bg-white shadow-sm border border-gray-200 hover:shadow-md transition-shadow ${locked ? 'opacity-75' : ''}`}
+                data-testid={`template-${template.id}`}
+              >
+                <CardContent className="p-0">
+                  {/* Template Preview */}
+                  <div className="aspect-[3/4] relative overflow-hidden rounded-t-lg">
+                    {renderTemplatePreview(template)}
+                    {locked && (
+                      <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center">
+                        <div className="bg-amber-500 text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
+                          <Crown className="h-4 w-4" />
+                          <span className="text-xs font-semibold">Premium</span>
+                        </div>
+                        <Lock className="h-8 w-8 text-white mt-3 drop-shadow-lg" />
+                      </div>
+                    )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  
+                  {/* Template Info */}
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-medium text-gray-900 text-sm">{template.name}</h3>
+                      {locked && (
+                        <span className="text-xs text-amber-600 font-medium flex items-center gap-1">
+                          <Crown className="h-3 w-3" />
+                          Pro
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTemplatePreview(template);
+                        }}
+                        data-testid={`button-preview-${template.id}`}
+                      >
+                        Preview
+                      </Button>
+                      {locked ? (
+                        <Button 
+                          size="sm" 
+                          className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLocation('/pricing');
+                          }}
+                          data-testid={`button-upgrade-${template.id}`}
+                        >
+                          <Crown className="h-3 w-3 mr-1" />
+                          Upgrade
+                        </Button>
+                      ) : (
+                        <Button 
+                          size="sm" 
+                          className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTemplateSelect(template);
+                          }}
+                          data-testid={`button-select-${template.id}`}
+                        >
+                          Select
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {filteredTemplates.length === 0 && (

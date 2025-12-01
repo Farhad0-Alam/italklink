@@ -5,6 +5,7 @@ import { PageElement } from "@shared/schema";
 import { generateFieldId } from "@/lib/card-data";
 import { useQuery } from "@tanstack/react-query";
 import { LockedFeature } from "@/components/LockedFeature";
+import { useUserPlan } from "@/hooks/useUserPlan";
 
 interface ElementType {
   type: string;
@@ -13,8 +14,43 @@ interface ElementType {
   color: string;
   description: string;
   isPremium?: boolean;
+  elementId?: number;
   defaultConfig?: any;
 }
+
+const ELEMENT_TYPE_TO_ID: Record<string, number> = {
+  heading: 1,
+  paragraph: 2,
+  link: 3,
+  image: 4,
+  contactSection: 5,
+  socialSection: 6,
+  qrcode: 7,
+  video: 8,
+  actionButtons: 9,
+  contactForm: 900,
+  accordion: 2012,
+  imageSlider: 2024,
+  testimonials: 10,
+  googleMaps: 11,
+  aiChatbot: 12,
+  ragKnowledge: 13,
+  voiceAgent: 14,
+  voiceAssistant: 15,
+  digitalWallet: 16,
+  profile: 17,
+  navigationMenu: 18,
+  arPreviewMindAR: 19,
+  pdfViewer: 20,
+  html: 21,
+  bookAppointment: 22,
+  scheduleCall: 23,
+  meetingRequest: 24,
+  availabilityDisplay: 25,
+  subscribeForm: 26,
+  installButton: 27,
+  shop: 28,
+};
 
 const fallbackElementTypes: ElementType[] = [
   { type: "heading", title: "Heading", icon: "fas fa-heading", color: "bg-blue-100", description: "Add a title or heading" },
@@ -56,30 +92,26 @@ interface ElementSelectorProps {
   onAddElement: (element: PageElement) => void;
 }
 
-interface CurrentUser {
-  id: string;
-  email: string;
-  plan_type?: string;
-  planType?: string;
-}
-
 export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSelectorProps) {
   const { data: apiElementTypes } = useQuery<ElementType[]>({
     queryKey: ['/api/element-types'],
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: currentUser } = useQuery<CurrentUser>({
-    queryKey: ['/api/auth/user'],
-    staleTime: 5 * 60 * 1000,
-  });
+  const { hasElement, isAdmin, elementFeatures, isLoading: planLoading, isPlanLoaded } = useUserPlan();
 
   const elementTypes = useMemo(() => {
     return apiElementTypes && apiElementTypes.length > 0 ? apiElementTypes : fallbackElementTypes;
   }, [apiElementTypes]);
 
-  // Check if user is premium
-  const isPremiumUser = currentUser?.plan_type === 'paid' || currentUser?.planType === 'paid';
+  const isElementLocked = (elementType: string): boolean => {
+    if (planLoading) return true;
+    if (!isPlanLoaded) return true;
+    if (isAdmin) return false;
+    const elementId = ELEMENT_TYPE_TO_ID[elementType];
+    if (!elementId) return false;
+    return !hasElement(elementId);
+  };
 
   const handleAddElement = (type: string) => {
     const id = generateFieldId();
@@ -656,7 +688,7 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
         <div className="flex-1 overflow-y-auto px-4 pb-4">
           <div className="grid grid-cols-3 gap-4 py-4">
             {elementTypes.map((elementType) => {
-              const isLocked = elementType.isPremium && !isPremiumUser;
+              const isLocked = isElementLocked(elementType.type);
               
               return isLocked ? (
                 <LockedFeature

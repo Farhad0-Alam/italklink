@@ -1139,37 +1139,58 @@ export class DatabaseStorage implements IStorage {
 
   async createPlan(planData: any): Promise<SubscriptionPlan> {
     // Map frontend field names to database column names
-    // Remove templates (frontend form field) and templateIds (sent separately) from rest
-    const { frequency, templateIds, templates, moduleFeatures, ...rest } = planData;
+    // Extract all special fields that need explicit handling
+    const { frequency, templateIds, templates, moduleFeatures, elementFeatures, features, ...rest } = planData;
     const dbData: any = {
       ...rest,
       interval: frequency,
     };
-    // Include templateIds if provided (use the explicitly sent templateIds or fall back to templates)
+    
+    // Handle templateIds (use explicitly sent templateIds or fall back to legacy 'templates' field)
     const templateArray = templateIds || templates || [];
     if (templateArray && templateArray.length > 0) {
       dbData.templateIds = templateArray;
     }
-    // Include moduleFeatures if provided
+    
+    // Handle elementFeatures (use explicitly sent elementFeatures or fall back to legacy 'features' field)
+    const elementArray = elementFeatures || features || [];
+    if (elementArray && elementArray.length > 0) {
+      dbData.elementFeatures = elementArray;
+    }
+    
+    // Handle moduleFeatures object
     if (moduleFeatures !== undefined && moduleFeatures !== null) {
       dbData.moduleFeatures = moduleFeatures;
     }
+    
     const [plan] = await db.insert(subscriptionPlans).values(dbData).returning();
     return plan;
   }
 
   async updatePlan(id: number, planData: any): Promise<SubscriptionPlan> {
     // Map frontend field names to database column names
-    // Remove templates (frontend form field) and templateIds (sent separately) from rest
-    const { frequency, templateIds, templates, moduleFeatures, ...rest } = planData;
+    // Extract all special fields that need explicit handling
+    const { frequency, templateIds, templates, moduleFeatures, elementFeatures, features, ...rest } = planData;
     const dbData: any = { ...rest };
-    if (frequency !== undefined) dbData.interval = frequency;
-    // Include templateIds if provided (use the explicitly sent templateIds or fall back to templates)
-    const templateArray = templateIds || templates;
+    
+    // Handle frequency -> interval mapping
+    if (frequency !== undefined) {
+      dbData.interval = frequency;
+    }
+    
+    // Handle templateIds (use explicitly sent templateIds or fall back to legacy 'templates' field)
+    const templateArray = templateIds !== undefined ? templateIds : templates;
     if (templateArray !== undefined && templateArray !== null) {
       dbData.templateIds = templateArray;
     }
-    // Include moduleFeatures if provided
+    
+    // Handle elementFeatures (use explicitly sent elementFeatures or fall back to legacy 'features' field)
+    const elementArray = elementFeatures !== undefined ? elementFeatures : features;
+    if (elementArray !== undefined && elementArray !== null) {
+      dbData.elementFeatures = elementArray;
+    }
+    
+    // Handle moduleFeatures object
     if (moduleFeatures !== undefined && moduleFeatures !== null) {
       dbData.moduleFeatures = moduleFeatures;
     }

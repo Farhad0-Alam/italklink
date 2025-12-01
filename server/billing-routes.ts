@@ -27,8 +27,26 @@ const createPlanSchema = z.object({
   businessCardsLimit: z.number().int().min(0).default(1),
   cardLabel: z.string().optional(),
   trialDays: z.number().int().min(0).default(0),
-  features: z.array(z.number()).default([]),
-  templates: z.array(z.string()).default([]),
+  // Element features - array of element type IDs allowed for this plan
+  elementFeatures: z.array(z.number()).default([]),
+  // Template IDs - array of template IDs allowed for this plan
+  templateIds: z.array(z.string()).default([]),
+  // Module features - object controlling access to platform modules
+  moduleFeatures: z.object({
+    analytics: z.boolean().optional(),
+    crm: z.boolean().optional(),
+    appointments: z.boolean().optional(),
+    emailSignature: z.boolean().optional(),
+    nfc: z.boolean().optional(),
+    voiceConversation: z.boolean().optional(),
+    digitalShop: z.boolean().optional(),
+    bulkGeneration: z.boolean().optional(),
+    customDomain: z.boolean().optional(),
+    apiAccess: z.boolean().optional(),
+    whiteLabel: z.boolean().optional(),
+    prioritySupport: z.boolean().optional(),
+    visitorNotifications: z.boolean().optional(),
+  }).passthrough().default({}),
   isActive: z.boolean().default(true),
   stripePriceId: z.string().optional(),
   extraCardOptions: z.array(z.any()).default([]),
@@ -47,6 +65,10 @@ const createPlanSchema = z.object({
     description: z.string().optional(),
     icon: z.string().optional().default('Check')
   })).default([]),
+  // Legacy field for backward compatibility (maps to elementFeatures)
+  features: z.array(z.number()).optional(),
+  // Legacy field for backward compatibility (maps to templateIds)  
+  templates: z.array(z.string()).optional(),
 });
 
 const createCouponSchema = z.object({
@@ -389,6 +411,88 @@ router.get('/subscription', requireAuth, asyncHandler(async (req, res) => {
   }
 }));
 
+// Get current user's plan with all feature access information
+// Used by frontend to check element, template, and module access
+router.get('/user/plan', requireAuth, asyncHandler(async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'Not authenticated' });
+  }
+
+  // Get user's subscription
+  const subscription = await storage.getUserSubscription(req.user.id);
+  
+  // Get user data for planId reference
+  const user = await storage.getUser(req.user.id);
+  
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  // Get all plans to find the user's plan
+  const plans = await storage.getPlans();
+  
+  // Find user's plan - either from subscription or from user's planId
+  let userPlan = null;
+  
+  if (subscription && subscription.planId) {
+    userPlan = plans.find(p => p.id === subscription.planId);
+  } else if (user.planId) {
+    userPlan = plans.find(p => p.id === user.planId);
+  }
+  
+  // If no plan found, return default free plan access
+  if (!userPlan) {
+    // Return a default free plan with limited features
+    const freePlan = plans.find(p => p.planType === 'free');
+    
+    return res.json({
+      success: true,
+      data: {
+        hasPlan: false,
+        plan: freePlan || null,
+        elementFeatures: freePlan?.elementFeatures || [],
+        templateIds: freePlan?.templateIds || [],
+        moduleFeatures: freePlan?.moduleFeatures || {},
+        businessCardsLimit: freePlan?.businessCardsLimit || 1,
+        isAdmin: user.role === 'admin',
+        unlimitedElements: false,
+        unlimitedTemplates: false,
+        unlimitedModules: false,
+      }
+    });
+  }
+
+  // Determine unlimited access flags
+  // A plan has unlimited access if no specific features are defined (empty arrays/objects)
+  // OR if the plan has explicit unlimited flags
+  const hasUnlimitedElements = (userPlan as any).unlimitedElements === true;
+  const hasUnlimitedTemplates = (userPlan as any).unlimitedTemplates === true;
+  const hasUnlimitedModules = (userPlan as any).unlimitedModules === true;
+
+  // Return the user's plan with all feature access information
+  res.json({
+    success: true,
+    data: {
+      hasPlan: true,
+      plan: userPlan,
+      elementFeatures: userPlan.elementFeatures || [],
+      templateIds: userPlan.templateIds || [],
+      moduleFeatures: userPlan.moduleFeatures || {},
+      businessCardsLimit: userPlan.businessCardsLimit,
+      subscription: subscription ? {
+        status: subscription.status,
+        startDate: subscription.startDate,
+        endDate: subscription.endDate,
+        isActive: subscription.isActive,
+      } : null,
+      isAdmin: user.role === 'admin',
+      unlimitedElements: hasUnlimitedElements,
+      unlimitedTemplates: hasUnlimitedTemplates,
+      unlimitedModules: hasUnlimitedModules,
+    }
+  });
+}));
+
 router.post('/subscription/cancel', requireAuth, asyncHandler(async (req, res) => {
   if (!req.user) {
     return res.status(401).json({ success: false, message: 'Not authenticated' });
@@ -683,6 +787,212 @@ router.post('/webhooks/stripe/recurring', asyncHandler(async (req, res) => {
   }
 
   res.json({ received: true });
+}));
+
+// Admin: Assign plan to user
+const assignPlanSchema = z.object({
+  userId: z.string().min(1, 'User ID is required'),
+  planId: z.number().int().positive('Plan ID must be a positive integer'),
+  validUntil: z.string().optional(), // ISO date string
+  notes: z.string().optional(),
+});
+
+router.post('/admin/users/:userId/assign-plan', requireAdmin, asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const { planId, validUntil, notes } = assignPlanSchema.parse({
+    userId,
+    ...req.body,
+  });
+
+  // Get the user
+  const user = await storage.getUser(userId);
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  // Get the plan
+  const plans = await storage.getPlans();
+  const plan = plans.find(p => p.id === planId);
+  if (!plan) {
+    return res.status(404).json({ success: false, message: 'Plan not found' });
+  }
+
+  // Calculate valid until date
+  let planValidUntil: Date | null = null;
+  if (validUntil) {
+    planValidUntil = new Date(validUntil);
+  } else if (plan.customDurationDays && plan.customDurationDays > 0) {
+    planValidUntil = new Date();
+    planValidUntil.setDate(planValidUntil.getDate() + plan.customDurationDays);
+  }
+
+  // Update user with plan assignment
+  await storage.updateUser(userId, {
+    planId: plan.id,
+    planName: plan.name,
+    planType: plan.planType as 'free' | 'paid',
+    businessCardsLimit: plan.businessCardsLimit,
+    planValidUntil,
+    planAssignedAt: new Date(),
+    planAssignedBy: req.user?.id,
+    planAssignmentNotes: notes,
+  });
+
+  // Also create a subscription record if one doesn't exist
+  const existingSubscription = await storage.getUserSubscription(userId);
+  if (!existingSubscription) {
+    await storage.createUserSubscription({
+      userId,
+      planId: plan.id,
+      couponId: null,
+      stripeSubscriptionId: null,
+      stripeCustomerId: null,
+      userCount: 1,
+      pricePaid: 0, // Admin assigned, no payment
+      features: plan.features || {},
+      startDate: new Date(),
+      endDate: planValidUntil,
+      isActive: true,
+      status: 'active',
+      metadata: {
+        assignedBy: req.user?.id,
+        assignmentNotes: notes,
+        assignmentType: 'admin_assigned',
+      },
+    });
+  } else {
+    // Update existing subscription
+    await storage.updateUserSubscription(existingSubscription.id, {
+      planId: plan.id,
+      isActive: true,
+      status: 'active',
+      endDate: planValidUntil,
+      features: plan.features || {},
+      metadata: {
+        ...(existingSubscription.metadata as object || {}),
+        lastAssignedBy: req.user?.id,
+        lastAssignmentNotes: notes,
+        lastAssignmentType: 'admin_assigned',
+        lastAssignedAt: new Date().toISOString(),
+      },
+    });
+  }
+
+  // Get the updated user
+  const updatedUser = await storage.getUser(userId);
+
+  res.json({
+    success: true,
+    message: `Successfully assigned ${plan.name} to user`,
+    data: {
+      user: updatedUser,
+      plan: plan,
+      validUntil: planValidUntil,
+    },
+  });
+}));
+
+// Admin: Remove plan from user
+router.delete('/admin/users/:userId/plan', requireAdmin, asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  // Get the user
+  const user = await storage.getUser(userId);
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  // Get free plan or default values
+  const plans = await storage.getPlans();
+  const freePlan = plans.find(p => p.planType === 'free');
+
+  // Reset user to free plan
+  await storage.updateUser(userId, {
+    planId: freePlan?.id || null,
+    planName: freePlan?.name || 'Free',
+    planType: 'free',
+    businessCardsLimit: freePlan?.businessCardsLimit || 1,
+    planValidUntil: null,
+    planAssignedAt: null,
+    planAssignedBy: null,
+    planAssignmentNotes: null,
+  });
+
+  // Deactivate any active subscription
+  const subscription = await storage.getUserSubscription(userId);
+  if (subscription) {
+    await storage.updateUserSubscription(subscription.id, {
+      isActive: false,
+      status: 'canceled',
+      endDate: new Date(),
+      metadata: {
+        ...(subscription.metadata as object || {}),
+        removedBy: req.user?.id,
+        removedAt: new Date().toISOString(),
+        removalType: 'admin_removed',
+      },
+    });
+  }
+
+  res.json({
+    success: true,
+    message: 'Successfully removed plan from user',
+    data: {
+      userId,
+      newPlan: freePlan?.name || 'Free',
+    },
+  });
+}));
+
+// Admin: Get user's current plan details
+router.get('/admin/users/:userId/plan', requireAdmin, asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  // Get the user
+  const user = await storage.getUser(userId);
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  // Get user's subscription
+  const subscription = await storage.getUserSubscription(userId);
+
+  // Get all plans
+  const plans = await storage.getPlans();
+
+  // Find user's plan
+  let userPlan = null;
+  if (subscription && subscription.planId) {
+    userPlan = plans.find(p => p.id === subscription.planId);
+  } else if (user.planId) {
+    userPlan = plans.find(p => p.id === user.planId);
+  }
+
+  res.json({
+    success: true,
+    data: {
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        planId: user.planId,
+        planName: user.planName,
+        planType: user.planType,
+        planValidUntil: user.planValidUntil,
+        planAssignedAt: user.planAssignedAt,
+        planAssignedBy: user.planAssignedBy,
+        businessCardsLimit: user.businessCardsLimit,
+      },
+      plan: userPlan,
+      subscription: subscription ? {
+        id: subscription.id,
+        status: subscription.status,
+        startDate: subscription.startDate,
+        endDate: subscription.endDate,
+        isActive: subscription.isActive,
+      } : null,
+    },
+  });
 }));
 
 export default router;
