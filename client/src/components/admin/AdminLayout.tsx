@@ -75,26 +75,22 @@ const sidebarNavItems = [
     icon: UserPlus,
   },
   {
-    title: 'Shop Management',
+    title: 'Products',
     href: '/admin/shop',
-    icon: ShoppingCart,
-    submenu: [
-      {
-        title: 'Products',
-        href: '/admin/shop',
-        icon: Package,
-      },
-      {
-        title: 'Commissions',
-        href: '/admin/shop/commission',
-        icon: Percent,
-      },
-      {
-        title: 'Reviews',
-        href: '/admin/reviews',
-        icon: Star,
-      },
-    ],
+    icon: Package,
+    group: 'Shop Management',
+  },
+  {
+    title: 'Commissions',
+    href: '/admin/shop/commission',
+    icon: Percent,
+    group: 'Shop Management',
+  },
+  {
+    title: 'Reviews',
+    href: '/admin/reviews',
+    icon: Star,
+    group: 'Shop Management',
   },
 ];
 
@@ -124,47 +120,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   const HorizontalNavContent = () => (
-    <div className="flex items-center justify-center space-x-2 overflow-x-auto scrollbar-hide py-1">
+    <div className="flex items-center justify-center space-x-1 overflow-x-auto scrollbar-hide py-1">
       {sidebarNavItems.map((item) => {
         const Icon = item.icon;
         const isActive = location === item.href;
-        const hasSubmenu = (item as any).submenu?.length > 0;
-        
-        if (hasSubmenu) {
-          return (
-            <div key={item.href} className="flex items-center gap-0.5 px-2 py-1 rounded-xl bg-gradient-to-r from-orange-50/40 to-orange-50/20 dark:from-orange-950/30 dark:to-orange-950/20 border border-orange-200/50 dark:border-orange-800/50 backdrop-blur-sm" style={{ pointerEvents: 'auto' }}>
-              <span className="text-xs font-semibold text-orange-700 dark:text-orange-300 px-1.5 pointer-events-none select-none">
-                {item.title}
-              </span>
-              {(item as any).submenu.map((subitem: any) => {
-                const SubIcon = subitem.icon;
-                const isSubActive = location === subitem.href;
-                return (
-                  <Link 
-                    key={subitem.href} 
-                    href={subitem.href} 
-                    data-testid={`nav-${subitem.title.toLowerCase().replace(/\s+/g, '-')}`}
-                    className={`
-                      group relative inline-flex items-center gap-1 px-2 py-1.5 
-                      text-xs font-medium rounded-lg whitespace-nowrap 
-                      transition-all duration-200 ease-in-out cursor-pointer
-                      ${isSubActive 
-                        ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25' 
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-700/30'
-                      }
-                    `}
-                    style={{ pointerEvents: 'auto' }}
-                  >
-                    <SubIcon className={`w-3 h-3 transition-transform duration-200 flex-shrink-0 ${
-                      isSubActive ? 'text-white' : 'group-hover:scale-110'
-                    }`} />
-                    <span className="hidden sm:inline text-xs">{subitem.title}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          );
-        }
+        const isGrouped = (item as any).group === 'Shop Management';
         
         return (
           <Link 
@@ -172,22 +132,21 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             href={item.href} 
             data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
             className={`
-              group relative flex items-center gap-2 px-4 py-2.5 
-              text-sm font-medium rounded-xl whitespace-nowrap 
-              transition-all duration-200 ease-in-out
+              group relative inline-flex items-center gap-1.5 px-3 py-2 
+              text-xs sm:text-sm font-medium rounded-lg whitespace-nowrap 
+              transition-all duration-200 ease-in-out cursor-pointer
               ${isActive 
-                ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 scale-105' 
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700/50'
+                ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md' 
+                : isGrouped
+                ? 'text-orange-700 dark:text-orange-300 hover:bg-orange-50/50 dark:hover:bg-orange-950/30 border border-orange-200/40 dark:border-orange-800/40'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
               }
             `}
           >
-            <Icon className={`w-4 h-4 transition-transform duration-200 ${
+            <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 flex-shrink-0 ${
               isActive ? 'text-white' : 'group-hover:scale-110'
             }`} />
-            <span className="hidden sm:inline">{item.title}</span>
-            {isActive && (
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-white rounded-full" />
-            )}
+            <span>{item.title}</span>
           </Link>
         );
       })}
