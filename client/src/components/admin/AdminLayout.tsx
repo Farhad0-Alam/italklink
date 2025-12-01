@@ -138,6 +138,42 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {sidebarNavItems.map((item) => {
         const Icon = item.icon;
         const isActive = location === item.href;
+        const hasSubmenu = (item as any).submenu?.length > 0;
+        
+        if (hasSubmenu) {
+          return (
+            <div key={item.href} className="flex items-center gap-1">
+              {(item as any).submenu.map((subitem: any) => {
+                const SubIcon = subitem.icon;
+                const isSubActive = location === subitem.href;
+                return (
+                  <Link 
+                    key={subitem.href} 
+                    href={subitem.href} 
+                    data-testid={`nav-${subitem.title.toLowerCase().replace(/\s+/g, '-')}`}
+                    className={`
+                      group relative flex items-center gap-2 px-4 py-2.5 
+                      text-sm font-medium rounded-xl whitespace-nowrap 
+                      transition-all duration-200 ease-in-out
+                      ${isSubActive 
+                        ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 scale-105' 
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700/50'
+                      }
+                    `}
+                  >
+                    <SubIcon className={`w-4 h-4 transition-transform duration-200 ${
+                      isSubActive ? 'text-white' : 'group-hover:scale-110'
+                    }`} />
+                    <span className="hidden sm:inline">{subitem.title}</span>
+                    {isSubActive && (
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-white rounded-full" />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          );
+        }
         
         return (
           <Link 
@@ -253,6 +289,57 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       {sidebarNavItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = location === item.href;
+                        const hasSubmenu = (item as any).submenu?.length > 0;
+                        const isExpanded = expandedSection === item.title;
+                        
+                        if (hasSubmenu) {
+                          return (
+                            <div key={item.href}>
+                              <button
+                                onClick={() => setExpandedSection(isExpanded ? null : item.title)}
+                                className={`
+                                  w-full group flex items-center justify-between gap-3 px-4 py-3 
+                                  rounded-xl font-medium transition-all duration-200
+                                  text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50
+                                `}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <Icon className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:scale-110" />
+                                  <span>{item.title}</span>
+                                </div>
+                                <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                              </button>
+                              {isExpanded && (
+                                <div className="pl-6 space-y-1">
+                                  {(item as any).submenu.map((subitem: any) => {
+                                    const SubIcon = subitem.icon;
+                                    const isSubActive = location === subitem.href;
+                                    return (
+                                      <Link
+                                        key={subitem.href}
+                                        href={subitem.href}
+                                        onClick={() => setSidebarOpen(false)}
+                                        className={`
+                                          group flex items-center gap-3 px-4 py-2 
+                                          rounded-lg font-medium transition-all duration-200
+                                          ${isSubActive 
+                                            ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30' 
+                                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                          }
+                                        `}
+                                      >
+                                        <SubIcon className={`w-4 h-4 ${
+                                          isSubActive ? 'text-white' : 'text-gray-500 dark:text-gray-400'
+                                        }`} />
+                                        <span className={isSubActive ? 'text-white' : ''}>{subitem.title}</span>
+                                      </Link>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }
                         
                         return (
                           <Link 
