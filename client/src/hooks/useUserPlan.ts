@@ -47,13 +47,18 @@ export function useUserPlan() {
   
   const isPlanLoaded = !isLoading && !!planData;
 
+  // Normalize elementFeatures to numbers once (API may return strings from JSON)
+  const normalizedElementFeatures = planData?.elementFeatures 
+    ? planData.elementFeatures.map((id: any) => Number(id)).filter((id: number) => !isNaN(id))
+    : [];
+
   const hasElement = (elementId: number): boolean => {
     if (isLoading) return false;
     if (!planData) return false;
     if (planData.isAdmin) return true;
     if (planData.unlimitedElements || planData.plan?.unlimitedElements) return true;
-    if (!planData.elementFeatures || planData.elementFeatures.length === 0) return false;
-    return planData.elementFeatures.includes(elementId);
+    if (normalizedElementFeatures.length === 0) return false;
+    return normalizedElementFeatures.includes(elementId);
   };
 
   const hasTemplate = (templateId: string): boolean => {
@@ -106,7 +111,7 @@ export function useUserPlan() {
     isAdmin: planData?.isAdmin || false,
     hasPlan: planData?.hasPlan || false,
     plan: planData?.plan || null,
-    elementFeatures: planData?.elementFeatures || [],
+    elementFeatures: normalizedElementFeatures,
     templateIds: planData?.templateIds || [],
     moduleFeatures: planData?.moduleFeatures || {},
     businessCardsLimit: getBusinessCardsLimit(),
