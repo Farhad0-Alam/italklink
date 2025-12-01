@@ -603,6 +603,20 @@ export function ElementSelector({ open, onOpenChange, onAddElement }: ElementSel
           data: {}
         };
         break;
+
+      case "shop":
+        element = {
+          id,
+          type: "shop",
+          order: uniqueOrder,
+          data: {
+            title: "My Digital Products",
+            description: "Browse and purchase my digital products",
+            maxItems: 6,
+            displayStyle: "grid" as const
+          }
+        };
+        break;
       
       default:
         return;
