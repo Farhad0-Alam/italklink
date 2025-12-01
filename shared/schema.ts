@@ -5946,3 +5946,89 @@ export type GiftCard = typeof giftCards.$inferSelect;
 export type InsertGiftCard = typeof giftCards.$inferInsert;
 export type ProductInventory = typeof productInventory.$inferSelect;
 export type InsertProductInventory = typeof productInventory.$inferInsert;
+
+// Bulk Upload Jobs table
+export const bulkUploadJobs = pgTable("bulk_upload_jobs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  status: varchar("status").default('processing'), // processing, completed, failed
+  totalRows: integer("total_rows").default(0),
+  successCount: integer("success_count").default(0),
+  failureCount: integer("failure_count").default(0),
+  fileUrl: varchar("file_url"),
+  errors: text("errors"),
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+}, (table) => [
+  index("idx_upload_seller").on(table.sellerId),
+  index("idx_upload_status").on(table.status),
+]);
+
+// Product Approval Queue table
+export const productApprovals = pgTable("product_approvals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).notNull().unique(),
+  sellerId: varchar("seller_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  status: varchar("status").default('pending'), // pending, approved, rejected
+  submittedAt: timestamp("submitted_at").defaultNow(),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  rejectionReason: text("rejection_reason"),
+}, (table) => [
+  index("idx_approval_product").on(table.productId),
+  index("idx_approval_status").on(table.status),
+]);
+
+// Webhooks table
+export const webhooks = pgTable("webhooks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  url: varchar("url").notNull(),
+  events: text("events").array().notNull(), // order.created, order.paid, product.sold, etc
+  isActive: boolean("is_active").default(true),
+  secret: varchar("secret").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_webhook_user").on(table.userId),
+  index("idx_webhook_active").on(table.isActive),
+]);
+
+// Shipping Methods table
+export const shippingMethods = pgTable("shipping_methods", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  name: varchar("name").notNull(),
+  basePrice: integer("base_price").default(0),
+  estimatedDays: integer("estimated_days").default(3),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_shipping_seller").on(table.sellerId),
+]);
+
+// Platform Settings table
+export const platformSettings = pgTable("platform_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: varchar("key").unique().notNull(),
+  value: text("value"),
+  type: varchar("type").default('string'),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Email Templates table
+export const emailTemplates = pgTable("email_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  slug: varchar("slug").unique().notNull(),
+  subject: varchar("subject").notNull(),
+  template: text("template").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type BulkUploadJob = typeof bulkUploadJobs.$inferSelect;
+export type ProductApproval = typeof productApprovals.$inferSelect;
+export type Webhook = typeof webhooks.$inferSelect;
+export type ShippingMethod = typeof shippingMethods.$inferSelect;
+export type PlatformSettings = typeof platformSettings.$inferSelect;
+export type EmailTemplate = typeof emailTemplates.$inferSelect;

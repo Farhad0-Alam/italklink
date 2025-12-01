@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate, productSocialShares, type ProductSocialShare, type InsertProductSocialShare, abandonedCarts, type AbandonedCart, type InsertAbandonedCart, sellerSubscriptionPlans, sellerSubscriptions, type SellerSubscriptionPlan, type InsertSellerSubscriptionPlan, type SellerSubscription, type InsertSellerSubscription, giftCards, type GiftCard, type InsertGiftCard, productInventory, type ProductInventory, type InsertProductInventory
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate, productSocialShares, type ProductSocialShare, type InsertProductSocialShare, abandonedCarts, type AbandonedCart, type InsertAbandonedCart, sellerSubscriptionPlans, sellerSubscriptions, type SellerSubscriptionPlan, type InsertSellerSubscriptionPlan, type SellerSubscription, type InsertSellerSubscription, giftCards, type GiftCard, type InsertGiftCard, productInventory, type ProductInventory, type InsertProductInventory, bulkUploadJobs, productApprovals, webhooks, shippingMethods, platformSettings, emailTemplates
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -718,6 +718,29 @@ export interface IStorage {
   createProductInventory(inventoryData: any): Promise<ProductInventory>;
   updateProductInventory(inventoryId: string, inventoryData: Partial<any>): Promise<ProductInventory>;
   getLowStockProducts(): Promise<ProductInventory[]>;
+
+  // Bulk upload operations
+  createBulkUploadJob(jobData: any): Promise<any>;
+  updateBulkUploadJob(jobId: string, jobData: any): Promise<any>;
+  getSellerBulkUploads(sellerId: string): Promise<any[]>;
+
+  // Product approval operations
+  getPendingApprovals(): Promise<any[]>;
+  approveProduct(productId: string, adminId: string): Promise<any>;
+  rejectProduct(productId: string, adminId: string, reason: string): Promise<any>;
+
+  // Webhook operations
+  createWebhook(webhookData: any): Promise<any>;
+  getWebhooks(userId: string): Promise<any[]>;
+  deleteWebhook(webhookId: string): Promise<void>;
+
+  // Settings operations
+  getSetting(key: string): Promise<any>;
+  setSetting(key: string, value: string, type?: string): Promise<any>;
+
+  // Email template operations
+  getEmailTemplate(slug: string): Promise<any>;
+  getAllEmailTemplates(): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -7869,6 +7892,63 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(productInventory)
       .where(eq(productInventory.isLowStock, true))
       .orderBy(productInventory.remainingStock);
+  }
+
+  // ===== BULK UPLOAD OPERATIONS =====
+  async createBulkUploadJob(jobData: any): Promise<any> {
+    const [job] = await db.insert(bulkUploadJobs).values(jobData).returning();
+    return job;
+  }
+  async updateBulkUploadJob(jobId: string, jobData: any): Promise<any> {
+    const [job] = await db.update(bulkUploadJobs).set(jobData).where(eq(bulkUploadJobs.id, jobId)).returning();
+    return job;
+  }
+  async getSellerBulkUploads(sellerId: string): Promise<any[]> {
+    return await db.select().from(bulkUploadJobs).where(eq(bulkUploadJobs.sellerId, sellerId)).orderBy(desc(bulkUploadJobs.createdAt));
+  }
+
+  // ===== PRODUCT APPROVAL OPERATIONS =====
+  async getPendingApprovals(): Promise<any[]> {
+    return await db.select().from(productApprovals).where(eq(productApprovals.status, 'pending')).orderBy(desc(productApprovals.submittedAt));
+  }
+  async approveProduct(productId: string, adminId: string): Promise<any> {
+    const [approval] = await db.update(productApprovals).set({ status: 'approved', reviewedAt: new Date(), reviewedBy: adminId }).where(eq(productApprovals.productId, productId)).returning();
+    return approval;
+  }
+  async rejectProduct(productId: string, adminId: string, reason: string): Promise<any> {
+    const [approval] = await db.update(productApprovals).set({ status: 'rejected', reviewedAt: new Date(), reviewedBy: adminId, rejectionReason: reason }).where(eq(productApprovals.productId, productId)).returning();
+    return approval;
+  }
+
+  // ===== WEBHOOK OPERATIONS =====
+  async createWebhook(webhookData: any): Promise<any> {
+    const [webhook] = await db.insert(webhooks).values(webhookData).returning();
+    return webhook;
+  }
+  async getWebhooks(userId: string): Promise<any[]> {
+    return await db.select().from(webhooks).where(eq(webhooks.userId, userId));
+  }
+  async deleteWebhook(webhookId: string): Promise<void> {
+    await db.delete(webhooks).where(eq(webhooks.id, webhookId));
+  }
+
+  // ===== SETTINGS OPERATIONS =====
+  async getSetting(key: string): Promise<any> {
+    const [setting] = await db.select().from(platformSettings).where(eq(platformSettings.key, key));
+    return setting?.value;
+  }
+  async setSetting(key: string, value: string, type?: string): Promise<any> {
+    const [setting] = await db.insert(platformSettings).values({ key, value, type }).onConflictDoUpdate({ target: platformSettings.key, set: { value } }).returning();
+    return setting;
+  }
+
+  // ===== EMAIL TEMPLATE OPERATIONS =====
+  async getEmailTemplate(slug: string): Promise<any> {
+    const [template] = await db.select().from(emailTemplates).where(eq(emailTemplates.slug, slug));
+    return template;
+  }
+  async getAllEmailTemplates(): Promise<any[]> {
+    return await db.select().from(emailTemplates).where(eq(emailTemplates.isActive, true));
   }
 }
 
