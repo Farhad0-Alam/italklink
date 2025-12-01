@@ -46,7 +46,8 @@ const fallbackElementTypes: ElementType[] = [
   { type: "meetingRequest", title: "Meeting Request", icon: "fas fa-handshake", color: "bg-gradient-to-r from-purple-500 to-indigo-600", description: "Request a meeting button" },
   { type: "availabilityDisplay", title: "Availability Display", icon: "fas fa-clock", color: "bg-gradient-to-r from-amber-500 to-orange-600", description: "Show your availability schedule" },
   { type: "subscribeForm", title: "Subscribe to Updates", icon: "fas fa-bell", color: "bg-gradient-to-r from-orange-500 to-red-600", description: "Let visitors subscribe to notifications" },
-  { type: "installButton", title: "Install Button", icon: "fas fa-download", color: "bg-green-100", description: "PWA install button for Android & iPhone" }
+  { type: "installButton", title: "Install Button", icon: "fas fa-download", color: "bg-green-100", description: "PWA install button for Android & iPhone" },
+  { type: "shop", title: "Digital Shop", icon: "fas fa-shopping-bag", color: "bg-gradient-to-r from-green-500 to-emerald-600", description: "Showcase your digital products" }
 ];
 
 interface ElementSelectorProps {
