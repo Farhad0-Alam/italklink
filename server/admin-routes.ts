@@ -311,6 +311,15 @@ router.post('/users', requireOwner, async (req, res) => {
       });
     }
     
+    // Validate planId is a valid number
+    const numericPlanId = Number(planId);
+    if (isNaN(numericPlanId)) {
+      return res.status(400).json({ 
+        message: 'Invalid plan ID format',
+        error: 'INVALID_PLAN_ID' 
+      });
+    }
+    
     // Check if user with this email already exists
     const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
     
@@ -324,7 +333,7 @@ router.post('/users', requireOwner, async (req, res) => {
     // Get plan details
     const [selectedPlan] = await db.select()
       .from(subscriptionPlans)
-      .where(eq(subscriptionPlans.id, Number(planId)))
+      .where(eq(subscriptionPlans.id, numericPlanId))
       .limit(1);
     
     if (!selectedPlan) {
@@ -348,13 +357,13 @@ router.post('/users', requireOwner, async (req, res) => {
       role: 'user',
       planType,
       businessCardsLimit,
-      planId: Number(planId), // Store planId in users table too
+      planId: numericPlanId, // Store planId in users table too
     }).returning();
     
     // Create userPlans entry for mandatory plan assignment
     await db.insert(userPlans).values({
       userId: newUser.id,
-      planId: Number(planId),
+      planId: numericPlanId,
       startsAt: new Date(),
       note: 'Assigned by admin during user creation',
     });
@@ -463,10 +472,20 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
     const { id } = req.params;
     const { planId, startsAt, endsAt, note } = req.body;
     
+    // Validate and parse planId as number FIRST before any DB queries
+    if (!planId) {
+      return res.status(400).json({ message: 'Plan ID is required' });
+    }
+    
+    const numericPlanId = Number(planId);
+    if (isNaN(numericPlanId)) {
+      return res.status(400).json({ message: 'Invalid plan ID format' });
+    }
+    
     // Get plan details to update user's plan type and limits
     const [selectedPlan] = await db.select()
       .from(subscriptionPlans)
-      .where(eq(subscriptionPlans.id, Number(planId)))
+      .where(eq(subscriptionPlans.id, numericPlanId))
       .limit(1);
     
     if (!selectedPlan) {
@@ -476,7 +495,7 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
     // Create user plan assignment
     await db.insert(userPlans).values({
       userId: id,
-      planId,
+      planId: numericPlanId,
       startsAt: startsAt ? new Date(startsAt) : new Date(),
       endsAt: endsAt ? new Date(endsAt) : null,
       note
@@ -485,7 +504,7 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
     // Update user's subscription info, plan type, limits, and planId
     await db.update(users)
       .set({ 
-        planId: Number(planId), // Critical: set planId for mandatory plan selection system
+        planId: numericPlanId, // Critical: set planId for mandatory plan selection system
         planType: selectedPlan.planType,
         businessCardsLimit: selectedPlan.businessCardsLimit === -1 ? 999999 : selectedPlan.businessCardsLimit,
         subscriptionEndsAt: endsAt ? new Date(endsAt) : null,

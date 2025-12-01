@@ -8,9 +8,18 @@ TalkLink is an enterprise-grade platform providing professional digital business
 - Development approach: Work autonomously with minimal interruptions
 - Testing: Create new test users to verify functionality
 
-## Recent Updates (Current Session - 25/39 Tasks Complete - 64%)
+## Recent Updates (Current Session)
 
-### Digital Shop Development Complete Features
+### Mandatory Plan Selection System (Latest)
+- **No Default Plans**: Users must explicitly choose a plan to access any features
+- **Plan Validity Display**: Admin Users page now shows plan validity as DD-MMM-YYYY format (calculated from startsAt + interval)
+- **useUserPlan Hook**: Returns `isPlanAssigned: false` when no plan, locks ALL features (elements, templates, modules, cards)
+- **PlanRequiredOverlay Component**: Premium overlay shown on Dashboard and CardBuilder when no plan assigned
+- **Registration Flow**: New users redirected to /pricing page after registration
+- **Admin User Creation**: Requires plan assignment, inserts into userPlans table
+- **Admin Plan Assignment**: Updates both users.planId and userPlans table for proper tracking
+
+### Digital Shop Development Complete Features (25/39 Tasks Complete - 64%)
 - **Completed Tasks 1-18, 20-25** (25 tasks - 64% of 39-task roadmap):
   * Task 1: Digital Downloads System - Token-based access, download tracking, 30-day expiration, 5 re-downloads
   * Task 2: Reviews & Ratings - 5-star ratings with seller responses, helpful votes, review display
