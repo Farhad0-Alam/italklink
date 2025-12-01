@@ -2,18 +2,22 @@ import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
-import { Download, ShoppingCart, AlertCircle, Package, Star, Heart, Share2, Shield, Truck, RotateCcw, MessageCircle, Twitter, Facebook, Linkedin } from "lucide-react";
+import { Download, ShoppingCart, AlertCircle, Package, Star, Heart, Share2, Shield, Truck, RotateCcw, MessageCircle, Twitter, Facebook, Linkedin, Copy } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import type { DigitalProduct } from "@shared/schema";
 import { getTwitterShareUrl, getFacebookShareUrl, getLinkedInShareUrl, trackShare } from "@/lib/sharing";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProductDetails() {
   const { slug } = useParams<{ slug: string }>();
   const [, setLocation] = useLocation();
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState(0);
+  const [shareOpen, setShareOpen] = useState(false);
+  const { toast } = useToast();
 
   // Fetch product
   const { data: product, isLoading, error } = useQuery<DigitalProduct>({
@@ -55,6 +59,31 @@ export default function ProductDetails() {
   const discountPercent = product.discountPrice
     ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
     : 0;
+
+  const productUrl = typeof window !== 'undefined' ? window.location.href : '';
+
+  const handleShare = (platform: 'twitter' | 'facebook' | 'linkedin') => {
+    const shareConfig = {
+      title: product.title,
+      description: product.shortDescription || product.description?.slice(0, 100) || '',
+      url: productUrl,
+      hashtags: ['DigitalProduct', 'TalkLink'],
+    };
+
+    let shareUrl = '';
+    if (platform === 'twitter') shareUrl = getTwitterShareUrl(shareConfig);
+    if (platform === 'facebook') shareUrl = getFacebookShareUrl(shareConfig);
+    if (platform === 'linkedin') shareUrl = getLinkedInShareUrl(shareConfig);
+
+    trackShare(product.id, platform, shareUrl);
+    window.open(shareUrl, 'share', 'width=600,height=400');
+    setShareOpen(false);
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(productUrl);
+    toast({ title: 'Link copied to clipboard!' });
+  };
 
   // Safe numeric values
   const price = product.price || 0;
@@ -209,14 +238,61 @@ export default function ProductDetails() {
                       Add to Cart
                     </Button>
                     <div className="flex gap-3">
-                      <Button variant="outline" size="lg" className="flex-1 rounded-lg h-12">
+                      <Button variant="outline" size="lg" className="flex-1 rounded-lg h-12" data-testid="button-wishlist">
                         <Heart className="w-5 h-5 mr-2" />
                         Save
                       </Button>
-                      <Button variant="outline" size="lg" className="flex-1 rounded-lg h-12">
-                        <Share2 className="w-5 h-5 mr-2" />
-                        Share
-                      </Button>
+                      <Popover open={shareOpen} onOpenChange={setShareOpen}>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="lg" className="flex-1 rounded-lg h-12" data-testid="button-share">
+                            <Share2 className="w-5 h-5 mr-2" />
+                            Share
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-4" align="end">
+                          <div className="space-y-3">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">Share this product</p>
+                            
+                            <button
+                              onClick={() => handleShare('twitter')}
+                              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 border border-gray-200 dark:border-gray-700 transition"
+                              data-testid="button-share-twitter"
+                            >
+                              <Twitter className="w-5 h-5 text-blue-400" />
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Share on Twitter</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleShare('facebook')}
+                              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 border border-gray-200 dark:border-gray-700 transition"
+                              data-testid="button-share-facebook"
+                            >
+                              <Facebook className="w-5 h-5 text-blue-600" />
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Share on Facebook</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleShare('linkedin')}
+                              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 border border-gray-200 dark:border-gray-700 transition"
+                              data-testid="button-share-linkedin"
+                            >
+                              <Linkedin className="w-5 h-5 text-blue-700" />
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Share on LinkedIn</span>
+                            </button>
+
+                            <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
+                              <button
+                                onClick={copyToClipboard}
+                                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition"
+                                data-testid="button-copy-link"
+                              >
+                                <Copy className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Copy link</span>
+                              </button>
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </div>
                 </div>
