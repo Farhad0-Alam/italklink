@@ -32,7 +32,7 @@ const Appointments = lazy(() => import("./pages/appointments"));
 const Share = lazy(() => import("./pages/share").then(module => ({ default: module.Share })));
 const TemplatePreview = lazy(() => import("./pages/template-preview"));
 const CardEditor = lazy(() => import("./pages/card-editor"));
-const Admin = lazy(() => import("./pages/admin"));
+const Admin = lazy(() => import("./modules/admin-panel/components/AdminMain"));
 const TemplateBuilderPage = lazy(() => import("./components/admin/TemplateBuilder"));
 const Pricing = lazy(() => import("./pages/pricing"));
 const Affiliate = lazy(() => import("./pages/affiliate"));
