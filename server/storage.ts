@@ -6528,17 +6528,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPlatformSettings(): Promise<any> {
-    const settings = await db.execute(sql`SELECT setting_key, setting_value FROM platform_settings`);
     const result: Record<string, any> = {
       ownerCommission: 50,
       sellerCommission: 30,
       platformCommission: 20,
     };
     
-    for (const row of settings as any[]) {
-      if (row.setting_key === 'default_owner_commission') result.ownerCommission = parseInt(row.setting_value);
-      if (row.setting_key === 'default_seller_commission') result.sellerCommission = parseInt(row.setting_value);
-      if (row.setting_key === 'default_platform_commission') result.platformCommission = parseInt(row.setting_value);
+    try {
+      const queryResult = await db.execute(sql`SELECT setting_key, setting_value FROM platform_settings`);
+      const rows = (queryResult as any).rows || queryResult || [];
+      
+      for (const row of rows) {
+        if (row.setting_key === 'default_owner_commission') result.ownerCommission = parseInt(row.setting_value);
+        if (row.setting_key === 'default_seller_commission') result.sellerCommission = parseInt(row.setting_value);
+        if (row.setting_key === 'default_platform_commission') result.platformCommission = parseInt(row.setting_value);
+      }
+    } catch (error) {
+      console.log('Platform settings table may not exist, using defaults');
     }
     
     return result;
