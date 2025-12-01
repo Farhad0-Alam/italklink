@@ -1,0 +1,283 @@
+.section {
+  position: relative;
+  padding: 8rem 1.5rem;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #0b3a23;
+  color: white;
+}
+
+.backgroundElements {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gradientOrb {
+  position: absolute;
+  width: 30vw;
+  height: 30vw;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.15;
+}
+
+.gradientOrb:nth-child(1) {
+  top: -10%;
+  left: -10%;
+  background: linear-gradient(135deg, #ff6b6b, #ffe66d);
+}
+
+.gradientOrb:nth-child(2) {
+  top: 40%;
+  right: -10%;
+  background: linear-gradient(135deg, #4ecdc4, #556270); /* Gradient 2 */
+}
+
+.gradientOrb:nth-child(3) {
+  bottom: -10%;
+  left: 30%;
+  background: linear-gradient(135deg, #a8e6cf, #dcedc1); /* Gradient 3 */
+}
+
+.container {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  z-index: 1;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 9999px;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #d0e500;
+  margin-bottom: 1.5rem;
+}
+
+.header h2 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #d0e500;
+  margin-bottom: 1rem;
+}
+
+.header p {
+  font-size: 1.25rem;
+  color: #d0e500;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 5rem;
+}
+
+.featureCard {
+  position: relative;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.featureCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #ffd93d, #ff6b6b); /* Gradient 4 */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.featureCard:hover::before {
+  opacity: 0.05;
+}
+
+.iconWrapper {
+  position: relative;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.iconWrapper svg {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+  color: white;
+}
+
+.iconBackground {
+  position: absolute;
+  inset: -5px;
+  background: linear-gradient(135deg, #ffd93d, #ff6b6b); /* Gradient 4 */
+  border-radius: 12px;
+  opacity: 0.2;
+}
+
+.featureCard h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: white;
+}
+
+.featureCard p {
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+.shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    45deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.featureCard:hover .shine {
+  transform: translateX(100%);
+}
+
+.ctaSection {
+  text-align: center;
+  padding: 4rem;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border-radius: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.ctaContent h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ctaContent p {
+  color: #94a3b8;
+  margin-bottom: 2rem;
+}
+
+.ctaButton {
+  position: relative;
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  background: linear-gradient(to right, #ffd83d8b, #ff6b6b);
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.ctaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.sparkle {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  transform: translateY(-50%);
+  font-size: 1.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .section {
+    padding: 4rem 1rem;
+  }
+
+  .header h2 {
+    font-size: 2.5rem;
+  }
+
+  .ctaSection {
+    padding: 2rem;
+  }
+
+  .featuresGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .gradientOrb {
+    width: 50vw;
+    height: 50vw;
+  }
+}
+
+@media (max-width: 480px) {
+  .header h2 {
+    font-size: 2rem;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+  }
+
+  .featureCard {
+    padding: 1.5rem;
+  }
+
+  .ctaButton {
+    width: 100%;
+  }
+}
+
+/* Animation Keyframes */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

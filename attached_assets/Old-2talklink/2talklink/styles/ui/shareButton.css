@@ -1,0 +1,25 @@
+.v1-2024-share-button {
+  border-radius: 50%;
+  position: fixed;
+  bottom: 15%;
+  right: 5%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+  width: 50px; /* Width of the button */
+  height: 50px; /* Height of the button */
+  z-index: 9999;
+}
+
+.v1-2024-share-button:active {
+  transform: scale(1.2); /* Scale effect on hover */
+}
+
+@media (max-width: 768px) {
+  .v1-2024-share-button {
+    width: 50px; /* Responsive width for smaller devices */
+    height: 50px; /* Responsive height for smaller devices */
+  }
+}

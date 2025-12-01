@@ -1,0 +1,224 @@
+[{
+  "_id": {
+    "$oid": "6319dad76e743011249d0bf6"
+  },
+  "status": 1,
+  "title": "Merchants (Retail)",
+  "createdAt": {
+    "$date": "2022-09-08T12:06:47.709Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:40.313Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "62b1ae05959b1949a45e5479"
+  },
+  "status": 1,
+  "title": "Home & Garden",
+  "createdAt": {
+    "$date": "2022-06-21T11:39:49.835Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:50.118Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "62b1adff959b1949a45e5472"
+  },
+  "status": 1,
+  "title": "Legal & Financial",
+  "createdAt": {
+    "$date": "2022-06-21T11:39:43.957Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-08T12:06:10.305Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "631040c665afea1cecc8c5fc"
+  },
+  "status": 1,
+  "title": "Food & Dining",
+  "createdAt": {
+    "$date": "2022-09-01T05:19:02.038Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:48.158Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "62b1a348e4371640f4285816"
+  },
+  "status": 1,
+  "title": "Manufacturing, Wholesale, Distribution",
+  "createdAt": {
+    "$date": "2022-06-21T10:54:00.025Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-08T12:06:24.750Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "631040cc65afea1cecc8c603"
+  },
+  "status": 1,
+  "title": "Entertainment",
+  "createdAt": {
+    "$date": "2022-09-01T05:19:08.707Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:47.056Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "631040d565afea1cecc8c60a"
+  },
+  "status": 1,
+  "title": "Education",
+  "createdAt": {
+    "$date": "2022-09-01T05:19:17.048Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:43.842Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "631040eb65afea1cecc8c626"
+  },
+  "status": 1,
+  "title": "Automotive",
+  "createdAt": {
+    "$date": "2022-09-01T05:19:39.184Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:40.723Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "631040e565afea1cecc8c61f"
+  },
+  "status": 1,
+  "title": "Business Support & Supplies",
+  "createdAt": {
+    "$date": "2022-09-01T05:19:33.863Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:41.648Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6319daf26e743011249d0c15"
+  },
+  "status": 1,
+  "title": "Travel & Transportation",
+  "createdAt": {
+    "$date": "2022-09-08T12:07:14.595Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-27T06:53:50.499Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6319dade6e743011249d0c00"
+  },
+  "status": 1,
+  "title": "Miscellaneous",
+  "createdAt": {
+    "$date": "2022-09-08T12:06:54.572Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:39.890Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "631040ba65afea1cecc8c5f5"
+  },
+  "status": 1,
+  "title": "Health & Medicine",
+  "createdAt": {
+    "$date": "2022-09-01T05:18:50.817Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:49.207Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "631040e065afea1cecc8c618"
+  },
+  "status": 1,
+  "title": "Computers & Electronics",
+  "createdAt": {
+    "$date": "2022-09-01T05:19:28.337Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:42.433Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "631040da65afea1cecc8c611"
+  },
+  "status": 1,
+  "title": "Construction & Contractors",
+  "createdAt": {
+    "$date": "2022-09-01T05:19:22.933Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:42.778Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6319dae56e743011249d0c07"
+  },
+  "status": 1,
+  "title": "Personal Care & Services",
+  "createdAt": {
+    "$date": "2022-09-08T12:07:01.692Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:39.403Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6319daeb6e743011249d0c0e"
+  },
+  "status": 1,
+  "title": "Real Estate",
+  "createdAt": {
+    "$date": "2022-09-08T12:07:07.978Z"
+  },
+  "updatedAt": {
+    "$date": "2022-09-14T13:35:38.875Z"
+  },
+  "__v": 0
+}]

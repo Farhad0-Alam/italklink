@@ -1,0 +1,86 @@
+/* General Card Styles */
+.card {
+  width: 100%;
+  height: 400px;
+  perspective: 1000px; /* Enables 3D flipping effect */
+  margin: 20px auto;
+  border-radius: 20px;
+  object-fit: cover;
+}
+
+.cardInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s ease-in-out;
+  transform-style: preserve-3d;
+}
+
+.card.flipped .cardInner {
+  transform: rotateY(180deg); /* Flips the card */
+}
+
+.cardFront,
+.cardBack {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden; /* Hides the opposite side */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardFront {
+  background: #f9f9f9;
+}
+
+.cardBack {
+  background: #4caf50;
+  color: white;
+  transform: rotateY(180deg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image scales nicely */
+}
+
+/* Back Content */
+.backContent {
+  padding: 20px;
+}
+
+.link {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  margin-top: 10px;
+  display: flex;
+  gap: 4px;
+}
+
+.link:hover {
+  color: #ffeb3b;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card {
+    width: 250px;
+    height: 350px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    width: 200px;
+    height: 300px;
+  }
+}

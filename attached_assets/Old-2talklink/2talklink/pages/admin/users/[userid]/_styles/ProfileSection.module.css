@@ -1,0 +1,32 @@
+.profileSection {
+  flex: 1;
+  min-width: 300px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.avatarContainer {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.details p {
+  margin: 0.5rem 0;
+}
+
+.active {
+  color: #28a745;
+}
+
+.inactive {
+  color: #dc3545;
+}

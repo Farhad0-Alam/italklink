@@ -1,0 +1,141 @@
+.card {
+  background: linear-gradient(135deg, #f6f8fa 0%, #e9eef2 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.pricingInfo {
+  text-align: left;
+  margin: 0px 0;
+  position: relative;
+}
+
+.currency {
+  font-size: 28px;
+  vertical-align: super;
+  color: #222;
+}
+
+.price {
+  font-size: 30px;
+  font-weight: 500;
+  color: #222;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.period {
+  font-size: 20px;
+  color: #666;
+}
+
+.cardInfo {
+  text-align: left;
+  font-size: 18px;
+  color: #555;
+}
+
+.cardInfo p:first-child {
+  margin: 0;
+}
+
+.freeTrial {
+  color: #008080;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+  margin: 0;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.extraCardsButton,
+.freeTrialButton,
+.subscribeButton {
+  padding: 16px 32px;
+  border: none;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.extraCardsButton {
+  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+  color: #333;
+}
+
+.extraCardsButton:hover {
+  background: linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%);
+}
+
+.freeTrialButton {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  font-weight: 400;
+}
+
+.freeTrialButton:hover {
+  background: linear-gradient(135deg, #45a049 0%, #3d8b3d 100%);
+}
+
+.subscribeButton {
+  color: white;
+  background: linear-gradient(135deg, #2196f3 0%, #1e88e5 100%);
+  transition: unset !important;
+}
+
+.subscribeButton:hover {
+  background: #f15a29;
+}
+
+@media (max-width: 767px) {
+  .card {
+    margin-bottom: 25px;
+  }
+  .card:last-child {
+    margin-bottom: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 24px;
+  }
+
+  .price {
+    font-size: 35px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}

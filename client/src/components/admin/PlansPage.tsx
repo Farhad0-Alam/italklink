@@ -478,12 +478,23 @@ export default function PlansPage() {
       });
 
       if (response.ok) {
-        resetForm();
-        setEditPlanOpen(false);
-        setSelectedPlan(null);
+        const result = await response.json();
+        const updatedPlan = result.data;
+        
+        // Invalidate cache to refresh the plans list
         queryClient.invalidateQueries({ queryKey: ['/api/billing/admin/plans'] });
         queryClient.invalidateQueries({ queryKey: ['/api/plans'] }); // Also refresh public plans
+        
+        // Wait for cache to update, then reload the form with fresh data
+        setTimeout(() => {
+          if (updatedPlan) {
+            openEditModal(updatedPlan);
+          }
+          setIsSubmitting(false);
+        }, 100);
+        
         console.log('Plan updated successfully');
+        return;
       } else {
         const error = await response.json();
         alert(`Failed to update plan: ${error.message || 'Unknown error'}`);

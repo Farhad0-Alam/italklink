@@ -1,0 +1,85 @@
+.planDetailsForm {
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  font-family: "Roboto", sans-serif;
+  min-width: 300px;
+  flex: 1;
+}
+
+.planDetailsForm h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.formGroup input[type="text"],
+.formGroup input[type="number"],
+.formGroup input[type="datetime-local"] {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.formGroup input[type="text"]:focus,
+.formGroup input[type="number"]:focus,
+.formGroup input[type="datetime-local"]:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+}
+
+.formGroup input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.formGroup input[disabled] {
+  background: #f7f7f7;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.planDetailsForm .formGroup:last-of-type {
+  margin-bottom: 2rem;
+}
+
+.planDetailsForm .formGroup label[for="isFreePlan"] {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .planDetailsForm {
+    padding: 1.5rem;
+  }
+
+  .planDetailsForm h2 {
+    font-size: 1.6rem;
+  }
+
+  .formGroup input[type="text"],
+  .formGroup input[type="number"],
+  .formGroup input[type="datetime-local"] {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+}

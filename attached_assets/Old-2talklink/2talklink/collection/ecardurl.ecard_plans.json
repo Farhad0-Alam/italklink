@@ -1,0 +1,18 @@
+[{
+  "_id": {
+    "$oid": "66ca3d773c3201f12bb65b38"
+  },
+  "parentId": "66bc93baceaa50dead24e024",
+  "planname": "Premium Plan",
+  "price": 29.99,
+  "validity": 30,
+  "source": "Online",
+  "currency": {
+    "code": "USD",
+    "symbol": "$"
+  },
+  "status": 1,
+  "createdAt": "2024-08-25T12:34:56.789Z",
+  "updatedAt": "2024-08-25T12:34:56.789Z",
+  "__v": 0
+}]
