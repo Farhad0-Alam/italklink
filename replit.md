@@ -10,7 +10,14 @@ TalkLink is an enterprise-grade platform providing professional digital business
 
 ## Recent Updates (Current Session)
 
-### Mandatory Plan Selection System (Latest)
+### Plan Duration & Auto-Renewal System (Latest)
+- **Duration Selector**: Admin Assign Plan dialog now has Monthly (30 days), Yearly (365 days), Unlimited options
+- **Subscription Continuity**: When reassigning plans before expiry, extends from existing end date (not now)
+- **Stripe Auto-Renewal**: When Stripe payment succeeds, automatically extends userPlans using exact billing period dates
+- **Exact Period Matching**: Stripe webhook uses timestamps to match/update correct records, avoiding duplicates
+- **Admin Plan Isolation**: Stripe webhooks only affect matching planId+period records, preserving admin-assigned plans
+
+### Mandatory Plan Selection System
 - **No Default Plans**: Users must explicitly choose a plan to access any features
 - **Plan Validity Display**: Admin Users page now shows plan validity as DD-MMM-YYYY format (calculated from startsAt + interval)
 - **useUserPlan Hook**: Returns `isPlanAssigned: false` when no plan, locks ALL features (elements, templates, modules, cards)
