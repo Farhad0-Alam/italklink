@@ -4,6 +4,9 @@ import { storage } from './storage';
 import { requireAuth, requireAdmin } from './auth';
 import { asyncHandler } from './middleware/error-handling';
 import { z } from 'zod';
+import { db } from './db';
+import { users, userPlans, subscriptionPlans } from '@shared/schema';
+import { eq, desc, and } from 'drizzle-orm';
 
 const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.TESTING_STRIPE_SECRET_KEY;
 
@@ -761,6 +764,75 @@ router.post('/webhooks/stripe/recurring', asyncHandler(async (req, res) => {
           await storage.updateUser(dbSubscription.userId, {
             subscriptionStatus: 'active',
           });
+          
+          // Auto-extend userPlans using Stripe's actual billing period dates
+          const stripeSubscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+          
+          // Use Stripe's actual period dates for accurate billing cycle alignment
+          const periodStart = new Date(stripeSubscription.current_period_start * 1000);
+          const periodEnd = new Date(stripeSubscription.current_period_end * 1000);
+          const interval = stripeSubscription.items.data[0]?.price?.recurring?.interval; // 'month' or 'year'
+          
+          // Get the plan from the subscription
+          const planId = dbSubscription.planId;
+          
+          // Use Stripe's period timestamps as unique identifiers to match exact periods
+          // This avoids any timezone or date normalization issues
+          const stripePeriodStartTs = stripeSubscription.current_period_start;
+          const stripePeriodEndTs = stripeSubscription.current_period_end;
+          
+          // Query for existing userPlans matching planId and look for exact period match
+          const existingPlansForUser = await db.select()
+            .from(userPlans)
+            .where(and(
+              eq(userPlans.userId, dbSubscription.userId),
+              eq(userPlans.planId, planId)
+            ))
+            .orderBy(desc(userPlans.startsAt));
+          
+          // Find exact match by comparing timestamps (within 1 second tolerance for rounding)
+          const matchingRecord = existingPlansForUser.find((p) => {
+            if (!p.startsAt || !p.endsAt) return false;
+            const startsAtTs = Math.floor(p.startsAt.getTime() / 1000);
+            const endsAtTs = Math.floor(p.endsAt.getTime() / 1000);
+            return Math.abs(startsAtTs - stripePeriodStartTs) <= 1 && 
+                   Math.abs(endsAtTs - stripePeriodEndTs) <= 1;
+          });
+          
+          const periodNote = `Stripe ${interval === 'year' ? 'Yearly' : 'Monthly'} - ${periodStart.toISOString().split('T')[0]} to ${periodEnd.toISOString().split('T')[0]}`;
+          
+          if (matchingRecord) {
+            // Update existing record only if it matches exact period timestamps
+            await db.update(userPlans)
+              .set({ 
+                startsAt: periodStart,
+                endsAt: periodEnd,
+                note: periodNote
+              })
+              .where(eq(userPlans.id, matchingRecord.id));
+              
+            console.log(`[Stripe Webhook] Updated existing period for user ${dbSubscription.userId}`);
+          } else {
+            // Create a new userPlans entry for this unique renewal period
+            await db.insert(userPlans).values({
+              userId: dbSubscription.userId,
+              planId: planId,
+              startsAt: periodStart,
+              endsAt: periodEnd,
+              note: periodNote
+            });
+            
+            console.log(`[Stripe Webhook] Created new period for user ${dbSubscription.userId} - ${periodNote}`);
+          }
+          
+          // Update user's subscriptionEndsAt with Stripe's period end
+          await db.update(users)
+            .set({ 
+              subscriptionEndsAt: periodEnd,
+              planId: planId, // Ensure planId is synced
+              updatedAt: new Date()
+            })
+            .where(eq(users.id, dbSubscription.userId));
         }
       }
       break;

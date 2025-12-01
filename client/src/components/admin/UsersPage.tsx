@@ -85,7 +85,7 @@ export default function UsersPage() {
   
   // Form states for assigning plan
   const [selectedPlanId, setSelectedPlanId] = useState('');
-  const [planEndsAt, setPlanEndsAt] = useState('');
+  const [planDurationType, setPlanDurationType] = useState<'monthly' | 'yearly' | 'unlimited'>('monthly');
   const [planNote, setPlanNote] = useState('');
   
   const queryClient = useQueryClient();
@@ -273,7 +273,7 @@ export default function UsersPage() {
   const handleAssignPlan = (user: User) => {
     setSelectedUser(user);
     setSelectedPlanId('');
-    setPlanEndsAt('');
+    setPlanDurationType('monthly');
     setPlanNote('');
     setAssignPlanOpen(true);
   };
@@ -294,7 +294,7 @@ export default function UsersPage() {
         credentials: 'include',
         body: JSON.stringify({
           planId: Number(selectedPlanId),
-          endsAt: planEndsAt || null,
+          durationType: planDurationType,
           note: planNote.trim() || null
         })
       });
@@ -749,14 +749,22 @@ export default function UsersPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="planEnds">Plan Ends (Optional)</Label>
-              <Input 
-                id="planEnds" 
-                type="date"
-                value={planEndsAt}
-                onChange={(e) => setPlanEndsAt(e.target.value)}
-              />
-              <p className="text-sm text-gray-500">Leave empty for unlimited duration</p>
+              <Label htmlFor="durationType">Duration</Label>
+              <Select value={planDurationType} onValueChange={(value: 'monthly' | 'yearly' | 'unlimited') => setPlanDurationType(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Monthly (30 days)</SelectItem>
+                  <SelectItem value="yearly">Yearly (365 days)</SelectItem>
+                  <SelectItem value="unlimited">Unlimited (No expiry)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500">
+                {planDurationType === 'unlimited' 
+                  ? 'Plan will never expire' 
+                  : 'Plan will automatically expire after the selected duration'}
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="planNote">Note (Optional)</Label>

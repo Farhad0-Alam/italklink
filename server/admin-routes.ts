@@ -470,7 +470,7 @@ router.delete('/users/:id', requireOwner, async (req, res) => {
 router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
   try {
     const { id } = req.params;
-    const { planId, startsAt, endsAt, note } = req.body;
+    const { planId, durationType, note } = req.body;
     
     // Validate and parse planId as number FIRST before any DB queries
     if (!planId) {
@@ -480,6 +480,11 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
     const numericPlanId = Number(planId);
     if (isNaN(numericPlanId)) {
       return res.status(400).json({ message: 'Invalid plan ID format' });
+    }
+    
+    // Validate durationType - allow 'monthly', 'yearly', or 'unlimited'
+    if (durationType && !['monthly', 'yearly', 'unlimited'].includes(durationType)) {
+      return res.status(400).json({ message: 'Duration type must be "monthly", "yearly", or "unlimited"' });
     }
     
     // Get plan details to update user's plan type and limits
@@ -492,12 +497,40 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
       return res.status(400).json({ message: 'Plan not found' });
     }
     
+    // Get current user's subscriptionEndsAt to extend from if it's in the future
+    const [currentUser] = await db.select()
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
+    
+    // Calculate startsAt: use the later of now vs existing subscriptionEndsAt
+    // This preserves continuity when reassigning plans before expiry
+    const now = new Date();
+    let startsAt = now;
+    
+    if (currentUser?.subscriptionEndsAt && currentUser.subscriptionEndsAt > now) {
+      startsAt = currentUser.subscriptionEndsAt;
+    }
+    
+    // Calculate endsAt based on durationType: monthly = +30 days, yearly = +365 days, unlimited = null
+    let endsAt: Date | null = null;
+    if (durationType === 'unlimited' || !durationType) {
+      endsAt = null; // Unlimited duration
+    } else {
+      endsAt = new Date(startsAt);
+      if (durationType === 'yearly') {
+        endsAt.setDate(endsAt.getDate() + 365);
+      } else {
+        endsAt.setDate(endsAt.getDate() + 30);
+      }
+    }
+    
     // Create user plan assignment
     await db.insert(userPlans).values({
       userId: id,
       planId: numericPlanId,
-      startsAt: startsAt ? new Date(startsAt) : new Date(),
-      endsAt: endsAt ? new Date(endsAt) : null,
+      startsAt,
+      endsAt,
       note
     });
     
@@ -507,7 +540,7 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
         planId: numericPlanId, // Critical: set planId for mandatory plan selection system
         planType: selectedPlan.planType,
         businessCardsLimit: selectedPlan.businessCardsLimit === -1 ? 999999 : selectedPlan.businessCardsLimit,
-        subscriptionEndsAt: endsAt ? new Date(endsAt) : null,
+        subscriptionEndsAt: endsAt,
         updatedAt: new Date()
       })
       .where(eq(users.id, id));
@@ -516,11 +549,22 @@ router.post('/users/:id/assign-plan', requireOwner, async (req, res) => {
       planId, 
       planType: selectedPlan.planType, 
       businessCardsLimit: selectedPlan.businessCardsLimit,
-      endsAt, 
+      durationType,
+      endsAt: endsAt ? endsAt.toISOString() : null, 
       note 
     });
     
-    res.json({ success: true, message: 'Plan assigned successfully', data: { userId: id, planId, planType: selectedPlan.planType } });
+    res.json({ 
+      success: true, 
+      message: 'Plan assigned successfully', 
+      data: { 
+        userId: id, 
+        planId, 
+        planType: selectedPlan.planType,
+        durationType,
+        endsAt: endsAt ? endsAt.toISOString() : null
+      } 
+    });
   } catch (error) {
     console.error('Failed to assign plan:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
