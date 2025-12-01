@@ -1139,20 +1139,25 @@ export class DatabaseStorage implements IStorage {
 
   async createPlan(planData: any): Promise<SubscriptionPlan> {
     // Map frontend field names to database column names
-    const { frequency, ...rest } = planData;
-    const dbData = {
+    const { frequency, templateIds, ...rest } = planData;
+    const dbData: any = {
       ...rest,
       interval: frequency,
     };
+    // Only include templateIds if provided
+    if (templateIds !== undefined && templateIds !== null) {
+      dbData.templateIds = templateIds;
+    }
     const [plan] = await db.insert(subscriptionPlans).values(dbData).returning();
     return plan;
   }
 
   async updatePlan(id: number, planData: any): Promise<SubscriptionPlan> {
     // Map frontend field names to database column names
-    const { frequency, ...rest } = planData;
+    const { frequency, templateIds, ...rest } = planData;
     const dbData: any = { ...rest };
     if (frequency !== undefined) dbData.interval = frequency;
+    if (templateIds !== undefined && templateIds !== null) dbData.templateIds = templateIds;
     
     const [plan] = await db
       .update(subscriptionPlans)
