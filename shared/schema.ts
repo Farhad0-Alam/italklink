@@ -5882,3 +5882,67 @@ export type SellerSubscriptionPlan = typeof sellerSubscriptionPlans.$inferSelect
 export type InsertSellerSubscriptionPlan = typeof sellerSubscriptionPlans.$inferInsert;
 export type SellerSubscription = typeof sellerSubscriptions.$inferSelect;
 export type InsertSellerSubscription = typeof sellerSubscriptions.$inferInsert;
+
+// Gift Cards table (digital gift cards for shop credit)
+export const giftCards = pgTable("gift_cards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code").unique().notNull(),
+  
+  // Pricing & value
+  amount: integer("amount").notNull(), // in cents
+  remainingBalance: integer("remaining_balance").notNull(), // in cents
+  currency: varchar("currency").default('usd'),
+  
+  // Metadata
+  createdBy: varchar("created_by").references(() => users.id, { onDelete: 'set null' }),
+  purchasedBy: varchar("purchased_by").references(() => users.id, { onDelete: 'set null' }),
+  redeemedBy: varchar("redeemed_by").references(() => users.id, { onDelete: 'set null' }),
+  
+  // Status
+  status: varchar("status").default('active'), // active, redeemed, expired
+  expiresAt: timestamp("expires_at"),
+  redeemedAt: timestamp("redeemed_at"),
+  
+  // Gift message
+  senderName: varchar("sender_name"),
+  recipientEmail: varchar("recipient_email"),
+  message: text("message"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_giftcard_code").on(table.code),
+  index("idx_giftcard_status").on(table.status),
+  index("idx_giftcard_purchasedby").on(table.purchasedBy),
+]);
+
+// Product Inventory table (track stock levels & low-stock alerts)
+export const productInventory = pgTable("product_inventory", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => digitalProducts.id, { onDelete: 'cascade' }).unique().notNull(),
+  
+  // Stock tracking
+  totalStock: integer("total_stock").default(0),
+  soldCount: integer("sold_count").default(0),
+  remainingStock: integer("remaining_stock").default(0),
+  
+  // Low stock alert
+  lowStockThreshold: integer("low_stock_threshold").default(5),
+  isLowStock: boolean("is_low_stock").default(false),
+  lastLowStockAlertAt: timestamp("last_low_stock_alert_at"),
+  
+  // Re-stock tracking
+  reorderPoint: integer("reorder_point").default(10),
+  lastRestockedAt: timestamp("last_restocked_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_inventory_product").on(table.productId),
+  index("idx_inventory_lowstock").on(table.isLowStock),
+]);
+
+export type GiftCard = typeof giftCards.$inferSelect;
+export type InsertGiftCard = typeof giftCards.$inferInsert;
+export type ProductInventory = typeof productInventory.$inferSelect;
+export type InsertProductInventory = typeof productInventory.$inferInsert;

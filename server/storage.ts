@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate, productSocialShares, type ProductSocialShare, type InsertProductSocialShare, abandonedCarts, type AbandonedCart, type InsertAbandonedCart, sellerSubscriptionPlans, sellerSubscriptions, type SellerSubscriptionPlan, type InsertSellerSubscriptionPlan, type SellerSubscription, type InsertSellerSubscription
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate, productSocialShares, type ProductSocialShare, type InsertProductSocialShare, abandonedCarts, type AbandonedCart, type InsertAbandonedCart, sellerSubscriptionPlans, sellerSubscriptions, type SellerSubscriptionPlan, type InsertSellerSubscriptionPlan, type SellerSubscription, type InsertSellerSubscription, giftCards, type GiftCard, type InsertGiftCard, productInventory, type ProductInventory, type InsertProductInventory
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -706,6 +706,18 @@ export interface IStorage {
   rejectReview(reviewId: string, adminId: string, reason: string): Promise<ShopReview>;
   flagReview(reviewId: string, reason: string): Promise<ShopReview>;
   getAllReviewsForProduct(productId: string): Promise<ShopReview[]>;
+
+  // Gift card operations
+  createGiftCard(giftData: any): Promise<GiftCard>;
+  getGiftCardByCode(code: string): Promise<GiftCard | undefined>;
+  redeemGiftCard(code: string, userId: string): Promise<GiftCard>;
+  getSellerGiftCards(sellerId: string): Promise<GiftCard[]>;
+
+  // Inventory operations
+  getProductInventory(productId: string): Promise<ProductInventory | undefined>;
+  createProductInventory(inventoryData: any): Promise<ProductInventory>;
+  updateProductInventory(inventoryId: string, inventoryData: Partial<any>): Promise<ProductInventory>;
+  getLowStockProducts(): Promise<ProductInventory[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -7785,6 +7797,78 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(shopReviews)
       .where(eq(shopReviews.productId, productId))
       .orderBy(desc(shopReviews.createdAt));
+  }
+
+  // ===== GIFT CARD OPERATIONS =====
+
+  async createGiftCard(giftData: any): Promise<GiftCard> {
+    const [gift] = await db.insert(giftCards).values({
+      code: giftData.code,
+      amount: giftData.amount,
+      remainingBalance: giftData.amount,
+      createdBy: giftData.createdBy,
+      purchasedBy: giftData.purchasedBy,
+      senderName: giftData.senderName,
+      recipientEmail: giftData.recipientEmail,
+      message: giftData.message,
+      expiresAt: giftData.expiresAt,
+    }).returning();
+    return gift;
+  }
+
+  async getGiftCardByCode(code: string): Promise<GiftCard | undefined> {
+    const [gift] = await db.select().from(giftCards).where(eq(giftCards.code, code));
+    return gift;
+  }
+
+  async redeemGiftCard(code: string, userId: string): Promise<GiftCard> {
+    const [gift] = await db.update(giftCards)
+      .set({ 
+        status: 'redeemed',
+        redeemedBy: userId,
+        redeemedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(giftCards.code, code))
+      .returning();
+    return gift;
+  }
+
+  async getSellerGiftCards(sellerId: string): Promise<GiftCard[]> {
+    return await db.select().from(giftCards)
+      .where(eq(giftCards.createdBy, sellerId))
+      .orderBy(desc(giftCards.createdAt));
+  }
+
+  // ===== INVENTORY OPERATIONS =====
+
+  async getProductInventory(productId: string): Promise<ProductInventory | undefined> {
+    const [inv] = await db.select().from(productInventory).where(eq(productInventory.productId, productId));
+    return inv;
+  }
+
+  async createProductInventory(inventoryData: any): Promise<ProductInventory> {
+    const [inv] = await db.insert(productInventory).values({
+      productId: inventoryData.productId,
+      totalStock: inventoryData.totalStock || 0,
+      lowStockThreshold: inventoryData.lowStockThreshold || 5,
+      reorderPoint: inventoryData.reorderPoint || 10,
+    }).returning();
+    return inv;
+  }
+
+  async updateProductInventory(inventoryId: string, inventoryData: Partial<any>): Promise<ProductInventory> {
+    const [inv] = await db.update(productInventory)
+      .set({ ...inventoryData, updatedAt: new Date() })
+      .where(eq(productInventory.id, inventoryId))
+      .returning();
+    return inv;
+  }
+
+  async getLowStockProducts(): Promise<ProductInventory[]> {
+    return await db.select().from(productInventory)
+      .where(eq(productInventory.isLowStock, true))
+      .orderBy(productInventory.remainingStock);
   }
 }
 
