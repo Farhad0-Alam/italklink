@@ -3,7 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { 
   BarChart3, Users, FileText, LogOut, Settings, HelpCircle, Zap, 
   CalendarDays, QrCode, Mail, Phone, DollarSign, ChevronDown,
-  Home, ChevronRight, Sparkles, Workflow, ShoppingBag, Heart, Percent, TrendingUp
+  Home, ChevronRight, Sparkles, Workflow, ShoppingBag, Heart, Percent, TrendingUp, Grid, AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -101,14 +101,18 @@ export function DashboardSidebar({ user, businessCardsCount, affiliate, onLogout
       label: 'Shop',
       items: [
         { href: '/shop', label: 'Browse Shop', icon: ShoppingBag, testId: 'link-shop-browse' },
+        { href: '/shop/bundles', label: 'Bundles', icon: Grid, testId: 'link-shop-bundles' },
+        { href: '/shop/categories', label: 'Categories', icon: Grid, testId: 'link-shop-categories' },
         { href: '/wishlist', label: 'Wishlist', icon: Heart, testId: 'link-wishlist' },
         { href: '/shop/seller/products', label: 'My Products', icon: ShoppingBag, testId: 'link-seller-products' },
         { href: '/shop/seller/orders', label: 'Orders', icon: BarChart3, testId: 'link-seller-orders' },
         { href: '/shop/seller/analytics', label: 'Sales', icon: TrendingUp, testId: 'link-seller-analytics' },
         { href: '/shop/seller/payouts', label: 'Payouts', icon: DollarSign, testId: 'link-seller-payouts' },
         { href: '/seller/subscription', label: 'Plans', icon: Percent, testId: 'link-seller-plans' },
+        { href: '/shop/seller/refunds', label: 'Refunds (Seller)', icon: AlertCircle, testId: 'link-seller-refunds' },
         { href: '/user/purchases', label: 'Purchases', icon: ShoppingBag, testId: 'link-user-purchases' },
         { href: '/user/downloads', label: 'Downloads', icon: FileText, testId: 'link-user-downloads' },
+        { href: '/shop/buyer/refunds', label: 'Refunds (Buyer)', icon: AlertCircle, testId: 'link-buyer-refunds' },
       ],
     },
     {
