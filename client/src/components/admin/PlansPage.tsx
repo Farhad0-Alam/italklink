@@ -663,6 +663,14 @@ export default function PlansPage() {
     }));
   };
 
+  const toggleAllTemplates = () => {
+    const allTemplateIds = templates.map(t => t.id);
+    setFormData(prev => ({
+      ...prev,
+      templates: prev.templates.length === allTemplateIds.length ? [] : allTemplateIds
+    }));
+  };
+
   const renderPlanCard = (plan: SubscriptionPlan) => (
     <Card key={plan.id} className="relative">
       <CardHeader className="pb-3">
@@ -1128,13 +1136,7 @@ export default function PlansPage() {
             type="button"
             variant="outline" 
             size="sm"
-            onClick={() => {
-              const allTemplateIds = templates.map(t => t.id);
-              setFormData(prev => ({
-                ...prev,
-                templates: prev.templates.length === allTemplateIds.length ? [] : allTemplateIds
-              }));
-            }}
+            onClick={toggleAllTemplates}
           >
             {formData.templates.length === templates.length ? 'Deselect All' : 'Select All'} ({formData.templates.length})
           </Button>
