@@ -1144,6 +1144,8 @@ export class DatabaseStorage implements IStorage {
     const dbData: any = {
       ...rest,
       interval: frequency,
+      // features jsonb column is required (NOT NULL) - default to empty object
+      features: features || {},
     };
     
     // Handle templateIds (use explicitly sent templateIds or fall back to legacy 'templates' field)
@@ -1152,8 +1154,8 @@ export class DatabaseStorage implements IStorage {
       dbData.templateIds = templateArray;
     }
     
-    // Handle elementFeatures (use explicitly sent elementFeatures or fall back to legacy 'features' field)
-    const elementArray = elementFeatures || features || [];
+    // Handle elementFeatures
+    const elementArray = elementFeatures || [];
     if (elementArray && elementArray.length > 0) {
       dbData.elementFeatures = elementArray;
     }
