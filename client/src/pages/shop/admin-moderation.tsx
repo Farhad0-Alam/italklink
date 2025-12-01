@@ -10,20 +10,20 @@ import type { DigitalProduct } from "@shared/schema";
 
 export default function AdminShopModeration() {
   const { data: products = [], isLoading, error } = useQuery<DigitalProduct[]>({
-    queryKey: ["/shop/admin/products"],
+    queryKey: ["/api/shop/admin/products"],
     select: (response: any) => Array.isArray(response) ? response : (response?.data || []),
   });
 
   const approveMutation = useMutation({
     mutationFn: async (productId: string) =>
-      apiRequest("PATCH", `/shop/admin/products/${productId}/status`, { status: 'approved' }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/shop/admin/products"] }),
+      apiRequest("PATCH", `/api/shop/admin/products/${productId}/status`, { status: 'approved' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/shop/admin/products"] }),
   });
 
   const rejectMutation = useMutation({
     mutationFn: async (productId: string) =>
-      apiRequest("PATCH", `/shop/admin/products/${productId}/status`, { status: 'rejected' }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/shop/admin/products"] }),
+      apiRequest("PATCH", `/api/shop/admin/products/${productId}/status`, { status: 'rejected' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/shop/admin/products"] }),
   });
 
   if (isLoading) return <LoadingSkeleton />;
