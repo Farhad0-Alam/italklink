@@ -5766,3 +5766,42 @@ export const productSocialShares = pgTable("product_social_shares", {
 
 export type ProductSocialShare = typeof productSocialShares.$inferSelect;
 export type InsertProductSocialShare = typeof productSocialShares.$inferInsert;
+
+// Abandoned Cart Emails table (track cart abandonment and recovery)
+export const abandonedCarts = pgTable("abandoned_carts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Cart contents
+  cartItems: varchar("cart_items").array().notNull(), // JSON array of product IDs
+  cartValue: integer("cart_value").notNull(), // Total value in cents
+  
+  // Abandonment tracking
+  abandonedAt: timestamp("abandoned_at").defaultNow(),
+  recoveryEmail1Sent: timestamp("recovery_email_1_sent"),
+  recoveryEmail2Sent: timestamp("recovery_email_2_sent"),
+  recoveryEmail3Sent: timestamp("recovery_email_3_sent"),
+  
+  // Recovery status
+  recovered: boolean("recovered").default(false),
+  recoveredOrderId: varchar("recovered_order_id"),
+  
+  // Email tracking
+  email1Opened: boolean("email_1_opened").default(false),
+  email2Opened: boolean("email_2_opened").default(false),
+  email3Opened: boolean("email_3_opened").default(false),
+  
+  // Metadata
+  userEmail: varchar("user_email").notNull(),
+  userName: varchar("user_name"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_abandoned_user").on(table.userId),
+  index("idx_abandoned_recovered").on(table.recovered),
+  index("idx_abandoned_timestamp").on(table.abandonedAt),
+]);
+
+export type AbandonedCart = typeof abandonedCarts.$inferSelect;
+export type InsertAbandonedCart = typeof abandonedCarts.$inferInsert;

@@ -39,7 +39,7 @@ import {
   type Bio, type InsertBio, type Connection, type InsertConnection,
   type Subscription, type InsertSubscription, type Analytics, type InsertAnalytics,
   type NfcTag, type InsertNfcTag, type NfcTapEvent, type InsertNfcTapEvent, type NfcAnalytics, type InsertNfcAnalytics,
-  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate, productSocialShares, type ProductSocialShare, type InsertProductSocialShare
+  type DigitalProduct, type InsertDigitalProduct, type ShopOrder, type InsertShopOrder, type ShopDownload, type InsertShopDownload, type ShopCartItem, type InsertShopCartItem, type ShopReview, type InsertShopReview, type ShopWishlist, type InsertShopWishlist, type ShopAffiliateCommission, type InsertShopAffiliateCommission, refundRequests, type RefundRequest, type InsertRefundRequest, productBundles, bundleItems, type ProductBundle, type InsertProductBundle, type BundleItem, type InsertBundleItem, productCategories, productTags, productCategoriesToProducts, productTagsToProducts, type ProductCategory, type InsertProductCategory, type ProductTag, type InsertProductTag, sellerPayoutMethods, sellerPayouts, type SellerPayoutMethod, type InsertSellerPayoutMethod, type SellerPayout, type InsertSellerPayout, productVariations, productVariantOptions, productVariantAttributes, type ProductVariation, type InsertProductVariation, type ProductVariantOption, type InsertProductVariantOption, type ProductVariantAttribute, type InsertProductVariantAttribute, commissionSettings, categoryCommissionRates, promotionalCommissionRates, type CommissionSettings, type InsertCommissionSettings, type CategoryCommissionRate, type InsertCategoryCommissionRate, type PromotionalCommissionRate, type InsertPromotionalCommissionRate, productSocialShares, type ProductSocialShare, type InsertProductSocialShare, abandonedCarts, type AbandonedCart, type InsertAbandonedCart
 } from '@shared/schema';
 import { eq, and, desc, count, inArray, like, or, sql, gte, lte } from 'drizzle-orm';
 
@@ -682,6 +682,13 @@ export interface IStorage {
   createSocialShare(shareData: any): Promise<ProductSocialShare>;
   getProductShareCount(productId: string, platform?: string): Promise<number>;
   getProductShareStats(productId: string): Promise<{ platform: string; count: number }[]>;
+
+  // Abandoned cart operations
+  createAbandonedCart(cartData: any): Promise<AbandonedCart>;
+  getAbandonedCart(userId: string): Promise<AbandonedCart | undefined>;
+  getAbandonedCartsNotRecovered(): Promise<AbandonedCart[]>;
+  updateAbandonedCart(cartId: string, cartData: Partial<any>): Promise<AbandonedCart>;
+  markAbandonedCartRecovered(cartId: string, orderId: string): Promise<AbandonedCart>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -7578,6 +7585,52 @@ export class DatabaseStorage implements IStorage {
       .groupBy(productSocialShares.platform);
     
     return stats;
+  }
+
+  // ===== ABANDONED CART OPERATIONS =====
+
+  async createAbandonedCart(cartData: any): Promise<AbandonedCart> {
+    const [cart] = await db.insert(abandonedCarts).values({
+      userId: cartData.userId,
+      cartItems: cartData.cartItems,
+      cartValue: cartData.cartValue,
+      userEmail: cartData.userEmail,
+      userName: cartData.userName,
+    }).returning();
+    return cart;
+  }
+
+  async getAbandonedCart(userId: string): Promise<AbandonedCart | undefined> {
+    const [cart] = await db.select().from(abandonedCarts)
+      .where(and(eq(abandonedCarts.userId, userId), eq(abandonedCarts.recovered, false)))
+      .orderBy(desc(abandonedCarts.abandonedAt));
+    return cart;
+  }
+
+  async getAbandonedCartsNotRecovered(): Promise<AbandonedCart[]> {
+    return await db.select().from(abandonedCarts)
+      .where(eq(abandonedCarts.recovered, false))
+      .orderBy(abandonedCarts.abandonedAt);
+  }
+
+  async updateAbandonedCart(cartId: string, cartData: Partial<any>): Promise<AbandonedCart> {
+    const [cart] = await db.update(abandonedCarts)
+      .set({ ...cartData, updatedAt: new Date() })
+      .where(eq(abandonedCarts.id, cartId))
+      .returning();
+    return cart;
+  }
+
+  async markAbandonedCartRecovered(cartId: string, orderId: string): Promise<AbandonedCart> {
+    const [cart] = await db.update(abandonedCarts)
+      .set({ 
+        recovered: true, 
+        recoveredOrderId: orderId,
+        updatedAt: new Date() 
+      })
+      .where(eq(abandonedCarts.id, cartId))
+      .returning();
+    return cart;
   }
 }
 
