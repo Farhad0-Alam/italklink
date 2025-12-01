@@ -83,7 +83,6 @@ const CategoriesBrowse = lazy(() => import("./pages/shop/categories-browse").the
 const CategoryProducts = lazy(() => import("./pages/shop/category-products").then(m => ({ default: m.CategoryProducts })));
 const SellerPayouts = lazy(() => import("./pages/shop/seller-payouts").then(m => ({ default: m.SellerPayouts })));
 const ProductVariations = lazy(() => import("./pages/shop/product-variations").then(m => ({ default: m.ProductVariations })));
-const AdminCommissionSettings = lazy(() => import("./pages/shop/admin-commission").then(m => ({ default: m.AdminCommissionSettings })));
 const SellerSubscriptionPlans = lazy(() => import("./pages/seller-subscription").then(m => ({ default: m.SellerSubscriptionPlans })));
 const AdminReviewModeration = lazy(() => import("./pages/shop/admin-review-moderation").then(m => ({ default: m.AdminReviewModeration })));
 
@@ -178,7 +177,7 @@ function Router() {
       <Route path="/user/purchases">{() => <PageSuspense><UserPurchases /></PageSuspense>}</Route>
       <Route path="/user/downloads">{() => <PageSuspense><UserDownloads /></PageSuspense>}</Route>
       <Route path="/admin/shop">{() => <PageSuspense><AdminShop /></PageSuspense>}</Route>
-      <Route path="/admin/shop/commission">{() => <PageSuspense><AdminCommissionSettings /></PageSuspense>}</Route>
+      <Route path="/admin/shop/commission">{() => <PageSuspense><AdminCommission /></PageSuspense>}</Route>
       <Route path="/admin/reviews">{() => <PageSuspense><AdminReviewModeration /></PageSuspense>}</Route>
       <Route path="/admin/coupons">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
       <Route path="/admin/templates">{() => <PageSuspense><Admin /></PageSuspense>}</Route>
