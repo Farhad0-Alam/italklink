@@ -67,11 +67,6 @@ export function LockedFeature({
           )}
         </div>
       </div>
-
-      {/* Lock badge */}
-      <div className="absolute -top-2 -right-2 bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-full p-2 shadow-lg">
-        <Lock className="h-3 w-3" />
-      </div>
     </div>
   );
 }
