@@ -55,7 +55,6 @@ const ELEMENT_TYPE_TO_ID: Record<string, number> = {
 };
 
 const fallbackElementTypes: ElementType[] = [
-  { type: "profile", title: "Profile Section", icon: "fas fa-user-circle", color: "bg-gradient-to-r from-amber-500 to-orange-600", description: "Add profile with cover image, photo, name, title, company" },
   { type: "heading", title: "Heading", icon: "fas fa-heading", color: "bg-blue-100", description: "Add a title or heading" },
   { type: "paragraph", title: "Paragraph", icon: "fas fa-align-left", color: "bg-orange-100", description: "Add text content" },
   { type: "contactSection", title: "Contact Info", icon: "fas fa-address-book", color: "bg-slate-100", description: "Add contact buttons (phone, email, etc.)" },
@@ -75,6 +74,7 @@ const fallbackElementTypes: ElementType[] = [
   { type: "voiceAgent", title: "AI Voice Agent", icon: "fas fa-phone-volume", color: "bg-gradient-to-r from-green-500 to-emerald-600", description: "AI-powered phone calls with ChatGPT integration" },
   { type: "voiceAssistant", title: "Voice Chat Assistant", icon: "fas fa-microphone-alt", color: "bg-gradient-to-r from-purple-500 to-violet-600", description: "Embedded voice & text chat with knowledge base" },
   { type: "digitalWallet", title: "Digital Wallet", icon: "fas fa-wallet", color: "bg-gradient-to-r from-black to-blue-600", description: "Save to Apple & Google Wallet" },
+  { type: "profile", title: "Profile Section", icon: "fas fa-user-circle", color: "bg-gradient-to-r from-amber-500 to-orange-600", description: "Add profile with cover image, photo, name, title, company" },
   { type: "navigationMenu", title: "Navigation Menu", icon: "fas fa-bars", color: "bg-gradient-to-r from-slate-500 to-slate-700", description: "Multi-page navigation menu" },
   { type: "arPreviewMindAR", title: "AR Preview", icon: "fas fa-cube", color: "bg-gradient-to-r from-purple-500 to-pink-600", description: "AR Digital Business Card Viewer" },
   { type: "pdfViewer", title: "PDF Viewer", icon: "fas fa-file-pdf", color: "bg-purple-100", description: "Display PDF with modal viewer and clickable links" },
