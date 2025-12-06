@@ -18,6 +18,7 @@ import i18n from "./lib/i18n";
 
 // Lazy load Landing to reduce initial bundle size (it imports framer-motion + 30+ icons)
 const Landing = lazy(() => import("./pages/landing"));
+const IconPreview = lazy(() => import("./pages/icon-preview"));
 
 // Lazy load auth pages - they're not needed until user navigates to them
 const Login = lazy(() => import("./pages/login"));
@@ -111,6 +112,7 @@ function Router() {
       {/* All pages lazy loaded for optimal initial bundle size */}
       <Route path="/">{() => <PageSuspense><Landing /></PageSuspense>}</Route>
       <Route path="/landing">{() => <PageSuspense><Landing /></PageSuspense>}</Route>
+      <Route path="/icon-preview">{() => <PageSuspense><IconPreview /></PageSuspense>}</Route>
       <Route path="/login">{() => <PageSuspense><Login /></PageSuspense>}</Route>
       <Route path="/register">{() => <PageSuspense><Register /></PageSuspense>}</Route>
       <Route path="/forgot-password">{() => <PageSuspense><ForgotPassword /></PageSuspense>}</Route>
