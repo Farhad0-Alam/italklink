@@ -76,12 +76,37 @@ const IconVariant5Geometric = () => (
   </svg>
 );
 
+const IconVariant6Connected = () => (
+  <svg width="64" height="64" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Outer connection ring */}
+    <circle cx="16" cy="16" r="14" stroke="url(#gradient6)" strokeWidth="1.5" opacity="0.3" fill="none" />
+    <circle cx="16" cy="16" r="11" stroke="url(#gradient6)" strokeWidth="1.5" opacity="0.5" fill="none" />
+    
+    {/* Central 'i' letter */}
+    <circle cx="16" cy="7" r="3" fill="url(#gradient6)" />
+    <rect x="13.5" y="12" width="5" height="14" rx="2.5" fill="url(#gradient6)" />
+    
+    {/* Connection points/nodes around the i */}
+    <circle cx="8" cy="16" r="1.5" fill="#16a34a" opacity="0.7" />
+    <circle cx="24" cy="16" r="1.5" fill="#16a34a" opacity="0.7" />
+    <circle cx="16" cy="8" r="1" fill="#22c55e" opacity="0.9" />
+    
+    <defs>
+      <linearGradient id="gradient6" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#16a34a" />
+        <stop offset="1" stopColor="#15803d" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 const iconVariants = [
   { name: "Person", component: IconVariant1Person, description: "Minimalist person silhouette - 'i' as a person" },
   { name: "Card", component: IconVariant2Card, description: "Business card with 'i' integrated" },
   { name: "Signal", component: IconVariant3Signal, description: "Tech connectivity with signal waves" },
   { name: "Layered", component: IconVariant4Layered, description: "Modern overlapping geometric shapes with depth" },
   { name: "Geometric", component: IconVariant5Geometric, description: "Clean, bold rounded geometric design" },
+  { name: "Connected", component: IconVariant6Connected, description: "Communication icon with connection rings - inspired design" },
 ];
 
 export default function IconPreview() {
@@ -95,11 +120,11 @@ export default function IconPreview() {
             Choose Your Favorite iTalkLink Icon
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300">
-            All 5 creative icon variations displayed below
+            All 6 creative icon variations displayed below
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {iconVariants.map((variant, index) => {
             const IconComponent = variant.component;
             return (
@@ -127,7 +152,7 @@ export default function IconPreview() {
               Tell me which one you like best:
             </p>
             <p className="text-md text-gray-600 dark:text-gray-300 mt-2">
-              Person • Card • Signal • Layered • Geometric
+              Person • Card • Signal • Layered • Geometric • Connected
             </p>
           </div>
         </div>
