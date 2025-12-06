@@ -31,24 +31,24 @@ export const Navigation = () => {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-orange-500 to-orange-600 backdrop-blur-lg border-b border-orange-700 sticky top-0 z-50">
+    <nav className="bg-gradient-to-r from-green-600 to-green-700 backdrop-blur-lg border-b border-green-800 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center space-x-2" data-testid="nav-logo">
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg">
-              <i className="fas fa-address-card text-orange-500 text-sm"></i>
+              <i className="fas fa-address-card text-green-600 text-sm"></i>
             </div>
-            <span className="text-xl font-bold text-white">TalkLink</span>
+            <span className="text-xl font-bold text-white">iTalkLink</span>
           </Link>
           
           <div className="hidden md:flex items-center space-x-6">
             <Link href="/affiliate" data-testid="nav-affiliate">
-              <span className="text-white hover:text-orange-100 transition-colors font-medium">
+              <span className="text-white hover:text-green-100 transition-colors font-medium">
                 Affiliate
               </span>
             </Link>
             <Link href="/pricing" data-testid="nav-pricing">
-              <span className="text-white hover:text-orange-100 transition-colors font-medium">
+              <span className="text-white hover:text-green-100 transition-colors font-medium">
                 Pricing
               </span>
             </Link>
@@ -60,7 +60,7 @@ export const Navigation = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="bg-orange-400 hover:bg-orange-300 border-orange-300 text-white relative"
+                  className="bg-green-500 hover:bg-green-400 border-green-400 text-white relative"
                 >
                   <ShoppingCart className="w-5 h-5" />
                   {cartCount > 0 && (
@@ -77,7 +77,7 @@ export const Navigation = () => {
               size="sm"
               onClick={toggleLanguage}
               data-testid="button-language-toggle"
-              className="bg-orange-400 hover:bg-orange-300 border-orange-300 text-white"
+              className="bg-green-500 hover:bg-green-400 border-green-400 text-white"
             >
               {i18n.language === "en" ? "EN" : "বাং"}
             </Button>
@@ -88,7 +88,7 @@ export const Navigation = () => {
                 size="sm"
                 onClick={toggleTheme}
                 data-testid="button-theme-toggle"
-                className="bg-orange-400 hover:bg-orange-300 border-orange-300 text-white"
+                className="bg-green-500 hover:bg-green-400 border-green-400 text-white"
               >
                 <i className={`fas ${theme === "dark" ? "fa-sun" : "fa-moon"}`}></i>
               </Button>
@@ -96,11 +96,11 @@ export const Navigation = () => {
             
             <Button
               asChild
-              className="bg-green-500 hover:bg-green-600 text-white"
-              data-testid="button-get-talklink"
+              className="bg-white hover:bg-gray-100 text-green-700 font-bold"
+              data-testid="button-get-italklink"
             >
               <a 
-                href="https://talkl.ink" 
+                href="https://italklink.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
               >

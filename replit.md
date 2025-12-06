@@ -1,7 +1,7 @@
-# TalkLink - Digital Business Card Platform
+# iTalkLink - Digital Business Card Platform
 
 ## Overview
-TalkLink is an enterprise-grade platform providing professional digital business cards integrated with a comprehensive appointment booking and CRM system. It enables users to create customizable business cards, manage scheduling, track leads, and analyze business performance, aiming to streamline professional networking and business operations. The platform is designed as a complete SaaS solution, offering a robust suite of tools for individuals and businesses to enhance their digital presence and client interactions.
+iTalkLink is an enterprise-grade platform providing professional digital business cards integrated with a comprehensive appointment booking and CRM system. It enables users to create customizable business cards, manage scheduling, track leads, and analyze business performance, aiming to streamline professional networking and business operations. The platform is designed as a complete SaaS solution, offering a robust suite of tools for individuals and businesses to enhance their digital presence and client interactions.
 
 ## User Preferences
 - Communication style: Simple, everyday language
@@ -10,7 +10,15 @@ TalkLink is an enterprise-grade platform providing professional digital business
 
 ## Recent Updates (Current Session)
 
-### Plan Duration & Auto-Renewal System (Latest)
+### Branding Update - iTalkLink (Latest - December 2025)
+- **New Brand Name**: Rebranded from TalkLink to **iTalkLink**
+- **New Domain**: **italklink.com** (replacing talkl.ink)
+- **Color Scheme**: Green (#10b981 / green-600), Black, and White as primary brand colors
+- **Navigation**: Updated to green gradient (from-green-600 to-green-700)
+- **Logo**: New "iT" icon with green gradient background
+- **Email**: Support contact updated to support@italklink.com
+
+### Plan Duration & Auto-Renewal System
 - **Duration Selector**: Admin Assign Plan dialog now has Monthly (30 days), Yearly (365 days), Unlimited options
 - **Subscription Continuity**: When reassigning plans before expiry, extends from existing end date (not now)
 - **Stripe Auto-Renewal**: When Stripe payment succeeds, automatically extends userPlans using exact billing period dates

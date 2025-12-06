@@ -23,11 +23,11 @@ export const Footer = () => {
           {/* Brand */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
-                <span className="text-white text-sm font-bold">2T</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center shadow-lg">
+                <span className="text-white text-sm font-bold">iT</span>
               </div>
-              <span className="text-lg font-bold bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">
-                TalkLink
+              <span className="text-lg font-bold bg-gradient-to-r from-green-500 to-green-400 bg-clip-text text-transparent">
+                iTalkLink
               </span>
             </div>
             <p className="text-sm text-gray-400">Professional digital business cards made simple.</p>
@@ -37,9 +37,9 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold text-white mb-4">Product</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/pricing"><a className="hover:text-orange-400 transition">Pricing</a></Link></li>
-              <li><Link href="/templates"><a className="hover:text-orange-400 transition">Templates</a></Link></li>
-              <li><Link href="/features"><a className="hover:text-orange-400 transition">Features</a></Link></li>
+              <li><Link href="/pricing"><a className="hover:text-green-400 transition">Pricing</a></Link></li>
+              <li><Link href="/templates"><a className="hover:text-green-400 transition">Templates</a></Link></li>
+              <li><Link href="/features"><a className="hover:text-green-400 transition">Features</a></Link></li>
             </ul>
           </div>
 
@@ -47,9 +47,9 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold text-white mb-4">Company</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/help"><a className="hover:text-orange-400 transition">Help Center</a></Link></li>
-              <li><a href="mailto:support@talklink.com" className="hover:text-orange-400 transition">Contact Us</a></li>
-              <li><a href="#" className="hover:text-orange-400 transition">Privacy Policy</a></li>
+              <li><Link href="/help"><a className="hover:text-green-400 transition">Help Center</a></Link></li>
+              <li><a href="mailto:support@italklink.com" className="hover:text-green-400 transition">Contact Us</a></li>
+              <li><a href="#" className="hover:text-green-400 transition">Privacy Policy</a></li>
             </ul>
           </div>
 
@@ -57,9 +57,9 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold text-white mb-4">Legal</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/terms-of-service"><a className="hover:text-orange-400 transition">Terms of Service</a></Link></li>
-              <li><Link href="/privacy-policy"><a className="hover:text-orange-400 transition">Privacy Policy</a></Link></li>
-              <li><Link href="/cookie-policy"><a className="hover:text-orange-400 transition">Cookie Policy</a></Link></li>
+              <li><Link href="/terms-of-service"><a className="hover:text-green-400 transition">Terms of Service</a></Link></li>
+              <li><Link href="/privacy-policy"><a className="hover:text-green-400 transition">Privacy Policy</a></Link></li>
+              <li><Link href="/cookie-policy"><a className="hover:text-green-400 transition">Cookie Policy</a></Link></li>
             </ul>
           </div>
         </div>
@@ -85,10 +85,10 @@ export const Footer = () => {
         {/* Bottom */}
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-gray-400">
-            © 2025 TalkLink. All rights reserved.
+            © 2025 iTalkLink. All rights reserved.
           </p>
           <p className="text-sm text-gray-400 mt-4 md:mt-0">
-            Powered by <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300">Stripe</a>
+            Powered by <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:text-green-300">Stripe</a>
           </p>
         </div>
       </div>
