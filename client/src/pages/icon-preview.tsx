@@ -126,6 +126,66 @@ const IconVariant7NFCCard = () => (
   </svg>
 );
 
+// Waveform i - Inspired by the attached equalizer design with "i" dot
+const IconVariant8Waveform = () => (
+  <svg width="64" height="64" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Dark green rounded background */}
+    <rect x="1" y="1" width="30" height="30" rx="6" fill="#06301A" />
+    
+    {/* The "i" dot */}
+    <circle cx="13.5" cy="6" r="2.2" fill="#bef264" />
+    
+    {/* Waveform bars - varying heights like equalizer */}
+    {/* Bar 1 - short left */}
+    <rect x="5" y="15" width="3" height="7" rx="1.5" fill="#bef264" />
+    {/* Bar 2 - tall center-left (the "i" body) */}
+    <rect x="11" y="9" width="5" height="17" rx="2.5" fill="#bef264" />
+    {/* Bar 3 - medium center-right */}
+    <rect x="18" y="12" width="4" height="11" rx="2" fill="#bef264" />
+    {/* Bar 4 - short right */}
+    <rect x="24" y="15" width="3" height="7" rx="1.5" fill="#bef264" />
+  </svg>
+);
+
+// Audio Pulse - Sound wave with rhythmic pattern
+const IconVariant9AudioPulse = () => (
+  <svg width="64" height="64" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Dark green rounded background */}
+    <rect x="1" y="1" width="30" height="30" rx="6" fill="#06301A" />
+    
+    {/* The "i" dot */}
+    <circle cx="16" cy="5" r="2" fill="#bef264" />
+    
+    {/* 5 equalizer bars with different heights */}
+    <rect x="4" y="14" width="3" height="8" rx="1.5" fill="#bef264" />
+    <rect x="9" y="11" width="3" height="14" rx="1.5" fill="#bef264" />
+    <rect x="14.5" y="9" width="3" height="18" rx="1.5" fill="#bef264" />
+    <rect x="20" y="11" width="3" height="14" rx="1.5" fill="#bef264" />
+    <rect x="25" y="14" width="3" height="8" rx="1.5" fill="#bef264" />
+  </svg>
+);
+
+// Voice Signal - Similar to attached design with 4 bars
+const IconVariant10VoiceSignal = () => (
+  <svg width="64" height="64" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Dark green rounded background */}
+    <rect x="1" y="1" width="30" height="30" rx="6" fill="#06301A" />
+    
+    {/* The "i" dot above the tall bar */}
+    <circle cx="12" cy="5.5" r="2.2" fill="#bef264" />
+    
+    {/* 4 waveform bars exactly like the attached image */}
+    {/* Bar 1 - short left */}
+    <rect x="4" y="14" width="3.5" height="9" rx="1.75" fill="#bef264" />
+    {/* Bar 2 - tall (main i body) */}
+    <rect x="10" y="9" width="4" height="18" rx="2" fill="#bef264" />
+    {/* Bar 3 - medium-tall */}
+    <rect x="16.5" y="11" width="4" height="14" rx="2" fill="#bef264" />
+    {/* Bar 4 - short right */}
+    <rect x="23" y="14" width="3.5" height="9" rx="1.75" fill="#bef264" />
+  </svg>
+);
+
 const iconVariants = [
   { name: "Person", component: IconVariant1Person, description: "Minimalist person silhouette - 'i' as a person" },
   { name: "Card", component: IconVariant2Card, description: "Business card with 'i' integrated" },
@@ -134,6 +194,9 @@ const iconVariants = [
   { name: "Geometric", component: IconVariant5Geometric, description: "Clean, bold rounded geometric design" },
   { name: "Connected", component: IconVariant6Connected, description: "Communication icon with connection rings - inspired design" },
   { name: "NFC Card", component: IconVariant7NFCCard, description: "Business card with NFC contactless wave signals" },
+  { name: "Waveform i", component: IconVariant8Waveform, description: "Equalizer bars with 'i' dot - inspired by your design" },
+  { name: "Audio Pulse", component: IconVariant9AudioPulse, description: "5 symmetric audio bars with centered 'i' dot" },
+  { name: "Voice Signal", component: IconVariant10VoiceSignal, description: "4-bar waveform exactly like your attached design" },
 ];
 
 export default function IconPreview() {
@@ -147,7 +210,7 @@ export default function IconPreview() {
             Choose Your Favorite iTalkLink Icon
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300">
-            All 7 creative icon variations displayed below
+            All 10 creative icon variations displayed below
           </p>
         </div>
 
@@ -179,7 +242,7 @@ export default function IconPreview() {
               Tell me which one you like best:
             </p>
             <p className="text-md text-gray-600 dark:text-gray-300 mt-2">
-              Person • Card • Signal • Layered • Geometric • Connected • NFC Card
+              Person • Card • Signal • Layered • Geometric • Connected • NFC Card • Waveform i • Audio Pulse • Voice Signal
             </p>
           </div>
         </div>
