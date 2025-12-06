@@ -21,54 +21,72 @@ const AnimatedLandingLogo = () => {
   const dotControls = useAnimationControls();
 
   useEffect(() => {
+    let isCancelled = false;
+    
     const runAnimation = async () => {
-      while (true) {
+      while (!isCancelled) {
         // Step 1: Rotate spiral for 4 seconds
+        if (isCancelled) return;
         await spiralControls.start({
           rotate: 360,
           transition: { duration: 4, ease: "linear" }
         });
         
+        if (isCancelled) return;
         // Reset rotation for next cycle
         spiralControls.set({ rotate: 0 });
         
         // Step 2: Cricket ball bounce - 3 bounces hitting top of circle
         // Bounce 1 - highest
+        if (isCancelled) return;
         await dotControls.start({
           y: -170,
           transition: { duration: 0.25, ease: "easeOut" }
         });
+        if (isCancelled) return;
         await dotControls.start({
           y: 0,
           transition: { duration: 0.25, ease: "easeIn" }
         });
         
         // Bounce 2 - medium (losing energy)
+        if (isCancelled) return;
         await dotControls.start({
           y: -130,
           transition: { duration: 0.22, ease: "easeOut" }
         });
+        if (isCancelled) return;
         await dotControls.start({
           y: 0,
           transition: { duration: 0.22, ease: "easeIn" }
         });
         
         // Bounce 3 - lowest
+        if (isCancelled) return;
         await dotControls.start({
           y: -80,
           transition: { duration: 0.18, ease: "easeOut" }
         });
+        if (isCancelled) return;
         await dotControls.start({
           y: 0,
           transition: { duration: 0.18, ease: "easeIn" }
         });
         
         // Step 3: Wait 5 seconds before repeating
+        if (isCancelled) return;
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
     };
     
     runAnimation();
+    
+    // Cleanup function
+    return () => {
+      isCancelled = true;
+      spiralControls.stop();
+      dotControls.stop();
+    };
   }, [spiralControls, dotControls]);
 
   return (
