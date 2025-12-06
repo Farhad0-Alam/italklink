@@ -100,6 +100,32 @@ const IconVariant6Connected = () => (
   </svg>
 );
 
+const IconVariant7NFCCard = () => (
+  <svg width="64" height="64" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Business card rectangle */}
+    <rect x="3" y="8" width="26" height="16" rx="2" fill="url(#gradient7)" />
+    
+    {/* 'i' on the card */}
+    <circle cx="10" cy="12" r="1.5" fill="white" />
+    <rect x="9" y="14" width="2" height="6" rx="1" fill="white" />
+    
+    {/* NFC waves emanating from card */}
+    <path d="M 20 12 Q 22 14 20 16" stroke="#22c55e" strokeWidth="1.5" fill="none" opacity="0.8" />
+    <path d="M 22 10 Q 25 14 22 18" stroke="#22c55e" strokeWidth="1.5" fill="none" opacity="0.6" />
+    <path d="M 24 8 Q 28 14 24 20" stroke="#22c55e" strokeWidth="1.5" fill="none" opacity="0.4" />
+    
+    {/* NFC icon on card */}
+    <circle cx="20" cy="16" r="1" fill="white" opacity="0.9" />
+    
+    <defs>
+      <linearGradient id="gradient7" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#16a34a" />
+        <stop offset="1" stopColor="#15803d" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 const iconVariants = [
   { name: "Person", component: IconVariant1Person, description: "Minimalist person silhouette - 'i' as a person" },
   { name: "Card", component: IconVariant2Card, description: "Business card with 'i' integrated" },
@@ -107,6 +133,7 @@ const iconVariants = [
   { name: "Layered", component: IconVariant4Layered, description: "Modern overlapping geometric shapes with depth" },
   { name: "Geometric", component: IconVariant5Geometric, description: "Clean, bold rounded geometric design" },
   { name: "Connected", component: IconVariant6Connected, description: "Communication icon with connection rings - inspired design" },
+  { name: "NFC Card", component: IconVariant7NFCCard, description: "Business card with NFC contactless wave signals" },
 ];
 
 export default function IconPreview() {
@@ -120,11 +147,11 @@ export default function IconPreview() {
             Choose Your Favorite iTalkLink Icon
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300">
-            All 6 creative icon variations displayed below
+            All 7 creative icon variations displayed below
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {iconVariants.map((variant, index) => {
             const IconComponent = variant.component;
             return (
@@ -152,7 +179,7 @@ export default function IconPreview() {
               Tell me which one you like best:
             </p>
             <p className="text-md text-gray-600 dark:text-gray-300 mt-2">
-              Person • Card • Signal • Layered • Geometric • Connected
+              Person • Card • Signal • Layered • Geometric • Connected • NFC Card
             </p>
           </div>
         </div>
