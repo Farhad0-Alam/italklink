@@ -162,8 +162,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             {/* Logo - Left (Mobile only) */}
             <div className="flex items-center lg:hidden flex-shrink-0">
               <Link href="/admin" className="flex items-center space-x-2">
-                <div className="w-7 sm:w-8 h-7 sm:h-8 bg-gradient-to-br from-blue-600 via-purple-600 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-xs sm:text-sm">2T</span>
+                <div className="w-7 sm:w-8 h-7 sm:h-8 flex items-center justify-center">
+                  <svg viewBox="0 0 1000 1000" className="w-7 sm:w-8 h-7 sm:h-8">
+                    <path fill="#FFFFFF" d="M817.9,999.9H182.1C81.8,999.9-0.2,917.8-0.2,817.5v-635C-0.2,82.2,81.8,0.1,182.1,0.1h635.7c100.3,0,182.4,82.1,182.4,182.4v635C1000.2,917.8,918.2,999.9,817.9,999.9z"/>
+                    <path fill="none" stroke="#16A34A" strokeWidth="70" strokeMiterlimit="10" d="M315,857c-116.4-65.3-195-189.8-195-332.7C120,313.7,290.7,143,501.3,143c210.6,0,381.2,170.7,381.2,381.2c0,82.3-26.7,166.9-77.1,232.3c-47.2,61.2-124.5,112.4-204.8,97.6c-27.8-5.1-55-17.9-74.7-38.6c-17.8-18.8-26.3-42.5-27.2-68V437"/>
+                    <path fill="#16A34A" d="M498.5,402L498.5,402c-24.6,0-44.5-19.9-44.5-44.5v0c0-24.6,19.9-44.5,44.5-44.5h0c24.6,0,44.5,19.9,44.5,44.5v0C543,382.1,523.1,402,498.5,402z"/>
+                  </svg>
                 </div>
               </Link>
             </div>
@@ -192,7 +196,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">abdur321</p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        admin@talkl.ink
+                        admin@italklink.com
                       </p>
                     </div>
                   </DropdownMenuLabel>
