@@ -223,11 +223,26 @@ export default function Landing() {
           <div className="flex justify-between items-center h-16">
             <motion.div 
               className="flex items-center space-x-2 flex-shrink-0"
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.05, transition: { type: "spring", stiffness: 400 } }}
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center shadow-lg">
-                <i className="fas fa-address-card text-white text-sm"></i>
-              </div>
+              <motion.div 
+                className="w-8 h-8 rounded-lg overflow-hidden shadow-lg"
+                whileHover={{ boxShadow: "0 0 15px rgba(34, 197, 94, 0.5)" }}
+              >
+                <svg viewBox="0 0 1000 1000" className="w-full h-full">
+                  <path fill="#22c55e" d="M817.9,999.9H182.1C81.8,999.9-0.2,917.8-0.2,817.5v-635C-0.2,82.2,81.8,0.1,182.1,0.1h635.7c100.3,0,182.4,82.1,182.4,182.4v635C1000.2,917.8,918.2,999.9,817.9,999.9z"/>
+                  <path fill="none" stroke="#FFFFFF" strokeWidth="70" strokeMiterlimit="10" d="M315,857c-116.4-65.3-195-189.8-195-332.7C120,313.7,290.7,143,501.3,143c210.6,0,381.2,170.7,381.2,381.2c0,82.3-26.7,166.9-77.1,232.3c-47.2,61.2-124.5,112.4-204.8,97.6c-27.8-5.1-55-17.9-74.7-38.6c-17.8-18.8-26.3-42.5-27.2-68V437"/>
+                  <motion.ellipse
+                    cx="498.5"
+                    cy="357.5"
+                    rx="44.5"
+                    ry="44.5"
+                    fill="#FFFFFF"
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                </svg>
+              </motion.div>
               <span className="text-lg sm:text-xl font-bold text-gray-900 whitespace-nowrap">iTalkLink</span>
             </motion.div>
             
