@@ -96,7 +96,6 @@ export const Navigation = () => {
   const [location] = useLocation();
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
-  const [iconIndex, setIconIndex] = useState(0);
 
   const { data: cartItems = [] } = useQuery({
     queryKey: ['/api/cart'],
@@ -117,30 +116,41 @@ export const Navigation = () => {
     storage.saveLanguage(newLang);
   };
 
-  const CurrentIcon = iconVariants[iconIndex].component;
-
   return (
-    <nav className="bg-gradient-to-r from-green-600 to-green-700 backdrop-blur-lg border-b border-green-800 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-2">
+    <>
+      {/* Icon Preview Section */}
+      <div className="bg-gradient-to-r from-green-700 to-green-800 py-8">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl font-bold text-white text-center mb-6">
+            Choose Your Favorite iTalkLink Icon
+          </h2>
+          <div className="grid grid-cols-5 gap-6">
+            {iconVariants.map((variant, index) => {
+              const IconComponent = variant.component;
+              return (
+                <div key={index} className="flex flex-col items-center space-y-3">
+                  <div className="w-20 h-20 bg-white rounded-xl flex items-center justify-center shadow-xl hover:scale-110 transition-transform">
+                    <IconComponent />
+                  </div>
+                  <span className="text-sm font-semibold text-white bg-green-900 px-4 py-1.5 rounded-full">
+                    {variant.name}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <nav className="bg-gradient-to-r from-green-600 to-green-700 backdrop-blur-lg border-b border-green-800 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center space-x-2" data-testid="nav-logo">
-              <div 
-                className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIconIndex((prev) => (prev + 1) % iconVariants.length);
-                }}
-                title={`Current: ${iconVariants[iconIndex].name} (Click to cycle)`}
-              >
-                <CurrentIcon />
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg">
+                <i className="fas fa-address-card text-green-600 text-sm"></i>
               </div>
               <span className="text-xl font-bold text-white">iTalkLink</span>
             </Link>
-            <span className="text-xs text-green-100 bg-green-800 px-2 py-0.5 rounded-full opacity-75">
-              {iconVariants[iconIndex].name}
-            </span>
-          </div>
           
           <div className="hidden md:flex items-center space-x-6">
             <Link href="/affiliate" data-testid="nav-affiliate">
@@ -212,5 +222,6 @@ export const Navigation = () => {
         </div>
       </div>
     </nav>
+    </>
   );
 };
