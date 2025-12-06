@@ -17,27 +17,52 @@ const AnimatedITalkLinkLogo = () => (
       {/* Green background */}
       <path fill="#22c55e" d="M817.9,999.9H182.1C81.8,999.9-0.2,917.8-0.2,817.5v-635C-0.2,82.2,81.8,0.1,182.1,0.1h635.7c100.3,0,182.4,82.1,182.4,182.4v635C1000.2,917.8,918.2,999.9,817.9,999.9z"/>
       
-      {/* White "i" spiral stroke - animated */}
-      <motion.path 
-        fill="none" 
-        stroke="#FFFFFF" 
-        strokeWidth="70" 
-        strokeMiterlimit="10" 
-        d="M315,857c-116.4-65.3-195-189.8-195-332.7C120,313.7,290.7,143,501.3,143c210.6,0,381.2,170.7,381.2,381.2c0,82.3-26.7,166.9-77.1,232.3c-47.2,61.2-124.5,112.4-204.8,97.6c-27.8-5.1-55-17.9-74.7-38.6c-17.8-18.8-26.3-42.5-27.2-68V437"
-        initial={{ pathLength: 0, opacity: 0 }}
-        animate={{ pathLength: 1, opacity: 1 }}
-        transition={{ duration: 2, ease: "easeInOut" }}
-      />
+      {/* White "i" spiral stroke - slow rotation animation */}
+      <motion.g
+        style={{ transformOrigin: "500px 500px" }}
+        animate={{ rotate: [0, 360] }}
+        transition={{ 
+          duration: 4, 
+          ease: "linear",
+          repeat: Infinity,
+          repeatDelay: 8
+        }}
+      >
+        <path 
+          fill="none" 
+          stroke="#FFFFFF" 
+          strokeWidth="70" 
+          strokeMiterlimit="10" 
+          d="M315,857c-116.4-65.3-195-189.8-195-332.7C120,313.7,290.7,143,501.3,143c210.6,0,381.2,170.7,381.2,381.2c0,82.3-26.7,166.9-77.1,232.3c-47.2,61.2-124.5,112.4-204.8,97.6c-27.8-5.1-55-17.9-74.7-38.6c-17.8-18.8-26.3-42.5-27.2-68V437"
+        />
+      </motion.g>
       
-      {/* White dot - bouncing animation */}
+      {/* White dot - cricket ball bounce: 3 bounces hitting top of circle, then 5s pause */}
       <motion.ellipse
         cx="498.5"
         cy="357.5"
         rx="44.5"
         ry="44.5"
         fill="#FFFFFF"
-        animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ 
+          y: [
+            0,      // Start position
+            -140,   // Bounce 1: Hit top of circle
+            0,      // Return
+            -120,   // Bounce 2: Slightly lower (losing energy)
+            0,      // Return
+            -90,    // Bounce 3: Even lower
+            0,      // Return to rest
+            0       // Stay at rest during 5s pause
+          ]
+        }}
+        transition={{ 
+          duration: 8,
+          times: [0, 0.08, 0.16, 0.22, 0.30, 0.35, 0.42, 1],
+          ease: ["easeOut", "easeIn", "easeOut", "easeIn", "easeOut", "easeIn", "linear"],
+          repeat: Infinity,
+          delay: 4
+        }}
       />
     </svg>
   </motion.div>
