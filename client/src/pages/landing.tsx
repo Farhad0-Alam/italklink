@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useAnimationControls } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -209,6 +209,20 @@ const staggerContainer = {
 export default function Landing() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [activeFeatureTab, setActiveFeatureTab] = useState(0);
+  const pathControls = useAnimationControls();
+
+  const handleLogoHover = async () => {
+    await pathControls.start({
+      pathLength: 0,
+      opacity: 0,
+      transition: { duration: 0.1 }
+    });
+    await pathControls.start({
+      pathLength: 1,
+      opacity: 1,
+      transition: { duration: 1.5, ease: "easeInOut" }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -229,6 +243,7 @@ export default function Landing() {
                 className="w-8 h-8 rounded-lg overflow-hidden shadow-lg"
                 whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(34, 197, 94, 0.6)" }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                onHoverStart={handleLogoHover}
               >
                 <svg viewBox="0 0 1000 1000" className="w-full h-full">
                   {/* Green background */}
@@ -243,6 +258,7 @@ export default function Landing() {
                     d="M315,857c-116.4-65.3-195-189.8-195-332.7C120,313.7,290.7,143,501.3,143c210.6,0,381.2,170.7,381.2,381.2c0,82.3-26.7,166.9-77.1,232.3c-47.2,61.2-124.5,112.4-204.8,97.6c-27.8-5.1-55-17.9-74.7-38.6c-17.8-18.8-26.3-42.5-27.2-68V437"
                     initial={{ pathLength: 0, opacity: 0 }}
                     animate={{ pathLength: 1, opacity: 1 }}
+                    controls={pathControls}
                     transition={{ duration: 2, ease: "easeInOut" }}
                   />
                   
