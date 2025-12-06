@@ -1993,7 +1993,7 @@ export default function EmailSignature() {
                         id="company"
                         value={signatureData.company}
                         onChange={(e) => updateField("company", e.target.value)}
-                        placeholder="TalkLink Inc."
+                        placeholder="iTalkLink Inc."
                         data-testid="input-company"
                       />
                     </div>

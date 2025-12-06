@@ -66,17 +66,17 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100 dark:bg-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100 dark:bg-gray-900">
       <div className="w-full max-w-md p-6">
-        <Card className="shadow-xl border-orange-100">
+        <Card className="shadow-xl border-green-100">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/30">
-                <span className="text-white font-bold text-2xl">2T</span>
+              <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-green-700 rounded-2xl flex items-center justify-center shadow-lg shadow-green-600/30">
+                <span className="text-white font-bold text-2xl">iT</span>
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
-              TalkLink Admin
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+              iTalkLink Admin
             </CardTitle>
             <CardDescription>
               Sign in to access the admin dashboard
@@ -97,7 +97,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                           autoComplete="username"
                           placeholder="admin@example.com"
                           data-testid="input-admin-email"
-                          className="focus-visible:ring-orange-500"
+                          className="focus-visible:ring-green-600"
                           {...field}
                         />
                       </FormControl>
@@ -114,7 +114,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                       <div className="flex items-center justify-between">
                         <FormLabel>Password</FormLabel>
                         <Link href="/forgot-password">
-                          <a className="text-sm text-orange-600 hover:text-orange-500">
+                          <a className="text-sm text-green-600 hover:text-green-700">
                             Forgot password?
                           </a>
                         </Link>
@@ -126,7 +126,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                             autoComplete="current-password"
                             placeholder="Enter your password"
                             data-testid="input-admin-password"
-                            className="focus-visible:ring-orange-500"
+                            className="focus-visible:ring-green-600"
                             {...field}
                           />
                           <Button
@@ -160,7 +160,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                           checked={field.value}
                           onCheckedChange={field.onChange}
                           data-testid="checkbox-remember-me"
-                          className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                          className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
@@ -180,7 +180,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
 
                 <Button
                   type="submit"
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium shadow-lg shadow-orange-500/30 transition-all duration-200"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-medium shadow-lg shadow-green-600/30 transition-all duration-200"
                   disabled={isLoading}
                   data-testid="button-admin-login"
                 >
@@ -195,8 +195,8 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
               </p>
             </div>
 
-            <div className="mt-4 p-4 bg-orange-50 dark:bg-gray-800 rounded-lg border border-orange-100">
-              <p className="text-sm text-orange-600 dark:text-orange-400 mb-2 font-medium">Test Credentials:</p>
+            <div className="mt-4 p-4 bg-green-50 dark:bg-gray-800 rounded-lg border border-green-100">
+              <p className="text-sm text-green-600 dark:text-green-400 mb-2 font-medium">Test Credentials:</p>
               <p className="text-xs font-mono text-gray-600 dark:text-gray-500">
                 Email: admin@test.com<br />
                 Password: password

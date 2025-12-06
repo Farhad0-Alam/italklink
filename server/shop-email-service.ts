@@ -12,7 +12,7 @@ const sendEmail = async (to: string, subject: string, html: string) => {
     sgMail.setApiKey(apiKey);
     await sgMail.send({
       to,
-      from: process.env.SENDGRID_FROM_EMAIL || 'noreply@talklink.app',
+      from: process.env.SENDGRID_FROM_EMAIL || 'noreply@italklink.com',
       subject,
       html,
     });

@@ -7,16 +7,16 @@ const resources = {
       // Navigation
       'nav.home': 'Home',
       'nav.builder': 'Builder',
-      'nav.getTalkLink': 'Get TalkLink',
+      'nav.getTalkLink': 'Get iTalkLink',
       
       // Home Page
       'home.hero.title': 'Create a Free Digital Business Card Preview in 60 Seconds',
-      'home.hero.subtitle': 'Perfect preview. Save as PNG. Share a link. Upgrade to a full smart card with TalkLink.',
+      'home.hero.subtitle': 'Perfect preview. Save as PNG. Share a link. Upgrade to a full smart card with iTalkLink.',
       'home.trustBadge.noSignup': 'No Sign-up',
       'home.trustBadge.noCreditCard': 'No Credit Card',
       'home.trustBadge.free': '100% Free',
       'home.cta.create': 'Create Your Card',
-      'home.cta.whatIs': 'What is TalkLink?',
+      'home.cta.whatIs': 'What is iTalkLink?',
       
       // Features
       'features.title': 'Why Choose Our Preview Tool?',
@@ -54,7 +54,7 @@ const resources = {
       'action.saveSettings': 'Save Settings',
       'action.downloadPNG': 'Download PNG',
       'action.shareLink': 'Share Link',
-      'action.getFullCard': 'Get a Full Smart Card on TalkLink →',
+      'action.getFullCard': 'Get a Full Smart Card on iTalkLink →',
       
       // Messages
       'message.settingsSaved': 'Settings saved!',
@@ -63,7 +63,7 @@ const resources = {
       
       // Footer
       'footer.privacy': 'Your data lives in your browser. We do not upload files or store personal information.',
-      'footer.poweredBy': 'Powered by TalkLink',
+      'footer.poweredBy': 'Powered by iTalkLink',
     }
   },
   bn: {
@@ -71,16 +71,16 @@ const resources = {
       // Navigation
       'nav.home': 'হোম',
       'nav.builder': 'বিল্ডার',
-      'nav.getTalkLink': '২টকলিংক পান',
+      'nav.getTalkLink': 'আইটকলিংক পান',
       
       // Home Page
       'home.hero.title': '৬০ সেকেন্ডে বিনামূল্যে ডিজিটাল ব্যবসায়িক কার্ড প্রিভিউ তৈরি করুন',
-      'home.hero.subtitle': 'নিখুঁত প্রিভিউ। PNG হিসেবে সেভ করুন। লিংক শেয়ার করুন। ২টকলিংকের সাথে সম্পূর্ণ স্মার্ট কার্ডে আপগ্রেড করুন।',
+      'home.hero.subtitle': 'নিখুঁত প্রিভিউ। PNG হিসেবে সেভ করুন। লিংক শেয়ার করুন। আইটকলিংকের সাথে সম্পূর্ণ স্মার্ট কার্ডে আপগ্রেড করুন।',
       'home.trustBadge.noSignup': 'সাইন-আপ নেই',
       'home.trustBadge.noCreditCard': 'ক্রেডিট কার্ড নেই',
       'home.trustBadge.free': '১০০% বিনামূল্যে',
       'home.cta.create': 'আপনার কার্ড তৈরি করুন',
-      'home.cta.whatIs': '২টকলিংক কী?',
+      'home.cta.whatIs': 'আইটকলিংক কী?',
       
       // Features
       'features.title': 'কেন আমাদের প্রিভিউ টুল বেছে নেবেন?',
@@ -118,7 +118,7 @@ const resources = {
       'action.saveSettings': 'সেটিংস সেভ করুন',
       'action.downloadPNG': 'PNG ডাউনলোড করুন',
       'action.shareLink': 'লিংক শেয়ার করুন',
-      'action.getFullCard': '২টকলিংকে সম্পূর্ণ স্মার্ট কার্ড পান →',
+      'action.getFullCard': 'আইটকলিংকে সম্পূর্ণ স্মার্ট কার্ড পান →',
       
       // Messages
       'message.settingsSaved': 'সেটিংস সেভ হয়েছে!',
@@ -127,7 +127,7 @@ const resources = {
       
       // Footer
       'footer.privacy': 'আপনার ডেটা আপনার ব্রাউজারে থাকে। আমরা ফাইল আপলোড করি না বা ব্যক্তিগত তথ্য সংরক্ষণ করি না।',
-      'footer.poweredBy': '২টকলিংক দ্বারা চালিত',
+      'footer.poweredBy': 'আইটকলিংক দ্বারা চালিত',
     }
   }
 };

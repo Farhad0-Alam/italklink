@@ -141,8 +141,8 @@ const pricingTiers = [
 
 const faqs = [
   {
-    question: "What makes TalkLink different from other digital business card platforms?",
-    answer: "TalkLink is a complete business solution, not just a card creator. You get digital business cards PLUS appointment booking, CRM, AI chatbot, automated notifications, and analytics - all in one platform. It's like having a virtual sales team working 24/7."
+    question: "What makes iTalkLink different from other digital business card platforms?",
+    answer: "iTalkLink is a complete business solution, not just a card creator. You get digital business cards PLUS appointment booking, CRM, AI chatbot, automated notifications, and analytics - all in one platform. It's like having a virtual sales team working 24/7."
   },
   {
     question: "Can I add AI chatbot to my business card?",
@@ -225,10 +225,10 @@ export default function Landing() {
               className="flex items-center space-x-2 flex-shrink-0"
               whileHover={{ scale: 1.02 }}
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
+              <div className="w-8 h-8 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center shadow-lg">
                 <i className="fas fa-address-card text-white text-sm"></i>
               </div>
-              <span className="text-lg sm:text-xl font-bold text-gray-900 whitespace-nowrap">TalkLink</span>
+              <span className="text-lg sm:text-xl font-bold text-gray-900 whitespace-nowrap">iTalkLink</span>
             </motion.div>
             
             <div className="hidden lg:flex items-center space-x-1 xl:space-x-6 overflow-x-auto flex-1 justify-center">
@@ -245,7 +245,7 @@ export default function Landing() {
                 <a 
                   key={item.hash}
                   href={`#${item.hash}`}
-                  className="text-gray-600 hover:text-orange-500 transition-colors font-medium whitespace-nowrap text-sm xl:text-base"
+                  className="text-gray-600 hover:text-green-600 transition-colors font-medium whitespace-nowrap text-sm xl:text-base"
                   data-testid={`link-nav-${item.hash}`}
                 >
                   {item.label}
@@ -257,7 +257,7 @@ export default function Landing() {
               <Button variant="ghost" asChild className="font-medium text-sm sm:text-base px-2 sm:px-4" data-testid="button-signin">
                 <Link href="/login">Sign In</Link>
               </Button>
-              <Button asChild className="bg-orange-500 hover:bg-orange-600 font-medium text-sm sm:text-base px-3 sm:px-6 h-9 sm:h-10" data-testid="button-get-started-nav">
+              <Button asChild className="bg-green-600 hover:bg-green-700 font-medium text-sm sm:text-base px-3 sm:px-6 h-9 sm:h-10" data-testid="button-get-started-nav">
                 <Link href="/register">Get Started</Link>
               </Button>
             </div>
@@ -266,10 +266,10 @@ export default function Landing() {
       </motion.nav>
 
       {/* Hero Section */}
-      <section id="about" className="pt-32 pb-20 bg-gradient-to-br from-orange-50 via-white to-blue-50 overflow-hidden relative w-full">
+      <section id="about" className="pt-32 pb-20 bg-gradient-to-br from-green-50 via-white to-blue-50 overflow-hidden relative w-full">
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
           <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
         </div>
@@ -280,10 +280,10 @@ export default function Landing() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center px-4 py-2 bg-orange-100 rounded-full mb-6"
+              className="inline-flex items-center px-4 py-2 bg-green-100 rounded-full mb-6"
             >
-              <Sparkles className="w-4 h-4 text-orange-600 mr-2" />
-              <span className="text-orange-700 font-semibold text-sm">All-in-One Business Platform</span>
+              <Sparkles className="w-4 h-4 text-green-600 mr-2" />
+              <span className="text-green-700 font-semibold text-sm">All-in-One Business Platform</span>
             </motion.div>
             
             <motion.h1 
@@ -293,7 +293,7 @@ export default function Landing() {
               transition={{ delay: 0.2, duration: 0.6 }}
             >
               Digital Cards +<br />
-              <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
                 AI + Booking + CRM
               </span>
             </motion.h1>
@@ -315,13 +315,13 @@ export default function Landing() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.6 }}
             >
-              <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 h-auto shadow-xl hover:shadow-2xl transition-all w-full sm:w-auto" asChild data-testid="button-create-card-hero">
+              <Button size="lg" className="bg-green-600 hover:bg-green-700 text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 h-auto shadow-xl hover:shadow-2xl transition-all w-full sm:w-auto" asChild data-testid="button-create-card-hero">
                 <Link href="/register">
                   <Sparkles className="w-4 sm:w-5 h-4 sm:h-5 mr-2" />
                   Create Card Free
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 h-auto border-2 border-gray-300 hover:border-orange-500 hover:text-orange-600 transition-all w-full sm:w-auto" asChild data-testid="button-watch-demo">
+              <Button size="lg" variant="outline" className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 h-auto border-2 border-gray-300 hover:border-green-600 hover:text-green-600 transition-all w-full sm:w-auto" asChild data-testid="button-watch-demo">
                 <Link href="/dashboard">
                   <PlayCircle className="w-4 sm:w-5 h-4 sm:h-5 mr-2" />
                   Watch Demo
@@ -359,7 +359,7 @@ export default function Landing() {
           >
             <div className="relative">
               {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-orange-500 to-blue-500 rounded-2xl sm:rounded-3xl blur-3xl opacity-20"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-green-400 via-green-500 to-blue-500 rounded-2xl sm:rounded-3xl blur-3xl opacity-20"></div>
               
               {/* Main preview card */}
               <div className="relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-1 border border-gray-200">
@@ -368,7 +368,7 @@ export default function Landing() {
                     {/* Card Preview */}
                     <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                       <div className="flex items-center justify-center mb-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center">
+                        <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-green-700 rounded-2xl flex items-center justify-center">
                           <i className="fas fa-user text-white text-2xl"></i>
                         </div>
                       </div>
@@ -406,7 +406,7 @@ export default function Landing() {
                       <button className="w-full bg-gray-900 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors mb-2" data-testid="button-preview-save-contact">
                         <i className="fas fa-download mr-2"></i>Save Contact
                       </button>
-                      <button className="w-full bg-orange-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-600 transition-colors" data-testid="button-preview-book-meeting">
+                      <button className="w-full bg-green-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors" data-testid="button-preview-book-meeting">
                         <i className="fas fa-calendar mr-2"></i>Book Meeting
                       </button>
                     </div>
@@ -414,8 +414,8 @@ export default function Landing() {
                     {/* Features highlight */}
                     <div className="md:col-span-2 space-y-4">
                       <div className="flex items-start space-x-3 bg-white rounded-xl p-4 border border-gray-100">
-                        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Bot className="w-5 h-5 text-orange-600" />
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Bot className="w-5 h-5 text-green-600" />
                         </div>
                         <div>
                           <h4 className="font-bold text-gray-900 text-sm">AI Chatbot Included</h4>
@@ -460,12 +460,12 @@ export default function Landing() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-100">
+            <Badge className="mb-4 bg-green-100 text-green-700 hover:bg-green-100">
               <Layout className="w-3 h-3 mr-1" />
               25+ Builder Elements
             </Badge>
             <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
-              Build <span className="text-orange-500">Anything</span> You Want
+              Build <span className="text-green-600">Anything</span> You Want
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Create rich, interactive digital business cards with 25+ powerful elements.
@@ -487,10 +487,10 @@ export default function Landing() {
                 variants={fadeInUp}
                 className="group"
               >
-                <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-orange-200 h-full cursor-pointer" data-testid={`card-builder-element-${index}`}>
+                <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-green-200 h-full cursor-pointer" data-testid={`card-builder-element-${index}`}>
                   <CardContent className="p-4 text-center">
-                    <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                      <i className={`${element.icon} text-orange-600 text-lg`}></i>
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-green-50 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                      <i className={`${element.icon} text-green-600 text-lg`}></i>
                     </div>
                     <h4 className="font-bold text-gray-900 text-sm mb-1" data-testid={`text-element-${index}-name`}>{element.name}</h4>
                     <p className="text-gray-600 text-xs" data-testid={`text-element-${index}-desc`}>{element.description}</p>
@@ -503,13 +503,13 @@ export default function Landing() {
           {/* Featured Elements Spotlight */}
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             <motion.div
-              className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-8 border-2 border-orange-200"
+              className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 border-2 border-green-200"
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
               <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-                <Bot className="w-8 h-8 text-orange-600" />
+                <Bot className="w-8 h-8 text-green-600" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">AI Chatbot</h3>
               <p className="text-gray-700 mb-4">
@@ -518,15 +518,15 @@ export default function Landing() {
               </p>
               <ul className="space-y-2 text-sm text-gray-700">
                 <li className="flex items-center">
-                  <CheckCircle2 className="w-4 h-4 text-orange-600 mr-2 flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
                   Custom personality & responses
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle2 className="w-4 h-4 text-orange-600 mr-2 flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
                   Lead qualification automation
                 </li>
                 <li className="flex items-center">
-                  <CheckCircle2 className="w-4 h-4 text-orange-600 mr-2 flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
                   24/7 availability
                 </li>
               </ul>
@@ -601,7 +601,7 @@ export default function Landing() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-lg px-8 py-6 h-auto shadow-lg" asChild>
+            <Button size="lg" className="bg-green-600 hover:bg-green-700 text-lg px-8 py-6 h-auto shadow-lg" asChild>
               <Link href="/register">
                 Start Building Your Card
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -699,7 +699,7 @@ export default function Landing() {
       </section>
 
       {/* HTML Email Signature Generator Section */}
-      <section id="email-signatures" className="py-24 bg-gradient-to-br from-orange-50 to-white">
+      <section id="email-signatures" className="py-24 bg-gradient-to-br from-green-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16"
@@ -707,12 +707,12 @@ export default function Landing() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-100">
+            <Badge className="mb-4 bg-green-100 text-green-700 hover:bg-green-100">
               <Mail className="w-3 h-3 mr-1" />
               HTML Email Signature
             </Badge>
             <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
-              Professional <span className="text-orange-600">Email Signatures</span>
+              Professional <span className="text-green-600">Email Signatures</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Create stunning HTML email signatures with live preview. Choose from multiple templates, 
@@ -730,10 +730,10 @@ export default function Landing() {
           >
             {emailSignatureFeatures.map((feature, index) => (
               <motion.div key={index} variants={fadeInUp}>
-                <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-orange-200 h-full" data-testid={`card-email-signature-feature-${index}`}>
+                <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-green-200 h-full" data-testid={`card-email-signature-feature-${index}`}>
                   <CardContent className="p-6">
-                    <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
-                      <feature.icon className="w-6 h-6 text-orange-600" />
+                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                      <feature.icon className="w-6 h-6 text-green-600" />
                     </div>
                     <h3 className="font-bold text-gray-900 mb-2 text-lg" data-testid={`text-email-signature-${index}-title`}>{feature.title}</h3>
                     <p className="text-gray-600 text-sm" data-testid={`text-email-signature-${index}-desc`}>{feature.description}</p>
@@ -927,7 +927,7 @@ export default function Landing() {
               viewport={{ once: true }}
             >
               {/* Analytics Dashboard Visual */}
-              <div className="bg-gradient-to-br from-orange-50 to-white rounded-3xl shadow-2xl p-8 border border-orange-200">
+              <div className="bg-gradient-to-br from-green-50 to-white rounded-3xl shadow-2xl p-8 border border-green-200">
                 <h3 className="font-bold text-gray-900 mb-6 text-xl">Performance Dashboard</h3>
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
@@ -947,7 +947,7 @@ export default function Landing() {
                     <div className="text-sm text-gray-600 mb-3">Conversion Rate</div>
                     <div className="flex items-end space-x-1 h-32">
                       {[60, 75, 45, 90, 70, 85, 100].map((height, i) => (
-                        <div key={i} className="flex-1 bg-gradient-to-t from-orange-500 to-orange-400 rounded-t" style={{ height: `${height}%` }}></div>
+                        <div key={i} className="flex-1 bg-gradient-to-t from-green-600 to-green-500 rounded-t" style={{ height: `${height}%` }}></div>
                       ))}
                     </div>
                   </div>
@@ -960,7 +960,7 @@ export default function Landing() {
                           <span className="text-sm text-gray-900">{name}</span>
                           <div className="flex items-center space-x-2">
                             <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                              <div className="h-full bg-orange-500 rounded-full" style={{ width: `${[85, 72][i]}%` }}></div>
+                              <div className="h-full bg-green-600 rounded-full" style={{ width: `${[85, 72][i]}%` }}></div>
                             </div>
                             <span className="text-xs text-gray-600">{[85, 72][i]}%</span>
                           </div>
@@ -977,12 +977,12 @@ export default function Landing() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-100">
+              <Badge className="mb-4 bg-green-100 text-green-700 hover:bg-green-100">
                 <BarChart3 className="w-3 h-3 mr-1" />
                 Analytics & Insights
               </Badge>
               <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
-                <span className="text-orange-600">Track Everything</span>
+                <span className="text-green-600">Track Everything</span>
                 <br />That Matters
               </h2>
               <p className="text-xl text-gray-600 mb-8">
@@ -1000,8 +1000,8 @@ export default function Landing() {
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <feature.icon className="w-5 h-5 text-orange-600" />
+                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <feature.icon className="w-5 h-5 text-green-600" />
                     </div>
                     <div>
                       <h4 className="font-bold text-gray-900 mb-1">{feature.title}</h4>
@@ -1060,7 +1060,7 @@ export default function Landing() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-24 bg-gradient-to-br from-orange-50 to-white">
+      <section id="testimonials" className="py-24 bg-gradient-to-br from-green-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16"
@@ -1068,12 +1068,12 @@ export default function Landing() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-100">
+            <Badge className="mb-4 bg-green-100 text-green-700 hover:bg-green-100">
               <Star className="w-3 h-3 mr-1" />
               Customer Stories
             </Badge>
             <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
-              Loved by <span className="text-orange-500">Professionals</span> Worldwide
+              Loved by <span className="text-green-600">Professionals</span> Worldwide
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Join thousands of professionals growing their business with TalkLink
@@ -1089,7 +1089,7 @@ export default function Landing() {
           >
             {testimonials.map((testimonial, index) => (
               <motion.div key={index} variants={fadeInUp}>
-                <Card className="border-2 border-gray-200 hover:border-orange-200 hover:shadow-xl transition-all h-full" data-testid={`card-testimonial-${index}`}>
+                <Card className="border-2 border-gray-200 hover:border-green-200 hover:shadow-xl transition-all h-full" data-testid={`card-testimonial-${index}`}>
                   <CardContent className="p-8">
                     <div className="flex text-yellow-400 mb-4" data-testid={`stars-testimonial-${index}`}>
                       {[...Array(5)].map((_, i) => (
@@ -1132,7 +1132,7 @@ export default function Landing() {
               Frequently Asked
             </Badge>
             <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6">
-              Got <span className="text-orange-500">Questions?</span>
+              Got <span className="text-green-600">Questions?</span>
             </h2>
             <p className="text-xl text-gray-600">
               Everything you need to know about TalkLink
@@ -1146,7 +1146,7 @@ export default function Landing() {
                 open={expandedFaq === index}
                 onOpenChange={() => setExpandedFaq(expandedFaq === index ? null : index)}
               >
-                <Card className="border-2 border-gray-200 hover:border-orange-200 transition-all" data-testid={`card-faq-${index}`}>
+                <Card className="border-2 border-gray-200 hover:border-green-200 transition-all" data-testid={`card-faq-${index}`}>
                   <CollapsibleTrigger asChild>
                     <CardContent className="p-6 cursor-pointer" data-testid={`button-faq-${index}-toggle`}>
                       <div className="flex justify-between items-center">
@@ -1172,7 +1172,7 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section id="contact" className="py-24 bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+      <section id="contact" className="py-24 bg-gradient-to-br from-green-600 to-green-700 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1182,27 +1182,27 @@ export default function Landing() {
             <h2 className="text-4xl lg:text-5xl font-black mb-6">
               Ready to Transform Your Business?
             </h2>
-            <p className="text-xl mb-10 text-orange-100">
-              Join thousands of professionals using TalkLink to grow their business.
+            <p className="text-xl mb-10 text-green-100">
+              Join thousands of professionals using iTalkLink to grow their business.
               <br />
               Create your first card in 60 seconds. No credit card required.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-white text-orange-600 hover:bg-gray-100 text-lg px-8 py-6 h-auto shadow-xl font-bold" asChild data-testid="button-cta-get-started">
+              <Button size="lg" className="bg-white text-green-600 hover:bg-gray-100 text-lg px-8 py-6 h-auto shadow-xl font-bold" asChild data-testid="button-cta-get-started">
                 <Link href="/register">
                   Get Started Free
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-2 border-white text-orange-400 hover:bg-white/10 text-lg px-8 py-6 h-auto font-bold" asChild data-testid="button-cta-view-pricing">
+              <Button size="lg" variant="outline" className="border-2 border-white text-green-400 hover:bg-white/10 text-lg px-8 py-6 h-auto font-bold" asChild data-testid="button-cta-view-pricing">
                 <Link href="/pricing">
                   View Pricing
                 </Link>
               </Button>
             </div>
 
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-orange-100">
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-green-100">
               <div className="flex items-center">
                 <CheckCircle2 className="w-5 h-5 mr-2" />
                 Free forever plan

@@ -136,9 +136,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               text-xs sm:text-sm font-medium rounded-lg whitespace-nowrap 
               transition-all duration-200 ease-in-out cursor-pointer
               ${isActive 
-                ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md' 
+                ? 'bg-gradient-to-br from-green-600 to-green-700 text-white shadow-md' 
                 : isGrouped
-                ? 'text-orange-700 dark:text-orange-300 hover:bg-orange-50/50 dark:hover:bg-orange-950/30 border border-orange-200/40 dark:border-orange-800/40'
+                ? 'text-green-700 dark:text-green-300 hover:bg-green-50/50 dark:hover:bg-green-950/30 border border-green-200/40 dark:border-green-800/40'
                 : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
               }
             `}
@@ -227,11 +227,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <div className="h-full px-4 py-6 overflow-y-auto bg-white dark:bg-gray-800">
                     <div className="flex items-center mb-8 px-2">
                       <Link href="/admin" className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                          <span className="text-white font-bold text-lg">2T</span>
+                        <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center shadow-lg">
+                          <span className="text-white font-bold text-lg">iT</span>
                         </div>
-                        <span className="text-xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
-                          TalkLink
+                        <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+                          iTalkLink
                         </span>
                       </Link>
                     </div>
@@ -251,19 +251,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                   w-full group flex items-center justify-between gap-3 px-4 py-3 
                                   rounded-xl font-medium transition-all duration-200
                                   ${isExpanded 
-                                    ? 'bg-gradient-to-r from-orange-50 to-orange-50/50 dark:from-orange-950/30 dark:to-orange-950/10 border border-orange-200/60 dark:border-orange-800/40' 
+                                    ? 'bg-gradient-to-r from-green-50 to-green-50/50 dark:from-green-950/30 dark:to-orange-950/10 border border-green-200/60 dark:border-green-800/40' 
                                     : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50'
                                   }
                                 `}
                               >
                                 <div className="flex items-center gap-3">
-                                  <Icon className={`w-5 h-5 transition-all ${isExpanded ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-gray-400'} group-hover:scale-110`} />
-                                  <span className={isExpanded ? 'text-orange-900 dark:text-orange-100 font-semibold' : ''}>{item.title}</span>
+                                  <Icon className={`w-5 h-5 transition-all ${isExpanded ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'} group-hover:scale-110`} />
+                                  <span className={isExpanded ? 'text-green-900 dark:text-green-100 font-semibold' : ''}>{item.title}</span>
                                 </div>
-                                <ChevronDown className={`w-4 h-4 transition-all duration-300 ${isExpanded ? 'rotate-180 text-orange-600 dark:text-orange-400' : 'text-gray-500'}`} />
+                                <ChevronDown className={`w-4 h-4 transition-all duration-300 ${isExpanded ? 'rotate-180 text-green-600 dark:text-green-400' : 'text-gray-500'}`} />
                               </button>
                               {isExpanded && (
-                                <div className="px-2 py-1 space-y-0.5 bg-gradient-to-b from-orange-50/40 to-transparent dark:from-orange-950/10 rounded-lg">
+                                <div className="px-2 py-1 space-y-0.5 bg-gradient-to-b from-orange-50/40 to-transparent dark:from-green-950/10 rounded-lg">
                                   {(item as any).submenu.map((subitem: any) => {
                                     const SubIcon = subitem.icon;
                                     const isSubActive = location === subitem.href;
@@ -276,7 +276,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                           group flex items-center gap-3 px-3 py-2.5 
                                           rounded-lg font-medium transition-all duration-200
                                           ${isSubActive 
-                                            ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25' 
+                                            ? 'bg-gradient-to-br from-green-600 to-green-700 text-white shadow-md shadow-green-600/25' 
                                             : 'text-gray-700 hover:bg-white/50 dark:text-gray-300 dark:hover:bg-gray-700/30'
                                           }
                                         `}
@@ -303,7 +303,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                               group flex items-center gap-3 px-4 py-3 
                               rounded-xl font-medium transition-all duration-200
                               ${isActive 
-                                ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30' 
+                                ? 'bg-gradient-to-br from-green-600 to-green-700 text-white shadow-lg shadow-green-600/30' 
                                 : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50'
                               }
                             `}

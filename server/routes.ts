@@ -1473,7 +1473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Send email
         await emailService.sendEmail({
           to: email,
-          subject: 'Reset Your Password - TalkLink',
+          subject: 'Reset Your Password - iTalkLink',
           html: `
             <!DOCTYPE html>
             <html>
@@ -1483,13 +1483,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               <style>
                 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #374151; background-color: #f3f4f6; margin: 0; padding: 0; }
                 .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
-                .header { background: linear-gradient(135deg, #ea580c 0%, #f97316 100%); padding: 40px 30px; text-align: center; }
-                .logo { width: 60px; height: 60px; background: white; border-radius: 12px; display: inline-flex; align-items: center; justify-center; font-size: 28px; font-weight: bold; color: #ea580c; margin-bottom: 20px; }
+                .header { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 40px 30px; text-align: center; }
+                .logo { width: 60px; height: 60px; background: white; border-radius: 12px; display: inline-flex; align-items: center; justify-center; font-size: 28px; font-weight: bold; color: #16a34a; margin-bottom: 20px; }
                 .header h1 { color: white; margin: 0; font-size: 24px; }
                 .content { padding: 40px 30px; }
                 .content h2 { color: #1f2937; margin-top: 0; }
-                .button { display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #ea580c 0%, #f97316 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0; }
-                .button:hover { background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%); }
+                .button { display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0; }
+                .button:hover { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
                 .footer { background-color: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 14px; }
                 .warning { background-color: #fef3c7; border-left: 4px solid: #f59e0b; padding: 12px 16px; margin: 20px 0; border-radius: 4px; }
               </style>
@@ -1497,12 +1497,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <body>
               <div class="container">
                 <div class="header">
-                  <div class="logo">2T</div>
+                  <div class="logo">iT</div>
                   <h1>Password Reset Request</h1>
                 </div>
                 <div class="content">
                   <h2>Hello ${user.firstName || 'there'},</h2>
-                  <p>We received a request to reset your password for your TalkLink account. If you didn't make this request, you can safely ignore this email.</p>
+                  <p>We received a request to reset your password for your iTalkLink account. If you didn't make this request, you can safely ignore this email.</p>
                   <p>To reset your password, click the button below:</p>
                   <center>
                     <a href="${resetUrl}" class="button">Reset Password</a>
@@ -1514,7 +1514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   <p style="word-break: break-all; color: #6b7280; font-size: 14px;">${resetUrl}</p>
                 </div>
                 <div class="footer">
-                  <p><strong>TalkLink</strong> - Digital Business Cards & Networking</p>
+                  <p><strong>iTalkLink</strong> - Digital Business Cards & Networking</p>
                   <p>This is an automated email. Please do not reply.</p>
                 </div>
               </div>

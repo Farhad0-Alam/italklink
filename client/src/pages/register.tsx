@@ -73,7 +73,7 @@ export default function Register() {
     onSuccess: () => {
       toast({
         title: 'Account Created Successfully!',
-        description: 'Please select a plan to start using TalkLink.',
+        description: 'Please select a plan to start using iTalkLink.',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       // Redirect to pricing page for new users to select a plan (mandatory plan selection)
@@ -141,17 +141,17 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4 py-8">
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/">
             <div className="flex items-center justify-center space-x-2 mb-4 group cursor-pointer">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-105">
-                <span className="text-white text-xl font-bold">2T</span>
+              <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-105">
+                <span className="text-white text-xl font-bold">iT</span>
               </div>
-              <span className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
-                TalkLink
+              <span className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+                iTalkLink
               </span>
             </div>
           </Link>
@@ -160,7 +160,7 @@ export default function Register() {
 
         <Card className="shadow-2xl border-0 max-h-[90vh] overflow-y-auto">
           <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
+            <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
               Create Account
             </CardTitle>
             <CardDescription className="text-center text-base">
@@ -171,7 +171,7 @@ export default function Register() {
             {/* Google Signup Button */}
             <Button
               variant="outline"
-              className="w-full h-12 border-2 hover:bg-orange-50 hover:border-orange-200 transition-all"
+              className="w-full h-12 border-2 hover:bg-green-50 hover:border-green-200 transition-all"
               onClick={handleGoogleSignup}
               disabled={registerMutation.isPending}
               data-testid="button-google-signup"
@@ -204,7 +204,7 @@ export default function Register() {
                     required
                     disabled={registerMutation.isPending}
                     data-testid="input-firstName"
-                    className="h-11 focus-visible:ring-orange-500 border-slate-300"
+                    className="h-11 focus-visible:ring-green-600 border-slate-300"
                   />
                 </div>
                 <div className="space-y-2">
@@ -220,7 +220,7 @@ export default function Register() {
                     required
                     disabled={registerMutation.isPending}
                     data-testid="input-lastName"
-                    className="h-11 focus-visible:ring-orange-500 border-slate-300"
+                    className="h-11 focus-visible:ring-green-600 border-slate-300"
                   />
                 </div>
               </div>
@@ -238,7 +238,7 @@ export default function Register() {
                   required
                   disabled={registerMutation.isPending}
                   data-testid="input-email"
-                  className="h-11 focus-visible:ring-orange-500 border-slate-300"
+                  className="h-11 focus-visible:ring-green-600 border-slate-300"
                 />
               </div>
               
@@ -256,7 +256,7 @@ export default function Register() {
                     required
                     disabled={registerMutation.isPending}
                     data-testid="input-password"
-                    className="h-11 pr-10 focus-visible:ring-orange-500 border-slate-300"
+                    className="h-11 pr-10 focus-visible:ring-green-600 border-slate-300"
                   />
                   <button
                     type="button"
@@ -330,7 +330,7 @@ export default function Register() {
                     required
                     disabled={registerMutation.isPending}
                     data-testid="input-confirmPassword"
-                    className={`h-11 pr-10 focus-visible:ring-orange-500 border-slate-300 ${
+                    className={`h-11 pr-10 focus-visible:ring-green-600 border-slate-300 ${
                       formData.confirmPassword && (passwordsMatch ? 'border-green-500' : 'border-red-500')
                     }`}
                   />

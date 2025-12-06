@@ -1460,9 +1460,9 @@ router.get('/settings/:category', requireOwner, async (req, res) => {
     // For now, return mock settings based on category
     const mockSettings = {
       profile: {
-        companyName: 'TalkLink',
+        companyName: 'iTalkLink',
         adminEmail: req.user!.email,
-        supportEmail: 'support@talkl.ink'
+        supportEmail: 'support@italklink.com'
       },
       payment: {
         stripeEnabled: false,
@@ -1470,7 +1470,7 @@ router.get('/settings/:category', requireOwner, async (req, res) => {
       },
       email: {
         smtpConfigured: false,
-        fromAddress: 'noreply@talkl.ink'
+        fromAddress: 'noreply@italklink.com'
       },
       branding: {
         logoUrl: '',
