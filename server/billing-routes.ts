@@ -264,7 +264,7 @@ router.post('/checkout/create-session', requireAuth, asyncHandler(async (req, re
       acss_debit: {
         mandate_options: {
           payment_schedule: 'sporadic',
-          transaction_type: 'one_time',
+          transaction_type: 'personal',
         },
       },
       wechat_pay: {
