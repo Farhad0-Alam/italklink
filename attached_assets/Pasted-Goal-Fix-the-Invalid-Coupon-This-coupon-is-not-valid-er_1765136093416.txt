@@ -1,0 +1,116 @@
+Goal: Fix the "Invalid Coupon – This coupon is not valid" error for a valid coupon like PREMIUM30 on the pricing page checkout.
+
+Important constraints:
+- Do NOT touch or create the `shop_cart` table.
+- Do NOT refactor unrelated code or UI.
+- Only work in coupon model, coupon validation endpoint, and checkout coupon integration.
+
+-------------------------------------
+1) Locate current coupon logic
+-------------------------------------
+1.1 Find:
+    - Coupon database model / table (e.g. coupons, discount_codes).
+    - The API endpoint used when a user enters a coupon on the pricing page
+      (likely something like /api/billing/validate-coupon or similar).
+    - Any service/helper functions used to validate coupons.
+
+1.2 Identify which environment we are using (local/test) for:
+    - Coupon DB records
+    - Plans / price IDs
+
+Make sure coupon validation is reading from the SAME database where coupons are stored.
+
+-------------------------------------
+2) Ensure PREMIUM30 exists and is configured correctly in code/DB
+-------------------------------------
+2.1 Inspect the coupons table directly (via ORM query or DB browser) and confirm that there is a row with:
+    - code: 'PREMIUM30'
+    - status: Active
+    - correct startDate (in the past) and expiryDate (null or in the future)
+    - applicablePlans includes the Test Restricted Plan and Custom Plan (and optionally Free Plan if desired).
+
+2.2 If this coupon only exists in an admin UI or seed file but not in the actual DB the app is using:
+    - Insert or fix the coupon record so that 'PREMIUM30' is stored in the active coupons table.
+
+-------------------------------------
+3) Fix coupon validation function
+-------------------------------------
+3.1 Open the backend function that validates the coupon code (the one that ultimately produces “Invalid Coupon”).
+
+3.2 Implement/verify the following logic:
+
+    Given input:
+      - couponCode (string from request)
+      - planId (or priceId) for the selected plan
+
+    Steps:
+      - Normalize couponCode:
+            const normalizedCode = couponCode.trim().toUpperCase();
+        and ensure the DB stores coupon codes in uppercase as well, or compare case-insensitively.
+
+      - Query the coupon record by normalizedCode.
+      - If not found:
+            return { valid: false, message: 'Coupon not found' };
+
+      - Check status === 'Active'. If not, return message 'Coupon is inactive'.
+
+      - Check startDate <= now and (expiryDate == null || expiryDate >= now).
+        If invalid by date, return message 'Coupon is expired or not yet active'.
+
+      - If coupon has applicablePlans:
+            - If the selected planId is NOT in coupon.applicablePlans:
+                  return { valid: false, message: 'Coupon not valid for this plan' };
+
+      - (Optional) Check usage limits (totalUsageLimit, usesPerUser) if these are implemented.
+        If exceeded, return 'Usage limit exceeded'.
+
+      - If all checks pass:
+            return { valid: true, couponId, discountType, percentage/amount, message: 'Coupon applied' }.
+
+3.3 Make sure the frontend error banner "Invalid Coupon – This coupon is not valid" is only shown when
+     the backend returns valid: false. If valid: true, do NOT show that banner.
+
+-------------------------------------
+4) Integrate with Stripe Checkout (keep it simple)
+-------------------------------------
+4.1 In the backend route that creates the Stripe Checkout Session, check if the request includes a valid coupon object:
+
+    - If valid coupon maps to a Stripe coupon or promotion code, include:
+          discounts: [{ coupon: 'stripe_coupon_id' }] or
+          discounts: [{ promotion_code: 'stripe_promo_code_id' }]
+
+    - If coupon is purely internal and not mapped to Stripe coupon, you may skip Stripe discount for now,
+      but DO NOT cause an error; still allow checkout.
+
+4.2 Very important: The “Invalid Coupon” error must not be coming from Stripe itself.
+     - If Stripe returns an error, log it clearly and send a proper 400/500 with a clear message.
+
+-------------------------------------
+5) Logging & Final Verification
+-------------------------------------
+5.1 Add temporary debug logging in the coupon validation function:
+    - Log the incoming couponCode and planId.
+    - Log which check fails (not found, inactive, wrong plan, date, usage).
+    - This will help understand any future issues.
+
+5.2 Run the app in test mode and test the following:
+
+    - Enter PREMIUM30 on:
+        a) Test Restricted Plan – Paid ($10.00/month)
+        b) Custom Plan – Paid ($15.00/month)
+    - Click Subscribe and observe:
+
+        ✔ Backend returns valid: true for PREMIUM30 on allowed plans.
+        ✔ No red "Invalid Coupon" banner appears.
+        ✔ If Stripe discount is enabled, checkout shows discounted amount.
+
+    - Test a clearly invalid code (e.g. ABCXYZ):
+        ✔ Red “Invalid Coupon – This coupon is not valid” appears correctly.
+
+5.3 Finally, remove or reduce any noisy debug logs if necessary, but keep essential error messages.
+
+-------------------------------------
+Rules:
+- Do NOT touch any cart/shop_cart code.
+- Do NOT refactor unrelated modules or UI components.
+- Make the smallest possible code changes to make coupon validation and PREMIUM30 work reliably.
