@@ -70,12 +70,12 @@ export default function Pricing() {
   const [isYearly, setIsYearly] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
   const [userQuantities, setUserQuantities] = useState<{[key: number]: number}>({});
-  const [couponCode, setCouponCode] = useState('');
-  const [validatedCoupon, setValidatedCoupon] = useState<{
+  const [couponCodes, setCouponCodes] = useState<{[planId: number]: string}>({});
+  const [validatedCoupons, setValidatedCoupons] = useState<{[planId: number]: {
     valid: boolean;
     discount?: number;
     message?: string;
-  } | null>(null);
+  } | null}>({});
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -95,15 +95,16 @@ export default function Pricing() {
 
   const validateCouponMutation = useMutation({
     mutationFn: async ({ code, planId, userCount }: { code: string; planId: number; userCount: number }) => {
-      return apiRequest('POST', '/api/billing/coupons/validate', {
+      const response = await apiRequest('POST', '/api/billing/coupons/validate', {
         code: code.toUpperCase(),
         planId,
         userCount
       });
+      return { response, planId };
     },
-    onSuccess: (response: any) => {
+    onSuccess: ({ response, planId }: { response: any; planId: number }) => {
       const data = response.data;
-      setValidatedCoupon(data);
+      setValidatedCoupons(prev => ({ ...prev, [planId]: data }));
       if (data.valid) {
         toast({
           title: "Coupon Applied",
@@ -244,7 +245,8 @@ export default function Pricing() {
   };
 
   const handleApplyCoupon = (planId: number) => {
-    if (!couponCode.trim()) {
+    const code = couponCodes[planId] || '';
+    if (!code.trim()) {
       toast({
         title: "Enter Coupon Code",
         description: "Please enter a coupon code",
@@ -255,7 +257,7 @@ export default function Pricing() {
 
     const userCount = getUserCount(planId);
     validateCouponMutation.mutate({
-      code: couponCode,
+      code,
       planId,
       userCount
     });
@@ -273,6 +275,9 @@ export default function Pricing() {
       return;
     }
 
+    const planCouponCode = couponCodes[planId] || '';
+    const planValidatedCoupon = validatedCoupons[planId];
+
     // Check if user is logged in
     if (!user) {
       // Save plan info to localStorage
@@ -280,7 +285,7 @@ export default function Pricing() {
       localStorage.setItem('pendingPlan', JSON.stringify({
         planId,
         userCount,
-        couponCode: validatedCoupon?.valid ? couponCode : undefined,
+        couponCode: planValidatedCoupon?.valid ? planCouponCode : undefined,
         isYearly
       }));
       
@@ -293,7 +298,7 @@ export default function Pricing() {
     checkoutMutation.mutate({
       planId,
       userCount,
-      couponCode: validatedCoupon?.valid ? couponCode : undefined
+      couponCode: planValidatedCoupon?.valid ? planCouponCode : undefined
     });
   };
 
@@ -346,7 +351,7 @@ export default function Pricing() {
                     }`}
                     onClick={() => {
                       setIsYearly(false);
-                      setValidatedCoupon(null);
+                      setValidatedCoupons({});
                     }}
                     data-testid="toggle-monthly"
                   >
@@ -360,7 +365,7 @@ export default function Pricing() {
                     }`}
                     onClick={() => {
                       setIsYearly(true);
-                      setValidatedCoupon(null);
+                      setValidatedCoupons({});
                     }}
                     data-testid="toggle-yearly"
                   >
@@ -447,11 +452,6 @@ export default function Pricing() {
                                 Save ${pricing.yearlySavings.toFixed(2)} ({yearlyDiscountPercent}% off)
                               </Badge>
                             )}
-                            {validatedCoupon?.valid && isSelected && validatedCoupon.discount && (
-                              <div className="mt-3 text-sm text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/20 py-2 rounded-lg">
-                                ✓ Coupon applied: -${validatedCoupon.discount.toFixed(2)}
-                              </div>
-                            )}
                           </div>
                           
                           {hasPerUserPricing && (
@@ -497,10 +497,10 @@ export default function Pricing() {
                               <div className="flex items-center space-x-2">
                                 <Input
                                   placeholder="Coupon code"
-                                  value={couponCode}
+                                  value={couponCodes[plan.id] || ''}
                                   onChange={(e) => {
-                                    setCouponCode(e.target.value.toUpperCase());
-                                    setValidatedCoupon(null);
+                                    setCouponCodes(prev => ({ ...prev, [plan.id]: e.target.value.toUpperCase() }));
+                                    setValidatedCoupons(prev => ({ ...prev, [plan.id]: null }));
                                   }}
                                   onFocus={() => setSelectedPlan(plan.id)}
                                   className="text-sm rounded-lg border-gray-300 dark:border-gray-600 focus:ring-orange-500"
@@ -514,7 +514,7 @@ export default function Pricing() {
                                     setSelectedPlan(plan.id);
                                     handleApplyCoupon(plan.id);
                                   }}
-                                  disabled={validateCouponMutation.isPending || !couponCode.trim()}
+                                  disabled={validateCouponMutation.isPending || !(couponCodes[plan.id] || '').trim()}
                                   data-testid={`button-apply-coupon-${plan.id}`}
                                 >
                                   {validateCouponMutation.isPending && isSelected ? (
@@ -524,6 +524,11 @@ export default function Pricing() {
                                   )}
                                 </Button>
                               </div>
+                              {validatedCoupons[plan.id]?.valid && validatedCoupons[plan.id]?.discount && (
+                                <div className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/20 py-2 px-3 rounded-lg">
+                                  ✓ Coupon applied: -${validatedCoupons[plan.id]?.discount?.toFixed(2)}
+                                </div>
+                              )}
                             </div>
                           )}
 
