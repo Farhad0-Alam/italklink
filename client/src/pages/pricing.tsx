@@ -386,7 +386,8 @@ export default function Pricing() {
               {plans?.map((plan) => {
                 const userCount = getUserCount(plan.id);
                 const pricing = calculatePlanPrice(plan, userCount);
-                const finalTotal = applyDiscount(pricing.total, validatedCoupon?.valid && selectedPlan === plan.id ? validatedCoupon.discount : undefined);
+                const planValidatedCoupon = validatedCoupons[plan.id];
+                const finalTotal = applyDiscount(pricing.total, planValidatedCoupon?.valid ? planValidatedCoupon.discount : undefined);
                 const popular = isPopular(plan.planType);
                 const isSelected = selectedPlan === plan.id;
                 const hasPerUserPricing = plan.allowUserSelection && (plan.pricePerUser || 0) > 0;
