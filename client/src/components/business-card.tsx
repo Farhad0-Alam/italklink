@@ -1431,8 +1431,8 @@ export const BusinessCardComponent = forwardRef<
 
           {/* Page Elements - renders all elements including profile element when present */}
           {data.pageElements && data.pageElements.length > 0 && (
-            <div className="space-y-4 mb-6">
-              {data.pageElements.map((element: any) => {
+            <div className="mb-6">
+              {data.pageElements.map((element: any, index: number) => {
                 // Render profile section content when encountering a profile element
                 if (element.type === 'profile') {
                   // Skip if profile element is hidden
@@ -1573,9 +1573,9 @@ export const BusinessCardComponent = forwardRef<
                   };
                   
                   return (
-                    <div key={element.id} className="profile-section-element -mx-6" data-testid="profile-section-element">
+                    <div key={element.id} className={`profile-section-element -mx-6 ${index === 0 ? '-mt-8' : 'mt-4'}`} data-testid="profile-section-element">
                       {/* Header with Cover Image, Profile Photo, and Logo */}
-                      <div className="relative mb-4">
+                      <div className="relative">
                         {/* Cover Image Section */}
                         {showCoverImage && (
                           <CoverImageSection
@@ -1757,13 +1757,14 @@ export const BusinessCardComponent = forwardRef<
                 
                 // Render other elements normally
                 return (
-                  <PageElementRenderer
-                    key={element.id}
-                    element={element}
-                    isInteractive={isInteractive}
-                    cardData={data}
-                    onNavigatePage={onNavigatePage}
-                  />
+                  <div key={element.id} className={index > 0 ? 'mt-4' : ''}>
+                    <PageElementRenderer
+                      element={element}
+                      isInteractive={isInteractive}
+                      cardData={data}
+                      onNavigatePage={onNavigatePage}
+                    />
+                  </div>
                 );
               })}
             </div>
