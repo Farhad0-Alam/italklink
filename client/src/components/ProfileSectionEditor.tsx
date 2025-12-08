@@ -131,25 +131,6 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-          <i className="fas fa-user-circle text-talklink-600"></i>
-          Profile Section
-        </h3>
-        <div className="flex items-center gap-2">
-          <Switch
-            checked={data.enabled !== false}
-            onCheckedChange={(checked) => handleDataUpdate({ enabled: checked })}
-            className="data-[state=checked]:bg-talklink-500"
-            data-testid="switch-profile-element-enabled"
-          />
-          <span className="text-xs text-slate-500">
-            {data.enabled !== false ? "Enabled" : "Disabled"}
-          </span>
-        </div>
-      </div>
-
       {/* Image Uploads */}
       <div className="space-y-4">
         {[
@@ -220,8 +201,8 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
               <Label className="text-sm text-slate-600">Show Profile Image</Label>
               <input
                 type="checkbox"
-                checked={profileImageStyles.visible !== false}
-                onChange={(e) => handleNestedUpdate("profileImageStyles.visible", e.target.checked)}
+                checked={data.showProfilePhoto !== false}
+                onChange={(e) => handleDataUpdate({ showProfilePhoto: e.target.checked })}
                 className="w-4 h-4 rounded border-slate-300"
               />
             </div>
@@ -459,6 +440,17 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
 
         <Collapsible open={!collapsedSections.coverImageStyling}>
           <CollapsibleContent className="space-y-3 pt-2">
+            {/* Visibility Toggle */}
+            <div className="flex items-center justify-between p-2 bg-white rounded border border-slate-200">
+              <Label className="text-sm text-slate-600">Show Cover Image</Label>
+              <input
+                type="checkbox"
+                checked={data.showCoverImage !== false}
+                onChange={(e) => handleDataUpdate({ showCoverImage: e.target.checked })}
+                className="w-4 h-4 rounded border-slate-300"
+              />
+            </div>
+
             {/* Cover Height */}
             <div>
               <Label className="text-xs text-slate-500">Height: {coverImageStyles.height || 200}px</Label>
