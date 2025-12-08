@@ -5476,7 +5476,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
 
       case "profile":
         return (
-          <div className="mb-4">
+          <div className="w-full">
             {isEditing ? (
               <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border border-slate-200">
                 <ProfileSectionEditor

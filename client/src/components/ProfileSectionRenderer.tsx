@@ -13,6 +13,13 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
   const brandColor = cardData?.brandColor || data.brandColor || "#22c55e";
   const accentColor = cardData?.accentColor || data.accentColor || "#f093fb";
 
+  // Use element data first, fall back to card data
+  const fullName = data.fullName || cardData?.fullName || "";
+  const title = data.title || cardData?.title || "";
+  const company = data.company || cardData?.company || "";
+  const profilePhoto = data.profilePhoto || cardData?.profilePhoto || "";
+  const coverImage = data.coverImage || cardData?.coverImage || "";
+
   const profileImageSize = profileImageStyles.size || 120;
   const profileShape = profileImageStyles.shape || "circle";
   const profileBorderWidth = profileImageStyles.borderWidth ?? 3;
@@ -171,7 +178,7 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
       `}</style>
 
       {/* Cover Image */}
-      {data.coverImage && (
+      {coverImage && (
         <div 
           className="relative w-full overflow-hidden"
           style={{ 
@@ -182,7 +189,7 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
           }}
         >
           <img
-            src={data.coverImage}
+            src={coverImage}
             alt="Cover"
             className="w-full h-full object-cover"
           />
@@ -195,14 +202,14 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
       <div 
         className="relative"
         style={{
-          marginTop: data.coverImage ? `-${profileImageSize / 2}px` : "0",
+          marginTop: coverImage ? `-${profileImageSize / 2}px` : "0",
           display: "flex",
           justifyContent: profilePositionX <= 33 ? "flex-start" : profilePositionX >= 67 ? "flex-end" : "center",
           paddingLeft: profilePositionX < 50 ? `${profilePositionX}%` : undefined,
           paddingRight: profilePositionX > 50 ? `${100 - profilePositionX}%` : undefined
         }}
       >
-        {profileVisible && data.profilePhoto && (
+        {profileVisible && profilePhoto && (
           <div
             className="relative"
             style={{
@@ -218,7 +225,7 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
             }}
           >
             <img
-              src={data.profilePhoto}
+              src={profilePhoto}
               alt="Profile"
               className="w-full h-full object-cover"
               style={{
@@ -238,7 +245,7 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
         }}
       >
         {/* Name */}
-        {data.fullName && (
+        {fullName && (
           <div
             style={{
               color: nameStyles.nameColor || "#ffffff",
@@ -250,12 +257,12 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
               transform: `translate(${nameStyles.namePositionX ?? 0}px, ${nameStyles.namePositionY ?? 0}px)`
             }}
           >
-            {data.fullName}
+            {fullName}
           </div>
         )}
 
         {/* Title */}
-        {data.title && (
+        {title && (
           <div
             style={{
               color: nameStyles.titleColor || "#4b5563",
@@ -267,12 +274,12 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
               transform: `translate(${nameStyles.titlePositionX ?? 0}px, ${nameStyles.titlePositionY ?? 0}px)`
             }}
           >
-            {data.title}
+            {title}
           </div>
         )}
 
         {/* Company */}
-        {data.company && (
+        {company && (
           <div
             style={{
               color: nameStyles.companyColor || "#6b7280",
@@ -284,7 +291,7 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
               transform: `translate(${nameStyles.companyPositionX ?? 0}px, ${nameStyles.companyPositionY ?? 0}px)`
             }}
           >
-            {data.company}
+            {company}
           </div>
         )}
       </div>
