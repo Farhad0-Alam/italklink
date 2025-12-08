@@ -9,6 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { fileToBase64, validateImageFile } from "@/lib/storage";
+import { SHAPE_PRESETS } from "@/lib/header-schema";
 
 interface ProfileSectionEditorProps {
   data: any;
@@ -520,221 +521,164 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
             </div>
 
             {/* Shape Divider */}
-            <TooltipProvider>
-              <div className="space-y-3 p-3 bg-white rounded border border-slate-200">
-                <Label className="text-xs text-slate-600 font-medium">Shape Divider</Label>
-                
-                {/* Top/Bottom Toggle */}
-                <div className="flex gap-1 p-1 bg-slate-100 rounded-lg">
-                  <button
-                    type="button"
-                    onClick={() => setActiveDividerPosition("top")}
-                    className={`flex-1 px-3 py-2 text-xs font-medium rounded transition-all ${
-                      activeDividerPosition === "top"
-                        ? "bg-purple-500 text-white shadow-md"
-                        : "text-slate-500 hover:text-slate-700"
-                    }`}
-                  >
-                    Top
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveDividerPosition("bottom")}
-                    className={`flex-1 px-3 py-2 text-xs font-medium rounded transition-all ${
-                      activeDividerPosition === "bottom"
-                        ? "bg-purple-500 text-white shadow-md"
-                        : "text-slate-500 hover:text-slate-700"
-                    }`}
-                  >
-                    Bottom
-                  </button>
-                </div>
-
-                {/* Top Shape Divider Controls */}
-                {activeDividerPosition === "top" && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs text-slate-500">Enable</Label>
-                      <input
-                        type="checkbox"
-                        checked={coverImageStyles.shapeDividerTop?.enabled || false}
-                        onChange={(e) => handleNestedUpdate("coverImageStyles.shapeDividerTop.enabled", e.target.checked)}
-                        className="w-4 h-4 rounded border-slate-300"
-                      />
-                    </div>
-
-                    {coverImageStyles.shapeDividerTop?.enabled && (
-                      <>
-                        <div>
-                          <Label className="text-xs text-slate-500 mb-2 block">Shape Type</Label>
-                          <div className="grid grid-cols-3 gap-1">
-                            {SHAPE_DIVIDERS.slice(0, 9).map((shape) => (
-                              <button
-                                key={shape}
-                                type="button"
-                                onClick={() => handleNestedUpdate("coverImageStyles.shapeDividerTop.preset", shape)}
-                                className={`px-2 py-1 rounded text-xs capitalize transition-colors ${
-                                  (coverImageStyles.shapeDividerTop?.preset || "wave") === shape
-                                    ? "bg-purple-600 text-white"
-                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                }`}
-                              >
-                                {shape.replace(/-/g, ' ')}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs text-slate-500">Color</Label>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="color"
-                              value={coverImageStyles.shapeDividerTop?.color || "#ffffff"}
-                              onChange={(e) => handleNestedUpdate("coverImageStyles.shapeDividerTop.color", e.target.value)}
-                              className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
-                            />
-                            <span className="text-xs text-slate-500">
-                              {coverImageStyles.shapeDividerTop?.color || "#ffffff"}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs text-slate-500">
-                            Width: {coverImageStyles.shapeDividerTop?.width || 100}%
-                          </Label>
-                          <input
-                            type="range"
-                            min={50}
-                            max={200}
-                            value={coverImageStyles.shapeDividerTop?.width || 100}
-                            onChange={(e) => handleNestedUpdate("coverImageStyles.shapeDividerTop.width", parseInt(e.target.value))}
-                            className="w-full h-1 bg-slate-200 rounded-lg appearance-none slider"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs text-slate-500">
-                            Height: {coverImageStyles.shapeDividerTop?.height || 60}px
-                          </Label>
-                          <input
-                            type="range"
-                            min={20}
-                            max={150}
-                            value={coverImageStyles.shapeDividerTop?.height || 60}
-                            onChange={(e) => handleNestedUpdate("coverImageStyles.shapeDividerTop.height", parseInt(e.target.value))}
-                            className="w-full h-1 bg-slate-200 rounded-lg appearance-none slider"
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <Label className="text-xs text-slate-500">Invert</Label>
-                          <input
-                            type="checkbox"
-                            checked={coverImageStyles.shapeDividerTop?.invert || false}
-                            onChange={(e) => handleNestedUpdate("coverImageStyles.shapeDividerTop.invert", e.target.checked)}
-                            className="w-4 h-4 rounded border-slate-300"
-                          />
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-
-                {/* Bottom Shape Divider Controls */}
-                {activeDividerPosition === "bottom" && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs text-slate-500">Enable</Label>
-                      <input
-                        type="checkbox"
-                        checked={coverImageStyles.shapeDividerBottom?.enabled || false}
-                        onChange={(e) => handleNestedUpdate("coverImageStyles.shapeDividerBottom.enabled", e.target.checked)}
-                        className="w-4 h-4 rounded border-slate-300"
-                      />
-                    </div>
-
-                    {coverImageStyles.shapeDividerBottom?.enabled && (
-                      <>
-                        <div>
-                          <Label className="text-xs text-slate-500 mb-2 block">Shape Type</Label>
-                          <div className="grid grid-cols-3 gap-1">
-                            {SHAPE_DIVIDERS.slice(0, 9).map((shape) => (
-                              <button
-                                key={shape}
-                                type="button"
-                                onClick={() => handleNestedUpdate("coverImageStyles.shapeDividerBottom.preset", shape)}
-                                className={`px-2 py-1 rounded text-xs capitalize transition-colors ${
-                                  (coverImageStyles.shapeDividerBottom?.preset || "wave") === shape
-                                    ? "bg-purple-600 text-white"
-                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                }`}
-                              >
-                                {shape.replace(/-/g, ' ')}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs text-slate-500">Color</Label>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="color"
-                              value={coverImageStyles.shapeDividerBottom?.color || "#ffffff"}
-                              onChange={(e) => handleNestedUpdate("coverImageStyles.shapeDividerBottom.color", e.target.value)}
-                              className="w-12 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
-                            />
-                            <span className="text-xs text-slate-500">
-                              {coverImageStyles.shapeDividerBottom?.color || "#ffffff"}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs text-slate-500">
-                            Width: {coverImageStyles.shapeDividerBottom?.width || 100}%
-                          </Label>
-                          <input
-                            type="range"
-                            min={50}
-                            max={200}
-                            value={coverImageStyles.shapeDividerBottom?.width || 100}
-                            onChange={(e) => handleNestedUpdate("coverImageStyles.shapeDividerBottom.width", parseInt(e.target.value))}
-                            className="w-full h-1 bg-slate-200 rounded-lg appearance-none slider"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs text-slate-500">
-                            Height: {coverImageStyles.shapeDividerBottom?.height || 60}px
-                          </Label>
-                          <input
-                            type="range"
-                            min={20}
-                            max={150}
-                            value={coverImageStyles.shapeDividerBottom?.height || 60}
-                            onChange={(e) => handleNestedUpdate("coverImageStyles.shapeDividerBottom.height", parseInt(e.target.value))}
-                            className="w-full h-1 bg-slate-200 rounded-lg appearance-none slider"
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <Label className="text-xs text-slate-500">Invert</Label>
-                          <input
-                            type="checkbox"
-                            checked={coverImageStyles.shapeDividerBottom?.invert || false}
-                            onChange={(e) => handleNestedUpdate("coverImageStyles.shapeDividerBottom.invert", e.target.checked)}
-                            className="w-4 h-4 rounded border-slate-300"
-                          />
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
+            <div className="space-y-3 p-3 bg-slate-800 rounded-lg border border-slate-700">
+              <Label className="text-sm text-slate-200 font-medium">Shape Divider</Label>
+              
+              {/* Top/Bottom Toggle */}
+              <div className="flex p-1 bg-slate-700 rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => setActiveDividerPosition("top")}
+                  className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    activeDividerPosition === "top"
+                      ? "bg-slate-600 text-white"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                  data-testid="btn-shape-divider-top"
+                >
+                  Top
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveDividerPosition("bottom")}
+                  className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                    activeDividerPosition === "bottom"
+                      ? "bg-orange-500 text-white"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                  data-testid="btn-shape-divider-bottom"
+                >
+                  Bottom
+                </button>
               </div>
-            </TooltipProvider>
+
+              {/* Shape Divider Controls - shared UI for both Top and Bottom */}
+              {(() => {
+                const position = activeDividerPosition;
+                const dividerKey = position === "top" ? "shapeDividerTop" : "shapeDividerBottom";
+                const dividerStyles = coverImageStyles[dividerKey] || {};
+                const isEnabled = dividerStyles.enabled || false;
+                const selectedPreset = dividerStyles.preset || "wave";
+
+                return (
+                  <div className="space-y-4">
+                    {/* Enable Toggle */}
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm text-slate-300">Enable</Label>
+                      <Checkbox
+                        checked={isEnabled}
+                        onCheckedChange={(checked) => handleNestedUpdate(`coverImageStyles.${dividerKey}.enabled`, checked)}
+                        className="border-slate-500 data-[state=checked]:bg-blue-500"
+                        data-testid={`checkbox-shape-divider-${position}-enable`}
+                      />
+                    </div>
+
+                    {/* Shape Type - Visual Grid */}
+                    <div>
+                      <Label className="text-sm text-slate-300 mb-2 block">Shape Type</Label>
+                      <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
+                        {SHAPE_DIVIDERS.map((shape) => {
+                          const svgPath = SHAPE_PRESETS[shape];
+                          const isSelected = selectedPreset === shape;
+                          return (
+                            <button
+                              key={shape}
+                              type="button"
+                              onClick={() => handleNestedUpdate(`coverImageStyles.${dividerKey}.preset`, shape)}
+                              className={`relative h-12 rounded-lg overflow-hidden transition-all border-2 ${
+                                isSelected
+                                  ? "border-purple-500 ring-2 ring-purple-500/50"
+                                  : "border-slate-600 hover:border-slate-500"
+                              }`}
+                              data-testid={`btn-shape-${position}-${shape}`}
+                            >
+                              <div className="absolute inset-0 bg-slate-700">
+                                <svg
+                                  viewBox="0 0 1440 320"
+                                  preserveAspectRatio="none"
+                                  className="w-full h-full"
+                                  style={{ transform: position === "top" ? "scaleY(-1)" : "none" }}
+                                >
+                                  <path
+                                    d={svgPath}
+                                    fill={isSelected ? "#a855f7" : "#94a3b8"}
+                                    opacity={0.8}
+                                  />
+                                </svg>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {isEnabled && (
+                      <>
+                        {/* Color */}
+                        <div>
+                          <Label className="text-sm text-slate-300">Color</Label>
+                          <div className="flex items-center gap-2 mt-1">
+                            <input
+                              type="color"
+                              value={dividerStyles.color || "#ffffff"}
+                              onChange={(e) => handleNestedUpdate(`coverImageStyles.${dividerKey}.color`, e.target.value)}
+                              className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+                              data-testid={`input-shape-${position}-color`}
+                            />
+                            <span className="text-xs text-slate-400 font-mono">
+                              {dividerStyles.color || "#ffffff"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Width */}
+                        <div>
+                          <Label className="text-sm text-slate-300">
+                            Width: {dividerStyles.width || 100}%
+                          </Label>
+                          <input
+                            type="range"
+                            min={50}
+                            max={200}
+                            value={dividerStyles.width || 100}
+                            onChange={(e) => handleNestedUpdate(`coverImageStyles.${dividerKey}.width`, parseInt(e.target.value))}
+                            className="w-full h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer mt-1"
+                            data-testid={`slider-shape-${position}-width`}
+                          />
+                        </div>
+
+                        {/* Height */}
+                        <div>
+                          <Label className="text-sm text-slate-300">
+                            Height: {dividerStyles.height || 60}px
+                          </Label>
+                          <input
+                            type="range"
+                            min={20}
+                            max={150}
+                            value={dividerStyles.height || 60}
+                            onChange={(e) => handleNestedUpdate(`coverImageStyles.${dividerKey}.height`, parseInt(e.target.value))}
+                            className="w-full h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer mt-1"
+                            data-testid={`slider-shape-${position}-height`}
+                          />
+                        </div>
+
+                        {/* Invert */}
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm text-slate-300">Flip</Label>
+                          <Checkbox
+                            checked={dividerStyles.invert || false}
+                            onCheckedChange={(checked) => handleNestedUpdate(`coverImageStyles.${dividerKey}.invert`, checked)}
+                            className="border-slate-500 data-[state=checked]:bg-blue-500"
+                            data-testid={`checkbox-shape-${position}-invert`}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
           </CollapsibleContent>
         </Collapsible>
       </div>
