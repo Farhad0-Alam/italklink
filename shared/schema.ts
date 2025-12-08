@@ -3632,12 +3632,73 @@ export const installButtonElementSchema = baseElementSchema.extend({
 export const profileElementSchema = baseElementSchema.extend({
   type: z.literal("profile"),
   data: z.object({
+    // Visibility toggles
     showCoverImage: z.boolean().default(true),
     showProfilePhoto: z.boolean().default(true),
     showLogo: z.boolean().default(true),
     showName: z.boolean().default(true),
     showTitle: z.boolean().default(true),
     showCompany: z.boolean().default(true),
+    
+    // Content data (stored in element, independent of card-level)
+    fullName: z.string().optional(),
+    title: z.string().optional(),
+    company: z.string().optional(),
+    profilePhoto: z.string().optional(),
+    coverImage: z.string().optional(),
+    logo: z.string().optional(),
+    brandColor: z.string().optional(),
+    
+    // Profile Image Styling
+    profileImageStyles: z.object({
+      visible: z.boolean().optional(),
+      size: z.number().optional(),
+      shape: z.enum(["circle", "square", "rounded"]).optional(),
+      borderWidth: z.number().optional(),
+      borderColor: z.string().optional(),
+      animation: z.string().optional(),
+      useBrandColor: z.boolean().optional(),
+      animationColors: z.object({
+        start: z.string().optional(),
+        end: z.string().optional(),
+        primary: z.string().optional(),
+      }).optional(),
+      shadow: z.number().optional(),
+      opacity: z.number().optional(),
+    }).optional(),
+    
+    // Cover Image Styling
+    coverImageStyles: z.object({
+      height: z.number().optional(),
+      borderWidth: z.number().optional(),
+      borderColor: z.string().optional(),
+      animation: z.string().optional(),
+      profilePositionX: z.number().optional(),
+      profilePositionY: z.number().optional(),
+      shapeDividerTop: z.object({
+        enabled: z.boolean().optional(),
+        preset: z.string().optional(),
+        color: z.string().optional(),
+        width: z.number().optional(),
+        height: z.number().optional(),
+        invert: z.boolean().optional(),
+        bringToFront: z.boolean().optional(),
+      }).optional(),
+      shapeDividerBottom: z.object({
+        enabled: z.boolean().optional(),
+        preset: z.string().optional(),
+        color: z.string().optional(),
+        width: z.number().optional(),
+        height: z.number().optional(),
+        invert: z.boolean().optional(),
+        bringToFront: z.boolean().optional(),
+      }).optional(),
+    }).optional(),
+    
+    // Text Section Styling
+    sectionStyles: z.object({
+      basicInfo: z.record(z.any()).optional(),
+    }).optional(),
   }),
 });
 
