@@ -181,6 +181,68 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
         ))}
       </div>
 
+      {/* Profile Info Fields */}
+      <div className="border border-green-200 rounded-lg p-3 space-y-3 bg-green-50/50">
+        <h4 className="text-sm font-medium text-green-700 flex items-center gap-2">
+          <i className="fas fa-user text-green-500"></i>
+          Profile Information
+        </h4>
+        
+        <div className="space-y-3">
+          <div>
+            <Label className="text-sm text-slate-700 font-normal">Full Name</Label>
+            <Input
+              value={data.fullName || ""}
+              onChange={(e) => handleDataUpdate({ fullName: e.target.value })}
+              placeholder="Enter full name"
+              className="bg-white border-slate-300 text-slate-800"
+              data-testid="input-profile-fullname"
+            />
+          </div>
+          
+          <div>
+            <Label className="text-sm text-slate-700 font-normal">Title</Label>
+            <Input
+              value={data.title || ""}
+              onChange={(e) => handleDataUpdate({ title: e.target.value })}
+              placeholder="Enter title"
+              className="bg-white border-slate-300 text-slate-800"
+              data-testid="input-profile-title"
+            />
+          </div>
+          
+          <div>
+            <Label className="text-sm text-slate-700 font-normal">Company</Label>
+            <Input
+              value={data.company || ""}
+              onChange={(e) => handleDataUpdate({ company: e.target.value })}
+              placeholder="Enter company name"
+              className="bg-white border-slate-300 text-slate-800"
+              data-testid="input-profile-company"
+            />
+          </div>
+
+          <div>
+            <Label className="text-sm text-slate-700 font-normal">Brand Color</Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={data.brandColor || brandColor}
+                onChange={(e) => handleDataUpdate({ brandColor: e.target.value })}
+                className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
+              />
+              <Input
+                value={data.brandColor || ""}
+                onChange={(e) => handleDataUpdate({ brandColor: e.target.value })}
+                placeholder={brandColor}
+                className="bg-white border-slate-300 text-slate-800 text-sm"
+                data-testid="input-profile-brandcolor"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Profile Image Styling */}
       <div className="border border-blue-200 rounded-lg p-3 space-y-3 bg-blue-50/50">
         <div
