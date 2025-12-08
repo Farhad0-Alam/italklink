@@ -1717,6 +1717,134 @@ export const BusinessCardComponent = forwardRef<
                   const showTitle = element.data?.showTitle !== false;
                   const showCompany = element.data?.showCompany !== false;
                   
+                  // Use element's own data with fallback to card-level data for backward compatibility
+                  const elData = element.data || {};
+                  const elCoverImage = elData.coverImage || data.backgroundImage;
+                  const elProfilePhoto = elData.profilePhoto || data.profilePhoto;
+                  const elFullName = elData.fullName || data.fullName;
+                  const elTitle = elData.title || data.title;
+                  const elCompany = elData.company || data.company;
+                  const elLogo = elData.logo || data.logo;
+                  const elBrandColor = elData.brandColor || data.brandColor || "#22c55e";
+                  
+                  // Use element's styling with fallback to card-level styles
+                  const elCoverImageStyles = elData.coverImageStyles || data.coverImageStyles || {};
+                  const elProfileImageStyles = elData.profileImageStyles || data.profileImageStyles || {};
+                  const elSectionStyles = elData.sectionStyles?.basicInfo || data.sectionStyles?.basicInfo || {};
+                  
+                  // Helper to get element-specific section style
+                  const getElSectionStyle = (key: string) => {
+                    return elSectionStyles[key];
+                  };
+                  
+                  // Build profile image styles for the element with full animation support
+                  const getElProfileImageStyle = (baseSize: number = 96) => {
+                    const styles = elProfileImageStyles;
+                    const size = styles?.size || baseSize;
+                    const shape = styles?.shape || "circle";
+                    const borderWidth = styles?.borderWidth !== undefined ? styles.borderWidth : 3;
+                    const defaultBorderColor = elBrandColor;
+                    const borderColor = styles?.borderColor || defaultBorderColor;
+                    const shadow = styles?.shadow || 0;
+                    const opacity = styles?.opacity !== undefined ? styles.opacity / 100 : 1;
+                    const animation = styles?.animation || "none";
+                    const visible = styles?.visible !== false;
+                    
+                    // Get animation colors (use brand color if useBrandColor is true)
+                    const useBrandColor = styles?.useBrandColor !== false;
+                    const accentColor = elData.accentColor || data.accentColor || "#f093fb";
+                    
+                    // Animation-specific default gradients
+                    const getDefaultGradient = () => {
+                      switch(animation) {
+                        case 'instagram':
+                          return { stops: [{ color: '#f09433', stop: 0 }, { color: '#e6683c', stop: 25 }, { color: '#dc2743', stop: 50 }, { color: '#cc2366', stop: 75 }, { color: '#bc1888', stop: 100 }], angle: 45, type: 'linear' as const };
+                        case 'wave':
+                          return { stops: [{ color: '#1E40AF', stop: 0 }, { color: '#06B6D4', stop: 100 }], angle: 90, type: 'linear' as const };
+                        case 'shimmer':
+                          return { stops: [{ color: 'transparent', stop: 0 }, { color: '#E5E7EB', stop: 50 }, { color: 'transparent', stop: 100 }], angle: 90, type: 'linear' as const };
+                        case 'gradient-slide':
+                          return { stops: [{ color: '#8B5CF6', stop: 0 }, { color: '#3B82F6', stop: 100 }], angle: 45, type: 'linear' as const };
+                        case 'neon':
+                          return { stops: [{ color: '#00D9FF', stop: 0 }, { color: '#00D9FF', stop: 100 }], angle: 90, type: 'linear' as const };
+                        default:
+                          return { stops: [{ color: elBrandColor, stop: 0 }, { color: accentColor, stop: 100 }], angle: 90, type: 'linear' as const };
+                      }
+                    };
+                    
+                    const animationGradient = styles?.animationGradient || {};
+                    const defaultGradient = getDefaultGradient();
+                    const gradientStops = animationGradient.stops || defaultGradient.stops;
+                    const gradientAngle = animationGradient.angle !== undefined ? animationGradient.angle : defaultGradient.angle;
+                    const gradientType = animationGradient.type || defaultGradient.type;
+                    
+                    const gradientCss = useBrandColor 
+                      ? (gradientType === 'linear'
+                          ? `linear-gradient(${gradientAngle}deg, ${defaultBorderColor} 0%, ${accentColor} 100%)`
+                          : `radial-gradient(circle, ${defaultBorderColor} 0%, ${accentColor} 100%)`)
+                      : (gradientType === 'linear'
+                          ? `linear-gradient(${gradientAngle}deg, ${gradientStops.map((s: any) => `${s.color} ${s.stop}%`).join(', ')})`
+                          : `radial-gradient(circle, ${gradientStops.map((s: any) => `${s.color} ${s.stop}%`).join(', ')})`);
+                    
+                    const animationColors = styles?.animationColors || {};
+                    const primaryAnimColor = useBrandColor ? defaultBorderColor : (animationColors.primary || defaultBorderColor);
+                    const secondaryAnimColor = useBrandColor ? accentColor : (animationColors.secondary || accentColor);
+
+                    const borderRadius = shape === "circle" ? "50%" : shape === "square" ? "0" : "16px";
+                    const usePseudoElements = animation === "instagram" || animation === "shimmer" || animation === "gradient-slide";
+                    
+                    const wrapperStyles: any = {
+                      position: 'relative',
+                      width: `${size}px`,
+                      height: `${size}px`,
+                      borderRadius,
+                    };
+
+                    const positionX = styles?.positionX || 0;
+                    const positionY = styles?.positionY || 0;
+                    
+                    const imageStyles: any = {
+                      width: '100%',
+                      height: '100%',
+                      borderRadius,
+                      opacity,
+                      objectFit: 'cover',
+                      objectPosition: `${50 + positionX}% ${50 + positionY}%`,
+                    };
+
+                    if (shadow > 0) {
+                      wrapperStyles.boxShadow = `0 ${shadow / 2}px ${shadow}px rgba(0, 0, 0, 0.3)`;
+                    }
+
+                    if (borderWidth > 0 && animation === "none") {
+                      imageStyles.border = `${borderWidth}px solid ${borderColor}`;
+                    }
+
+                    if (animation !== "none") {
+                      wrapperStyles['--profile-gradient'] = gradientCss;
+                      wrapperStyles['--profile-anim-color-1'] = primaryAnimColor;
+                      wrapperStyles['--profile-anim-color-2'] = secondaryAnimColor;
+                      wrapperStyles['--profile-border-width'] = `${borderWidth}px`;
+                      imageStyles['--profile-gradient'] = gradientCss;
+                      imageStyles['--profile-anim-color-1'] = primaryAnimColor;
+                      imageStyles['--profile-anim-color-2'] = secondaryAnimColor;
+                      imageStyles['--profile-border-width'] = `${borderWidth}px`;
+                    }
+
+                    const wrapperAnimationClass = usePseudoElements ? (
+                      animation === "instagram" ? "profile-image-instagram" :
+                      animation === "shimmer" ? "profile-image-shimmer" :
+                      animation === "gradient-slide" ? "profile-image-gradient-slide" : ""
+                    ) : "";
+
+                    const imageAnimationClass = !usePseudoElements ? (
+                      animation === "neon" ? "profile-image-neon" :
+                      animation === "wave" ? "profile-image-wave" : ""
+                    ) : "";
+                    
+                    return { wrapperStyles, imageStyles, wrapperAnimationClass, imageAnimationClass, visible };
+                  };
+                  
                   return (
                     <div key={element.id} className="profile-section-element -mx-6" data-testid="profile-section-element">
                       {/* Header with Cover Image, Profile Photo, and Logo */}
@@ -1724,22 +1852,22 @@ export const BusinessCardComponent = forwardRef<
                         {/* Cover Image Section */}
                         {showCoverImage && (
                           <CoverImageSection
-                            coverImageUrl={data.backgroundImage ? getOptimizedImageSrc(data.backgroundImage, "large") : undefined}
-                            brandColor={data.brandColor || "#22c55e"}
-                            coverImageStyles={data.coverImageStyles}
-                            defaultHeight={160}
+                            coverImageUrl={elCoverImage ? getOptimizedImageSrc(elCoverImage, "large") : undefined}
+                            brandColor={elBrandColor}
+                            coverImageStyles={elCoverImageStyles}
+                            defaultHeight={elCoverImageStyles.height || 160}
                           >
                             {/* Logo in top left corner */}
-                            {showLogo && data.logo && (
+                            {showLogo && elLogo && (
                               <div 
                                 className="absolute z-10"
                                 style={{
-                                  top: data.coverImageStyles?.logoPositionY !== undefined ? `${data.coverImageStyles.logoPositionY}%` : '16px',
-                                  left: data.coverImageStyles?.logoPositionX !== undefined ? `${data.coverImageStyles.logoPositionX}%` : '16px',
+                                  top: elCoverImageStyles?.logoPositionY !== undefined ? `${elCoverImageStyles.logoPositionY}%` : '16px',
+                                  left: elCoverImageStyles?.logoPositionX !== undefined ? `${elCoverImageStyles.logoPositionX}%` : '16px',
                                 }}
                               >
                                 <img
-                                  src={data.logo}
+                                  src={elLogo}
                                   alt="Logo"
                                   className="h-8 w-auto max-w-20 object-contain"
                                   data-testid="img-logo"
@@ -1748,11 +1876,11 @@ export const BusinessCardComponent = forwardRef<
                             )}
 
                             {/* Profile Photo with Styling */}
-                            {showProfilePhoto && (() => {
-                              const { wrapperStyles, imageStyles, wrapperAnimationClass, imageAnimationClass, visible } = getProfileImageStyle(96);
+                            {showProfilePhoto && elProfilePhoto && (() => {
+                              const { wrapperStyles, imageStyles, wrapperAnimationClass, imageAnimationClass, visible } = getElProfileImageStyle(96);
                               if (!visible) return null;
-                              const profilePosX = data.coverImageStyles?.profilePositionX ?? 50;
-                              const profilePosY = data.coverImageStyles?.profilePositionY ?? 100;
+                              const profilePosX = elCoverImageStyles?.profilePositionX ?? 50;
+                              const profilePosY = elCoverImageStyles?.profilePositionY ?? 100;
                               return (
                                 <div 
                                   className="absolute z-30"
@@ -1764,8 +1892,8 @@ export const BusinessCardComponent = forwardRef<
                                 >
                                   <div className={wrapperAnimationClass} style={wrapperStyles}>
                                     <img
-                                      src={profileImageSrc}
-                                      alt={data.fullName || "Profile photo"}
+                                      src={elProfilePhoto}
+                                      alt={elFullName || "Profile photo"}
                                       className={imageAnimationClass}
                                       style={imageStyles}
                                       data-testid="img-profile-photo"
@@ -1778,15 +1906,15 @@ export const BusinessCardComponent = forwardRef<
                         )}
                         
                         {/* Profile Photo without cover (standalone) */}
-                        {!showCoverImage && showProfilePhoto && (() => {
-                          const { wrapperStyles, imageStyles, wrapperAnimationClass, imageAnimationClass, visible } = getProfileImageStyle(96);
+                        {!showCoverImage && showProfilePhoto && elProfilePhoto && (() => {
+                          const { wrapperStyles, imageStyles, wrapperAnimationClass, imageAnimationClass, visible } = getElProfileImageStyle(96);
                           if (!visible) return null;
                           return (
                             <div className="flex justify-center py-4">
                               <div className={wrapperAnimationClass} style={wrapperStyles}>
                                 <img
-                                  src={profileImageSrc}
-                                  alt={data.fullName || "Profile photo"}
+                                  src={elProfilePhoto}
+                                  alt={elFullName || "Profile photo"}
                                   className={imageAnimationClass}
                                   style={imageStyles}
                                   data-testid="img-profile-photo"
@@ -1797,10 +1925,10 @@ export const BusinessCardComponent = forwardRef<
                         })()}
                         
                         {/* Logo without cover (standalone) */}
-                        {!showCoverImage && showLogo && data.logo && (
+                        {!showCoverImage && showLogo && elLogo && (
                           <div className="flex justify-center py-2">
                             <img
-                              src={data.logo}
+                              src={elLogo}
                               alt="Logo"
                               className="h-8 w-auto max-w-20 object-contain"
                               data-testid="img-logo"
@@ -1814,7 +1942,7 @@ export const BusinessCardComponent = forwardRef<
                         className="px-6"
                         style={{
                           paddingTop: showCoverImage ? '40px' : '0',
-                          transform: `translate(${Number(getSectionStyle("basicInfo", "textGroupHorizontal")) || 0}px, ${Number(getSectionStyle("basicInfo", "textGroupVertical")) || 0}px)`,
+                          transform: `translate(${Number(getElSectionStyle("textGroupHorizontal")) || 0}px, ${Number(getElSectionStyle("textGroupVertical")) || 0}px)`,
                         }}
                       >
                         {showName && (
@@ -1822,25 +1950,25 @@ export const BusinessCardComponent = forwardRef<
                             className="text-xl font-bold"
                             style={{
                               color:
-                                getSectionStyle("basicInfo", "nameColor") ||
+                                getElSectionStyle("nameColor") ||
                                 data.headingColor ||
                                 "#1f2937",
-                              fontSize: `${getSectionStyle("basicInfo", "nameFontSize") || 22}px`,
+                              fontSize: `${getElSectionStyle("nameFontSize") || 22}px`,
                               fontWeight:
-                                getSectionStyle("basicInfo", "nameFontWeight") ||
+                                getElSectionStyle("nameFontWeight") ||
                                 data.headingFontWeight ||
                                 650,
                               fontFamily:
-                                getSectionStyle("basicInfo", "nameFont") || "Inter, sans-serif",
+                                getElSectionStyle("nameFont") || "Inter, sans-serif",
                               fontStyle:
-                                getSectionStyle("basicInfo", "nameTextStyle") || "normal",
-                              marginBottom: `${getSectionStyle("basicInfo", "nameSpacing") ?? 8}px`,
+                                getElSectionStyle("nameTextStyle") || "normal",
+                              marginBottom: `${getElSectionStyle("nameSpacing") ?? 8}px`,
                               textAlign: "center",
-                              transform: `translate(${Number(getSectionStyle("basicInfo", "namePositionX")) || 0}px, ${Number(getSectionStyle("basicInfo", "namePositionY")) || 0}px)`,
+                              transform: `translate(${Number(getElSectionStyle("namePositionX")) || 0}px, ${Number(getElSectionStyle("namePositionY")) || 0}px)`,
                             }}
                             data-testid="text-name"
                           >
-                            {data.fullName || "Your Name"}
+                            {elFullName || "Your Name"}
                           </h3>
                         )}
                         {showTitle && (
@@ -1848,51 +1976,51 @@ export const BusinessCardComponent = forwardRef<
                             className="text-sm"
                             style={{
                               color:
-                                getSectionStyle("basicInfo", "titleColor") ||
+                                getElSectionStyle("titleColor") ||
                                 data.paragraphColor ||
                                 "#4b5563",
-                              fontSize: `${getSectionStyle("basicInfo", "titleFontSize") || 15}px`,
+                              fontSize: `${getElSectionStyle("titleFontSize") || 15}px`,
                               fontWeight:
-                                getSectionStyle("basicInfo", "titleFontWeight") ||
+                                getElSectionStyle("titleFontWeight") ||
                                 data.paragraphFontWeight ||
                                 500,
                               fontFamily:
-                                getSectionStyle("basicInfo", "titleFont") ||
+                                getElSectionStyle("titleFont") ||
                                 "Inter, sans-serif",
                               fontStyle:
-                                getSectionStyle("basicInfo", "titleTextStyle") || "normal",
-                              marginBottom: `${getSectionStyle("basicInfo", "titleSpacing") ?? 8}px`,
+                                getElSectionStyle("titleTextStyle") || "normal",
+                              marginBottom: `${getElSectionStyle("titleSpacing") ?? 8}px`,
                               textAlign: "center",
-                              transform: `translate(${Number(getSectionStyle("basicInfo", "titlePositionX")) || 0}px, ${Number(getSectionStyle("basicInfo", "titlePositionY")) || 0}px)`,
+                              transform: `translate(${Number(getElSectionStyle("titlePositionX")) || 0}px, ${Number(getElSectionStyle("titlePositionY")) || 0}px)`,
                             }}
                             data-testid="text-title"
                           >
-                            {data.title || "Your Title"}
+                            {elTitle || "Your Title"}
                           </p>
                         )}
-                        {showCompany && data.company && (
+                        {showCompany && elCompany && (
                           <p
                             className="text-sm"
                             style={{
                               color:
-                                getSectionStyle("basicInfo", "companyColor") || "#6b7280",
-                              fontSize: `${getSectionStyle("basicInfo", "companyFontSize") || 14}px`,
+                                getElSectionStyle("companyColor") || "#6b7280",
+                              fontSize: `${getElSectionStyle("companyFontSize") || 14}px`,
                               fontWeight:
-                                getSectionStyle("basicInfo", "companyFontWeight") ||
+                                getElSectionStyle("companyFontWeight") ||
                                 data.paragraphFontWeight ||
                                 600,
                               fontFamily:
-                                getSectionStyle("basicInfo", "companyFont") ||
+                                getElSectionStyle("companyFont") ||
                                 "Inter, sans-serif",
                               fontStyle:
-                                getSectionStyle("basicInfo", "companyTextStyle") || "normal",
-                              marginBottom: `${getSectionStyle("basicInfo", "companySpacing") ?? 8}px`,
+                                getElSectionStyle("companyTextStyle") || "normal",
+                              marginBottom: `${getElSectionStyle("companySpacing") ?? 8}px`,
                               textAlign: "center",
-                              transform: `translate(${Number(getSectionStyle("basicInfo", "companyPositionX")) || 0}px, ${Number(getSectionStyle("basicInfo", "companyPositionY")) || 0}px)`,
+                              transform: `translate(${Number(getElSectionStyle("companyPositionX")) || 0}px, ${Number(getElSectionStyle("companyPositionY")) || 0}px)`,
                             }}
                             data-testid="text-company"
                           >
-                            {data.company}
+                            {elCompany}
                           </p>
                         )}
                       </div>
