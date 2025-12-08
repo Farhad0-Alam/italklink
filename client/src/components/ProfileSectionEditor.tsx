@@ -204,9 +204,15 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
           <div>
             <Label className="text-sm text-slate-700 font-normal">Full Name</Label>
             <Input
-              value={data.fullName || ""}
-              onChange={(e) => handleDataUpdate({ fullName: e.target.value })}
-              onBlur={handleBlurSave}
+              key={`fullName-${data.id || 'default'}`}
+              defaultValue={data.fullName || ""}
+              onBlur={(e) => {
+                const newData = { ...data, fullName: e.target.value };
+                onChange(newData);
+                if (onSave) {
+                  setTimeout(() => onSave(), 50);
+                }
+              }}
               placeholder="Enter full name"
               className="bg-white border-slate-300 text-slate-800"
               data-testid="input-profile-fullname"
@@ -216,9 +222,15 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
           <div>
             <Label className="text-sm text-slate-700 font-normal">Title</Label>
             <Input
-              value={data.title || ""}
-              onChange={(e) => handleDataUpdate({ title: e.target.value })}
-              onBlur={handleBlurSave}
+              key={`title-${data.id || 'default'}`}
+              defaultValue={data.title || ""}
+              onBlur={(e) => {
+                const newData = { ...data, title: e.target.value };
+                onChange(newData);
+                if (onSave) {
+                  setTimeout(() => onSave(), 50);
+                }
+              }}
               placeholder="Enter title"
               className="bg-white border-slate-300 text-slate-800"
               data-testid="input-profile-title"
@@ -228,9 +240,15 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
           <div>
             <Label className="text-sm text-slate-700 font-normal">Company</Label>
             <Input
-              value={data.company || ""}
-              onChange={(e) => handleDataUpdate({ company: e.target.value })}
-              onBlur={handleBlurSave}
+              key={`company-${data.id || 'default'}`}
+              defaultValue={data.company || ""}
+              onBlur={(e) => {
+                const newData = { ...data, company: e.target.value };
+                onChange(newData);
+                if (onSave) {
+                  setTimeout(() => onSave(), 50);
+                }
+              }}
               placeholder="Enter company name"
               className="bg-white border-slate-300 text-slate-800"
               data-testid="input-profile-company"
@@ -247,8 +265,15 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
                 className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
               />
               <Input
-                value={data.brandColor || ""}
-                onChange={(e) => handleDataUpdate({ brandColor: e.target.value })}
+                key={`brandColor-${data.id || 'default'}`}
+                defaultValue={data.brandColor || ""}
+                onBlur={(e) => {
+                  const newData = { ...data, brandColor: e.target.value };
+                  onChange(newData);
+                  if (onSave) {
+                    setTimeout(() => onSave(), 50);
+                  }
+                }}
                 placeholder={brandColor}
                 className="bg-white border-slate-300 text-slate-800 text-sm"
                 data-testid="input-profile-brandcolor"
