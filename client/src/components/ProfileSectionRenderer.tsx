@@ -13,6 +13,13 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
   const brandColor = cardData?.brandColor || data.brandColor || "#22c55e";
   const accentColor = cardData?.accentColor || data.accentColor || "#f093fb";
 
+  // Visibility toggles
+  const showCoverImage = data.showCoverImage !== false;
+  const showProfilePhoto = data.showProfilePhoto !== false;
+  const showName = data.showName !== false;
+  const showTitle = data.showTitle !== false;
+  const showCompany = data.showCompany !== false;
+
   // Use element data first, fall back to card data
   const fullName = data.fullName || cardData?.fullName || "";
   const title = data.title || cardData?.title || "";
@@ -178,7 +185,7 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
       `}</style>
 
       {/* Cover Image */}
-      {coverImage && (
+      {showCoverImage && coverImage && (
         <div 
           className="relative w-full overflow-hidden"
           style={{ 
@@ -202,14 +209,14 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
       <div 
         className="relative"
         style={{
-          marginTop: coverImage ? `-${profileImageSize / 2}px` : "0",
+          marginTop: (showCoverImage && coverImage) ? `-${profileImageSize / 2}px` : "0",
           display: "flex",
           justifyContent: profilePositionX <= 33 ? "flex-start" : profilePositionX >= 67 ? "flex-end" : "center",
           paddingLeft: profilePositionX < 50 ? `${profilePositionX}%` : undefined,
           paddingRight: profilePositionX > 50 ? `${100 - profilePositionX}%` : undefined
         }}
       >
-        {profileVisible && profilePhoto && (
+        {showProfilePhoto && profileVisible && profilePhoto && (
           <div
             className="relative"
             style={{
@@ -245,7 +252,7 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
         }}
       >
         {/* Name */}
-        {fullName && (
+        {showName && fullName && (
           <div
             style={{
               color: nameStyles.nameColor || "#ffffff",
@@ -262,7 +269,7 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
         )}
 
         {/* Title */}
-        {title && (
+        {showTitle && title && (
           <div
             style={{
               color: nameStyles.titleColor || "#4b5563",
@@ -279,7 +286,7 @@ export function ProfileSectionRenderer({ data, cardData }: ProfileSectionRendere
         )}
 
         {/* Company */}
-        {company && (
+        {showCompany && company && (
           <div
             style={{
               color: nameStyles.companyColor || "#6b7280",
