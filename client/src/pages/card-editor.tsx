@@ -373,12 +373,14 @@ export default function CardEditor() {
     updatePendingData(cardData, customUrlSlug);
   }, [cardData, user, params.id, customUrlSlug, updatePendingData]);
 
-  const triggerSave = useCallback(async () => {
+  // Accept optional data parameter for immediate saves with fresh data (2talklink pattern)
+  const triggerSave = useCallback(async (dataOverride?: any) => {
     if (!user) return;
-    if (!params.id && !customUrlSlug && !cardData.fullName && !cardData.title) return;
+    const dataToSave = dataOverride || cardData;
+    if (!params.id && !customUrlSlug && !dataToSave.fullName && !dataToSave.title) return;
     
-    console.log('[CardEditor] Triggering immediate save');
-    await saveNow(cardData, customUrlSlug);
+    console.log('[CardEditor] Triggering immediate save with data:', dataOverride ? 'override provided' : 'using current cardData');
+    await saveNow(dataToSave, customUrlSlug);
   }, [user, params.id, customUrlSlug, cardData, saveNow]);
 
   const copyShareUrl = async () => {

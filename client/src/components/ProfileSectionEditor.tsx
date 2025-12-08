@@ -14,7 +14,7 @@ import { SHAPE_PRESETS } from "@/lib/header-schema";
 interface ProfileSectionEditorProps {
   data: any;
   onChange: (data: any) => void;
-  onSave?: () => Promise<void>;
+  onSave?: (dataOverride?: any) => Promise<void>;
   cardData?: any;
 }
 
@@ -60,6 +60,42 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
 
   const handleDataUpdate = (updates: any) => {
     onChange({ ...data, ...updates });
+  };
+
+  // Build updated cardData with new element data for immediate save (2talklink pattern)
+  const buildUpdatedCardData = (newElementData: any) => {
+    if (!cardData) return null;
+    
+    // Update pageElements array with the new profile data
+    const currentElements = cardData.pageElements || [];
+    const updatedElements = currentElements.map((el: any) => {
+      if (el.id === data.id || el.type === 'profile') {
+        return { ...el, data: newElementData };
+      }
+      return el;
+    });
+    
+    // Also update pages array if it exists
+    const updatedPages = (cardData.pages || []).map((page: any) => {
+      if (page.elements) {
+        return {
+          ...page,
+          elements: page.elements.map((el: any) => {
+            if (el.id === data.id || el.type === 'profile') {
+              return { ...el, data: newElementData };
+            }
+            return el;
+          })
+        };
+      }
+      return page;
+    });
+    
+    return {
+      ...cardData,
+      pageElements: updatedElements,
+      pages: updatedPages,
+    };
   };
 
   const handleNestedUpdate = (path: string, value: any) => {
@@ -108,15 +144,16 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
     setIsUploading(true);
     try {
       const base64 = await fileToBase64(file);
-      handleDataUpdate({ [field]: base64 });
+      const newElementData = { ...data, [field]: base64 };
+      onChange(newElementData);
       toast({
         title: "Image uploaded",
         description: "Your image has been uploaded successfully",
       });
       if (onSave) {
-        setTimeout(() => {
-          onSave();
-        }, 100);
+        const updatedCard = buildUpdatedCardData(newElementData);
+        console.log('[ProfileSectionEditor] Saving image upload with updated card:', updatedCard ? 'yes' : 'no');
+        onSave(updatedCard);
       }
     } catch (e) {
       toast({
@@ -126,12 +163,6 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
       });
     } finally {
       setIsUploading(false);
-    }
-  };
-
-  const handleBlurSave = () => {
-    if (onSave) {
-      onSave();
     }
   };
 
@@ -207,10 +238,12 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
               key={`fullName-${data.id || 'default'}`}
               defaultValue={data.fullName || ""}
               onBlur={(e) => {
-                const newData = { ...data, fullName: e.target.value };
-                onChange(newData);
+                const newElementData = { ...data, fullName: e.target.value };
+                onChange(newElementData);
                 if (onSave) {
-                  setTimeout(() => onSave(), 50);
+                  const updatedCard = buildUpdatedCardData(newElementData);
+                  console.log('[ProfileSectionEditor] Saving fullName with updated card:', updatedCard ? 'yes' : 'no');
+                  onSave(updatedCard);
                 }
               }}
               placeholder="Enter full name"
@@ -225,10 +258,12 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
               key={`title-${data.id || 'default'}`}
               defaultValue={data.title || ""}
               onBlur={(e) => {
-                const newData = { ...data, title: e.target.value };
-                onChange(newData);
+                const newElementData = { ...data, title: e.target.value };
+                onChange(newElementData);
                 if (onSave) {
-                  setTimeout(() => onSave(), 50);
+                  const updatedCard = buildUpdatedCardData(newElementData);
+                  console.log('[ProfileSectionEditor] Saving title with updated card:', updatedCard ? 'yes' : 'no');
+                  onSave(updatedCard);
                 }
               }}
               placeholder="Enter title"
@@ -243,10 +278,12 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
               key={`company-${data.id || 'default'}`}
               defaultValue={data.company || ""}
               onBlur={(e) => {
-                const newData = { ...data, company: e.target.value };
-                onChange(newData);
+                const newElementData = { ...data, company: e.target.value };
+                onChange(newElementData);
                 if (onSave) {
-                  setTimeout(() => onSave(), 50);
+                  const updatedCard = buildUpdatedCardData(newElementData);
+                  console.log('[ProfileSectionEditor] Saving company with updated card:', updatedCard ? 'yes' : 'no');
+                  onSave(updatedCard);
                 }
               }}
               placeholder="Enter company name"
@@ -268,10 +305,12 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
                 key={`brandColor-${data.id || 'default'}`}
                 defaultValue={data.brandColor || ""}
                 onBlur={(e) => {
-                  const newData = { ...data, brandColor: e.target.value };
-                  onChange(newData);
+                  const newElementData = { ...data, brandColor: e.target.value };
+                  onChange(newElementData);
                   if (onSave) {
-                    setTimeout(() => onSave(), 50);
+                    const updatedCard = buildUpdatedCardData(newElementData);
+                    console.log('[ProfileSectionEditor] Saving brandColor with updated card:', updatedCard ? 'yes' : 'no');
+                    onSave(updatedCard);
                   }
                 }}
                 placeholder={brandColor}

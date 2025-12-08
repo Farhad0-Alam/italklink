@@ -651,7 +651,7 @@ interface PageElementProps {
   isEditing?: boolean;
   onUpdate?: (element: PageElement) => void;
   onDelete?: (elementId: string) => void;
-  onSave?: () => Promise<void>;
+  onSave?: (dataOverride?: any) => Promise<void>;
   isInteractive?: boolean;
   cardData?: any; // Business card data for theme colors
   onNavigatePage?: (pageId: string) => void;

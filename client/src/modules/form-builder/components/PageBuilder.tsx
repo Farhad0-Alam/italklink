@@ -80,9 +80,10 @@ interface SortableElementProps {
   cardData?: any;
   isElementLocked: (elementType: string) => boolean;
   getElementTitle: (element: PageElement) => string;
+  onSave?: (dataOverride?: any) => Promise<void>;
 }
 
-function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibility, cardData, isElementLocked, getElementTitle }: SortableElementProps) {
+function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibility, cardData, isElementLocked, getElementTitle, onSave }: SortableElementProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const {
     attributes,
@@ -176,6 +177,7 @@ function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibil
                   onUpdate={onUpdate}
                   onDelete={onDelete}
                   cardData={cardData}
+                  onSave={onSave}
                 />
               </div>
             </CollapsibleContent>
@@ -193,9 +195,10 @@ interface PageBuilderProps {
   onElementSpacingChange?: (spacing: number) => void;
   cardData?: any; // Business card data for theme colors
   onNavigatePage?: (pageId: string) => void;
+  onSave?: (dataOverride?: any) => Promise<void>;
 }
 
-export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, onElementSpacingChange, cardData, onNavigatePage }: PageBuilderProps) {
+export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, onElementSpacingChange, cardData, onNavigatePage, onSave }: PageBuilderProps) {
   const [showElementSelector, setShowElementSelector] = useState(false);
   
   // Fetch element types from API for accurate ID mapping
@@ -367,6 +370,7 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
                   cardData={cardData}
                   isElementLocked={isElementLocked}
                   getElementTitle={getElementTitle}
+                  onSave={onSave}
                 />
               ))}
             </div>

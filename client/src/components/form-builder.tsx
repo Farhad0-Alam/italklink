@@ -48,7 +48,7 @@ import { CSS } from "@dnd-kit/utilities";
 interface FormBuilderProps {
   cardData: BusinessCard;
   onDataChange: (data: BusinessCard) => void;
-  onSave?: () => Promise<void>;
+  onSave?: (dataOverride?: any) => Promise<void>;
   onGenerateQR: () => void;
   onNavigationChange?: (pageId: string) => void;
 }
