@@ -52,7 +52,7 @@ export default function CardEditor() {
   // Counter for generating unique IDs within the same render cycle
   let profileElementIdCounter = 0;
   
-  // Function to create a profile element with guaranteed unique ID
+  // Function to create a profile element with guaranteed unique ID and complete default data
   const createProfileElement = () => {
     profileElementIdCounter++;
     const uniqueId = typeof crypto !== 'undefined' && crypto.randomUUID 
@@ -65,12 +65,86 @@ export default function CardEditor() {
       order: 0,
       visible: true,
       data: {
+        enabled: true,
         showCoverImage: true,
         showProfilePhoto: true,
         showLogo: true,
         showName: true,
         showTitle: true,
         showCompany: true,
+        fullName: "",
+        title: "",
+        company: "",
+        profilePhoto: null,
+        coverImage: null,
+        brandColor: "#22c55e",
+        accentColor: "#16a34a",
+        profileImageStyles: {
+          visible: true,
+          size: 120,
+          shape: "circle",
+          borderWidth: 3,
+          borderColor: "#22c55e",
+          animation: "none",
+          useBrandColor: true,
+          animationColors: { start: "#22c55e", end: "#16a34a" },
+          shadow: 0,
+          opacity: 100
+        },
+        coverImageStyles: {
+          height: 200,
+          borderWidth: 0,
+          borderColor: "#22c55e",
+          animation: "none",
+          profilePositionX: 50,
+          profilePositionY: 100,
+          shapeDividerTop: {
+            enabled: false,
+            preset: "wave",
+            color: "#ffffff",
+            width: 100,
+            height: 60,
+            invert: false
+          },
+          shapeDividerBottom: {
+            enabled: false,
+            preset: "wave",
+            color: "#ffffff",
+            width: 100,
+            height: 60,
+            invert: false
+          }
+        },
+        sectionStyles: {
+          basicInfo: {
+            nameColor: "#ffffff",
+            nameFont: "Inter",
+            nameFontSize: 24,
+            nameFontWeight: "700",
+            nameTextStyle: "normal",
+            nameSpacing: 8,
+            namePositionX: 0,
+            namePositionY: 0,
+            titleColor: "#4b5563",
+            titleFont: "Inter",
+            titleFontSize: 14,
+            titleFontWeight: "400",
+            titleTextStyle: "normal",
+            titleSpacing: 8,
+            titlePositionX: 0,
+            titlePositionY: 0,
+            companyColor: "#6b7280",
+            companyFont: "Inter",
+            companyFontSize: 14,
+            companyFontWeight: "400",
+            companyTextStyle: "normal",
+            companySpacing: 8,
+            companyPositionX: 0,
+            companyPositionY: 0,
+            textGroupHorizontal: 0,
+            textGroupVertical: 0
+          }
+        }
       }
     };
   };
