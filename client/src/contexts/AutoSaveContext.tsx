@@ -13,13 +13,13 @@ interface AutoSaveContextType {
   cardId: string | null;
   setCardId: (id: string | null) => void;
   queueSave: (data: BusinessCard, customUrlSlug?: string) => void;
+  saveNow: (data: BusinessCard, customUrlSlug?: string) => Promise<void>;
   forceSave: () => Promise<void>;
   reset: () => void;
+  updatePendingData: (data: BusinessCard, customUrlSlug?: string) => void;
 }
 
 const AutoSaveContext = createContext<AutoSaveContextType | null>(null);
-
-const DEBOUNCE_DELAY = 1500;
 
 interface AutoSaveProviderProps {
   children: ReactNode;
@@ -140,29 +140,37 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
     },
   });
 
+  const updatePendingData = useCallback((data: BusinessCard, customUrlSlug?: string) => {
+    pendingDataRef.current = { data, customUrlSlug };
+    if (status !== "saving") {
+      setStatus("dirty");
+    }
+  }, [status]);
+
   const queueSave = useCallback((data: BusinessCard, customUrlSlug?: string) => {
     pendingDataRef.current = { data, customUrlSlug };
-    setStatus("dirty");
+    if (status !== "saving") {
+      setStatus("dirty");
+    }
+  }, [status]);
+
+  const saveNow = useCallback(async (data: BusinessCard, customUrlSlug?: string) => {
+    if (isSavingRef.current) {
+      pendingDataRef.current = { data, customUrlSlug };
+      return;
+    }
     
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
     }
     
-    debounceTimerRef.current = setTimeout(() => {
-      if (isSavingRef.current) {
-        return;
-      }
-      
-      const pending = pendingDataRef.current;
-      if (pending) {
-        pendingDataRef.current = null;
-        saveMutation.mutate({ 
-          data: pending.data, 
-          customUrlSlug: pending.customUrlSlug,
-          currentCardId: cardId
-        });
-      }
-    }, DEBOUNCE_DELAY);
+    pendingDataRef.current = null;
+    await saveMutation.mutateAsync({ 
+      data, 
+      customUrlSlug,
+      currentCardId: cardId
+    });
   }, [cardId, saveMutation]);
 
   const forceSave = useCallback(async () => {
@@ -203,8 +211,10 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
       cardId,
       setCardId,
       queueSave,
+      saveNow,
       forceSave,
       reset,
+      updatePendingData,
     }}>
       {children}
     </AutoSaveContext.Provider>

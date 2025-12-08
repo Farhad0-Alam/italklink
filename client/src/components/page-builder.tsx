@@ -34,11 +34,12 @@ interface SortableElementProps {
   onDelete: (elementId: string) => void;
   onClone: (elementId: string) => void;
   onToggleVisibility: (elementId: string) => void;
+  onSave?: () => Promise<void>;
   cardData?: any;
   onNavigatePage?: (pageId: string) => void;
 }
 
-function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibility, cardData, onNavigatePage }: SortableElementProps) {
+function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibility, onSave, cardData, onNavigatePage }: SortableElementProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const {
     attributes,
@@ -148,6 +149,7 @@ function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibil
                 isEditing={true}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
+                onSave={onSave}
                 cardData={cardData}
                 onNavigatePage={onNavigatePage}
               />
@@ -162,6 +164,7 @@ function SortableElement({ element, onUpdate, onDelete, onClone, onToggleVisibil
 interface PageBuilderProps {
   elements: PageElement[];
   onElementsChange: (elements: PageElement[]) => void;
+  onSave?: () => Promise<void>;
   elementSpacing?: number;
   onElementSpacingChange?: (spacing: number) => void;
   individualElementSpacing?: Record<string, number>;
@@ -170,7 +173,7 @@ interface PageBuilderProps {
   onNavigatePage?: (pageId: string) => void;
 }
 
-export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, onElementSpacingChange, individualElementSpacing, onIndividualSpacingChange, cardData, onNavigatePage }: PageBuilderProps) {
+export function PageBuilder({ elements, onElementsChange, onSave, elementSpacing = 16, onElementSpacingChange, individualElementSpacing, onIndividualSpacingChange, cardData, onNavigatePage }: PageBuilderProps) {
   const [showElementSelector, setShowElementSelector] = useState(false);
   
   const sensors = useSensors(
@@ -401,6 +404,7 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
                   onDelete={handleDeleteElement}
                   onClone={handleCloneElement}
                   onToggleVisibility={handleToggleVisibility}
+                  onSave={onSave}
                   cardData={cardData}
                   onNavigatePage={onNavigatePage}
                 />

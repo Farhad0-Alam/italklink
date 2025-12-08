@@ -48,6 +48,7 @@ import { CSS } from "@dnd-kit/utilities";
 interface FormBuilderProps {
   cardData: BusinessCard;
   onDataChange: (data: BusinessCard) => void;
+  onSave?: () => Promise<void>;
   onGenerateQR: () => void;
   onNavigationChange?: (pageId: string) => void;
 }
@@ -92,6 +93,7 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, children }) => {
 export const FormBuilder: React.FC<FormBuilderProps> = ({
   cardData,
   onDataChange,
+  onSave,
   onGenerateQR,
   onNavigationChange,
 }) => {
@@ -4792,8 +4794,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   console.log('[FormBuilder] onElementsChange called with', elements.length, 'elements');
                   console.log('[FormBuilder] Elements:', elements.map(e => ({ type: e.type, id: e.id, order: e.order })));
                   form.setValue("pageElements", elements, { shouldDirty: true, shouldTouch: true });
-                  // CRITICAL: Also update parent immediately with new elements to ensure they're saved
-                  // This bypasses any form sync delays
                   const currentFormData = form.getValues();
                   const updatedData = {
                     ...currentFormData,
@@ -4802,6 +4802,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   console.log('[FormBuilder] Notifying parent of element change with', elements.length, 'elements');
                   onDataChange(updatedData);
                 }}
+                onSave={onSave}
                 elementSpacing={elementSpacing ?? 16}
                 onElementSpacingChange={(spacing: number) => {
                   form.setValue("elementSpacing", spacing, { shouldDirty: true, shouldTouch: true, shouldValidate: false });
@@ -4867,6 +4868,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                   onElementsChange={(elements: PageElement[]) => {
                     updatePageElements(selectedPageId, elements);
                   }}
+                  onSave={onSave}
                   elementSpacing={elementSpacing ?? 16}
                   onElementSpacingChange={(spacing: number) => {
                     form.setValue("elementSpacing", spacing, { shouldDirty: true, shouldTouch: true, shouldValidate: false });

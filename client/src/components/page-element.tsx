@@ -651,12 +651,13 @@ interface PageElementProps {
   isEditing?: boolean;
   onUpdate?: (element: PageElement) => void;
   onDelete?: (elementId: string) => void;
+  onSave?: () => Promise<void>;
   isInteractive?: boolean;
   cardData?: any; // Business card data for theme colors
   onNavigatePage?: (pageId: string) => void;
 }
 
-export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, isInteractive = true, cardData, onNavigatePage }: PageElementProps) {
+export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, onSave, isInteractive = true, cardData, onNavigatePage }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [voiceAgentSections, setVoiceAgentSections] = useState({
@@ -5482,6 +5483,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 <ProfileSectionEditor
                   data={element.data}
                   onChange={(newData) => handleDataUpdate(newData)}
+                  onSave={onSave}
                   cardData={cardData}
                 />
               </div>

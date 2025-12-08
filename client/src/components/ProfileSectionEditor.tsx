@@ -14,6 +14,7 @@ import { SHAPE_PRESETS } from "@/lib/header-schema";
 interface ProfileSectionEditorProps {
   data: any;
   onChange: (data: any) => void;
+  onSave?: () => Promise<void>;
   cardData?: any;
 }
 
@@ -39,7 +40,7 @@ const SHAPE_DIVIDERS = [
   "curve", "curve-asymmetrical", "drop", "mountain", "opacity-fan-alt", "book"
 ];
 
-export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectionEditorProps) {
+export function ProfileSectionEditor({ data, onChange, onSave, cardData }: ProfileSectionEditorProps) {
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [activeDividerPosition, setActiveDividerPosition] = useState<"top" | "bottom">("top");
@@ -112,6 +113,11 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
         title: "Image uploaded",
         description: "Your image has been uploaded successfully",
       });
+      if (onSave) {
+        setTimeout(() => {
+          onSave();
+        }, 100);
+      }
     } catch (e) {
       toast({
         title: "Upload failed",
@@ -120,6 +126,12 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
       });
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleBlurSave = () => {
+    if (onSave) {
+      onSave();
     }
   };
 
@@ -194,6 +206,7 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
             <Input
               value={data.fullName || ""}
               onChange={(e) => handleDataUpdate({ fullName: e.target.value })}
+              onBlur={handleBlurSave}
               placeholder="Enter full name"
               className="bg-white border-slate-300 text-slate-800"
               data-testid="input-profile-fullname"
@@ -205,6 +218,7 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
             <Input
               value={data.title || ""}
               onChange={(e) => handleDataUpdate({ title: e.target.value })}
+              onBlur={handleBlurSave}
               placeholder="Enter title"
               className="bg-white border-slate-300 text-slate-800"
               data-testid="input-profile-title"
@@ -216,6 +230,7 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
             <Input
               value={data.company || ""}
               onChange={(e) => handleDataUpdate({ company: e.target.value })}
+              onBlur={handleBlurSave}
               placeholder="Enter company name"
               className="bg-white border-slate-300 text-slate-800"
               data-testid="input-profile-company"
@@ -745,6 +760,7 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
             id="fullName"
             value={data.fullName || ""}
             onChange={(e) => handleDataUpdate({ fullName: e.target.value })}
+            onBlur={handleBlurSave}
             placeholder="John Doe"
             className="bg-white border-slate-300 text-slate-800"
             data-testid="input-profile-fullname"
@@ -757,6 +773,7 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
             id="title"
             value={data.title || ""}
             onChange={(e) => handleDataUpdate({ title: e.target.value })}
+            onBlur={handleBlurSave}
             placeholder="Senior Developer"
             className="bg-white border-slate-300 text-slate-800"
             data-testid="input-profile-title"
@@ -769,6 +786,7 @@ export function ProfileSectionEditor({ data, onChange, cardData }: ProfileSectio
             id="company"
             value={data.company || ""}
             onChange={(e) => handleDataUpdate({ company: e.target.value })}
+            onBlur={handleBlurSave}
             placeholder="Tech Corp"
             className="bg-white border-slate-300 text-slate-800"
             data-testid="input-profile-company"

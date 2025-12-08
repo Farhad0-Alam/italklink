@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ export default function CardEditor() {
   const cardRef = useRef<HTMLDivElement>(null);
   const prevCardDataRef = useRef<string>("");
   
-  const { queueSave, setCardId: setAutoSaveCardId, forceSave, status: autoSaveStatus, lastSavedCard } = useAutoSave();
+  const { queueSave, saveNow, setCardId: setAutoSaveCardId, forceSave, status: autoSaveStatus, lastSavedCard, updatePendingData } = useAutoSave();
   
   const { data: user, isLoading: userLoading, error: userError } = useQuery({
     queryKey: ['/api/auth/user'],
@@ -370,21 +370,16 @@ export default function CardEditor() {
     if (!user) return;
     if (!params.id && !customUrlSlug && !cardData.fullName && !cardData.title) return;
     
-    // Create a serialized version of the card data to compare
-    // Exclude volatile fields that shouldn't trigger saves
-    const dataToCompare = {
-      ...cardData,
-      currentPreviewMode: undefined,
-      currentSelectedPage: undefined,
-    };
-    const currentDataHash = JSON.stringify(dataToCompare);
+    updatePendingData(cardData, customUrlSlug);
+  }, [cardData, user, params.id, customUrlSlug, updatePendingData]);
+
+  const triggerSave = useCallback(async () => {
+    if (!user) return;
+    if (!params.id && !customUrlSlug && !cardData.fullName && !cardData.title) return;
     
-    // Only queue save if data has actually changed
-    if (currentDataHash !== prevCardDataRef.current) {
-      prevCardDataRef.current = currentDataHash;
-      queueSave(cardData, customUrlSlug);
-    }
-  }, [cardData, user, params.id, customUrlSlug, queueSave]);
+    console.log('[CardEditor] Triggering immediate save');
+    await saveNow(cardData, customUrlSlug);
+  }, [user, params.id, customUrlSlug, cardData, saveNow]);
 
   const copyShareUrl = async () => {
     if (shareUrl) {
@@ -537,6 +532,7 @@ END:VCARD`;
                   currentSelectedPage: prev.currentSelectedPage
                 }));
               }}
+              onSave={triggerSave}
               onGenerateQR={() => {}}
               onNavigationChange={handleNavigatePage}
             />
