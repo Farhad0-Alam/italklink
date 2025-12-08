@@ -26,6 +26,7 @@ export default function CardEditor() {
   const params = useParams() as CardEditorParams;
   const [, setLocation] = useLocation();
   const cardRef = useRef<HTMLDivElement>(null);
+  const prevCardDataRef = useRef<string>("");
   
   const { queueSave, setCardId: setAutoSaveCardId, forceSave, status: autoSaveStatus, lastSavedCard } = useAutoSave();
   
@@ -369,7 +370,20 @@ export default function CardEditor() {
     if (!user) return;
     if (!params.id && !customUrlSlug && !cardData.fullName && !cardData.title) return;
     
-    queueSave(cardData, customUrlSlug);
+    // Create a serialized version of the card data to compare
+    // Exclude volatile fields that shouldn't trigger saves
+    const dataToCompare = {
+      ...cardData,
+      currentPreviewMode: undefined,
+      currentSelectedPage: undefined,
+    };
+    const currentDataHash = JSON.stringify(dataToCompare);
+    
+    // Only queue save if data has actually changed
+    if (currentDataHash !== prevCardDataRef.current) {
+      prevCardDataRef.current = currentDataHash;
+      queueSave(cardData, customUrlSlug);
+    }
   }, [cardData, user, params.id, customUrlSlug, queueSave]);
 
   const copyShareUrl = async () => {
