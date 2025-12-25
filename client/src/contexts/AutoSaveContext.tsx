@@ -155,7 +155,9 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
   }, [status]);
 
   const saveNow = useCallback(async (data: BusinessCard, customUrlSlug?: string) => {
+    console.log('[AutoSave] saveNow called with', data?.pageElements?.length || 0, 'elements, cardId:', cardId);
     if (isSavingRef.current) {
+      console.log('[AutoSave] Already saving, queuing data');
       pendingDataRef.current = { data, customUrlSlug };
       return;
     }
@@ -166,6 +168,7 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
     }
     
     pendingDataRef.current = null;
+    console.log('[AutoSave] Executing save mutation...');
     await saveMutation.mutateAsync({ 
       data, 
       customUrlSlug,

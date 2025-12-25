@@ -375,11 +375,18 @@ export default function CardEditor() {
 
   // Accept optional data parameter for immediate saves with fresh data (2talklink pattern)
   const triggerSave = useCallback(async (dataOverride?: any) => {
-    if (!user) return;
+    console.log('[CardEditor] triggerSave called, dataOverride:', !!dataOverride, 'elements:', dataOverride?.pageElements?.length || 0);
+    if (!user) {
+      console.log('[CardEditor] triggerSave aborted - no user');
+      return;
+    }
     const dataToSave = dataOverride || cardData;
-    if (!params.id && !customUrlSlug && !dataToSave.fullName && !dataToSave.title) return;
+    if (!params.id && !customUrlSlug && !dataToSave.fullName && !dataToSave.title) {
+      console.log('[CardEditor] triggerSave aborted - no id/slug/name/title');
+      return;
+    }
     
-    console.log('[CardEditor] Triggering immediate save with data:', dataOverride ? 'override provided' : 'using current cardData');
+    console.log('[CardEditor] Triggering immediate save with', dataToSave?.pageElements?.length || 0, 'elements');
     await saveNow(dataToSave, customUrlSlug);
   }, [user, params.id, customUrlSlug, cardData, saveNow]);
 
