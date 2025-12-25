@@ -203,7 +203,10 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
   
   // Build updated cardData with new elements for immediate save (2talklink pattern)
   const buildUpdatedCardData = (newElements: PageElement[]) => {
-    if (!cardData) return null;
+    if (!cardData) {
+      console.log('[PageBuilder] WARNING: cardData is null/undefined, cannot save');
+      return null;
+    }
     return {
       ...cardData,
       pageElements: newElements,
@@ -212,10 +215,17 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
 
   // Trigger save with updated elements
   const saveWithElements = (newElements: PageElement[]) => {
+    console.log('[PageBuilder] saveWithElements called with', newElements.length, 'elements, onSave:', !!onSave, 'cardData:', !!cardData);
     if (onSave) {
       const updatedCard = buildUpdatedCardData(newElements);
-      console.log('[PageBuilder] Saving with updated elements:', newElements.length);
-      onSave(updatedCard);
+      if (updatedCard) {
+        console.log('[PageBuilder] Triggering save with', updatedCard.pageElements?.length, 'elements');
+        onSave(updatedCard);
+      } else {
+        console.log('[PageBuilder] Cannot save - cardData is null');
+      }
+    } else {
+      console.log('[PageBuilder] Cannot save - onSave callback is not provided');
     }
   };
 
