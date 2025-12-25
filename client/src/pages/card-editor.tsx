@@ -11,11 +11,9 @@ import { PagePreview } from "@/components/page-preview";
 import { FormBuilder } from "@/components/form-builder";
 import { AutoSaveIndicator } from "@/components/AutoSaveIndicator";
 import { useAutoSave } from "@/contexts/AutoSaveContext";
-import { LockedFeature } from "@/components/LockedFeature";
 import { Copy, Share2, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import type { BusinessCard } from "@shared/schema";
-import { hasElementAccess } from "@/lib/featureAccess";
 
 interface CardEditorParams {
   id?: string;
@@ -26,15 +24,22 @@ export default function CardEditor() {
   const params = useParams() as CardEditorParams;
   const [, setLocation] = useLocation();
   const cardRef = useRef<HTMLDivElement>(null);
-  const prevCardDataRef = useRef<string>("");
-  
-  const { queueSave, saveNow, setCardId: setAutoSaveCardId, forceSave, status: autoSaveStatus, lastSavedCard, updatePendingData } = useAutoSave();
-  
+
+  const hasHydratedRef = useRef(false);
+
+  const {
+    queueSave,
+    saveNow,
+    setCardId: setAutoSaveCardId,
+    status: autoSaveStatus,
+    lastSavedCard,
+  } = useAutoSave();
+
   const { data: user, isLoading: userLoading, error: userError } = useQuery({
-    queryKey: ['/api/auth/user'],
+    queryKey: ["/api/auth/user"],
     retry: false,
   });
-  
+
   useEffect(() => {
     if (userError && !userLoading) {
       toast({
@@ -42,24 +47,27 @@ export default function CardEditor() {
         description: "Please log in to create or edit business cards.",
         variant: "destructive",
       });
-      setLocation('/login');
+      setLocation("/login");
     }
   }, [userError, userLoading, setLocation, toast]);
-  
+
   const urlParams = new URLSearchParams(window.location.search);
-  const selectedTemplateId = urlParams.get('template');
-  const customUrlFromTemplate = urlParams.get('url');
-  
+  const selectedTemplateId = urlParams.get("template");
+  const customUrlFromTemplate = urlParams.get("url");
+
   // Counter for generating unique IDs within the same render cycle
   let profileElementIdCounter = 0;
-  
+
   // Function to create a profile element with guaranteed unique ID and complete default data
   const createProfileElement = () => {
     profileElementIdCounter++;
-    const uniqueId = typeof crypto !== 'undefined' && crypto.randomUUID 
-      ? crypto.randomUUID()
-      : `profile-${Date.now()}-${profileElementIdCounter}-${Math.random().toString(36).substring(2, 11)}`;
-    
+    const uniqueId =
+      typeof crypto !== "undefined" && (crypto as any).randomUUID
+        ? (crypto as any).randomUUID()
+        : `profile-${Date.now()}-${profileElementIdCounter}-${Math.random()
+            .toString(36)
+            .substring(2, 11)}`;
+
     return {
       id: uniqueId,
       type: "profile" as const,
@@ -90,7 +98,7 @@ export default function CardEditor() {
           useBrandColor: true,
           animationColors: { start: "#22c55e", end: "#16a34a" },
           shadow: 0,
-          opacity: 100
+          opacity: 100,
         },
         coverImageStyles: {
           height: 200,
@@ -105,7 +113,7 @@ export default function CardEditor() {
             color: "#ffffff",
             width: 100,
             height: 60,
-            invert: false
+            invert: false,
           },
           shapeDividerBottom: {
             enabled: false,
@@ -113,8 +121,8 @@ export default function CardEditor() {
             color: "#ffffff",
             width: 100,
             height: 60,
-            invert: false
-          }
+            invert: false,
+          },
         },
         sectionStyles: {
           basicInfo: {
@@ -143,13 +151,13 @@ export default function CardEditor() {
             companyPositionX: 0,
             companyPositionY: 0,
             textGroupHorizontal: 0,
-            textGroupVertical: 0
-          }
-        }
-      }
+            textGroupVertical: 0,
+          },
+        },
+      },
     };
   };
-  
+
   // Create separate profile elements for pageElements and pages to avoid shared references
   const initialProfileElement = createProfileElement();
   const homePageProfileElement = createProfileElement();
@@ -181,15 +189,15 @@ export default function CardEditor() {
         path: "",
         label: "Home",
         visible: true,
-        elements: [homePageProfileElement]
-      }
+        elements: [homePageProfileElement],
+      },
     ] as any,
   });
 
   const [shareUrl, setShareUrl] = useState("");
-  const [currentPageId, setCurrentPageId] = useState<string>('home');
+  const [currentPageId, setCurrentPageId] = useState<string>("home");
   const [customUrlSlug, setCustomUrlSlug] = useState<string>(customUrlFromTemplate || "");
-  
+
   useEffect(() => {
     if (params.id) {
       setAutoSaveCardId(params.id);
@@ -203,13 +211,10 @@ export default function CardEditor() {
     } else if (card.shareSlug) {
       setShareUrl(`${window.location.origin}/${card.shareSlug}`);
     } else if (card.id) {
-      // Fallback: use cardId to generate a default shareUrl
       setShareUrl(`${window.location.origin}/${card.id}`);
     }
   };
 
-  
-  // Helper function to get current page data based on currentPageId
   const getCurrentPageData = () => {
     const pages = (cardData as any).pages || [];
     const page = pages.find((p: any) => p.id === currentPageId);
@@ -217,56 +222,54 @@ export default function CardEditor() {
       return {
         id: page.id,
         label: page.label,
-        elements: page.elements || []
+        elements: page.elements || [],
       };
     }
-    // Return the currentSelectedPage from FormBuilder as fallback
     return (cardData as any).currentSelectedPage;
   };
-  
-  // Enhanced navigation function that switches to page mode and sets the page
+
   const handleNavigatePage = (pageId: string) => {
     setCurrentPageId(pageId);
-    // Update the card data to switch to page preview mode with the specific page
     const pages = (cardData as any).pages || [];
     const targetPage = pages.find((p: any) => p.id === pageId);
     if (targetPage) {
-      const isHome = pageId === 'home' || targetPage.key === 'home';
-      setCardData(prev => ({
+      const isHome = pageId === "home" || targetPage.key === "home";
+      setCardData((prev) => ({
         ...prev,
-        currentPreviewMode: isHome ? 'card' : 'page',
-        currentSelectedPage: isHome ? undefined : {
-          id: targetPage.id,
-          label: targetPage.label,
-          elements: targetPage.elements || []
-        }
+        currentPreviewMode: isHome ? "card" : "page",
+        currentSelectedPage: isHome
+          ? undefined
+          : {
+              id: targetPage.id,
+              label: targetPage.label,
+              elements: targetPage.elements || [],
+            },
       }));
     }
   };
 
-  // Function to go back from page preview to main card view
   const handleBackToCard = () => {
-    setCurrentPageId('home');
-    setCardData(prev => ({
+    setCurrentPageId("home");
+    setCardData((prev) => ({
       ...prev,
-      currentPreviewMode: 'card',
-      currentSelectedPage: undefined
+      currentPreviewMode: "card",
+      currentSelectedPage: undefined,
     }));
   };
-  
+
   // Fetch template data if template parameter is provided
   const { data: templates } = useQuery({
-    queryKey: ['/api/templates'],
+    queryKey: ["/api/templates"],
     enabled: !!selectedTemplateId,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 10,
   });
-  
+
   // Load existing card if editing
   const { data: existingCard, isLoading } = useQuery({
-    queryKey: ['/api/business-cards', params.id],
+    queryKey: ["/api/business-cards", params.id],
     queryFn: async () => {
       if (!params.id) return null;
-      return await apiRequest('GET', `/api/business-cards/${params.id}`);
+      return await apiRequest("GET", `/api/business-cards/${params.id}`);
     },
     enabled: !!params.id,
   });
@@ -274,11 +277,8 @@ export default function CardEditor() {
   // Apply template when templates load and we have a template parameter
   useEffect(() => {
     if (selectedTemplateId && templates && !existingCard) {
-      const selectedTemplate = templates.find((t: any) => t.id === selectedTemplateId);
-      console.log('Selected template ID:', selectedTemplateId);
-      console.log('Found template:', selectedTemplate);
+      const selectedTemplate = (templates as any[]).find((t: any) => t.id === selectedTemplateId);
       if (selectedTemplate) {
-        console.log('Applying template:', selectedTemplate.name);
         const newCardData = {
           ...cardData,
           template: selectedTemplate.id,
@@ -286,39 +286,31 @@ export default function CardEditor() {
           title: selectedTemplate.defaultTitle || cardData.title,
           brandColor: selectedTemplate.brandColor || cardData.brandColor,
           accentColor: selectedTemplate.accentColor || cardData.accentColor,
-          backgroundColor: selectedTemplate.backgroundColor || cardData.backgroundColor,
-          textColor: selectedTemplate.textColor || cardData.textColor,
+          backgroundColor: selectedTemplate.backgroundColor || (cardData as any).backgroundColor,
+          textColor: selectedTemplate.textColor || (cardData as any).textColor,
           font: selectedTemplate.font || cardData.font,
         };
-        console.log('New card data with template:', newCardData);
         setCardData(newCardData);
+        // allow autosave after this point (user starts editing)
+        hasHydratedRef.current = true;
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTemplateId, templates, existingCard]);
 
   // Update form data when existing card loads
   useEffect(() => {
     if (existingCard) {
-      // Convert database format to FormBuilder format
-      // Home page elements are in pageElements, additional pages are in pages array
       let homePageElements = existingCard.pageElements || [];
       const additionalPages = existingCard.pages || [];
-      
-      // Inject profile element if it doesn't exist in the home page elements
-      const hasProfileElement = homePageElements.some((el: any) => el.type === 'profile');
+
+      const hasProfileElement = homePageElements.some((el: any) => el.type === "profile");
       if (!hasProfileElement && existingCard.profileSectionEnabled !== false) {
-        // Use createProfileElement for consistent unique ID generation
-        const profileElement = {
-          ...createProfileElement(),
-          order: -1, // Will be reindexed
-        };
+        const profileElement = { ...createProfileElement(), order: -1 };
         homePageElements = [profileElement, ...homePageElements];
-        // Re-index order
         homePageElements = homePageElements.map((el: any, idx: number) => ({ ...el, order: idx }));
       }
-      
-      // Build complete pages array with home page first, then any additional pages
-      // Clone elements arrays to avoid shared mutations between pageElements and pages[0].elements
+
       const allPages = [
         {
           id: "home",
@@ -326,7 +318,7 @@ export default function CardEditor() {
           path: "",
           label: "Home",
           visible: true,
-          elements: homePageElements.map((el: any) => ({ ...el }))
+          elements: homePageElements.map((el: any) => ({ ...el })),
         },
         ...additionalPages.map((page: any) => ({
           id: page.id,
@@ -334,78 +326,58 @@ export default function CardEditor() {
           path: page.path,
           label: page.label,
           visible: page.visible !== false,
-          elements: (page.elements || []).map((el: any) => ({ ...el }))
-        }))
+          elements: (page.elements || []).map((el: any) => ({ ...el })),
+        })),
       ];
-      
+
       const convertedCard = {
         ...existingCard,
-        pageElements: homePageElements.map((el: any) => ({ ...el })), // Clone to avoid shared reference
-        pages: allPages
+        pageElements: homePageElements.map((el: any) => ({ ...el })),
+        pages: allPages,
       };
-      
-      console.log('[CardEditor] Loaded card - pages structure:', {
-        homePageElements: homePageElements.length,
-        additionalPages: additionalPages.length,
-        totalPages: allPages.length,
-        hasProfileElement: homePageElements.some((el: any) => el.type === 'profile')
-      });
-      
-      setCardData(prev => ({
-        ...convertedCard,
+
+      setCardData((prev) => ({
+        ...(convertedCard as any),
         currentPreviewMode: prev.currentPreviewMode,
-        currentSelectedPage: prev.currentSelectedPage
+        currentSelectedPage: prev.currentSelectedPage,
       }));
+
       updateShareUrl(existingCard);
+
+      // allow autosave after hydration
+      hasHydratedRef.current = true;
     }
   }, [existingCard]);
 
   useEffect(() => {
-    if (lastSavedCard) {
-      updateShareUrl(lastSavedCard);
-    }
+    if (lastSavedCard) updateShareUrl(lastSavedCard);
   }, [lastSavedCard]);
 
-  useEffect(() => {
-    if (!user) return;
-    if (!params.id && !customUrlSlug && !cardData.fullName && !cardData.title) return;
-    
-    updatePendingData(cardData, customUrlSlug);
-  }, [cardData, user, params.id, customUrlSlug, updatePendingData]);
-
-  // Accept optional data parameter for immediate saves with fresh data (2talklink pattern)
-  const triggerSave = useCallback(async (dataOverride?: any) => {
-    console.log('[CardEditor] triggerSave called, dataOverride:', !!dataOverride, 'elements:', dataOverride?.pageElements?.length || 0);
-    if (!user) {
-      console.log('[CardEditor] triggerSave aborted - no user');
-      return;
-    }
-    const dataToSave = dataOverride || cardData;
-    if (!params.id && !customUrlSlug && !dataToSave.fullName && !dataToSave.title) {
-      console.log('[CardEditor] triggerSave aborted - no id/slug/name/title');
-      return;
-    }
-    
-    console.log('[CardEditor] Triggering immediate save with', dataToSave?.pageElements?.length || 0, 'elements');
-    await saveNow(dataToSave, customUrlSlug);
-  }, [user, params.id, customUrlSlug, cardData, saveNow]);
+  // Manual save (button / explicit)
+  const triggerSave = useCallback(
+    async (dataOverride?: any) => {
+      if (!user) return;
+      const dataToSave = dataOverride || cardData;
+      if (!params.id && !customUrlSlug && !dataToSave.fullName && !dataToSave.title) return;
+      await saveNow(dataToSave, customUrlSlug);
+    },
+    [user, params.id, customUrlSlug, cardData, saveNow]
+  );
 
   const copyShareUrl = async () => {
-    if (shareUrl) {
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        
-        toast({
-          title: "Link copied!",
-          description: "URL copied to clipboard. Use the View TalkLink button to preview.",
-        });
-      } catch (err) {
-        toast({
-          title: "Copy failed",
-          description: "Please copy the URL manually.",
-          variant: "destructive",
-        });
-      }
+    if (!shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: "Link copied!",
+        description: "URL copied to clipboard. Use the View TalkLink button to preview.",
+      });
+    } catch {
+      toast({
+        title: "Copy failed",
+        description: "Please copy the URL manually.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -418,34 +390,6 @@ export default function CardEditor() {
     } else {
       copyShareUrl();
     }
-  };
-
-  const downloadVCard = () => {
-    const vCardData = `BEGIN:VCARD
-VERSION:3.0
-FN:${cardData.fullName}
-ORG:${cardData.company || ''}
-TITLE:${cardData.title}
-TEL:${cardData.phone || ''}
-EMAIL:${cardData.email || ''}
-URL:${cardData.website || ''}
-NOTE:${cardData.about || ''}
-END:VCARD`;
-
-    const blob = new Blob([vCardData], { type: 'text/vcard' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${cardData.fullName || 'contact'}.vcf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Contact Downloaded",
-      description: "VCard file downloaded successfully. You can now add it to your contacts.",
-    });
   };
 
   if (isLoading) {
@@ -470,18 +414,14 @@ END:VCARD`;
                 <ArrowLeft className="w-5 h-5 mr-2" />
                 Back
               </Link>
-              <div className="text-xl font-semibold text-gray-900">
-                {params.id ? 'Edit Card' : 'Create Card'}
-              </div>
+              <div className="text-xl font-semibold text-gray-900">{params.id ? "Edit Card" : "Create Card"}</div>
               <AutoSaveIndicator />
             </div>
-            
+
             <div className="flex items-center space-x-3">
               {shareUrl ? (
                 <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-orange-50 rounded-full px-6 py-3 shadow-sm border border-gray-200">
-                  <div className="text-sm text-gray-700 font-medium truncate max-w-xs">
-                    {shareUrl}
-                  </div>
+                  <div className="text-sm text-gray-700 font-medium truncate max-w-xs">{shareUrl}</div>
                   <Button
                     size="sm"
                     onClick={copyShareUrl}
@@ -503,21 +443,11 @@ END:VCARD`;
                 </div>
               ) : (
                 <div className="flex items-center space-x-3">
-                  <Button
-                    size="sm"
-                    disabled
-                    className="bg-gray-200 text-gray-400 rounded-full px-6 cursor-not-allowed"
-                    data-testid="button-copy-url"
-                  >
+                  <Button size="sm" disabled className="bg-gray-200 text-gray-400 rounded-full px-6 cursor-not-allowed">
                     <Copy className="w-4 h-4 mr-2" />
                     Copy
                   </Button>
-                  <Button
-                    size="sm"
-                    disabled
-                    className="bg-gray-200 text-gray-400 rounded-full px-6 cursor-not-allowed"
-                    data-testid="button-share"
-                  >
+                  <Button size="sm" disabled className="bg-gray-200 text-gray-400 rounded-full px-6 cursor-not-allowed">
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
@@ -535,11 +465,20 @@ END:VCARD`;
             <FormBuilder
               cardData={cardData}
               onDataChange={(data) => {
-                setCardData(prev => ({
-                  ...data,
-                  currentPreviewMode: prev.currentPreviewMode,
-                  currentSelectedPage: prev.currentSelectedPage
-                }));
+                const updated = {
+                  ...(data as any),
+                  currentPreviewMode: (cardData as any).currentPreviewMode,
+                  currentSelectedPage: (cardData as any).currentSelectedPage,
+                };
+
+                setCardData(updated as any);
+
+                // ✅ AUTOSAVE HERE
+                if (!user) return;
+                if (!hasHydratedRef.current) return;
+                if (!params.id && !customUrlSlug && !updated.fullName && !updated.title) return;
+
+                queueSave(updated as any, customUrlSlug);
               }}
               onSave={triggerSave}
               onGenerateQR={() => {}}
@@ -556,28 +495,18 @@ END:VCARD`;
                 <span>Updates in real-time</span>
               </div>
             </div>
-            
-            {/* Mobile Phone Mockup */}
+
             <div className="relative mx-auto max-w-sm">
-              {/* Professional Mobile Frame with CSS styling */}
-              <div 
+              <div
                 className="relative w-[390px] mx-auto bg-gray-900 rounded-[50px] shadow-2xl overflow-hidden border-[12px] border-gray-800"
-                style={{
-                  aspectRatio: '9/19.5',
-                }}
+                style={{ aspectRatio: "9/19.5" }}
               >
-                {/* Top Notch */}
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[150px] h-[28px] bg-gray-900 rounded-b-[20px] z-10"></div>
-                
-                {/* Screen Content Area */}
+
                 <div className="absolute top-[10px] left-[8px] right-[8px] bottom-[10px] overflow-hidden rounded-[40px] bg-white">
-                  <div 
-                    ref={cardRef}
-                    className="h-full overflow-y-auto"
-                  >
-                    {/* Check if we're in page mode by looking at current focus or form data */}
-                    {(cardData as any).currentPreviewMode === 'page' && getCurrentPageData() ? (
-                      <PagePreview 
+                  <div ref={cardRef} className="h-full overflow-y-auto">
+                    {(cardData as any).currentPreviewMode === "page" && getCurrentPageData() ? (
+                      <PagePreview
                         pageData={getCurrentPageData()}
                         cardData={cardData}
                         elementSpacing={(cardData as any).elementSpacing || 16}
@@ -587,8 +516,8 @@ END:VCARD`;
                         hideBackButton={true}
                       />
                     ) : (
-                      <BusinessCardComponent 
-                        data={cardData} 
+                      <BusinessCardComponent
+                        data={cardData}
                         isMobilePreview={true}
                         showViewButton={false}
                         onNavigatePage={handleNavigatePage}
@@ -599,8 +528,7 @@ END:VCARD`;
                 </div>
               </div>
             </div>
-            
-            {/* View TalkLink Button Below Mobile Frame */}
+
             {shareUrl && (
               <div className="mt-4 flex justify-center">
                 <a
@@ -615,7 +543,7 @@ END:VCARD`;
                 </a>
               </div>
             )}
-            
+
             <div className="mt-6 text-center">
               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                 <span className="w-2 h-2 bg-blue-500 rounded-full inline-block mr-2"></span>
