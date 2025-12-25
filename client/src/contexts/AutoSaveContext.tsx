@@ -53,12 +53,15 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
       // Merge all elements from all pages into pageElements for backward compatibility
       // The first page (home) elements go to pageElements, additional pages are stored in pages array
       let pageElementsToSave = (dataToSave.pageElements || []) as any[];
+      console.log('[AutoSave] Initial pageElements from dataToSave:', pageElementsToSave.length);
       
       // If we have a home page with elements, use those as pageElements
       if (Array.isArray(pages)) {
         const homePage = pages.find((p: any) => p.key === 'home' || p.id === 'home');
+        console.log('[AutoSave] Found home page in pages array?', !!homePage, 'elements:', homePage?.elements?.length || 0);
         if (homePage?.elements && Array.isArray(homePage.elements) && homePage.elements.length > 0) {
           pageElementsToSave = homePage.elements;
+          console.log('[AutoSave] Using home page elements instead:', pageElementsToSave.length);
         }
       }
       

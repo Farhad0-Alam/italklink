@@ -207,20 +207,39 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
       console.log('[PageBuilder] WARNING: cardData is null/undefined, cannot save');
       return null;
     }
+    
+    // Also update the home page in pages array if it exists (for consistency with AutoSaveContext)
+    let updatedPages = cardData.pages;
+    if (Array.isArray(cardData.pages)) {
+      updatedPages = cardData.pages.map((page: any) => {
+        if (page.key === 'home' || page.id === 'home') {
+          return { ...page, elements: newElements };
+        }
+        return page;
+      });
+    }
+    
+    console.log('[PageBuilder] Building updated card - pageElements:', newElements.length, 'pages:', updatedPages?.length || 0);
     return {
       ...cardData,
       pageElements: newElements,
+      pages: updatedPages,
     };
   };
 
   // Trigger save with updated elements
-  const saveWithElements = (newElements: PageElement[]) => {
+  const saveWithElements = async (newElements: PageElement[]) => {
     console.log('[PageBuilder] saveWithElements called with', newElements.length, 'elements, onSave:', !!onSave, 'cardData:', !!cardData);
     if (onSave) {
       const updatedCard = buildUpdatedCardData(newElements);
       if (updatedCard) {
         console.log('[PageBuilder] Triggering save with', updatedCard.pageElements?.length, 'elements');
-        onSave(updatedCard);
+        try {
+          await onSave(updatedCard);
+          console.log('[PageBuilder] Save completed successfully');
+        } catch (error) {
+          console.error('[PageBuilder] Save failed:', error);
+        }
       } else {
         console.log('[PageBuilder] Cannot save - cardData is null');
       }
