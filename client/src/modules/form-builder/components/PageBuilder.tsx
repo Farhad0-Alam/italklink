@@ -201,6 +201,24 @@ interface PageBuilderProps {
 export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, onElementSpacingChange, cardData, onNavigatePage, onSave }: PageBuilderProps) {
   const [showElementSelector, setShowElementSelector] = useState(false);
   
+  // Build updated cardData with new elements for immediate save (2talklink pattern)
+  const buildUpdatedCardData = (newElements: PageElement[]) => {
+    if (!cardData) return null;
+    return {
+      ...cardData,
+      pageElements: newElements,
+    };
+  };
+
+  // Trigger save with updated elements
+  const saveWithElements = (newElements: PageElement[]) => {
+    if (onSave) {
+      const updatedCard = buildUpdatedCardData(newElements);
+      console.log('[PageBuilder] Saving with updated elements:', newElements.length);
+      onSave(updatedCard);
+    }
+  };
+
   // Fetch element types from API for accurate ID mapping
   const { data: apiElementTypes } = useQuery<ElementTypeFromAPI[]>({
     queryKey: ['/api/element-types'],
@@ -280,6 +298,7 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
       }));
       
       onElementsChange(updatedElements);
+      saveWithElements(updatedElements); // Trigger immediate save after reorder
     }
   }
 
@@ -290,6 +309,7 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
     console.log('[PageBuilder] New elements count after adding:', newElements.length);
     console.log('[PageBuilder] All element orders:', newElements.map(e => ({ type: e.type, order: e.order })));
     onElementsChange(newElements);
+    saveWithElements(newElements); // Trigger immediate save
   };
 
   const handleUpdateElement = (updatedElement: PageElement) => {
@@ -297,11 +317,13 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
       el.id === updatedElement.id ? updatedElement : el
     );
     onElementsChange(newElements);
+    // Note: Don't save on every update - individual element editors handle their own saves
   };
 
   const handleDeleteElement = (elementId: string) => {
     const newElements = elements.filter(el => el.id !== elementId);
     onElementsChange(newElements);
+    saveWithElements(newElements); // Trigger immediate save
   };
 
   const handleCloneElement = (elementId: string) => {
@@ -332,6 +354,7 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
     }));
     
     onElementsChange(updatedElements);
+    saveWithElements(updatedElements); // Trigger immediate save
   };
 
   const handleToggleVisibility = (elementId: string) => {
@@ -339,6 +362,7 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
       el.id === elementId ? { ...el, visible: el.visible !== false ? false : true } : el
     );
     onElementsChange(newElements);
+    saveWithElements(newElements); // Trigger immediate save
   };
 
   return (
