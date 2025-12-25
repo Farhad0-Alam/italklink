@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -44,6 +44,23 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [activeDividerPosition, setActiveDividerPosition] = useState<"top" | "bottom">("top");
+  
+  // 2talklink pattern: Local state for form fields, synced with props
+  const [fullName, setFullName] = useState(data.fullName || "");
+  const [title, setTitle] = useState(data.title || "");
+  const [company, setCompany] = useState(data.company || "");
+  const [localBrandColor, setLocalBrandColor] = useState(data.brandColor || "");
+  
+  // Track whether each field is focused to prevent sync during edits
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  
+  // Sync local state with props when data changes externally (but not while editing)
+  useEffect(() => {
+    if (focusedField !== 'fullName') setFullName(data.fullName || "");
+    if (focusedField !== 'title') setTitle(data.title || "");
+    if (focusedField !== 'company') setCompany(data.company || "");
+    if (focusedField !== 'brandColor') setLocalBrandColor(data.brandColor || "");
+  }, [data.fullName, data.title, data.company, data.brandColor, focusedField]);
   
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
     profileImageStyling: true,
@@ -238,7 +255,7 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
         ))}
       </div>
 
-      {/* Profile Info Fields */}
+      {/* Profile Info Fields - 2talklink pattern: local state + blur save */}
       <div className="border border-green-200 rounded-lg p-3 space-y-3 bg-green-50/50">
         <h4 className="text-sm font-medium text-green-700 flex items-center gap-2">
           <i className="fas fa-user text-green-500"></i>
@@ -249,15 +266,18 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
           <div>
             <Label className="text-sm text-slate-700 font-normal">Full Name</Label>
             <Input
-              key={`fullName-${data.id || 'default'}`}
-              defaultValue={data.fullName || ""}
-              onBlur={(e) => {
-                const newElementData = { ...data, fullName: e.target.value };
-                onChange(newElementData);
-                if (onSave) {
-                  const updatedCard = buildUpdatedCardData(newElementData);
-                  console.log('[ProfileSectionEditor] Saving fullName with updated card:', updatedCard ? 'yes' : 'no');
-                  onSave(updatedCard);
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              onFocus={() => setFocusedField('fullName')}
+              onBlur={() => {
+                setFocusedField(null);
+                if (fullName !== data.fullName) {
+                  const newElementData = { ...data, fullName };
+                  onChange(newElementData);
+                  if (onSave) {
+                    const updatedCard = buildUpdatedCardData(newElementData);
+                    onSave(updatedCard);
+                  }
                 }
               }}
               placeholder="Enter full name"
@@ -269,15 +289,18 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
           <div>
             <Label className="text-sm text-slate-700 font-normal">Title</Label>
             <Input
-              key={`title-${data.id || 'default'}`}
-              defaultValue={data.title || ""}
-              onBlur={(e) => {
-                const newElementData = { ...data, title: e.target.value };
-                onChange(newElementData);
-                if (onSave) {
-                  const updatedCard = buildUpdatedCardData(newElementData);
-                  console.log('[ProfileSectionEditor] Saving title with updated card:', updatedCard ? 'yes' : 'no');
-                  onSave(updatedCard);
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onFocus={() => setFocusedField('title')}
+              onBlur={() => {
+                setFocusedField(null);
+                if (title !== data.title) {
+                  const newElementData = { ...data, title };
+                  onChange(newElementData);
+                  if (onSave) {
+                    const updatedCard = buildUpdatedCardData(newElementData);
+                    onSave(updatedCard);
+                  }
                 }
               }}
               placeholder="Enter title"
@@ -289,15 +312,18 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
           <div>
             <Label className="text-sm text-slate-700 font-normal">Company</Label>
             <Input
-              key={`company-${data.id || 'default'}`}
-              defaultValue={data.company || ""}
-              onBlur={(e) => {
-                const newElementData = { ...data, company: e.target.value };
-                onChange(newElementData);
-                if (onSave) {
-                  const updatedCard = buildUpdatedCardData(newElementData);
-                  console.log('[ProfileSectionEditor] Saving company with updated card:', updatedCard ? 'yes' : 'no');
-                  onSave(updatedCard);
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              onFocus={() => setFocusedField('company')}
+              onBlur={() => {
+                setFocusedField(null);
+                if (company !== data.company) {
+                  const newElementData = { ...data, company };
+                  onChange(newElementData);
+                  if (onSave) {
+                    const updatedCard = buildUpdatedCardData(newElementData);
+                    onSave(updatedCard);
+                  }
                 }
               }}
               placeholder="Enter company name"
@@ -311,20 +337,35 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
             <div className="flex items-center gap-2">
               <input
                 type="color"
-                value={data.brandColor || brandColor}
-                onChange={(e) => handleDataUpdate({ brandColor: e.target.value })}
+                value={localBrandColor || brandColor}
+                onChange={(e) => setLocalBrandColor(e.target.value)}
+                onFocus={() => setFocusedField('brandColor')}
+                onBlur={() => {
+                  setFocusedField(null);
+                  if (localBrandColor !== data.brandColor) {
+                    const newElementData = { ...data, brandColor: localBrandColor };
+                    onChange(newElementData);
+                    if (onSave) {
+                      const updatedCard = buildUpdatedCardData(newElementData);
+                      onSave(updatedCard);
+                    }
+                  }
+                }}
                 className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
               />
               <Input
-                key={`brandColor-${data.id || 'default'}`}
-                defaultValue={data.brandColor || ""}
-                onBlur={(e) => {
-                  const newElementData = { ...data, brandColor: e.target.value };
-                  onChange(newElementData);
-                  if (onSave) {
-                    const updatedCard = buildUpdatedCardData(newElementData);
-                    console.log('[ProfileSectionEditor] Saving brandColor with updated card:', updatedCard ? 'yes' : 'no');
-                    onSave(updatedCard);
+                value={localBrandColor}
+                onChange={(e) => setLocalBrandColor(e.target.value)}
+                onFocus={() => setFocusedField('brandColor')}
+                onBlur={() => {
+                  setFocusedField(null);
+                  if (localBrandColor !== data.brandColor) {
+                    const newElementData = { ...data, brandColor: localBrandColor };
+                    onChange(newElementData);
+                    if (onSave) {
+                      const updatedCard = buildUpdatedCardData(newElementData);
+                      onSave(updatedCard);
+                    }
                   }
                 }}
                 placeholder={brandColor}
@@ -828,48 +869,6 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
             </div>
           </CollapsibleContent>
         </Collapsible>
-      </div>
-
-      {/* Basic Information Fields */}
-      <div className="space-y-4 pt-4 border-t border-slate-200">
-        <div>
-          <Label htmlFor="fullName" className="text-slate-700 font-medium">Full Name *</Label>
-          <Input
-            id="fullName"
-            value={data.fullName || ""}
-            onChange={(e) => handleDataUpdate({ fullName: e.target.value })}
-            onBlur={handleBlurSave}
-            placeholder="John Doe"
-            className="bg-white border-slate-300 text-slate-800"
-            data-testid="input-profile-fullname"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="title" className="text-slate-700 font-medium">Title/Role *</Label>
-          <Input
-            id="title"
-            value={data.title || ""}
-            onChange={(e) => handleDataUpdate({ title: e.target.value })}
-            onBlur={handleBlurSave}
-            placeholder="Senior Developer"
-            className="bg-white border-slate-300 text-slate-800"
-            data-testid="input-profile-title"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="company" className="text-slate-700 font-medium">Company</Label>
-          <Input
-            id="company"
-            value={data.company || ""}
-            onChange={(e) => handleDataUpdate({ company: e.target.value })}
-            onBlur={handleBlurSave}
-            placeholder="Tech Corp"
-            className="bg-white border-slate-300 text-slate-800"
-            data-testid="input-profile-company"
-          />
-        </div>
       </div>
 
       {/* Name Styling */}
