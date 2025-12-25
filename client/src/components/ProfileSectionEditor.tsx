@@ -98,6 +98,20 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
     };
   };
 
+  // 2talklink pattern: Save on blur event
+  const handleBlurSave = async () => {
+    if (!onSave) return;
+    
+    // Build the updated card data with current element data
+    const updatedCardData = buildUpdatedCardData(data);
+    
+    try {
+      await onSave(updatedCardData);
+    } catch (error) {
+      console.error('[ProfileSectionEditor] handleBlurSave error:', error);
+    }
+  };
+
   const handleNestedUpdate = (path: string, value: any) => {
     const keys = path.split('.');
     const newData = { ...data };
