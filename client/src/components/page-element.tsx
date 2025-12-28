@@ -178,11 +178,11 @@ function SortableImageItem({ image, index, onDelete, onUpdateAlt }: SortableImag
 }
 
 // Contact Form Renderer Component - wraps hooks to avoid React hook rules violation
-// Contact Form Renderer Component - wraps hooks to avoid React hook rules violation
 function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
   type FieldType = "text" | "email" | "tel" | "textarea" | "date" | "select" | "checkbox";
 
-  type FieldKey =
+  // Built-in field keys (cannot be deleted)
+  type BuiltInFieldKey =
     | "name"
     | "email"
     | "phone"
@@ -196,7 +196,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     | "custom2";
 
   type FieldConfig = {
-    key: FieldKey;
+    key: string; // Can be built-in or custom (e.g., "custom_1234567890")
     enabled: boolean;
     type: FieldType;
     label: string;
@@ -204,9 +204,15 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     required?: boolean;
     rows?: number; // only for textarea
     options?: string[]; // only for select
+    isCustom?: boolean; // true for user-added custom fields
   };
 
-  const defaultFieldConfig: Record<FieldKey, FieldConfig> = {
+  const builtInKeys: BuiltInFieldKey[] = [
+    "name", "email", "phone", "subject", "message", 
+    "company", "website", "service", "budget", "custom1", "custom2"
+  ];
+
+  const defaultFieldConfig: Record<BuiltInFieldKey, FieldConfig> = {
     name: {
       key: "name",
       enabled: true,
@@ -307,17 +313,22 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     const saved = element.data?.fieldConfigs;
     if (Array.isArray(saved) && saved.length) {
       // merge with defaults to avoid missing keys after upgrades
-      const map = new Map<string, FieldConfig>();
+      const result: FieldConfig[] = [];
+      const seenKeys = new Set<string>();
+
+      // First, process saved fields in order (preserves order including custom fields)
       saved.forEach((f: any) => {
         if (!f?.key) return;
-        const base = (defaultFieldConfig as any)[f.key as FieldKey];
-        if (!base) return;
-        map.set(f.key, {
-          ...base,
+        const isBuiltIn = builtInKeys.includes(f.key as BuiltInFieldKey);
+        const base = isBuiltIn ? (defaultFieldConfig as any)[f.key] : null;
+        
+        seenKeys.add(f.key);
+        result.push({
+          ...(base || {}),
           ...f,
-          // safety
+          key: f.key,
           enabled: !!f.enabled,
-          required: typeof f.required === "boolean" ? f.required : base.required,
+          required: typeof f.required === "boolean" ? f.required : (base?.required ?? false),
           type: ([
             "text",
             "email",
@@ -328,23 +339,27 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
             "checkbox",
           ].includes(f.type)
             ? f.type
-            : base.type) as FieldType,
-          rows: typeof f.rows === "number" ? f.rows : base.rows,
-          options: Array.isArray(f.options) ? f.options : base.options,
+            : (base?.type ?? "text")) as FieldType,
+          rows: typeof f.rows === "number" ? f.rows : (base?.rows ?? 3),
+          options: Array.isArray(f.options) ? f.options : (base?.options ?? []),
+          label: f.label || (base?.label ?? f.key),
+          placeholder: f.placeholder || (base?.placeholder ?? ""),
+          isCustom: !isBuiltIn || f.isCustom,
         });
       });
 
-      // ensure all known keys exist (so UI always shows all fields)
-      (Object.keys(defaultFieldConfig) as FieldKey[]).forEach((k) => {
-        if (!map.has(k)) map.set(k, { ...defaultFieldConfig[k], enabled: false });
+      // Add any missing built-in keys (disabled by default)
+      builtInKeys.forEach((k) => {
+        if (!seenKeys.has(k)) {
+          result.push({ ...defaultFieldConfig[k], enabled: false });
+        }
       });
 
-      return Array.from(map.values());
+      return result;
     }
 
     const oldFields: string[] = element.data?.fields || ["name", "email", "message"];
-    const keys = Object.keys(defaultFieldConfig) as FieldKey[];
-    return keys.map((k) => ({
+    return builtInKeys.map((k) => ({
       ...defaultFieldConfig[k],
       enabled: oldFields.includes(k),
     }));
@@ -527,7 +542,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
 
   // -------- EDIT MODE (FULL CUSTOMIZATION UI) --------
   if (isEditing) {
-    const setField = (key: FieldKey, patch: Partial<FieldConfig>) => {
+    const setField = (key: string, patch: Partial<FieldConfig>) => {
       const next = normalizeFieldConfigs().map((f) =>
         f.key === key ? { ...f, ...patch } : f
       );
@@ -536,6 +551,39 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
       // keep old "fields" array updated for older parts of app
       const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
       handleDataUpdate({ fields: fieldsLegacy });
+    };
+
+    const addCustomField = () => {
+      const uniqueKey = `custom_${Date.now()}`;
+      const newField: FieldConfig = {
+        key: uniqueKey,
+        enabled: true,
+        type: "text",
+        label: "New Field",
+        placeholder: "Enter value",
+        required: false,
+        isCustom: true,
+      };
+      const current = normalizeFieldConfigs();
+      const next = [...current, newField];
+      handleDataUpdate({ fieldConfigs: next });
+    };
+
+    const deleteField = (key: string) => {
+      const current = normalizeFieldConfigs();
+      const next = current.filter((f) => f.key !== key);
+      handleDataUpdate({ fieldConfigs: next });
+      // Update legacy fields array
+      const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
+      handleDataUpdate({ fields: fieldsLegacy });
+    };
+
+    const moveField = (fromIndex: number, toIndex: number) => {
+      const current = normalizeFieldConfigs();
+      const next = [...current];
+      const [removed] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, removed);
+      handleDataUpdate({ fieldConfigs: next });
     };
 
     return (
@@ -553,42 +601,92 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
 
         {/* Fields (Modern) */}
         <div className="bg-slate-700 p-3 rounded space-y-3">
-          <h4 className="text-white text-sm font-medium flex items-center gap-2">
-            <i className="fas fa-sliders"></i>
-            Fields (Modern)
-          </h4>
+          <div className="flex items-center justify-between">
+            <h4 className="text-white text-sm font-medium flex items-center gap-2">
+              <i className="fas fa-sliders"></i>
+              Form Fields
+            </h4>
+            <button
+              type="button"
+              onClick={addCustomField}
+              className="flex items-center gap-1 px-2 py-1 text-xs bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+              data-testid="button-add-field"
+            >
+              <i className="fas fa-plus text-[10px]"></i>
+              Add Field
+            </button>
+          </div>
 
           <div className="space-y-3">
-            {fieldConfigs.map((f) => (
+            {fieldConfigs.map((f, index) => (
               <div
                 key={f.key}
-                className="bg-slate-800/50 rounded p-3 space-y-2 border border-slate-600"
+                className="bg-slate-800/50 rounded p-3 space-y-2 border border-slate-600 relative group"
               >
                 <div className="flex items-center justify-between">
-                  <label className="text-sm text-slate-200 flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={!!f.enabled}
-                      onChange={() =>
-                        setField(f.key, { enabled: !f.enabled })
-                      }
-                      className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
-                    />
-                    <span className="capitalize">{f.key}</span>
-                  </label>
+                  <div className="flex items-center gap-2">
+                    {/* Reorder buttons */}
+                    <div className="flex flex-col gap-0.5 mr-1">
+                      <button
+                        type="button"
+                        onClick={() => index > 0 && moveField(index, index - 1)}
+                        disabled={index === 0}
+                        className="text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed text-[10px] p-0.5"
+                        title="Move up"
+                      >
+                        <i className="fas fa-chevron-up"></i>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => index < fieldConfigs.length - 1 && moveField(index, index + 1)}
+                        disabled={index === fieldConfigs.length - 1}
+                        className="text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed text-[10px] p-0.5"
+                        title="Move down"
+                      >
+                        <i className="fas fa-chevron-down"></i>
+                      </button>
+                    </div>
+                    <label className="text-sm text-slate-200 flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={!!f.enabled}
+                        onChange={() =>
+                          setField(f.key, { enabled: !f.enabled })
+                        }
+                        className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
+                      />
+                      <span className="capitalize">{f.label || f.key}</span>
+                      {f.isCustom && (
+                        <span className="text-[10px] bg-green-600/50 text-green-200 px-1.5 py-0.5 rounded">Custom</span>
+                      )}
+                    </label>
+                  </div>
 
-                  <label className="text-xs text-slate-300 flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={!!f.required}
-                      disabled={!f.enabled}
-                      onChange={() =>
-                        setField(f.key, { required: !f.required })
-                      }
-                      className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
-                    />
-                    Required
-                  </label>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-slate-300 flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={!!f.required}
+                        disabled={!f.enabled}
+                        onChange={() =>
+                          setField(f.key, { required: !f.required })
+                        }
+                        className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
+                      />
+                      Required
+                    </label>
+                    {f.isCustom && (
+                      <button
+                        type="button"
+                        onClick={() => deleteField(f.key)}
+                        className="text-red-400 hover:text-red-300 p-1 rounded transition-colors"
+                        title="Delete field"
+                        data-testid={`button-delete-field-${f.key}`}
+                      >
+                        <i className="fas fa-trash text-xs"></i>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
