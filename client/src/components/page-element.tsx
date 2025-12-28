@@ -181,19 +181,13 @@ function SortableImageItem({ image, index, onDelete, onUpdateAlt }: SortableImag
 function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
   type FieldType = "text" | "email" | "tel" | "textarea" | "date" | "select" | "checkbox";
 
-  // Built-in field keys (cannot be deleted)
+  // Built-in field keys (only 5 default fields - users can add more with +Add Field)
   type BuiltInFieldKey =
     | "name"
     | "email"
     | "phone"
     | "subject"
-    | "message"
-    | "company"
-    | "website"
-    | "service"
-    | "budget"
-    | "custom1"
-    | "custom2";
+    | "message";
 
   type FieldConfig = {
     key: string; // Can be built-in or custom (e.g., "custom_1234567890")
@@ -208,8 +202,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
   };
 
   const builtInKeys: BuiltInFieldKey[] = [
-    "name", "email", "phone", "subject", "message", 
-    "company", "website", "service", "budget", "custom1", "custom2"
+    "name", "email", "phone", "subject", "message"
   ];
 
   const defaultFieldConfig: Record<BuiltInFieldKey, FieldConfig> = {
@@ -253,56 +246,6 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
       placeholder: "Your Message",
       required: true,
       rows: 3,
-    },
-    company: {
-      key: "company",
-      enabled: false,
-      type: "text",
-      label: "Company",
-      placeholder: "Your Company",
-      required: false,
-    },
-    website: {
-      key: "website",
-      enabled: false,
-      type: "text",
-      label: "Website",
-      placeholder: "https://your-website.com",
-      required: false,
-    },
-    service: {
-      key: "service",
-      enabled: false,
-      type: "select",
-      label: "Service",
-      placeholder: "Select a service",
-      required: false,
-      options: ["General Inquiry", "Support", "Sales", "Collaboration"],
-    },
-    budget: {
-      key: "budget",
-      enabled: false,
-      type: "select",
-      label: "Budget",
-      placeholder: "Select budget range",
-      required: false,
-      options: ["< $500", "$500 – $1,000", "$1,000 – $3,000", "$3,000+"],
-    },
-    custom1: {
-      key: "custom1",
-      enabled: false,
-      type: "text",
-      label: "Custom Field 1",
-      placeholder: "Custom value 1",
-      required: false,
-    },
-    custom2: {
-      key: "custom2",
-      enabled: false,
-      type: "text",
-      label: "Custom Field 2",
-      placeholder: "Custom value 2",
-      required: false,
     },
   };
 
