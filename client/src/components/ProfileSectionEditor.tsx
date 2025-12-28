@@ -44,16 +44,16 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [activeDividerPosition, setActiveDividerPosition] = useState<"top" | "bottom">("top");
-  
-  // 2talklink pattern: Local state for form fields, synced with props
+
+  // Local state for form fields, synced with props
   const [fullName, setFullName] = useState(data.fullName || "");
   const [title, setTitle] = useState(data.title || "");
   const [company, setCompany] = useState(data.company || "");
   const [localBrandColor, setLocalBrandColor] = useState(data.brandColor || "");
-  
+
   // Track whether each field is focused to prevent sync during edits
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  
+
   // Sync local state with props when data changes externally (but not while editing)
   useEffect(() => {
     if (focusedField !== 'fullName') setFullName(data.fullName || "");
@@ -61,7 +61,7 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
     if (focusedField !== 'company') setCompany(data.company || "");
     if (focusedField !== 'brandColor') setLocalBrandColor(data.brandColor || "");
   }, [data.fullName, data.title, data.company, data.brandColor, focusedField]);
-  
+
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
     profileImageStyling: true,
     coverImageStyling: true,
@@ -76,13 +76,22 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
   };
 
   const handleDataUpdate = (updates: any) => {
-    onChange({ ...data, ...updates });
+    const newData = { ...data, ...updates };
+    onChange(newData);
+
+    // Trigger autosave
+    if (onSave) {
+      buildAndSaveUpdatedCard(newData);
+    }
   };
 
-  // Build updated cardData with new element data for immediate save (2talklink pattern)
+  // Build updated cardData with new element data for immediate save
   const buildUpdatedCardData = (newElementData: any) => {
-    if (!cardData) return null;
-    
+    if (!cardData) {
+      console.log('[ProfileSectionEditor] WARNING: cardData is null/undefined, cannot build update');
+      return null;
+    }
+
     // Update pageElements array with the new profile data
     const currentElements = cardData.pageElements || [];
     const updatedElements = currentElements.map((el: any) => {
@@ -91,8 +100,8 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
       }
       return el;
     });
-    
-    // Also update pages array if it exists
+
+    // Also update pages array if it exists (for home page)
     const updatedPages = (cardData.pages || []).map((page: any) => {
       if (page.elements) {
         return {
@@ -107,7 +116,7 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
       }
       return page;
     });
-    
+
     return {
       ...cardData,
       pageElements: updatedElements,
@@ -115,17 +124,17 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
     };
   };
 
-  // 2talklink pattern: Save on blur event
-  const handleBlurSave = async () => {
+  // Helper to build and save updated card
+  const buildAndSaveUpdatedCard = async (newElementData: any) => {
     if (!onSave) return;
-    
-    // Build the updated card data with current element data
-    const updatedCardData = buildUpdatedCardData(data);
-    
-    try {
-      await onSave(updatedCardData);
-    } catch (error) {
-      console.error('[ProfileSectionEditor] handleBlurSave error:', error);
+
+    const updatedCardData = buildUpdatedCardData(newElementData);
+    if (updatedCardData) {
+      try {
+        await onSave(updatedCardData);
+      } catch (error) {
+        console.error('[ProfileSectionEditor] Save error:', error);
+      }
     }
   };
 
@@ -133,7 +142,7 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
     const keys = path.split('.');
     const newData = { ...data };
     let current: any = newData;
-    
+
     for (let i = 0; i < keys.length - 1; i++) {
       if (!current[keys[i]]) {
         current[keys[i]] = {};
@@ -143,7 +152,13 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
       current = current[keys[i]];
     }
     current[keys[keys.length - 1]] = value;
+
     onChange(newData);
+
+    // Trigger autosave
+    if (onSave) {
+      buildAndSaveUpdatedCard(newData);
+    }
   };
 
   const getNestedValue = (path: string, defaultValue: any = undefined) => {
@@ -182,9 +197,7 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
         description: "Your image has been uploaded successfully",
       });
       if (onSave) {
-        const updatedCard = buildUpdatedCardData(newElementData);
-        console.log('[ProfileSectionEditor] Saving image upload with updated card:', updatedCard ? 'yes' : 'no');
-        onSave(updatedCard);
+        await buildAndSaveUpdatedCard(newElementData);
       }
     } catch (e) {
       toast({
@@ -202,6 +215,30 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
   const sectionStyles = data.sectionStyles || { basicInfo: {} };
   const brandColor = cardData?.brandColor || data.brandColor || "#22c55e";
   const accentColor = cardData?.accentColor || data.accentColor || "#f093fb";
+
+  // Handle blur for text fields with autosave
+  const handleTextBlur = (field: string, localValue: string, originalValue: string) => {
+    setFocusedField(null);
+    if (localValue !== originalValue) {
+      const newElementData = { ...data, [field]: localValue };
+      onChange(newElementData);
+      if (onSave) {
+        buildAndSaveUpdatedCard(newElementData);
+      }
+    }
+  };
+
+  // Handle brand color blur
+  const handleBrandColorBlur = () => {
+    setFocusedField(null);
+    if (localBrandColor !== data.brandColor) {
+      const newElementData = { ...data, brandColor: localBrandColor };
+      onChange(newElementData);
+      if (onSave) {
+        buildAndSaveUpdatedCard(newElementData);
+      }
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -255,13 +292,13 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
         ))}
       </div>
 
-      {/* Profile Info Fields - 2talklink pattern: local state + blur save */}
+      {/* Profile Info Fields */}
       <div className="border border-green-200 rounded-lg p-3 space-y-3 bg-green-50/50">
         <h4 className="text-sm font-medium text-green-700 flex items-center gap-2">
           <i className="fas fa-user text-green-500"></i>
           Profile Information
         </h4>
-        
+
         <div className="space-y-3">
           <div>
             <Label className="text-sm text-slate-700 font-normal">Full Name</Label>
@@ -269,63 +306,33 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               onFocus={() => setFocusedField('fullName')}
-              onBlur={() => {
-                setFocusedField(null);
-                if (fullName !== data.fullName) {
-                  const newElementData = { ...data, fullName };
-                  onChange(newElementData);
-                  if (onSave) {
-                    const updatedCard = buildUpdatedCardData(newElementData);
-                    onSave(updatedCard);
-                  }
-                }
-              }}
+              onBlur={() => handleTextBlur('fullName', fullName, data.fullName)}
               placeholder="Enter full name"
               className="bg-white border-slate-300 text-slate-800"
               data-testid="input-profile-fullname"
             />
           </div>
-          
+
           <div>
             <Label className="text-sm text-slate-700 font-normal">Title</Label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onFocus={() => setFocusedField('title')}
-              onBlur={() => {
-                setFocusedField(null);
-                if (title !== data.title) {
-                  const newElementData = { ...data, title };
-                  onChange(newElementData);
-                  if (onSave) {
-                    const updatedCard = buildUpdatedCardData(newElementData);
-                    onSave(updatedCard);
-                  }
-                }
-              }}
+              onBlur={() => handleTextBlur('title', title, data.title)}
               placeholder="Enter title"
               className="bg-white border-slate-300 text-slate-800"
               data-testid="input-profile-title"
             />
           </div>
-          
+
           <div>
             <Label className="text-sm text-slate-700 font-normal">Company</Label>
             <Input
               value={company}
               onChange={(e) => setCompany(e.target.value)}
               onFocus={() => setFocusedField('company')}
-              onBlur={() => {
-                setFocusedField(null);
-                if (company !== data.company) {
-                  const newElementData = { ...data, company };
-                  onChange(newElementData);
-                  if (onSave) {
-                    const updatedCard = buildUpdatedCardData(newElementData);
-                    onSave(updatedCard);
-                  }
-                }
-              }}
+              onBlur={() => handleTextBlur('company', company, data.company)}
               placeholder="Enter company name"
               className="bg-white border-slate-300 text-slate-800"
               data-testid="input-profile-company"
@@ -340,34 +347,14 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
                 value={localBrandColor || brandColor}
                 onChange={(e) => setLocalBrandColor(e.target.value)}
                 onFocus={() => setFocusedField('brandColor')}
-                onBlur={() => {
-                  setFocusedField(null);
-                  if (localBrandColor !== data.brandColor) {
-                    const newElementData = { ...data, brandColor: localBrandColor };
-                    onChange(newElementData);
-                    if (onSave) {
-                      const updatedCard = buildUpdatedCardData(newElementData);
-                      onSave(updatedCard);
-                    }
-                  }
-                }}
+                onBlur={handleBrandColorBlur}
                 className="w-10 h-8 p-0 border-0 rounded bg-transparent cursor-pointer"
               />
               <Input
                 value={localBrandColor}
                 onChange={(e) => setLocalBrandColor(e.target.value)}
                 onFocus={() => setFocusedField('brandColor')}
-                onBlur={() => {
-                  setFocusedField(null);
-                  if (localBrandColor !== data.brandColor) {
-                    const newElementData = { ...data, brandColor: localBrandColor };
-                    onChange(newElementData);
-                    if (onSave) {
-                      const updatedCard = buildUpdatedCardData(newElementData);
-                      onSave(updatedCard);
-                    }
-                  }
-                }}
+                onBlur={handleBrandColorBlur}
                 placeholder={brandColor}
                 className="bg-white border-slate-300 text-slate-800 text-sm"
                 data-testid="input-profile-brandcolor"
@@ -377,6 +364,7 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
         </div>
       </div>
 
+      {/* Rest of the component remains the same */}
       {/* Profile Image Styling */}
       <div className="border border-blue-200 rounded-lg p-3 space-y-3 bg-blue-50/50">
         <div
@@ -588,7 +576,7 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
             {/* Position Controls */}
             <div className="space-y-3 p-3 bg-white rounded border border-slate-200">
               <Label className="text-xs text-slate-600 font-medium">Image Position</Label>
-              
+
               <div>
                 <Label className="text-xs text-slate-500">
                   Horizontal: {coverImageStyles.profilePositionX ?? 50}%
@@ -711,7 +699,7 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
             {/* Shape Divider */}
             <div className="space-y-3 p-3 bg-slate-800 rounded-lg border border-slate-700">
               <Label className="text-sm text-slate-200 font-medium">Shape Divider</Label>
-              
+
               {/* Top/Bottom Toggle */}
               <div className="flex p-1 bg-slate-700 rounded-lg">
                 <button
@@ -786,13 +774,7 @@ export function ProfileSectionEditor({ data, onChange, onSave, cardData }: Profi
                                   preserveAspectRatio="none"
                                   className="w-full h-full"
                                   style={{ transform: position === "top" ? "scaleY(-1)" : "none" }}
-                                >
-                                  <path
-                                    d={svgPath}
-                                    fill={isSelected ? "#a855f7" : "#94a3b8"}
-                                    opacity={0.8}
-                                  />
-                                </svg>
+                                />
                               </div>
                             </button>
                           );

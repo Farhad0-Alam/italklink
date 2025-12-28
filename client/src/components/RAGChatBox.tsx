@@ -80,9 +80,10 @@ interface RAGChatBoxProps {
   onClose: () => void;
   primaryColor?: string;
   isEditing?: boolean;
+  cardId?: string; // Added cardId prop
 }
 
-export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditing = false }: RAGChatBoxProps) {
+export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditing = false, cardId }: RAGChatBoxProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -158,7 +159,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     if (!isVoiceModalOpen || !autoMicrophoneEnabled) return;
 
     console.log('[Voice Modal] Opening - will auto-start microphone in 2 seconds...');
-    
+
     const timeoutId = setTimeout(() => {
       if (isMountedRef.current && isVoiceModalOpen && autoMicrophoneEnabled) {
         console.log('[Voice Modal] Auto-starting microphone after 2 second delay...');
@@ -175,13 +176,13 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         blobSize: blob.size,
         blobType: blob.type,
       });
-      
+
       const reader = new FileReader();
-      
+
       reader.onloadstart = () => {
         console.log('[blobToBase64] FileReader loading started');
       };
-      
+
       reader.onprogress = (event) => {
         console.log('[blobToBase64] Progress:', {
           loaded: event.loaded,
@@ -189,7 +190,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
           percent: ((event.loaded / event.total) * 100).toFixed(2) + '%',
         });
       };
-      
+
       reader.onloadend = () => {
         if (!reader.result) {
           console.error('[blobToBase64] Result is empty!');
@@ -204,17 +205,17 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
           resolve(dataUrl);
         }
       };
-      
+
       reader.onerror = () => {
         console.error('[blobToBase64] FileReader error:', reader.error);
         reject(reader.error || new Error('FileReader error'));
       };
-      
+
       reader.onabort = () => {
         console.error('[blobToBase64] FileReader aborted');
         reject(new Error('FileReader aborted'));
       };
-      
+
       console.log('[blobToBase64] Calling readAsDataURL');
       reader.readAsDataURL(blob);
     });
@@ -299,14 +300,14 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         description: 'Failed to get AI response. Please try again.',
         variant: 'destructive',
       });
-      
+
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
         content: 'Sorry, I encountered an error. Please try again.',
         timestamp: new Date(),
       };
-      
+
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
@@ -325,7 +326,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         apiKey: 'sk-frontend-proxy', // Dummy key - backend handles actual OpenAI API key
       });
 
-      let transcript = '';
+      realtimeClientRef.current = realtimeClient;
 
       await realtimeClient.connect(
         (audioData) => {
@@ -334,10 +335,8 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
             try {
               const audioBlob = new Blob([audioData], { type: 'audio/pcm' });
               const audioUrl = URL.createObjectURL(audioBlob);
-              if (!audioRef.current.src) {
-                audioRef.current.src = audioUrl;
-                audioRef.current.play().catch((e) => console.error('Play error:', e));
-              }
+              audioRef.current.src = audioUrl;
+              audioRef.current.play().catch((e) => console.error('Play error:', e));
             } catch (error) {
               console.error('Audio playback error:', error);
             }
@@ -345,9 +344,9 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         },
         (text) => {
           // Handle transcript from API
-          console.log('[RealtimeAPI] Transcript:', text);
-          transcript += text;
-          currentTranscriptRef.current = transcript;
+          console.log('[RealtimeAPI] Transcript update:', text);
+          setTranscript(prev => prev + text);
+          currentTranscriptRef.current = currentTranscriptRef.current + text;
         },
         (error) => {
           // Handle errors from API
@@ -357,10 +356,10 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
             description: error,
             variant: 'destructive',
           });
+          setIsListening(false);
         }
       );
 
-      realtimeClientRef.current = realtimeClient;
       realtimeClient.createResponse();
     } catch (error: any) {
       console.error('[RealtimeAPI] Connection error:', error);
@@ -400,21 +399,21 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
 
   const stopListening = async () => {
     setIsListening(false);
-    
+
     if (realtimeClientRef.current) {
       try {
         // Commit audio and wait for AI response
         realtimeClientRef.current.commitAudio();
-        
+
         // Wait for audio playback to complete
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
+
         // Get transcript that was captured
-        const userTranscript = currentTranscriptRef.current || '';
-        
+        const userTranscript = currentTranscriptRef.current || transcript || '';
+
         if (userTranscript) {
           console.log('[Voice] Processing transcript:', userTranscript);
-          
+
           // Add user message to chat
           const userMessage: ChatMessage = {
             id: Date.now().toString(),
@@ -422,26 +421,28 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
             content: userTranscript,
             timestamp: new Date(),
           };
-          
+
           setMessages(prev => [...prev, userMessage]);
-          
-          // Send to RAG for response
+
+          // Send to RAG for response - FIXED: Use correct API endpoint and body structure
           try {
-            const ragResponse = await apiRequest<{ answer: string }>('POST', '/api/chat', {
-              message: userTranscript,
+            const ragResponse = await apiRequest<RAGResponse>('POST', '/api/chat', {
+              query: userTranscript,
               cardId: cardId || '',
+              topK: 5,
             });
-            
+
             if (ragResponse?.answer) {
               const assistantMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
                 type: 'assistant',
                 content: ragResponse.answer,
+                sources: ragResponse.sources,
                 timestamp: new Date(),
               };
-              
+
               setMessages(prev => [...prev, assistantMessage]);
-              
+
               // Auto-play as audio (ChatGPT Voice mode)
               try {
                 const ttsResponse = await fetch('/api/tts', {
@@ -449,7 +450,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ text: ragResponse.answer }),
                 });
-                
+
                 const ttsData = await ttsResponse.json();
                 if (ttsResponse.ok && ttsData.audioUrl && audioRef.current) {
                   audioRef.current.src = ttsData.audioUrl;
@@ -460,13 +461,19 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                 console.error('[TTS Error]:', ttsErr);
               }
             }
-          } catch (ragErr) {
+          } catch (ragErr: any) {
             console.error('[RAG Error]:', ragErr);
+            toast({
+              title: 'RAG Error',
+              description: ragErr.message || 'Failed to get response from knowledge base',
+              variant: 'destructive',
+            });
           }
         }
-        
+
         // Reset transcript
         currentTranscriptRef.current = '';
+        setTranscript('');
         if (realtimeClientRef.current) {
           realtimeClientRef.current.disconnect();
           realtimeClientRef.current = null;
@@ -507,7 +514,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         try {
           const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
           const base64Audio = await blobToBase64(audioBlob);
-          
+
           // Send to STT endpoint
           const sttResponse = await fetch('/api/stt', {
             method: 'POST',
@@ -516,7 +523,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
           });
 
           const sttData = await sttResponse.json();
-          
+
           if (sttResponse.ok && sttData.transcript) {
             setInput(sttData.transcript);
           }
@@ -550,7 +557,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       if (!audioBlob) {
         throw new Error('No audio data. Please try recording again.');
       }
-      
+
       if (audioBlob.size === 0) {
         throw new Error('Audio recording is empty. Please try recording for a few seconds.');
       }
@@ -562,7 +569,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
       });
 
       const base64Audio = await blobToBase64(audioBlob);
-      
+
       if (!base64Audio) {
         throw new Error('Failed to convert audio to base64. Please try again.');
       }
@@ -583,47 +590,29 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         messagesCount: messages.length,
       });
 
-      try {
-        console.log('[Audio Processing] Sending to backend /api/voice/process...');
-        
-        const requestPayload = {
-          audio: base64Audio,
-          knowledgeBase: {},
-          messages,
-        };
-        
-        console.log('[Audio Processing] Request payload size:', JSON.stringify(requestPayload).length, 'bytes');
-        
-        const response = await apiRequest<{
-          transcript: string;
-          response: string;
-          audioUrl?: string;
-        }>('POST', '/api/voice/process', requestPayload);
+      console.log('[Audio Processing] Sending to backend /api/voice/process...');
 
-        console.log('[Audio Processing] Backend response received:', {
-          hasTranscript: !!response?.transcript,
-          hasResponse: !!response?.response,
-          transcriptLength: response?.transcript?.length || 0,
-          responseLength: response?.response?.length || 0,
-        });
-      } catch (apiError: any) {
-        console.error('[Audio Processing] API Request failed:', {
-          name: apiError?.name,
-          message: apiError?.message,
-          details: apiError?.details,
-          error: apiError?.error,
-          status: apiError?.status,
-          code: apiError?.code,
-          requestId: apiError?.requestId,
-          stack: apiError?.stack?.substring(0, 200),
-        });
-        
-        // Create a more helpful error message from API response
-        const errorMessage = apiError?.details || apiError?.error || apiError?.message || 'Unknown error occurred';
-        const enhancedError = new Error(errorMessage);
-        (enhancedError as any).requestId = apiError?.requestId;
-        throw enhancedError;
-      }
+      const requestPayload = {
+        audio: base64Audio,
+        knowledgeBase: {},
+        messages,
+      };
+
+      console.log('[Audio Processing] Request payload size:', JSON.stringify(requestPayload).length, 'bytes');
+
+      // FIXED: Declare response variable properly
+      const response = await apiRequest<{
+        transcript: string;
+        response: string;
+        audioUrl?: string;
+      }>('POST', '/api/voice/process', requestPayload);
+
+      console.log('[Audio Processing] Backend response received:', {
+        hasTranscript: !!response?.transcript,
+        hasResponse: !!response?.response,
+        transcriptLength: response?.transcript?.length || 0,
+        responseLength: response?.response?.length || 0,
+      });
 
       if (response?.transcript) {
         const userText = response.transcript;
@@ -681,13 +670,13 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
         requestId: error?.requestId,
         stack: error?.stack,
       });
-      
+
       let errorTitle = 'Processing Error';
       let errorDescription = 'Failed to process audio. Please try again.';
-      
+
       if (error?.message) {
         errorDescription = error.message;
-        
+
         // Customize title based on error type
         if (error.message.includes('transcription') || error.message.includes('transcribe')) {
           errorTitle = 'Audio Transcription Failed';
@@ -736,6 +725,8 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
     setIsListening(false);
     setIsPlayingAudio(false);
     setIsVoiceModalOpen(false);
+    setTranscript('');
+    currentTranscriptRef.current = '';
   };
 
   const renderMessage = (message: ChatMessage) => (
@@ -745,7 +736,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
           <Bot className="h-4 w-4 text-white" />
         </div>
       )}
-      
+
       <div className={`flex items-end gap-2 ${message.type === 'user' ? 'max-w-[80%]' : ''}`}>
         <div className={`${message.type === 'user' ? 'rounded-lg px-4 py-3' : ''}`} style={message.type === 'user' ? { backgroundColor: '#1f2937' } : {}}>
           <p className="text-white text-sm leading-relaxed text-left">
@@ -756,7 +747,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
             )}
           </p>
         </div>
-        
+
         {message.type === 'user' && (
           <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
             <User className="h-4 w-4 text-white" />
@@ -880,7 +871,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
                     className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none text-sm sm:text-base disabled:cursor-not-allowed"
                     data-testid="input-chat"
                   />
-                  
+
                   {/* Voice-to-Text Mic Button in Chat Input */}
                   <button
                     type="button"
@@ -949,7 +940,7 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
             <div className="relative w-48 h-48 sm:w-64 sm:h-64">
               <div className="absolute inset-0 rounded-full animate-waveform-gradient bg-gradient-to-b from-blue-300 to-blue-600"></div>
               <div className="absolute inset-0 rounded-full bg-gradient-to-b from-blue-200/30 to-blue-500/50 animate-waveform-pulse"></div>
-              
+
               {/* Waveform Lines */}
               <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-60">
                 <div className="w-2 bg-white/80 rounded-full animate-wave" style={{ height: '60%', animationDelay: '0s' }}></div>
@@ -970,9 +961,12 @@ export function RAGChatBox({ isOpen, onClose, primaryColor = '#22c55e', isEditin
               <div className="text-center">
                 <p className="text-red-400 text-sm font-medium animate-pulse">🎙️ Recording...</p>
                 <p className="text-cyan-400 text-xs mt-2">📚 Using Knowledge Base</p>
+                {transcript && (
+                  <p className="text-white text-xs mt-2 max-w-xs truncate">"{transcript}"</p>
+                )}
               </div>
             )}
-            
+
             {/* Knowledge Base Indicator When Not Recording */}
             {!isListening && !isProcessing && !isTTSLoading && (
               <p className="text-cyan-400 text-xs">📚 Connected to Knowledge Base</p>

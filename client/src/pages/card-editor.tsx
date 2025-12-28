@@ -211,7 +211,7 @@ export default function CardEditor() {
     } else if (card.shareSlug) {
       setShareUrl(`${window.location.origin}/${card.shareSlug}`);
     } else if (card.id) {
-      setShareUrl(`${window.location.origin}/${card.id}`);
+      setShareUrl(`${window.location.origin}/card/${card.id}`);
     }
   };
 
@@ -301,6 +301,8 @@ export default function CardEditor() {
   // Update form data when existing card loads
   useEffect(() => {
     if (existingCard) {
+      console.log('[CardEditor] Hydrating from existing card:', existingCard.id);
+
       let homePageElements = existingCard.pageElements || [];
       const additionalPages = existingCard.pages || [];
 
@@ -338,7 +340,7 @@ export default function CardEditor() {
 
       setCardData((prev) => ({
         ...(convertedCard as any),
-        currentPreviewMode: prev.currentPreviewMode,
+        currentPreviewMode: prev.currentPreviewMode || "card",
         currentSelectedPage: prev.currentSelectedPage,
       }));
 
@@ -346,22 +348,60 @@ export default function CardEditor() {
 
       // allow autosave after hydration
       hasHydratedRef.current = true;
+      console.log('[CardEditor] Hydration complete, autosave enabled');
     }
   }, [existingCard]);
 
   useEffect(() => {
-    if (lastSavedCard) updateShareUrl(lastSavedCard);
-  }, [lastSavedCard]);
+    if (lastSavedCard) {
+      updateShareUrl(lastSavedCard);
+      // Update cardId if this was a create operation
+      if (!params.id && lastSavedCard.id) {
+        setAutoSaveCardId(lastSavedCard.id);
+      }
+    }
+  }, [lastSavedCard, params.id, setAutoSaveCardId]);
 
   // Manual save (button / explicit)
   const triggerSave = useCallback(
     async (dataOverride?: any) => {
-      if (!user) return;
+      if (!user) {
+        toast({
+          title: "Not logged in",
+          description: "Please log in to save your card.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const dataToSave = dataOverride || cardData;
-      if (!params.id && !customUrlSlug && !dataToSave.fullName && !dataToSave.title) return;
-      await saveNow(dataToSave, customUrlSlug);
+
+      // Validate for new cards
+      if (!params.id && !customUrlSlug && !dataToSave.fullName && !dataToSave.title) {
+        toast({
+          title: "Cannot save",
+          description: "Please provide either a custom URL or name and title.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      try {
+        await saveNow(dataToSave, customUrlSlug);
+        toast({
+          title: "Saved successfully",
+          description: "Your card has been saved.",
+        });
+      } catch (error) {
+        console.error('Save error:', error);
+        toast({
+          title: "Save failed",
+          description: "Could not save your card. Please try again.",
+          variant: "destructive",
+        });
+      }
     },
-    [user, params.id, customUrlSlug, cardData, saveNow]
+    [user, params.id, customUrlSlug, cardData, saveNow, toast]
   );
 
   const copyShareUrl = async () => {
@@ -475,9 +515,16 @@ export default function CardEditor() {
 
                 // ✅ AUTOSAVE HERE
                 if (!user) return;
-                if (!hasHydratedRef.current) return;
-                if (!params.id && !customUrlSlug && !updated.fullName && !updated.title) return;
+                if (!hasHydratedRef.current) {
+                  console.log('[CardEditor] Skipping autosave - not hydrated yet');
+                  return;
+                }
+                if (!params.id && !customUrlSlug && !updated.fullName && !updated.title) {
+                  console.log('[CardEditor] Skipping autosave - missing required fields for new card');
+                  return;
+                }
 
+                console.log('[CardEditor] Queueing autosave');
                 queueSave(updated as any, customUrlSlug);
               }}
               onSave={triggerSave}

@@ -200,15 +200,18 @@ interface PageBuilderProps {
 
 export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, onElementSpacingChange, cardData, onNavigatePage, onSave }: PageBuilderProps) {
   const [showElementSelector, setShowElementSelector] = useState(false);
-  
-  // Build updated cardData with new elements for immediate save (2talklink pattern)
+
+  // Build updated cardData with new elements for immediate save
   const buildUpdatedCardData = (newElements: PageElement[]) => {
     if (!cardData) {
       console.log('[PageBuilder] WARNING: cardData is null/undefined, cannot save');
       return null;
     }
-    
-    // Also update the home page in pages array if it exists (for consistency with AutoSaveContext)
+
+    // Update pageElements array
+    let updatedPageElements = newElements;
+
+    // Also update the home page in pages array if it exists
     let updatedPages = cardData.pages;
     if (Array.isArray(cardData.pages)) {
       updatedPages = cardData.pages.map((page: any) => {
@@ -218,33 +221,25 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
         return page;
       });
     }
-    
-    console.log('[PageBuilder] Building updated card - pageElements:', newElements.length, 'pages:', updatedPages?.length || 0);
+
     return {
       ...cardData,
-      pageElements: newElements,
+      pageElements: updatedPageElements,
       pages: updatedPages,
     };
   };
 
   // Trigger save with updated elements
   const saveWithElements = async (newElements: PageElement[]) => {
-    console.log('[PageBuilder] saveWithElements called with', newElements.length, 'elements, onSave:', !!onSave, 'cardData:', !!cardData);
     if (onSave) {
       const updatedCard = buildUpdatedCardData(newElements);
       if (updatedCard) {
-        console.log('[PageBuilder] Triggering save with', updatedCard.pageElements?.length, 'elements');
         try {
           await onSave(updatedCard);
-          console.log('[PageBuilder] Save completed successfully');
         } catch (error) {
           console.error('[PageBuilder] Save failed:', error);
         }
-      } else {
-        console.log('[PageBuilder] Cannot save - cardData is null');
       }
-    } else {
-      console.log('[PageBuilder] Cannot save - onSave callback is not provided');
     }
   };
 
@@ -317,26 +312,22 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
     if (active.id !== over?.id) {
       const oldIndex = sortedElements.findIndex(el => el.id === active.id);
       const newIndex = sortedElements.findIndex(el => el.id === over?.id);
-      
+
       const newElements = arrayMove(sortedElements, oldIndex, newIndex);
-      
+
       // Update order values
       const updatedElements = newElements.map((el, index) => ({
         ...el,
         order: index
       }));
-      
+
       onElementsChange(updatedElements);
       saveWithElements(updatedElements); // Trigger immediate save after reorder
     }
   }
 
   const handleAddElement = (element: PageElement) => {
-    console.log('[PageBuilder] Adding element:', element.type, 'with order:', element.order);
-    console.log('[PageBuilder] Current elements count:', elements.length);
     const newElements = [...elements, element];
-    console.log('[PageBuilder] New elements count after adding:', newElements.length);
-    console.log('[PageBuilder] All element orders:', newElements.map(e => ({ type: e.type, order: e.order })));
     onElementsChange(newElements);
     saveWithElements(newElements); // Trigger immediate save
   };
@@ -346,7 +337,7 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
       el.id === updatedElement.id ? updatedElement : el
     );
     onElementsChange(newElements);
-    // Note: Don't save on every update - individual element editors handle their own saves
+    // Save is handled by individual element editors
   };
 
   const handleDeleteElement = (elementId: string) => {
@@ -361,7 +352,7 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
 
     // Sort elements by order to get the correct position
     const sortedElements = [...elements].sort((a, b) => a.order - b.order);
-    
+
     // Find the index of the original element in the sorted array
     const originalIndex = sortedElements.findIndex(el => el.id === elementId);
     if (originalIndex === -1) return;
@@ -375,13 +366,13 @@ export function PageBuilder({ elements, onElementsChange, elementSpacing = 16, o
 
     // Insert the cloned element right after the original
     sortedElements.splice(originalIndex + 1, 0, clonedElement);
-    
+
     // Recompute order indices to keep sorting stable
     const updatedElements = sortedElements.map((el, index) => ({
       ...el,
       order: index
     }));
-    
+
     onElementsChange(updatedElements);
     saveWithElements(updatedElements); // Trigger immediate save
   };

@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { QRCodeSVG } from "qrcode.react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { generateFieldId } from "@/lib/card-data";
 import { AIChat } from "@/components/ai-chat";
 import { IngestForm } from "@/components/IngestForm";
@@ -95,6 +95,21 @@ function SortableImageItem({ image, index, onDelete, onUpdateAlt }: SortableImag
     transition,
   };
 
+  const handleAltUpdate = useCallback(() => {
+    onUpdateAlt(altText);
+    setShowAltInput(false);
+  }, [altText, onUpdateAlt]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleAltUpdate();
+    }
+    if (e.key === 'Escape') {
+      setAltText(image.alt || '');
+      setShowAltInput(false);
+    }
+  }, [handleAltUpdate, image.alt]);
+
   return (
     <div
       ref={setNodeRef}
@@ -143,20 +158,8 @@ function SortableImageItem({ image, index, onDelete, onUpdateAlt }: SortableImag
           <Input
             value={altText}
             onChange={(e) => setAltText(e.target.value)}
-            onBlur={() => {
-              onUpdateAlt(altText);
-              setShowAltInput(false);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                onUpdateAlt(altText);
-                setShowAltInput(false);
-              }
-              if (e.key === 'Escape') {
-                setAltText(image.alt || '');
-                setShowAltInput(false);
-              }
-            }}
+            onBlur={handleAltUpdate}
+            onKeyDown={handleKeyDown}
             placeholder="Image description..."
             className="text-xs bg-transparent border-none text-white placeholder:text-slate-300 p-0 h-auto focus:ring-0"
             autoFocus
@@ -215,9 +218,9 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate, onUpdate }:
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = useCallback((field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
   if (isEditing) {
     return (
@@ -238,9 +241,9 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate, onUpdate }:
 
   return (
     <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-      <h3 className="font-bold mb-4 text-slate-800 text-xl tracking-wide opacity-100">{element.data.title}</h3>
+      <h3 className="font-bold mb-4 text-slate-800 text-xl tracking-wide opacity-100">{element.data?.title || ''}</h3>
       <form onSubmit={handleFormSubmit} className="space-y-3">
-        {element.data.fields.includes('name') && (
+        {element.data?.fields?.includes('name') && (
           <input
             type="text"
             placeholder="Your Name"
@@ -250,7 +253,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate, onUpdate }:
             required
           />
         )}
-        {element.data.fields.includes('email') && (
+        {element.data?.fields?.includes('email') && (
           <input
             type="email"
             placeholder="Your Email"
@@ -260,7 +263,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate, onUpdate }:
             required
           />
         )}
-        {element.data.fields.includes('message') && (
+        {element.data?.fields?.includes('message') && (
           <textarea
             placeholder="Your Message"
             value={formData.message || ''}
@@ -313,23 +316,23 @@ function AvailabilityWidget({
   // Generate mock availability data
   useEffect(() => {
     setIsLoading(true);
-    
+
     // Simulate API call
     const timer = setTimeout(() => {
       const mockSlots = [];
       const today = new Date();
-      
+
       for (let i = 0; i < daysToShow; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
-        
+
         const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        
+
         // Mock availability - some days available, some busy, some with multiple slots
         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
         const isAvailable = !isWeekend && Math.random() > 0.3;
-        
+
         if (isAvailable) {
           // Add multiple time slots for available days
           const timeSlots = ['9:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'];
@@ -355,43 +358,43 @@ function AvailabilityWidget({
           });
         }
       }
-      
+
       setAvailableSlots(mockSlots);
       setIsLoading(false);
     }, 800); // Simulate loading delay
-    
+
     return () => clearTimeout(timer);
   }, [daysToShow, eventTypeSlug]);
 
-  const handleSlotClick = (slot: any) => {
+  const handleSlotClick = useCallback((slot: any) => {
     if (!isInteractive || !slot.available) return;
-    
-    const bookingUrl = `/booking/${eventTypeSlug}?date=${slot.date}&time=${encodeURIComponent(slot.time)}&source=availability`;
-    
-    if (openInNewTab) {
-      window.open(bookingUrl, '_blank');
-    } else {
-      window.location.href = bookingUrl;
-    }
-  };
 
-  const handleBookingClick = () => {
-    if (!isInteractive) return;
-    
-    const bookingUrl = `/booking/${eventTypeSlug}?source=availability`;
-    
+    const bookingUrl = `/booking/${eventTypeSlug}?date=${slot.date}&time=${encodeURIComponent(slot.time)}&source=availability`;
+
     if (openInNewTab) {
       window.open(bookingUrl, '_blank');
     } else {
       window.location.href = bookingUrl;
     }
-  };
+  }, [eventTypeSlug, isInteractive, openInNewTab]);
+
+  const handleBookingClick = useCallback(() => {
+    if (!isInteractive) return;
+
+    const bookingUrl = `/booking/${eventTypeSlug}?source=availability`;
+
+    if (openInNewTab) {
+      window.open(bookingUrl, '_blank');
+    } else {
+      window.location.href = bookingUrl;
+    }
+  }, [eventTypeSlug, isInteractive, openInNewTab]);
 
   if (isLoading) {
     return (
       <div className="space-y-3" data-testid="availability-loading">
         {Array.from({ length: Math.min(daysToShow, 5) }).map((_, index) => (
-          <div key={index} className="flex items-center justify-between p-3 bg-white rounded border animate-pulse">
+          <div key={`loading-${index}`} className="flex items-center justify-between p-3 bg-white rounded border animate-pulse">
             <div className="h-4 bg-slate-200 rounded w-20"></div>
             <div className="h-4 bg-slate-200 rounded w-16"></div>
             <div className="h-4 bg-slate-200 rounded w-12"></div>
@@ -464,7 +467,7 @@ function AvailabilityWidget({
           </div>
         </div>
       ))}
-      
+
       {showBookingButton && (
         <div className="mt-4 text-center">
           <Button
@@ -577,7 +580,7 @@ interface TestimonialsSliderProps {
 
 function TestimonialsSlider({ testimonials }: TestimonialsSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  
+
   return (
     <div className="relative">
       <div className="overflow-hidden">
@@ -586,11 +589,11 @@ function TestimonialsSlider({ testimonials }: TestimonialsSliderProps) {
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
           {testimonials.map((testimonial, index) => (
-            <div key={testimonial.id} className="w-full flex-shrink-0 px-2">
+            <div key={testimonial.id || `testimonial-${index}`} className="w-full flex-shrink-0 px-2">
               <div className="bg-white p-6 rounded-lg shadow-md border border-slate-200">
                 <div className="flex items-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <i key={i} className="fas fa-star text-yellow-400"></i>
+                  {[...Array(testimonial.rating || 5)].map((_, i) => (
+                    <i key={`star-${i}`} className="fas fa-star text-yellow-400"></i>
                   ))}
                 </div>
                 <p className="text-slate-700 mb-4 italic">"{testimonial.content}"</p>
@@ -610,7 +613,7 @@ function TestimonialsSlider({ testimonials }: TestimonialsSliderProps) {
           ))}
         </div>
       </div>
-      
+
       {testimonials.length > 1 && (
         <>
           <button
@@ -630,7 +633,7 @@ function TestimonialsSlider({ testimonials }: TestimonialsSliderProps) {
           <div className="flex justify-center mt-4 space-x-2">
             {testimonials.map((_, index) => (
               <button
-                key={index}
+                key={`dot-${index}`}
                 onClick={() => setCurrentSlide(index)}
                 className={`w-3 h-3 rounded-full transition-colors ${
                   index === currentSlide ? 'bg-green-500' : 'bg-slate-300'
@@ -669,7 +672,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
     callSettings: false,
     audio: false
   });
-  
+
   // Define sensors for drag and drop
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -681,39 +684,41 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-  
+
   // Helper function to safely access element data
   const getData = () => element.data || {};
-  
-  const handleDataUpdate = (newData: any) => {
+
+  const handleDataUpdate = useCallback((newData: any) => {
     if (onUpdate) {
       onUpdate({ ...element, data: { ...(element.data || {}), ...newData } });
     }
-  };
+  }, [element, onUpdate]);
 
-  const toggleVoiceSection = (section: keyof typeof voiceAgentSections) => {
+  const toggleVoiceSection = useCallback((section: keyof typeof voiceAgentSections) => {
     setVoiceAgentSections(prev => ({ ...prev, [section]: !prev[section] }));
-  };
+  }, []);
 
   const renderElement = () => {
+    const elementData = element.data || {};
+
     switch (element.type) {
       case "heading":
-        const HeadingTag = element.data.level as keyof JSX.IntrinsicElements;
-        const headingColor = element.data?.color || cardData?.headingColor || "#0f0f0f";
-        
+        const HeadingTag = elementData.level as keyof JSX.IntrinsicElements || 'h1';
+        const headingColor = elementData?.color || cardData?.headingColor || "#0f0f0f";
+
         return (
-          <div className={`text-${element.data.alignment} mb-4`}>
+          <div className={`text-${elementData.alignment || 'left'} mb-4`}>
             {isEditing ? (
               <div className="space-y-2">
                 <Input
-                  value={element.data?.text || ''}
+                  value={elementData?.text || ''}
                   onChange={(e) => handleDataUpdate({ text: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Heading text"
                 />
                 <div className="flex gap-2">
                   <select
-                    value={element.data?.level || 'h1'}
+                    value={elementData?.level || 'h1'}
                     onChange={(e) => handleDataUpdate({ level: e.target.value })}
                     className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
                   >
@@ -722,7 +727,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <option value="h3">H3</option>
                   </select>
                   <select
-                    value={element.data?.alignment || 'left'}
+                    value={elementData?.alignment || 'left'}
                     onChange={(e) => handleDataUpdate({ alignment: e.target.value })}
                     className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
                   >
@@ -735,11 +740,11 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   <label className="text-xs text-gray-400 block mb-1">Text Color</label>
                   <input
                     type="color"
-                    value={element.data?.color || cardData?.headingColor || "#0f0f0f"}
+                    value={elementData?.color || cardData?.headingColor || "#0f0f0f"}
                     onChange={(e) => handleDataUpdate({ color: e.target.value })}
                     className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                   />
-                  {element.data?.color && (
+                  {elementData?.color && (
                     <button
                       onClick={() => handleDataUpdate({ color: undefined })}
                       className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
@@ -753,33 +758,33 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             ) : (
               <HeadingTag 
                 className={`font-bold ${
-                  element.data.level === 'h1' ? 'text-2xl' : 
-                  element.data.level === 'h2' ? 'text-xl' : 'text-lg'
+                  elementData.level === 'h1' ? 'text-2xl' : 
+                  elementData.level === 'h2' ? 'text-xl' : 'text-lg'
                 }`}
                 style={{ color: headingColor }}
               >
-                {element.data.text}
+                {elementData.text}
               </HeadingTag>
             )}
           </div>
         );
 
       case "paragraph":
-        const paragraphColor = element.data?.color || cardData?.paragraphColor || "#141414";
-        
+        const paragraphColor = elementData?.color || cardData?.paragraphColor || "#141414";
+
         return (
-          <div className={`text-${element.data.alignment} mb-4`}>
+          <div className={`text-${elementData.alignment || 'left'} mb-4`}>
             {isEditing ? (
               <div className="space-y-2">
                 <Textarea
-                  value={element.data?.text || ''}
+                  value={elementData?.text || ''}
                   onChange={(e) => handleDataUpdate({ text: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Paragraph text"
                   rows={3}
                 />
                 <select
-                  value={element.data?.alignment || 'left'}
+                  value={elementData?.alignment || 'left'}
                   onChange={(e) => handleDataUpdate({ alignment: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
                 >
@@ -791,11 +796,11 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   <label className="text-xs text-gray-400 block mb-1">Text Color</label>
                   <input
                     type="color"
-                    value={element.data?.color || cardData?.paragraphColor || "#141414"}
+                    value={elementData?.color || cardData?.paragraphColor || "#141414"}
                     onChange={(e) => handleDataUpdate({ color: e.target.value })}
                     className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                   />
-                  {element.data?.color && (
+                  {elementData?.color && (
                     <button
                       onClick={() => handleDataUpdate({ color: undefined })}
                       className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
@@ -808,7 +813,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
               </div>
             ) : (
               <p className="text-sm leading-relaxed" style={{ color: paragraphColor }}>
-                {element.data.text}
+                {elementData.text}
               </p>
             )}
           </div>
@@ -820,19 +825,19 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             {isEditing ? (
               <div className="space-y-3">
                 <Input
-                  value={element.data?.text || ''}
+                  value={elementData?.text || ''}
                   onChange={(e) => handleDataUpdate({ text: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Link text"
                 />
                 <Input
-                  value={element.data?.url || ''}
+                  value={elementData?.url || ''}
                   onChange={(e) => handleDataUpdate({ url: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="https://example.com"
                 />
                 <select
-                  value={element.data?.style || 'button'}
+                  value={elementData?.style || 'button'}
                   onChange={(e) => handleDataUpdate({ style: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
                 >
@@ -840,7 +845,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   <option value="text">Text Link</option>
                 </select>
 
-                {element.data?.style === 'button' && (
+                {elementData?.style === 'button' && (
                   (() => {
                     // Compute theme-based fallback colors for the color pickers
                     const theme = cardData?.theme || { brandColor: "#1e40af", secondaryColor: "#a855f7", tertiaryColor: "#ffffff" };
@@ -851,12 +856,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     return (
                       <div className="space-y-3 pt-2 border-t border-slate-600">
                         <p className="text-xs text-gray-300 font-medium">Button Styling</p>
-                        
+
                         {/* Icon Input */}
                         <div>
                           <label className="text-xs text-gray-400 block mb-1">Icon (Optional)</label>
                           <IconPicker
-                            value={element.data?.buttonIcon || ''}
+                            value={elementData?.buttonIcon || ''}
                             onChange={(icon) => handleDataUpdate({ buttonIcon: icon })}
                           />
                           <p className="text-xs text-gray-500 mt-1">Browse to select from FontAwesome icons</p>
@@ -867,11 +872,11 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                           <label className="text-xs text-gray-400 block mb-1">Background Color</label>
                           <input
                             type="color"
-                            value={element.data?.buttonBgColor || defaultBgColor}
+                            value={elementData?.buttonBgColor || defaultBgColor}
                             onChange={(e) => handleDataUpdate({ buttonBgColor: e.target.value })}
                             className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                           />
-                          {element.data?.buttonBgColor && (
+                          {elementData?.buttonBgColor && (
                             <button
                               onClick={() => handleDataUpdate({ buttonBgColor: undefined })}
                               className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
@@ -887,11 +892,11 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                           <label className="text-xs text-gray-400 block mb-1">Text Color</label>
                           <input
                             type="color"
-                            value={element.data?.buttonTextColor || defaultTextColor}
+                            value={elementData?.buttonTextColor || defaultTextColor}
                             onChange={(e) => handleDataUpdate({ buttonTextColor: e.target.value })}
                             className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                           />
-                          {element.data?.buttonTextColor && (
+                          {elementData?.buttonTextColor && (
                             <button
                               onClick={() => handleDataUpdate({ buttonTextColor: undefined })}
                               className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
@@ -907,11 +912,11 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                           <label className="text-xs text-gray-400 block mb-1">Border Color</label>
                           <input
                             type="color"
-                            value={element.data?.buttonBorderColor || defaultBorderColor}
+                            value={elementData?.buttonBorderColor || defaultBorderColor}
                             onChange={(e) => handleDataUpdate({ buttonBorderColor: e.target.value })}
                             className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                           />
-                          {element.data?.buttonBorderColor && (
+                          {elementData?.buttonBorderColor && (
                             <button
                               onClick={() => handleDataUpdate({ buttonBorderColor: undefined })}
                               className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
@@ -927,7 +932,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 )}
               </div>
             ) : (
-              element.data.style === "button" ? (
+              elementData.style === "button" ? (
                 (() => {
                   // Helper function to adjust color brightness
                   const adjustColor = (hex: string, amount: number): string => {
@@ -939,13 +944,13 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   };
 
                   const theme = cardData?.theme || { brandColor: "#1e40af", secondaryColor: "#a855f7", tertiaryColor: "#ffffff" };
-                  const buttonBg = element.data?.buttonBgColor || theme.brandColor || "#1e40af";
-                  const buttonText = element.data?.buttonTextColor || theme.tertiaryColor || "#ffffff";
-                  const buttonBorder = element.data?.buttonBorderColor || theme.secondaryColor || "#a855f7";
+                  const buttonBg = elementData?.buttonBgColor || theme.brandColor || "#1e40af";
+                  const buttonText = elementData?.buttonTextColor || theme.tertiaryColor || "#ffffff";
+                  const buttonBorder = elementData?.buttonBorderColor || theme.secondaryColor || "#a855f7";
 
                   return (
                     <button
-                      onClick={() => window.open(element.data.url, '_blank')}
+                      onClick={() => window.open(elementData.url, '_blank')}
                       className="w-full py-3 px-4 rounded-xl flex items-center justify-center font-semibold text-sm transition-colors"
                       style={{
                         backgroundColor: buttonBg,
@@ -953,21 +958,21 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                         borderBottom: `4px solid ${adjustColor(buttonBorder, -20)}`,
                       }}
                     >
-                      {element.data?.buttonIcon && (
-                        <i className={`${element.data.buttonIcon} text-lg mr-3`}></i>
+                      {elementData?.buttonIcon && (
+                        <i className={`${elementData.buttonIcon} text-lg mr-3`}></i>
                       )}
-                      {element.data.text}
+                      {elementData.text}
                     </button>
                   );
                 })()
               ) : (
                 <a
-                  href={element.data.url}
+                  href={elementData.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-talklink-500 hover:text-talklink-600 underline"
                 >
-                  {element.data.text}
+                  {elementData.text}
                 </a>
               )
             )}
@@ -995,17 +1000,17 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                   className="bg-slate-700 border-slate-600 text-white"
                 />
                 <Input
-                  value={element.data?.alt || ''}
+                  value={elementData?.alt || ''}
                   onChange={(e) => handleDataUpdate({ alt: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Image description"
                 />
               </div>
             ) : (
-              element.data.src && (
+              elementData.src && (
                 <img
-                  src={element.data.src}
-                  alt={element.data.alt || ''}
+                  src={elementData.src}
+                  alt={elementData.alt || ''}
                   className="w-full max-w-sm mx-auto rounded-lg"
                 />
               )
@@ -1022,7 +1027,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 <div>
                   <label className="block text-white text-sm font-medium mb-2">QR Code Content</label>
                   <Input
-                    value={element.data?.value || ''}
+                    value={elementData?.value || ''}
                     onChange={(e) => handleDataUpdate({ value: e.target.value })}
                     className="bg-slate-600 border-slate-500 text-white"
                     placeholder="Enter URL or text"
@@ -1032,11 +1037,11 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 {/* Size */}
                 <div>
                   <label className="block text-white text-sm font-medium mb-2">
-                    Size: {element.data.size || 200}px
+                    Size: {elementData.size || 200}px
                   </label>
                   <input
                     type="range"
-                    value={element.data?.size || 200}
+                    value={elementData?.size || 200}
                     onChange={(e) => handleDataUpdate({ size: parseInt(e.target.value) })}
                     min="120"
                     max="300"
@@ -1051,7 +1056,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <button
                       onClick={() => handleDataUpdate({ frameStyle: 'none' })}
                       className={`p-3 rounded-lg border text-sm transition-colors ${
-                        (!element.data?.frameStyle || element.data?.frameStyle === 'none')
+                        (!elementData?.frameStyle || elementData?.frameStyle === 'none')
                           ? 'bg-talklink-500 border-talklink-400 text-white'
                           : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                       }`}
@@ -1062,7 +1067,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <button
                       onClick={() => handleDataUpdate({ frameStyle: 'rounded' })}
                       className={`p-3 rounded-lg border text-sm transition-colors ${
-                        element.data?.frameStyle === 'rounded'
+                        elementData?.frameStyle === 'rounded'
                           ? 'bg-talklink-500 border-talklink-400 text-white'
                           : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                       }`}
@@ -1073,7 +1078,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     <button
                       onClick={() => handleDataUpdate({ frameStyle: 'corners' })}
                       className={`p-3 rounded-lg border text-sm transition-colors ${
-                        element.data?.frameStyle === 'corners'
+                        elementData?.frameStyle === 'corners'
                           ? 'bg-talklink-500 border-talklink-400 text-white'
                           : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                       }`}
@@ -1093,16 +1098,16 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={element.data?.customLabel || false}
+                    checked={elementData?.customLabel || false}
                     onChange={(e) => handleDataUpdate({ customLabel: e.target.checked })}
                     className="accent-talklink-500"
                   />
                   <label className="text-white text-sm">Add custom label</label>
                 </div>
 
-                {element.data?.customLabel && (
+                {elementData?.customLabel && (
                   <Input
-                    value={element.data?.labelText || ''}
+                    value={elementData?.labelText || ''}
                     onChange={(e) => handleDataUpdate({ labelText: e.target.value })}
                     placeholder="Follow us on X"
                     className="bg-slate-600 border-slate-500 text-white"
@@ -1111,24 +1116,24 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                {element.data.value && (
+                {elementData.value && (
                   <>
                     <div className="relative">
                       {/* QR Code Container */}
                       <div 
                         className={`transition-all ${
-                          element.data.frameStyle === 'rounded' ? 'rounded-lg' : 'rounded'
+                          elementData.frameStyle === 'rounded' ? 'rounded-lg' : 'rounded'
                         }`}
                         style={{
                           backgroundColor: 'white',
                           padding: '11px',
-                          border: element.data.frameStyle === 'rounded' ? `6px solid ${cardData?.brandColor || '#22c55e'}` : 'none',
+                          border: elementData.frameStyle === 'rounded' ? `6px solid ${cardData?.brandColor || '#22c55e'}` : 'none',
                           boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                         }}
                       >
                         <QRCodeSVG
-                          value={element.data.value}
-                          size={element.data.size || 200}
+                          value={elementData.value}
+                          size={elementData.size || 200}
                           level="H"
                           includeMargin={false}
                           fgColor="#1e293b"
@@ -1137,7 +1142,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                       </div>
 
                       {/* Corner Brackets Style */}
-                      {element.data.frameStyle === 'corners' && (
+                      {elementData.frameStyle === 'corners' && (
                         <>
                           {/* Top Left Corner */}
                           <div 
@@ -1176,12 +1181,12 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
                     </div>
 
                     {/* Custom Label */}
-                    {element.data.customLabel && element.data.labelText && (
+                    {elementData.customLabel && elementData.labelText && (
                       <div 
                         className="mt-3 px-4 py-2 rounded-full text-white font-medium text-sm"
                         style={{backgroundColor: cardData?.brandColor || '#22c55e'}}
                       >
-                        {element.data.labelText}
+                        {elementData.labelText}
                       </div>
                     )}
                   </>
@@ -1194,17 +1199,17 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
       case "contactSection": {
         if (isEditing) {
           // Convert schema data (numbers) to editor format (strings) for editing
-          const editorData = schemaToEditorContact(element.data);
-          
+          const editorData = schemaToEditorContact(elementData);
+
           // Handle updates from the editor
           const handleEditorChange = (updatedEditorData: any) => {
             // Convert editor format (strings) back to schema (numbers)
             const schemaData = editorToSchemaContact(updatedEditorData);
             handleDataUpdate(schemaData);
           };
-          
+
           return (
-            <div className="mb-6">
+            <div className="mb-6" key={`contact-${element.id}`}>
               <ContactSectionEditor
                 data={editorData}
                 onChange={handleEditorChange}
@@ -1212,24 +1217,24 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             </div>
           );
         }
-        
-        return <ContactLinksRenderer data={element.data} />;
+
+        return <ContactLinksRenderer key={`contact-render-${element.id}`} data={elementData} />;
       }
 
       case "socialSection": {
         if (isEditing) {
           // Convert schema data (numbers) to editor format (strings) for editing
-          const editorData = schemaToEditorSocial(element.data);
-          
+          const editorData = schemaToEditorSocial(elementData);
+
           // Handle updates from the editor
           const handleEditorChange = (updatedEditorData: any) => {
             // Convert editor format (strings) back to schema (numbers)
             const schemaData = editorToSchemaSocial(updatedEditorData);
             handleDataUpdate(schemaData);
           };
-          
+
           return (
-            <div className="mb-6">
+            <div className="mb-6" key={`social-${element.id}`}>
               <SocialSectionEditor
                 data={editorData}
                 onChange={handleEditorChange}
@@ -1237,14 +1242,14 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
             </div>
           );
         }
-        
-        return <SocialLinksRenderer data={element.data} />;
+
+        return <SocialLinksRenderer key={`social-render-${element.id}`} data={elementData} />;
       }
 
       case "actionButtons": {
         // Safe cardData access with defaults
         const theme = cardData ?? {};
-        
+
         const adjustColor = (hex: string, amount: number): string => {
           const num = parseInt(hex.replace("#", ""), 16);
           const r = Math.max(0, Math.min(255, ((num >> 16) & 0xff) + amount));
@@ -1258,7 +1263,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
 VERSION:3.0
 FN:${theme.fullName || 'Contact'}
 ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.company}\n` : ''}${theme.email ? `EMAIL:${theme.email}\n` : ''}${theme.phone ? `TEL:${theme.phone}\n` : ''}${theme.location ? `ADR:;;${theme.location};;;;\n` : ''}${theme.website ? `URL:${theme.website}\n` : ''}END:VCARD`;
-          
+
           const blob = new Blob([vCard], { type: "text/vcard" });
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement("a");
@@ -1313,8 +1318,8 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <label className="text-xs text-gray-400 block mb-1">Button Color</label>
                     <input
                       type="color"
-                      value={element.data?.addToContactsBgColor || ""}
-                      onChange={(e) => handleDataUpdate({ ...element.data, addToContactsBgColor: e.target.value })}
+                      value={elementData?.addToContactsBgColor || ""}
+                      onChange={(e) => handleDataUpdate({ addToContactsBgColor: e.target.value })}
                       className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                     />
                   </div>
@@ -1322,8 +1327,8 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <label className="text-xs text-gray-400 block mb-1">Border Color</label>
                     <input
                       type="color"
-                      value={element.data?.addToContactsBorderColor || ""}
-                      onChange={(e) => handleDataUpdate({ ...element.data, addToContactsBorderColor: e.target.value })}
+                      value={elementData?.addToContactsBorderColor || ""}
+                      onChange={(e) => handleDataUpdate({ addToContactsBorderColor: e.target.value })}
                       className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                     />
                   </div>
@@ -1331,8 +1336,8 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <label className="text-xs text-gray-400 block mb-1">Text Color</label>
                     <input
                       type="color"
-                      value={element.data?.addToContactsTextColor || ""}
-                      onChange={(e) => handleDataUpdate({ ...element.data, addToContactsTextColor: e.target.value })}
+                      value={elementData?.addToContactsTextColor || ""}
+                      onChange={(e) => handleDataUpdate({ addToContactsTextColor: e.target.value })}
                       className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                     />
                   </div>
@@ -1345,8 +1350,8 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <label className="text-xs text-gray-400 block mb-1">Button Color</label>
                     <input
                       type="color"
-                      value={element.data?.shareBgColor || ""}
-                      onChange={(e) => handleDataUpdate({ ...element.data, shareBgColor: e.target.value })}
+                      value={elementData?.shareBgColor || ""}
+                      onChange={(e) => handleDataUpdate({ shareBgColor: e.target.value })}
                       className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                     />
                   </div>
@@ -1354,8 +1359,8 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <label className="text-xs text-gray-400 block mb-1">Border Color</label>
                     <input
                       type="color"
-                      value={element.data?.shareBorderColor || ""}
-                      onChange={(e) => handleDataUpdate({ ...element.data, shareBorderColor: e.target.value })}
+                      value={elementData?.shareBorderColor || ""}
+                      onChange={(e) => handleDataUpdate({ shareBorderColor: e.target.value })}
                       className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                     />
                   </div>
@@ -1363,8 +1368,8 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <label className="text-xs text-gray-400 block mb-1">Text Color</label>
                     <input
                       type="color"
-                      value={element.data?.shareTextColor || ""}
-                      onChange={(e) => handleDataUpdate({ ...element.data, shareTextColor: e.target.value })}
+                      value={elementData?.shareTextColor || ""}
+                      onChange={(e) => handleDataUpdate({ shareTextColor: e.target.value })}
                       className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                     />
                   </div>
@@ -1384,12 +1389,12 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
           );
         }
 
-        const addToContactsBg = element.data?.addToContactsBgColor || theme.secondaryColor || "#a855f7";
-        const addToContactsBorder = element.data?.addToContactsBorderColor || theme.brandColor || "#1e40af";
-        const addToContactsText = element.data?.addToContactsTextColor || theme.tertiaryColor || "#ffffff";
-        const shareBg = element.data?.shareBgColor || theme.brandColor || "#1e40af";
-        const shareBorder = element.data?.shareBorderColor || theme.secondaryColor || "#a855f7";
-        const shareText = element.data?.shareTextColor || theme.tertiaryColor || "#ffffff";
+        const addToContactsBg = elementData?.addToContactsBgColor || theme.secondaryColor || "#a855f7";
+        const addToContactsBorder = elementData?.addToContactsBorderColor || theme.brandColor || "#1e40af";
+        const addToContactsText = elementData?.addToContactsTextColor || theme.tertiaryColor || "#ffffff";
+        const shareBg = elementData?.shareBgColor || theme.brandColor || "#1e40af";
+        const shareBorder = elementData?.shareBorderColor || theme.secondaryColor || "#a855f7";
+        const shareText = elementData?.shareTextColor || theme.tertiaryColor || "#ffffff";
 
         return (
           <div className="flex gap-1 mb-1">
@@ -1431,38 +1436,38 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
             {isEditing ? (
               <div className="space-y-2">
                 <Input
-                  value={element.data?.url || ''}
+                  value={elementData?.url || ''}
                   onChange={(e) => handleDataUpdate({ url: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="YouTube/Vimeo URL"
                 />
                 <Input
-                  value={element.data?.thumbnail || ''}
+                  value={elementData?.thumbnail || ''}
                   onChange={(e) => handleDataUpdate({ thumbnail: e.target.value })}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Thumbnail URL (optional)"
                 />
               </div>
             ) : (
-              element.data.url && (
+              elementData.url && (
                 <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-100">
-                  {element.data.url.includes('youtube.com') || element.data.url.includes('youtu.be') ? (
+                  {elementData.url.includes('youtube.com') || elementData.url.includes('youtu.be') ? (
                     <iframe
-                      src={element.data.url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                      src={elementData.url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
                       className="w-full h-full border-0"
                       allowFullScreen
                       title="YouTube video"
                     />
-                  ) : element.data.url.includes('vimeo.com') ? (
+                  ) : elementData.url.includes('vimeo.com') ? (
                     <iframe
-                      src={element.data.url.replace('vimeo.com/', 'player.vimeo.com/video/')}
+                      src={elementData.url.replace('vimeo.com/', 'player.vimeo.com/video/')}
                       className="w-full h-full border-0"
                       allowFullScreen
                       title="Vimeo video"
                     />
                   ) : (
                     <video controls className="w-full h-full">
-                      <source src={element.data.url} type="video/mp4" />
+                      <source src={elementData.url} type="video/mp4" />
                       Your browser does not support the video tag.
                     </video>
                   )}
@@ -1475,6 +1480,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
       case "contactForm":
         return (
           <ContactFormRenderer
+            key={`contact-form-${element.id}`}
             element={element}
             isEditing={isEditing}
             handleDataUpdate={handleDataUpdate}
@@ -1483,18 +1489,19 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
         );
 
       case "accordion":
+        const accordionItems = elementData.items || [];
         return (
           <div className="mb-4">
             {isEditing ? (
               <div className="space-y-4">
                 {/* Items */}
                 <div className="space-y-2">
-                  {element.data.items.map((item, index) => (
-                    <div key={item.id} className="bg-slate-600 p-3 rounded">
+                  {accordionItems.map((item: any, index: number) => (
+                    <div key={item.id || `accordion-${index}`} className="bg-slate-600 p-3 rounded">
                       <Input
-                        value={item.title}
+                        value={item.title || ''}
                         onChange={(e) => {
-                          const newItems = [...element.data.items];
+                          const newItems = [...accordionItems];
                           newItems[index] = { ...item, title: e.target.value };
                           handleDataUpdate({ items: newItems });
                         }}
@@ -1502,9 +1509,9 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         placeholder="Question title"
                       />
                       <Textarea
-                        value={item.content}
+                        value={item.content || ''}
                         onChange={(e) => {
-                          const newItems = [...element.data.items];
+                          const newItems = [...accordionItems];
                           newItems[index] = { ...item, content: e.target.value };
                           handleDataUpdate({ items: newItems });
                         }}
@@ -1512,10 +1519,10 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         placeholder="Answer content"
                         rows={2}
                       />
-                      {element.data.items.length > 1 && (
+                      {accordionItems.length > 1 && (
                         <Button
                           onClick={() => {
-                            const newItems = element.data.items.filter((_, i) => i !== index);
+                            const newItems = accordionItems.filter((_, i) => i !== index);
                             handleDataUpdate({ items: newItems });
                           }}
                           variant="destructive"
@@ -1535,7 +1542,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         title: "New Question",
                         content: "New Answer"
                       };
-                      handleDataUpdate({ items: [...element.data.items, newItem] });
+                      handleDataUpdate({ items: [...accordionItems, newItem] });
                     }}
                     variant="outline"
                     size="sm"
@@ -1552,20 +1559,20 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <i className="fas fa-palette"></i>
                     Styling
                   </h4>
-                  
+
                   {/* Colors */}
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-xs text-gray-400 block mb-1">Title Color</label>
                       <input
                         type="color"
-                        value={element.data?.titleColor || cardData?.brandColor || "#0f0f0f"}
-                        onChange={(e) => handleDataUpdate({ ...element.data, titleColor: e.target.value })}
+                        value={elementData?.titleColor || cardData?.brandColor || "#0f0f0f"}
+                        onChange={(e) => handleDataUpdate({ ...elementData, titleColor: e.target.value })}
                         className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                       />
-                      {element.data?.titleColor && (
+                      {elementData?.titleColor && (
                         <button
-                          onClick={() => handleDataUpdate({ ...element.data, titleColor: undefined })}
+                          onClick={() => handleDataUpdate({ ...elementData, titleColor: undefined })}
                           className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
                         >
                           <i className="fas fa-undo mr-1"></i>
@@ -1577,13 +1584,13 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <label className="text-xs text-gray-400 block mb-1">Content Color</label>
                       <input
                         type="color"
-                        value={element.data?.contentColor || cardData?.secondaryColor || "#525252"}
-                        onChange={(e) => handleDataUpdate({ ...element.data, contentColor: e.target.value })}
+                        value={elementData?.contentColor || cardData?.secondaryColor || "#525252"}
+                        onChange={(e) => handleDataUpdate({ ...elementData, contentColor: e.target.value })}
                         className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                       />
-                      {element.data?.contentColor && (
+                      {elementData?.contentColor && (
                         <button
-                          onClick={() => handleDataUpdate({ ...element.data, contentColor: undefined })}
+                          onClick={() => handleDataUpdate({ ...elementData, contentColor: undefined })}
                           className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
                         >
                           <i className="fas fa-undo mr-1"></i>
@@ -1595,13 +1602,13 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <label className="text-xs text-gray-400 block mb-1">Border Color</label>
                       <input
                         type="color"
-                        value={element.data?.borderColor || cardData?.tertiaryColor || "#e2e8f0"}
-                        onChange={(e) => handleDataUpdate({ ...element.data, borderColor: e.target.value })}
+                        value={elementData?.borderColor || cardData?.tertiaryColor || "#e2e8f0"}
+                        onChange={(e) => handleDataUpdate({ ...elementData, borderColor: e.target.value })}
                         className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                       />
-                      {element.data?.borderColor && (
+                      {elementData?.borderColor && (
                         <button
-                          onClick={() => handleDataUpdate({ ...element.data, borderColor: undefined })}
+                          onClick={() => handleDataUpdate({ ...elementData, borderColor: undefined })}
                           className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
                         >
                           <i className="fas fa-undo mr-1"></i>
@@ -1613,13 +1620,13 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <label className="text-xs text-gray-400 block mb-1">Background Color</label>
                       <input
                         type="color"
-                        value={element.data?.backgroundColor || cardData?.backgroundColor || "#ffffff"}
-                        onChange={(e) => handleDataUpdate({ ...element.data, backgroundColor: e.target.value })}
+                        value={elementData?.backgroundColor || cardData?.backgroundColor || "#ffffff"}
+                        onChange={(e) => handleDataUpdate({ ...elementData, backgroundColor: e.target.value })}
                         className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                       />
-                      {element.data?.backgroundColor && (
+                      {elementData?.backgroundColor && (
                         <button
-                          onClick={() => handleDataUpdate({ ...element.data, backgroundColor: undefined })}
+                          onClick={() => handleDataUpdate({ ...elementData, backgroundColor: undefined })}
                           className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
                         >
                           <i className="fas fa-undo mr-1"></i>
@@ -1632,14 +1639,14 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                   {/* Border Width */}
                   <div>
                     <label className="text-xs text-gray-400 block mb-1">
-                      Border Width: {element.data.borderWidth !== undefined ? element.data.borderWidth : 1}px
+                      Border Width: {elementData.borderWidth !== undefined ? elementData.borderWidth : 1}px
                     </label>
                     <input
                       type="range"
                       min="0"
                       max="5"
-                      value={element.data.borderWidth !== undefined ? element.data.borderWidth : 1}
-                      onChange={(e) => handleDataUpdate({ ...element.data, borderWidth: Number(e.target.value) })}
+                      value={elementData.borderWidth !== undefined ? elementData.borderWidth : 1}
+                      onChange={(e) => handleDataUpdate({ ...elementData, borderWidth: Number(e.target.value) })}
                       className="w-full"
                     />
                   </div>
@@ -1649,9 +1656,9 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <label className="text-xs text-gray-400 block mb-1">Shape</label>
                     <div className="grid grid-cols-3 gap-2">
                       <button
-                        onClick={() => handleDataUpdate({ ...element.data, shape: "rounded" })}
+                        onClick={() => handleDataUpdate({ ...elementData, shape: "rounded" })}
                         className={`px-3 py-2 text-xs rounded transition-colors ${
-                          (element.data?.shape || "rounded") === "rounded" 
+                          (elementData?.shape || "rounded") === "rounded" 
                             ? "bg-talklink-500 text-white" 
                             : "bg-slate-600 text-gray-300 hover:bg-slate-500"
                         }`}
@@ -1660,9 +1667,9 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         Rounded
                       </button>
                       <button
-                        onClick={() => handleDataUpdate({ ...element.data, shape: "square" })}
+                        onClick={() => handleDataUpdate({ ...elementData, shape: "square" })}
                         className={`px-3 py-2 text-xs transition-colors ${
-                          element.data?.shape === "square" 
+                          elementData?.shape === "square" 
                             ? "bg-talklink-500 text-white" 
                             : "bg-slate-600 text-gray-300 hover:bg-slate-500"
                         }`}
@@ -1671,9 +1678,9 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         Square
                       </button>
                       <button
-                        onClick={() => handleDataUpdate({ ...element.data, shape: "circle" })}
+                        onClick={() => handleDataUpdate({ ...elementData, shape: "circle" })}
                         className={`px-3 py-2 text-xs rounded-full transition-colors ${
-                          element.data?.shape === "circle" 
+                          elementData?.shape === "circle" 
                             ? "bg-talklink-500 text-white" 
                             : "bg-slate-600 text-gray-300 hover:bg-slate-500"
                         }`}
@@ -1687,14 +1694,14 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                   {/* Shadow Intensity */}
                   <div>
                     <label className="text-xs text-gray-400 block mb-1">
-                      Shadow Intensity: {element.data.shadowIntensity !== undefined ? element.data.shadowIntensity : 2}
+                      Shadow Intensity: {elementData.shadowIntensity !== undefined ? elementData.shadowIntensity : 2}
                     </label>
                     <input
                       type="range"
                       min="0"
                       max="10"
-                      value={element.data.shadowIntensity !== undefined ? element.data.shadowIntensity : 2}
-                      onChange={(e) => handleDataUpdate({ ...element.data, shadowIntensity: Number(e.target.value) })}
+                      value={elementData.shadowIntensity !== undefined ? elementData.shadowIntensity : 2}
+                      onChange={(e) => handleDataUpdate({ ...elementData, shadowIntensity: Number(e.target.value) })}
                       className="w-full"
                     />
                   </div>
@@ -1703,27 +1710,27 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-xs text-gray-400 block mb-1">
-                        Title Size: {element.data.titleFontSize !== undefined ? element.data.titleFontSize : 16}px
+                        Title Size: {elementData.titleFontSize !== undefined ? elementData.titleFontSize : 16}px
                       </label>
                       <input
                         type="range"
                         min="12"
                         max="24"
-                        value={element.data.titleFontSize !== undefined ? element.data.titleFontSize : 16}
-                        onChange={(e) => handleDataUpdate({ ...element.data, titleFontSize: Number(e.target.value) })}
+                        value={elementData.titleFontSize !== undefined ? elementData.titleFontSize : 16}
+                        onChange={(e) => handleDataUpdate({ ...elementData, titleFontSize: Number(e.target.value) })}
                         className="w-full"
                       />
                     </div>
                     <div>
                       <label className="text-xs text-gray-400 block mb-1">
-                        Content Size: {element.data.contentFontSize !== undefined ? element.data.contentFontSize : 14}px
+                        Content Size: {elementData.contentFontSize !== undefined ? elementData.contentFontSize : 14}px
                       </label>
                       <input
                         type="range"
                         min="10"
                         max="20"
-                        value={element.data.contentFontSize !== undefined ? element.data.contentFontSize : 14}
-                        onChange={(e) => handleDataUpdate({ ...element.data, contentFontSize: Number(e.target.value) })}
+                        value={elementData.contentFontSize !== undefined ? elementData.contentFontSize : 14}
+                        onChange={(e) => handleDataUpdate({ ...elementData, contentFontSize: Number(e.target.value) })}
                         className="w-full"
                       />
                     </div>
@@ -1732,17 +1739,17 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
               </div>
             ) : (
               <div className="space-y-2">
-                {element.data.items.map((item) => {
-                  const titleColor = element.data?.titleColor || cardData?.brandColor || "#0f0f0f";
-                  const contentColor = element.data?.contentColor || cardData?.secondaryColor || "#525252";
-                  const borderColor = element.data?.borderColor || cardData?.tertiaryColor || "#e2e8f0";
-                  const backgroundColor = element.data?.backgroundColor || cardData?.backgroundColor || "#ffffff";
-                  const shadowIntensity = element.data?.shadowIntensity ?? 2;
-                  const titleFontSize = element.data?.titleFontSize ?? 16;
-                  const contentFontSize = element.data?.contentFontSize ?? 14;
-                  const borderWidth = element.data.borderWidth !== undefined ? element.data.borderWidth : 1;
-                  const shape = element.data?.shape || "rounded";
-                  
+                {accordionItems.map((item: any) => {
+                  const titleColor = elementData?.titleColor || cardData?.brandColor || "#0f0f0f";
+                  const contentColor = elementData?.contentColor || cardData?.secondaryColor || "#525252";
+                  const borderColor = elementData?.borderColor || cardData?.tertiaryColor || "#e2e8f0";
+                  const backgroundColor = elementData?.backgroundColor || cardData?.backgroundColor || "#ffffff";
+                  const shadowIntensity = elementData?.shadowIntensity ?? 2;
+                  const titleFontSize = elementData?.titleFontSize ?? 16;
+                  const contentFontSize = elementData?.contentFontSize ?? 14;
+                  const borderWidth = elementData.borderWidth !== undefined ? elementData.borderWidth : 1;
+                  const shape = elementData?.shape || "rounded";
+
                   const getBorderRadius = () => {
                     switch(shape) {
                       case "square": return "0px";
@@ -1751,7 +1758,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       default: return "8px";
                     }
                   };
-                  
+
                   return (
                     <details 
                       key={item.id} 
@@ -1799,6 +1806,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
         );
 
       case "imageSlider":
+        const sliderImages = elementData.images || [];
         return (
           <div className="mb-4">
             {isEditing ? (
@@ -1808,7 +1816,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
                     <h3 className="text-white text-sm font-medium">Image Gallery</h3>
-                    <span className="text-xs text-slate-400">({element.data.images?.length || 0} images)</span>
+                    <span className="text-xs text-slate-400">({sliderImages.length} images)</span>
                   </div>
                   <div className="text-xs text-slate-400">Drag to reorder</div>
                 </div>
@@ -1830,7 +1838,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                             alt: file.name.split('.')[0]
                           };
                           handleDataUpdate({ 
-                            images: [...(element.data.images || []), newImage] 
+                            images: [...sliderImages, newImage] 
                           });
                         };
                         reader.readAsDataURL(file);
@@ -1841,33 +1849,33 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 </div>
 
                 {/* Image Preview with Drag & Drop */}
-                {element.data.images && element.data.images.length > 0 && (
+                {sliderImages.length > 0 && (
                   <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={(event) => {
                       const {active, over} = event;
                       if (active.id !== over?.id) {
-                        const oldIndex = element.data.images.findIndex(img => img.id === active.id);
-                        const newIndex = element.data.images.findIndex(img => img.id === over?.id);
-                        const reorderedImages = arrayMove(element.data.images, oldIndex, newIndex);
+                        const oldIndex = sliderImages.findIndex((img: any) => img.id === active.id);
+                        const newIndex = sliderImages.findIndex((img: any) => img.id === over?.id);
+                        const reorderedImages = arrayMove(sliderImages, oldIndex, newIndex);
                         handleDataUpdate({ images: reorderedImages });
                       }
                     }}
                   >
-                    <SortableContext items={element.data.images.map(img => img.id)} strategy={rectSortingStrategy}>
+                    <SortableContext items={sliderImages.map((img: any) => img.id)} strategy={rectSortingStrategy}>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {element.data.images.map((img, index) => (
+                        {sliderImages.map((img: any, index: number) => (
                           <SortableImageItem
                             key={img.id}
                             image={img}
                             index={index}
                             onDelete={() => {
-                              const newImages = element.data.images.filter((_, i) => i !== index);
+                              const newImages = sliderImages.filter((_: any, i: number) => i !== index);
                               handleDataUpdate({ images: newImages });
                             }}
                             onUpdateAlt={(alt) => {
-                              const updatedImages = element.data.images.map((image, i) => 
+                              const updatedImages = sliderImages.map((image: any, i: number) => 
                                 i === index ? { ...image, alt } : image
                               );
                               handleDataUpdate({ images: updatedImages });
@@ -1880,7 +1888,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 )}
 
                 {/* Empty State */}
-                {(!element.data.images || element.data.images.length === 0) && (
+                {sliderImages.length === 0 && (
                   <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center">
                     <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-slate-700 flex items-center justify-center">
                       <i className="fas fa-images text-slate-400 text-xl"></i>
@@ -1891,13 +1899,13 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 )}
 
                 {/* Gallery Settings */}
-                {element.data.images && element.data.images.length > 0 && (
+                {sliderImages.length > 0 && (
                   <div className="bg-slate-700/50 rounded-lg p-4 space-y-4">
                     <h4 className="text-white text-sm font-medium flex items-center">
                       <i className="fas fa-cog mr-2 text-slate-400"></i>
                       Gallery Settings
                     </h4>
-                    
+
                     <div className="space-y-4">
                       {/* Image Orientation Setting */}
                       <div>
@@ -1906,7 +1914,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                           <button
                             onClick={() => handleDataUpdate({ orientation: 'mixed' })}
                             className={`p-3 rounded-lg border text-xs transition-colors ${
-                              (!((element.data as any)?.orientation) || (element.data as any)?.orientation === 'mixed')
+                              (!elementData?.orientation || elementData?.orientation === 'mixed')
                                 ? 'bg-talklink-500 border-talklink-400 text-white'
                                 : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                             }`}
@@ -1920,7 +1928,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                           <button
                             onClick={() => handleDataUpdate({ orientation: 'horizontal' })}
                             className={`p-3 rounded-lg border text-xs transition-colors ${
-                              (element.data as any)?.orientation === 'horizontal'
+                              elementData?.orientation === 'horizontal'
                                 ? 'bg-talklink-500 border-talklink-400 text-white'
                                 : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                             }`}
@@ -1931,7 +1939,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                           <button
                             onClick={() => handleDataUpdate({ orientation: 'vertical' })}
                             className={`p-3 rounded-lg border text-xs transition-colors ${
-                              (element.data as any)?.orientation === 'vertical'
+                              elementData?.orientation === 'vertical'
                                 ? 'bg-talklink-500 border-talklink-400 text-white'
                                 : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                             }`}
@@ -1953,7 +1961,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         </div>
                         <input
                           type="checkbox"
-                          checked={(element.data as any)?.autoPlay || false}
+                          checked={elementData?.autoPlay || false}
                           onChange={(e) => handleDataUpdate({ autoPlay: e.target.checked })}
                           className="rounded border-slate-500 text-talklink-500 focus:ring-talklink-500"
                         />
@@ -1966,7 +1974,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                           <button
                             onClick={() => handleDataUpdate({ displayMode: 'contain' })}
                             className={`p-2 rounded-lg border text-xs transition-colors ${
-                              (!((element.data as any)?.displayMode) || (element.data as any)?.displayMode === 'contain')
+                              (!elementData?.displayMode || elementData?.displayMode === 'contain')
                                 ? 'bg-talklink-500 border-talklink-400 text-white'
                                 : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                             }`}
@@ -1976,7 +1984,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                           <button
                             onClick={() => handleDataUpdate({ displayMode: 'cover' })}
                             className={`p-2 rounded-lg border text-xs transition-colors ${
-                              (element.data as any)?.displayMode === 'cover'
+                              elementData?.displayMode === 'cover'
                                 ? 'bg-talklink-500 border-talklink-400 text-white'
                                 : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                             }`}
@@ -1990,13 +1998,13 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 )}
               </div>
             ) : (
-              element.data.images?.length > 0 && (
+              sliderImages.length > 0 && (
                 <ImageSliderComponent 
-                  images={element.data.images}
-                  defaultView={(element.data as any)?.defaultView}
-                  autoPlay={(element.data as any)?.autoPlay}
-                  orientation={(element.data as any)?.orientation}
-                  displayMode={(element.data as any)?.displayMode}
+                  images={sliderImages}
+                  defaultView={elementData?.defaultView}
+                  autoPlay={elementData?.autoPlay}
+                  orientation={elementData?.orientation}
+                  displayMode={elementData?.displayMode}
                 />
               )
             )}
@@ -2004,10 +2012,11 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
         );
 
       case "testimonials":
+        const testimonialsData = elementData.testimonials || [];
         return (
           <div className="mb-6">
             <h3 className="text-lg font-bold text-slate-800 mb-4 text-center">
-              {element.data.title}
+              {elementData.title}
             </h3>
             {isEditing ? (
               <div className="space-y-4">
@@ -2018,7 +2027,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     Section Title
                   </label>
                   <Input
-                    value={element.data.title}
+                    value={elementData.title || ''}
                     onChange={(e) => handleDataUpdate({ title: e.target.value })}
                     placeholder="What Our Clients Say"
                     className="bg-slate-600 border-slate-500 text-white placeholder:text-slate-400"
@@ -2032,7 +2041,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     Display Style
                   </label>
                   <select
-                    value={element.data.displayStyle}
+                    value={elementData.displayStyle || 'cards'}
                     onChange={(e) => handleDataUpdate({ displayStyle: e.target.value })}
                     className="bg-slate-600 border-slate-500 text-white rounded px-3 py-2 w-full hover:bg-slate-500 transition-colors"
                   >
@@ -2042,13 +2051,13 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                   </select>
                 </div>
                 {/* Testimonials List */}
-                {element.data.testimonials.map((testimonial, index) => (
-                  <div key={testimonial.id} className="p-3 bg-slate-800 rounded border space-y-2">
+                {testimonialsData.map((testimonial: any, index: number) => (
+                  <div key={testimonial.id || `testimonial-edit-${index}`} className="p-3 bg-slate-800 rounded border space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-white text-sm">Testimonial {index + 1}</span>
                       <Button
                         onClick={() => {
-                          const newTestimonials = element.data.testimonials.filter(t => t.id !== testimonial.id);
+                          const newTestimonials = testimonialsData.filter((t: any) => t.id !== testimonial.id);
                           handleDataUpdate({ testimonials: newTestimonials });
                         }}
                         variant="destructive"
@@ -2060,9 +2069,9 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <Input
-                        value={testimonial.name}
+                        value={testimonial.name || ''}
                         onChange={(e) => {
-                          const newTestimonials = element.data.testimonials.map(t => 
+                          const newTestimonials = testimonialsData.map((t: any) => 
                             t.id === testimonial.id ? { ...t, name: e.target.value } : t
                           );
                           handleDataUpdate({ testimonials: newTestimonials });
@@ -2073,7 +2082,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <Input
                         value={testimonial.title || ''}
                         onChange={(e) => {
-                          const newTestimonials = element.data.testimonials.map(t => 
+                          const newTestimonials = testimonialsData.map((t: any) => 
                             t.id === testimonial.id ? { ...t, title: e.target.value } : t
                           );
                           handleDataUpdate({ testimonials: newTestimonials });
@@ -2085,7 +2094,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <Input
                       value={testimonial.company || ''}
                       onChange={(e) => {
-                        const newTestimonials = element.data.testimonials.map(t => 
+                        const newTestimonials = testimonialsData.map((t: any) => 
                           t.id === testimonial.id ? { ...t, company: e.target.value } : t
                         );
                         handleDataUpdate({ testimonials: newTestimonials });
@@ -2094,9 +2103,9 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       className="bg-slate-700 border-slate-600 text-white"
                     />
                     <Textarea
-                      value={testimonial.content}
+                      value={testimonial.content || ''}
                       onChange={(e) => {
-                        const newTestimonials = element.data.testimonials.map(t => 
+                        const newTestimonials = testimonialsData.map((t: any) => 
                           t.id === testimonial.id ? { ...t, content: e.target.value } : t
                         );
                         handleDataUpdate({ testimonials: newTestimonials });
@@ -2107,9 +2116,9 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="flex items-center space-x-2">
                       <span className="text-white text-sm">Rating:</span>
                       <select
-                        value={testimonial.rating}
+                        value={testimonial.rating || 5}
                         onChange={(e) => {
-                          const newTestimonials = element.data.testimonials.map(t => 
+                          const newTestimonials = testimonialsData.map((t: any) => 
                             t.id === testimonial.id ? { ...t, rating: parseInt(e.target.value) } : t
                           );
                           handleDataUpdate({ testimonials: newTestimonials });
@@ -2135,7 +2144,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       content: "Great service and experience!",
                       rating: 5
                     };
-                    handleDataUpdate({ testimonials: [...element.data.testimonials, newTestimonial] });
+                    handleDataUpdate({ testimonials: [...testimonialsData, newTestimonial] });
                   }}
                   className="w-full"
                 >
@@ -2144,18 +2153,18 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 </Button>
               </div>
             ) : (
-              element.data.displayStyle === 'slider' ? (
-                <TestimonialsSlider testimonials={element.data.testimonials} />
+              elementData.displayStyle === 'slider' ? (
+                <TestimonialsSlider testimonials={testimonialsData} />
               ) : (
                 <div className={`grid gap-4 ${
-                  element.data.displayStyle === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'
+                  elementData.displayStyle === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'
                 }`}>
-                  {element.data.testimonials.map((testimonial) => (
-                    <div key={testimonial.id} className="bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                  {testimonialsData.map((testimonial: any) => (
+                    <div key={testimonial.id || `testimonial-${testimonial.name}`} className="bg-white p-6 rounded-lg shadow-md border border-slate-200">
                       <div className="flex mb-3">
                         {[...Array(5)].map((_, i) => (
-                          <i key={i} className={`fas fa-star text-sm ${
-                            i < testimonial.rating ? 'text-yellow-400' : 'text-slate-300'
+                          <i key={`star-${i}`} className={`fas fa-star text-sm ${
+                            i < (testimonial.rating || 5) ? 'text-yellow-400' : 'text-slate-300'
                           }`}></i>
                         ))}
                       </div>
@@ -2182,23 +2191,23 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
         return (
           <div className="mb-6">
             <h3 className="text-lg font-bold text-black mb-4 text-center">
-              {element.data.title}
+              {elementData.title}
             </h3>
             {isEditing ? (
               <div className="space-y-4">
                 <Input
-                  value={element.data.title}
+                  value={elementData.title || ''}
                   onChange={(e) => handleDataUpdate({ title: e.target.value })}
                   placeholder="Location section title"
                   className="bg-slate-700 border-slate-600 text-white"
                 />
                 <Input
-                  value={element.data.address}
+                  value={elementData.address || ''}
                   onChange={(e) => handleDataUpdate({ address: e.target.value })}
                   placeholder="Address or location"
                   className="bg-slate-700 border-slate-600 text-white"
                 />
-                
+
                 {/* Display Mode Selection */}
                 <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
                   <label className="block text-white text-sm font-medium mb-3">Display Mode</label>
@@ -2206,7 +2215,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <button
                       onClick={() => handleDataUpdate({ displayMode: 'address' })}
                       className={`p-4 rounded-lg border text-sm transition-colors ${
-                        element.data.displayMode === 'address'
+                        elementData.displayMode === 'address'
                           ? 'bg-talklink-500 border-talklink-400 text-white'
                           : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                       }`}
@@ -2220,7 +2229,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <button
                       onClick={() => handleDataUpdate({ displayMode: 'map' })}
                       className={`p-4 rounded-lg border text-sm transition-colors ${
-                        (!element.data.displayMode || element.data.displayMode === 'map')
+                        (!elementData.displayMode || elementData.displayMode === 'map')
                           ? 'bg-talklink-500 border-talklink-400 text-white'
                           : 'bg-slate-600 border-slate-500 text-slate-300 hover:bg-slate-500'
                       }`}
@@ -2235,7 +2244,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 </div>
 
                 {/* Map-specific settings - only show when map mode is selected */}
-                {(!element.data.displayMode || element.data.displayMode === 'map') && (
+                {(!elementData.displayMode || elementData.displayMode === 'map') && (
                   <>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
@@ -2244,7 +2253,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                           type="number"
                           min="1"
                           max="20"
-                          value={element.data.zoom}
+                          value={elementData.zoom || 15}
                           onChange={(e) => handleDataUpdate({ zoom: parseInt(e.target.value) || 15 })}
                           className="bg-slate-700 border-slate-600 text-white"
                         />
@@ -2252,7 +2261,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <div>
                         <label className="text-black text-sm mb-1 block">Map Type</label>
                         <select
-                          value={element.data.mapType}
+                          value={elementData.mapType || 'roadmap'}
                           onChange={(e) => handleDataUpdate({ mapType: e.target.value })}
                           className="bg-slate-700 border-slate-600 text-white rounded px-2 py-2 w-full"
                         >
@@ -2264,7 +2273,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="flex items-center space-x-2">
                       <input
                         type="checkbox"
-                        checked={element.data.showMarker}
+                        checked={elementData.showMarker || false}
                         onChange={(e) => handleDataUpdate({ showMarker: e.target.checked })}
                         className="rounded"
                       />
@@ -2275,7 +2284,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
               </div>
             ) : (
               // Display based on selected mode
-              element.data.displayMode === 'address' ? (
+              elementData.displayMode === 'address' ? (
                 // Simple Address Display with Location Pin
                 <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200 hover:shadow-xl transition-shadow">
                   <div className="flex items-start space-x-4">
@@ -2286,10 +2295,10 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     </div>
                     <div className="flex-grow">
                       <h4 className="text-lg font-semibold text-slate-800 mb-2">Our Location</h4>
-                      <p className="text-slate-600 leading-relaxed">{element.data.address}</p>
+                      <p className="text-slate-600 leading-relaxed">{elementData.address}</p>
                       <div className="mt-4">
                         <a 
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(element.data.address)}`}
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(elementData.address || '')}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center space-x-2 text-talklink-500 hover:text-talklink-600 font-medium transition-colors"
@@ -2305,9 +2314,9 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 // Interactive Google Maps (default)
                 <div className="bg-slate-100 rounded-lg overflow-hidden">
                   <iframe
-                    src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(element.data.address)}&zoom=${element.data.zoom}&maptype=${element.data.mapType}`}
+                    src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(elementData.address || '')}&zoom=${elementData.zoom || 15}&maptype=${elementData.mapType || 'roadmap'}`}
                     width="100%"
-                    height={element.data.height}
+                    height={elementData.height || 300}
                     style={{ border: 0 }}
                     allowFullScreen
                     loading="lazy"
@@ -2324,18 +2333,18 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
         return (
           <div className="mb-6">
             <h3 className="text-lg font-bold text-black mb-4 text-center">
-              {element.data.title}
+              {elementData.title}
             </h3>
             {isEditing ? (
               <div className="space-y-4">
                 <Input
-                  value={element.data.title}
+                  value={elementData.title || ''}
                   onChange={(e) => handleDataUpdate({ title: e.target.value })}
                   placeholder="Chatbot section title"
                   className="bg-slate-700 border-slate-600 text-white"
                 />
                 <Input
-                  value={element.data.welcomeMessage}
+                  value={elementData.welcomeMessage || ''}
                   onChange={(e) => handleDataUpdate({ welcomeMessage: e.target.value })}
                   placeholder="Welcome message"
                   className="bg-slate-700 border-slate-600 text-white"
@@ -2343,10 +2352,10 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 <div className="space-y-2">
                   <label className="text-black text-sm">Knowledge Base Content:</label>
                   <Textarea
-                    value={element.data.knowledgeBase.textContent || ''}
+                    value={elementData.knowledgeBase?.textContent || ''}
                     onChange={(e) => handleDataUpdate({ 
                       knowledgeBase: { 
-                        ...element.data.knowledgeBase, 
+                        ...elementData.knowledgeBase, 
                         textContent: e.target.value 
                       } 
                     })}
@@ -2356,10 +2365,10 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                   />
                 </div>
                 <Input
-                  value={element.data.knowledgeBase.websiteUrl || ''}
+                  value={elementData.knowledgeBase?.websiteUrl || ''}
                   onChange={(e) => handleDataUpdate({ 
                     knowledgeBase: { 
-                      ...element.data.knowledgeBase, 
+                      ...elementData.knowledgeBase, 
                       websiteUrl: e.target.value 
                     } 
                   })}
@@ -2383,10 +2392,10 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                             content: event.target?.result as string,
                             uploadedAt: new Date()
                           };
-                          const currentPdfs = element.data.knowledgeBase.pdfFiles || [];
+                          const currentPdfs = elementData.knowledgeBase?.pdfFiles || [];
                           handleDataUpdate({ 
                             knowledgeBase: { 
-                              ...element.data.knowledgeBase, 
+                              ...elementData.knowledgeBase, 
                               pdfFiles: [...currentPdfs, newPdf] 
                             } 
                           });
@@ -2396,15 +2405,15 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     }}
                     className="bg-slate-700 border-slate-600 text-white"
                   />
-                  {element.data.knowledgeBase.pdfFiles.map((pdf) => (
+                  {(elementData.knowledgeBase?.pdfFiles || []).map((pdf: any) => (
                     <div key={pdf.id} className="flex items-center justify-between bg-slate-800 p-2 rounded">
                       <span className="text-white text-sm">{pdf.name}</span>
                       <Button
                         onClick={() => {
-                          const newPdfs = element.data.knowledgeBase.pdfFiles.filter(p => p.id !== pdf.id);
+                          const newPdfs = (elementData.knowledgeBase?.pdfFiles || []).filter((p: any) => p.id !== pdf.id);
                           handleDataUpdate({ 
                             knowledgeBase: { 
-                              ...element.data.knowledgeBase, 
+                              ...elementData.knowledgeBase, 
                               pdfFiles: newPdfs 
                             } 
                           });
@@ -2422,10 +2431,10 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                   <div>
                     <label className="text-black text-sm mb-1 block">Position</label>
                     <select
-                      value={element.data.appearance.position}
+                      value={elementData.appearance?.position || 'bottom-right'}
                       onChange={(e) => handleDataUpdate({ 
                         appearance: { 
-                          ...element.data.appearance, 
+                          ...elementData.appearance, 
                           position: e.target.value as any 
                         } 
                       })}
@@ -2440,10 +2449,10 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <label className="text-black text-sm mb-1 block">Primary Color</label>
                     <Input
                       type="color"
-                      value={element.data?.appearance?.primaryColor || '#22C55E'}
+                      value={elementData?.appearance?.primaryColor || '#22C55E'}
                       onChange={(e) => handleDataUpdate({ 
                         appearance: { 
-                          ...(element.data?.appearance || {}), 
+                          ...(elementData?.appearance || {}), 
                           primaryColor: e.target.value 
                         } 
                       })}
@@ -2454,7 +2463,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={element.data.isEnabled}
+                    checked={elementData.isEnabled || false}
                     onChange={(e) => handleDataUpdate({ isEnabled: e.target.checked })}
                     className="rounded"
                   />
@@ -2462,28 +2471,28 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 </div>
               </div>
             ) : (
-              element.data.isEnabled && (
+              elementData.isEnabled && (
                 <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-6">
                   <div className="flex items-center space-x-3 mb-4">
                     <div 
                       className="w-10 h-10 rounded-full flex items-center justify-center text-white"
-                      style={{ backgroundColor: element.data.appearance.primaryColor }}
+                      style={{ backgroundColor: elementData.appearance?.primaryColor || '#22C55E' }}
                     >
                       <i className="fas fa-robot"></i>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-slate-800">{element.data.title}</h4>
+                      <h4 className="font-semibold text-slate-800">{elementData.title}</h4>
                       <p className="text-sm text-slate-600">AI Assistant</p>
                     </div>
                   </div>
                   <div className="bg-slate-50 p-3 rounded-lg mb-4">
-                    <p className="text-slate-700 text-sm">{element.data.welcomeMessage}</p>
+                    <p className="text-slate-700 text-sm">{elementData.welcomeMessage}</p>
                   </div>
                   <div className="flex items-center justify-between text-sm text-slate-500">
-                    <span>Knowledge Base: {element.data.knowledgeBase.textContent ? 'Text' : ''} {element.data.knowledgeBase.websiteUrl ? 'Website' : ''} {element.data.knowledgeBase.pdfFiles.length > 0 ? `${element.data.knowledgeBase.pdfFiles.length} PDFs` : ''}</span>
+                    <span>Knowledge Base: {elementData.knowledgeBase?.textContent ? 'Text' : ''} {elementData.knowledgeBase?.websiteUrl ? 'Website' : ''} {(elementData.knowledgeBase?.pdfFiles || []).length > 0 ? `${(elementData.knowledgeBase?.pdfFiles || []).length} PDFs` : ''}</span>
                     <button 
                       className="px-3 py-1 rounded text-white text-xs hover:opacity-90 transition-opacity"
-                      style={{ backgroundColor: element.data.appearance.primaryColor }}
+                      style={{ backgroundColor: elementData.appearance?.primaryColor || '#22C55E' }}
                       onClick={() => setIsChatOpen(true)}
                       data-testid="button-start-chat"
                     >
@@ -2493,15 +2502,15 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 </div>
               )
             )}
-            
+
             {/* AI Chat Dialog */}
             {element.type === "aiChatbot" && (
               <AIChat
                 isOpen={isChatOpen}
                 onClose={() => setIsChatOpen(false)}
-                knowledgeBase={element.data.knowledgeBase}
-                welcomeMessage={element.data.welcomeMessage}
-                primaryColor={element.data.appearance.primaryColor}
+                knowledgeBase={elementData.knowledgeBase}
+                welcomeMessage={elementData.welcomeMessage}
+                primaryColor={elementData.appearance?.primaryColor}
               />
             )}
           </div>
@@ -2517,20 +2526,20 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
           settings: false,
         });
 
-        const toggleRagSection = (section: string) => {
+        const toggleRagSection = useCallback((section: string) => {
           setRagKnowledgeSections(prev => ({
             ...prev,
-            [section]: !prev[section]
+            [section]: !prev[section as keyof typeof prev]
           }));
-        };
+        }, []);
 
         return (
           <div className="mb-6">
             <h3 className="text-lg font-bold text-black mb-4 text-center">
-              {element.data.title}
+              {elementData.title}
             </h3>
-            <p className="text-center text-gray-600 mb-6">{element.data.description}</p>
-            
+            <p className="text-center text-gray-600 mb-6">{elementData.description}</p>
+
             {isEditing ? (
               <div className="space-y-3 max-h-[70vh] overflow-y-auto p-3 bg-slate-800 rounded-lg border border-slate-600">
                 {/* Basic Settings */}
@@ -2544,13 +2553,13 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                   </CollapsibleTrigger>
                   <CollapsibleContent className="pt-3 space-y-3">
                     <Input
-                      value={element.data.title}
+                      value={elementData.title || ''}
                       onChange={(e) => handleDataUpdate({ title: e.target.value })}
                       placeholder="Knowledge assistant title"
                       className="bg-slate-700 border-slate-600 text-white"
                     />
                     <Textarea
-                      value={element.data.description}
+                      value={elementData.description || ''}
                       onChange={(e) => handleDataUpdate({ description: e.target.value })}
                       placeholder="Description"
                       className="bg-slate-700 border-slate-600 text-white"
@@ -2619,17 +2628,17 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <DocumentManager
                       title="+ Add Documents (One by One)"
                       description="Upload documents one by one for precise knowledge management"
-                      documents={element.data.knowledgeBase?.pdfFiles?.map((pdf: any) => ({
+                      documents={(elementData.knowledgeBase?.pdfFiles || []).map((pdf: any) => ({
                         id: pdf.id || generateFieldId(),
                         name: pdf.name,
                         content: pdf.content,
                         size: pdf.size,
                         status: 'success' as const
-                      })) || []}
+                      }))}
                       onDocumentsChange={(documents: DocumentItem[]) => {
                         handleDataUpdate({
                           knowledgeBase: {
-                            ...element.data.knowledgeBase,
+                            ...elementData.knowledgeBase,
                             pdfFiles: documents.map(doc => ({
                               id: doc.id,
                               name: doc.name,
@@ -2673,7 +2682,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="flex items-center space-x-2">
                       <input
                         type="checkbox"
-                        checked={element.data.showChatBox}
+                        checked={elementData.showChatBox || false}
                         onChange={(e) => handleDataUpdate({ showChatBox: e.target.checked })}
                         className="rounded"
                       />
@@ -2682,7 +2691,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="space-y-2">
                       <label className="text-white text-sm block">Welcome Message:</label>
                       <Input
-                        value={element.data.welcomeMessage || 'Hi! How can I help you today?'}
+                        value={elementData.welcomeMessage || 'Hi! How can I help you today?'}
                         onChange={(e) => handleDataUpdate({ welcomeMessage: e.target.value })}
                         placeholder="Hi! How can I help you today?"
                         className="bg-slate-600 border-slate-500 text-white text-sm"
@@ -2693,17 +2702,17 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <div className="flex gap-2 items-center">
                         <Input
                           type="color"
-                          value={element.data.primaryColor || '#22c55e'}
+                          value={elementData.primaryColor || '#22c55e'}
                           onChange={(e) => handleDataUpdate({ primaryColor: e.target.value })}
                           className="w-12 h-10 rounded cursor-pointer"
                         />
-                        <span className="text-slate-400 text-sm">{element.data.primaryColor || '#22c55e'}</span>
+                        <span className="text-slate-400 text-sm">{elementData.primaryColor || '#22c55e'}</span>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input
                         type="checkbox"
-                        checked={element.data.enableStreaming !== false}
+                        checked={elementData.enableStreaming !== false}
                         onChange={(e) => handleDataUpdate({ enableStreaming: e.target.checked })}
                         className="rounded"
                       />
@@ -2718,52 +2727,52 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 <div className="flex items-start gap-4 mb-4">
                   <div 
                     className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: element.data.primaryColor || '#22c55e' }}
+                    style={{ backgroundColor: elementData.primaryColor || '#22c55e' }}
                   >
                     <MessageCircle className="h-8 w-8 text-white" />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                      {element.data.title || 'AI Assistant'}
+                      {elementData.title || 'AI Assistant'}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {element.data.description || 'AI Assistant'}
+                      {elementData.description || 'AI Assistant'}
                     </p>
                   </div>
                 </div>
-                
+
                 {/* Welcome Message */}
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4">
                   <p className="text-center text-gray-700 dark:text-gray-300">
                     Hi! How can I help you today?
                   </p>
                 </div>
-                
+
                 {/* Knowledge Base Label and Start Chat Button */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Knowledge Base:</span>
-                  {element.data.showChatBox && (
+                  {elementData.showChatBox && (
                     <Button
                       onClick={() => setIsChatOpen(true)}
                       className="text-white px-6 py-2 rounded-lg shadow-md hover:opacity-90 transition-opacity"
-                      style={{ backgroundColor: element.data.primaryColor || '#22c55e' }}
+                      style={{ backgroundColor: elementData.primaryColor || '#22c55e' }}
                       data-testid="button-start-chat"
                     >
                       Start Chat
                     </Button>
                   )}
                 </div>
-                
+
                 {/* RAG Chat Dialog */}
                 {element.type === "ragKnowledge" && (
                   <RAGChatBox
                     isOpen={isChatOpen}
                     onClose={() => setIsChatOpen(false)}
-                    primaryColor={element.data.primaryColor}
+                    primaryColor={elementData.primaryColor}
                     isEditing={isEditing}
                   />
                 )}
-                
+
                 {/* Technical note for card creators - only visible during editing */}
                 <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
                   <p><strong>For Card Creators:</strong> Edit this element to manage knowledge base content. End users will only see the chat interface above.</p>
@@ -2811,7 +2820,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Phone Number *</label>
                       <Input
-                        value={element.data.phoneNumber || ''}
+                        value={elementData.phoneNumber || ''}
                         onChange={(e) => handleDataUpdate({ phoneNumber: e.target.value })}
                         placeholder="+1-555-0000"
                         className="text-black"
@@ -2821,7 +2830,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Agent Name</label>
                       <Input
-                        value={element.data.agentName || 'AI Assistant'}
+                        value={elementData.agentName || 'AI Assistant'}
                         onChange={(e) => handleDataUpdate({ agentName: e.target.value })}
                         placeholder="AI Assistant"
                         className="text-black"
@@ -2831,7 +2840,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
                       <label className="text-sm text-slate-700 font-medium">Is Active</label>
                       <Switch
-                        checked={element.data.isActive !== false}
+                        checked={elementData.isActive !== false}
                         onCheckedChange={(checked) => handleDataUpdate({ isActive: checked })}
                         data-testid="switch-is-active"
                       />
@@ -2839,7 +2848,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Agent Mode</label>
                       <Select
-                        value={element.data.agentMode || 'answering'}
+                        value={elementData.agentMode || 'answering'}
                         onValueChange={(value) => handleDataUpdate({ agentMode: value })}
                       >
                         <SelectTrigger className="text-black" data-testid="select-agent-mode">
@@ -2873,7 +2882,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Voice Provider</label>
                       <Select
-                        value={element.data.voiceProvider || 'openai'}
+                        value={elementData.voiceProvider || 'openai'}
                         onValueChange={(value) => handleDataUpdate({ voiceProvider: value })}
                       >
                         <SelectTrigger className="text-black" data-testid="select-voice-provider">
@@ -2890,7 +2899,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Voice Gender</label>
                       <Select
-                        value={element.data.voiceGender || 'neutral'}
+                        value={elementData.voiceGender || 'neutral'}
                         onValueChange={(value) => handleDataUpdate({ voiceGender: value })}
                       >
                         <SelectTrigger className="text-black" data-testid="select-voice-gender">
@@ -2906,7 +2915,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Voice Language</label>
                       <Input
-                        value={element.data.voiceLanguage || 'en'}
+                        value={elementData.voiceLanguage || 'en'}
                         onChange={(e) => handleDataUpdate({ voiceLanguage: e.target.value })}
                         placeholder="en"
                         className="text-black"
@@ -2916,7 +2925,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Voice Tone</label>
                       <Select
-                        value={element.data.voiceTone || 'professional'}
+                        value={elementData.voiceTone || 'professional'}
                         onValueChange={(value) => handleDataUpdate({ voiceTone: value })}
                       >
                         <SelectTrigger className="text-black" data-testid="select-voice-tone">
@@ -2934,14 +2943,14 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <div className="flex justify-between items-center mb-2">
                         <label className="text-sm text-slate-700 font-medium">Speech Speed</label>
                         <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
-                          {element.data.speechSpeed || 100}
+                          {elementData.speechSpeed || 100}
                         </span>
                       </div>
                       <Slider
                         min={50}
                         max={150}
                         step={1}
-                        value={[element.data.speechSpeed || 100]}
+                        value={[elementData.speechSpeed || 100]}
                         onValueChange={(value) => handleDataUpdate({ speechSpeed: value[0] })}
                         className="cursor-pointer"
                         data-testid="slider-speech-speed"
@@ -2971,7 +2980,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
                       <label className="text-sm text-slate-700 font-medium">Use Knowledge Base</label>
                       <Switch
-                        checked={element.data.useKnowledgeBase !== false}
+                        checked={elementData.useKnowledgeBase !== false}
                         onCheckedChange={(checked) => handleDataUpdate({ useKnowledgeBase: checked })}
                         data-testid="switch-use-knowledge-base"
                       />
@@ -2980,14 +2989,14 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <div className="flex justify-between items-center mb-2">
                         <label className="text-sm text-slate-700 font-medium">Context Limit</label>
                         <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
-                          {element.data.contextLimit || 3}
+                          {elementData.contextLimit || 3}
                         </span>
                       </div>
                       <Slider
                         min={1}
                         max={10}
                         step={1}
-                        value={[element.data.contextLimit || 3]}
+                        value={[elementData.contextLimit || 3]}
                         onValueChange={(value) => handleDataUpdate({ contextLimit: value[0] })}
                         className="cursor-pointer"
                         data-testid="slider-context-limit"
@@ -2997,28 +3006,28 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <div className="flex justify-between items-center mb-2">
                         <label className="text-sm text-slate-700 font-medium">Confidence Threshold (%)</label>
                         <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">
-                          {element.data.confidenceThreshold || 70}%
+                          {elementData.confidenceThreshold || 70}%
                         </span>
                       </div>
                       <Slider
                         min={0}
                         max={100}
                         step={5}
-                        value={[element.data.confidenceThreshold || 70]}
+                        value={[elementData.confidenceThreshold || 70]}
                         onValueChange={(value) => handleDataUpdate({ confidenceThreshold: value[0] })}
                         className="cursor-pointer"
                         data-testid="slider-confidence-threshold"
                       />
                     </div>
-                    
+
                     {/* Text Content Input */}
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-2 block">Knowledge Base Content</label>
                       <Textarea
-                        value={element.data.knowledgeBase?.textContent || ''}
+                        value={elementData.knowledgeBase?.textContent || ''}
                         onChange={(e) => handleDataUpdate({ 
                           knowledgeBase: { 
-                            ...element.data.knowledgeBase, 
+                            ...elementData.knowledgeBase, 
                             textContent: e.target.value 
                           } 
                         })}
@@ -3027,27 +3036,27 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         className="w-full text-black"
                         data-testid="textarea-knowledge-content"
                       />
-                      {element.data.knowledgeBase?.textContent && (
+                      {elementData.knowledgeBase?.textContent && (
                         <Button
                           onClick={async () => {
-                            const textContent = element.data.knowledgeBase?.textContent;
+                            const textContent = elementData.knowledgeBase?.textContent;
                             if (!textContent || textContent.trim().length < 10) {
                               alert('Please enter at least 10 characters of text');
                               return;
                             }
-                            
+
                             try {
                               const response = await fetch('/api/ingest-text', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                   text: textContent,
-                                  title: element.data.agentName || 'Voice Agent Knowledge Base'
+                                  title: elementData.agentName || 'Voice Agent Knowledge Base'
                                 })
                               });
-                              
+
                               const result = await response.json();
-                              
+
                               if (result.success) {
                                 alert('Knowledge base content saved successfully!');
                               } else {
@@ -3066,23 +3075,23 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         </Button>
                       )}
                     </div>
-                    
+
                     {/* Document Upload */}
                     <div>
                       <DocumentManager
                         title="📄 Upload Documents"
                         description="Upload PDFs, Word docs, and text files"
-                        documents={element.data.knowledgeBase?.pdfFiles?.map((pdf: any) => ({
+                        documents={(elementData.knowledgeBase?.pdfFiles || []).map((pdf: any) => ({
                           id: pdf.id || generateFieldId(),
                           name: pdf.name,
                           content: pdf.content,
                           size: pdf.size,
                           status: 'success' as const
-                        })) || []}
+                        }))}
                         onDocumentsChange={(documents: DocumentItem[]) => {
                           handleDataUpdate({
                             knowledgeBase: {
-                              ...element.data.knowledgeBase,
+                              ...elementData.knowledgeBase,
                               pdfFiles: documents.map(doc => ({
                                 id: doc.id,
                                 name: doc.name,
@@ -3097,7 +3106,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         className="bg-white border-slate-200"
                       />
                     </div>
-                    
+
                     {/* URL Manager */}
                     <div>
                       <URLManager
@@ -3108,7 +3117,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                           console.log('URLs ingested:', urls);
                           handleDataUpdate({
                             knowledgeBase: {
-                              ...element.data.knowledgeBase,
+                              ...elementData.knowledgeBase,
                               urls: urls
                             }
                           });
@@ -3137,7 +3146,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Greeting</label>
                       <Textarea
-                        value={element.data.greeting || ''}
+                        value={elementData.greeting || ''}
                         onChange={(e) => handleDataUpdate({ greeting: e.target.value })}
                         placeholder="Hello! I'm your AI assistant. How can I help you today?"
                         className="text-black min-h-[80px]"
@@ -3147,7 +3156,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">System Prompt</label>
                       <Textarea
-                        value={element.data.systemPrompt || ''}
+                        value={elementData.systemPrompt || ''}
                         onChange={(e) => handleDataUpdate({ systemPrompt: e.target.value })}
                         placeholder="You are a helpful AI assistant representing our company..."
                         className="text-black min-h-[100px]"
@@ -3157,7 +3166,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Fallback Message</label>
                       <Textarea
-                        value={element.data.fallbackMessage || ''}
+                        value={elementData.fallbackMessage || ''}
                         onChange={(e) => handleDataUpdate({ fallbackMessage: e.target.value })}
                         placeholder="I'm sorry, I didn't understand that. Could you please rephrase?"
                         className="text-black min-h-[80px]"
@@ -3167,7 +3176,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">End Call Message</label>
                       <Textarea
-                        value={element.data.endCallMessage || ''}
+                        value={elementData.endCallMessage || ''}
                         onChange={(e) => handleDataUpdate({ endCallMessage: e.target.value })}
                         placeholder="Thank you for calling. Have a great day!"
                         className="text-black min-h-[80px]"
@@ -3194,7 +3203,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
                       <label className="text-sm text-slate-700 font-medium">Enable Appointment Booking</label>
                       <Switch
-                        checked={element.data.enableAppointmentBooking || false}
+                        checked={elementData.enableAppointmentBooking || false}
                         onCheckedChange={(checked) => handleDataUpdate({ enableAppointmentBooking: checked })}
                         data-testid="switch-enable-appointment-booking"
                       />
@@ -3202,7 +3211,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
                       <label className="text-sm text-slate-700 font-medium">Enable Lead Qualification</label>
                       <Switch
-                        checked={element.data.enableLeadQualification || false}
+                        checked={elementData.enableLeadQualification || false}
                         onCheckedChange={(checked) => handleDataUpdate({ enableLeadQualification: checked })}
                         data-testid="switch-enable-lead-qualification"
                       />
@@ -3210,7 +3219,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
                       <label className="text-sm text-slate-700 font-medium">Enable CRM Sync</label>
                       <Switch
-                        checked={element.data.enableCrmSync !== false}
+                        checked={elementData.enableCrmSync !== false}
                         onCheckedChange={(checked) => handleDataUpdate({ enableCrmSync: checked })}
                         data-testid="switch-enable-crm-sync"
                       />
@@ -3218,7 +3227,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Booking Confirmation Message</label>
                       <Textarea
-                        value={element.data.bookingConfirmationMessage || ''}
+                        value={elementData.bookingConfirmationMessage || ''}
                         onChange={(e) => handleDataUpdate({ bookingConfirmationMessage: e.target.value })}
                         placeholder="Your appointment has been confirmed. You'll receive a confirmation email shortly."
                         className="text-black min-h-[80px]"
@@ -3245,7 +3254,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
                       <label className="text-sm text-slate-700 font-medium">Enable Voicemail</label>
                       <Switch
-                        checked={element.data.enableVoicemail !== false}
+                        checked={elementData.enableVoicemail !== false}
                         onCheckedChange={(checked) => handleDataUpdate({ enableVoicemail: checked })}
                         data-testid="switch-enable-voicemail"
                       />
@@ -3253,7 +3262,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Voicemail Message</label>
                       <Textarea
-                        value={element.data.voicemailMessage || ''}
+                        value={elementData.voicemailMessage || ''}
                         onChange={(e) => handleDataUpdate({ voicemailMessage: e.target.value })}
                         placeholder="Please leave a message and we'll get back to you shortly."
                         className="text-black min-h-[80px]"
@@ -3263,7 +3272,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
                       <label className="text-sm text-slate-700 font-medium">Enable Call Recording</label>
                       <Switch
-                        checked={element.data.enableCallRecording || false}
+                        checked={elementData.enableCallRecording || false}
                         onCheckedChange={(checked) => handleDataUpdate({ enableCallRecording: checked })}
                         data-testid="switch-enable-call-recording"
                       />
@@ -3272,7 +3281,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Max Call Duration (seconds)</label>
                       <Input
                         type="number"
-                        value={element.data.maxCallDuration || 600}
+                        value={elementData.maxCallDuration || 600}
                         onChange={(e) => handleDataUpdate({ maxCallDuration: parseInt(e.target.value) || 600 })}
                         placeholder="600"
                         className="text-black"
@@ -3302,7 +3311,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Audio Quality</label>
                       <Select
-                        value={element.data.audioQuality || 'high'}
+                        value={elementData.audioQuality || 'high'}
                         onValueChange={(value) => handleDataUpdate({ audioQuality: value })}
                       >
                         <SelectTrigger className="text-black" data-testid="select-audio-quality">
@@ -3318,7 +3327,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
                       <label className="text-sm text-slate-700 font-medium">Noise Cancellation</label>
                       <Switch
-                        checked={element.data.noiseCancellation !== false}
+                        checked={elementData.noiseCancellation !== false}
                         onCheckedChange={(checked) => handleDataUpdate({ noiseCancellation: checked })}
                         data-testid="switch-noise-cancellation"
                       />
@@ -3326,7 +3335,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div className="flex items-center justify-between p-2 bg-slate-50 rounded">
                       <label className="text-sm text-slate-700 font-medium">Echo Cancellation</label>
                       <Switch
-                        checked={element.data.echoCancellation !== false}
+                        checked={elementData.echoCancellation !== false}
                         onCheckedChange={(checked) => handleDataUpdate({ echoCancellation: checked })}
                         data-testid="switch-echo-cancellation"
                       />
@@ -3336,14 +3345,14 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
               </div>
             ) : (
               <VoiceAgentElement
-                phoneNumber={element.data.phoneNumber || '+1-555-0000'}
-                agentName={element.data.agentName || 'AI Assistant'}
-                description={element.data.description || 'Call us anytime to speak with our AI assistant'}
-                buttonText={element.data.buttonText || 'Call Now'}
-                primaryColor={element.data.primaryColor || '#22c55e'}
-                showAgentInfo={element.data.showAgentInfo !== false}
+                phoneNumber={elementData.phoneNumber || '+1-555-0000'}
+                agentName={elementData.agentName || 'AI Assistant'}
+                description={elementData.description || 'Call us anytime to speak with our AI assistant'}
+                buttonText={elementData.buttonText || 'Call Now'}
+                primaryColor={elementData.primaryColor || '#22c55e'}
+                showAgentInfo={elementData.showAgentInfo !== false}
                 isEditing={isEditing}
-                knowledgeBase={element.data.knowledgeBase}
+                knowledgeBase={elementData.knowledgeBase}
                 cardId={cardData?.id}
               />
             )}
@@ -3374,51 +3383,51 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Business Name</label>
                       <Input
-                        value={element.data.businessName || ''}
+                        value={elementData.businessName || ''}
                         onChange={(e) => handleDataUpdate({ businessName: e.target.value })}
                         placeholder="Your Business Name"
                         className="text-black"
                         data-testid="input-business-name"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Assistant Name</label>
                       <Input
-                        value={element.data.assistantName || 'AI Assistant'}
+                        value={elementData.assistantName || 'AI Assistant'}
                         onChange={(e) => handleDataUpdate({ assistantName: e.target.value })}
                         placeholder="AI Assistant"
                         className="text-black"
                         data-testid="input-assistant-name"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-1 block">Primary Color</label>
                       <div className="flex items-center gap-2">
                         <Input
                           type="color"
-                          value={element.data.primaryColor || '#8b5cf6'}
+                          value={elementData.primaryColor || '#8b5cf6'}
                           onChange={(e) => handleDataUpdate({ primaryColor: e.target.value })}
                           className="w-20 h-10"
                         />
                         <Input
                           type="text"
-                          value={element.data.primaryColor || '#8b5cf6'}
+                          value={elementData.primaryColor || '#8b5cf6'}
                           onChange={(e) => handleDataUpdate({ primaryColor: e.target.value })}
                           placeholder="#8b5cf6"
                           className="flex-1 text-black"
                         />
                       </div>
                     </div>
-                    
+
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-2 block">Knowledge Base</label>
                       <Textarea
-                        value={element.data.knowledgeBase?.textContent || ''}
+                        value={elementData.knowledgeBase?.textContent || ''}
                         onChange={(e) => handleDataUpdate({ 
                           knowledgeBase: { 
-                            ...element.data.knowledgeBase, 
+                            ...elementData.knowledgeBase, 
                             textContent: e.target.value 
                           } 
                         })}
@@ -3431,14 +3440,14 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         This information will be used to train your AI assistant about your business
                       </p>
                     </div>
-                    
+
                     <div>
                       <label className="text-sm text-slate-700 font-medium mb-2 block">System Prompt</label>
                       <Textarea
-                        value={element.data.knowledgeBase?.systemPrompt || ''}
+                        value={elementData.knowledgeBase?.systemPrompt || ''}
                         onChange={(e) => handleDataUpdate({ 
                           knowledgeBase: { 
-                            ...element.data.knowledgeBase, 
+                            ...elementData.knowledgeBase, 
                             systemPrompt: e.target.value 
                           } 
                         })}
@@ -3448,23 +3457,23 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                         data-testid="textarea-system-prompt"
                       />
                     </div>
-                    
+
                     {/* Document Upload */}
                     <div>
                       <DocumentManager
                         title="📄 Upload Business Documents"
                         description="Upload PDFs, brochures, and documents about your business"
-                        documents={element.data.knowledgeBase?.documents?.map((doc: any) => ({
+                        documents={(elementData.knowledgeBase?.documents || []).map((doc: any) => ({
                           id: doc.id || generateFieldId(),
                           name: doc.name,
                           content: doc.content,
                           size: doc.size,
                           status: 'success' as const
-                        })) || []}
+                        }))}
                         onDocumentsChange={(documents: DocumentItem[]) => {
                           handleDataUpdate({
                             knowledgeBase: {
-                              ...element.data.knowledgeBase,
+                              ...elementData.knowledgeBase,
                               documents: documents.map(doc => ({
                                 id: doc.id,
                                 name: doc.name,
@@ -3484,10 +3493,10 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
               </div>
             ) : (
               <VoiceAssistantCard
-                businessName={element.data.businessName || cardData?.businessName || 'Our Business'}
-                agentName={element.data.assistantName || 'AI Assistant'}
-                primaryColor={element.data.primaryColor || '#8b5cf6'}
-                knowledgeBase={element.data.knowledgeBase}
+                businessName={elementData.businessName || cardData?.businessName || 'Our Business'}
+                agentName={elementData.assistantName || 'AI Assistant'}
+                primaryColor={elementData.primaryColor || '#8b5cf6'}
+                knowledgeBase={elementData.knowledgeBase}
                 isEditing={isEditing}
                 cardId={cardData?.id}
               />
@@ -3510,13 +3519,13 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <i className={`fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-slate-600`}></i>
                   </Button>
                 </div>
-                
+
                 {isExpanded && (
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm text-slate-600 mb-1 block">Button Title</label>
                       <Input
-                        value={element.data.title}
+                        value={elementData.title || ''}
                         onChange={(e) => handleDataUpdate({ title: e.target.value })}
                         placeholder="Add to Apple Wallet"
                         className="text-black"
@@ -3525,7 +3534,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-600 mb-1 block">Subtitle</label>
                       <Input
-                        value={element.data.subtitle}
+                        value={elementData.subtitle || ''}
                         onChange={(e) => handleDataUpdate({ subtitle: e.target.value })}
                         placeholder="Save this business card to your iPhone or Mac"
                         className="text-black"
@@ -3534,7 +3543,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-600 mb-1 block">Button Style</label>
                       <select
-                        value={element.data.buttonStyle}
+                        value={elementData.buttonStyle || 'default'}
                         onChange={(e) => handleDataUpdate({ buttonStyle: e.target.value as "default" | "minimal" | "full" })}
                         className="w-full p-2 border border-slate-300 rounded text-black"
                       >
@@ -3548,18 +3557,18 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <div className="flex items-center space-x-2">
                         <Input
                           type="color"
-                          value={element.data.customColor || "#000000"}
+                          value={elementData.customColor || "#000000"}
                           onChange={(e) => handleDataUpdate({ customColor: e.target.value })}
                           className="w-12 h-10 p-1"
                         />
                         <Input
                           type="text"
-                          value={element.data.customColor || ""}
+                          value={elementData.customColor || ""}
                           onChange={(e) => handleDataUpdate({ customColor: e.target.value })}
                           placeholder="#000000 or leave empty for default black"
                           className="flex-1 text-black"
                         />
-                        {element.data.customColor && (
+                        {elementData.customColor && (
                           <Button
                             onClick={() => handleDataUpdate({ customColor: "" })}
                             variant="ghost"
@@ -3582,16 +3591,16 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       const response = await fetch(`/api/wallet/apple/${cardData?.id || ''}/create`, {
                         method: 'POST',
                       });
-                      
+
                       if (response.status === 501) {
                         alert('Apple Wallet integration is being set up. Coming soon!');
                         return;
                       }
-                      
+
                       if (!response.ok) {
                         throw new Error('Failed to generate Apple pass');
                       }
-                      
+
                       const blob = await response.blob();
                       const url = window.URL.createObjectURL(blob);
                       const a = document.createElement('a');
@@ -3607,24 +3616,24 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     }
                   }}
                   className={`
-                    ${element.data.buttonStyle === 'full' ? 'w-full' : element.data.buttonStyle === 'minimal' ? 'px-4 py-2' : 'px-6 py-3'}
+                    ${elementData.buttonStyle === 'full' ? 'w-full' : elementData.buttonStyle === 'minimal' ? 'px-4 py-2' : 'px-6 py-3'}
                     bg-black hover:bg-gray-800 text-white border-black
                     transition-all duration-200
                   `}
-                  style={element.data.customColor ? { backgroundColor: element.data.customColor } : {}}
+                  style={elementData.customColor ? { backgroundColor: elementData.customColor } : {}}
                   data-testid="button-apple-wallet-element"
                 >
-                  {element.data.showIcon && <i className="fas fa-wallet mr-2"></i>}
-                  {element.data.title}
+                  {elementData.showIcon && <i className="fas fa-wallet mr-2"></i>}
+                  {elementData.title || 'Add to Apple Wallet'}
                 </Button>
-                {element.data.subtitle && (
-                  <p className="text-xs text-slate-500 mt-2">{element.data.subtitle}</p>
+                {elementData.subtitle && (
+                  <p className="text-xs text-slate-500 mt-2">{elementData.subtitle}</p>
                 )}
               </div>
             )}
           </div>
         );
-      
+
       case "googleWallet":
         return (
           <div className="mb-4">
@@ -3640,13 +3649,13 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <i className={`fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-slate-600`}></i>
                   </Button>
                 </div>
-                
+
                 {isExpanded && (
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm text-slate-600 mb-1 block">Button Title</label>
                       <Input
-                        value={element.data.title}
+                        value={elementData.title || ''}
                         onChange={(e) => handleDataUpdate({ title: e.target.value })}
                         placeholder="Add to Google Wallet"
                         className="text-black"
@@ -3655,7 +3664,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-600 mb-1 block">Subtitle</label>
                       <Input
-                        value={element.data.subtitle}
+                        value={elementData.subtitle || ''}
                         onChange={(e) => handleDataUpdate({ subtitle: e.target.value })}
                         placeholder="Save this business card to your Android phone"
                         className="text-black"
@@ -3664,7 +3673,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="text-sm text-slate-600 mb-1 block">Button Style</label>
                       <select
-                        value={element.data.buttonStyle}
+                        value={elementData.buttonStyle || 'default'}
                         onChange={(e) => handleDataUpdate({ buttonStyle: e.target.value as "default" | "minimal" | "full" })}
                         className="w-full p-2 border border-slate-300 rounded text-black"
                       >
@@ -3678,18 +3687,18 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <div className="flex items-center space-x-2">
                         <Input
                           type="color"
-                          value={element.data.customColor || "#2563eb"}
+                          value={elementData.customColor || "#2563eb"}
                           onChange={(e) => handleDataUpdate({ customColor: e.target.value })}
                           className="w-12 h-10 p-1"
                         />
                         <Input
                           type="text"
-                          value={element.data.customColor || ""}
+                          value={elementData.customColor || ""}
                           onChange={(e) => handleDataUpdate({ customColor: e.target.value })}
                           placeholder="#2563eb or leave empty for default blue"
                           className="flex-1 text-black"
                         />
-                        {element.data.customColor && (
+                        {elementData.customColor && (
                           <Button
                             onClick={() => handleDataUpdate({ customColor: "" })}
                             variant="ghost"
@@ -3712,16 +3721,16 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       const response = await fetch(`/api/wallet/google/${cardData?.id || ''}/create`, {
                         method: 'POST',
                       });
-                      
+
                       if (response.status === 501) {
                         alert('Google Wallet integration is being set up. Coming soon!');
                         return;
                       }
-                      
+
                       if (!response.ok) {
                         throw new Error('Failed to generate Google pass');
                       }
-                      
+
                       const result = await response.json();
                       if (result.addToGoogleWalletUrl) {
                         window.open(result.addToGoogleWalletUrl, '_blank');
@@ -3732,18 +3741,18 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     }
                   }}
                   className={`
-                    ${element.data.buttonStyle === 'full' ? 'w-full' : element.data.buttonStyle === 'minimal' ? 'px-4 py-2' : 'px-6 py-3'}
+                    ${elementData.buttonStyle === 'full' ? 'w-full' : elementData.buttonStyle === 'minimal' ? 'px-4 py-2' : 'px-6 py-3'}
                     bg-blue-600 hover:bg-blue-700 text-white border-blue-600
                     transition-all duration-200
                   `}
-                  style={element.data.customColor ? { backgroundColor: element.data.customColor } : {}}
+                  style={elementData.customColor ? { backgroundColor: elementData.customColor } : {}}
                   data-testid="button-google-wallet-element"
                 >
-                  {element.data.showIcon && <i className="fas fa-credit-card mr-2"></i>}
-                  {element.data.title}
+                  {elementData.showIcon && <i className="fas fa-credit-card mr-2"></i>}
+                  {elementData.title || 'Add to Google Wallet'}
                 </Button>
-                {element.data.subtitle && (
-                  <p className="text-xs text-slate-500 mt-2">{element.data.subtitle}</p>
+                {elementData.subtitle && (
+                  <p className="text-xs text-slate-500 mt-2">{elementData.subtitle}</p>
                 )}
               </div>
             )}
@@ -3761,11 +3770,11 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="block text-sm font-medium mb-1">Section Title</label>
                       <Input
-                        value={element.data.title || 'Save to Digital Wallet'}
+                        value={elementData.title || 'Save to Digital Wallet'}
                         onChange={(e) => onUpdate && onUpdate({ 
                           ...element, 
                           data: { 
-                            ...element.data, 
+                            ...elementData, 
                             title: e.target.value 
                           } 
                         })}
@@ -3775,11 +3784,11 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="block text-sm font-medium mb-1">Layout</label>
                       <select
-                        value={element.data.layout || 'stacked'}
+                        value={elementData.layout || 'stacked'}
                         onChange={(e) => onUpdate && onUpdate({ 
                           ...element, 
                           data: { 
-                            ...element.data, 
+                            ...elementData, 
                             layout: e.target.value as "stacked" | "columns"
                           } 
                         })}
@@ -3790,15 +3799,15 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       </select>
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium mb-1">Subtitle</label>
                     <Input
-                      value={element.data.subtitle || 'Add this business card to your phone\'s wallet'}
+                      value={elementData.subtitle || 'Add this business card to your phone\'s wallet'}
                       onChange={(e) => onUpdate && onUpdate({ 
                         ...element, 
                         data: { 
-                          ...element.data, 
+                          ...elementData, 
                           subtitle: e.target.value 
                         } 
                       })}
@@ -3811,11 +3820,11 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={element.data.showApple !== false}
+                          checked={elementData.showApple !== false}
                           onChange={(e) => onUpdate && onUpdate({ 
                             ...element, 
                             data: { 
-                              ...element.data, 
+                              ...elementData, 
                               showApple: e.target.checked 
                             } 
                           })}
@@ -3829,11 +3838,11 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={element.data.showGoogle !== false}
+                          checked={elementData.showGoogle !== false}
                           onChange={(e) => onUpdate && onUpdate({ 
                             ...element, 
                             data: { 
-                              ...element.data, 
+                              ...elementData, 
                               showGoogle: e.target.checked 
                             } 
                           })}
@@ -3849,31 +3858,31 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <div>
                       <label className="block text-sm font-medium mb-1">Apple Button Text</label>
                       <Input
-                        value={element.data.appleButtonText || 'Add to Apple Wallet'}
+                        value={elementData.appleButtonText || 'Add to Apple Wallet'}
                         onChange={(e) => onUpdate && onUpdate({ 
                           ...element, 
                           data: { 
-                            ...element.data, 
+                            ...elementData, 
                             appleButtonText: e.target.value 
                           } 
                         })}
                         placeholder="Apple button text"
-                        disabled={!element.data.showApple}
+                        disabled={!elementData.showApple}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">Google Button Text</label>
                       <Input
-                        value={element.data.googleButtonText || 'Add to Google Wallet'}
+                        value={elementData.googleButtonText || 'Add to Google Wallet'}
                         onChange={(e) => onUpdate && onUpdate({ 
                           ...element, 
                           data: { 
-                            ...element.data, 
+                            ...elementData, 
                             googleButtonText: e.target.value 
                           } 
                         })}
                         placeholder="Google button text"
-                        disabled={!element.data.showGoogle}
+                        disabled={!elementData.showGoogle}
                       />
                     </div>
                   </div>
@@ -3883,32 +3892,32 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <label className="block text-sm font-medium mb-1">Apple Button Color</label>
                       <Input
                         type="color"
-                        value={element.data.appleButtonColor || '#000000'}
+                        value={elementData.appleButtonColor || '#000000'}
                         onChange={(e) => onUpdate && onUpdate({ 
                           ...element, 
                           data: { 
-                            ...element.data, 
+                            ...elementData, 
                             appleButtonColor: e.target.value 
                           } 
                         })}
                         className="h-10"
-                        disabled={!element.data.showApple}
+                        disabled={!elementData.showApple}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">Google Button Color</label>
                       <Input
                         type="color"
-                        value={element.data.googleButtonColor || '#2563eb'}
+                        value={elementData.googleButtonColor || '#2563eb'}
                         onChange={(e) => onUpdate && onUpdate({ 
                           ...element, 
                           data: { 
-                            ...element.data, 
+                            ...elementData, 
                             googleButtonColor: e.target.value 
                           } 
                         })}
                         className="h-10"
-                        disabled={!element.data.showGoogle}
+                        disabled={!elementData.showGoogle}
                       />
                     </div>
                   </div>
@@ -3918,11 +3927,11 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <label className="block text-sm font-medium mb-1">Background Color</label>
                       <Input
                         type="color"
-                        value={element.data.backgroundColor || '#1e293b'}
+                        value={elementData.backgroundColor || '#1e293b'}
                         onChange={(e) => onUpdate && onUpdate({ 
                           ...element, 
                           data: { 
-                            ...element.data, 
+                            ...elementData, 
                             backgroundColor: e.target.value 
                           } 
                         })}
@@ -3933,11 +3942,11 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <label className="block text-sm font-medium mb-1">Text Color</label>
                       <Input
                         type="color"
-                        value={element.data.textColor || '#ffffff'}
+                        value={elementData.textColor || '#ffffff'}
                         onChange={(e) => onUpdate && onUpdate({ 
                           ...element, 
                           data: { 
-                            ...element.data, 
+                            ...elementData, 
                             textColor: e.target.value 
                           } 
                         })}
@@ -3949,11 +3958,11 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                   <div>
                     <label className="block text-sm font-medium mb-1">Font Family</label>
                     <select
-                      value={element.data.fontFamily || 'Inter'}
+                      value={elementData.fontFamily || 'Inter'}
                       onChange={(e) => onUpdate && onUpdate({ 
                         ...element, 
                         data: { 
-                          ...element.data, 
+                          ...elementData, 
                           fontFamily: e.target.value 
                         } 
                       })}
@@ -3968,20 +3977,20 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <option value="Open Sans">Open Sans</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium mb-1">QR Download Button Text</label>
                     <Input
-                      value={element.data.qrButtonText || 'Download QR Code'}
+                      value={elementData.qrButtonText || 'Download QR Code'}
                       onChange={(e) => onUpdate && onUpdate({ 
                         ...element, 
                         data: { 
-                          ...element.data, 
+                          ...elementData, 
                           qrButtonText: e.target.value 
                         } 
                       })}
                       placeholder="QR button text"
-                      disabled={!element.data.showQRDownload}
+                      disabled={!elementData.showQRDownload}
                     />
                   </div>
 
@@ -3989,16 +3998,16 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     <label className="block text-sm font-medium mb-1">QR Code Button Color</label>
                     <Input
                       type="color"
-                      value={element.data.qrButtonColor || '#000000'}
+                      value={elementData.qrButtonColor || '#000000'}
                       onChange={(e) => onUpdate && onUpdate({ 
                         ...element, 
                         data: { 
-                          ...element.data, 
+                          ...elementData, 
                           qrButtonColor: e.target.value 
                         } 
                       })}
                       className="h-10"
-                      disabled={!element.data.showQRDownload}
+                      disabled={!elementData.showQRDownload}
                     />
                   </div>
 
@@ -4007,11 +4016,11 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <input
                         type="checkbox"
                         id={`show-download-qr-${element.id}`}
-                        checked={element.data.showQRDownload || false}
+                        checked={elementData.showQRDownload || false}
                         onChange={(e) => onUpdate && onUpdate({ 
                           ...element, 
                           data: { 
-                            ...element.data, 
+                            ...elementData, 
                             showQRDownload: e.target.checked 
                           } 
                         })}
@@ -4025,11 +4034,11 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                       <input
                         type="checkbox"
                         id={`modern-style-${element.id}`}
-                        checked={element.data.modernStyle || false}
+                        checked={elementData.modernStyle || false}
                         onChange={(e) => onUpdate && onUpdate({ 
                           ...element, 
                           data: { 
-                            ...element.data, 
+                            ...elementData, 
                             modernStyle: e.target.checked 
                           } 
                         })}
@@ -4043,36 +4052,36 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                 </div>
               </div>
             )}
-            
+
             {/* Digital Wallet Container */}
             <div 
               className={`
-                ${element.data.modernStyle 
+                ${elementData.modernStyle 
                   ? 'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 border-2 border-slate-500 shadow-2xl' 
                   : 'border border-slate-700 shadow-lg'
                 } 
                 rounded-xl p-6
               `}
               style={{
-                backgroundColor: element.data.modernStyle ? undefined : (element.data.backgroundColor || '#1e293b'),
-                color: element.data.textColor || '#ffffff',
-                fontFamily: element.data.fontFamily || 'Inter'
+                backgroundColor: elementData.modernStyle ? undefined : (elementData.backgroundColor || '#1e293b'),
+                color: elementData.textColor || '#ffffff',
+                fontFamily: elementData.fontFamily || 'Inter'
               }}
             >
               <div className="text-center mb-6">
                 <h3 className="text-lg font-semibold mb-2">
-                  {element.data.title || 'Save to Digital Wallet'}
+                  {elementData.title || 'Save to Digital Wallet'}
                 </h3>
                 <p className="text-sm opacity-80">
-                  {element.data.subtitle || 'Add this business card to your phone\'s wallet'}
+                  {elementData.subtitle || 'Add this business card to your phone\'s wallet'}
                 </p>
               </div>
-              
+
               <div className={`
-                ${element.data.layout === 'columns' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'space-y-3'}
+                ${elementData.layout === 'columns' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'space-y-3'}
               `}>
                 {/* Apple Wallet Button */}
-                {element.data.showApple !== false && (
+                {elementData.showApple !== false && (
                   <Button
                     onClick={async () => {
                       try {
@@ -4083,18 +4092,18 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                             'Content-Type': 'application/json',
                           },
                         });
-                        
+
                         console.log('Apple Wallet API response status:', response.status);
-                        
+
                         if (!response.ok) {
                           const errorData = await response.json();
                           console.error('Apple Wallet API error:', errorData);
                           throw new Error(`Failed to generate Apple pass: ${errorData.message}`);
                         }
-                        
+
                         const result = await response.json();
                         console.log('Apple Wallet API response:', result);
-                        
+
                         if (result.success) {
                           alert(`✅ ${result.message}\n\nApple Wallet pass data generated successfully. In production, this would download a .pkpass file that can be added to Apple Wallet.`);
                         } else {
@@ -4107,18 +4116,18 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                     }}
                     className="w-full h-12 text-white transition-all duration-200 flex items-center justify-center space-x-3 hover:opacity-90"
                     style={{
-                      backgroundColor: element.data.appleButtonColor || '#000000',
-                      borderColor: element.data.appleButtonColor || '#000000'
+                      backgroundColor: elementData.appleButtonColor || '#000000',
+                      borderColor: elementData.appleButtonColor || '#000000'
                     }}
                     data-testid="button-add-apple-wallet"
                   >
                     <i className="fab fa-apple text-lg"></i>
-                    <span className="font-medium">{element.data.appleButtonText || 'Add to Apple Wallet'}</span>
+                    <span className="font-medium">{elementData.appleButtonText || 'Add to Apple Wallet'}</span>
                   </Button>
                 )}
 
                 {/* Google Wallet Button */}
-                {element.data.showGoogle !== false && (
+                {elementData.showGoogle !== false && (
                   <Button
                     onClick={async () => {
                       try {
@@ -4129,18 +4138,18 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
                             'Content-Type': 'application/json',
                           },
                         });
-                        
+
                         console.log('Google Wallet API response status:', response.status);
-                        
+
                         if (!response.ok) {
                           const errorData = await response.json();
                           console.error('Google Wallet API error:', errorData);
                           throw new Error(`Failed to generate Google pass: ${errorData.message}`);
                         }
-                        
+
                         const result = await response.json();
                         console.log('Google Wallet API result:', result);
-                        
+
                         if (result.success) {
                           if (result.saveUrl) {
                             console.log('Opening Google Wallet URL:', result.saveUrl);
@@ -4159,7 +4168,7 @@ ${theme.title ? `TITLE:${theme.title}\n` : ''}${theme.company ? `ORG:${theme.com
 • Contact: ${demoInfo.businessCardData.contact}
 
 🚀 For Production Setup:
-${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
+${demoInfo.requirements.map((req: string, i: number) => `${i + 1}. ${req}`).join('\n')}
 
 💡 In production, this would open Google Wallet to save the business card pass.`);
                           } else {
@@ -4168,26 +4177,26 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                         } else {
                           throw new Error(result.message || 'Failed to create Google Wallet pass');
                         }
-                      } catch (error) {
+                      } catch (error: any) {
                         console.error('Error generating Google pass:', error);
                         alert(`Failed to create Google Wallet pass: ${error.message}`);
                       }
                     }}
                     className="w-full h-12 text-white transition-all duration-200 flex items-center justify-center space-x-3 hover:opacity-90"
                     style={{
-                      backgroundColor: element.data.googleButtonColor || '#2563eb',
-                      borderColor: element.data.googleButtonColor || '#2563eb'
+                      backgroundColor: elementData.googleButtonColor || '#2563eb',
+                      borderColor: elementData.googleButtonColor || '#2563eb'
                     }}
                     data-testid="button-add-google-wallet"
                   >
                     <i className="fab fa-google text-lg"></i>
-                    <span className="font-medium">{element.data.googleButtonText || 'Add to Google Wallet'}</span>
+                    <span className="font-medium">{elementData.googleButtonText || 'Add to Google Wallet'}</span>
                   </Button>
                 )}
               </div>
 
               {/* QR Download Option */}
-              {element.data.showQRDownload && (
+              {elementData.showQRDownload && (
                 <div className="mt-4">
                   <Button
                     onClick={async () => {
@@ -4196,19 +4205,19 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                         // Generate QR code download link for business card
                         const shareUrl = `${window.location.origin}/${cardData?.shareSlug || cardData?.id}`;
                         console.log('Share URL for QR:', shareUrl);
-                        
-                        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&bgcolor=ffffff&color=${element.data.qrButtonColor?.replace('#', '') || '000000'}&data=${encodeURIComponent(shareUrl)}`;
+
+                        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&bgcolor=ffffff&color=${(elementData.qrButtonColor || '000000').replace('#', '')}&data=${encodeURIComponent(shareUrl)}`;
                         console.log('QR API URL:', qrUrl);
-                        
+
                         // Fetch the QR code image
                         const response = await fetch(qrUrl);
                         if (!response.ok) {
                           throw new Error('Failed to generate QR code');
                         }
-                        
+
                         const blob = await response.blob();
                         const url = window.URL.createObjectURL(blob);
-                        
+
                         const a = document.createElement('a');
                         a.href = url;
                         a.download = `${cardData?.fullName || 'BusinessCard'}-QR.png`;
@@ -4216,9 +4225,9 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                         a.click();
                         document.body.removeChild(a);
                         window.URL.revokeObjectURL(url);
-                        
+
                         console.log('QR code download triggered');
-                      } catch (error) {
+                      } catch (error: any) {
                         console.error('Error downloading QR code:', error);
                         alert(`Failed to download QR code: ${error.message}`);
                       }
@@ -4226,14 +4235,14 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     variant="outline"
                     className="w-full h-10 border-slate-500 hover:bg-slate-700 hover:text-white transition-all duration-200 flex items-center justify-center space-x-2"
                     style={{
-                      borderColor: element.data.qrButtonColor || '#000000',
-                      backgroundColor: element.data.qrButtonColor || '#000000',
+                      borderColor: elementData.qrButtonColor || '#000000',
+                      backgroundColor: elementData.qrButtonColor || '#000000',
                       color: '#ffffff'
                     }}
                     data-testid="button-download-qr"
                   >
                     <i className="fas fa-download"></i>
-                    <span>{element.data.qrButtonText || 'Download QR Code'}</span>
+                    <span>{elementData.qrButtonText || 'Download QR Code'}</span>
                   </Button>
                 </div>
               )}
@@ -4253,7 +4262,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
 
         return (
           <MenuPageElement 
-            data={element.data}
+            data={elementData}
             isEditing={isEditing}
             onChange={(data) => onUpdate && onUpdate({ ...element, data })}
             availablePages={availablePages}
@@ -4267,7 +4276,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
             {isEditing ? (
               <div className="space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
                 <h3 className="text-lg font-semibold text-gray-800">AR Preview Settings</h3>
-                
+
                 {/* Generate from Card Image Button */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
@@ -4279,14 +4288,14 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      
+
                       try {
                         const result = await compileMind(file);
                         handleDataUpdate({
                           mindFileUrl: result.mindFileUrl,
-                          planeTextureUrl: result.textureUrl || element.data.planeTextureUrl
+                          planeTextureUrl: result.textureUrl || elementData.planeTextureUrl
                         });
-                        
+
                         if (result.mindFileUrl) {
                           alert('AR target generated successfully!');
                         } else if (result.message) {
@@ -4311,13 +4320,13 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     Mind (.mind) File URL
                   </label>
                   <Input
-                    value={element.data.mindFileUrl || ''}
+                    value={elementData.mindFileUrl || ''}
                     onChange={(e) => handleDataUpdate({ mindFileUrl: e.target.value })}
                     placeholder="https://example.com/targets.mind"
                     className="text-sm"
                   />
                   <p className="text-xs text-gray-500">
-                    {element.data.mindFileUrl ? 'AR target configured' : 'Upload image above or paste .mind URL manually'}
+                    {elementData.mindFileUrl ? 'AR target configured' : 'Upload image above or paste .mind URL manually'}
                   </p>
                 </div>
 
@@ -4327,7 +4336,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     Poster URL (Fallback)
                   </label>
                   <Input
-                    value={element.data.posterUrl || ''}
+                    value={elementData.posterUrl || ''}
                     onChange={(e) => handleDataUpdate({ posterUrl: e.target.value })}
                     placeholder="https://example.com/poster.jpg"
                     className="text-sm"
@@ -4340,7 +4349,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     Plane Texture URL
                   </label>
                   <Input
-                    value={element.data.planeTextureUrl || ''}
+                    value={elementData.planeTextureUrl || ''}
                     onChange={(e) => handleDataUpdate({ planeTextureUrl: e.target.value })}
                     placeholder="https://example.com/texture.jpg"
                     className="text-sm"
@@ -4358,7 +4367,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       min="0.1"
                       max="2"
                       step="0.05"
-                      value={element.data.planeWidth || 0.8}
+                      value={elementData.planeWidth || 0.8}
                       onChange={(e) => handleDataUpdate({ planeWidth: parseFloat(e.target.value) })}
                       className="text-sm"
                     />
@@ -4372,7 +4381,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       min="0.1"
                       max="2"
                       step="0.05"
-                      value={element.data.planeHeight || 0.45}
+                      value={elementData.planeHeight || 0.45}
                       onChange={(e) => handleDataUpdate({ planeHeight: parseFloat(e.target.value) })}
                       className="text-sm"
                     />
@@ -4386,7 +4395,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   </label>
                   <input
                     type="color"
-                    value={element.data.accent || '#0ea5e9'}
+                    value={elementData.accent || '#0ea5e9'}
                     onChange={(e) => handleDataUpdate({ accent: e.target.value })}
                     className="w-full h-10 rounded border border-gray-300"
                   />
@@ -4398,12 +4407,12 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     Call-to-Action Buttons
                   </label>
                   <div className="space-y-2">
-                    {(element.data.ctas || []).map((cta: any, index: number) => (
-                      <div key={index} className="flex gap-2 items-center p-2 border rounded">
+                    {(elementData.ctas || []).map((cta: any, index: number) => (
+                      <div key={`cta-${index}`} className="flex gap-2 items-center p-2 border rounded">
                         <Input
                           value={cta.label || ''}
                           onChange={(e) => {
-                            const newCtas = [...(element.data.ctas || [])];
+                            const newCtas = [...(elementData.ctas || [])];
                             newCtas[index] = { ...cta, label: e.target.value };
                             handleDataUpdate({ ctas: newCtas });
                           }}
@@ -4413,7 +4422,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                         <select
                           value={cta.action || 'link'}
                           onChange={(e) => {
-                            const newCtas = [...(element.data.ctas || [])];
+                            const newCtas = [...(elementData.ctas || [])];
                             newCtas[index] = { ...cta, action: e.target.value };
                             handleDataUpdate({ ctas: newCtas });
                           }}
@@ -4427,7 +4436,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                         <Input
                           value={cta.value || ''}
                           onChange={(e) => {
-                            const newCtas = [...(element.data.ctas || [])];
+                            const newCtas = [...(elementData.ctas || [])];
                             newCtas[index] = { ...cta, value: e.target.value };
                             handleDataUpdate({ ctas: newCtas });
                           }}
@@ -4436,7 +4445,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                         />
                         <Button
                           onClick={() => {
-                            const newCtas = (element.data.ctas || []).filter((_: any, i: number) => i !== index);
+                            const newCtas = (elementData.ctas || []).filter((_: any, i: number) => i !== index);
                             handleDataUpdate({ ctas: newCtas });
                           }}
                           variant="outline"
@@ -4449,7 +4458,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     ))}
                     <Button
                       onClick={() => {
-                        const newCtas = [...(element.data.ctas || []), { label: 'New Action', action: 'link', value: '' }];
+                        const newCtas = [...(elementData.ctas || []), { label: 'New Action', action: 'link', value: '' }];
                         handleDataUpdate({ ctas: newCtas });
                       }}
                       variant="outline"
@@ -4463,13 +4472,13 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
               </div>
             ) : (
               <ARPreviewMindAR
-                mindFileUrl={element.data.mindFileUrl}
-                posterUrl={element.data.posterUrl}
-                planeTextureUrl={element.data.planeTextureUrl}
-                planeWidth={element.data.planeWidth}
-                planeHeight={element.data.planeHeight}
-                accent={element.data.accent}
-                ctas={element.data.ctas}
+                mindFileUrl={elementData.mindFileUrl}
+                posterUrl={elementData.posterUrl}
+                planeTextureUrl={elementData.planeTextureUrl}
+                planeWidth={elementData.planeWidth}
+                planeHeight={elementData.planeHeight}
+                accent={elementData.accent}
+                ctas={elementData.ctas}
               />
             )}
           </div>
@@ -4488,7 +4497,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Title</label>
                     <Input
-                      value={element.data.title || ""}
+                      value={elementData.title || ""}
                       onChange={(e) => handleDataUpdate({ title: e.target.value })}
                       placeholder="Book Appointment"
                     />
@@ -4496,7 +4505,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Button Text</label>
                     <Input
-                      value={element.data.buttonText || ""}
+                      value={elementData.buttonText || ""}
                       onChange={(e) => handleDataUpdate({ buttonText: e.target.value })}
                       placeholder="Book Now"
                     />
@@ -4505,7 +4514,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 <div>
                   <label className="text-sm font-medium text-slate-700 block mb-1">Subtitle</label>
                   <Input
-                    value={element.data.subtitle || ""}
+                    value={elementData.subtitle || ""}
                     onChange={(e) => handleDataUpdate({ subtitle: e.target.value })}
                     placeholder="Schedule a meeting with me"
                   />
@@ -4514,7 +4523,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Event Type Slug</label>
                     <Input
-                      value={element.data.eventTypeSlug || ""}
+                      value={elementData.eventTypeSlug || ""}
                       onChange={(e) => handleDataUpdate({ eventTypeSlug: e.target.value })}
                       placeholder="consultation"
                     />
@@ -4523,7 +4532,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <label className="text-sm font-medium text-slate-700 block mb-1">Duration (min)</label>
                     <Input
                       type="number"
-                      value={element.data.duration || 30}
+                      value={elementData.duration || 30}
                       onChange={(e) => handleDataUpdate({ duration: parseInt(e.target.value) })}
                       min="15"
                       max="180"
@@ -4535,7 +4544,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <label className="text-sm font-medium text-slate-700 block mb-1">Button Color</label>
                     <Input
                       type="color"
-                      value={element.data.buttonColor || "#22c55e"}
+                      value={elementData.buttonColor || "#22c55e"}
                       onChange={(e) => handleDataUpdate({ buttonColor: e.target.value })}
                     />
                   </div>
@@ -4543,13 +4552,13 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <label className="text-sm font-medium text-slate-700 block mb-1">Text Color</label>
                     <Input
                       type="color"
-                      value={element.data.textColor || "#ffffff"}
+                      value={elementData.textColor || "#ffffff"}
                       onChange={(e) => handleDataUpdate({ textColor: e.target.value })}
                     />
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      checked={element.data.openInNewTab || false}
+                      checked={elementData.openInNewTab || false}
                       onCheckedChange={(checked) => handleDataUpdate({ openInNewTab: checked })}
                     />
                     <label className="text-sm font-medium text-slate-700">Open in new tab</label>
@@ -4558,7 +4567,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Icon</label>
-                    <Select value={element.data.icon || "calendar"} onValueChange={(value) => handleDataUpdate({ icon: value })}>
+                    <Select value={elementData.icon || "calendar"} onValueChange={(value) => handleDataUpdate({ icon: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -4572,7 +4581,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Button Size</label>
-                    <Select value={element.data.size || "medium"} onValueChange={(value) => handleDataUpdate({ size: value })}>
+                    <Select value={elementData.size || "medium"} onValueChange={(value) => handleDataUpdate({ size: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -4587,44 +4596,44 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
               </div>
             ) : (
               <div className="text-center space-y-3 p-4 rounded-lg border border-slate-200 bg-white">
-                <h3 className="text-lg font-bold text-slate-800">{element.data.title || "Book Appointment"}</h3>
-                {element.data.subtitle && (
-                  <p className="text-sm text-slate-600">{element.data.subtitle}</p>
+                <h3 className="text-lg font-bold text-slate-800">{elementData.title || "Book Appointment"}</h3>
+                {elementData.subtitle && (
+                  <p className="text-sm text-slate-600">{elementData.subtitle}</p>
                 )}
                 <Button
                   onClick={() => {
                     if (!isInteractive) return;
-                    const eventSlug = element.data.eventTypeSlug || 'consultation';
-                    const duration = element.data.duration || 30;
+                    const eventSlug = elementData.eventTypeSlug || 'consultation';
+                    const duration = elementData.duration || 30;
                     const bookingUrl = `/booking/${eventSlug}?duration=${duration}&source=card`;
-                    
-                    if (element.data.openInNewTab) {
+
+                    if (elementData.openInNewTab) {
                       window.open(bookingUrl, '_blank');
                     } else {
                       window.location.href = bookingUrl;
                     }
                   }}
                   style={{
-                    backgroundColor: element.data.buttonColor || "#22c55e",
-                    color: element.data.textColor || "#ffffff",
+                    backgroundColor: elementData.buttonColor || "#22c55e",
+                    color: elementData.textColor || "#ffffff",
                   }}
                   className={`rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${
-                    element.data.size === 'small' ? 'px-4 py-1 text-sm' :
-                    element.data.size === 'large' ? 'px-8 py-3 text-lg' :
+                    elementData.size === 'small' ? 'px-4 py-1 text-sm' :
+                    elementData.size === 'large' ? 'px-8 py-3 text-lg' :
                     'px-6 py-2'
                   }`}
                   data-testid="button-book-appointment"
                 >
-                  {element.data.icon && element.data.icon !== 'none' && (
+                  {elementData.icon && elementData.icon !== 'none' && (
                     <i className={`fas fa-${
-                      element.data.icon === 'calendar' ? 'calendar-alt' :
-                      element.data.icon === 'clock' ? 'clock' :
-                      element.data.icon === 'user' ? 'user' : 'calendar-alt'
+                      elementData.icon === 'calendar' ? 'calendar-alt' :
+                      elementData.icon === 'clock' ? 'clock' :
+                      elementData.icon === 'user' ? 'user' : 'calendar-alt'
                     } mr-2`}></i>
                   )}
-                  {element.data.buttonText || "Book Now"}
-                  {element.data.duration && (
-                    <span className="ml-2 text-xs opacity-80">({element.data.duration}min)</span>
+                  {elementData.buttonText || "Book Now"}
+                  {elementData.duration && (
+                    <span className="ml-2 text-xs opacity-80">({elementData.duration}min)</span>
                   )}
                 </Button>
               </div>
@@ -4644,7 +4653,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Title</label>
                     <Input
-                      value={element.data.title || ""}
+                      value={elementData.title || ""}
                       onChange={(e) => handleDataUpdate({ title: e.target.value })}
                       placeholder="Schedule a Call"
                     />
@@ -4652,7 +4661,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Button Text</label>
                     <Input
-                      value={element.data.buttonText || ""}
+                      value={elementData.buttonText || ""}
                       onChange={(e) => handleDataUpdate({ buttonText: e.target.value })}
                       placeholder="Schedule Call"
                     />
@@ -4661,7 +4670,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 <div>
                   <label className="text-sm font-medium text-slate-700 block mb-1">Subtitle</label>
                   <Input
-                    value={element.data.subtitle || ""}
+                    value={elementData.subtitle || ""}
                     onChange={(e) => handleDataUpdate({ subtitle: e.target.value })}
                     placeholder="Let's discuss your project"
                   />
@@ -4670,14 +4679,14 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Event Type Slug</label>
                     <Input
-                      value={element.data.eventTypeSlug || ""}
+                      value={elementData.eventTypeSlug || ""}
                       onChange={(e) => handleDataUpdate({ eventTypeSlug: e.target.value })}
                       placeholder="phone-call"
                     />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Call Type</label>
-                    <Select value={element.data.callType || "phone"} onValueChange={(value) => handleDataUpdate({ callType: value })}>
+                    <Select value={elementData.callType || "phone"} onValueChange={(value) => handleDataUpdate({ callType: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -4694,7 +4703,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <label className="text-sm font-medium text-slate-700 block mb-1">Button Color</label>
                     <Input
                       type="color"
-                      value={element.data.buttonColor || "#2563eb"}
+                      value={elementData.buttonColor || "#2563eb"}
                       onChange={(e) => handleDataUpdate({ buttonColor: e.target.value })}
                     />
                   </div>
@@ -4702,7 +4711,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <label className="text-sm font-medium text-slate-700 block mb-1">Text Color</label>
                     <Input
                       type="color"
-                      value={element.data.textColor || "#ffffff"}
+                      value={elementData.textColor || "#ffffff"}
                       onChange={(e) => handleDataUpdate({ textColor: e.target.value })}
                     />
                   </div>
@@ -4710,7 +4719,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <label className="text-sm font-medium text-slate-700 block mb-1">Duration (min)</label>
                     <Input
                       type="number"
-                      value={element.data.duration || 30}
+                      value={elementData.duration || 30}
                       onChange={(e) => handleDataUpdate({ duration: parseInt(e.target.value) })}
                       min="15"
                       max="180"
@@ -4720,7 +4729,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Button Size</label>
-                    <Select value={element.data.size || "medium"} onValueChange={(value) => handleDataUpdate({ size: value })}>
+                    <Select value={elementData.size || "medium"} onValueChange={(value) => handleDataUpdate({ size: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -4733,7 +4742,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      checked={element.data.openInNewTab || false}
+                      checked={elementData.openInNewTab || false}
                       onCheckedChange={(checked) => handleDataUpdate({ openInNewTab: checked })}
                     />
                     <label className="text-sm font-medium text-slate-700">Open in new tab</label>
@@ -4742,50 +4751,50 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
               </div>
             ) : (
               <div className="text-center space-y-3 p-4 rounded-lg border border-slate-200 bg-white">
-                <h3 className="text-lg font-bold text-slate-800">{element.data.title || "Schedule a Call"}</h3>
-                {element.data.subtitle && (
-                  <p className="text-sm text-slate-600">{element.data.subtitle}</p>
+                <h3 className="text-lg font-bold text-slate-800">{elementData.title || "Schedule a Call"}</h3>
+                {elementData.subtitle && (
+                  <p className="text-sm text-slate-600">{elementData.subtitle}</p>
                 )}
                 <Button
                   onClick={() => {
                     if (!isInteractive) return;
-                    const eventSlug = element.data.eventTypeSlug || 'phone-call';
-                    const duration = element.data.duration || 30;
-                    const callType = element.data.callType || 'phone';
+                    const eventSlug = elementData.eventTypeSlug || 'phone-call';
+                    const duration = elementData.duration || 30;
+                    const callType = elementData.callType || 'phone';
                     const bookingUrl = `/booking/${eventSlug}?duration=${duration}&type=${callType}&source=card`;
-                    
-                    if (element.data.openInNewTab) {
+
+                    if (elementData.openInNewTab) {
                       window.open(bookingUrl, '_blank');
                     } else {
                       window.location.href = bookingUrl;
                     }
                   }}
                   style={{
-                    backgroundColor: element.data.buttonColor || "#2563eb",
-                    color: element.data.textColor || "#ffffff",
+                    backgroundColor: elementData.buttonColor || "#2563eb",
+                    color: elementData.textColor || "#ffffff",
                   }}
                   className={`rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${
-                    element.data.size === 'small' ? 'px-4 py-1 text-sm' :
-                    element.data.size === 'large' ? 'px-8 py-3 text-lg' :
+                    elementData.size === 'small' ? 'px-4 py-1 text-sm' :
+                    elementData.size === 'large' ? 'px-8 py-3 text-lg' :
                     'px-6 py-2'
                   }`}
                   data-testid="button-schedule-call"
                 >
-                  {element.data.callType === 'phone' && (
+                  {elementData.callType === 'phone' && (
                     <i className="fas fa-phone mr-2"></i>
                   )}
-                  {element.data.callType === 'video' && (
+                  {elementData.callType === 'video' && (
                     <i className="fas fa-video mr-2"></i>
                   )}
-                  {element.data.callType === 'both' && (
+                  {elementData.callType === 'both' && (
                     <>
                       <i className="fas fa-phone mr-1"></i>
                       <i className="fas fa-video mr-2"></i>
                     </>
                   )}
-                  {element.data.buttonText || "Schedule Call"}
-                  {element.data.duration && (
-                    <span className="ml-2 text-xs opacity-80">({element.data.duration}min)</span>
+                  {elementData.buttonText || "Schedule Call"}
+                  {elementData.duration && (
+                    <span className="ml-2 text-xs opacity-80">({elementData.duration}min)</span>
                   )}
                 </Button>
               </div>
@@ -4805,7 +4814,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Title</label>
                     <Input
-                      value={element.data.title || ""}
+                      value={elementData.title || ""}
                       onChange={(e) => handleDataUpdate({ title: e.target.value })}
                       placeholder="Request a Meeting"
                     />
@@ -4813,7 +4822,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Button Text</label>
                     <Input
-                      value={element.data.buttonText || ""}
+                      value={elementData.buttonText || ""}
                       onChange={(e) => handleDataUpdate({ buttonText: e.target.value })}
                       placeholder="Request Meeting"
                     />
@@ -4822,7 +4831,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 <div>
                   <label className="text-sm font-medium text-slate-700 block mb-1">Subtitle</label>
                   <Input
-                    value={element.data.subtitle || ""}
+                    value={elementData.subtitle || ""}
                     onChange={(e) => handleDataUpdate({ subtitle: e.target.value })}
                     placeholder="Let's meet to discuss opportunities"
                   />
@@ -4831,14 +4840,14 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Event Type Slug</label>
                     <Input
-                      value={element.data.eventTypeSlug || ""}
+                      value={elementData.eventTypeSlug || ""}
                       onChange={(e) => handleDataUpdate({ eventTypeSlug: e.target.value })}
                       placeholder="discovery-meeting"
                     />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Meeting Type</label>
-                    <Select value={element.data.meetingType || "business"} onValueChange={(value) => handleDataUpdate({ meetingType: value })}>
+                    <Select value={elementData.meetingType || "business"} onValueChange={(value) => handleDataUpdate({ meetingType: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -4856,7 +4865,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <label className="text-sm font-medium text-slate-700 block mb-1">Border Color</label>
                     <Input
                       type="color"
-                      value={element.data.borderColor || "#7c3aed"}
+                      value={elementData.borderColor || "#7c3aed"}
                       onChange={(e) => handleDataUpdate({ borderColor: e.target.value })}
                     />
                   </div>
@@ -4864,7 +4873,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <label className="text-sm font-medium text-slate-700 block mb-1">Text Color</label>
                     <Input
                       type="color"
-                      value={element.data.textColor || "#7c3aed"}
+                      value={elementData.textColor || "#7c3aed"}
                       onChange={(e) => handleDataUpdate({ textColor: e.target.value })}
                     />
                   </div>
@@ -4872,7 +4881,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <label className="text-sm font-medium text-slate-700 block mb-1">Duration (min)</label>
                     <Input
                       type="number"
-                      value={element.data.duration || 60}
+                      value={elementData.duration || 60}
                       onChange={(e) => handleDataUpdate({ duration: parseInt(e.target.value) })}
                       min="15"
                       max="180"
@@ -4882,7 +4891,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Button Style</label>
-                    <Select value={element.data.style || "outlined"} onValueChange={(value) => handleDataUpdate({ style: value })}>
+                    <Select value={elementData.style || "outlined"} onValueChange={(value) => handleDataUpdate({ style: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -4895,7 +4904,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Button Size</label>
-                    <Select value={element.data.size || "medium"} onValueChange={(value) => handleDataUpdate({ size: value })}>
+                    <Select value={elementData.size || "medium"} onValueChange={(value) => handleDataUpdate({ size: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -4909,7 +4918,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    checked={element.data.openInNewTab || false}
+                    checked={elementData.openInNewTab || false}
                     onCheckedChange={(checked) => handleDataUpdate({ openInNewTab: checked })}
                   />
                   <label className="text-sm font-medium text-slate-700">Open in new tab</label>
@@ -4917,57 +4926,57 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
               </div>
             ) : (
               <div className="text-center space-y-3 p-4 rounded-lg border border-slate-200 bg-white">
-                <h3 className="text-lg font-bold text-slate-800">{element.data.title || "Request a Meeting"}</h3>
-                {element.data.subtitle && (
-                  <p className="text-sm text-slate-600">{element.data.subtitle}</p>
+                <h3 className="text-lg font-bold text-slate-800">{elementData.title || "Request a Meeting"}</h3>
+                {elementData.subtitle && (
+                  <p className="text-sm text-slate-600">{elementData.subtitle}</p>
                 )}
                 <Button
                   onClick={() => {
                     if (!isInteractive) return;
-                    const eventSlug = element.data.eventTypeSlug || 'discovery-meeting';
-                    const duration = element.data.duration || 60;
-                    const meetingType = element.data.meetingType || 'business';
+                    const eventSlug = elementData.eventTypeSlug || 'discovery-meeting';
+                    const duration = elementData.duration || 60;
+                    const meetingType = elementData.meetingType || 'business';
                     const bookingUrl = `/booking/${eventSlug}?duration=${duration}&type=${meetingType}&source=card&style=meeting`;
-                    
-                    if (element.data.openInNewTab) {
+
+                    if (elementData.openInNewTab) {
                       window.open(bookingUrl, '_blank');
                     } else {
                       window.location.href = bookingUrl;
                     }
                   }}
                   style={{
-                    backgroundColor: element.data.style === 'filled' ? (element.data.borderColor || "#7c3aed") : "transparent",
-                    color: element.data.style === 'filled' ? "#ffffff" : (element.data.textColor || "#7c3aed"),
-                    borderColor: element.data.style !== 'minimal' ? (element.data.borderColor || "#7c3aed") : "transparent",
-                    borderWidth: element.data.style === 'minimal' ? '0' : '2px',
+                    backgroundColor: elementData.style === 'filled' ? (elementData.borderColor || "#7c3aed") : "transparent",
+                    color: elementData.style === 'filled' ? "#ffffff" : (elementData.textColor || "#7c3aed"),
+                    borderColor: elementData.style !== 'minimal' ? (elementData.borderColor || "#7c3aed") : "transparent",
+                    borderWidth: elementData.style === 'minimal' ? '0' : '2px',
                   }}
                   className={`rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 ${
-                    element.data.style === 'outlined' ? 'border-2 hover:shadow-lg' :
-                    element.data.style === 'filled' ? 'shadow-lg hover:shadow-xl' :
+                    elementData.style === 'outlined' ? 'border-2 hover:shadow-lg' :
+                    elementData.style === 'filled' ? 'shadow-lg hover:shadow-xl' :
                     'hover:bg-slate-50'
                   } ${
-                    element.data.size === 'small' ? 'px-4 py-1 text-sm' :
-                    element.data.size === 'large' ? 'px-8 py-3 text-lg' :
+                    elementData.size === 'small' ? 'px-4 py-1 text-sm' :
+                    elementData.size === 'large' ? 'px-8 py-3 text-lg' :
                     'px-6 py-2'
                   }`}
-                  variant={element.data.style === 'filled' ? 'default' : 'outline'}
+                  variant={elementData.style === 'filled' ? 'default' : 'outline'}
                   data-testid="button-meeting-request"
                 >
-                  {element.data.meetingType === 'business' && (
+                  {elementData.meetingType === 'business' && (
                     <i className="fas fa-handshake mr-2"></i>
                   )}
-                  {element.data.meetingType === 'consultation' && (
+                  {elementData.meetingType === 'consultation' && (
                     <i className="fas fa-user-tie mr-2"></i>
                   )}
-                  {element.data.meetingType === 'discovery' && (
+                  {elementData.meetingType === 'discovery' && (
                     <i className="fas fa-search mr-2"></i>
                   )}
-                  {element.data.meetingType === 'demo' && (
+                  {elementData.meetingType === 'demo' && (
                     <i className="fas fa-desktop mr-2"></i>
                   )}
-                  {element.data.buttonText || "Request Meeting"}
-                  {element.data.duration && (
-                    <span className="ml-2 text-xs opacity-80">({element.data.duration}min)</span>
+                  {elementData.buttonText || "Request Meeting"}
+                  {elementData.duration && (
+                    <span className="ml-2 text-xs opacity-80">({elementData.duration}min)</span>
                   )}
                 </Button>
               </div>
@@ -4987,7 +4996,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Title</label>
                     <Input
-                      value={element.data.title || ""}
+                      value={elementData.title || ""}
                       onChange={(e) => handleDataUpdate({ title: e.target.value })}
                       placeholder="My Availability"
                     />
@@ -4995,7 +5004,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Subtitle</label>
                     <Input
-                      value={element.data.subtitle || ""}
+                      value={elementData.subtitle || ""}
                       onChange={(e) => handleDataUpdate({ subtitle: e.target.value })}
                       placeholder="Choose a convenient time"
                     />
@@ -5005,14 +5014,14 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Event Type Slug</label>
                     <Input
-                      value={element.data.eventTypeSlug || ""}
+                      value={elementData.eventTypeSlug || ""}
                       onChange={(e) => handleDataUpdate({ eventTypeSlug: e.target.value })}
                       placeholder="30min-meeting"
                     />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Timezone</label>
-                    <Select value={element.data.timezone || "auto"} onValueChange={(value) => handleDataUpdate({ timezone: value })}>
+                    <Select value={elementData.timezone || "auto"} onValueChange={(value) => handleDataUpdate({ timezone: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -5033,7 +5042,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <label className="text-sm font-medium text-slate-700 block mb-1">Primary Color</label>
                     <Input
                       type="color"
-                      value={element.data.primaryColor || "#22c55e"}
+                      value={elementData.primaryColor || "#22c55e"}
                       onChange={(e) => handleDataUpdate({ primaryColor: e.target.value })}
                     />
                   </div>
@@ -5041,7 +5050,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <label className="text-sm font-medium text-slate-700 block mb-1">Background Color</label>
                     <Input
                       type="color"
-                      value={element.data.backgroundColor || "#f8fafc"}
+                      value={elementData.backgroundColor || "#f8fafc"}
                       onChange={(e) => handleDataUpdate({ backgroundColor: e.target.value })}
                     />
                   </div>
@@ -5049,7 +5058,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Display Style</label>
-                    <Select value={element.data.displayStyle || "compact"} onValueChange={(value) => handleDataUpdate({ displayStyle: value })}>
+                    <Select value={elementData.displayStyle || "compact"} onValueChange={(value) => handleDataUpdate({ displayStyle: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -5064,7 +5073,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <label className="text-sm font-medium text-slate-700 block mb-1">Days to Show</label>
                     <Input
                       type="number"
-                      value={element.data.daysToShow || 7}
+                      value={elementData.daysToShow || 7}
                       onChange={(e) => handleDataUpdate({ daysToShow: parseInt(e.target.value) })}
                       min="3"
                       max="14"
@@ -5074,24 +5083,24 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      checked={element.data.showBookingButton || true}
+                      checked={elementData.showBookingButton !== false}
                       onCheckedChange={(checked) => handleDataUpdate({ showBookingButton: checked })}
                     />
                     <label className="text-sm font-medium text-slate-700">Show booking button</label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      checked={element.data.openInNewTab || false}
+                      checked={elementData.openInNewTab || false}
                       onCheckedChange={(checked) => handleDataUpdate({ openInNewTab: checked })}
                     />
                     <label className="text-sm font-medium text-slate-700">Open in new tab</label>
                   </div>
                 </div>
-                {element.data.showBookingButton && (
+                {elementData.showBookingButton !== false && (
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Booking Button Text</label>
                     <Input
-                      value={element.data.bookingButtonText || ""}
+                      value={elementData.bookingButtonText || ""}
                       onChange={(e) => handleDataUpdate({ bookingButtonText: e.target.value })}
                       placeholder="Book a slot"
                     />
@@ -5101,22 +5110,22 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
             ) : (
               <div 
                 className="p-4 rounded-lg border border-slate-200"
-                style={{ backgroundColor: element.data.backgroundColor || "#f8fafc" }}
+                style={{ backgroundColor: elementData.backgroundColor || "#f8fafc" }}
                 data-testid="availability-display"
               >
-                <h3 className="text-lg font-bold text-slate-800 mb-2 text-center">{element.data.title || "My Availability"}</h3>
-                {element.data.subtitle && (
-                  <p className="text-sm text-slate-600 mb-4 text-center">{element.data.subtitle}</p>
+                <h3 className="text-lg font-bold text-slate-800 mb-2 text-center">{elementData.title || "My Availability"}</h3>
+                {elementData.subtitle && (
+                  <p className="text-sm text-slate-600 mb-4 text-center">{elementData.subtitle}</p>
                 )}
                 <AvailabilityWidget
-                  eventTypeSlug={element.data.eventTypeSlug}
-                  timezone={element.data.timezone}
-                  displayStyle={element.data.displayStyle}
-                  daysToShow={element.data.daysToShow}
-                  primaryColor={element.data.primaryColor}
-                  showBookingButton={element.data.showBookingButton}
-                  bookingButtonText={element.data.bookingButtonText}
-                  openInNewTab={element.data.openInNewTab}
+                  eventTypeSlug={elementData.eventTypeSlug}
+                  timezone={elementData.timezone}
+                  displayStyle={elementData.displayStyle}
+                  daysToShow={elementData.daysToShow}
+                  primaryColor={elementData.primaryColor}
+                  showBookingButton={elementData.showBookingButton !== false}
+                  bookingButtonText={elementData.bookingButtonText}
+                  openInNewTab={elementData.openInNewTab}
                   isInteractive={isInteractive}
                 />
               </div>
@@ -5132,34 +5141,34 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 <div className="mb-4">
                   <h4 className="text-md font-semibold text-slate-800">Subscribe Form Element</h4>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Title</label>
                     <Input
-                      value={element.data.title || ""}
+                      value={elementData.title || ""}
                       onChange={(e) => handleDataUpdate({ title: e.target.value })}
                       placeholder="Stay Updated"
                       data-testid="input-title"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Description</label>
                     <Textarea
-                      value={element.data.description || ""}
+                      value={elementData.description || ""}
                       onChange={(e) => handleDataUpdate({ description: e.target.value })}
                       placeholder="Subscribe to get notified about updates and news."
                       rows={3}
                       data-testid="input-description"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-slate-700 block mb-1">Button Text</label>
                       <Input
-                        value={element.data.buttonText || ""}
+                        value={elementData.buttonText || ""}
                         onChange={(e) => handleDataUpdate({ buttonText: e.target.value })}
                         placeholder="Subscribe"
                         data-testid="input-buttonText"
@@ -5168,19 +5177,19 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     <div>
                       <label className="text-sm font-medium text-slate-700 block mb-1">Success Message</label>
                       <Input
-                        value={element.data.successMessage || ""}
+                        value={elementData.successMessage || ""}
                         onChange={(e) => handleDataUpdate({ successMessage: e.target.value })}
                         placeholder="Thank you for subscribing!"
                         data-testid="input-successMessage"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Checkbox
                         id={`requireName-${element.id}`}
-                        checked={element.data.requireName || false}
+                        checked={elementData.requireName || false}
                         onCheckedChange={(checked) => handleDataUpdate({ requireName: checked })}
                         data-testid="checkbox-requireName"
                       />
@@ -5188,11 +5197,11 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                         Require Name
                       </label>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <Checkbox
                         id={`requireEmail-${element.id}`}
-                        checked={element.data.requireEmail !== false}
+                        checked={elementData.requireEmail !== false}
                         onCheckedChange={(checked) => handleDataUpdate({ requireEmail: checked })}
                         data-testid="checkbox-requireEmail"
                       />
@@ -5200,11 +5209,11 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                         Require Email
                       </label>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <Checkbox
                         id={`enablePush-${element.id}`}
-                        checked={element.data.enablePushNotifications !== false}
+                        checked={elementData.enablePushNotifications !== false}
                         onCheckedChange={(checked) => handleDataUpdate({ enablePushNotifications: checked })}
                         data-testid="checkbox-enablePush"
                       />
@@ -5213,13 +5222,13 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       </label>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <label className="text-sm font-medium text-slate-700 block mb-1">Primary Color</label>
                       <Input
                         type="color"
-                        value={element.data.primaryColor || "#f97316"}
+                        value={elementData.primaryColor || "#f97316"}
                         onChange={(e) => handleDataUpdate({ primaryColor: e.target.value })}
                         data-testid="input-primaryColor"
                       />
@@ -5228,7 +5237,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       <label className="text-sm font-medium text-slate-700 block mb-1">Background Color</label>
                       <Input
                         type="color"
-                        value={element.data.backgroundColor || "#ffffff"}
+                        value={elementData.backgroundColor || "#ffffff"}
                         onChange={(e) => handleDataUpdate({ backgroundColor: e.target.value })}
                         data-testid="input-backgroundColor"
                       />
@@ -5237,7 +5246,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       <label className="text-sm font-medium text-slate-700 block mb-1">Text Color</label>
                       <Input
                         type="color"
-                        value={element.data.textColor || "#1e293b"}
+                        value={elementData.textColor || "#1e293b"}
                         onChange={(e) => handleDataUpdate({ textColor: e.target.value })}
                         data-testid="input-textColor"
                       />
@@ -5248,16 +5257,16 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
             ) : (
               <SubscribeFormComponent
                 cardId={cardData?.id || ""}
-                title={element.data.title}
-                description={element.data.description}
-                buttonText={element.data.buttonText}
-                successMessage={element.data.successMessage}
-                requireName={element.data.requireName}
-                requireEmail={element.data.requireEmail}
-                enablePushNotifications={element.data.enablePushNotifications}
-                primaryColor={element.data.primaryColor}
-                backgroundColor={element.data.backgroundColor}
-                textColor={element.data.textColor}
+                title={elementData.title}
+                description={elementData.description}
+                buttonText={elementData.buttonText}
+                successMessage={elementData.successMessage}
+                requireName={elementData.requireName}
+                requireEmail={elementData.requireEmail}
+                enablePushNotifications={elementData.enablePushNotifications}
+                primaryColor={elementData.primaryColor}
+                backgroundColor={elementData.backgroundColor}
+                textColor={elementData.textColor}
               />
             )}
           </div>
@@ -5275,7 +5284,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">HTML Content</label>
                     <Textarea
-                      value={element.data.content || ""}
+                      value={elementData.content || ""}
                       onChange={(e) => handleDataUpdate({ content: e.target.value })}
                       placeholder="Enter your HTML code here..."
                       className="min-h-[200px] font-mono text-sm"
@@ -5287,7 +5296,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       <label className="text-sm font-medium text-slate-700 block mb-1">Height (px)</label>
                       <Input
                         type="number"
-                        value={element.data.height || 300}
+                        value={elementData.height || 300}
                         onChange={(e) => handleDataUpdate({ height: parseInt(e.target.value) || 300 })}
                         min={100}
                         max={1000}
@@ -5297,7 +5306,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox
-                        checked={element.data.sandbox !== false}
+                        checked={elementData.sandbox !== false}
                         onCheckedChange={(checked) => handleDataUpdate({ sandbox: checked })}
                         data-testid="html-sandbox-checkbox"
                       />
@@ -5314,7 +5323,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
               </div>
             ) : (
               <div className="html-element-preview w-full" data-testid="html-element-preview">
-                {element.data.content && element.data.content.trim() ? (
+                {elementData.content && elementData.content.trim() ? (
                   <iframe
                     srcDoc={`<!DOCTYPE html>
 <html>
@@ -5326,13 +5335,13 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
   </style>
 </head>
 <body>
-  ${element.data.content}
+  ${elementData.content}
 </body>
 </html>`}
                     style={{ 
                       width: '430px',
                       maxWidth: '100%',
-                      height: `${element.data.height || 300}px`,
+                      height: `${elementData.height || 300}px`,
                       border: 'none',
                       borderRadius: '0'
                     }}
@@ -5343,7 +5352,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                 ) : (
                   <div 
                     className="border-2 border-dashed border-slate-300 p-8 text-center text-slate-500"
-                    style={{ width: '430px', maxWidth: '100%', height: `${element.data.height || 300}px` }}
+                    style={{ width: '430px', maxWidth: '100%', height: `${elementData.height || 300}px` }}
                     data-testid="html-placeholder"
                   >
                     <i className="fas fa-code text-4xl mb-4"></i>
@@ -5386,30 +5395,30 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       className="w-full"
                       data-testid="pdf-file-input"
                     />
-                    {element.data.file_name && (
+                    {elementData.file_name && (
                       <p className="text-xs text-green-600 mt-1">
                         <i className="fas fa-check mr-1"></i>
-                        Uploaded: {element.data.file_name}
+                        Uploaded: {elementData.file_name}
                       </p>
                     )}
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Button Text</label>
                     <Input
-                      value={element.data.button_text || "View PDF"}
+                      value={elementData.button_text || "View PDF"}
                       onChange={(e) => handleDataUpdate({ button_text: e.target.value })}
                       placeholder="View PDF"
                       className="w-full"
                       data-testid="pdf-button-text-input"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-sm font-medium text-slate-700 block mb-1">Button Color</label>
                       <Input
                         type="color"
-                        value={element.data.buttonColor || "#6b21a8"}
+                        value={elementData.buttonColor || "#6b21a8"}
                         onChange={(e) => handleDataUpdate({ buttonColor: e.target.value })}
                         className="w-full h-10"
                         data-testid="pdf-button-color-input"
@@ -5419,7 +5428,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       <label className="text-sm font-medium text-slate-700 block mb-1">Text Color</label>
                       <Input
                         type="color"
-                        value={element.data.textColor || "#ffffff"}
+                        value={elementData.textColor || "#ffffff"}
                         onChange={(e) => handleDataUpdate({ textColor: e.target.value })}
                         className="w-full h-10"
                         data-testid="pdf-text-color-input"
@@ -5428,14 +5437,14 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">
-                      Scale ({Math.round((element.data.scale || 1.0) * 100)}%)
+                      Scale ({Math.round((elementData.scale || 1.0) * 100)}%)
                     </label>
                     <Input
                       type="range"
                       min="0.5"
                       max="3"
                       step="0.1"
-                      value={element.data.scale || 1.0}
+                      value={elementData.scale || 1.0}
                       onChange={(e) => handleDataUpdate({ scale: parseFloat(e.target.value) })}
                       className="w-full"
                       data-testid="pdf-scale-input"
@@ -5454,14 +5463,14 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
               </div>
             ) : (
               <div className="pdf-viewer-element w-full flex justify-center" data-testid="pdf-viewer-element">
-                {element.data.pdf_file ? (
+                {elementData.pdf_file ? (
                   <PdfViewerButton
-                    pdf_file={element.data.pdf_file}
-                    button_text={element.data.button_text || "View PDF"}
-                    scale={element.data.scale || 1.0}
-                    file_name={element.data.file_name || ""}
-                    buttonColor={element.data.buttonColor || "#6b21a8"}
-                    textColor={element.data.textColor || "#ffffff"}
+                    pdf_file={elementData.pdf_file}
+                    button_text={elementData.button_text || "View PDF"}
+                    scale={elementData.scale || 1.0}
+                    file_name={elementData.file_name || ""}
+                    buttonColor={elementData.buttonColor || "#6b21a8"}
+                    textColor={elementData.textColor || "#ffffff"}
                     className="w-full max-w-xs"
                   />
                 ) : (
@@ -5481,7 +5490,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
             {isEditing ? (
               <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border border-slate-200">
                 <ProfileSectionEditor
-                  data={element.data}
+                  data={elementData}
                   onChange={(newData) => handleDataUpdate(newData)}
                   onSave={onSave}
                   cardData={cardData}
@@ -5489,7 +5498,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
               </div>
             ) : (
               <ProfileSectionRenderer
-                data={element.data}
+                data={elementData}
                 cardData={cardData}
               />
             )}
@@ -5515,7 +5524,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Shop Title</label>
                     <Input
-                      value={element.data.title || "My Digital Products"}
+                      value={elementData.title || "My Digital Products"}
                       onChange={(e) => handleDataUpdate({ title: e.target.value })}
                       placeholder="Enter shop title"
                       data-testid="shop-element-title"
@@ -5524,7 +5533,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                   <div>
                     <label className="text-sm font-medium text-slate-700 block mb-1">Description</label>
                     <Input
-                      value={element.data.description || ""}
+                      value={elementData.description || ""}
                       onChange={(e) => handleDataUpdate({ description: e.target.value })}
                       placeholder="Enter shop description"
                       data-testid="shop-element-description"
@@ -5536,7 +5545,7 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
                       type="number"
                       min="1"
                       max="12"
-                      value={element.data.maxItems || 6}
+                      value={elementData.maxItems || 6}
                       onChange={(e) => handleDataUpdate({ maxItems: parseInt(e.target.value) })}
                       data-testid="shop-element-maxitems"
                     />
@@ -5553,9 +5562,9 @@ ${demoInfo.requirements.map((req, i) => `${i + 1}. ${req}`).join('\n')}
               <div className="shop-element w-full" data-testid="shop-element">
                 <ShopElement
                   sellerId={cardData?.userId || ""}
-                  title={element.data.title || "My Digital Products"}
-                  description={element.data.description}
-                  maxItems={element.data.maxItems || 6}
+                  title={elementData.title || "My Digital Products"}
+                  description={elementData.description}
+                  maxItems={elementData.maxItems || 6}
                 />
               </div>
             )}
