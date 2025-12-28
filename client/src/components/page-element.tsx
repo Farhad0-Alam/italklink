@@ -223,52 +223,366 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate, onUpdate }:
   }, []);
 
   if (isEditing) {
+    const fields = element.data?.fields || ['name', 'email', 'message'];
+    const buttonColor = element.data?.buttonColor || '#1e293b';
+    const buttonTextColor = element.data?.buttonTextColor || '#ffffff';
+    const successMessage = element.data?.successMessage || '✅ Message sent successfully!';
+    const buttonText = element.data?.buttonText || 'Send Message';
+    const showPhone = fields.includes('phone');
+    const showName = fields.includes('name');
+    const showEmail = fields.includes('email');
+    const showMessage = fields.includes('message');
+    const showSubject = fields.includes('subject');
+
+    const toggleField = (field: string) => {
+      const currentFields = element.data?.fields || ['name', 'email', 'message'];
+      let newFields;
+      if (currentFields.includes(field)) {
+        newFields = currentFields.filter((f: string) => f !== field);
+      } else {
+        newFields = [...currentFields, field];
+      }
+      handleDataUpdate({ fields: newFields });
+    };
+
     return (
       <div className="space-y-4">
-        <div className="p-4 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border border-slate-500 shadow-lg">
+        {/* Title Input */}
+        <div>
+          <label className="text-xs text-gray-400 block mb-1">Form Title</label>
           <Input
             value={element.data?.title || ''}
             onChange={(e) => handleDataUpdate({ title: e.target.value })}
-            className="bg-transparent border-0 text-white font-semibold text-xl tracking-wide opacity-100 p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
-            placeholder="Form Title here"
+            className="bg-slate-700 border-slate-600 text-white"
+            placeholder="Contact Me"
           />
-          <div className="text-slate-300 text-sm font-medium mt-1 opacity-100">contactForm</div>
         </div>
-        <div className="text-slate-400 text-sm">Configure form settings above</div>
+
+        {/* Form Fields Selection */}
+        <div className="bg-slate-700 p-3 rounded space-y-3">
+          <h4 className="text-white text-sm font-medium flex items-center gap-2">
+            <i className="fas fa-list-check"></i>
+            Form Fields
+          </h4>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showName}
+                onChange={() => toggleField('name')}
+                className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
+              />
+              Name
+            </label>
+            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showEmail}
+                onChange={() => toggleField('email')}
+                className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
+              />
+              Email
+            </label>
+            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showPhone}
+                onChange={() => toggleField('phone')}
+                className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
+              />
+              Phone
+            </label>
+            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showSubject}
+                onChange={() => toggleField('subject')}
+                className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
+              />
+              Subject
+            </label>
+            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer col-span-2">
+              <input
+                type="checkbox"
+                checked={showMessage}
+                onChange={() => toggleField('message')}
+                className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
+              />
+              Message
+            </label>
+          </div>
+        </div>
+
+        {/* Button Customization */}
+        <div className="bg-slate-700 p-3 rounded space-y-3">
+          <h4 className="text-white text-sm font-medium flex items-center gap-2">
+            <i className="fas fa-square"></i>
+            Button Settings
+          </h4>
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Button Text</label>
+            <Input
+              value={buttonText}
+              onChange={(e) => handleDataUpdate({ buttonText: e.target.value })}
+              className="bg-slate-600 border-slate-500 text-white"
+              placeholder="Send Message"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">Button Color</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={buttonColor}
+                  onChange={(e) => handleDataUpdate({ buttonColor: e.target.value })}
+                  className="w-8 h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                />
+                <Input
+                  value={buttonColor}
+                  onChange={(e) => handleDataUpdate({ buttonColor: e.target.value })}
+                  className="bg-slate-600 border-slate-500 text-white text-xs flex-1"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">Text Color</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={buttonTextColor}
+                  onChange={(e) => handleDataUpdate({ buttonTextColor: e.target.value })}
+                  className="w-8 h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+                />
+                <Input
+                  value={buttonTextColor}
+                  onChange={(e) => handleDataUpdate({ buttonTextColor: e.target.value })}
+                  className="bg-slate-600 border-slate-500 text-white text-xs flex-1"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Success Message */}
+        <div className="bg-slate-700 p-3 rounded space-y-3">
+          <h4 className="text-white text-sm font-medium flex items-center gap-2">
+            <i className="fas fa-check-circle"></i>
+            Success Message
+          </h4>
+          <Input
+            value={successMessage}
+            onChange={(e) => handleDataUpdate({ successMessage: e.target.value })}
+            className="bg-slate-600 border-slate-500 text-white"
+            placeholder="Message sent successfully!"
+          />
+        </div>
+
+        {/* Form Styling */}
+        <div className="bg-slate-700 p-3 rounded space-y-3">
+          <h4 className="text-white text-sm font-medium flex items-center gap-2">
+            <i className="fas fa-palette"></i>
+            Form Styling
+          </h4>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">Background</label>
+              <input
+                type="color"
+                value={element.data?.backgroundColor || '#f8fafc'}
+                onChange={(e) => handleDataUpdate({ backgroundColor: e.target.value })}
+                className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">Border Color</label>
+              <input
+                type="color"
+                value={element.data?.borderColor || '#e2e8f0'}
+                onChange={(e) => handleDataUpdate({ borderColor: e.target.value })}
+                className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">Input Border</label>
+              <input
+                type="color"
+                value={element.data?.inputBorderColor || '#cbd5e1'}
+                onChange={(e) => handleDataUpdate({ inputBorderColor: e.target.value })}
+                className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">Title Color</label>
+              <input
+                type="color"
+                value={element.data?.titleColor || '#1e293b'}
+                onChange={(e) => handleDataUpdate({ titleColor: e.target.value })}
+                className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">
+              Border Radius: {element.data?.borderRadius || 8}px
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="24"
+              value={element.data?.borderRadius || 8}
+              onChange={(e) => handleDataUpdate({ borderRadius: Number(e.target.value) })}
+              className="w-full accent-green-500"
+            />
+          </div>
+        </div>
+
+        {/* Preview */}
+        <div 
+          className="p-4 rounded-lg border"
+          style={{
+            backgroundColor: element.data?.backgroundColor || '#f8fafc',
+            borderColor: element.data?.borderColor || '#e2e8f0',
+            borderRadius: `${element.data?.borderRadius || 8}px`
+          }}
+        >
+          <h3 
+            className="font-bold mb-3 text-lg"
+            style={{ color: element.data?.titleColor || '#1e293b' }}
+          >
+            {element.data?.title || 'Contact Me'}
+          </h3>
+          <div className="space-y-2">
+            {showName && (
+              <div 
+                className="w-full p-2 border rounded text-sm text-slate-400"
+                style={{ borderColor: element.data?.inputBorderColor || '#cbd5e1' }}
+              >
+                Your Name
+              </div>
+            )}
+            {showEmail && (
+              <div 
+                className="w-full p-2 border rounded text-sm text-slate-400"
+                style={{ borderColor: element.data?.inputBorderColor || '#cbd5e1' }}
+              >
+                Your Email
+              </div>
+            )}
+            {showPhone && (
+              <div 
+                className="w-full p-2 border rounded text-sm text-slate-400"
+                style={{ borderColor: element.data?.inputBorderColor || '#cbd5e1' }}
+              >
+                Your Phone
+              </div>
+            )}
+            {showSubject && (
+              <div 
+                className="w-full p-2 border rounded text-sm text-slate-400"
+                style={{ borderColor: element.data?.inputBorderColor || '#cbd5e1' }}
+              >
+                Subject
+              </div>
+            )}
+            {showMessage && (
+              <div 
+                className="w-full p-2 border rounded text-sm text-slate-400 h-16"
+                style={{ borderColor: element.data?.inputBorderColor || '#cbd5e1' }}
+              >
+                Your Message
+              </div>
+            )}
+            <button
+              className="w-full py-2 rounded font-medium text-sm"
+              style={{
+                backgroundColor: buttonColor,
+                color: buttonTextColor
+              }}
+            >
+              {buttonText}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
+  const backgroundColor = element.data?.backgroundColor || '#f8fafc';
+  const borderColor = element.data?.borderColor || '#e2e8f0';
+  const inputBorderColor = element.data?.inputBorderColor || '#cbd5e1';
+  const titleColor = element.data?.titleColor || '#1e293b';
+  const borderRadius = element.data?.borderRadius || 8;
+  const buttonColor = element.data?.buttonColor || '#1e293b';
+  const buttonTextColor = element.data?.buttonTextColor || '#ffffff';
+  const buttonText = element.data?.buttonText || 'Send Message';
+  const fields = element.data?.fields || ['name', 'email', 'message'];
+
   return (
-    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-      <h3 className="font-bold mb-4 text-slate-800 text-xl tracking-wide opacity-100">{element.data?.title || ''}</h3>
+    <div 
+      className="p-4 border"
+      style={{
+        backgroundColor,
+        borderColor,
+        borderRadius: `${borderRadius}px`
+      }}
+    >
+      <h3 
+        className="font-bold mb-4 text-xl tracking-wide"
+        style={{ color: titleColor }}
+      >
+        {element.data?.title || 'Contact Me'}
+      </h3>
       <form onSubmit={handleFormSubmit} className="space-y-3">
-        {element.data?.fields?.includes('name') && (
+        {fields.includes('name') && (
           <input
             type="text"
             placeholder="Your Name"
             value={formData.name || ''}
             onChange={(e) => handleInputChange('name', e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
+            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+            style={{ borderColor: inputBorderColor }}
             required
           />
         )}
-        {element.data?.fields?.includes('email') && (
+        {fields.includes('email') && (
           <input
             type="email"
             placeholder="Your Email"
             value={formData.email || ''}
             onChange={(e) => handleInputChange('email', e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
+            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+            style={{ borderColor: inputBorderColor }}
             required
           />
         )}
-        {element.data?.fields?.includes('message') && (
+        {fields.includes('phone') && (
+          <input
+            type="tel"
+            placeholder="Your Phone"
+            value={formData.phone || ''}
+            onChange={(e) => handleInputChange('phone', e.target.value)}
+            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+            style={{ borderColor: inputBorderColor }}
+          />
+        )}
+        {fields.includes('subject') && (
+          <input
+            type="text"
+            placeholder="Subject"
+            value={formData.subject || ''}
+            onChange={(e) => handleInputChange('subject', e.target.value)}
+            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+            style={{ borderColor: inputBorderColor }}
+          />
+        )}
+        {fields.includes('message') && (
           <textarea
             placeholder="Your Message"
             value={formData.message || ''}
             onChange={(e) => handleInputChange('message', e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-talklink-500"
+            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+            style={{ borderColor: inputBorderColor }}
             rows={3}
             required
           />
@@ -276,11 +590,15 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate, onUpdate }:
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-slate-800 text-white py-2 rounded font-medium hover:bg-slate-900 disabled:opacity-50"
+          className="w-full py-2 rounded font-medium disabled:opacity-50 transition-opacity"
+          style={{
+            backgroundColor: buttonColor,
+            color: buttonTextColor
+          }}
         >
-          {isSubmitting ? 'Sending...' : 'Send Message'}
+          {isSubmitting ? 'Sending...' : buttonText}
         </button>
-        {submitStatus && <div className="text-sm text-center">{submitStatus}</div>}
+        {submitStatus && <div className="text-sm text-center mt-2">{submitStatus}</div>}
       </form>
     </div>
   );
