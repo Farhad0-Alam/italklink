@@ -178,149 +178,585 @@ function SortableImageItem({ image, index, onDelete, onUpdateAlt }: SortableImag
 }
 
 // Contact Form Renderer Component - wraps hooks to avoid React hook rules violation
-function ContactFormRenderer({ element, isEditing, handleDataUpdate, onUpdate }: any) {
-  const [formData, setFormData] = useState<Record<string, string>>({});
+// Contact Form Renderer Component - wraps hooks to avoid React hook rules violation
+function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
+  type FieldType = "text" | "email" | "tel" | "textarea" | "date" | "select" | "checkbox";
+
+  type FieldKey =
+    | "name"
+    | "email"
+    | "phone"
+    | "subject"
+    | "message"
+    | "company"
+    | "website"
+    | "service"
+    | "budget"
+    | "custom1"
+    | "custom2";
+
+  type FieldConfig = {
+    key: FieldKey;
+    enabled: boolean;
+    type: FieldType;
+    label: string;
+    placeholder: string;
+    required?: boolean;
+    rows?: number; // only for textarea
+    options?: string[]; // only for select
+  };
+
+  const defaultFieldConfig: Record<FieldKey, FieldConfig> = {
+    name: {
+      key: "name",
+      enabled: true,
+      type: "text",
+      label: "Name",
+      placeholder: "Your Name",
+      required: true,
+    },
+    email: {
+      key: "email",
+      enabled: true,
+      type: "email",
+      label: "Email",
+      placeholder: "Your Email",
+      required: true,
+    },
+    phone: {
+      key: "phone",
+      enabled: false,
+      type: "tel",
+      label: "Phone",
+      placeholder: "Your Phone",
+      required: false,
+    },
+    subject: {
+      key: "subject",
+      enabled: false,
+      type: "text",
+      label: "Subject",
+      placeholder: "Subject",
+      required: false,
+    },
+    message: {
+      key: "message",
+      enabled: true,
+      type: "textarea",
+      label: "Message",
+      placeholder: "Your Message",
+      required: true,
+      rows: 3,
+    },
+    company: {
+      key: "company",
+      enabled: false,
+      type: "text",
+      label: "Company",
+      placeholder: "Your Company",
+      required: false,
+    },
+    website: {
+      key: "website",
+      enabled: false,
+      type: "text",
+      label: "Website",
+      placeholder: "https://your-website.com",
+      required: false,
+    },
+    service: {
+      key: "service",
+      enabled: false,
+      type: "select",
+      label: "Service",
+      placeholder: "Select a service",
+      required: false,
+      options: ["General Inquiry", "Support", "Sales", "Collaboration"],
+    },
+    budget: {
+      key: "budget",
+      enabled: false,
+      type: "select",
+      label: "Budget",
+      placeholder: "Select budget range",
+      required: false,
+      options: ["< $500", "$500 – $1,000", "$1,000 – $3,000", "$3,000+"],
+    },
+    custom1: {
+      key: "custom1",
+      enabled: false,
+      type: "text",
+      label: "Custom Field 1",
+      placeholder: "Custom value 1",
+      required: false,
+    },
+    custom2: {
+      key: "custom2",
+      enabled: false,
+      type: "text",
+      label: "Custom Field 2",
+      placeholder: "Custom value 2",
+      required: false,
+    },
+  };
+
+  // Backward compatibility:
+  // - If element.data.fieldConfigs exists => use it
+  // - else fallback to element.data.fields (old array) and map to configs
+  const normalizeFieldConfigs = (): FieldConfig[] => {
+    const saved = element.data?.fieldConfigs;
+    if (Array.isArray(saved) && saved.length) {
+      // merge with defaults to avoid missing keys after upgrades
+      const map = new Map<string, FieldConfig>();
+      saved.forEach((f: any) => {
+        if (!f?.key) return;
+        const base = (defaultFieldConfig as any)[f.key as FieldKey];
+        if (!base) return;
+        map.set(f.key, {
+          ...base,
+          ...f,
+          // safety
+          enabled: !!f.enabled,
+          required: typeof f.required === "boolean" ? f.required : base.required,
+          type: ([
+            "text",
+            "email",
+            "tel",
+            "textarea",
+            "date",
+            "select",
+            "checkbox",
+          ].includes(f.type)
+            ? f.type
+            : base.type) as FieldType,
+          rows: typeof f.rows === "number" ? f.rows : base.rows,
+          options: Array.isArray(f.options) ? f.options : base.options,
+        });
+      });
+
+      // ensure all known keys exist (so UI always shows all fields)
+      (Object.keys(defaultFieldConfig) as FieldKey[]).forEach((k) => {
+        if (!map.has(k)) map.set(k, { ...defaultFieldConfig[k], enabled: false });
+      });
+
+      return Array.from(map.values());
+    }
+
+    const oldFields: string[] = element.data?.fields || ["name", "email", "message"];
+    const keys = Object.keys(defaultFieldConfig) as FieldKey[];
+    return keys.map((k) => ({
+      ...defaultFieldConfig[k],
+      enabled: oldFields.includes(k),
+    }));
+  };
+
+  const [formData, setFormData] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<string>('');
+  const [submitStatus, setSubmitStatus] = useState<string>("");
+
+  const handleInputChange = useCallback((field: string, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const fieldConfigs = normalizeFieldConfigs();
+  const enabledFields = fieldConfigs.filter((f) => f.enabled);
+
+  // helpful derived list of email-type fields (for auto-reply recipient select)
+  const emailFieldOptions = fieldConfigs.filter((f) => f.type === "email");
+
+  // Modern settings (with defaults)
+  const backgroundColor = element.data?.backgroundColor || "#f8fafc";
+  const borderColor = element.data?.borderColor || "#e2e8f0";
+  const inputBorderColor = element.data?.inputBorderColor || "#cbd5e1";
+  const titleColor = element.data?.titleColor || "#1e293b";
+  const borderRadius = element.data?.borderRadius ?? 8;
+
+  const inputBgColor = element.data?.inputBgColor || "#ffffff";
+  const inputTextColor = element.data?.inputTextColor || "#0f172a";
+  const showLabels = element.data?.showLabels ?? false;
+  const layout = element.data?.layout || "stack"; // stack | twoColumn
+  const gap = element.data?.gap ?? 12; // px
+
+  const buttonColor = element.data?.buttonColor || "#1e293b";
+  const buttonTextColor = element.data?.buttonTextColor || "#ffffff";
+  const buttonText = element.data?.buttonText || "Send Message";
+
+  const successMessage =
+    element.data?.successMessage || "✅ Message sent successfully!";
+  const errorMessage =
+    element.data?.errorMessage || "❌ Failed to send message. Please try again.";
+
+  // Modern automation / advanced
+  const redirectUrl = element.data?.redirectUrl || "";
+  const openRedirectNewTab = element.data?.openRedirectNewTab ?? false;
+
+  const enableHoneypot = element.data?.enableHoneypot ?? true;
+  const enableGDPR = element.data?.enableGDPR ?? false;
+  const gdprText =
+    element.data?.gdprText ||
+    "I agree to be contacted and allow you to store my submitted information.";
+
+  const includeMeta = element.data?.includeMeta ?? true;
+  const includeUTM = element.data?.includeUTM ?? true;
+
+  // Optional client-side webhook (best-effort, CORS dependent)
+  const clientWebhookUrl = element.data?.clientWebhookUrl || "";
+
+  // NEW: Google Sheets integration options
+  const googleSheetsEnabled = element.data?.googleSheetsEnabled ?? false;
+  const googleSheetsSheetId = element.data?.googleSheetsSheetId || "";
+  const googleSheetsTabName = element.data?.googleSheetsTabName || "Sheet1";
+
+  // NEW: Auto-reply email options
+  const autoReplyEnabled = element.data?.autoReplyEnabled ?? false;
+  const autoReplyFromName = element.data?.autoReplyFromName || "";
+  const autoReplyFromEmail = element.data?.autoReplyFromEmail || "";
+  const autoReplyEmailFieldKey =
+    element.data?.autoReplyEmailFieldKey || "email";
+  const autoReplySubject =
+    element.data?.autoReplySubject || "Thank you for contacting us";
+  const autoReplyMessage =
+    element.data?.autoReplyMessage ||
+    "Hi {{name}},\n\nThanks for reaching out. We’ll get back to you soon.\n\nBest regards,\n{{from_name}}";
+
+  const buildMeta = () => {
+    const meta: any = {
+      timestamp: new Date().toISOString(),
+      pageUrl: typeof window !== "undefined" ? window.location.href : "",
+      userAgent:
+        typeof navigator !== "undefined" ? navigator.userAgent : "",
+    };
+
+    if (includeUTM && typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const utmKeys = [
+        "utm_source",
+        "utm_medium",
+        "utm_campaign",
+        "utm_term",
+        "utm_content",
+      ];
+      const utm: any = {};
+      utmKeys.forEach((k) => {
+        const v = params.get(k);
+        if (v) utm[k] = v;
+      });
+      meta.utm = utm;
+    }
+
+    return meta;
+  };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSubmitStatus('');
+    setSubmitStatus("");
 
     try {
-      const response = await fetch('/api/contact-form/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Honeypot check (client-side)
+      if (enableHoneypot && formData._hp) {
+        setSubmitStatus(errorMessage);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // GDPR required check
+      if (enableGDPR && !formData._gdpr) {
+        setSubmitStatus("Please accept the consent checkbox.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const payload = {
+        formData,
+        formConfig: {
+          ...element.data,
+          googleSheetsEnabled,
+          googleSheetsSheetId,
+          googleSheetsTabName,
+          autoReplyEnabled,
+          autoReplyFromName,
+          autoReplyFromEmail,
+          autoReplyEmailFieldKey,
+          autoReplySubject,
+          autoReplyMessage,
         },
-        body: JSON.stringify({
-          formData,
-          formConfig: element.data
-        }),
+        meta: includeMeta ? buildMeta() : undefined,
+      };
+
+      const response = await fetch("/api/contact-form/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
 
       if (result.success) {
-        setSubmitStatus(element.data.successMessage || '✅ Message sent successfully!');
+        setSubmitStatus(successMessage);
         setFormData({});
-        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-        if (fileInput) fileInput.value = '';
+
+        // best-effort client-side webhook (optional)
+        if (clientWebhookUrl) {
+          try {
+            fetch(clientWebhookUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            }).catch(() => {});
+          } catch {}
+        }
+
+        // redirect (optional)
+        if (redirectUrl) {
+          setTimeout(() => {
+            if (openRedirectNewTab) window.open(redirectUrl, "_blank");
+            else window.location.href = redirectUrl;
+          }, 400);
+        }
       } else {
-        setSubmitStatus('❌ Failed to send message. Please try again.');
+        setSubmitStatus(errorMessage);
       }
     } catch (error: any) {
-      console.error('Form submission error:', error);
-      setSubmitStatus('❌ Failed to send message. Please try again.');
+      console.error("Form submission error:", error);
+      setSubmitStatus(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleInputChange = useCallback((field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  }, []);
-
+  // -------- EDIT MODE (FULL CUSTOMIZATION UI) --------
   if (isEditing) {
-    const fields = element.data?.fields || ['name', 'email', 'message'];
-    const buttonColor = element.data?.buttonColor || '#1e293b';
-    const buttonTextColor = element.data?.buttonTextColor || '#ffffff';
-    const successMessage = element.data?.successMessage || '✅ Message sent successfully!';
-    const buttonText = element.data?.buttonText || 'Send Message';
-    const showPhone = fields.includes('phone');
-    const showName = fields.includes('name');
-    const showEmail = fields.includes('email');
-    const showMessage = fields.includes('message');
-    const showSubject = fields.includes('subject');
+    const setField = (key: FieldKey, patch: Partial<FieldConfig>) => {
+      const next = normalizeFieldConfigs().map((f) =>
+        f.key === key ? { ...f, ...patch } : f
+      );
+      handleDataUpdate({ fieldConfigs: next });
 
-    const toggleField = (field: string) => {
-      const currentFields = element.data?.fields || ['name', 'email', 'message'];
-      let newFields;
-      if (currentFields.includes(field)) {
-        newFields = currentFields.filter((f: string) => f !== field);
-      } else {
-        newFields = [...currentFields, field];
-      }
-      handleDataUpdate({ fields: newFields });
+      // keep old "fields" array updated for older parts of app
+      const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
+      handleDataUpdate({ fields: fieldsLegacy });
     };
 
     return (
       <div className="space-y-4">
-        {/* Title Input */}
+        {/* Title */}
         <div>
           <label className="text-xs text-gray-400 block mb-1">Form Title</label>
           <Input
-            value={element.data?.title || ''}
+            value={element.data?.title || ""}
             onChange={(e) => handleDataUpdate({ title: e.target.value })}
             className="bg-slate-700 border-slate-600 text-white"
             placeholder="Contact Me"
           />
         </div>
 
-        {/* Form Fields Selection */}
+        {/* Fields (Modern) */}
         <div className="bg-slate-700 p-3 rounded space-y-3">
           <h4 className="text-white text-sm font-medium flex items-center gap-2">
-            <i className="fas fa-list-check"></i>
-            Form Fields
+            <i className="fas fa-sliders"></i>
+            Fields (Modern)
           </h4>
-          <div className="grid grid-cols-2 gap-2">
-            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showName}
-                onChange={() => toggleField('name')}
-                className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
-              />
-              Name
-            </label>
-            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showEmail}
-                onChange={() => toggleField('email')}
-                className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
-              />
-              Email
-            </label>
-            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showPhone}
-                onChange={() => toggleField('phone')}
-                className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
-              />
-              Phone
-            </label>
-            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showSubject}
-                onChange={() => toggleField('subject')}
-                className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
-              />
-              Subject
-            </label>
-            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer col-span-2">
-              <input
-                type="checkbox"
-                checked={showMessage}
-                onChange={() => toggleField('message')}
-                className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
-              />
-              Message
-            </label>
+
+          <div className="space-y-3">
+            {fieldConfigs.map((f) => (
+              <div
+                key={f.key}
+                className="bg-slate-800/50 rounded p-3 space-y-2 border border-slate-600"
+              >
+                <div className="flex items-center justify-between">
+                  <label className="text-sm text-slate-200 flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={!!f.enabled}
+                      onChange={() =>
+                        setField(f.key, { enabled: !f.enabled })
+                      }
+                      className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
+                    />
+                    <span className="capitalize">{f.key}</span>
+                  </label>
+
+                  <label className="text-xs text-slate-300 flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={!!f.required}
+                      disabled={!f.enabled}
+                      onChange={() =>
+                        setField(f.key, { required: !f.required })
+                      }
+                      className="rounded border-slate-500 bg-slate-600 text-green-500 focus:ring-green-500"
+                    />
+                    Required
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">
+                      Label
+                    </label>
+                    <Input
+                      value={f.label}
+                      disabled={!f.enabled}
+                      onChange={(e) =>
+                        setField(f.key, { label: e.target.value })
+                      }
+                      className="bg-slate-600 border-slate-500 text-white text-xs"
+                      placeholder="Label"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">
+                      Placeholder
+                    </label>
+                    <Input
+                      value={f.placeholder}
+                      disabled={!f.enabled}
+                      onChange={(e) =>
+                        setField(f.key, { placeholder: e.target.value })
+                      }
+                      className="bg-slate-600 border-slate-500 text-white text-xs"
+                      placeholder="Placeholder"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="text-xs text-gray-400 block mb-1">
+                      Type
+                    </label>
+                    <Select
+                      value={f.type}
+                      onValueChange={(v) =>
+                        setField(f.key, { type: v as FieldType })
+                      }
+                      disabled={!f.enabled}
+                    >
+                      <SelectTrigger className="bg-slate-600 border-slate-500 text-white text-xs">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Text</SelectItem>
+                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="tel">Phone</SelectItem>
+                        <SelectItem value="textarea">Textarea</SelectItem>
+                        <SelectItem value="date">Date</SelectItem>
+                        <SelectItem value="select">Dropdown</SelectItem>
+                        <SelectItem value="checkbox">Checkbox</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {f.type === "textarea" && (
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">
+                      Rows
+                    </label>
+                    <input
+                      type="range"
+                      min={2}
+                      max={8}
+                      value={f.rows ?? 3}
+                      disabled={!f.enabled}
+                      onChange={(e) =>
+                        setField(f.key, { rows: Number(e.target.value) })
+                      }
+                      className="w-full accent-green-500"
+                    />
+                    <div className="text-xs text-slate-300">
+                      {f.rows ?? 3} rows
+                    </div>
+                  </div>
+                )}
+
+                {f.type === "select" && (
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">
+                      Options (comma separated)
+                    </label>
+                    <Input
+                      disabled={!f.enabled}
+                      value={(f.options || []).join(", ")}
+                      onChange={(e) =>
+                        setField(f.key, {
+                          options: e.target.value
+                            .split(",")
+                            .map((s) => s.trim())
+                            .filter(Boolean),
+                        })
+                      }
+                      className="bg-slate-600 border-slate-500 text-white text-xs"
+                      placeholder="Option 1, Option 2, Option 3"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Button Customization */}
+        {/* Layout & UX */}
+        <div className="bg-slate-700 p-3 rounded space-y-3">
+          <h4 className="text-white text-sm font-medium flex items-center gap-2">
+            <i className="fas fa-table-columns"></i>
+            Layout & UX
+          </h4>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">Layout</label>
+              <Select
+                value={layout}
+                onValueChange={(v) => handleDataUpdate({ layout: v })}
+              >
+                <SelectTrigger className="bg-slate-600 border-slate-500 text-white text-xs">
+                  <SelectValue placeholder="Layout" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="stack">Stack</SelectItem>
+                  <SelectItem value="twoColumn">Two Column</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">
+                Gap ({gap}px)
+              </label>
+              <input
+                type="range"
+                min="6"
+                max="24"
+                value={gap}
+                onChange={(e) =>
+                  handleDataUpdate({ gap: Number(e.target.value) })
+                }
+                className="w-full accent-green-500"
+              />
+            </div>
+
+            <div className="col-span-2 flex items-center justify-between bg-slate-800/40 p-2 rounded border border-slate-600">
+              <div className="text-sm text-slate-200">Show Labels</div>
+              <Switch
+                checked={showLabels}
+                onCheckedChange={(v) => handleDataUpdate({ showLabels: v })}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Button */}
         <div className="bg-slate-700 p-3 rounded space-y-3">
           <h4 className="text-white text-sm font-medium flex items-center gap-2">
             <i className="fas fa-square"></i>
             Button Settings
           </h4>
           <div>
-            <label className="text-xs text-gray-400 block mb-1">Button Text</label>
+            <label className="text-xs text-gray-400 block mb-1">
+              Button Text
+            </label>
             <Input
               value={buttonText}
               onChange={(e) => handleDataUpdate({ buttonText: e.target.value })}
@@ -330,33 +766,45 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate, onUpdate }:
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Button Color</label>
+              <label className="text-xs text-gray-400 block mb-1">
+                Button Color
+              </label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
                   value={buttonColor}
-                  onChange={(e) => handleDataUpdate({ buttonColor: e.target.value })}
+                  onChange={(e) =>
+                    handleDataUpdate({ buttonColor: e.target.value })
+                  }
                   className="w-8 h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                 />
                 <Input
                   value={buttonColor}
-                  onChange={(e) => handleDataUpdate({ buttonColor: e.target.value })}
+                  onChange={(e) =>
+                    handleDataUpdate({ buttonColor: e.target.value })
+                  }
                   className="bg-slate-600 border-slate-500 text-white text-xs flex-1"
                 />
               </div>
             </div>
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Text Color</label>
+              <label className="text-xs text-gray-400 block mb-1">
+                Text Color
+              </label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
                   value={buttonTextColor}
-                  onChange={(e) => handleDataUpdate({ buttonTextColor: e.target.value })}
+                  onChange={(e) =>
+                    handleDataUpdate({ buttonTextColor: e.target.value })
+                  }
                   className="w-8 h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
                 />
                 <Input
                   value={buttonTextColor}
-                  onChange={(e) => handleDataUpdate({ buttonTextColor: e.target.value })}
+                  onChange={(e) =>
+                    handleDataUpdate({ buttonTextColor: e.target.value })
+                  }
                   className="bg-slate-600 border-slate-500 text-white text-xs flex-1"
                 />
               </div>
@@ -364,21 +812,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate, onUpdate }:
           </div>
         </div>
 
-        {/* Success Message */}
-        <div className="bg-slate-700 p-3 rounded space-y-3">
-          <h4 className="text-white text-sm font-medium flex items-center gap-2">
-            <i className="fas fa-check-circle"></i>
-            Success Message
-          </h4>
-          <Input
-            value={successMessage}
-            onChange={(e) => handleDataUpdate({ successMessage: e.target.value })}
-            className="bg-slate-600 border-slate-500 text-white"
-            placeholder="Message sent successfully!"
-          />
-        </div>
-
-        {/* Form Styling */}
+        {/* Styling */}
         <div className="bg-slate-700 p-3 rounded space-y-3">
           <h4 className="text-white text-sm font-medium flex items-center gap-2">
             <i className="fas fa-palette"></i>
@@ -386,223 +820,600 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate, onUpdate }:
           </h4>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Background</label>
+              <label className="text-xs text-gray-400 block mb-1">
+                Background
+              </label>
               <input
                 type="color"
-                value={element.data?.backgroundColor || '#f8fafc'}
-                onChange={(e) => handleDataUpdate({ backgroundColor: e.target.value })}
+                value={backgroundColor}
+                onChange={(e) =>
+                  handleDataUpdate({ backgroundColor: e.target.value })
+                }
                 className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
               />
             </div>
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Border Color</label>
+              <label className="text-xs text-gray-400 block mb-1">
+                Border Color
+              </label>
               <input
                 type="color"
-                value={element.data?.borderColor || '#e2e8f0'}
-                onChange={(e) => handleDataUpdate({ borderColor: e.target.value })}
+                value={borderColor}
+                onChange={(e) =>
+                  handleDataUpdate({ borderColor: e.target.value })
+                }
                 className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
               />
             </div>
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Input Border</label>
+              <label className="text-xs text-gray-400 block mb-1">
+                Input Border
+              </label>
               <input
                 type="color"
-                value={element.data?.inputBorderColor || '#cbd5e1'}
-                onChange={(e) => handleDataUpdate({ inputBorderColor: e.target.value })}
+                value={inputBorderColor}
+                onChange={(e) =>
+                  handleDataUpdate({ inputBorderColor: e.target.value })
+                }
                 className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
               />
             </div>
             <div>
-              <label className="text-xs text-gray-400 block mb-1">Title Color</label>
+              <label className="text-xs text-gray-400 block mb-1">
+                Title Color
+              </label>
               <input
                 type="color"
-                value={element.data?.titleColor || '#1e293b'}
-                onChange={(e) => handleDataUpdate({ titleColor: e.target.value })}
+                value={titleColor}
+                onChange={(e) =>
+                  handleDataUpdate({ titleColor: e.target.value })
+                }
+                className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">
+                Input BG
+              </label>
+              <input
+                type="color"
+                value={inputBgColor}
+                onChange={(e) =>
+                  handleDataUpdate({ inputBgColor: e.target.value })
+                }
+                className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">
+                Input Text
+              </label>
+              <input
+                type="color"
+                value={inputTextColor}
+                onChange={(e) =>
+                  handleDataUpdate({ inputTextColor: e.target.value })
+                }
                 className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
               />
             </div>
           </div>
+
           <div>
             <label className="text-xs text-gray-400 block mb-1">
-              Border Radius: {element.data?.borderRadius || 8}px
+              Border Radius: {borderRadius}px
             </label>
             <input
               type="range"
               min="0"
               max="24"
-              value={element.data?.borderRadius || 8}
-              onChange={(e) => handleDataUpdate({ borderRadius: Number(e.target.value) })}
+              value={borderRadius}
+              onChange={(e) =>
+                handleDataUpdate({ borderRadius: Number(e.target.value) })
+              }
               className="w-full accent-green-500"
             />
           </div>
         </div>
 
-        {/* Preview */}
-        <div 
-          className="p-4 rounded-lg border"
-          style={{
-            backgroundColor: element.data?.backgroundColor || '#f8fafc',
-            borderColor: element.data?.borderColor || '#e2e8f0',
-            borderRadius: `${element.data?.borderRadius || 8}px`
-          }}
-        >
-          <h3 
-            className="font-bold mb-3 text-lg"
-            style={{ color: element.data?.titleColor || '#1e293b' }}
-          >
-            {element.data?.title || 'Contact Me'}
-          </h3>
-          <div className="space-y-2">
-            {showName && (
-              <div 
-                className="w-full p-2 border rounded text-sm text-slate-400"
-                style={{ borderColor: element.data?.inputBorderColor || '#cbd5e1' }}
-              >
-                Your Name
+        {/* Automation */}
+        <div className="bg-slate-700 p-3 rounded space-y-3">
+          <h4 className="text-white text-sm font-medium flex items-center gap-2">
+            <i className="fas fa-bolt"></i>
+            Automation (Modern)
+          </h4>
+
+          {/* Redirect */}
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">
+              Redirect URL (after success)
+            </label>
+            <Input
+              value={redirectUrl}
+              onChange={(e) =>
+                handleDataUpdate({ redirectUrl: e.target.value })
+              }
+              className="bg-slate-600 border-slate-500 text-white"
+              placeholder="https://your-site.com/thank-you"
+            />
+            <div className="mt-2 flex items-center justify-between bg-slate-800/40 p-2 rounded border border-slate-600">
+              <div className="text-sm text-slate-200">
+                Open redirect in new tab
+              </div>
+              <Switch
+                checked={openRedirectNewTab}
+                onCheckedChange={(v) =>
+                  handleDataUpdate({ openRedirectNewTab: v })
+                }
+              />
+            </div>
+          </div>
+
+          {/* Client-side Webhook */}
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">
+              Client-side Webhook URL (optional, CORS needed)
+            </label>
+            <Input
+              value={clientWebhookUrl}
+              onChange={(e) =>
+                handleDataUpdate({ clientWebhookUrl: e.target.value })
+              }
+              className="bg-slate-600 border-slate-500 text-white"
+              placeholder="https://hooks.zapier.com/hooks/catch/xxxx/yyyy"
+            />
+            <p className="text-xs text-slate-300 mt-1">
+              Tip: For best reliability use backend automation in{" "}
+              <code>/api/contact-form/submit</code>.
+            </p>
+          </div>
+
+          {/* Google Sheets */}
+          <div className="pt-3 mt-2 border-t border-slate-600 space-y-2">
+            <div className="flex items-center justify-between bg-slate-800/40 p-2 rounded border border-slate-600">
+              <div className="text-sm text-slate-200">
+                Send submissions to Google Sheets
+              </div>
+              <Switch
+                checked={googleSheetsEnabled}
+                onCheckedChange={(v) =>
+                  handleDataUpdate({ googleSheetsEnabled: v })
+                }
+              />
+            </div>
+
+            {googleSheetsEnabled && (
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">
+                    Sheet ID
+                  </label>
+                  <Input
+                    value={googleSheetsSheetId}
+                    onChange={(e) =>
+                      handleDataUpdate({ googleSheetsSheetId: e.target.value })
+                    }
+                    className="bg-slate-600 border-slate-500 text-white text-xs"
+                    placeholder="Google Sheet ID"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">
+                    Tab Name
+                  </label>
+                  <Input
+                    value={googleSheetsTabName}
+                    onChange={(e) =>
+                      handleDataUpdate({ googleSheetsTabName: e.target.value })
+                    }
+                    className="bg-slate-600 border-slate-500 text-white text-xs"
+                    placeholder="Sheet1"
+                  />
+                </div>
               </div>
             )}
-            {showEmail && (
-              <div 
-                className="w-full p-2 border rounded text-sm text-slate-400"
-                style={{ borderColor: element.data?.inputBorderColor || '#cbd5e1' }}
-              >
-                Your Email
+          </div>
+
+          {/* Auto-reply */}
+          <div className="pt-3 mt-2 border-t border-slate-600 space-y-2">
+            <div className="flex items-center justify-between bg-slate-800/40 p-2 rounded border border-slate-600">
+              <div className="text-sm text-slate-200">
+                Send auto-reply email to user
+              </div>
+              <Switch
+                checked={autoReplyEnabled}
+                onCheckedChange={(v) =>
+                  handleDataUpdate({ autoReplyEnabled: v })
+                }
+              />
+            </div>
+
+            {autoReplyEnabled && (
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">
+                      From Name
+                    </label>
+                    <Input
+                      value={autoReplyFromName}
+                      onChange={(e) =>
+                        handleDataUpdate({
+                          autoReplyFromName: e.target.value,
+                        })
+                      }
+                      className="bg-slate-600 border-slate-500 text-white text-xs"
+                      placeholder="Your Brand / Name"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">
+                      From Email
+                    </label>
+                    <Input
+                      value={autoReplyFromEmail}
+                      onChange={(e) =>
+                        handleDataUpdate({
+                          autoReplyFromEmail: e.target.value,
+                        })
+                      }
+                      className="bg-slate-600 border-slate-500 text-white text-xs"
+                      placeholder="no-reply@yourdomain.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">
+                    Use Email From Field
+                  </label>
+                  <Select
+                    value={autoReplyEmailFieldKey}
+                    onValueChange={(v) =>
+                      handleDataUpdate({ autoReplyEmailFieldKey: v })
+                    }
+                  >
+                    <SelectTrigger className="bg-slate-600 border-slate-500 text-white text-xs">
+                      <SelectValue placeholder="Select email field" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {emailFieldOptions.length === 0 && (
+                        <SelectItem value="email">email</SelectItem>
+                      )}
+                      {emailFieldOptions.map((f) => (
+                        <SelectItem key={f.key} value={f.key}>
+                          {f.label} ({f.key})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-300 mt-1">
+                    This field’s value will receive the auto-reply.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">
+                    Subject
+                  </label>
+                  <Input
+                    value={autoReplySubject}
+                    onChange={(e) =>
+                      handleDataUpdate({
+                        autoReplySubject: e.target.value,
+                      })
+                    }
+                    className="bg-slate-600 border-slate-500 text-white text-xs"
+                    placeholder="Thank you for contacting us"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">
+                    Message (supports {{name}}, {{from_name}})
+                  </label>
+                  <Textarea
+                    value={autoReplyMessage}
+                    onChange={(e) =>
+                      handleDataUpdate({
+                        autoReplyMessage: e.target.value,
+                      })
+                    }
+                    className="bg-slate-600 border-slate-500 text-white text-xs"
+                    rows={4}
+                  />
+                </div>
               </div>
             )}
-            {showPhone && (
-              <div 
-                className="w-full p-2 border rounded text-sm text-slate-400"
-                style={{ borderColor: element.data?.inputBorderColor || '#cbd5e1' }}
-              >
-                Your Phone
-              </div>
-            )}
-            {showSubject && (
-              <div 
-                className="w-full p-2 border rounded text-sm text-slate-400"
-                style={{ borderColor: element.data?.inputBorderColor || '#cbd5e1' }}
-              >
-                Subject
-              </div>
-            )}
-            {showMessage && (
-              <div 
-                className="w-full p-2 border rounded text-sm text-slate-400 h-16"
-                style={{ borderColor: element.data?.inputBorderColor || '#cbd5e1' }}
-              >
-                Your Message
-              </div>
-            )}
-            <button
-              className="w-full py-2 rounded font-medium text-sm"
-              style={{
-                backgroundColor: buttonColor,
-                color: buttonTextColor
-              }}
-            >
-              {buttonText}
-            </button>
+          </div>
+        </div>
+
+        {/* Advanced */}
+        <div className="bg-slate-700 p-3 rounded space-y-3">
+          <h4 className="text-white text-sm font-medium flex items-center gap-2">
+            <i className="fas fa-shield-halved"></i>
+            Advanced
+          </h4>
+
+          <div className="flex items-center justify-between bg-slate-800/40 p-2 rounded border border-slate-600">
+            <div className="text-sm text-slate-200">
+              Enable Honeypot (anti-spam)
+            </div>
+            <Switch
+              checked={enableHoneypot}
+              onCheckedChange={(v) =>
+                handleDataUpdate({ enableHoneypot: v })
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between bg-slate-800/40 p-2 rounded border border-slate-600">
+            <div className="text-sm text-slate-200">
+              Include Meta (url, userAgent, time)
+            </div>
+            <Switch
+              checked={includeMeta}
+              onCheckedChange={(v) =>
+                handleDataUpdate({ includeMeta: v })
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between bg-slate-800/40 p-2 rounded border border-slate-600">
+            <div className="text-sm text-slate-200">Include UTM params</div>
+            <Switch
+              checked={includeUTM}
+              onCheckedChange={(v) =>
+                handleDataUpdate({ includeUTM: v })
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between bg-slate-800/40 p-2 rounded border border-slate-600">
+            <div className="text-sm text-slate-200">
+              GDPR Consent Checkbox
+            </div>
+            <Switch
+              checked={enableGDPR}
+              onCheckedChange={(v) =>
+                handleDataUpdate({ enableGDPR: v })
+              }
+            />
+          </div>
+
+          {enableGDPR && (
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">
+                Consent Text
+              </label>
+              <Input
+                value={gdprText}
+                onChange={(e) =>
+                  handleDataUpdate({ gdprText: e.target.value })
+                }
+                className="bg-slate-600 border-slate-500 text-white"
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">
+                Success Message
+              </label>
+              <Input
+                value={successMessage}
+                onChange={(e) =>
+                  handleDataUpdate({ successMessage: e.target.value })
+                }
+                className="bg-slate-600 border-slate-500 text-white"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">
+                Error Message
+              </label>
+              <Input
+                value={errorMessage}
+                onChange={(e) =>
+                  handleDataUpdate({ errorMessage: e.target.value })
+                }
+                className="bg-slate-600 border-slate-500 text-white"
+              />
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  const backgroundColor = element.data?.backgroundColor || '#f8fafc';
-  const borderColor = element.data?.borderColor || '#e2e8f0';
-  const inputBorderColor = element.data?.inputBorderColor || '#cbd5e1';
-  const titleColor = element.data?.titleColor || '#1e293b';
-  const borderRadius = element.data?.borderRadius || 8;
-  const buttonColor = element.data?.buttonColor || '#1e293b';
-  const buttonTextColor = element.data?.buttonTextColor || '#ffffff';
-  const buttonText = element.data?.buttonText || 'Send Message';
-  const fields = element.data?.fields || ['name', 'email', 'message'];
+  // -------- VIEW MODE (MODERN FORM RENDER) --------
+  const gridClass =
+    layout === "twoColumn"
+      ? "grid grid-cols-1 sm:grid-cols-2"
+      : "grid grid-cols-1";
 
   return (
-    <div 
+    <div
       className="p-4 border"
       style={{
         backgroundColor,
         borderColor,
-        borderRadius: `${borderRadius}px`
+        borderRadius: `${borderRadius}px`,
       }}
     >
-      <h3 
+      <h3
         className="font-bold mb-4 text-xl tracking-wide"
         style={{ color: titleColor }}
       >
-        {element.data?.title || 'Contact Me'}
+        {element.data?.title || "Contact Me"}
       </h3>
-      <form onSubmit={handleFormSubmit} className="space-y-3">
-        {fields.includes('name') && (
+
+      <form onSubmit={handleFormSubmit} style={{ display: "block" }}>
+        {enableHoneypot && (
           <input
             type="text"
-            placeholder="Your Name"
-            value={formData.name || ''}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-            style={{ borderColor: inputBorderColor }}
-            required
+            name="_hp"
+            value={formData._hp || ""}
+            onChange={(e) => handleInputChange("_hp", e.target.value)}
+            style={{ display: "none" }}
+            tabIndex={-1}
+            autoComplete="off"
           />
         )}
-        {fields.includes('email') && (
-          <input
-            type="email"
-            placeholder="Your Email"
-            value={formData.email || ''}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-            style={{ borderColor: inputBorderColor }}
-            required
-          />
+
+        <div className={`${gridClass}`} style={{ gap: `${gap}px` }}>
+          {enabledFields.map((f) => {
+            const commonStyle: React.CSSProperties = {
+              borderColor: inputBorderColor,
+              backgroundColor: inputBgColor,
+              color: inputTextColor,
+            };
+
+            const labelEl = showLabels ? (
+              <label
+                className="text-sm mb-1 block text-slate-700"
+                style={{ color: titleColor }}
+              >
+                {f.label}
+                {f.required ? (
+                  <span className="ml-1 text-red-500">*</span>
+                ) : null}
+              </label>
+            ) : null;
+
+            const value = formData[f.key] ?? "";
+
+            if (f.type === "textarea") {
+              return (
+                <div
+                  key={f.key}
+                  className={
+                    layout === "twoColumn" ? "sm:col-span-2" : ""
+                  }
+                >
+                  {labelEl}
+                  <textarea
+                    placeholder={f.placeholder}
+                    value={value}
+                    onChange={(e) =>
+                      handleInputChange(f.key, e.target.value)
+                    }
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                    style={commonStyle}
+                    rows={f.rows ?? 3}
+                    required={!!f.required}
+                  />
+                </div>
+              );
+            }
+
+            if (f.type === "select") {
+              return (
+                <div key={f.key}>
+                  {labelEl}
+                  <select
+                    value={value}
+                    onChange={(e) =>
+                      handleInputChange(f.key, e.target.value)
+                    }
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                    style={commonStyle}
+                    required={!!f.required}
+                  >
+                    <option value="">
+                      {f.placeholder || "Select an option"}
+                    </option>
+                    {(f.options || []).map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              );
+            }
+
+            if (f.type === "checkbox") {
+              return (
+                <div key={f.key} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={!!value}
+                    onChange={(e) =>
+                      handleInputChange(f.key, e.target.checked)
+                    }
+                    className="w-4 h-4 border rounded focus:ring-2 focus:ring-green-500"
+                    style={commonStyle}
+                  />
+                  <span
+                    className="text-sm"
+                    style={{ color: titleColor }}
+                  >
+                    {f.label}
+                  </span>
+                </div>
+              );
+            }
+
+            // text, email, tel, date
+            return (
+              <div key={f.key}>
+                {labelEl}
+                <input
+                  type={f.type === "date" ? "date" : f.type}
+                  placeholder={f.placeholder}
+                  value={value}
+                  onChange={(e) =>
+                    handleInputChange(f.key, e.target.value)
+                  }
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                  style={commonStyle}
+                  required={!!f.required}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        {enableGDPR && (
+          <label className="flex items-start gap-2 mt-3 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={!!formData._gdpr}
+              onChange={(e) =>
+                handleInputChange("_gdpr", e.target.checked)
+              }
+              className="mt-1"
+              required
+            />
+            <span>{gdprText}</span>
+          </label>
         )}
-        {fields.includes('phone') && (
-          <input
-            type="tel"
-            placeholder="Your Phone"
-            value={formData.phone || ''}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-            style={{ borderColor: inputBorderColor }}
-          />
-        )}
-        {fields.includes('subject') && (
-          <input
-            type="text"
-            placeholder="Subject"
-            value={formData.subject || ''}
-            onChange={(e) => handleInputChange('subject', e.target.value)}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-            style={{ borderColor: inputBorderColor }}
-          />
-        )}
-        {fields.includes('message') && (
-          <textarea
-            placeholder="Your Message"
-            value={formData.message || ''}
-            onChange={(e) => handleInputChange('message', e.target.value)}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-            style={{ borderColor: inputBorderColor }}
-            rows={3}
-            required
-          />
-        )}
+
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-2 rounded font-medium disabled:opacity-50 transition-opacity"
+          className="w-full py-2 rounded font-medium disabled:opacity-50 transition-opacity mt-4"
           style={{
             backgroundColor: buttonColor,
-            color: buttonTextColor
+            color: buttonTextColor,
           }}
         >
-          {isSubmitting ? 'Sending...' : buttonText}
+          {isSubmitting ? "Sending..." : buttonText}
         </button>
-        {submitStatus && <div className="text-sm text-center mt-2">{submitStatus}</div>}
+
+        {submitStatus && (
+          <div className="text-sm text-center mt-2">
+            {submitStatus}
+          </div>
+        )}
       </form>
     </div>
   );
 }
+
 
 // Availability Widget Component
 interface AvailabilityWidgetProps {
