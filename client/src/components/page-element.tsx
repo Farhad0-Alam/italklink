@@ -1111,7 +1111,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
 
                 <div>
                   <label className="text-xs text-gray-400 block mb-1">
-                    Message (supports {{name}}, {{from_name}})
+                    Message (supports {"{{name}}"}, {"{{from_name}}"})
                   </label>
                   <Textarea
                     value={autoReplyMessage}
