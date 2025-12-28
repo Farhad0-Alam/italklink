@@ -182,12 +182,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
   type FieldType = "text" | "email" | "tel" | "textarea" | "date" | "dropdown" | "checkbox";
 
   // Built-in field keys (only 5 default fields - users can add more with +Add Field)
-  type BuiltInFieldKey =
-    | "name"
-    | "email"
-    | "phone"
-    | "subject"
-    | "message";
+  type BuiltInFieldKey = "name" | "email" | "phone" | "subject" | "message";
 
   type FieldConfig = {
     key: string; // Can be built-in or custom (e.g., "custom_1234567890")
@@ -199,16 +194,10 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     rows?: number; // only for textarea
     options?: string[]; // only for dropdown
     isCustom?: boolean; // true for user-added custom fields
-    checkedLabel?: string; // optional label for checkbox checked state
-    uncheckedLabel?: string; // optional label for checkbox unchecked state
+    hint?: string; // for checkbox
   };
 
-  // Valid field types for validation
-  const validFieldTypes = ["text", "email", "tel", "textarea", "date", "dropdown", "checkbox", "select"] as const;
-
-  const builtInKeys: BuiltInFieldKey[] = [
-    "name", "email", "phone", "subject", "message"
-  ];
+  const builtInKeys: BuiltInFieldKey[] = ["name", "email", "phone", "subject", "message"];
 
   const defaultFieldConfig: Record<BuiltInFieldKey, FieldConfig> = {
     name: {
@@ -254,37 +243,31 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     },
   };
 
-  // Backward compatibility:
-  // - If element.data.fieldConfigs exists => use it
-  // - else fallback to element.data.fields (old array) and map to configs
   const normalizeFieldConfigs = (): FieldConfig[] => {
     const saved = element.data?.fieldConfigs;
+    const validFieldTypes = ["text", "email", "tel", "textarea", "date", "dropdown", "checkbox"];
+
     if (Array.isArray(saved) && saved.length) {
-      // merge with defaults to avoid missing keys after upgrades
       const result: FieldConfig[] = [];
       const seenKeys = new Set<string>();
 
-      // First, process saved fields in order (preserves order including custom fields)
       saved.forEach((f: any) => {
         if (!f?.key) return;
         const isBuiltIn = builtInKeys.includes(f.key as BuiltInFieldKey);
         const base = isBuiltIn ? (defaultFieldConfig as any)[f.key] : null;
-        
+
         seenKeys.add(f.key);
-        
-        // Normalize type - convert "select" to "dropdown" for backward compatibility
+
         let normalizedType: FieldType = "text";
-        if (validFieldTypes.includes(f.type)) {
-          normalizedType = (f.type === "select" ? "dropdown" : f.type) as FieldType;
+        const rawType = f.type?.toLowerCase();
+        if (validFieldTypes.includes(rawType)) {
+          normalizedType = rawType as FieldType;
+        } else if (rawType === "select") {
+          normalizedType = "dropdown";
         } else if (base?.type) {
           normalizedType = base.type;
         }
-        
-        // Default options for dropdown if none provided
-        const options = Array.isArray(f.options) && f.options.length > 0 
-          ? f.options 
-          : (normalizedType === "dropdown" ? ["Option 1", "Option 2"] : (base?.options ?? []));
-        
+
         result.push({
           ...(base || {}),
           ...f,
@@ -293,14 +276,14 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
           required: typeof f.required === "boolean" ? f.required : (base?.required ?? false),
           type: normalizedType,
           rows: typeof f.rows === "number" ? f.rows : (base?.rows ?? 3),
-          options,
+          options: Array.isArray(f.options) ? f.options : (base?.options ?? []),
           label: f.label || (base?.label ?? f.key),
           placeholder: f.placeholder || (base?.placeholder ?? ""),
-          isCustom: !isBuiltIn || f.isCustom,
+          isCustom: !isBuiltIn || !!f.isCustom,
+          hint: f.hint || "",
         });
       });
 
-      // Add any missing built-in keys (disabled by default)
       builtInKeys.forEach((k) => {
         if (!seenKeys.has(k)) {
           result.push({ ...defaultFieldConfig[k], enabled: false });
@@ -311,10 +294,35 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     }
 
     const oldFields: string[] = element.data?.fields || ["name", "email", "message"];
-    return builtInKeys.map((k) => ({
-      ...defaultFieldConfig[k],
-      enabled: oldFields.includes(k),
-    }));
+    const result: FieldConfig[] = [];
+    const seenKeys = new Set<string>();
+
+    builtInKeys.forEach((k) => {
+      seenKeys.add(k);
+      result.push({
+        ...defaultFieldConfig[k],
+        enabled: oldFields.includes(k),
+      });
+    });
+
+    oldFields.forEach((fieldKey) => {
+      if (!seenKeys.has(fieldKey)) {
+        const label = fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1);
+        result.push({
+          key: fieldKey,
+          enabled: true,
+          type: fieldKey === "budget" ? "dropdown" : "text",
+          label,
+          placeholder: `Enter ${label}`,
+          required: false,
+          isCustom: true,
+          options: fieldKey === "budget" ? ["< $1k", "$1k - $5k", "$5k+"] : [],
+        });
+        seenKeys.add(fieldKey);
+      }
+    });
+
+    return result;
   };
 
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -384,7 +392,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     element.data?.autoReplySubject || "Thank you for contacting us";
   const autoReplyMessage =
     element.data?.autoReplyMessage ||
-    "Hi {{name}},\n\nThanks for reaching out. We’ll get back to you soon.\n\nBest regards,\n{{from_name}}";
+    "Hi {{name}},\n\nThanks for reaching out. We'll get back to you soon.\n\nBest regards,\n{{from_name}}";
 
   const buildMeta = () => {
     const meta: any = {
@@ -425,38 +433,6 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
         setSubmitStatus(errorMessage);
         setIsSubmitting(false);
         return;
-      }
-
-      // Validate required fields
-      for (const field of enabledFields) {
-        if (!field.required) continue;
-        
-        const value = formData[field.key];
-        
-        // Checkbox validation: must be true
-        if (field.type === "checkbox") {
-          if (value !== true) {
-            setSubmitStatus(`Please check the "${field.label}" checkbox.`);
-            setIsSubmitting(false);
-            return;
-          }
-        }
-        // Dropdown validation: must be non-empty string
-        else if (field.type === "dropdown") {
-          if (!value || value === "") {
-            setSubmitStatus(`Please select an option for "${field.label}".`);
-            setIsSubmitting(false);
-            return;
-          }
-        }
-        // Other fields: must be non-empty string
-        else {
-          if (!value || (typeof value === "string" && value.trim() === "")) {
-            setSubmitStatus(`Please fill in the "${field.label}" field.`);
-            setIsSubmitting(false);
-            return;
-          }
-        }
       }
 
       // GDPR required check
@@ -710,7 +686,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                     </label>
                     <Select
                       value={f.type}
-                      onValueChange={(v) =>
+                      onValueChange={(v: string) =>
                         setField(f.key, { type: v as FieldType })
                       }
                       disabled={!f.enabled}
@@ -718,15 +694,15 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                       <SelectTrigger className="bg-slate-600 border-slate-500 text-white text-xs">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="text">Text</SelectItem>
-                        <SelectItem value="email">Email</SelectItem>
-                        <SelectItem value="tel">Phone</SelectItem>
-                        <SelectItem value="textarea">Textarea</SelectItem>
-                        <SelectItem value="date">Date</SelectItem>
-                        <SelectItem value="dropdown">Dropdown</SelectItem>
-                        <SelectItem value="checkbox">Checkbox</SelectItem>
-                      </SelectContent>
+                        <SelectContent>
+                          <SelectItem value="text">Text</SelectItem>
+                          <SelectItem value="email">Email</SelectItem>
+                          <SelectItem value="tel">Phone</SelectItem>
+                          <SelectItem value="textarea">Textarea</SelectItem>
+                          <SelectItem value="date">Date</SelectItem>
+                          <SelectItem value="dropdown">Dropdown</SelectItem>
+                          <SelectItem value="checkbox">Checkbox</SelectItem>
+                        </SelectContent>
                     </Select>
                   </div>
                 </div>
@@ -753,6 +729,23 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                   </div>
                 )}
 
+                {f.type === "checkbox" && (
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">
+                      Hint Text (appears below checkbox)
+                    </label>
+                    <Input
+                      disabled={!f.enabled}
+                      value={f.hint || ""}
+                      onChange={(e) =>
+                        setField(f.key, { hint: e.target.value })
+                      }
+                      className="bg-slate-600 border-slate-500 text-white text-xs"
+                      placeholder="e.g. I agree to receive marketing emails"
+                    />
+                  </div>
+                )}
+
                 {f.type === "dropdown" && (
                   <div>
                     <label className="text-xs text-gray-400 block mb-1">
@@ -774,13 +767,6 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                     />
                   </div>
                 )}
-
-                {f.type === "checkbox" && (
-                  <div className="text-xs text-slate-400 bg-slate-800/30 p-2 rounded border border-slate-600">
-                    <i className="fas fa-info-circle mr-1"></i>
-                    This will render as a single checkbox (true/false) in the form.
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -798,7 +784,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
               <label className="text-xs text-gray-400 block mb-1">Layout</label>
               <Select
                 value={layout}
-                onValueChange={(v) => handleDataUpdate({ layout: v })}
+                onValueChange={(v: string) => handleDataUpdate({ layout: v })}
               >
                 <SelectTrigger className="bg-slate-600 border-slate-500 text-white text-xs">
                   <SelectValue placeholder="Layout" />
@@ -1159,7 +1145,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                   </label>
                   <Select
                     value={autoReplyEmailFieldKey}
-                    onValueChange={(v) =>
+                    onValueChange={(v: string) =>
                       handleDataUpdate({ autoReplyEmailFieldKey: v })
                     }
                   >
@@ -1178,7 +1164,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-slate-300 mt-1">
-                    This field’s value will receive the auto-reply.
+                    This field's value will receive the auto-reply.
                   </p>
                 </div>
 
@@ -1461,7 +1447,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                     required={!!f.required}
                   >
                     <option value="">
-                      {f.placeholder || "Select..."}
+                      {f.placeholder || "Select an option"}
                     </option>
                     {(f.options || []).map((opt) => (
                       <option key={opt} value={opt}>
@@ -1473,57 +1459,40 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
               );
             }
 
-            if (f.type === "date") {
-              return (
-                <div key={f.key}>
-                  {labelEl}
-                  <input
-                    type="date"
-                    value={value}
-                    onChange={(e) =>
-                      handleInputChange(f.key, e.target.value)
-                    }
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-                    style={commonStyle}
-                    required={!!f.required}
-                  />
-                </div>
-              );
-            }
-
             if (f.type === "checkbox") {
               return (
-                <div key={f.key} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id={`field-${f.key}`}
-                    checked={!!value}
-                    onChange={(e) =>
-                      handleInputChange(f.key, e.target.checked)
-                    }
-                    className="w-4 h-4 border rounded focus:ring-2 focus:ring-green-500 accent-green-600"
-                    style={{
-                      borderColor: inputBorderColor,
-                    }}
-                  />
-                  <label
-                    htmlFor={`field-${f.key}`}
-                    className="text-sm cursor-pointer"
-                    style={{ color: titleColor }}
-                  >
-                    {f.label}
-                    {f.required && <span className="ml-1 text-red-500">*</span>}
-                  </label>
+                <div key={f.key} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={!!value}
+                      onChange={(e) =>
+                        handleInputChange(f.key, e.target.checked)
+                      }
+                      className="w-4 h-4 border rounded focus:ring-2 focus:ring-green-500"
+                      required={!!f.required}
+                      style={commonStyle}
+                    />
+                    <span
+                      className="text-sm"
+                      style={{ color: titleColor }}
+                    >
+                      {f.label}
+                    </span>
+                  </div>
+                  {f.hint && (
+                    <p className="text-xs text-gray-500 ml-6">{f.hint}</p>
+                  )}
                 </div>
               );
             }
 
-            // text, email, tel (fallback for any remaining types)
+            // text, email, tel, date
             return (
               <div key={f.key}>
                 {labelEl}
                 <input
-                  type={f.type === "tel" ? "tel" : f.type === "email" ? "email" : "text"}
+                  type={f.type === "date" ? "date" : f.type}
                   placeholder={f.placeholder}
                   value={value}
                   onChange={(e) =>
@@ -1574,7 +1543,6 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     </div>
   );
 }
-
 
 // Availability Widget Component
 interface AvailabilityWidgetProps {

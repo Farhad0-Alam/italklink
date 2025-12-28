@@ -1,0 +1,139 @@
+Looking at the code, I can see that there are TypeScript type issues in the ContactFormRenderer component. The main problem is that the FieldType type doesn't match what's being used in the code. Here are the fixes:
+
+Update the FieldType type to include "tel" and remove "select" since it's normalized to "dropdown":
+
+Fix the validFieldTypes array to match the actual types used
+
+Fix type assertions in the normalization function
+
+Here's the corrected code for the ContactFormRenderer component:
+
+typescript
+// In the ContactFormRenderer function, update these parts:
+
+type FieldType = "text" | "email" | "tel" | "textarea" | "date" | "dropdown" | "checkbox";
+
+// Valid field types for validation - remove "select" since it's normalized to "dropdown"
+const validFieldTypes = ["text", "email", "tel", "textarea", "date", "dropdown", "checkbox"] as const;
+
+// In the normalizeFieldConfigs function, fix the type checking:
+const normalizeFieldConfigs = (): FieldConfig[] => {
+  const saved = element.data?.fieldConfigs;
+  if (Array.isArray(saved) && saved.length) {
+    // merge with defaults to avoid missing keys after upgrades
+    const result: FieldConfig[] = [];
+    const seenKeys = new Set<string>();
+
+    // First, process saved fields in order (preserves order including custom fields)
+    saved.forEach((f: any) => {
+      if (!f?.key) return;
+      const isBuiltIn = builtInKeys.includes(f.key as BuiltInFieldKey);
+      const base = isBuiltIn ? (defaultFieldConfig as any)[f.key] : null;
+      
+      seenKeys.add(f.key);
+      
+      // Normalize type - convert "select" to "dropdown" for backward compatibility
+      let normalizedType: FieldType = "text";
+      const fieldType = f.type?.toLowerCase();
+      
+      // Check if the type is valid
+      if (fieldType && validFieldTypes.includes(fieldType as any)) {
+        normalizedType = fieldType as FieldType;
+      } else if (fieldType === "select") {
+        normalizedType = "dropdown"; // Convert "select" to "dropdown"
+      } else if (base?.type) {
+        normalizedType = base.type;
+      }
+      
+      // Default options for dropdown if none provided
+      const options = Array.isArray(f.options) && f.options.length > 0 
+        ? f.options 
+        : (normalizedType === "dropdown" ? ["Option 1", "Option 2"] : (base?.options ?? []));
+      
+      result.push({
+        ...(base || {}),
+        ...f,
+        key: f.key,
+        enabled: !!f.enabled,
+        required: typeof f.required === "boolean" ? f.required : (base?.required ?? false),
+        type: normalizedType,
+        rows: typeof f.rows === "number" ? f.rows : (base?.rows ?? 3),
+        options,
+        label: f.label || (base?.label ?? f.key),
+        placeholder: f.placeholder || (base?.placeholder ?? ""),
+        isCustom: !isBuiltIn || f.isCustom,
+      });
+    });
+
+    // Add any missing built-in keys (disabled by default)
+    builtInKeys.forEach((k) => {
+      if (!seenKeys.has(k)) {
+        result.push({ ...defaultFieldConfig[k], enabled: false });
+      }
+    });
+
+    return result;
+  }
+
+  const oldFields: string[] = element.data?.fields || ["name", "email", "message"];
+  return builtInKeys.map((k) => ({
+    ...defaultFieldConfig[k],
+    enabled: oldFields.includes(k),
+  }));
+};
+Also, update the dropdown rendering in the view mode to handle the phone type correctly:
+
+typescript
+// In the view mode rendering, update the input type handling:
+if (f.type === "tel") {
+  return (
+    <div key={f.key}>
+      {labelEl}
+      <input
+        type="tel"
+        placeholder={f.placeholder}
+        value={value}
+        onChange={(e) => handleInputChange(f.key, e.target.value)}
+        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+        style={commonStyle}
+        required={!!f.required}
+      />
+    </div>
+  );
+}
+And update the type selection dropdown in edit mode to only show valid types:
+
+typescript
+// In the edit mode type selector:
+<Select
+  value={f.type}
+  onValueChange={(v) =>
+    setField(f.key, { type: v as FieldType })
+  }
+  disabled={!f.enabled}
+>
+  <SelectTrigger className="bg-slate-600 border-slate-500 text-white text-xs">
+    <SelectValue placeholder="Select type" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="text">Text</SelectItem>
+    <SelectItem value="email">Email</SelectItem>
+    <SelectItem value="tel">Phone</SelectItem>
+    <SelectItem value="textarea">Textarea</SelectItem>
+    <SelectItem value="date">Date</SelectItem>
+    <SelectItem value="dropdown">Dropdown</SelectItem>
+    <SelectItem value="checkbox">Checkbox</SelectItem>
+  </SelectContent>
+</Select>
+The key fixes are:
+
+Added "tel" to the FieldType union type
+
+Removed "select" from validFieldTypes since it's normalized to "dropdown"
+
+Fixed the type checking logic in normalizeFieldConfigs
+
+Added proper rendering for phone (tel) input type in view mode
+
+Updated the type selector to only include valid FieldType values
+
