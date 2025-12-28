@@ -179,7 +179,7 @@ function SortableImageItem({ image, index, onDelete, onUpdateAlt }: SortableImag
 
 // Contact Form Renderer Component - wraps hooks to avoid React hook rules violation
 function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
-  type FieldType = "text" | "email" | "tel" | "textarea" | "date" | "select" | "checkbox";
+  type FieldType = "text" | "email" | "tel" | "textarea" | "date" | "dropdown" | "checkbox";
 
   // Built-in field keys (only 5 default fields - users can add more with +Add Field)
   type BuiltInFieldKey =
@@ -197,9 +197,14 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     placeholder: string;
     required?: boolean;
     rows?: number; // only for textarea
-    options?: string[]; // only for select
+    options?: string[]; // only for dropdown
     isCustom?: boolean; // true for user-added custom fields
+    checkedLabel?: string; // optional label for checkbox checked state
+    uncheckedLabel?: string; // optional label for checkbox unchecked state
   };
+
+  // Valid field types for validation
+  const validFieldTypes = ["text", "email", "tel", "textarea", "date", "dropdown", "checkbox", "select"] as const;
 
   const builtInKeys: BuiltInFieldKey[] = [
     "name", "email", "phone", "subject", "message"
@@ -266,25 +271,29 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
         const base = isBuiltIn ? (defaultFieldConfig as any)[f.key] : null;
         
         seenKeys.add(f.key);
+        
+        // Normalize type - convert "select" to "dropdown" for backward compatibility
+        let normalizedType: FieldType = "text";
+        if (validFieldTypes.includes(f.type)) {
+          normalizedType = (f.type === "select" ? "dropdown" : f.type) as FieldType;
+        } else if (base?.type) {
+          normalizedType = base.type;
+        }
+        
+        // Default options for dropdown if none provided
+        const options = Array.isArray(f.options) && f.options.length > 0 
+          ? f.options 
+          : (normalizedType === "dropdown" ? ["Option 1", "Option 2"] : (base?.options ?? []));
+        
         result.push({
           ...(base || {}),
           ...f,
           key: f.key,
           enabled: !!f.enabled,
           required: typeof f.required === "boolean" ? f.required : (base?.required ?? false),
-          type: ([
-            "text",
-            "email",
-            "tel",
-            "textarea",
-            "date",
-            "select",
-            "checkbox",
-          ].includes(f.type)
-            ? f.type
-            : (base?.type ?? "text")) as FieldType,
+          type: normalizedType,
           rows: typeof f.rows === "number" ? f.rows : (base?.rows ?? 3),
-          options: Array.isArray(f.options) ? f.options : (base?.options ?? []),
+          options,
           label: f.label || (base?.label ?? f.key),
           placeholder: f.placeholder || (base?.placeholder ?? ""),
           isCustom: !isBuiltIn || f.isCustom,
@@ -416,6 +425,38 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
         setSubmitStatus(errorMessage);
         setIsSubmitting(false);
         return;
+      }
+
+      // Validate required fields
+      for (const field of enabledFields) {
+        if (!field.required) continue;
+        
+        const value = formData[field.key];
+        
+        // Checkbox validation: must be true
+        if (field.type === "checkbox") {
+          if (value !== true) {
+            setSubmitStatus(`Please check the "${field.label}" checkbox.`);
+            setIsSubmitting(false);
+            return;
+          }
+        }
+        // Dropdown validation: must be non-empty string
+        else if (field.type === "dropdown") {
+          if (!value || value === "") {
+            setSubmitStatus(`Please select an option for "${field.label}".`);
+            setIsSubmitting(false);
+            return;
+          }
+        }
+        // Other fields: must be non-empty string
+        else {
+          if (!value || (typeof value === "string" && value.trim() === "")) {
+            setSubmitStatus(`Please fill in the "${field.label}" field.`);
+            setIsSubmitting(false);
+            return;
+          }
+        }
       }
 
       // GDPR required check
@@ -683,7 +724,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                         <SelectItem value="tel">Phone</SelectItem>
                         <SelectItem value="textarea">Textarea</SelectItem>
                         <SelectItem value="date">Date</SelectItem>
-                        <SelectItem value="select">Dropdown</SelectItem>
+                        <SelectItem value="dropdown">Dropdown</SelectItem>
                         <SelectItem value="checkbox">Checkbox</SelectItem>
                       </SelectContent>
                     </Select>
@@ -712,7 +753,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                   </div>
                 )}
 
-                {f.type === "select" && (
+                {f.type === "dropdown" && (
                   <div>
                     <label className="text-xs text-gray-400 block mb-1">
                       Options (comma separated)
@@ -731,6 +772,13 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                       className="bg-slate-600 border-slate-500 text-white text-xs"
                       placeholder="Option 1, Option 2, Option 3"
                     />
+                  </div>
+                )}
+
+                {f.type === "checkbox" && (
+                  <div className="text-xs text-slate-400 bg-slate-800/30 p-2 rounded border border-slate-600">
+                    <i className="fas fa-info-circle mr-1"></i>
+                    This will render as a single checkbox (true/false) in the form.
                   </div>
                 )}
               </div>
@@ -1399,7 +1447,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
               );
             }
 
-            if (f.type === "select") {
+            if (f.type === "dropdown") {
               return (
                 <div key={f.key}>
                   {labelEl}
@@ -1413,7 +1461,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                     required={!!f.required}
                   >
                     <option value="">
-                      {f.placeholder || "Select an option"}
+                      {f.placeholder || "Select..."}
                     </option>
                     {(f.options || []).map((opt) => (
                       <option key={opt} value={opt}>
@@ -1425,34 +1473,57 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
               );
             }
 
+            if (f.type === "date") {
+              return (
+                <div key={f.key}>
+                  {labelEl}
+                  <input
+                    type="date"
+                    value={value}
+                    onChange={(e) =>
+                      handleInputChange(f.key, e.target.value)
+                    }
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                    style={commonStyle}
+                    required={!!f.required}
+                  />
+                </div>
+              );
+            }
+
             if (f.type === "checkbox") {
               return (
                 <div key={f.key} className="flex items-center gap-2">
                   <input
                     type="checkbox"
+                    id={`field-${f.key}`}
                     checked={!!value}
                     onChange={(e) =>
                       handleInputChange(f.key, e.target.checked)
                     }
-                    className="w-4 h-4 border rounded focus:ring-2 focus:ring-green-500"
-                    style={commonStyle}
+                    className="w-4 h-4 border rounded focus:ring-2 focus:ring-green-500 accent-green-600"
+                    style={{
+                      borderColor: inputBorderColor,
+                    }}
                   />
-                  <span
-                    className="text-sm"
+                  <label
+                    htmlFor={`field-${f.key}`}
+                    className="text-sm cursor-pointer"
                     style={{ color: titleColor }}
                   >
                     {f.label}
-                  </span>
+                    {f.required && <span className="ml-1 text-red-500">*</span>}
+                  </label>
                 </div>
               );
             }
 
-            // text, email, tel, date
+            // text, email, tel (fallback for any remaining types)
             return (
               <div key={f.key}>
                 {labelEl}
                 <input
-                  type={f.type === "date" ? "date" : f.type}
+                  type={f.type === "tel" ? "tel" : f.type === "email" ? "email" : "text"}
                   placeholder={f.placeholder}
                   value={value}
                   onChange={(e) =>
