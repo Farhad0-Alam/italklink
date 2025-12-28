@@ -1127,6 +1127,55 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
               </div>
             )}
           </div>
+
+          {/* Admin Notification */}
+          <div className="pt-3 mt-2 border-t border-slate-600 space-y-2">
+            <div className="flex items-center justify-between bg-slate-800/40 p-2 rounded border border-slate-600">
+              <div className="text-sm text-slate-200">
+                Send notification to admin
+              </div>
+              <Switch
+                checked={!!element.data?.notifyAdminEmail}
+                onCheckedChange={(v) =>
+                  handleDataUpdate({ notifyAdminEmail: v ? '' : undefined })
+                }
+              />
+            </div>
+
+            {element.data?.notifyAdminEmail !== undefined && (
+              <div className="space-y-2">
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">
+                    Admin Email Address
+                  </label>
+                  <Input
+                    value={element.data?.notifyAdminEmail || ''}
+                    onChange={(e) =>
+                      handleDataUpdate({ notifyAdminEmail: e.target.value })
+                    }
+                    className="bg-slate-600 border-slate-500 text-white text-xs"
+                    placeholder="admin@yourdomain.com"
+                  />
+                  <p className="text-xs text-slate-300 mt-1">
+                    Receive email notifications for each form submission.
+                  </p>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">
+                    Notification Subject
+                  </label>
+                  <Input
+                    value={element.data?.notifyAdminSubject || ''}
+                    onChange={(e) =>
+                      handleDataUpdate({ notifyAdminSubject: e.target.value })
+                    }
+                    className="bg-slate-600 border-slate-500 text-white text-xs"
+                    placeholder="New Contact Form Submission"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Advanced */}
