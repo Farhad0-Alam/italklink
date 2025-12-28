@@ -2037,26 +2037,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact form submission endpoint
   app.post('/api/contact-form/submit', async (req, res) => {
     try {
-      const { formData, formConfig } = req.body;
+      const { formData, formConfig, meta } = req.body;
       
       if (!formData || !formConfig) {
         return res.status(400).json({ message: 'Form data and config are required' });
       }
 
+      // Honeypot check (if _hp field is filled, it's a bot)
+      if (formConfig.enableHoneypot && formData._hp) {
+        console.log('🤖 Bot detected via honeypot');
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Spam detected' 
+        });
+      }
+
       // Spam protection check
       if (formConfig.spamProtection) {
-        // Basic spam protection checks
         const suspiciousPatterns = [
           /viagra|cialis|pharmacy/i,
-          /\b\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\b/, // Credit card patterns
+          /\b\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\b/,
           /bitcoin|crypto|investment/i
         ];
         
-        const allText = Object.values(formData).join(' ').toLowerCase();
+        const allText = Object.values(formData).filter(v => typeof v === 'string').join(' ').toLowerCase();
         const isSpam = suspiciousPatterns.some(pattern => pattern.test(allText));
         
         if (isSpam) {
-          console.log('Spam detected in form submission');
+          console.log('🚫 Spam detected in form submission');
           return res.status(400).json({ 
             success: false, 
             message: 'Message flagged by spam protection' 
@@ -2065,77 +2073,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const results: {
-        email: boolean;
+        autoReply: boolean;
+        adminNotification: boolean;
         googleSheets: boolean;
         errors: string[];
       } = {
-        email: false,
+        autoReply: false,
+        adminNotification: false,
         googleSheets: false,
         errors: []
       };
 
-      // Send email if receiver email is configured and email notifications enabled
-      if (formConfig.receiverEmail && formConfig.emailNotifications !== false) {
+      // Helper function to replace {{placeholders}} in templates
+      const applyTemplate = (template: string, values: Record<string, any> = {}): string => {
+        if (!template) return '';
+        return template.replace(/{{\s*([^}]+)\s*}}/g, (_, key) => {
+          const v = values[key.trim()];
+          if (v === undefined || v === null) return '';
+          return String(v);
+        });
+      };
+
+      // 1. AUTO-REPLY EMAIL to form submitter
+      if (formConfig.autoReplyEnabled) {
         try {
-          // Email sending logic
-          console.log('📧 Email notification sent to:', formConfig.receiverEmail);
-          console.log('📝 Form submission data:', formData);
-          console.log('🛡️ Spam protection:', formConfig.spamProtection ? 'ENABLED' : 'DISABLED');
-          console.log('📎 File attachments:', formConfig.fileAttachments ? 'ENABLED' : 'DISABLED');
-          console.log('🔄 Auto-reply:', formConfig.autoReply ? 'ENABLED' : 'DISABLED');
+          const recipientFieldKey = formConfig.autoReplyEmailFieldKey || 'email';
+          const recipientEmail = formData[recipientFieldKey];
           
-          // Here you would integrate with an email service like SendGrid, Mailgun, etc.
-          // For now, we'll simulate successful email sending
-          results.email = true;
-          
-          // Auto-reply logic
-          if (formConfig.autoReply && formData.email) {
-            console.log('📧 Auto-reply sent to:', formData.email);
-            console.log('💬 Auto-reply message: "Thank you for your message! We will get back to you soon."');
+          if (recipientEmail && recipientEmail.includes('@')) {
+            const fromName = formConfig.autoReplyFromName || 'iTalkLink';
+            const fromEmail = formConfig.autoReplyFromEmail || process.env.FROM_EMAIL || 'noreply@italklink.com';
+            const subject = applyTemplate(formConfig.autoReplySubject || 'Thank you for contacting us', formData);
+            const messageBody = applyTemplate(
+              formConfig.autoReplyMessage || 'Hi {{name}},\n\nThanks for reaching out. We will get back to you soon.\n\nBest regards,\nThe Team',
+              { ...formData, from_name: fromName }
+            );
+            
+            // Use SendGrid via email service
+            const sgMail = await import('@sendgrid/mail');
+            const apiKey = process.env.SENDGRID_API_KEY;
+            
+            if (apiKey) {
+              sgMail.default.setApiKey(apiKey);
+              await sgMail.default.send({
+                to: recipientEmail,
+                from: { name: fromName, email: fromEmail },
+                subject,
+                text: messageBody,
+                html: messageBody.replace(/\n/g, '<br>')
+              });
+              results.autoReply = true;
+              console.log('📧 Auto-reply sent to:', recipientEmail);
+            } else {
+              console.warn('SendGrid API key not configured - auto-reply skipped');
+              results.errors.push('Email service not configured');
+            }
           }
-          
-        } catch (error) {
-          console.error('Email sending failed:', error);
-          results.errors.push('Failed to send email notification');
+        } catch (error: any) {
+          console.error('Auto-reply email failed:', error);
+          results.errors.push('Failed to send auto-reply: ' + (error.message || 'Unknown error'));
         }
       }
 
-      // Send to Google Sheets if configured
-      if (formConfig.googleSheets?.enabled && formConfig.googleSheets.spreadsheetId) {
+      // 2. ADMIN NOTIFICATION EMAIL
+      if (formConfig.notifyAdminEmail) {
+        try {
+          const adminEmail = formConfig.notifyAdminEmail;
+          const fromName = formConfig.autoReplyFromName || 'iTalkLink Contact Form';
+          const fromEmail = formConfig.autoReplyFromEmail || process.env.FROM_EMAIL || 'noreply@italklink.com';
+          const subject = formConfig.notifyAdminSubject || `New Contact Form Submission - ${formConfig.title || 'Contact Form'}`;
+          
+          // Build admin notification body
+          const formFieldsHtml = Object.entries(formData)
+            .filter(([key]) => !key.startsWith('_')) // Exclude internal fields like _hp, _gdpr
+            .map(([key, value]) => `<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${key}</td><td style="padding: 8px; border: 1px solid #ddd;">${value}</td></tr>`)
+            .join('');
+          
+          const metaInfo = meta ? `<p style="margin-top: 20px; color: #666; font-size: 12px;">
+            Submitted: ${meta.timestamp || new Date().toISOString()}<br>
+            Page: ${meta.pageUrl || 'N/A'}<br>
+            ${meta.utm ? 'UTM: ' + JSON.stringify(meta.utm) : ''}
+          </p>` : '';
+          
+          const adminHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px;">
+              <h2 style="color: #16a34a;">New Contact Form Submission</h2>
+              <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                ${formFieldsHtml}
+              </table>
+              ${metaInfo}
+            </div>
+          `;
+          
+          const sgMail = await import('@sendgrid/mail');
+          const apiKey = process.env.SENDGRID_API_KEY;
+          
+          if (apiKey) {
+            sgMail.default.setApiKey(apiKey);
+            await sgMail.default.send({
+              to: adminEmail,
+              from: { name: fromName, email: fromEmail },
+              subject,
+              html: adminHtml
+            });
+            results.adminNotification = true;
+            console.log('📧 Admin notification sent to:', adminEmail);
+          }
+        } catch (error: any) {
+          console.error('Admin notification email failed:', error);
+          results.errors.push('Failed to send admin notification: ' + (error.message || 'Unknown error'));
+        }
+      }
+
+      // 3. GOOGLE SHEETS integration
+      const sheetsEnabled = formConfig.googleSheetsEnabled || formConfig.googleSheets?.enabled;
+      const sheetId = formConfig.googleSheetsSheetId || formConfig.googleSheets?.spreadsheetId;
+      const sheetTab = formConfig.googleSheetsTabName || formConfig.googleSheets?.sheetName || 'Sheet1';
+      
+      if (sheetsEnabled && sheetId) {
         try {
           if (!isGoogleSheetsConfigured()) {
             throw new Error('Google Sheets not configured on server');
           }
 
+          // Clean form data (exclude internal fields)
+          const cleanData: Record<string, string> = {};
+          Object.entries(formData).forEach(([key, value]) => {
+            if (!key.startsWith('_')) {
+              cleanData[key] = String(value || '');
+            }
+          });
+
           await addToGoogleSheet(
-            {
-              spreadsheetId: formConfig.googleSheets.spreadsheetId,
-              sheetName: formConfig.googleSheets.sheetName || 'Sheet1'
-            },
-            formData
+            { spreadsheetId: sheetId, sheetName: sheetTab },
+            cleanData
           );
           results.googleSheets = true;
           console.log('📊 Google Sheets: Data saved successfully');
-        } catch (error) {
+        } catch (error: any) {
           console.error('Google Sheets submission failed:', error);
-          results.errors.push('Failed to save to Google Sheets');
+          results.errors.push('Failed to save to Google Sheets: ' + (error.message || 'Unknown error'));
         }
       }
 
-      // Return success if at least one method worked or if no receivers are configured
-      if (results.email || results.googleSheets || (!formConfig.receiverEmail && !formConfig.googleSheets?.enabled)) {
-        res.json({ 
-          success: true, 
-          message: formConfig.successMessage || 'Form submitted successfully!',
-          results 
-        });
-      } else {
-        res.status(500).json({ 
-          success: false, 
-          message: 'Form submission failed - email delivery failed',
-          results 
-        });
-      }
+      // Always return success - form submission itself is successful even if integrations fail
+      res.json({ 
+        success: true, 
+        message: formConfig.successMessage || 'Form submitted successfully!',
+        results 
+      });
+      
     } catch (error) {
       console.error('Contact form submission error:', error);
       res.status(500).json({ message: 'Failed to process form submission' });
