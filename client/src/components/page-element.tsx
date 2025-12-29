@@ -333,7 +333,16 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }, []);
 
-  const fieldConfigs = normalizeFieldConfigs();
+  // Local state for fieldConfigs - updates immediately on keystroke
+  const [localFieldConfigs, setLocalFieldConfigs] = useState<FieldConfig[]>(() => normalizeFieldConfigs());
+  
+  // Sync from props when element.data.fieldConfigs changes externally
+  useEffect(() => {
+    const normalized = normalizeFieldConfigs();
+    setLocalFieldConfigs(normalized);
+  }, [element.data?.fieldConfigs, element.data?.fields]);
+
+  const fieldConfigs = localFieldConfigs;
   const enabledFields = fieldConfigs.filter((f) => f.enabled);
 
   // helpful derived list of email-type fields (for auto-reply recipient select)
@@ -503,14 +512,18 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
   // -------- EDIT MODE (FULL CUSTOMIZATION UI) --------
   if (isEditing) {
     const setField = (key: string, patch: Partial<FieldConfig>) => {
-      const next = normalizeFieldConfigs().map((f) =>
-        f.key === key ? { ...f, ...patch } : f
-      );
-      handleDataUpdate({ fieldConfigs: next });
-
-      // keep old "fields" array updated for older parts of app
-      const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
-      handleDataUpdate({ fields: fieldsLegacy });
+      // Update local state immediately for responsive UI
+      setLocalFieldConfigs((prev) => {
+        const next = prev.map((f) =>
+          f.key === key ? { ...f, ...patch } : f
+        );
+        // Save to database
+        handleDataUpdate({ fieldConfigs: next });
+        // keep old "fields" array updated for older parts of app
+        const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
+        handleDataUpdate({ fields: fieldsLegacy });
+        return next;
+      });
     };
 
     const addCustomField = () => {
@@ -524,26 +537,31 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
         required: false,
         isCustom: true,
       };
-      const current = normalizeFieldConfigs();
-      const next = [...current, newField];
-      handleDataUpdate({ fieldConfigs: next });
+      setLocalFieldConfigs((prev) => {
+        const next = [...prev, newField];
+        handleDataUpdate({ fieldConfigs: next });
+        return next;
+      });
     };
 
     const deleteField = (key: string) => {
-      const current = normalizeFieldConfigs();
-      const next = current.filter((f) => f.key !== key);
-      handleDataUpdate({ fieldConfigs: next });
-      // Update legacy fields array
-      const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
-      handleDataUpdate({ fields: fieldsLegacy });
+      setLocalFieldConfigs((prev) => {
+        const next = prev.filter((f) => f.key !== key);
+        handleDataUpdate({ fieldConfigs: next });
+        const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
+        handleDataUpdate({ fields: fieldsLegacy });
+        return next;
+      });
     };
 
     const moveField = (fromIndex: number, toIndex: number) => {
-      const current = normalizeFieldConfigs();
-      const next = [...current];
-      const [removed] = next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, removed);
-      handleDataUpdate({ fieldConfigs: next });
+      setLocalFieldConfigs((prev) => {
+        const next = [...prev];
+        const [removed] = next.splice(fromIndex, 1);
+        next.splice(toIndex, 0, removed);
+        handleDataUpdate({ fieldConfigs: next });
+        return next;
+      });
     };
 
     return (
