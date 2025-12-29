@@ -286,7 +286,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
           placeholder: f.placeholder || (base?.placeholder ?? ""),
           isCustom: !isBuiltIn || !!f.isCustom,
           hint: f.hint || "",
-          isMultiple: isMultipleCheckbox,
+          isMultiple: normalizedType === "checkbox" ? (f.isMultiple !== undefined ? f.isMultiple : isMultipleCheckbox) : false,
         });
       });
 
@@ -339,7 +339,15 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }, []);
 
-  const fieldConfigs = normalizeFieldConfigs();
+  // Local state for field configs to enable immediate UI updates on keystroke
+  const [localFieldConfigs, setLocalFieldConfigs] = useState<FieldConfig[]>(() => normalizeFieldConfigs());
+
+  // Sync local state from props when element.data.fieldConfigs changes externally
+  useEffect(() => {
+    setLocalFieldConfigs(normalizeFieldConfigs());
+  }, [element.data?.fieldConfigs]);
+
+  const fieldConfigs = localFieldConfigs;
   const enabledFields = fieldConfigs.filter((f) => f.enabled);
 
   // helpful derived list of email-type fields (for auto-reply recipient select)
@@ -518,9 +526,13 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
   // -------- EDIT MODE (FULL CUSTOMIZATION UI) --------
   if (isEditing) {
     const setField = (key: string, patch: Partial<FieldConfig>) => {
-      const next = normalizeFieldConfigs().map((f) =>
+      // Update local state immediately for responsive UI
+      const next = localFieldConfigs.map((f) =>
         f.key === key ? { ...f, ...patch } : f
       );
+      setLocalFieldConfigs(next);
+      
+      // Sync to database
       handleDataUpdate({ fieldConfigs: next });
 
       // keep old "fields" array updated for older parts of app
@@ -539,14 +551,14 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
         required: false,
         isCustom: true,
       };
-      const current = normalizeFieldConfigs();
-      const next = [...current, newField];
+      const next = [...localFieldConfigs, newField];
+      setLocalFieldConfigs(next);
       handleDataUpdate({ fieldConfigs: next });
     };
 
     const deleteField = (key: string) => {
-      const current = normalizeFieldConfigs();
-      const next = current.filter((f) => f.key !== key);
+      const next = localFieldConfigs.filter((f) => f.key !== key);
+      setLocalFieldConfigs(next);
       handleDataUpdate({ fieldConfigs: next });
       // Update legacy fields array
       const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
@@ -554,10 +566,10 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     };
 
     const moveField = (fromIndex: number, toIndex: number) => {
-      const current = normalizeFieldConfigs();
-      const next = [...current];
+      const next = [...localFieldConfigs];
       const [removed] = next.splice(fromIndex, 1);
       next.splice(toIndex, 0, removed);
+      setLocalFieldConfigs(next);
       handleDataUpdate({ fieldConfigs: next });
     };
 
@@ -752,11 +764,11 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                       <label className="text-xs text-gray-400 block mb-1">
                         Checkbox Type
                       </label>
-                      <select
+                      <Select
                         value={f.isMultiple ? "multiple" : "single"}
                         disabled={!f.enabled}
-                        onChange={(e) => {
-                          if (e.target.value === "multiple") {
+                        onValueChange={(value) => {
+                          if (value === "multiple") {
                             // Switch to multiple checkboxes
                             setField(f.key, { 
                               isMultiple: true,
@@ -772,14 +784,19 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                             });
                           }
                         }}
-                        className="w-full bg-slate-600 border-slate-500 text-white text-xs rounded px-2 py-1"
                       >
-                        <option value="single">Single Checkbox (e.g., consent)</option>
-                        <option value="multiple">Multiple Checkboxes (options)</option>
-                      </select>
+                        <SelectTrigger className="bg-slate-600 border-slate-500 text-white text-xs">
+                          <SelectValue placeholder="Select checkbox type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="single">Single Checkbox (e.g., consent)</SelectItem>
+                          <SelectItem value="multiple">Multiple Checkboxes (options)</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
-                    {f.isMultiple ? (
+                    {/* Show options input for multiple checkboxes */}
+                    {f.isMultiple && (
                       <div>
                         <label className="text-xs text-gray-400 block mb-1">
                           Options (one per line, use | for label/value pairs)
@@ -803,7 +820,10 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                           Each line becomes a checkbox. Use "Label|value" format or just "Label".
                         </p>
                       </div>
-                    ) : (
+                    )}
+
+                    {/* Show hint input for single checkbox */}
+                    {!f.isMultiple && (
                       <div>
                         <label className="text-xs text-gray-400 block mb-1">
                           Hint Text (appears below checkbox)
