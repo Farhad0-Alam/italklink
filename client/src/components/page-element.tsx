@@ -804,6 +804,11 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                           value={(f.options || []).join("\n")}
                           onChange={(e) =>
                             setField(f.key, {
+                              options: e.target.value.split("\n"),
+                            })
+                          }
+                          onBlur={(e) =>
+                            setField(f.key, {
                               options: e.target.value
                                 .split("\n")
                                 .map((s) => s.trim())
@@ -851,6 +856,11 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                       value={(f.options || []).join("\n")}
                       onChange={(e) =>
                         setField(f.key, {
+                          options: e.target.value.split("\n"),
+                        })
+                      }
+                      onBlur={(e) =>
+                        setField(f.key, {
                           options: e.target.value
                             .split("\n")
                             .map((s) => s.trim())
@@ -877,6 +887,11 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                       disabled={!f.enabled}
                       value={(f.options || []).join("\n")}
                       onChange={(e) =>
+                        setField(f.key, {
+                          options: e.target.value.split("\n"),
+                        })
+                      }
+                      onBlur={(e) =>
                         setField(f.key, {
                           options: e.target.value
                             .split("\n")
@@ -1575,7 +1590,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                     <option value="">
                       {f.placeholder || "Select an option"}
                     </option>
-                    {(f.options || []).map((option) => {
+                    {(f.options || []).filter(Boolean).map((option) => {
                       const { label, value: optionValue } = parseOption(option);
                       return (
                         <option key={optionValue} value={optionValue}>
@@ -1593,7 +1608,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                 <div key={f.key}>
                   {labelEl}
                   <div className="space-y-2 mt-1">
-                    {(f.options || []).map((option) => {
+                    {(f.options || []).filter(Boolean).map((option) => {
                       const { label, value: optionValue } = parseOption(option);
                       return (
                         <label key={optionValue} className="flex items-center gap-2">
@@ -1627,7 +1642,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                   <div key={f.key}>
                     {labelEl}
                     <div className="space-y-2 mt-1">
-                      {(f.options || []).map((option) => {
+                      {(f.options || []).filter(Boolean).map((option) => {
                         const { label, value: optionValue } = parseOption(option);
                         const isChecked = (value || []).includes(optionValue);
 
