@@ -178,8 +178,9 @@ function SortableImageItem({ image, index, onDelete, onUpdateAlt }: SortableImag
 }
 
 // Contact Form Renderer Component - wraps hooks to avoid React hook rules violation
+// Contact Form Renderer Component - wraps hooks to avoid React hook rules violation
 function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
-  type FieldType = "text" | "email" | "tel" | "textarea" | "date" | "dropdown" | "checkbox";
+  type FieldType = "text" | "email" | "tel" | "textarea" | "date" | "dropdown" | "checkbox" | "radio";
 
   // Built-in field keys (only 5 default fields - users can add more with +Add Field)
   type BuiltInFieldKey = "name" | "email" | "phone" | "subject" | "message";
@@ -192,9 +193,10 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     placeholder: string;
     required?: boolean;
     rows?: number; // only for textarea
-    options?: string[]; // only for dropdown
+    options?: string[]; // only for dropdown, radio, and checkbox groups
     isCustom?: boolean; // true for user-added custom fields
-    hint?: string; // for checkbox
+    hint?: string; // for single checkbox
+    isMultiple?: boolean; // for checkbox groups (multiple checkboxes)
   };
 
   const builtInKeys: BuiltInFieldKey[] = ["name", "email", "phone", "subject", "message"];
@@ -245,7 +247,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
 
   const normalizeFieldConfigs = (): FieldConfig[] => {
     const saved = element.data?.fieldConfigs;
-    const validFieldTypes = ["text", "email", "tel", "textarea", "date", "dropdown", "checkbox"];
+    const validFieldTypes = ["text", "email", "tel", "textarea", "date", "dropdown", "checkbox", "radio"];
 
     if (Array.isArray(saved) && saved.length) {
       const result: FieldConfig[] = [];
@@ -268,6 +270,9 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
           normalizedType = base.type;
         }
 
+        // Check if checkbox has options (multiple checkboxes)
+        const isMultipleCheckbox = normalizedType === "checkbox" && Array.isArray(f.options) && f.options.length > 0;
+
         result.push({
           ...(base || {}),
           ...f,
@@ -281,6 +286,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
           placeholder: f.placeholder || (base?.placeholder ?? ""),
           isCustom: !isBuiltIn || !!f.isCustom,
           hint: f.hint || "",
+          isMultiple: isMultipleCheckbox,
         });
       });
 
@@ -333,16 +339,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }, []);
 
-  // Local state for fieldConfigs - updates immediately on keystroke
-  const [localFieldConfigs, setLocalFieldConfigs] = useState<FieldConfig[]>(() => normalizeFieldConfigs());
-  
-  // Sync from props when element.data.fieldConfigs changes externally
-  useEffect(() => {
-    const normalized = normalizeFieldConfigs();
-    setLocalFieldConfigs(normalized);
-  }, [element.data?.fieldConfigs, element.data?.fields]);
-
-  const fieldConfigs = localFieldConfigs;
+  const fieldConfigs = normalizeFieldConfigs();
   const enabledFields = fieldConfigs.filter((f) => f.enabled);
 
   // helpful derived list of email-type fields (for auto-reply recipient select)
@@ -509,21 +506,26 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     }
   };
 
+  // Helper function to parse options with label|value format
+  const parseOption = (option: string): { label: string; value: string } => {
+    const parts = option.split("|");
+    if (parts.length === 2) {
+      return { label: parts[0].trim(), value: parts[1].trim() };
+    }
+    return { label: option.trim(), value: option.trim() };
+  };
+
   // -------- EDIT MODE (FULL CUSTOMIZATION UI) --------
   if (isEditing) {
     const setField = (key: string, patch: Partial<FieldConfig>) => {
-      // Update local state immediately for responsive UI
-      setLocalFieldConfigs((prev) => {
-        const next = prev.map((f) =>
-          f.key === key ? { ...f, ...patch } : f
-        );
-        // Save to database
-        handleDataUpdate({ fieldConfigs: next });
-        // keep old "fields" array updated for older parts of app
-        const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
-        handleDataUpdate({ fields: fieldsLegacy });
-        return next;
-      });
+      const next = normalizeFieldConfigs().map((f) =>
+        f.key === key ? { ...f, ...patch } : f
+      );
+      handleDataUpdate({ fieldConfigs: next });
+
+      // keep old "fields" array updated for older parts of app
+      const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
+      handleDataUpdate({ fields: fieldsLegacy });
     };
 
     const addCustomField = () => {
@@ -537,31 +539,26 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
         required: false,
         isCustom: true,
       };
-      setLocalFieldConfigs((prev) => {
-        const next = [...prev, newField];
-        handleDataUpdate({ fieldConfigs: next });
-        return next;
-      });
+      const current = normalizeFieldConfigs();
+      const next = [...current, newField];
+      handleDataUpdate({ fieldConfigs: next });
     };
 
     const deleteField = (key: string) => {
-      setLocalFieldConfigs((prev) => {
-        const next = prev.filter((f) => f.key !== key);
-        handleDataUpdate({ fieldConfigs: next });
-        const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
-        handleDataUpdate({ fields: fieldsLegacy });
-        return next;
-      });
+      const current = normalizeFieldConfigs();
+      const next = current.filter((f) => f.key !== key);
+      handleDataUpdate({ fieldConfigs: next });
+      // Update legacy fields array
+      const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
+      handleDataUpdate({ fields: fieldsLegacy });
     };
 
     const moveField = (fromIndex: number, toIndex: number) => {
-      setLocalFieldConfigs((prev) => {
-        const next = [...prev];
-        const [removed] = next.splice(fromIndex, 1);
-        next.splice(toIndex, 0, removed);
-        handleDataUpdate({ fieldConfigs: next });
-        return next;
-      });
+      const current = normalizeFieldConfigs();
+      const next = [...current];
+      const [removed] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, removed);
+      handleDataUpdate({ fieldConfigs: next });
     };
 
     return (
@@ -712,15 +709,16 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                       <SelectTrigger className="bg-slate-600 border-slate-500 text-white text-xs">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="text">Text</SelectItem>
-                          <SelectItem value="email">Email</SelectItem>
-                          <SelectItem value="tel">Phone</SelectItem>
-                          <SelectItem value="textarea">Textarea</SelectItem>
-                          <SelectItem value="date">Date</SelectItem>
-                          <SelectItem value="dropdown">Dropdown</SelectItem>
-                          <SelectItem value="checkbox">Checkbox</SelectItem>
-                        </SelectContent>
+                      <SelectContent>
+                        <SelectItem value="text">Text</SelectItem>
+                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="tel">Phone</SelectItem>
+                        <SelectItem value="textarea">Textarea</SelectItem>
+                        <SelectItem value="date">Date</SelectItem>
+                        <SelectItem value="dropdown">Dropdown</SelectItem>
+                        <SelectItem value="checkbox">Checkbox</SelectItem>
+                        <SelectItem value="radio">Radio</SelectItem>
+                      </SelectContent>
                     </Select>
                   </div>
                 </div>
@@ -747,42 +745,134 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                   </div>
                 )}
 
+                {/* Checkbox Configuration */}
                 {f.type === "checkbox" && (
-                  <div>
-                    <label className="text-xs text-gray-400 block mb-1">
-                      Hint Text (appears below checkbox)
-                    </label>
-                    <Input
-                      disabled={!f.enabled}
-                      value={f.hint || ""}
-                      onChange={(e) =>
-                        setField(f.key, { hint: e.target.value })
-                      }
-                      className="bg-slate-600 border-slate-500 text-white text-xs"
-                      placeholder="e.g. I agree to receive marketing emails"
-                    />
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-gray-400 block mb-1">
+                        Checkbox Type
+                      </label>
+                      <select
+                        value={f.isMultiple ? "multiple" : "single"}
+                        disabled={!f.enabled}
+                        onChange={(e) => {
+                          if (e.target.value === "multiple") {
+                            // Switch to multiple checkboxes
+                            setField(f.key, { 
+                              isMultiple: true,
+                              hint: "",
+                              options: f.options && f.options.length > 0 ? f.options : [""]
+                            });
+                          } else {
+                            // Switch to single checkbox
+                            setField(f.key, { 
+                              isMultiple: false,
+                              options: [],
+                              hint: f.hint || ""
+                            });
+                          }
+                        }}
+                        className="w-full bg-slate-600 border-slate-500 text-white text-xs rounded px-2 py-1"
+                      >
+                        <option value="single">Single Checkbox (e.g., consent)</option>
+                        <option value="multiple">Multiple Checkboxes (options)</option>
+                      </select>
+                    </div>
+
+                    {f.isMultiple ? (
+                      <div>
+                        <label className="text-xs text-gray-400 block mb-1">
+                          Options (one per line, use | for label/value pairs)
+                        </label>
+                        <Textarea
+                          disabled={!f.enabled}
+                          value={(f.options || []).join("\n")}
+                          onChange={(e) =>
+                            setField(f.key, {
+                              options: e.target.value
+                                .split("\n")
+                                .map((s) => s.trim())
+                                .filter(Boolean),
+                            })
+                          }
+                          className="bg-slate-600 border-slate-500 text-white text-xs min-h-[80px]"
+                          placeholder="First Name|f_name\nLast Name|l_name\nAgree to terms"
+                          rows={3}
+                        />
+                        <p className="text-xs text-slate-400 mt-1">
+                          Each line becomes a checkbox. Use "Label|value" format or just "Label".
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="text-xs text-gray-400 block mb-1">
+                          Hint Text (appears below checkbox)
+                        </label>
+                        <Input
+                          disabled={!f.enabled}
+                          value={f.hint || ""}
+                          onChange={(e) =>
+                            setField(f.key, { hint: e.target.value })
+                          }
+                          className="bg-slate-600 border-slate-500 text-white text-xs"
+                          placeholder="e.g. I agree to receive marketing emails"
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
 
+                {/* Dropdown Options */}
                 {f.type === "dropdown" && (
                   <div>
                     <label className="text-xs text-gray-400 block mb-1">
-                      Options (comma separated)
+                      Options (one per line, use | for label/value pairs)
                     </label>
-                    <Input
+                    <Textarea
                       disabled={!f.enabled}
-                      value={(f.options || []).join(", ")}
+                      value={(f.options || []).join("\n")}
                       onChange={(e) =>
                         setField(f.key, {
                           options: e.target.value
-                            .split(",")
+                            .split("\n")
                             .map((s) => s.trim())
                             .filter(Boolean),
                         })
                       }
-                      className="bg-slate-600 border-slate-500 text-white text-xs"
-                      placeholder="Option 1, Option 2, Option 3"
+                      className="bg-slate-600 border-slate-500 text-white text-xs min-h-[80px]"
+                      placeholder="Option 1\nOption 2\nLabel 3|value_3"
+                      rows={3}
                     />
+                    <p className="text-xs text-slate-400 mt-1">
+                      Each line becomes a dropdown option. Use "Label|value" format or just "Label".
+                    </p>
+                  </div>
+                )}
+
+                {/* Radio Options */}
+                {f.type === "radio" && (
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">
+                      Options (one per line, use | for label/value pairs)
+                    </label>
+                    <Textarea
+                      disabled={!f.enabled}
+                      value={(f.options || []).join("\n")}
+                      onChange={(e) =>
+                        setField(f.key, {
+                          options: e.target.value
+                            .split("\n")
+                            .map((s) => s.trim())
+                            .filter(Boolean),
+                        })
+                      }
+                      className="bg-slate-600 border-slate-500 text-white text-xs min-h-[80px]"
+                      placeholder="Option 1\nOption 2\nLabel 3|value_3"
+                      rows={3}
+                    />
+                    <p className="text-xs text-slate-400 mt-1">
+                      Each line becomes a radio button. Use "Label|value" format or just "Label".
+                    </p>
                   </div>
                 )}
               </div>
@@ -1425,7 +1515,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
               </label>
             ) : null;
 
-            const value = formData[f.key] ?? "";
+            const value = formData[f.key] ?? (f.type === "checkbox" && f.isMultiple ? [] : "");
 
             if (f.type === "textarea") {
               return (
@@ -1467,17 +1557,93 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
                     <option value="">
                       {f.placeholder || "Select an option"}
                     </option>
-                    {(f.options || []).map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
+                    {(f.options || []).map((option) => {
+                      const { label, value: optionValue } = parseOption(option);
+                      return (
+                        <option key={optionValue} value={optionValue}>
+                          {label}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               );
             }
 
+            if (f.type === "radio") {
+              return (
+                <div key={f.key}>
+                  {labelEl}
+                  <div className="space-y-2 mt-1">
+                    {(f.options || []).map((option) => {
+                      const { label, value: optionValue } = parseOption(option);
+                      return (
+                        <label key={optionValue} className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={f.key}
+                            value={optionValue}
+                            checked={value === optionValue}
+                            onChange={(e) =>
+                              handleInputChange(f.key, e.target.value)
+                            }
+                            className="w-4 h-4 border rounded-full focus:ring-2 focus:ring-green-500"
+                            required={!!f.required}
+                            style={{ borderColor: inputBorderColor }}
+                          />
+                          <span className="text-sm" style={{ color: titleColor }}>
+                            {label}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            }
+
             if (f.type === "checkbox") {
+              // Check if it's multiple checkboxes or single checkbox
+              if (f.isMultiple && f.options && f.options.length > 0) {
+                return (
+                  <div key={f.key}>
+                    {labelEl}
+                    <div className="space-y-2 mt-1">
+                      {(f.options || []).map((option) => {
+                        const { label, value: optionValue } = parseOption(option);
+                        const isChecked = (value || []).includes(optionValue);
+
+                        return (
+                          <label key={optionValue} className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                const currentValues = value || [];
+                                let newValues;
+                                if (e.target.checked) {
+                                  newValues = [...currentValues, optionValue];
+                                } else {
+                                  newValues = currentValues.filter((v: string) => v !== optionValue);
+                                }
+                                handleInputChange(f.key, newValues);
+                              }}
+                              className="w-4 h-4 border rounded focus:ring-2 focus:ring-green-500"
+                              required={!!f.required && (value || []).length === 0}
+                              style={{ borderColor: inputBorderColor }}
+                            />
+                            <span className="text-sm" style={{ color: titleColor }}>
+                              {label}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }
+
+              // Single checkbox
               return (
                 <div key={f.key} className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
@@ -1561,7 +1727,6 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     </div>
   );
 }
-
 // Availability Widget Component
 interface AvailabilityWidgetProps {
   eventTypeSlug?: string;
