@@ -532,12 +532,9 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
       );
       setLocalFieldConfigs(next);
       
-      // Sync to database
-      handleDataUpdate({ fieldConfigs: next });
-
-      // keep old "fields" array updated for older parts of app
+      // Sync to database - combine fieldConfigs and legacy fields in single update
       const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
-      handleDataUpdate({ fields: fieldsLegacy });
+      handleDataUpdate({ fieldConfigs: next, fields: fieldsLegacy });
     };
 
     const addCustomField = () => {
@@ -553,16 +550,16 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
       };
       const next = [...localFieldConfigs, newField];
       setLocalFieldConfigs(next);
-      handleDataUpdate({ fieldConfigs: next });
+      const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
+      handleDataUpdate({ fieldConfigs: next, fields: fieldsLegacy });
     };
 
     const deleteField = (key: string) => {
       const next = localFieldConfigs.filter((f) => f.key !== key);
       setLocalFieldConfigs(next);
-      handleDataUpdate({ fieldConfigs: next });
-      // Update legacy fields array
+      // Update both fieldConfigs and legacy fields in single call
       const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
-      handleDataUpdate({ fields: fieldsLegacy });
+      handleDataUpdate({ fieldConfigs: next, fields: fieldsLegacy });
     };
 
     const moveField = (fromIndex: number, toIndex: number) => {
@@ -570,7 +567,8 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
       const [removed] = next.splice(fromIndex, 1);
       next.splice(toIndex, 0, removed);
       setLocalFieldConfigs(next);
-      handleDataUpdate({ fieldConfigs: next });
+      const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
+      handleDataUpdate({ fieldConfigs: next, fields: fieldsLegacy });
     };
 
     return (
