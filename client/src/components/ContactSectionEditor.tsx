@@ -309,7 +309,7 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
                             ))}
                           </PanelSelect>
                         </div>
-                        <div className="flex-1">
+                        <div className="w-16">
                           <PanelLabel>Icon</PanelLabel>
                           <IconPicker
                             value={contact.icon}
