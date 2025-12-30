@@ -209,15 +209,59 @@ export function ContactLinksRenderer({ data, cardData }: ContactLinksRendererPro
   const validContacts = contacts.filter((c) => c.value || c.actionType === 'install' || c.actionType === 'share' || c.actionType === 'vcard');
 
   // Generate vCard content - collects ALL data from sibling Custom Contact Methods
-  const generateVCard = useCallback((contact: typeof contacts[0]) => {
-    const label = contact.label || 'Contact';
+  const generateVCard = useCallback(async (contact: typeof contacts[0]) => {
+    // Find profile element from cardData.elements to get name/photo/title/company
+    const profileElement = (cardData as any)?.elements?.find((el: any) => el.type === 'profile');
+    const profileData = profileElement?.data || {};
+    
+    // Get name from: profile element > cardData.fullName > contact.value > contact.label > 'Contact'
+    const fullName = profileData.fullName || cardData?.fullName || contact.value || contact.label || 'Contact';
     
     // Build vCard fields by collecting ALL sibling contacts (not just the vCard item)
     const vcardLines: string[] = [
       'BEGIN:VCARD',
       'VERSION:3.0',
-      `FN:${label}`,
+      `FN:${fullName}`,
     ];
+    
+    // Add profile photo if available (from profile element > cardData.profilePhoto > coverImage)
+    const photoUrl = profileData.profilePhoto || cardData?.profilePhoto || 
+                     profileData.coverImage || cardData?.coverImage;
+    if (photoUrl) {
+      try {
+        // Fetch the image and convert to base64
+        const response = await fetch(photoUrl);
+        const blob = await response.blob();
+        const base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            // Extract just the base64 part (remove data:image/...;base64, prefix)
+            const base64Data = result.split(',')[1] || '';
+            resolve(base64Data);
+          };
+          reader.readAsDataURL(blob);
+        });
+        if (base64) {
+          // Determine image type
+          const imageType = photoUrl.includes('.png') ? 'PNG' : 
+                           photoUrl.includes('.gif') ? 'GIF' : 'JPEG';
+          vcardLines.push(`PHOTO;ENCODING=b;TYPE=${imageType}:${base64}`);
+        }
+      } catch (error) {
+        console.log('Could not embed photo in vCard:', error);
+      }
+    }
+    
+    // Add title and company if available (from profile element > cardData)
+    const title = profileData.title || cardData?.title;
+    const company = profileData.company || cardData?.company;
+    if (title) {
+      vcardLines.push(`TITLE:${title}`);
+    }
+    if (company) {
+      vcardLines.push(`ORG:${company}`);
+    }
     
     // Regex patterns for value detection
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -274,7 +318,7 @@ export function ContactLinksRenderer({ data, cardData }: ContactLinksRendererPro
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${label.replace(/[^a-z0-9]/gi, '_')}.vcf`;
+    link.download = `${fullName.replace(/[^a-z0-9]/gi, '_')}.vcf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -284,7 +328,7 @@ export function ContactLinksRenderer({ data, cardData }: ContactLinksRendererPro
       title: "Contact Saved",
       description: "vCard file downloaded with all contact methods",
     });
-  }, [contacts, toast]);
+  }, [contacts, cardData, toast]);
 
   // Copy to clipboard
   const copyToClipboard = useCallback(async (value: string) => {
