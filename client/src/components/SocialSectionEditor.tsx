@@ -30,6 +30,7 @@ import {
   PanelButton,
   panelTheme
 } from "./sidebar-panel-theme";
+import { IconPicker } from "@/components/icon-picker";
 import {
   SiFacebook, SiTwitter, SiInstagram, SiLinkedin, SiYoutube,
   SiTiktok, SiPinterest, SiSnapchat, SiReddit, SiTumblr,
@@ -238,6 +239,33 @@ export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps
     });
   };
 
+  // Map platform to FontAwesome icon class
+  const platformIconMap: Record<string, string> = {
+    facebook: "fab fa-facebook",
+    x: "fab fa-x-twitter",
+    instagram: "fab fa-instagram",
+    linkedin: "fab fa-linkedin",
+    youtube: "fab fa-youtube",
+    tiktok: "fab fa-tiktok",
+    pinterest: "fab fa-pinterest",
+    snapchat: "fab fa-snapchat",
+    reddit: "fab fa-reddit",
+    tumblr: "fab fa-tumblr",
+    whatsapp: "fab fa-whatsapp",
+    telegram: "fab fa-telegram",
+    discord: "fab fa-discord",
+    slack: "fab fa-slack",
+    medium: "fab fa-medium",
+    github: "fab fa-github",
+    dribbble: "fab fa-dribbble",
+    behance: "fab fa-behance",
+    spotify: "fab fa-spotify",
+    twitch: "fab fa-twitch",
+    vimeo: "fab fa-vimeo",
+    flickr: "fab fa-flickr",
+    threads: "fab fa-threads",
+  };
+
   const updateSocial = (index: number, updates: Partial<Social>) => {
     const socials = [...(data.socials || [])];
     socials[index] = { ...socials[index], ...updates };
@@ -303,7 +331,7 @@ export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps
                             updateSocial(index, { 
                               platform: value,
                               label: platform?.label || value,
-                              icon: `si-${value}`
+                              icon: platformIconMap[value] || "fas fa-link"
                             });
                           }}
                         >
@@ -326,6 +354,13 @@ export function SocialSectionEditor({ data, onChange }: SocialSectionEditorProps
                           value={social.url}
                           onChange={(e) => updateSocial(index, { url: e.target.value })}
                           placeholder="https://..."
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <PanelLabel>Custom Icon</PanelLabel>
+                        <IconPicker
+                          value={social.icon}
+                          onChange={(icon) => updateSocial(index, { icon })}
                         />
                       </div>
                       <PanelButton onClick={() => removeSocial(index)} variant="danger">

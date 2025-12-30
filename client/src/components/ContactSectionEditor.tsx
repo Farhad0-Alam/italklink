@@ -30,6 +30,7 @@ import {
   PanelButton,
   panelTheme
 } from "./sidebar-panel-theme";
+import { IconPicker } from "@/components/icon-picker";
 
 // Sortable item component
 function SortableItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -195,7 +196,7 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
       id: `contact_${Date.now()}`,
       label: "Contact",
       value: "",
-      icon: "fa-phone",
+      icon: "fas fa-phone",
     };
     onChange({
       ...data,
@@ -270,31 +271,12 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
                           placeholder="Value"
                         />
                       </div>
-                      <div className="w-28">
+                      <div className="flex-1">
                         <PanelLabel>Icon</PanelLabel>
-                        <PanelSelect
+                        <IconPicker
                           value={contact.icon}
-                          onValueChange={(value) => updateContact(index, { icon: value })}
-                        >
-                          <SelectItem value="fa-phone">
-                            <i className="fas fa-phone mr-2" />Phone
-                          </SelectItem>
-                          <SelectItem value="fa-envelope">
-                            <i className="fas fa-envelope mr-2" />Email
-                          </SelectItem>
-                          <SelectItem value="fa-map-marker-alt">
-                            <i className="fas fa-map-marker-alt mr-2" />Location
-                          </SelectItem>
-                          <SelectItem value="fa-globe">
-                            <i className="fas fa-globe mr-2" />Website
-                          </SelectItem>
-                          <SelectItem value="fa-mobile-alt">
-                            <i className="fas fa-mobile-alt mr-2" />Mobile
-                          </SelectItem>
-                          <SelectItem value="fa-fax">
-                            <i className="fas fa-fax mr-2" />Fax
-                          </SelectItem>
-                        </PanelSelect>
+                          onChange={(icon) => updateContact(index, { icon })}
+                        />
                       </div>
                       <PanelButton onClick={() => removeContact(index)} variant="danger">
                         <i className="fas fa-trash text-xs" />
