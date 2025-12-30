@@ -210,8 +210,8 @@ export function ContactLinksRenderer({ data, cardData }: ContactLinksRendererPro
 
   // Generate vCard content - collects ALL data from sibling Custom Contact Methods
   const generateVCard = useCallback(async (contact: typeof contacts[0]) => {
-    // Find profile element from cardData.elements to get name/photo/title/company
-    const profileElement = (cardData as any)?.elements?.find((el: any) => el.type === 'profile');
+    // Find profile element from cardData.pageElements to get name/photo/title/company
+    const profileElement = (cardData as any)?.pageElements?.find((el: any) => el.type === 'profile');
     const profileData = profileElement?.data || {};
     
     // Get name from: profile element > cardData.fullName > contact.value > contact.label > 'Contact'
