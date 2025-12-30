@@ -97,6 +97,20 @@ const actionTypes = [
   { value: 'install', label: 'Install App (PWA)', icon: 'fas fa-mobile-alt' },
 ] as const;
 
+const actionTypePlaceholders: Record<string, string> = {
+  tel: 'e.g., +1-234-567-8900',
+  sms: 'e.g., +1-234-567-8900',
+  email: 'e.g., email@example.com',
+  url: 'e.g., https://example.com',
+  vcard: 'Contact name or info',
+  map: 'e.g., 123 Main St, City, State',
+  appointment: 'e.g., https://calendly.com/...',
+  download: 'e.g., https://example.com/file.pdf',
+  copy: 'Text to copy',
+  share: 'Share message (optional)',
+  install: 'App name (optional)',
+};
+
 interface ContactSectionData {
   contacts?: Contact[];
   // Icon Styling
@@ -285,7 +299,7 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
                           <PanelInput
                             value={contact.value}
                             onChange={(e) => updateContact(index, { value: e.target.value })}
-                            placeholder="Value"
+                            placeholder={actionTypePlaceholders[contact.actionType || 'tel'] || 'Value'}
                           />
                         </div>
                         <PanelButton onClick={() => removeContact(index)} variant="danger">
