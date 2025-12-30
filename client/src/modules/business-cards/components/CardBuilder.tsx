@@ -196,27 +196,33 @@ export const Builder = ({ cardId }: BuilderProps) => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Card Preview Container - Professional Mobile Frame */}
+                {/* Card Preview Container - Professional Mobile Frame (scaled to 50% to fit on screen) */}
                 <div className="flex justify-center">
-                  <div className="relative">
-                    {/* Mobile Frame with Custom Image as Background */}
+                  <div className="relative h-[400px] w-[215px]">
+                    {/* Scaled wrapper for phone frame */}
                     <div 
-                      className="relative w-[430px] h-[800px] bg-cover bg-center bg-no-repeat shadow-2xl z-99999999"
-                      style={{
-                        backgroundImage: `url(/mobile-frame.png)`,
-                        backgroundSize: 'contain'
-                      }}
+                      className="origin-top-left"
+                      style={{ transform: 'scale(0.5)' }}
                     >
-                      {/* Screen Content Area */}
-                      <div className="absolute top-[160px] left-[50px] right-[52px] bottom-[165px] overflow-hidden rounded-[50px]">
-                        <div className="h-full overflow-y-auto">
-                          <BusinessCardComponent
-                            ref={cardRef}
-                            data={cardData}
-                            showQR={showQR}
-                            isInteractive={true}
-                            isMobilePreview={true}
-                          />
+                      {/* Mobile Frame with Custom Image as Background */}
+                      <div 
+                        className="relative w-[430px] h-[800px] bg-cover bg-center bg-no-repeat shadow-2xl"
+                        style={{
+                          backgroundImage: `url(/mobile-frame.png)`,
+                          backgroundSize: 'contain'
+                        }}
+                      >
+                        {/* Screen Content Area */}
+                        <div className="absolute top-[160px] left-[50px] right-[52px] bottom-[165px] overflow-hidden rounded-[50px]">
+                          <div className="h-full overflow-y-auto">
+                            <BusinessCardComponent
+                              ref={cardRef}
+                              data={cardData}
+                              showQR={showQR}
+                              isInteractive={true}
+                              isMobilePreview={true}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
