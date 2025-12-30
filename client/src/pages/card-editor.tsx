@@ -1,605 +1,410 @@
-import React from "react";
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useLocation, useParams } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import React, { createContext, useContext, useState, useCallback, useRef, ReactNode, useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { BusinessCardComponent } from "@/components/business-card";
-import { PagePreview } from "@/components/page-preview";
-import { FormBuilder } from "@/components/form-builder";
-import { AutoSaveIndicator } from "@/components/AutoSaveIndicator";
-import { useAutoSave } from "@/contexts/AutoSaveContext";
-import { Copy, Share2, ArrowLeft } from "lucide-react";
-import { Link } from "wouter";
 import type { BusinessCard } from "@shared/schema";
 
-interface CardEditorParams {
-  id?: string;
+type AutoSaveStatus = "idle" | "dirty" | "saving" | "saved" | "error";
+
+interface AutoSaveContextType {
+  status: AutoSaveStatus;
+  lastSaved: Date | null;
+  lastSavedCard: BusinessCard | null;
+  error: string | null;
+  cardId: string | null;
+  setCardId: (id: string | null) => void;
+  queueSave: (data: BusinessCard, customUrlSlug?: string) => void;
+  saveNow: (data: BusinessCard, customUrlSlug?: string) => Promise<void>;
+  forceSave: () => Promise<void>;
+  reset: () => void;
 }
 
-export default function CardEditor() {
-  const { toast } = useToast();
-  const params = useParams() as CardEditorParams;
-  const [, setLocation] = useLocation();
-  const cardRef = useRef<HTMLDivElement>(null);
+const AutoSaveContext = createContext<AutoSaveContextType | null>(null);
 
-  const hasHydratedRef = useRef(false);
+interface AutoSaveProviderProps {
+  children: ReactNode;
+}
 
-  const {
-    queueSave,
-    saveNow,
-    setCardId: setAutoSaveCardId,
-    status: autoSaveStatus,
-    lastSavedCard,
-  } = useAutoSave();
+/**
+ * Sanitize card data for API submission
+ * Removes server-managed fields and editor-only fields
+ */
+function sanitizeCardForSave(input: any): Partial<BusinessCard> {
+  // Deep clone to avoid mutating react state objects
+  const data = structuredClone ? structuredClone(input) : JSON.parse(JSON.stringify(input));
 
-  const { data: user, isLoading: userLoading, error: userError } = useQuery({
-    queryKey: ["/api/auth/user"],
-    retry: false,
+  // Remove ALL server-managed fields
+  const serverFields = [
+    'id', 'userId', 'createdAt', 'updatedAt', 'deletedAt',
+    'shareSlug', 'slug', 'views', 'analytics', 'lastViewedAt',
+    'lastSaved', 'lastSavedAt', 'published'
+  ];
+
+  serverFields.forEach(field => {
+    delete data[field];
   });
 
-  useEffect(() => {
-    if (userError && !userLoading) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to create or edit business cards.",
-        variant: "destructive",
+  // Remove editor-only UI state fields
+  const uiFields = [
+    'currentPreviewMode', 'currentSelectedPage'
+  ];
+
+  uiFields.forEach(field => {
+    delete data[field];
+  });
+
+  // Ensure arrays exist to prevent null errors
+  if (!data.customContacts) data.customContacts = [];
+  if (!data.customSocials) data.customSocials = [];
+  if (!data.galleryImages) data.galleryImages = [];
+  if (!data.availableIcons) data.availableIcons = [];
+  if (!data.pages) data.pages = [];
+  if (!data.pageElements) data.pageElements = [];
+
+  // Process pages: ensure home page is properly structured
+  if (Array.isArray(data.pages)) {
+    data.pages = data.pages.map((page: any) => {
+      // Ensure each page has required fields
+      const cleanPage = {
+        id: page.id || `page-${Date.now()}`,
+        key: page.key || page.id || `page-${Date.now()}`,
+        path: page.path || '',
+        label: page.label || 'Untitled Page',
+        visible: page.visible !== false,
+        elements: Array.isArray(page.elements) ? page.elements : []
+      };
+      return cleanPage;
+    });
+  }
+
+  // Ensure pageElements is always an array
+  if (!Array.isArray(data.pageElements)) {
+    data.pageElements = [];
+  }
+
+  return data;
+}
+
+function isCreatePayloadValid(data: any, customUrlSlug?: string): boolean {
+  // For creation, we need either customUrl or fullName + title
+  if (customUrlSlug && String(customUrlSlug).trim().length > 0) return true;
+
+  const fullNameOk = !!String(data?.fullName || "").trim();
+  const titleOk = !!String(data?.title || "").trim();
+  return fullNameOk && titleOk;
+}
+
+export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
+  const queryClient = useQueryClient();
+
+  const [status, setStatus] = useState<AutoSaveStatus>("idle");
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [lastSavedCard, setLastSavedCard] = useState<BusinessCard | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [cardId, setCardId] = useState<string | null>(null);
+
+  // Use a queue for pending saves instead of single ref
+  const pendingQueueRef = useRef<Array<{ data: BusinessCard; customUrlSlug?: string }>>([]);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isSavingRef = useRef(false);
+  const saveAttemptRef = useRef(0);
+
+  const saveMutation = useMutation({
+    mutationFn: async ({
+      data,
+      customUrlSlug,
+      currentCardId,
+    }: {
+      data: BusinessCard;
+      customUrlSlug?: string;
+      currentCardId: string | null;
+    }) => {
+      saveAttemptRef.current += 1;
+      const attempt = saveAttemptRef.current;
+
+      console.log(`[AutoSave] Save attempt ${attempt}`, {
+        currentCardId,
+        hasCustomUrl: !!customUrlSlug,
+        dataKeys: Object.keys(data)
       });
-      setLocation("/login");
-    }
-  }, [userError, userLoading, setLocation, toast]);
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const selectedTemplateId = urlParams.get("template");
-  const customUrlFromTemplate = urlParams.get("url");
+      const cleaned = sanitizeCardForSave(data);
 
-  // Counter for generating unique IDs within the same render cycle
-  let profileElementIdCounter = 0;
-
-  // Function to create a profile element with guaranteed unique ID and complete default data
-  const createProfileElement = () => {
-    profileElementIdCounter++;
-    const uniqueId =
-      typeof crypto !== "undefined" && (crypto as any).randomUUID
-        ? (crypto as any).randomUUID()
-        : `profile-${Date.now()}-${profileElementIdCounter}-${Math.random()
-            .toString(36)
-            .substring(2, 11)}`;
-
-    return {
-      id: uniqueId,
-      type: "profile" as const,
-      order: 0,
-      visible: true,
-      data: {
-        enabled: true,
-        showCoverImage: true,
-        showProfilePhoto: true,
-        showLogo: true,
-        showName: true,
-        showTitle: true,
-        showCompany: true,
-        fullName: "",
-        title: "",
-        company: "",
-        profilePhoto: null,
-        coverImage: null,
-        brandColor: "#22c55e",
-        accentColor: "#16a34a",
-        profileImageStyles: {
-          visible: true,
-          size: 120,
-          shape: "circle",
-          borderWidth: 3,
-          borderColor: "#22c55e",
-          animation: "none",
-          useBrandColor: true,
-          animationColors: { start: "#22c55e", end: "#16a34a" },
-          shadow: 0,
-          opacity: 100,
-        },
-        coverImageStyles: {
-          height: 200,
-          borderWidth: 0,
-          borderColor: "#22c55e",
-          animation: "none",
-          profilePositionX: 50,
-          profilePositionY: 100,
-          shapeDividerTop: {
-            enabled: false,
-            preset: "wave",
-            color: "#ffffff",
-            width: 100,
-            height: 60,
-            invert: false,
-          },
-          shapeDividerBottom: {
-            enabled: false,
-            preset: "wave",
-            color: "#ffffff",
-            width: 100,
-            height: 60,
-            invert: false,
-          },
-        },
-        sectionStyles: {
-          basicInfo: {
-            nameColor: "#ffffff",
-            nameFont: "Inter",
-            nameFontSize: 24,
-            nameFontWeight: "700",
-            nameTextStyle: "normal",
-            nameSpacing: 8,
-            namePositionX: 0,
-            namePositionY: 0,
-            titleColor: "#4b5563",
-            titleFont: "Inter",
-            titleFontSize: 14,
-            titleFontWeight: "400",
-            titleTextStyle: "normal",
-            titleSpacing: 8,
-            titlePositionX: 0,
-            titlePositionY: 0,
-            companyColor: "#6b7280",
-            companyFont: "Inter",
-            companyFontSize: 14,
-            companyFontWeight: "400",
-            companyTextStyle: "normal",
-            companySpacing: 8,
-            companyPositionX: 0,
-            companyPositionY: 0,
-            textGroupHorizontal: 0,
-            textGroupVertical: 0,
-          },
-        },
-      },
-    };
-  };
-
-  // Create separate profile elements for pageElements and pages to avoid shared references
-  const initialProfileElement = createProfileElement();
-  const homePageProfileElement = createProfileElement();
-
-  const [cardData, setCardData] = useState<BusinessCard>({
-    fullName: "",
-    title: "",
-    template: "minimal" as const,
-    customContacts: [],
-    pageElements: [initialProfileElement],
-    customSocials: [],
-    galleryImages: [],
-    availableIcons: [],
-    company: "",
-    about: "",
-    phone: "",
-    email: "",
-    website: "",
-    location: "",
-    brandColor: "#22c55e",
-    accentColor: "#16a34a",
-    font: "inter",
-    elementSpacing: 16,
-    individualElementSpacing: {},
-    pages: [
-      {
-        id: "home",
-        key: "home",
-        path: "",
-        label: "Home",
-        visible: true,
-        elements: [homePageProfileElement],
-      },
-    ] as any,
-  });
-
-  const [shareUrl, setShareUrl] = useState("");
-  const [currentPageId, setCurrentPageId] = useState<string>("home");
-  const [customUrlSlug, setCustomUrlSlug] = useState<string>(customUrlFromTemplate || "");
-
-  useEffect(() => {
-    if (params.id) {
-      setAutoSaveCardId(params.id);
-    }
-  }, [params.id, setAutoSaveCardId]);
-
-  // Helper function to update share URL
-  const updateShareUrl = (card: any) => {
-    if (card.customUrl) {
-      setShareUrl(`${window.location.origin}/${card.customUrl}`);
-    } else if (card.shareSlug) {
-      setShareUrl(`${window.location.origin}/${card.shareSlug}`);
-    } else if (card.id) {
-      setShareUrl(`${window.location.origin}/card/${card.id}`);
-    }
-  };
-
-  const getCurrentPageData = () => {
-    const pages = (cardData as any).pages || [];
-    const page = pages.find((p: any) => p.id === currentPageId);
-    if (page) {
-      return {
-        id: page.id,
-        label: page.label,
-        elements: page.elements || [],
+      // Attach customUrl if provided
+      const dataToSave: any = {
+        ...cleaned,
       };
-    }
-    return (cardData as any).currentSelectedPage;
-  };
 
-  const handleNavigatePage = (pageId: string) => {
-    setCurrentPageId(pageId);
-    const pages = (cardData as any).pages || [];
-    const targetPage = pages.find((p: any) => p.id === pageId);
-    if (targetPage) {
-      const isHome = pageId === "home" || targetPage.key === "home";
-      setCardData((prev) => ({
-        ...prev,
-        currentPreviewMode: isHome ? "card" : "page",
-        currentSelectedPage: isHome
-          ? undefined
-          : {
-              id: targetPage.id,
-              label: targetPage.label,
-              elements: targetPage.elements || [],
-            },
-      }));
-    }
-  };
+      if (customUrlSlug) {
+        dataToSave.customUrl = customUrlSlug.trim();
+      }
 
-  const handleBackToCard = () => {
-    setCurrentPageId("home");
-    setCardData((prev) => ({
-      ...prev,
-      currentPreviewMode: "card",
-      currentSelectedPage: undefined,
-    }));
-  };
+      // Validate create requirements (prevents 400 spam)
+      if (!currentCardId && !isCreatePayloadValid(dataToSave, customUrlSlug)) {
+        console.log('[AutoSave] Create validation failed - missing required fields');
+        throw new Error('{"message":"Please provide either a custom URL or name and title."}');
+      }
 
-  // Fetch template data if template parameter is provided
-  const { data: templates } = useQuery({
-    queryKey: ["/api/templates"],
-    enabled: !!selectedTemplateId,
-    staleTime: 1000 * 60 * 10,
-  });
+      // Prepare the final payload
+      const finalData = {
+        ...dataToSave,
+        // Ensure we always send these as arrays (not null/undefined)
+        customContacts: dataToSave.customContacts || [],
+        customSocials: dataToSave.customSocials || [],
+        galleryImages: dataToSave.galleryImages || [],
+        availableIcons: dataToSave.availableIcons || [],
+        pages: Array.isArray(dataToSave.pages) ? dataToSave.pages : [],
+        pageElements: Array.isArray(dataToSave.pageElements) ? dataToSave.pageElements : []
+      };
 
-  // Load existing card if editing
-  const { data: existingCard, isLoading } = useQuery({
-    queryKey: ["/api/business-cards", params.id],
-    queryFn: async () => {
-      if (!params.id) return null;
-      return await apiRequest("GET", `/api/business-cards/${params.id}`);
+      console.log(`[AutoSave] Attempt ${attempt} - Sending to API`, {
+        method: currentCardId ? 'PUT' : 'POST',
+        url: currentCardId ? `/api/business-cards/${currentCardId}` : '/api/business-cards',
+        hasPages: finalData.pages.length,
+        hasPageElements: finalData.pageElements.length
+      });
+
+      const result = currentCardId
+        ? await apiRequest("PUT", `/api/business-cards/${currentCardId}`, finalData)
+        : await apiRequest("POST", "/api/business-cards", finalData);
+
+      console.log(`[AutoSave] Attempt ${attempt} - Success`, {
+        newCardId: result?.id,
+        hasShareSlug: !!result?.shareSlug
+      });
+
+      return result;
     },
-    enabled: !!params.id,
-  });
 
-  // Apply template when templates load and we have a template parameter
-  useEffect(() => {
-    if (selectedTemplateId && templates && !existingCard) {
-      const selectedTemplate = (templates as any[]).find((t: any) => t.id === selectedTemplateId);
-      if (selectedTemplate) {
-        const newCardData = {
-          ...cardData,
-          template: selectedTemplate.id,
-          fullName: selectedTemplate.defaultName || cardData.fullName,
-          title: selectedTemplate.defaultTitle || cardData.title,
-          brandColor: selectedTemplate.brandColor || cardData.brandColor,
-          accentColor: selectedTemplate.accentColor || cardData.accentColor,
-          backgroundColor: selectedTemplate.backgroundColor || (cardData as any).backgroundColor,
-          textColor: selectedTemplate.textColor || (cardData as any).textColor,
-          font: selectedTemplate.font || cardData.font,
-        };
-        setCardData(newCardData);
-        // allow autosave after this point (user starts editing)
-        hasHydratedRef.current = true;
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTemplateId, templates, existingCard]);
+    onMutate: () => {
+      isSavingRef.current = true;
+      setStatus("saving");
+      setError(null);
+    },
 
-  // Update form data when existing card loads
-  useEffect(() => {
-    if (existingCard) {
-      console.log('[CardEditor] Hydrating from existing card:', existingCard.id);
+    onSuccess: (savedCard) => {
+      isSavingRef.current = false;
+      setStatus("saved");
+      setLastSaved(new Date());
+      setLastSavedCard(savedCard);
+      setError(null);
 
-      let homePageElements = existingCard.pageElements || [];
-      const additionalPages = existingCard.pages || [];
-
-      const hasProfileElement = homePageElements.some((el: any) => el.type === "profile");
-      if (!hasProfileElement && existingCard.profileSectionEnabled !== false) {
-        const profileElement = { ...createProfileElement(), order: -1 };
-        homePageElements = [profileElement, ...homePageElements];
-        homePageElements = homePageElements.map((el: any, idx: number) => ({ ...el, order: idx }));
+      // Update queries
+      queryClient.invalidateQueries({ queryKey: ["/api/business-cards"] });
+      if (savedCard?.id) {
+        queryClient.invalidateQueries({ queryKey: ["/api/business-cards", savedCard.id] });
       }
 
-      const allPages = [
-        {
-          id: "home",
-          key: "home",
-          path: "",
-          label: "Home",
-          visible: true,
-          elements: homePageElements.map((el: any) => ({ ...el })),
-        },
-        ...additionalPages.map((page: any) => ({
-          id: page.id,
-          key: page.key || page.id,
-          path: page.path,
-          label: page.label,
-          visible: page.visible !== false,
-          elements: (page.elements || []).map((el: any) => ({ ...el })),
-        })),
-      ];
-
-      const convertedCard = {
-        ...existingCard,
-        pageElements: homePageElements.map((el: any) => ({ ...el })),
-        pages: allPages,
-      };
-
-      setCardData((prev) => ({
-        ...(convertedCard as any),
-        currentPreviewMode: prev.currentPreviewMode || "card",
-        currentSelectedPage: prev.currentSelectedPage,
-      }));
-
-      updateShareUrl(existingCard);
-
-      // allow autosave after hydration
-      hasHydratedRef.current = true;
-      console.log('[CardEditor] Hydration complete, autosave enabled');
-    }
-  }, [existingCard]);
-
-  useEffect(() => {
-    if (lastSavedCard) {
-      updateShareUrl(lastSavedCard);
-      // Update cardId if this was a create operation
-      if (!params.id && lastSavedCard.id) {
-        setAutoSaveCardId(lastSavedCard.id);
+      // Update URL if this was a create operation
+      if (!cardId && savedCard?.id) {
+        setCardId(savedCard.id);
+        // Update browser URL without reload
+        window.history.replaceState(null, "", `/card-editor/${savedCard.id}`);
       }
-    }
-  }, [lastSavedCard, params.id, setAutoSaveCardId]);
 
-  // Manual save (button / explicit)
-  const triggerSave = useCallback(
-    async (dataOverride?: any) => {
-      if (!user) {
-        toast({
-          title: "Not logged in",
-          description: "Please log in to save your card.",
-          variant: "destructive",
-        });
+      // Process next item in queue if exists
+      processNextInQueue();
+    },
+
+    onError: (err: any) => {
+      isSavingRef.current = false;
+      console.error('[AutoSave] Error:', err);
+
+      const msg = String(err?.message || "Failed to save");
+      const isMissingFields = msg.includes("Please provide either a custom URL or name and title");
+
+      if (isMissingFields) {
+        setStatus("dirty"); // Keep as dirty but don't show error
+        setError(null);
+        // Still try to process next in queue
+        processNextInQueue();
         return;
       }
 
-      const dataToSave = dataOverride || cardData;
+      setStatus("error");
+      setError(msg);
+
+      // Retry after delay
+      setTimeout(() => {
+        processNextInQueue();
+      }, 3000);
+    },
+  });
+
+  // Process the next item in the save queue
+  const processNextInQueue = useCallback(() => {
+    // If already saving, do nothing
+    if (isSavingRef.current) return;
+
+    // If queue is empty, return to idle
+    if (pendingQueueRef.current.length === 0) {
+      setStatus("idle");
+      return;
+    }
+
+    // Take the next item from queue
+    const nextItem = pendingQueueRef.current.shift();
+    if (!nextItem) return;
+
+    // Validate for new cards
+    const cleaned = sanitizeCardForSave(nextItem.data);
+    if (!cardId && !isCreatePayloadValid(cleaned, nextItem.customUrlSlug)) {
+      console.log('[AutoSave] Invalid create payload, skipping');
+      setStatus("dirty");
+      // Try next item
+      processNextInQueue();
+      return;
+    }
+
+    // Save this item
+    saveMutation.mutate({
+      data: nextItem.data,
+      customUrlSlug: nextItem.customUrlSlug,
+      currentCardId: cardId,
+    });
+  }, [cardId, saveMutation]);
+
+  // Start debounced queue processing
+  const startDebouncedSave = useCallback(() => {
+    // Clear any existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set new debounce timer
+    debounceTimerRef.current = setTimeout(() => {
+      processNextInQueue();
+    }, 1200); // Increased debounce time
+  }, [processNextInQueue]);
+
+  const queueSave = useCallback(
+    (data: BusinessCard, customUrlSlug?: string) => {
+      // Add to queue
+      pendingQueueRef.current.push({ data, customUrlSlug });
+
+      // Limit queue size to prevent memory issues
+      if (pendingQueueRef.current.length > 10) {
+        // Keep only the most recent 5 items
+        pendingQueueRef.current = pendingQueueRef.current.slice(-5);
+      }
+
+      // Update status if not already saving/saved
+      if (status !== "saving" && status !== "saved") {
+        setStatus("dirty");
+      }
+
+      // Start debounced save
+      startDebouncedSave();
+    },
+    [status, startDebouncedSave]
+  );
+
+  const saveNow = useCallback(
+    async (data: BusinessCard, customUrlSlug?: string) => {
+      console.log('[AutoSave] Manual save triggered');
+
+      // Clear any pending debounced saves
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+
+      // Clear queue for manual save (we want immediate save)
+      pendingQueueRef.current = [];
+
+      // If already saving, wait for it to finish then save manually
+      if (isSavingRef.current) {
+        console.log('[AutoSave] Already saving, will save after current');
+        // Queue this save to happen after current
+        pendingQueueRef.current.push({ data, customUrlSlug });
+        setStatus("dirty");
+        return;
+      }
 
       // Validate for new cards
-      if (!params.id && !customUrlSlug && !dataToSave.fullName && !dataToSave.title) {
-        toast({
-          title: "Cannot save",
-          description: "Please provide either a custom URL or name and title.",
-          variant: "destructive",
-        });
+      const cleaned = sanitizeCardForSave(data);
+      if (!cardId && !isCreatePayloadValid(cleaned, customUrlSlug)) {
+        console.log('[AutoSave] Manual save validation failed');
+        setStatus("dirty");
         return;
       }
 
       try {
-        await saveNow(dataToSave, customUrlSlug);
-        toast({
-          title: "Saved successfully",
-          description: "Your card has been saved.",
+        await saveMutation.mutateAsync({
+          data,
+          customUrlSlug,
+          currentCardId: cardId,
         });
       } catch (error) {
-        console.error('Save error:', error);
-        toast({
-          title: "Save failed",
-          description: "Could not save your card. Please try again.",
-          variant: "destructive",
-        });
+        console.error('[AutoSave] Manual save failed:', error);
+        throw error;
       }
     },
-    [user, params.id, customUrlSlug, cardData, saveNow, toast]
+    [cardId, saveMutation]
   );
 
-  const copyShareUrl = async () => {
-    if (!shareUrl) return;
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast({
-        title: "Link copied!",
-        description: "URL copied to clipboard. Use the View TalkLink button to preview.",
-      });
-    } catch {
-      toast({
-        title: "Copy failed",
-        description: "Please copy the URL manually.",
-        variant: "destructive",
-      });
+  const forceSave = useCallback(async () => {
+    // Clear any pending timers
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
     }
-  };
 
-  const handleShare = () => {
-    if (shareUrl && navigator.share) {
-      navigator.share({
-        title: `${cardData.fullName} - Business Card`,
-        url: shareUrl,
-      });
+    // If queue has items, save the most recent one
+    if (pendingQueueRef.current.length > 0) {
+      const mostRecent = pendingQueueRef.current[pendingQueueRef.current.length - 1];
+      pendingQueueRef.current = [];
+      await saveNow(mostRecent.data, mostRecent.customUrlSlug);
     } else {
-      copyShareUrl();
+      console.log('[AutoSave] No pending data to force save');
     }
-  };
+  }, [saveNow]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading card...</p>
-        </div>
-      </div>
-    );
-  }
+  const reset = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    pendingQueueRef.current = [];
+    isSavingRef.current = false;
+    saveAttemptRef.current = 0;
+    setStatus("idle");
+    setError(null);
+    setCardId(null);
+    setLastSavedCard(null);
+    setLastSaved(null);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header with URL bar */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="flex items-center text-gray-600 hover:text-gray-900">
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Back
-              </Link>
-              <div className="text-xl font-semibold text-gray-900">{params.id ? "Edit Card" : "Create Card"}</div>
-              <AutoSaveIndicator />
-            </div>
-
-            <div className="flex items-center space-x-3">
-              {shareUrl ? (
-                <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-orange-50 rounded-full px-6 py-3 shadow-sm border border-gray-200">
-                  <div className="text-sm text-gray-700 font-medium truncate max-w-xs">{shareUrl}</div>
-                  <Button
-                    size="sm"
-                    onClick={copyShareUrl}
-                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-6 whitespace-nowrap"
-                    data-testid="button-copy-url"
-                  >
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copy
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleShare}
-                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 whitespace-nowrap"
-                    data-testid="button-share"
-                  >
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-3">
-                  <Button size="sm" disabled className="bg-gray-200 text-gray-400 rounded-full px-6 cursor-not-allowed">
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copy
-                  </Button>
-                  <Button size="sm" disabled className="bg-gray-200 text-gray-400 rounded-full px-6 cursor-not-allowed">
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left Panel - Form Builder */}
-          <div>
-            <FormBuilder
-              cardData={cardData}
-              onDataChange={(data) => {
-                const updated = {
-                  ...(data as any),
-                  currentPreviewMode: (cardData as any).currentPreviewMode,
-                  currentSelectedPage: (cardData as any).currentSelectedPage,
-                };
-
-                setCardData(updated as any);
-
-                // ✅ AUTOSAVE HERE
-                if (!user) return;
-                if (!hasHydratedRef.current) {
-                  console.log('[CardEditor] Skipping autosave - not hydrated yet');
-                  return;
-                }
-                if (!params.id && !customUrlSlug && !updated.fullName && !updated.title) {
-                  console.log('[CardEditor] Skipping autosave - missing required fields for new card');
-                  return;
-                }
-
-                console.log('[CardEditor] Queueing autosave');
-                queueSave(updated as any, customUrlSlug);
-              }}
-              onSave={triggerSave}
-              onGenerateQR={() => {}}
-              onNavigationChange={handleNavigatePage}
-            />
-          </div>
-
-          {/* Right Panel - Mobile Preview */}
-          <div className="lg:sticky lg:top-8 lg:h-fit">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Live Preview</h3>
-              <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>Updates in real-time</span>
-              </div>
-            </div>
-
-            <div className="relative mx-auto max-w-sm">
-              <div
-                className="relative w-[390px] mx-auto bg-gray-900 rounded-[50px] shadow-2xl overflow-hidden border-[12px] border-gray-800"
-                style={{ aspectRatio: "9/19.5" }}
-              >
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[150px] h-[28px] bg-gray-900 rounded-b-[20px] z-10"></div>
-
-                <div className="absolute top-[10px] left-[8px] right-[8px] bottom-[10px] overflow-hidden rounded-[40px] bg-white">
-                  <div ref={cardRef} className="h-full overflow-y-auto">
-                    {(cardData as any).currentPreviewMode === "page" && getCurrentPageData() ? (
-                      <PagePreview
-                        pageData={getCurrentPageData()}
-                        cardData={cardData}
-                        elementSpacing={(cardData as any).elementSpacing || 16}
-                        individualElementSpacing={(cardData as any).individualElementSpacing || {}}
-                        onNavigatePage={handleNavigatePage}
-                        onBackToCard={handleBackToCard}
-                        hideBackButton={true}
-                      />
-                    ) : (
-                      <BusinessCardComponent
-                        data={cardData}
-                        isMobilePreview={true}
-                        showViewButton={false}
-                        onNavigatePage={handleNavigatePage}
-                        showInternalShareButton={false}
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {shareUrl && (
-              <div className="mt-4 flex justify-center">
-                <a
-                  href={shareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-medium transition-colors"
-                  data-testid="button-view-talklink"
-                >
-                  <Share2 className="w-4 h-4 mr-2" />
-                  View TalkLink
-                </a>
-              </div>
-            )}
-
-            <div className="mt-6 text-center">
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                <span className="w-2 h-2 bg-blue-500 rounded-full inline-block mr-2"></span>
-                Mobile Optimized
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <AutoSaveContext.Provider
+      value={{
+        status,
+        lastSaved,
+        lastSavedCard,
+        error,
+        cardId,
+        setCardId,
+        queueSave,
+        saveNow,
+        forceSave,
+        reset,
+      }}
+    >
+      {children}
+    </AutoSaveContext.Provider>
   );
+}
+
+export function useAutoSave() {
+  const context = useContext(AutoSaveContext);
+  if (!context) throw new Error("useAutoSave must be used within an AutoSaveProvider");
+  return context;
 }
