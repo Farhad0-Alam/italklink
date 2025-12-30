@@ -80,7 +80,22 @@ interface Contact {
   label: string;
   value: string;
   icon: string;
+  actionType?: 'tel' | 'sms' | 'email' | 'url' | 'vcard' | 'map' | 'appointment' | 'download' | 'copy' | 'share' | 'install';
 }
+
+const actionTypes = [
+  { value: 'tel', label: 'Phone Call', icon: 'fas fa-phone' },
+  { value: 'sms', label: 'SMS/Text', icon: 'fas fa-comment-sms' },
+  { value: 'email', label: 'Email', icon: 'fas fa-envelope' },
+  { value: 'url', label: 'Website URL', icon: 'fas fa-link' },
+  { value: 'vcard', label: 'Save Contact (vCard)', icon: 'fas fa-address-card' },
+  { value: 'map', label: 'Open in Maps', icon: 'fas fa-map-marker-alt' },
+  { value: 'appointment', label: 'Book Appointment', icon: 'fas fa-calendar-check' },
+  { value: 'download', label: 'Download File', icon: 'fas fa-download' },
+  { value: 'copy', label: 'Copy to Clipboard', icon: 'fas fa-copy' },
+  { value: 'share', label: 'Share eCard', icon: 'fas fa-share-alt' },
+  { value: 'install', label: 'Install App (PWA)', icon: 'fas fa-mobile-alt' },
+] as const;
 
 interface ContactSectionData {
   contacts?: Contact[];
@@ -197,6 +212,7 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
       label: "Contact",
       value: "",
       icon: "fas fa-phone",
+      actionType: "tel",
     };
     onChange({
       ...data,
@@ -249,38 +265,58 @@ export function ContactSectionEditor({ data, onChange }: ContactSectionEditorPro
                 {data.contacts?.map((contact, index) => (
                   <SortableItem key={contact.id} id={contact.id}>
                     <div 
-                      className="flex gap-2 items-end p-2 rounded ml-8"
+                      className="p-2 rounded ml-8 space-y-2"
                       style={{ 
                         backgroundColor: panelTheme.colors.inputBg,
                         border: `1px solid ${panelTheme.colors.borderColorLight}`
                       }}
                     >
-                      <div className="flex-1">
-                        <PanelLabel>Label</PanelLabel>
-                        <PanelInput
-                          value={contact.label}
-                          onChange={(e) => updateContact(index, { label: e.target.value })}
-                          placeholder="Label"
-                        />
+                      <div className="flex gap-2 items-end">
+                        <div className="flex-1">
+                          <PanelLabel>Label</PanelLabel>
+                          <PanelInput
+                            value={contact.label}
+                            onChange={(e) => updateContact(index, { label: e.target.value })}
+                            placeholder="Label"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <PanelLabel>Value</PanelLabel>
+                          <PanelInput
+                            value={contact.value}
+                            onChange={(e) => updateContact(index, { value: e.target.value })}
+                            placeholder="Value"
+                          />
+                        </div>
+                        <PanelButton onClick={() => removeContact(index)} variant="danger">
+                          <i className="fas fa-trash text-xs" />
+                        </PanelButton>
                       </div>
-                      <div className="flex-1">
-                        <PanelLabel>Value</PanelLabel>
-                        <PanelInput
-                          value={contact.value}
-                          onChange={(e) => updateContact(index, { value: e.target.value })}
-                          placeholder="Value"
-                        />
+                      <div className="flex gap-2 items-end">
+                        <div className="flex-1">
+                          <PanelLabel>Action Type</PanelLabel>
+                          <PanelSelect
+                            value={contact.actionType || "tel"}
+                            onValueChange={(value) => updateContact(index, { actionType: value as Contact['actionType'] })}
+                          >
+                            {actionTypes.map(type => (
+                              <SelectItem key={type.value} value={type.value}>
+                                <div className="flex items-center gap-2">
+                                  <i className={`${type.icon} w-4`} />
+                                  <span>{type.label}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </PanelSelect>
+                        </div>
+                        <div className="flex-1">
+                          <PanelLabel>Icon</PanelLabel>
+                          <IconPicker
+                            value={contact.icon}
+                            onChange={(icon) => updateContact(index, { icon })}
+                          />
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <PanelLabel>Icon</PanelLabel>
-                        <IconPicker
-                          value={contact.icon}
-                          onChange={(icon) => updateContact(index, { icon })}
-                        />
-                      </div>
-                      <PanelButton onClick={() => removeContact(index)} variant="danger">
-                        <i className="fas fa-trash text-xs" />
-                      </PanelButton>
                     </div>
                   </SortableItem>
                 ))}

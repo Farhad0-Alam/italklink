@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { PageElement } from "@shared/schema";
 import { getSkinStyles } from "@/lib/skin-presets";
+import { useToast } from "@/hooks/use-toast";
 
 // Helper function to convert hex color to rgba
 function hexToRgba(hex: string, alpha: number = 1): string {
@@ -188,23 +189,195 @@ export function ContactLinksRenderer({ data }: ContactLinksRendererProps) {
     enableLabelSkin,
   ]);
 
-  // Filter contacts with values
-  const validContacts = contacts.filter((c) => c.value);
+  const { toast } = useToast();
+
+  // Filter contacts with values (except install/share which don't need value)
+  const validContacts = contacts.filter((c) => c.value || c.actionType === 'install' || c.actionType === 'share');
+
+  // Generate vCard content - creates a proper vCard with common contact fields
+  const generateVCard = useCallback((contact: typeof contacts[0]) => {
+    const value = contact.value || '';
+    const label = contact.label || 'Contact';
+    
+    // Build vCard fields based on value content detection
+    const vcardLines: string[] = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      `FN:${label}`,
+    ];
+    
+    // Detect type of value and add appropriate field
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+    const urlRegex = /^(https?:\/\/|www\.)/i;
+    
+    if (emailRegex.test(value)) {
+      vcardLines.push(`EMAIL:${value}`);
+    } else if (phoneRegex.test(value) && value.replace(/\D/g, '').length >= 7) {
+      vcardLines.push(`TEL:${value}`);
+    } else if (urlRegex.test(value)) {
+      vcardLines.push(`URL:${value}`);
+    } else if (value.includes(',') || value.includes('\n')) {
+      // Likely an address
+      vcardLines.push(`ADR:;;${value.replace(/[\n,]/g, ';')};;;;`);
+    } else {
+      // Generic note for anything else
+      vcardLines.push(`NOTE:${value}`);
+    }
+    
+    vcardLines.push('END:VCARD');
+    
+    const vcard = vcardLines.join('\r\n');
+    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${label.replace(/[^a-z0-9]/gi, '_')}.vcf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Contact Saved",
+      description: "vCard file downloaded",
+    });
+  }, [toast]);
+
+  // Copy to clipboard
+  const copyToClipboard = useCallback(async (value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast({
+        title: "Copied!",
+        description: "Value copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy to clipboard",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
+  // Share via Web Share API
+  const shareContent = useCallback(async () => {
+    const shareData = {
+      title: document.title || 'Business Card',
+      text: 'Check out my digital business card!',
+      url: window.location.href,
+    };
+    
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        // User cancelled or error
+        console.log('Share cancelled or failed');
+      }
+    } else {
+      // Fallback: copy link
+      await copyToClipboard(window.location.href);
+      toast({
+        title: "Link Copied!",
+        description: "Share link copied to clipboard",
+      });
+    }
+  }, [copyToClipboard, toast]);
+
+  // Trigger PWA install
+  const triggerInstall = useCallback(async () => {
+    // Dispatch a custom event that the PWA installer can listen to
+    const installEvent = new CustomEvent('triggerPWAInstall');
+    window.dispatchEvent(installEvent);
+    
+    // Also try direct approach if beforeinstallprompt was captured globally
+    const deferredPrompt = (window as any).__pwaInstallPrompt;
+    if (deferredPrompt) {
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          toast({
+            title: "Installing...",
+            description: "App is being installed",
+          });
+        }
+        (window as any).__pwaInstallPrompt = null;
+      } catch (err) {
+        console.log('Install prompt failed', err);
+      }
+    } else {
+      // Show manual install instructions
+      toast({
+        title: "Install App",
+        description: "Use your browser menu to 'Add to Home Screen'",
+      });
+    }
+  }, [toast]);
 
   if (validContacts.length === 0) {
     return null;
   }
 
   const handleContactClick = (contact: typeof contacts[0]) => {
-    if (contact.type === "phone") {
-      window.open(`tel:${contact.value}`, "_self");
-    } else if (contact.type === "email") {
-      window.open(`mailto:${contact.value}`, "_self");
-    } else if (contact.type === "website") {
-      const url = contact.value.startsWith("http")
-        ? contact.value
-        : `https://${contact.value}`;
-      window.open(url, "_blank");
+    const actionType = contact.actionType || 'tel';
+    const value = contact.value || '';
+
+    switch (actionType) {
+      case 'tel':
+        window.open(`tel:${value}`, "_self");
+        break;
+      case 'sms':
+        window.open(`sms:${value}`, "_self");
+        break;
+      case 'email':
+        window.open(`mailto:${value}`, "_self");
+        break;
+      case 'url':
+        const url = value.startsWith("http") ? value : `https://${value}`;
+        window.open(url, "_blank");
+        break;
+      case 'vcard':
+        generateVCard(contact);
+        break;
+      case 'map':
+        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(value)}`;
+        window.open(mapUrl, "_blank");
+        break;
+      case 'appointment':
+        // If value is a URL, open it; otherwise use relative path
+        if (value.startsWith("http")) {
+          window.open(value, "_blank");
+        } else {
+          window.open(value || '/book', "_blank");
+        }
+        break;
+      case 'download':
+        // Trigger file download
+        const downloadUrl = value.startsWith("http") ? value : `https://${value}`;
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = '';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        break;
+      case 'copy':
+        copyToClipboard(value);
+        break;
+      case 'share':
+        shareContent();
+        break;
+      case 'install':
+        triggerInstall();
+        break;
+      default:
+        // Fallback to URL behavior
+        const fallbackUrl = value.startsWith("http") ? value : `https://${value}`;
+        window.open(fallbackUrl, "_blank");
     }
   };
 

@@ -48,8 +48,11 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
     const handleBeforeInstallPrompt = (e: Event) => {
       console.log('PWA: beforeinstallprompt event fired!', e);
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      const prompt = e as BeforeInstallPromptEvent;
+      setDeferredPrompt(prompt);
       setIsInstallable(true);
+      // Store globally for access from ContactLinksRenderer
+      (window as any).__pwaInstallPrompt = prompt;
     };
 
     // Listen for app installed
@@ -61,8 +64,32 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
       setShowInstructions(false);
     };
 
+    // Listen for custom trigger from ContactLinksRenderer
+    const handleTriggerInstall = async () => {
+      console.log('PWA: triggerPWAInstall event received');
+      const prompt = (window as any).__pwaInstallPrompt as BeforeInstallPromptEvent | null;
+      if (prompt) {
+        try {
+          await prompt.prompt();
+          const { outcome } = await prompt.userChoice;
+          console.log('PWA: Install trigger outcome:', outcome);
+          (window as any).__pwaInstallPrompt = null;
+          if (outcome === 'accepted') {
+            setIsInstalled(true);
+            setIsInstallable(false);
+          }
+        } catch (error) {
+          console.log('PWA: Install trigger error:', error);
+        }
+      } else {
+        // Show manual instructions
+        setShowInstructions(true);
+      }
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener('triggerPWAInstall', handleTriggerInstall);
 
     // Force check for PWA installability after a delay
     // Since beforeinstallprompt may not fire, we default to installable if Web Share is available
@@ -88,6 +115,7 @@ export const useBusinessCardPWA = (cardData: BusinessCard) => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('triggerPWAInstall', handleTriggerInstall);
     };
   }, []);
 
