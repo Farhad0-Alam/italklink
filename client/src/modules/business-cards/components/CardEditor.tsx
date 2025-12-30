@@ -358,26 +358,34 @@ END:VCARD`;
               </div>
             </div>
             
-            {/* Mobile Phone Mockup */}
-            <div className="relative mx-auto max-w-sm">
-              {/* Professional Mobile Frame */}
-              <div 
-                className="relative w-[430px] h-[815px] bg-cover bg-center bg-no-repeat shadow-2xl z-99999999"
-                style={{
-                  backgroundImage: `url(/mobile-frame.png)`,
-                  backgroundSize: 'contain'
-                }}
-              >
-                {/* Screen Content Area */}
-                <div className="absolute top-[17px] left-[35px] right-[35px] bottom-[17px] overflow-hidden rounded-[50px]">
+            {/* Mobile Phone Mockup (scaled to 50% to fit on screen) */}
+            <div className="relative mx-auto flex justify-center">
+              <div className="relative h-[408px] w-[215px]">
+                {/* Scaled wrapper for phone frame */}
+                <div 
+                  className="origin-top-left"
+                  style={{ transform: 'scale(0.5)' }}
+                >
+                  {/* Professional Mobile Frame */}
                   <div 
-                    ref={cardRef}
-                    className="h-full overflow-y-auto"
+                    className="relative w-[430px] h-[815px] bg-cover bg-center bg-no-repeat shadow-2xl"
+                    style={{
+                      backgroundImage: `url(/mobile-frame.png)`,
+                      backgroundSize: 'contain'
+                    }}
                   >
-                    <BusinessCardComponent 
-                      data={cardData} 
-                      isMobilePreview={true}
-                    />
+                    {/* Screen Content Area */}
+                    <div className="absolute top-[17px] left-[35px] right-[35px] bottom-[17px] overflow-hidden rounded-[50px]">
+                      <div 
+                        ref={cardRef}
+                        className="h-full overflow-y-auto"
+                      >
+                        <BusinessCardComponent 
+                          data={cardData} 
+                          isMobilePreview={true}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
