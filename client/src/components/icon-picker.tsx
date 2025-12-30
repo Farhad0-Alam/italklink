@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const FONTAWESOME_ICONS = [
@@ -81,21 +80,36 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
 
   return (
     <>
-      <div className="flex gap-2">
+      <div className="space-y-2">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="w-full h-16 rounded-lg border border-slate-500 cursor-pointer hover:border-green-500 transition-colors relative overflow-hidden group"
+          style={{
+            backgroundImage: 'linear-gradient(45deg, #374151 25%, transparent 25%), linear-gradient(-45deg, #374151 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #374151 75%), linear-gradient(-45deg, transparent 75%, #374151 75%)',
+            backgroundSize: '16px 16px',
+            backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
+            backgroundColor: '#4b5563'
+          }}
+          title="Click to browse icons"
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            {value ? (
+              <i className={`${value} text-3xl text-white drop-shadow-lg`}></i>
+            ) : (
+              <span className="text-slate-400 text-sm">Click to select icon</span>
+            )}
+          </div>
+          <div className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-xs bg-black/50 text-white px-2 py-1 rounded">Browse</span>
+          </div>
+        </button>
         <Input
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
-          className="bg-slate-600 border-slate-500 text-white flex-1"
-          placeholder="fas fa-link"
+          className="bg-slate-700 border-slate-500 text-white text-xs h-8"
+          placeholder="Custom: fas fa-icon-name"
         />
-        <Button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="bg-talklink-500 hover:bg-talklink-600"
-        >
-          <i className="fas fa-search mr-2"></i>
-          Browse
-        </Button>
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
