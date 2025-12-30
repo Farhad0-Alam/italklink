@@ -98,14 +98,14 @@ const actionTypes = [
 ] as const;
 
 const actionTypePlaceholders: Record<string, string> = {
-  tel: 'e.g., +1-234-567-8900',
-  sms: 'e.g., +1-234-567-8900',
-  email: 'e.g., email@example.com',
-  url: 'e.g., https://example.com',
-  vcard: 'Contact name or info',
-  map: 'e.g., 123 Main St, City, State',
-  appointment: 'e.g., https://calendly.com/...',
-  download: 'e.g., https://example.com/file.pdf',
+  tel: '+1-234-567-8900',
+  sms: '+1-234-567-8900',
+  email: 'email@example.com',
+  url: 'https://example.com',
+  vcard: 'Generated from Custom Contact Methods',
+  map: '123 Main St, City, State',
+  appointment: 'https://calendly.com/your-link',
+  download: 'https://example.com/file.pdf',
   copy: 'Text to copy',
   share: 'Share message (optional)',
   install: 'App name (optional)',
