@@ -80,3 +80,29 @@ export default function BuyerPurchases() {
     </div>
   );
 }
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Buyer Email: {order.buyerEmail}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      disabled={order.paymentStatus !== 'completed'}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
