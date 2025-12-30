@@ -205,39 +205,67 @@ export function ContactLinksRenderer({ data, cardData }: ContactLinksRendererPro
     setShowInstructions
   } = useBusinessCardPWA(cardData || {} as BusinessCard);
 
-  // Filter contacts with values (except install/share which don't need value)
-  const validContacts = contacts.filter((c) => c.value || c.actionType === 'install' || c.actionType === 'share');
+  // Filter contacts with values (except install/share/vcard which don't need value)
+  const validContacts = contacts.filter((c) => c.value || c.actionType === 'install' || c.actionType === 'share' || c.actionType === 'vcard');
 
-  // Generate vCard content - creates a proper vCard with common contact fields
+  // Generate vCard content - collects ALL data from sibling Custom Contact Methods
   const generateVCard = useCallback((contact: typeof contacts[0]) => {
-    const value = contact.value || '';
     const label = contact.label || 'Contact';
     
-    // Build vCard fields based on value content detection
+    // Build vCard fields by collecting ALL sibling contacts (not just the vCard item)
     const vcardLines: string[] = [
       'BEGIN:VCARD',
       'VERSION:3.0',
       `FN:${label}`,
     ];
     
-    // Detect type of value and add appropriate field
+    // Regex patterns for value detection
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^[\d\s\-\+\(\)]+$/;
     const urlRegex = /^(https?:\/\/|www\.)/i;
     
-    if (emailRegex.test(value)) {
-      vcardLines.push(`EMAIL:${value}`);
-    } else if (phoneRegex.test(value) && value.replace(/\D/g, '').length >= 7) {
-      vcardLines.push(`TEL:${value}`);
-    } else if (urlRegex.test(value)) {
-      vcardLines.push(`URL:${value}`);
-    } else if (value.includes(',') || value.includes('\n')) {
-      // Likely an address
-      vcardLines.push(`ADR:;;${value.replace(/[\n,]/g, ';')};;;;`);
-    } else {
-      // Generic note for anything else
-      vcardLines.push(`NOTE:${value}`);
-    }
+    // Iterate through ALL contacts and add their data to vCard
+    contacts.forEach((c) => {
+      const value = c.value || '';
+      if (!value || c.actionType === 'vcard' || c.actionType === 'install' || c.actionType === 'share') {
+        return; // Skip empty values and action-only types
+      }
+      
+      // Use actionType to determine field type, or auto-detect
+      switch (c.actionType) {
+        case 'tel':
+          vcardLines.push(`TEL:${value}`);
+          break;
+        case 'sms':
+          vcardLines.push(`TEL;TYPE=CELL:${value}`);
+          break;
+        case 'email':
+          vcardLines.push(`EMAIL:${value}`);
+          break;
+        case 'url':
+          vcardLines.push(`URL:${value}`);
+          break;
+        case 'map':
+          vcardLines.push(`ADR:;;${value.replace(/[\n,]/g, ';')};;;;`);
+          break;
+        case 'appointment':
+          vcardLines.push(`URL;TYPE=BOOKING:${value}`);
+          break;
+        default:
+          // Auto-detect type based on value format
+          if (emailRegex.test(value)) {
+            vcardLines.push(`EMAIL:${value}`);
+          } else if (phoneRegex.test(value) && value.replace(/\D/g, '').length >= 7) {
+            vcardLines.push(`TEL:${value}`);
+          } else if (urlRegex.test(value)) {
+            vcardLines.push(`URL:${value}`);
+          } else if (value.includes(',') || value.includes('\n')) {
+            vcardLines.push(`ADR:;;${value.replace(/[\n,]/g, ';')};;;;`);
+          } else {
+            vcardLines.push(`NOTE:${c.label || 'Info'}: ${value}`);
+          }
+      }
+    });
     
     vcardLines.push('END:VCARD');
     
@@ -254,9 +282,9 @@ export function ContactLinksRenderer({ data, cardData }: ContactLinksRendererPro
     
     toast({
       title: "Contact Saved",
-      description: "vCard file downloaded",
+      description: "vCard file downloaded with all contact methods",
     });
-  }, [toast]);
+  }, [contacts, toast]);
 
   // Copy to clipboard
   const copyToClipboard = useCallback(async (value: string) => {

@@ -140,6 +140,7 @@ export const PanelSelect = ({ value, onValueChange, children, placeholder }: Pan
       style={{
         backgroundColor: panelTheme.colors.inputBg,
         borderColor: panelTheme.colors.borderColorLight,
+        color: panelTheme.colors.textPrimary,
       }}
     >
       {children}
