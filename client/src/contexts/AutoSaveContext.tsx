@@ -114,64 +114,75 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
 
   // Function to handle document clicks for auto-save
   const handleDocumentClick = useCallback((e: MouseEvent) => {
-    if (statusRef.current !== 'dirty' || isSavingRef.current) return;
+    try {
+      if (statusRef.current !== 'dirty' || isSavingRef.current) return;
 
-    const target = e.target as HTMLElement;
-    
-    const ignoreTags = ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'];
-    const tagName = target.tagName.toUpperCase();
-    
-    if (ignoreTags.includes(tagName)) return;
-    
-    const ignoreClasses = ['ignore-click-save', 'no-auto-save'];
-    const hasIgnoreClass = ignoreClasses.some(className => 
-      target.classList.contains(className) || 
-      target.closest(`.${className}`)
-    );
-    
-    if (hasIgnoreClass) return;
-
-    if (target.closest('.modal, .dialog, .popup, [role="dialog"]')) return;
-
-    if (pendingDataRef.current) {
-      console.log('[AutoSave] Click detected, triggering auto-save');
+      const target = e.target;
+      if (!target || !(target instanceof HTMLElement)) return;
       
-      if (clickSaveTimerRef.current) {
-        clearTimeout(clickSaveTimerRef.current);
-      }
+      const ignoreTags = ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'];
+      const tagName = target.tagName?.toUpperCase() || '';
       
-      clickSaveTimerRef.current = setTimeout(async () => {
-        try {
-          await forceSaveRef.current();
-        } catch (error) {
-          console.error('[AutoSave] Click-based save failed:', error);
+      if (ignoreTags.includes(tagName)) return;
+      
+      const ignoreClasses = ['ignore-click-save', 'no-auto-save'];
+      const hasIgnoreClass = ignoreClasses.some(className => 
+        target.classList?.contains(className) || 
+        target.closest?.(`.${className}`)
+      );
+      
+      if (hasIgnoreClass) return;
+
+      if (target.closest?.('.modal, .dialog, .popup, [role="dialog"]')) return;
+
+      if (pendingDataRef.current) {
+        console.log('[AutoSave] Click detected, triggering auto-save');
+        
+        if (clickSaveTimerRef.current) {
+          clearTimeout(clickSaveTimerRef.current);
         }
-      }, 300);
+        
+        clickSaveTimerRef.current = setTimeout(async () => {
+          try {
+            await forceSaveRef.current();
+          } catch (error) {
+            console.error('[AutoSave] Click-based save failed:', error);
+          }
+        }, 300);
+      }
+    } catch (err) {
+      console.error('[AutoSave] Error in click handler:', err);
     }
   }, []);
 
   // Function to handle input blur for auto-save
   const handleInputBlur = useCallback((e: FocusEvent) => {
-    if (statusRef.current !== 'dirty' || isSavingRef.current) return;
+    try {
+      if (statusRef.current !== 'dirty' || isSavingRef.current) return;
 
-    const target = e.target as HTMLElement;
-    const tagName = target.tagName.toUpperCase();
-    
-    const editableTags = ['INPUT', 'TEXTAREA', 'SELECT'];
-    const isContentEditable = target.getAttribute('contenteditable') === 'true';
-    
-    if ((editableTags.includes(tagName) || isContentEditable) && pendingDataRef.current) {
-      console.log('[AutoSave] Input blur detected, triggering auto-save');
+      const target = e.target;
+      if (!target || !(target instanceof HTMLElement)) return;
       
-      setTimeout(async () => {
-        if (pendingDataRef.current && statusRef.current === 'dirty' && !isSavingRef.current) {
-          try {
-            await forceSaveRef.current();
-          } catch (error) {
-            console.error('[AutoSave] Blur-based save failed:', error);
+      const tagName = target.tagName?.toUpperCase() || '';
+      
+      const editableTags = ['INPUT', 'TEXTAREA', 'SELECT'];
+      const isContentEditable = target.getAttribute?.('contenteditable') === 'true';
+      
+      if ((editableTags.includes(tagName) || isContentEditable) && pendingDataRef.current) {
+        console.log('[AutoSave] Input blur detected, triggering auto-save');
+        
+        setTimeout(async () => {
+          if (pendingDataRef.current && statusRef.current === 'dirty' && !isSavingRef.current) {
+            try {
+              await forceSaveRef.current();
+            } catch (error) {
+              console.error('[AutoSave] Blur-based save failed:', error);
+            }
           }
-        }
-      }, 500);
+        }, 500);
+      }
+    } catch (err) {
+      console.error('[AutoSave] Error in blur handler:', err);
     }
   }, []);
 
