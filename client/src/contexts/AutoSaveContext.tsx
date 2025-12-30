@@ -16,8 +16,6 @@ interface AutoSaveContextType {
   saveNow: (data: BusinessCard, customUrlSlug?: string) => Promise<void>;
   forceSave: () => Promise<void>;
   reset: () => void;
-  setupClickBasedAutoSave: () => void;
-  disableClickBasedAutoSave: () => void;
 }
 
 const AutoSaveContext = createContext<AutoSaveContextType | null>(null);
@@ -31,8 +29,10 @@ interface AutoSaveProviderProps {
  * Removes server-managed fields and editor-only fields
  */
 function sanitizeCardForSave(input: any): Partial<BusinessCard> {
+  // Deep clone to avoid mutating react state objects
   const data = structuredClone ? structuredClone(input) : JSON.parse(JSON.stringify(input));
 
+  // Remove ALL server-managed fields
   const serverFields = [
     'id', 'userId', 'createdAt', 'updatedAt', 'deletedAt',
     'shareSlug', 'slug', 'views', 'analytics', 'lastViewedAt',
@@ -43,6 +43,7 @@ function sanitizeCardForSave(input: any): Partial<BusinessCard> {
     delete data[field];
   });
 
+  // Remove editor-only UI state fields
   const uiFields = [
     'currentPreviewMode', 'currentSelectedPage'
   ];
@@ -51,6 +52,7 @@ function sanitizeCardForSave(input: any): Partial<BusinessCard> {
     delete data[field];
   });
 
+  // Ensure arrays exist to prevent null errors
   if (!data.customContacts) data.customContacts = [];
   if (!data.customSocials) data.customSocials = [];
   if (!data.galleryImages) data.galleryImages = [];
@@ -58,8 +60,10 @@ function sanitizeCardForSave(input: any): Partial<BusinessCard> {
   if (!data.pages) data.pages = [];
   if (!data.pageElements) data.pageElements = [];
 
+  // Process pages: ensure home page is properly structured
   if (Array.isArray(data.pages)) {
     data.pages = data.pages.map((page: any) => {
+      // Ensure each page has required fields
       const cleanPage = {
         id: page.id || `page-${Date.now()}`,
         key: page.key || page.id || `page-${Date.now()}`,
@@ -72,6 +76,7 @@ function sanitizeCardForSave(input: any): Partial<BusinessCard> {
     });
   }
 
+  // Ensure pageElements is always an array
   if (!Array.isArray(data.pageElements)) {
     data.pageElements = [];
   }
@@ -80,6 +85,7 @@ function sanitizeCardForSave(input: any): Partial<BusinessCard> {
 }
 
 function isCreatePayloadValid(data: any, customUrlSlug?: string): boolean {
+  // For creation, we need either customUrl or fullName + title
   if (customUrlSlug && String(customUrlSlug).trim().length > 0) return true;
 
   const fullNameOk = !!String(data?.fullName || "").trim();
@@ -100,132 +106,6 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isSavingRef = useRef(false);
   const saveAttemptRef = useRef(0);
-  const clickListenerActiveRef = useRef(false);
-  const clickSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const statusRef = useRef<AutoSaveStatus>("idle");
-
-  // Keep statusRef in sync with status state
-  useEffect(() => {
-    statusRef.current = status;
-  }, [status]);
-
-  // Forward declaration for forceSave (will be defined later)
-  const forceSaveRef = useRef<() => Promise<void>>(() => Promise.resolve());
-
-  // Function to handle document clicks for auto-save
-  const handleDocumentClick = useCallback((e: MouseEvent) => {
-    try {
-      if (statusRef.current !== 'dirty' || isSavingRef.current) return;
-
-      const target = e.target;
-      if (!target || !(target instanceof HTMLElement)) return;
-      
-      const ignoreTags = ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'];
-      const tagName = target.tagName?.toUpperCase() || '';
-      
-      if (ignoreTags.includes(tagName)) return;
-      
-      const ignoreClasses = ['ignore-click-save', 'no-auto-save'];
-      const hasIgnoreClass = ignoreClasses.some(className => 
-        target.classList?.contains(className) || 
-        target.closest?.(`.${className}`)
-      );
-      
-      if (hasIgnoreClass) return;
-
-      if (target.closest?.('.modal, .dialog, .popup, [role="dialog"]')) return;
-
-      if (pendingDataRef.current) {
-        console.log('[AutoSave] Click detected, triggering auto-save');
-        
-        if (clickSaveTimerRef.current) {
-          clearTimeout(clickSaveTimerRef.current);
-        }
-        
-        clickSaveTimerRef.current = setTimeout(async () => {
-          try {
-            await forceSaveRef.current();
-          } catch (error) {
-            console.error('[AutoSave] Click-based save failed:', error);
-          }
-        }, 300);
-      }
-    } catch (err) {
-      console.error('[AutoSave] Error in click handler:', err);
-    }
-  }, []);
-
-  // Function to handle input blur for auto-save
-  const handleInputBlur = useCallback((e: FocusEvent) => {
-    try {
-      if (statusRef.current !== 'dirty' || isSavingRef.current) return;
-
-      const target = e.target;
-      if (!target || !(target instanceof HTMLElement)) return;
-      
-      const tagName = target.tagName?.toUpperCase() || '';
-      
-      const editableTags = ['INPUT', 'TEXTAREA', 'SELECT'];
-      const isContentEditable = target.getAttribute?.('contenteditable') === 'true';
-      
-      if ((editableTags.includes(tagName) || isContentEditable) && pendingDataRef.current) {
-        console.log('[AutoSave] Input blur detected, triggering auto-save');
-        
-        setTimeout(async () => {
-          if (pendingDataRef.current && statusRef.current === 'dirty' && !isSavingRef.current) {
-            try {
-              await forceSaveRef.current();
-            } catch (error) {
-              console.error('[AutoSave] Blur-based save failed:', error);
-            }
-          }
-        }, 500);
-      }
-    } catch (err) {
-      console.error('[AutoSave] Error in blur handler:', err);
-    }
-  }, []);
-
-  // Setup click-based auto-save
-  const setupClickBasedAutoSave = useCallback(() => {
-    if (clickListenerActiveRef.current) return;
-    
-    console.log('[AutoSave] Setting up click-based auto-save');
-    
-    document.addEventListener('click', handleDocumentClick, true);
-    document.addEventListener('blur', handleInputBlur, true);
-    
-    clickListenerActiveRef.current = true;
-  }, [handleDocumentClick, handleInputBlur]);
-
-  // Disable click-based auto-save
-  const disableClickBasedAutoSave = useCallback(() => {
-    if (!clickListenerActiveRef.current) return;
-    
-    console.log('[AutoSave] Disabling click-based auto-save');
-    
-    document.removeEventListener('click', handleDocumentClick, true);
-    document.removeEventListener('blur', handleInputBlur, true);
-    
-    clickListenerActiveRef.current = false;
-  }, [handleDocumentClick, handleInputBlur]);
-
-  // Set up click-based auto-save when component mounts
-  useEffect(() => {
-    setupClickBasedAutoSave();
-    
-    return () => {
-      disableClickBasedAutoSave();
-      
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-      
-      if (clickSaveTimerRef.current) {
-        clearTimeout(clickSaveTimerRef.current);
-      }
-    };
-  }, [setupClickBasedAutoSave, disableClickBasedAutoSave]);
 
   const saveMutation = useMutation({
     mutationFn: async ({
@@ -248,6 +128,7 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
 
       const cleaned = sanitizeCardForSave(data);
 
+      // Attach customUrl if provided
       const dataToSave: any = {
         ...cleaned,
       };
@@ -256,13 +137,16 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         dataToSave.customUrl = customUrlSlug.trim();
       }
 
+      // Validate create requirements (prevents 400 spam)
       if (!currentCardId && !isCreatePayloadValid(dataToSave, customUrlSlug)) {
         console.log('[AutoSave] Create validation failed - missing required fields');
         throw new Error('{"message":"Please provide either a custom URL or name and title."}');
       }
 
+      // Prepare the final payload
       const finalData = {
         ...dataToSave,
+        // Ensure we always send these as arrays (not null/undefined)
         customContacts: dataToSave.customContacts || [],
         customSocials: dataToSave.customSocials || [],
         galleryImages: dataToSave.galleryImages || [],
@@ -294,8 +178,6 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
       isSavingRef.current = true;
       setStatus("saving");
       setError(null);
-      document.documentElement.classList.add('auto-saving');
-      document.documentElement.classList.remove('has-unsaved-changes');
     },
 
     onSuccess: (savedCard) => {
@@ -304,19 +186,21 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
       setLastSaved(new Date());
       setLastSavedCard(savedCard);
       setError(null);
-      document.documentElement.classList.remove('auto-saving');
-      document.documentElement.classList.add('auto-saved');
 
+      // Update queries
       queryClient.invalidateQueries({ queryKey: ["/api/business-cards"] });
       if (savedCard?.id) {
         queryClient.invalidateQueries({ queryKey: ["/api/business-cards", savedCard.id] });
       }
 
+      // Update URL if this was a create operation
       if (!cardId && savedCard?.id) {
         setCardId(savedCard.id);
+        // Update browser URL without reload
         window.history.replaceState(null, "", `/card-editor/${savedCard.id}`);
       }
 
+      // If more changes came in while saving, save again
       if (pendingDataRef.current) {
         const pending = pendingDataRef.current;
         pendingDataRef.current = null;
@@ -325,47 +209,44 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         return;
       }
 
+      // Auto-reset saved => idle after delay
       setTimeout(() => {
-        setStatus((currentStatus) => currentStatus === "saved" ? "idle" : currentStatus);
-        document.documentElement.classList.remove('auto-saved');
+        if (status === "saved") {
+          setStatus("idle");
+        }
       }, 2000);
     },
 
     onError: (err: any) => {
       isSavingRef.current = false;
       console.error('[AutoSave] Error:', err);
-      document.documentElement.classList.remove('auto-saving');
-      document.documentElement.classList.add('auto-save-error');
 
       const msg = String(err?.message || "Failed to save");
       const isMissingFields = msg.includes("Please provide either a custom URL or name and title");
 
       if (isMissingFields) {
-        setStatus("dirty");
+        setStatus("dirty"); // Keep as dirty but don't show error
         setError(null);
-        document.documentElement.classList.remove('auto-save-error');
-        document.documentElement.classList.add('has-unsaved-changes');
         return;
       }
 
       setStatus("error");
       setError(msg);
 
+      // Retry after delay if we have pending data
       setTimeout(() => {
-        document.documentElement.classList.remove('auto-save-error');
         if (pendingDataRef.current) {
           const pending = pendingDataRef.current;
           pendingDataRef.current = null;
           console.log('[AutoSave] Retrying after error...');
           queueSave(pending.data, pending.customUrlSlug);
-        } else if (statusRef.current === 'dirty' || statusRef.current === 'error') {
-          document.documentElement.classList.add('has-unsaved-changes');
         }
       }, 3000);
     },
   });
 
   const runDebouncedSave = useCallback(() => {
+    // Clear any existing timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
@@ -377,11 +258,13 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         return;
       }
 
+      // If already saving, keep the pending data for later
       if (isSavingRef.current) {
         console.log('[AutoSave] Already saving, queuing for later');
         return;
       }
 
+      // For new cards, validate required fields
       const cleaned = sanitizeCardForSave(pending.data);
       if (!cardId && !isCreatePayloadValid(cleaned, pending.customUrlSlug)) {
         console.log('[AutoSave] Invalid create payload, skipping');
@@ -389,6 +272,7 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         return;
       }
 
+      // Clear pending data before saving
       const dataToSave = { ...pending };
       pendingDataRef.current = null;
 
@@ -401,32 +285,36 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
       } catch (error) {
         console.error('[AutoSave] Debounced save failed:', error);
       }
-    }, 1200);
+    }, 1200); // Increased debounce time
   }, [cardId, saveMutation]);
 
   const queueSave = useCallback(
     (data: BusinessCard, customUrlSlug?: string) => {
+      // Always update pending data with latest
       pendingDataRef.current = { data, customUrlSlug };
 
-      if (statusRef.current !== "saving") {
+      // Update status if not already saving
+      if (status !== "saving") {
         setStatus("dirty");
-        document.documentElement.classList.add('has-unsaved-changes');
       }
 
+      // Start debounced save
       runDebouncedSave();
     },
-    [runDebouncedSave]
+    [status, runDebouncedSave]
   );
 
   const saveNow = useCallback(
     async (data: BusinessCard, customUrlSlug?: string) => {
       console.log('[AutoSave] Manual save triggered');
 
+      // Cancel any pending debounced save
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
         debounceTimerRef.current = null;
       }
 
+      // If already saving, queue this data for after current save
       if (isSavingRef.current) {
         console.log('[AutoSave] Already saving, queuing manual save');
         pendingDataRef.current = { data, customUrlSlug };
@@ -434,6 +322,7 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         return;
       }
 
+      // Validate for new cards
       const cleaned = sanitizeCardForSave(data);
       if (!cardId && !isCreatePayloadValid(cleaned, customUrlSlug)) {
         console.log('[AutoSave] Manual save validation failed');
@@ -441,6 +330,7 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         return;
       }
 
+      // Clear any pending data
       pendingDataRef.current = null;
 
       try {
@@ -466,22 +356,11 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
     }
   }, [saveNow]);
 
-  // Update the ref so event handlers can access the latest forceSave
-  useEffect(() => {
-    forceSaveRef.current = forceSave;
-  }, [forceSave]);
-
   const reset = useCallback(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
     }
-    
-    if (clickSaveTimerRef.current) {
-      clearTimeout(clickSaveTimerRef.current);
-      clickSaveTimerRef.current = null;
-    }
-    
     pendingDataRef.current = null;
     isSavingRef.current = false;
     saveAttemptRef.current = 0;
@@ -490,24 +369,16 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
     setCardId(null);
     setLastSavedCard(null);
     setLastSaved(null);
-    
-    document.documentElement.classList.remove(
-      'has-unsaved-changes',
-      'auto-saving',
-      'auto-saved',
-      'auto-save-error'
-    );
   }, []);
 
-  // Add visual indicator for unsaved changes in document title
+  // Cleanup on unmount
   useEffect(() => {
-    const originalTitle = document.title.replace(/^\*/, '');
-    if (status === 'dirty') {
-      document.title = '*' + originalTitle;
-    } else {
-      document.title = originalTitle;
-    }
-  }, [status]);
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <AutoSaveContext.Provider
@@ -522,8 +393,6 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         saveNow,
         forceSave,
         reset,
-        setupClickBasedAutoSave,
-        disableClickBasedAutoSave,
       }}
     >
       {children}
