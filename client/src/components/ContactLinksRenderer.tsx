@@ -1,7 +1,10 @@
-import { useMemo, useCallback } from "react";
-import { PageElement } from "@shared/schema";
+import { useMemo, useCallback, useState } from "react";
+import { PageElement, BusinessCard } from "@shared/schema";
 import { getSkinStyles } from "@/lib/skin-presets";
 import { useToast } from "@/hooks/use-toast";
+import { useBusinessCardPWA } from "@/hooks/useBusinessCardPWA";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Share, Plus, Download, MoreVertical, Smartphone } from "lucide-react";
 
 // Helper function to convert hex color to rgba
 function hexToRgba(hex: string, alpha: number = 1): string {
@@ -17,9 +20,10 @@ type ContactData = (PageElement & { type: "contactSection" })["data"];
 
 interface ContactLinksRendererProps {
   data: ContactData;
+  cardData?: BusinessCard;
 }
 
-export function ContactLinksRenderer({ data }: ContactLinksRendererProps) {
+export function ContactLinksRenderer({ data, cardData }: ContactLinksRendererProps) {
   const {
     contacts = [],
     iconColor = "#9333ea",
@@ -190,6 +194,16 @@ export function ContactLinksRenderer({ data }: ContactLinksRendererProps) {
   ]);
 
   const { toast } = useToast();
+  const [installing, setInstalling] = useState(false);
+  
+  // Use PWA hook for install functionality
+  const { 
+    isInstallable, 
+    isInstalled, 
+    installBusinessCard,
+    showInstructions,
+    setShowInstructions
+  } = useBusinessCardPWA(cardData || {} as BusinessCard);
 
   // Filter contacts with values (except install/share which don't need value)
   const validContacts = contacts.filter((c) => c.value || c.actionType === 'install' || c.actionType === 'share');
@@ -286,36 +300,40 @@ export function ContactLinksRenderer({ data }: ContactLinksRendererProps) {
     }
   }, [copyToClipboard, toast]);
 
-  // Trigger PWA install
+  // Trigger PWA install - uses the same logic as InstallButtonElement
   const triggerInstall = useCallback(async () => {
-    // Dispatch a custom event that the PWA installer can listen to
-    const installEvent = new CustomEvent('triggerPWAInstall');
-    window.dispatchEvent(installEvent);
+    console.log('Install action triggered from contact link');
+    setInstalling(true);
     
-    // Also try direct approach if beforeinstallprompt was captured globally
-    const deferredPrompt = (window as any).__pwaInstallPrompt;
-    if (deferredPrompt) {
-      try {
-        await deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          toast({
-            title: "Installing...",
-            description: "App is being installed",
-          });
+    try {
+      // Wait briefly for UI feedback, then trigger install
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const installed = await installBusinessCard();
+      
+      if (installed) {
+        console.log('PWA installation initiated successfully');
+        toast({
+          title: "Installing...",
+          description: "App is being installed",
+        });
+      } else {
+        console.log('PWA installation was not initiated - may need manual steps');
+        // Show manual instructions dialog (handled by showInstructions state)
+        if (setShowInstructions) {
+          setShowInstructions(true);
         }
-        (window as any).__pwaInstallPrompt = null;
-      } catch (err) {
-        console.log('Install prompt failed', err);
       }
-    } else {
-      // Show manual install instructions
+    } catch (error) {
+      console.error('Install failed:', error);
       toast({
         title: "Install App",
         description: "Use your browser menu to 'Add to Home Screen'",
       });
+    } finally {
+      setInstalling(false);
     }
-  }, [toast]);
+  }, [installBusinessCard, setShowInstructions, toast]);
 
   if (validContacts.length === 0) {
     return null;
@@ -456,6 +474,91 @@ export function ContactLinksRenderer({ data }: ContactLinksRendererProps) {
           </div>
         ))}
       </div>
+      
+      {/* PWA Install Instructions Dialog */}
+      <Dialog open={showInstructions} onOpenChange={setShowInstructions}>
+        <DialogContent className="max-w-sm mx-auto bg-white rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-center flex items-center justify-center gap-2">
+              <Smartphone className="w-6 h-6 text-green-600" />
+              Install App
+            </DialogTitle>
+            <DialogDescription className="text-center text-slate-600">
+              Add this business card to your home screen for quick access
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 pt-4">
+            {/iPad|iPhone|iPod/.test(navigator.userAgent) ? (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-slate-800">For iPhone/iPad (Safari):</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Share className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">1. Tap the Share button</p>
+                      <p className="text-xs text-slate-500">At the bottom of your screen</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <Plus className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">2. Add to Home Screen</p>
+                      <p className="text-xs text-slate-500">Scroll down and tap this option</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <Download className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">3. Tap Add</p>
+                      <p className="text-xs text-slate-500">The app will appear on your home screen</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-slate-800">For Android (Chrome):</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <MoreVertical className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">1. Tap the menu icon</p>
+                      <p className="text-xs text-slate-500">Three dots at top right</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <Plus className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">2. Add to Home screen</p>
+                      <p className="text-xs text-slate-500">Or "Install app" if available</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <Download className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">3. Tap Add</p>
+                      <p className="text-xs text-slate-500">The app will appear on your home screen</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

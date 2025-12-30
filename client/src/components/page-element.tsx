@@ -2692,7 +2692,7 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
           );
         }
 
-        return <ContactLinksRenderer key={`contact-render-${element.id}`} data={elementData} />;
+        return <ContactLinksRenderer key={`contact-render-${element.id}`} data={elementData} cardData={cardData} />;
       }
 
       case "socialSection": {
