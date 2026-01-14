@@ -11,7 +11,7 @@ import { PagePreview } from "@/components/page-preview";
 import { FormBuilder } from "@/components/form-builder";
 import { AutoSaveIndicator } from "@/components/AutoSaveIndicator";
 import { useAutoSave } from "@/contexts/AutoSaveContext";
-import { Copy, Share2, ArrowLeft } from "lucide-react";
+import { Copy, Share2, ArrowLeft, Eye } from "lucide-react";
 import { Link } from "wouter";
 import type { BusinessCard } from "@shared/schema";
 
@@ -24,6 +24,7 @@ export default function CardEditor() {
   const params = useParams() as CardEditorParams;
   const [, setLocation] = useLocation();
   const cardRef = useRef<HTMLDivElement>(null);
+  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
 
   const hasHydratedRef = useRef(false);
 
@@ -55,10 +56,8 @@ export default function CardEditor() {
   const selectedTemplateId = urlParams.get("template");
   const customUrlFromTemplate = urlParams.get("url");
 
-  // Counter for generating unique IDs within the same render cycle
   let profileElementIdCounter = 0;
 
-  // Function to create a profile element with guaranteed unique ID and complete default data
   const createProfileElement = () => {
     profileElementIdCounter++;
     const uniqueId =
@@ -158,7 +157,6 @@ export default function CardEditor() {
     };
   };
 
-  // Create separate profile elements for pageElements and pages to avoid shared references
   const initialProfileElement = createProfileElement();
   const homePageProfileElement = createProfileElement();
 
@@ -204,7 +202,6 @@ export default function CardEditor() {
     }
   }, [params.id, setAutoSaveCardId]);
 
-  // Helper function to update share URL
   const updateShareUrl = (card: any) => {
     if (card.customUrl) {
       setShareUrl(`${window.location.origin}/${card.customUrl}`);
@@ -257,14 +254,12 @@ export default function CardEditor() {
     }));
   };
 
-  // Fetch template data if template parameter is provided
   const { data: templates } = useQuery({
     queryKey: ["/api/templates"],
     enabled: !!selectedTemplateId,
     staleTime: 1000 * 60 * 10,
   });
 
-  // Load existing card if editing
   const { data: existingCard, isLoading } = useQuery({
     queryKey: ["/api/business-cards", params.id],
     queryFn: async () => {
@@ -274,7 +269,6 @@ export default function CardEditor() {
     enabled: !!params.id,
   });
 
-  // Apply template when templates load and we have a template parameter
   useEffect(() => {
     if (selectedTemplateId && templates && !existingCard) {
       const selectedTemplate = (templates as any[]).find((t: any) => t.id === selectedTemplateId);
@@ -291,14 +285,12 @@ export default function CardEditor() {
           font: selectedTemplate.font || cardData.font,
         };
         setCardData(newCardData);
-        // allow autosave after this point (user starts editing)
         hasHydratedRef.current = true;
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTemplateId, templates, existingCard]);
 
-  // Update form data when existing card loads
   useEffect(() => {
     if (existingCard) {
       console.log('[CardEditor] Hydrating from existing card:', existingCard.id);
@@ -345,24 +337,19 @@ export default function CardEditor() {
       }));
 
       updateShareUrl(existingCard);
-
-      // allow autosave after hydration
       hasHydratedRef.current = true;
-      console.log('[CardEditor] Hydration complete, autosave enabled');
     }
   }, [existingCard]);
 
   useEffect(() => {
     if (lastSavedCard) {
       updateShareUrl(lastSavedCard);
-      // Update cardId if this was a create operation
       if (!params.id && lastSavedCard.id) {
         setAutoSaveCardId(lastSavedCard.id);
       }
     }
   }, [lastSavedCard, params.id, setAutoSaveCardId]);
 
-  // Manual save (button / explicit)
   const triggerSave = useCallback(
     async (dataOverride?: any) => {
       if (!user) {
@@ -376,7 +363,6 @@ export default function CardEditor() {
 
       const dataToSave = dataOverride || cardData;
 
-      // Validate for new cards
       if (!params.id && !customUrlSlug && !dataToSave.fullName && !dataToSave.title) {
         toast({
           title: "Cannot save",
@@ -410,7 +396,7 @@ export default function CardEditor() {
       await navigator.clipboard.writeText(shareUrl);
       toast({
         title: "Link copied!",
-        description: "URL copied to clipboard. Use the View TalkLink button to preview.",
+        description: "URL copied to clipboard.",
       });
     } catch {
       toast({
@@ -445,52 +431,41 @@ export default function CardEditor() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with URL bar */}
+      {/* Minimal Header with URL and Copy/View buttons */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="flex items-center text-gray-600 hover:text-gray-900">
-                <ArrowLeft className="w-5 h-5 mr-2" />
+        <div className="max-w-full mx-auto px-4">
+          <div className="flex items-center justify-between h-12">
+            <div className="flex items-center space-x-3">
+              <Link href="/dashboard" className="flex items-center text-gray-600 hover:text-gray-900 text-sm">
+                <ArrowLeft className="w-4 h-4 mr-1" />
                 Back
               </Link>
-              <div className="text-xl font-semibold text-gray-900">{params.id ? "Edit Card" : "Create Card"}</div>
-              <AutoSaveIndicator />
+              <div className="text-lg font-semibold text-gray-900">CARD EDITOR</div>
+              <div className="text-xs text-gray-500">
+                <AutoSaveIndicator />
+              </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              {shareUrl ? (
-                <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-orange-50 rounded-full px-6 py-3 shadow-sm border border-gray-200">
-                  <div className="text-sm text-gray-700 font-medium truncate max-w-xs">{shareUrl}</div>
-                  <Button
-                    size="sm"
-                    onClick={copyShareUrl}
-                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-6 whitespace-nowrap"
-                    data-testid="button-copy-url"
-                  >
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copy
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleShare}
-                    className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 whitespace-nowrap"
-                    data-testid="button-share"
-                  >
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-3">
-                  <Button size="sm" disabled className="bg-gray-200 text-gray-400 rounded-full px-6 cursor-not-allowed">
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copy
-                  </Button>
-                  <Button size="sm" disabled className="bg-gray-200 text-gray-400 rounded-full px-6 cursor-not-allowed">
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                  </Button>
+            <div className="flex items-center space-x-2">
+              {shareUrl && (
+                <div className="flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-1.5">
+                  <div className="text-xs text-gray-700 truncate max-w-[120px]">{shareUrl}</div>
+                  <div className="flex items-center space-x-1">
+                    <Button
+                      size="sm"
+                      onClick={copyShareUrl}
+                      className="bg-blue-500 hover:bg-blue-600 text-white rounded px-2 h-6"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => window.open(shareUrl, '_blank')}
+                      className="bg-orange-500 hover:bg-orange-600 text-white rounded px-2 h-6"
+                    >
+                      <Eye className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -498,60 +473,65 @@ export default function CardEditor() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left Panel - Form Builder */}
-          <div>
-            <FormBuilder
-              cardData={cardData}
-              onDataChange={(data) => {
-                const updated = {
-                  ...(data as any),
-                  currentPreviewMode: (cardData as any).currentPreviewMode,
-                  currentSelectedPage: (cardData as any).currentSelectedPage,
-                };
+      {/* Main Editor Area */}
+      <div className="max-w-full mx-auto p-2">
+        <div className={`grid ${isPreviewExpanded ? 'grid-cols-1' : 'lg:grid-cols-4'} gap-2`}>
+          {/* Editor Panel - 3 columns when not expanded */}
+          <div className={`${isPreviewExpanded ? 'hidden' : 'lg:col-span-3'}`}>
+            <div className="bg-white rounded border border-gray-200 h-full">
+              <div className="p-2">
+                <FormBuilder
+                  cardData={cardData}
+                  onDataChange={(data) => {
+                    const updated = {
+                      ...(data as any),
+                      currentPreviewMode: (cardData as any).currentPreviewMode,
+                      currentSelectedPage: (cardData as any).currentSelectedPage,
+                    };
 
-                setCardData(updated as any);
+                    setCardData(updated as any);
 
-                // ✅ AUTOSAVE HERE
-                if (!user) return;
-                if (!hasHydratedRef.current) {
-                  console.log('[CardEditor] Skipping autosave - not hydrated yet');
-                  return;
-                }
-                if (!params.id && !customUrlSlug && !updated.fullName && !updated.title) {
-                  console.log('[CardEditor] Skipping autosave - missing required fields for new card');
-                  return;
-                }
+                    if (!user) return;
+                    if (!hasHydratedRef.current) return;
+                    if (!params.id && !customUrlSlug && !updated.fullName && !updated.title) return;
 
-                console.log('[CardEditor] Queueing autosave');
-                queueSave(updated as any, customUrlSlug);
-              }}
-              onSave={triggerSave}
-              onGenerateQR={() => {}}
-              onNavigationChange={handleNavigatePage}
-            />
-          </div>
-
-          {/* Right Panel - Mobile Preview */}
-          <div className="lg:sticky lg:top-8 lg:h-fit">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Live Preview</h3>
-              <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>Updates in real-time</span>
+                    queueSave(updated as any, customUrlSlug);
+                  }}
+                  onSave={triggerSave}
+                  onGenerateQR={() => {}}
+                  onNavigationChange={handleNavigatePage}
+                  compact={true}
+                  fullFrame={true}
+                  ultraCompact={true}
+                />
               </div>
             </div>
+          </div>
 
-            <div className="relative mx-auto max-w-sm">
-              <div
-                className="relative w-[390px] mx-auto bg-gray-900 rounded-[50px] shadow-2xl overflow-hidden border-[12px] border-gray-800"
-                style={{ aspectRatio: "9/19.5" }}
-              >
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[150px] h-[28px] bg-gray-900 rounded-b-[20px] z-10"></div>
+          {/* Preview Panel - 1 column when not expanded - CLEAN PREVIEW ONLY */}
+          <div className={`${isPreviewExpanded ? 'lg:col-span-4' : 'lg:col-span-1'} sticky top-2 h-[calc(100vh-4rem)]`}>
+            <div className="bg-white rounded border border-gray-200 h-full p-2">
+              {/* Mobile Preview Only - No View button at bottom */}
+              <div className="h-full flex flex-col">
+                {/* Mobile Preview Container */}
+                <div className="relative bg-white overflow-hidden rounded-lg border border-gray-200 flex-1 min-h-0"
+                  style={{ 
+                    maxWidth: '280px',
+                    margin: '0 auto',
+                    width: '100%'
+                  }}>
+                  {/* Mobile Status Bar */}
+                  <div className="absolute top-0 left-0 right-0 h-5 bg-gray-900 flex items-center justify-between px-3 z-10">
+                    <div className="text-white text-[10px]">12:29 AM</div>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                      <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
+                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                    </div>
+                  </div>
 
-                <div className="absolute top-[10px] left-[8px] right-[8px] bottom-[10px] overflow-hidden rounded-[40px] bg-white">
-                  <div ref={cardRef} className="h-full overflow-y-auto">
+                  {/* Clean Business Card Content Only - NO VIEW BUTTON */}
+                  <div ref={cardRef} className="h-full overflow-y-auto pt-5">
                     {(cardData as any).currentPreviewMode === "page" && getCurrentPageData() ? (
                       <PagePreview
                         pageData={getCurrentPageData()}
@@ -561,6 +541,8 @@ export default function CardEditor() {
                         onNavigatePage={handleNavigatePage}
                         onBackToCard={handleBackToCard}
                         hideBackButton={true}
+                        fullFrame={true}
+                        ultraCompact={true}
                       />
                     ) : (
                       <BusinessCardComponent
@@ -569,33 +551,16 @@ export default function CardEditor() {
                         showViewButton={false}
                         onNavigatePage={handleNavigatePage}
                         showInternalShareButton={false}
+                        fullFrame={true}
+                        ultraCompact={true}
                       />
                     )}
                   </div>
+
+                  {/* Mobile Bottom Indicator */}
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200"></div>
                 </div>
               </div>
-            </div>
-
-            {shareUrl && (
-              <div className="mt-4 flex justify-center">
-                <a
-                  href={shareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-medium transition-colors"
-                  data-testid="button-view-talklink"
-                >
-                  <Share2 className="w-4 h-4 mr-2" />
-                  View TalkLink
-                </a>
-              </div>
-            )}
-
-            <div className="mt-6 text-center">
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                <span className="w-2 h-2 bg-blue-500 rounded-full inline-block mr-2"></span>
-                Mobile Optimized
-              </Badge>
             </div>
           </div>
         </div>
