@@ -12,7 +12,7 @@ import { FormBuilder } from "@/components/form-builder";
 import { AutoSaveIndicator } from "@/components/AutoSaveIndicator";
 import { useAutoSave } from "@/contexts/AutoSaveContext";
 import { ElementEditorTabs, EditorTabId } from "@/components/ElementEditorTabs";
-import { TabbedContactEditor } from "@/components/TabbedContactEditor";
+import { ContactContentPanel, ContactDesignPanel, ContactSettingsPanel } from "@/components/ContactEditorPanels";
 import { Copy, Share2, ArrowLeft, Eye, Globe, ChevronUp, ChevronDown, Settings, Layers, Palette, EyeOff, X, Edit2, Type, Phone, Mail, Globe as GlobeIcon, MapPin, MessageSquare, Link as LinkIcon, Image } from "lucide-react";
 import { Link } from "wouter";
 import type { BusinessCard } from "@shared/schema";
@@ -780,48 +780,65 @@ export default function CardEditor() {
             </div>
           </div>
 
-          {/* Editor Tabs - Show for both full and block modes */}
-          {editorMode === "full" ? (
-            <div className="flex border-b border-gray-200 bg-gray-50">
-              {editorTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveEditorTab(tab.id)}
-                  className={`
-                    flex-1 flex flex-col items-center justify-center py-2 px-1
-                    ${activeEditorTab === tab.id 
-                      ? 'bg-white text-orange-500' 
-                      : 'text-gray-500 hover:text-gray-700'
-                    }
-                  `}
-                >
-                  <div className="mb-0.5">{tab.icon}</div>
-                  <span className="text-[10px] font-medium">{tab.label}</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <ElementEditorTabs
-              activeTab={blockEditorTab}
-              onTabChange={setBlockEditorTab}
-              compact={true}
-              className="border-b-0"
-            />
-          )}
+          {/* Editor Tabs - Sticky for mobile scrolling */}
+          <div className="sticky top-0 z-10 bg-white">
+            {editorMode === "full" ? (
+              <div className="flex border-b border-gray-200 bg-gray-50">
+                {editorTabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveEditorTab(tab.id)}
+                    className={`
+                      flex-1 flex flex-col items-center justify-center py-2.5 px-1 touch-manipulation
+                      ${activeEditorTab === tab.id 
+                        ? 'bg-white text-orange-500 border-b-2 border-orange-500' 
+                        : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'
+                      }
+                    `}
+                  >
+                    <div className="mb-0.5">{tab.icon}</div>
+                    <span className="text-[10px] font-medium">{tab.label}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <ElementEditorTabs
+                activeTab={blockEditorTab}
+                onTabChange={setBlockEditorTab}
+                compact={true}
+                className="border-b border-gray-200"
+              />
+            )}
+          </div>
 
           {/* Editor Content - Compact */}
           <div className={`${editorMode === "block" ? 'h-[45vh]' : 'h-[50vh]'} overflow-y-auto`}>
             <div className="p-3">
               {editorMode === "block" && selectedBlock ? (
-                // Block-specific editor with tabs
+                // Block-specific editor with tabs - consistent panel rendering
                 <div className="space-y-3">
-                  {/* Contact Section Editor - uses TabbedContactEditor */}
-                  {selectedBlock.type === "contact_section" && (
-                    <TabbedContactEditor
-                      data={selectedBlock.data || {}}
-                      onChange={(data) => updateBlockData(selectedBlock.id, data)}
-                      compact={true}
-                    />
+                  {/* Contact Section Editor - separate panels for each tab */}
+                  {selectedBlock.type === "contactSection" && (
+                    <>
+                      {blockEditorTab === "content" && (
+                        <ContactContentPanel
+                          data={selectedBlock.data || {}}
+                          onChange={(data) => updateBlockData(selectedBlock.id, data)}
+                        />
+                      )}
+                      {blockEditorTab === "design" && (
+                        <ContactDesignPanel
+                          data={selectedBlock.data || {}}
+                          onChange={(data) => updateBlockData(selectedBlock.id, data)}
+                        />
+                      )}
+                      {blockEditorTab === "settings" && (
+                        <ContactSettingsPanel
+                          data={selectedBlock.data || {}}
+                          onChange={(data) => updateBlockData(selectedBlock.id, data)}
+                        />
+                      )}
+                    </>
                   )}
 
                   {/* Profile Block Editor with tabs */}
@@ -968,7 +985,7 @@ export default function CardEditor() {
                   )}
 
                   {/* Default block editor for unsupported types */}
-                  {!["profile", "phone", "email", "website", "location", "contact_section"].includes(selectedBlock.type) && (
+                  {!["profile", "phone", "email", "website", "location", "contactSection"].includes(selectedBlock.type) && (
                     <div className="text-center py-4">
                       <div className="text-gray-400 mb-1">
                         {getBlockIcon(selectedBlock.type)}
