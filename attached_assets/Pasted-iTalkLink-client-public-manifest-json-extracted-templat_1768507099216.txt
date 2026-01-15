@@ -1,0 +1,182 @@
+iTalkLink/
+├── client/
+│   ├── public/
+│   │   ├── manifest.json
+│   │   └── extracted-template-assets.json
+│   │
+│   └── src/
+│       ├── main.tsx
+│       ├── App.tsx
+│       ├── index.css
+│       │
+│       ├── components/                    # All UI components
+│       │   ├── common/                    # Shared components
+│       │   │   ├── ui/                    # shadcn components (50+)
+│       │   │   │   ├── button.tsx
+│       │   │   │   ├── card.tsx
+│       │   │   │   └── ...
+│       │   │   ├── layout/                # Layout components
+│       │   │   │   ├── AppLayout.tsx
+│       │   │   │   ├── AdminLayout.tsx
+│       │   │   │   └── ...
+│       │   │   ├── business-card/         # Business card specific
+│       │   │   │   ├── BusinessCard.tsx
+│       │   │   │   ├── CardShare.tsx
+│       │   │   │   ├── DynamicHeaderRenderer.tsx
+│       │   │   │   └── ...
+│       │   │   ├── form-builder/          # Form builder components
+│       │   │   │   ├── FormBuilder.tsx    ★ Main editor
+│       │   │   │   ├── PageBuilder.tsx
+│       │   │   │   ├── PageElement.tsx
+│       │   │   │   └── ...
+│       │   │   ├── builder/               # Builder tools
+│       │   │   │   ├── header-builder/
+│       │   │   │   ├── element-selector.tsx
+│       │   │   │   └── ...
+│       │   │   ├── shop/                  # Shop components
+│       │   │   │   └── ...
+│       │   │   └── admin/                 # Admin components
+│       │   │       ├── AdminLogin.tsx
+│       │   │       ├── DashboardPage.tsx
+│       │   │       └── ...
+│       │   └── pages/                     # Page-specific components
+│       │       └── (keep here if component only used by one page)
+│       │
+│       ├── pages/                         # Page components (routes)
+│       │   ├── auth/
+│       │   │   ├── login.tsx
+│       │   │   └── register.tsx
+│       │   ├── dashboard/
+│       │   │   ├── index.tsx
+│       │   │   └── my-links.tsx
+│       │   ├── editor/
+│       │   │   └── card-editor.tsx        ★ Main editor page
+│       │   ├── shop/
+│       │   │   ├── index.tsx
+│       │   │   ├── cart.tsx
+│       │   │   └── seller-dashboard.tsx
+│       │   ├── templates/
+│       │   │   └── templates.tsx
+│       │   ├── pricing/
+│       │   │   └── pricing.tsx
+│       │   └── landing/
+│       │       └── landing.tsx
+│       │
+│       ├── hooks/                         # All React hooks
+│       │   ├── useAuth.ts
+│       │   ├── useUserPlan.ts
+│       │   ├── useIcons.ts
+│       │   ├── useToast.ts
+│       │   ├── useMobile.tsx
+│       │   ├── useBusinessCardPWA.ts
+│       │   └── ...
+│       │
+│       ├── lib/                           # Utilities & helpers
+│       │   ├── api/                       # API clients & utilities
+│       │   │   ├── client.ts
+│       │   │   ├── queryClient.ts
+│       │   │   ├── ar.ts                  ★ Moved from builder/api/
+│       │   │   └── ...
+│       │   ├── utils/                     # Pure utilities
+│       │   │   ├── storage.ts
+│       │   │   ├── payment-utils.ts
+│       │   │   ├── utils.ts
+│       │   │   ├── nfc-utils.ts
+│       │   │   └── ...
+│       │   ├── features/                  # Feature-specific utilities
+│       │   │   ├── business-card/
+│       │   │   │   ├── card-data.ts
+│       │   │   │   ├── skin-presets.ts
+│       │   │   │   └── ...
+│       │   │   └── form-builder/
+│       │   │       ├── element-adapters.ts
+│       │   │       └── ...
+│       │   └── constants/                 # App constants
+│       │       ├── config.ts
+│       │       ├── featureAccess.ts
+│       │       └── ...
+│       │
+│       ├── contexts/                      # React contexts
+│       │   ├── AuthContext.tsx
+│       │   ├── ThemeContext.tsx
+│       │   ├── AutoSaveContext.tsx
+│       │   ├── CartContext.tsx
+│       │   └── ...
+│       │
+│       ├── services/                      # Business logic services
+│       │   ├── auth.service.ts
+│       │   ├── business-card.service.ts
+│       │   ├── shop.service.ts
+│       │   └── ...
+│       │
+│       ├── types/                         # TypeScript types
+│       │   ├── index.ts
+│       │   ├── business-card.ts
+│       │   ├── form-builder.ts
+│       │   └── ...
+│       │
+│       ├── assets/                        # Static assets
+│       │   ├── images/
+│       │   ├── icons/
+│       │   └── templates/
+│       │
+│       └── styles/                        # Global styles
+│           ├── globals.css
+│           ├── components.css
+│           └── theme.ts
+│
+├── server/
+│   ├── index.ts                           ★ Server entry
+│   │
+│   ├── api/                               # API Layer
+│   │   ├── routes/                        # Route definitions
+│   │   │   ├── index.ts                   ★ Main routes aggregator
+│   │   │   ├── auth.routes.ts
+│   │   │   ├── business-card.routes.ts
+│   │   │   ├── shop.routes.ts
+│   │   │   └── ...
+│   │   └── controllers/                   # Route handlers
+│   │       ├── auth.controller.ts
+│   │       ├── business-card.controller.ts
+│   │       └── ...
+│   │
+│   ├── services/                          # Business logic
+│   │   ├── auth.service.ts
+│   │   ├── business-card.service.ts
+│   │   ├── google-calendar.service.ts
+│   │   ├── zoom-service.ts
+│   │   └── ...
+│   │
+│   ├── middleware/                        # Express middleware
+│   │   ├── auth.middleware.ts
+│   │   ├── validation.middleware.ts
+│   │   └── ...
+│   │
+│   ├── utils/                             # Server utilities
+│   │   ├── db.ts
+│   │   ├── storage.ts
+│   │   └── ...
+│   │
+│   └── types/                             # Server TypeScript types
+│       └── ...
+│
+├── shared/                               # Shared code (client + server)
+│   ├── types/                            # Shared TypeScript types
+│   │   ├── database.ts                   ★ Database schema
+│   │   └── api.ts                        ★ API request/response types
+│   └── constants/                        # Shared constants
+│       └── ...
+│
+├── drizzle/                              # Database migrations
+│   └── ...
+│
+├── public/                               # Static files (both client & server)
+│   ├── mobile-frame.png
+│   └── ...
+│
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+├── tailwind.config.ts
+├── drizzle.config.ts
+└── README.md
