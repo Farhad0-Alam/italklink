@@ -1,7 +1,24 @@
 import React from 'react';
 import { PageElementRenderer } from './page-element';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, GripVertical } from 'lucide-react';
 import type { PageElement, BusinessCard } from '@shared/schema';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface PagePreviewProps {
   pageData: {
@@ -15,16 +32,123 @@ interface PagePreviewProps {
   onNavigatePage?: (pageId: string) => void;
   onBackToCard?: () => void;
   hideBackButton?: boolean;
+  isEditing?: boolean;
+  onReorderElements?: (newOrder: string[]) => void;
+  onSelectElement?: (element: PageElement) => void;
+  selectedElementId?: string;
+  fullFrame?: boolean;
+  ultraCompact?: boolean;
 }
 
-export function PagePreview({ pageData, cardData, elementSpacing = 16, individualElementSpacing, onNavigatePage, onBackToCard, hideBackButton = false }: PagePreviewProps) {
-  // Debug logging
-  console.log('[PagePreview] Props received:', {
-    elementSpacing,
-    individualElementSpacing,
-    pageDataLength: pageData?.elements?.length
-  });
-  
+interface SortableElementWrapperProps {
+  element: PageElement;
+  spacing: number;
+  cardData: BusinessCard;
+  onNavigatePage?: (pageId: string) => void;
+  isEditing?: boolean;
+  onSelect?: () => void;
+  isSelected?: boolean;
+}
+
+function SortableElementWrapper({ 
+  element, 
+  spacing, 
+  cardData, 
+  onNavigatePage,
+  isEditing = false,
+  onSelect,
+  isSelected = false
+}: SortableElementWrapperProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: element.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    marginBottom: `${spacing}px`,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative group ${isDragging ? 'opacity-50 z-50' : ''} ${isSelected ? 'ring-2 ring-orange-500 ring-offset-1 rounded' : ''}`}
+      onClick={(e) => {
+        if (isEditing && onSelect) {
+          e.stopPropagation();
+          onSelect();
+        }
+      }}
+    >
+      {/* Drag Handle - Only show in editing mode */}
+      {isEditing && (
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute -left-6 top-1/2 -translate-y-1/2 p-1 bg-gray-100 hover:bg-gray-200 rounded cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical className="w-4 h-4 text-gray-500" />
+        </div>
+      )}
+      
+      <PageElementRenderer
+        element={element}
+        isEditing={false}
+        onUpdate={() => {}}
+        onDelete={() => {}}
+        cardData={cardData}
+        onNavigatePage={onNavigatePage}
+      />
+    </div>
+  );
+}
+
+export function PagePreview({ 
+  pageData, 
+  cardData, 
+  elementSpacing = 16, 
+  individualElementSpacing, 
+  onNavigatePage, 
+  onBackToCard, 
+  hideBackButton = false,
+  isEditing = false,
+  onReorderElements,
+  onSelectElement,
+  selectedElementId,
+  fullFrame,
+  ultraCompact
+}: PagePreviewProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id && onReorderElements) {
+      const sortedElements = visibleElements.sort((a, b) => a.order - b.order);
+      const oldIndex = sortedElements.findIndex((el) => el.id === active.id);
+      const newIndex = sortedElements.findIndex((el) => el.id === over.id);
+      
+      const newOrder = arrayMove(sortedElements, oldIndex, newIndex).map((el) => el.id);
+      onReorderElements(newOrder);
+    }
+  };
+
   // Get background settings from cardData
   const backgroundType = cardData?.backgroundType || "color";
   const backgroundColor = cardData?.backgroundColor || "#f0f0f0";
@@ -66,11 +190,9 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, individua
         backgroundRepeat: 'no-repeat',
       };
     } else if (backgroundType?.startsWith("animation-")) {
-      // Background animations will use CSS classes
       return { ...baseStyle, backgroundColor };
     }
     
-    // Fallback to color
     return { ...baseStyle, backgroundColor };
   };
   
@@ -115,7 +237,18 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, individua
   }
 
   // Sort elements by order
-  const sortedElements = visibleElements.sort((a, b) => a.order - b.order);
+  const sortedElements = [...visibleElements].sort((a, b) => a.order - b.order);
+
+  // Calculate spacing for each element
+  const getElementSpacing = (element: PageElement, index: number): number => {
+    if (index >= sortedElements.length - 1) return 0;
+    
+    const nextElement = sortedElements[index + 1];
+    if (nextElement.type === element.type) {
+      return individualElementSpacing?.[element.type] ?? elementSpacing;
+    }
+    return elementSpacing;
+  };
 
   return (
     <div 
@@ -134,32 +267,35 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, individua
           </button>
         </div>
       )}
-      <div className="flex-1 overflow-y-auto relative">
+      <div className={`flex-1 overflow-y-auto relative ${isEditing ? 'pl-8' : ''}`}>
         <div className="min-h-full relative">
-          {sortedElements.map((element, index) => {
-            // Calculate spacing for this element
-            let spacing = elementSpacing; // Default global spacing
-            
-            // Check if next element exists and is the same type
-            if (index < sortedElements.length - 1) {
-              const nextElement = sortedElements[index + 1];
-              
-              // If next element is same type, use individual spacing for this type
-              if (nextElement.type === element.type) {
-                spacing = individualElementSpacing?.[element.type] ?? elementSpacing;
-                console.log(`[PagePreview] Element ${index} (${element.type}): Next is same type, using individual spacing:`, spacing);
-              } else {
-                console.log(`[PagePreview] Element ${index} (${element.type}): Next is different type (${nextElement.type}), using global spacing:`, spacing);
-              }
-              // Otherwise use global spacing (already set as default)
-            } else {
-              // Last element, no spacing needed
-              spacing = 0;
-              console.log(`[PagePreview] Element ${index} (${element.type}): Last element, no spacing`);
-            }
-
-            return (
-              <div key={element.id} style={{ marginBottom: `${spacing}px` }}>
+          {isEditing && onReorderElements ? (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={sortedElements.map(el => el.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {sortedElements.map((element, index) => (
+                  <SortableElementWrapper
+                    key={element.id}
+                    element={element}
+                    spacing={getElementSpacing(element, index)}
+                    cardData={cardData}
+                    onNavigatePage={onNavigatePage}
+                    isEditing={isEditing}
+                    onSelect={() => onSelectElement?.(element)}
+                    isSelected={selectedElementId === element.id}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
+          ) : (
+            sortedElements.map((element, index) => (
+              <div key={element.id} style={{ marginBottom: `${getElementSpacing(element, index)}px` }}>
                 <PageElementRenderer
                   element={element}
                   isEditing={false}
@@ -169,8 +305,8 @@ export function PagePreview({ pageData, cardData, elementSpacing = 16, individua
                   onNavigatePage={onNavigatePage}
                 />
               </div>
-            );
-          })}
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -1,6 +1,23 @@
 import { useState } from "react";
 import { ChevronDown, ChevronRight, Eye, EyeOff, GripVertical, User, Type, Phone, Share2, Layers, Image, Video, FileText, MessageSquare, Layout, Map, Bot, Calendar, ShoppingBag, Link, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface PageElement {
   id: string;
@@ -15,6 +32,7 @@ interface StructurePanelProps {
   selectedElementId?: string;
   onSelectElement: (element: PageElement) => void;
   onToggleVisibility?: (elementId: string, visible: boolean) => void;
+  onReorderElements?: (newOrder: string[]) => void;
   onClose: () => void;
 }
 
@@ -100,10 +118,157 @@ const getElementTitle = (type: string, data?: any) => {
   return titleMap[type] || type;
 };
 
-export function StructurePanel({ elements, selectedElementId, onSelectElement, onToggleVisibility, onClose }: StructurePanelProps) {
+interface SortableElementItemProps {
+  element: PageElement;
+  isSelected: boolean;
+  expandedElements: Record<string, boolean>;
+  onSelect: () => void;
+  onToggleExpanded: () => void;
+  onToggleVisibility?: (elementId: string, visible: boolean) => void;
+}
+
+function SortableElementItem({ 
+  element, 
+  isSelected, 
+  expandedElements, 
+  onSelect, 
+  onToggleExpanded,
+  onToggleVisibility 
+}: SortableElementItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: element.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const IconComponent = getElementIcon(element.type);
+  const isVisible = element.visible !== false;
+  const hasChildren = element.type === "contactSection" && element.data?.contacts?.length > 0;
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {/* Element Row */}
+      <div
+        className={`
+          flex items-center gap-1 px-2 py-1.5 rounded cursor-pointer group
+          ${isSelected ? 'bg-orange-100 border border-orange-300' : 'hover:bg-gray-100'}
+          ${!isVisible ? 'opacity-50' : ''}
+          ${isDragging ? 'opacity-50 bg-orange-50 shadow-lg' : ''}
+        `}
+        onClick={onSelect}
+      >
+        {/* Expand/Collapse for elements with children */}
+        <div className="w-4">
+          {hasChildren && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleExpanded();
+              }}
+              className="p-0.5 hover:bg-gray-200 rounded"
+            >
+              {expandedElements[element.id] ? (
+                <ChevronDown className="w-3 h-3 text-gray-500" />
+              ) : (
+                <ChevronRight className="w-3 h-3 text-gray-500" />
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* Drag Handle */}
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-0.5 hover:bg-gray-200 rounded"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical className="w-3 h-3 text-gray-400 hover:text-gray-600" />
+        </div>
+
+        {/* Icon */}
+        <IconComponent className={`w-3.5 h-3.5 ${isSelected ? 'text-orange-600' : 'text-gray-500'}`} />
+
+        {/* Title */}
+        <span className={`flex-1 text-xs font-medium truncate ${isSelected ? 'text-orange-700' : 'text-gray-700'}`}>
+          {getElementTitle(element.type, element.data)}
+        </span>
+
+        {/* Visibility Toggle */}
+        {onToggleVisibility && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleVisibility(element.id, !isVisible);
+            }}
+            className="p-0.5 opacity-0 group-hover:opacity-100 hover:bg-gray-200 rounded"
+          >
+            {isVisible ? (
+              <Eye className="w-3 h-3 text-gray-500" />
+            ) : (
+              <EyeOff className="w-3 h-3 text-gray-400" />
+            )}
+          </button>
+        )}
+      </div>
+
+      {/* Children (for contact section) */}
+      {hasChildren && expandedElements[element.id] && (
+        <div className="ml-6 mt-0.5 space-y-0.5">
+          {element.data.contacts.map((contact: any, idx: number) => (
+            <div
+              key={contact.id || idx}
+              className="flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-50 text-xs text-gray-500"
+            >
+              <span className="w-4" />
+              <Phone className="w-3 h-3" />
+              <span className="truncate">{contact.label || contact.type}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function StructurePanel({ elements, selectedElementId, onSelectElement, onToggleVisibility, onReorderElements, onClose }: StructurePanelProps) {
   const [expandedElements, setExpandedElements] = useState<Record<string, boolean>>({});
 
   const sortedElements = [...elements].sort((a, b) => a.order - b.order);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = sortedElements.findIndex((el) => el.id === active.id);
+      const newIndex = sortedElements.findIndex((el) => el.id === over.id);
+      
+      const newOrder = arrayMove(sortedElements, oldIndex, newIndex).map((el) => el.id);
+      
+      if (onReorderElements) {
+        onReorderElements(newOrder);
+      }
+    }
+  };
 
   const toggleExpanded = (elementId: string) => {
     setExpandedElements(prev => ({
@@ -127,93 +292,32 @@ export function StructurePanel({ elements, selectedElementId, onSelectElement, o
         </Button>
       </div>
 
-      {/* Elements Tree */}
+      {/* Elements Tree with DnD */}
       <div className="flex-1 overflow-y-auto p-2">
-        <div className="space-y-0.5">
-          {sortedElements.map((element) => {
-            const IconComponent = getElementIcon(element.type);
-            const isSelected = selectedElementId === element.id;
-            const isVisible = element.visible !== false;
-            const hasChildren = element.type === "contactSection" && element.data?.contacts?.length > 0;
-
-            return (
-              <div key={element.id}>
-                {/* Element Row */}
-                <div
-                  className={`
-                    flex items-center gap-1 px-2 py-1.5 rounded cursor-pointer group
-                    ${isSelected ? 'bg-orange-100 border border-orange-300' : 'hover:bg-gray-100'}
-                    ${!isVisible ? 'opacity-50' : ''}
-                  `}
-                  onClick={() => onSelectElement(element)}
-                >
-                  {/* Expand/Collapse for elements with children */}
-                  <div className="w-4">
-                    {hasChildren && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleExpanded(element.id);
-                        }}
-                        className="p-0.5 hover:bg-gray-200 rounded"
-                      >
-                        {expandedElements[element.id] ? (
-                          <ChevronDown className="w-3 h-3 text-gray-500" />
-                        ) : (
-                          <ChevronRight className="w-3 h-3 text-gray-500" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Drag Handle */}
-                  <GripVertical className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100" />
-
-                  {/* Icon */}
-                  <IconComponent className={`w-3.5 h-3.5 ${isSelected ? 'text-orange-600' : 'text-gray-500'}`} />
-
-                  {/* Title */}
-                  <span className={`flex-1 text-xs font-medium truncate ${isSelected ? 'text-orange-700' : 'text-gray-700'}`}>
-                    {getElementTitle(element.type, element.data)}
-                  </span>
-
-                  {/* Visibility Toggle */}
-                  {onToggleVisibility && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleVisibility(element.id, !isVisible);
-                      }}
-                      className="p-0.5 opacity-0 group-hover:opacity-100 hover:bg-gray-200 rounded"
-                    >
-                      {isVisible ? (
-                        <Eye className="w-3 h-3 text-gray-500" />
-                      ) : (
-                        <EyeOff className="w-3 h-3 text-gray-400" />
-                      )}
-                    </button>
-                  )}
-                </div>
-
-                {/* Children (for contact section) */}
-                {hasChildren && expandedElements[element.id] && (
-                  <div className="ml-6 mt-0.5 space-y-0.5">
-                    {element.data.contacts.map((contact: any, idx: number) => (
-                      <div
-                        key={contact.id || idx}
-                        className="flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-50 text-xs text-gray-500"
-                      >
-                        <span className="w-4" />
-                        <Phone className="w-3 h-3" />
-                        <span className="truncate">{contact.label || contact.type}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={sortedElements.map(el => el.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-0.5">
+              {sortedElements.map((element) => (
+                <SortableElementItem
+                  key={element.id}
+                  element={element}
+                  isSelected={selectedElementId === element.id}
+                  expandedElements={expandedElements}
+                  onSelect={() => onSelectElement(element)}
+                  onToggleExpanded={() => toggleExpanded(element.id)}
+                  onToggleVisibility={onToggleVisibility}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
 
         {sortedElements.length === 0 && (
           <div className="text-center py-8 text-gray-500 text-xs">

@@ -396,6 +396,48 @@ export default function CardEditor() {
     }
   };
 
+  // Function to reorder elements (drag-drop)
+  const handleReorderElements = (newOrder: string[]) => {
+    // Update order property based on new order
+    const updatedPageElements = cardData.pageElements.map((element: any) => {
+      const newIndex = newOrder.indexOf(element.id);
+      if (newIndex !== -1) {
+        return { ...element, order: newIndex };
+      }
+      return element;
+    });
+
+    const updatedPages = cardData.pages.map((page: any) => {
+      if (page.id === "home") {
+        const updatedElements = page.elements.map((element: any) => {
+          const newIndex = newOrder.indexOf(element.id);
+          if (newIndex !== -1) {
+            return { ...element, order: newIndex };
+          }
+          return element;
+        });
+        return {
+          ...page,
+          elements: updatedElements.sort((a: any, b: any) => a.order - b.order)
+        };
+      }
+      return page;
+    });
+
+    const updatedCardData = {
+      ...cardData,
+      pageElements: updatedPageElements.sort((a: any, b: any) => a.order - b.order),
+      pages: updatedPages
+    };
+
+    setCardData(updatedCardData as any);
+
+    // Mark as dirty (manual save on Publish)
+    if (user && hasHydratedRef.current) {
+      markDirty();
+    }
+  };
+
   // Function to update a specific block
   const updateBlockData = (blockId: string, updatedData: any) => {
     // Update in pageElements
@@ -859,7 +901,10 @@ export default function CardEditor() {
                 hideBackButton={true}
                 fullFrame={true}
                 ultraCompact={true}
-                onBlockSelect={handleBlockSelect}
+                isEditing={true}
+                onReorderElements={handleReorderElements}
+                onSelectElement={(element) => handleBlockSelect(element as BlockElement)}
+                selectedElementId={selectedBlock?.id}
               />
             ) : (
               <BusinessCardComponent
@@ -1281,6 +1326,7 @@ export default function CardEditor() {
                 selectedElementId={selectedBlock?.id}
                 onSelectElement={(element) => handleBlockSelect(element as BlockElement)}
                 onToggleVisibility={handleToggleVisibility}
+                onReorderElements={handleReorderElements}
                 onClose={() => setSidebarView("elements")}
               />
             )}
@@ -1507,6 +1553,10 @@ export default function CardEditor() {
                   hideBackButton={true}
                   fullFrame={true}
                   ultraCompact={true}
+                  isEditing={true}
+                  onReorderElements={handleReorderElements}
+                  onSelectElement={(element) => handleBlockSelect(element as BlockElement)}
+                  selectedElementId={selectedBlock?.id}
                 />
               ) : (
                 <BusinessCardComponent
