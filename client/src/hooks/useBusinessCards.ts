@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BusinessCardsConfig } from '../types';
+import { BusinessCardsConfig } from '@/types/business-card';
 
 export const useBusinessCards = (config: BusinessCardsConfig = { enabled: true }) => {
   const [isLoading, setIsLoading] = useState(false);

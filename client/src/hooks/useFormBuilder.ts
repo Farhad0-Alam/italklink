@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FormBuilderConfig } from '../types';
+import { FormBuilderConfig } from '@/types/form-builder';
 
 export const useFormBuilder = (config: FormBuilderConfig = { enabled: true }) => {
   const [isLoading, setIsLoading] = useState(false);

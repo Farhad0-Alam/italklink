@@ -1,5 +1,5 @@
 import React from 'react';
-import { BusinessCardsProps } from '../types';
+import { BusinessCardsProps } from '@/types/business-card';
 
 export const BusinessCards: React.FC<BusinessCardsProps> = ({ 
   children,
