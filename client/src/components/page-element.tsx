@@ -48,6 +48,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { ContactLinksRenderer } from '@/components/ContactLinksRenderer';
 import { SocialLinksRenderer } from '@/components/SocialLinksRenderer';
 import { ContactSectionEditor } from '@/components/ContactSectionEditor';
+import { ElementEditorTabs } from '@/components/ElementEditorTabs';
+import { ContactContentPanel, ContactDesignPanel, ContactSettingsPanel } from '@/components/ContactEditorPanels';
 import { SocialSectionEditor } from '@/components/SocialSectionEditor';
 import {
   schemaToEditorContact,
@@ -2137,6 +2139,7 @@ interface PageElementProps {
 export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, onSave, isInteractive = true, cardData, onNavigatePage }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [activeEditorTab, setActiveEditorTab] = useState<"content" | "design" | "settings">("content");
   const [voiceAgentSections, setVoiceAgentSections] = useState({
     basic: true,
     voice: false,
@@ -2684,10 +2687,33 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
 
           return (
             <div className="mb-6" key={`contact-${element.id}`}>
-              <ContactSectionEditor
-                data={editorData}
-                onChange={handleEditorChange}
+              {/* Elementor Pro-style Content/Design/Settings tabs */}
+              <ElementEditorTabs
+                activeTab={activeEditorTab}
+                onTabChange={setActiveEditorTab}
+                compact={false}
+                className="mb-4"
               />
+              
+              {/* Tab Content */}
+              {activeEditorTab === "content" && (
+                <ContactContentPanel
+                  data={editorData}
+                  onChange={handleEditorChange}
+                />
+              )}
+              {activeEditorTab === "design" && (
+                <ContactDesignPanel
+                  data={editorData}
+                  onChange={handleEditorChange}
+                />
+              )}
+              {activeEditorTab === "settings" && (
+                <ContactSettingsPanel
+                  data={editorData}
+                  onChange={handleEditorChange}
+                />
+              )}
             </div>
           );
         }
