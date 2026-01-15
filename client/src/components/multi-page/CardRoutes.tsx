@@ -1,10 +1,10 @@
 import { Route } from 'wouter';
 import { CardLayout } from './CardLayout';
-import { Overview } from '../pages/Overview';
-import { About } from '../pages/About';
-import { Services } from '../pages/Services';
-import { Gallery } from '../pages/Gallery';
-import { Contact } from '../pages/Contact';
+import { Overview } from './pages/Overview';
+import { About } from './pages/About';
+import { Services } from './pages/Services';
+import { Gallery } from './pages/Gallery';
+import { Contact } from './pages/Contact';
 
 export function CardRoutes() {
   return (
