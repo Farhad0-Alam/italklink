@@ -11,7 +11,7 @@ import { PagePreview } from "@/components/page-preview";
 import { FormBuilder } from "@/components/form-builder";
 import { AutoSaveIndicator } from "@/components/AutoSaveIndicator";
 import { useAutoSave } from "@/contexts/AutoSaveContext";
-import { Copy, Share2, ArrowLeft, Eye } from "lucide-react";
+import { Copy, Share2, ArrowLeft, Eye, Globe, ChevronUp, ChevronDown, Settings, Layers, Palette, EyeOff, X, Edit2, Type, Phone, Mail, Globe as GlobeIcon, MapPin, MessageSquare, Link as LinkIcon, Image } from "lucide-react";
 import { Link } from "wouter";
 import type { BusinessCard } from "@shared/schema";
 
@@ -19,21 +19,36 @@ interface CardEditorParams {
   id?: string;
 }
 
+interface BlockElement {
+  id: string;
+  type: string;
+  order: number;
+  visible: boolean;
+  data: any;
+}
+
 export default function CardEditor() {
   const { toast } = useToast();
   const params = useParams() as CardEditorParams;
   const [, setLocation] = useLocation();
   const cardRef = useRef<HTMLDivElement>(null);
-  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
+
+  const [editorDrawerOpen, setEditorDrawerOpen] = useState(false);
+  const [activeEditorTab, setActiveEditorTab] = useState("content");
+  const [isMobile, setIsMobile] = useState(false);
+  const [selectedBlock, setSelectedBlock] = useState<BlockElement | null>(null);
+  const [editorMode, setEditorMode] = useState<"full" | "block">("full");
 
   const hasHydratedRef = useRef(false);
 
   const {
     queueSave,
     saveNow,
+    publishNow,
     setCardId: setAutoSaveCardId,
     status: autoSaveStatus,
     lastSavedCard,
+    isPublished,
   } = useAutoSave();
 
   const { data: user, isLoading: userLoading, error: userError } = useQuery({
@@ -51,6 +66,17 @@ export default function CardEditor() {
       setLocation("/login");
     }
   }, [userError, userLoading, setLocation, toast]);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const urlParams = new URLSearchParams(window.location.search);
   const selectedTemplateId = urlParams.get("template");
@@ -195,6 +221,7 @@ export default function CardEditor() {
   const [shareUrl, setShareUrl] = useState("");
   const [currentPageId, setCurrentPageId] = useState<string>("home");
   const [customUrlSlug, setCustomUrlSlug] = useState<string>(customUrlFromTemplate || "");
+  const [isPublishing, setIsPublishing] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -252,6 +279,103 @@ export default function CardEditor() {
       currentPreviewMode: "card",
       currentSelectedPage: undefined,
     }));
+  };
+
+  // Function to handle block selection from preview
+  const handleBlockSelect = (block: BlockElement) => {
+    setSelectedBlock(block);
+    setEditorMode("block");
+    setEditorDrawerOpen(true);
+  };
+
+  // Function to update a specific block
+  const updateBlockData = (blockId: string, updatedData: any) => {
+    // Update in pageElements
+    const updatedPageElements = cardData.pageElements.map((element: any) => {
+      if (element.id === blockId) {
+        return {
+          ...element,
+          data: {
+            ...element.data,
+            ...updatedData
+          }
+        };
+      }
+      return element;
+    });
+
+    // Update in pages (for home page)
+    const updatedPages = cardData.pages.map((page: any) => {
+      if (page.id === "home") {
+        return {
+          ...page,
+          elements: page.elements.map((element: any) => {
+            if (element.id === blockId) {
+              return {
+                ...element,
+                data: {
+                  ...element.data,
+                  ...updatedData
+                }
+              };
+            }
+            return element;
+          })
+        };
+      }
+      return page;
+    });
+
+    const updatedCardData = {
+      ...cardData,
+      pageElements: updatedPageElements,
+      pages: updatedPages
+    };
+
+    setCardData(updatedCardData as any);
+
+    // Auto-save
+    if (user && hasHydratedRef.current) {
+      queueSave(updatedCardData as any, customUrlSlug);
+    }
+  };
+
+  // Function to get block icon based on type
+  const getBlockIcon = (type: string) => {
+    switch (type) {
+      case "profile": return <Edit2 className="w-3.5 h-3.5" />;
+      case "heading": return <Type className="w-3.5 h-3.5" />;
+      case "contactSection": return <Phone className="w-3.5 h-3.5" />;
+      case "socialSection": return <GlobeIcon className="w-3.5 h-3.5" />;
+      case "phone": return <Phone className="w-3.5 h-3.5" />;
+      case "email": return <Mail className="w-3.5 h-3.5" />;
+      case "website": return <GlobeIcon className="w-3.5 h-3.5" />;
+      case "location": return <MapPin className="w-3.5 h-3.5" />;
+      case "about": return <MessageSquare className="w-3.5 h-3.5" />;
+      case "gallery": return <Image className="w-3.5 h-3.5" />;
+      case "link": return <LinkIcon className="w-3.5 h-3.5" />;
+      default: return <Edit2 className="w-3.5 h-3.5" />;
+    }
+  };
+
+  // Function to get block title based on type and data
+  const getBlockTitle = (block: BlockElement) => {
+    switch (block.type) {
+      case "profile":
+        return block.data?.fullName ? block.data.fullName : "Profile";
+      case "heading":
+        return block.data?.text ? block.data.text.substring(0, 20) + (block.data.text.length > 20 ? "..." : "") : "Heading";
+      case "contactSection":
+        return "Contacts";
+      case "phone":
+        return block.data?.value ? `Phone` : "Phone";
+      case "email":
+        return block.data?.value ? `Email` : "Email";
+      case "website":
+        return block.data?.value ? `Website` : "Website";
+      default:
+        return `${block.type.charAt(0).toUpperCase() + block.type.slice(1)}`;
+    }
   };
 
   const { data: templates } = useQuery({
@@ -390,6 +514,49 @@ export default function CardEditor() {
     [user, params.id, customUrlSlug, cardData, saveNow, toast]
   );
 
+  // Publish card
+  const handlePublish = useCallback(async () => {
+    if (!user) {
+      toast({
+        title: "Not logged in",
+        description: "Please log in to publish your card.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const dataToSave = cardData;
+
+    // Validate for new cards
+    if (!params.id && !customUrlSlug && !dataToSave.fullName && !dataToSave.title) {
+      toast({
+        title: "Cannot publish",
+        description: "Please provide either a custom URL or name and title.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsPublishing(true);
+    try {
+      await publishNow(dataToSave, customUrlSlug);
+      toast({
+        title: "Published successfully!",
+        description: "Your card is now live and can be shared publicly.",
+        variant: "default",
+      });
+    } catch (error: any) {
+      console.error('Publish error:', error);
+      toast({
+        title: "Publish failed",
+        description: error.message || "Could not publish your card. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPublishing(false);
+    }
+  }, [user, params.id, customUrlSlug, cardData, publishNow, toast]);
+
   const copyShareUrl = async () => {
     if (!shareUrl) return;
     try {
@@ -418,6 +585,27 @@ export default function CardEditor() {
     }
   };
 
+  const toggleEditorDrawer = () => {
+    setEditorDrawerOpen(!editorDrawerOpen);
+    // Reset to full editor when closing
+    if (editorDrawerOpen) {
+      setEditorMode("full");
+      setSelectedBlock(null);
+    }
+  };
+
+  const handleBackToFullEditor = () => {
+    setEditorMode("full");
+    setSelectedBlock(null);
+    setActiveEditorTab("content");
+  };
+
+  const editorTabs = [
+    { id: "content", label: "Content", icon: <Layers className="w-3.5 h-3.5" /> },
+    { id: "design", label: "Design", icon: <Palette className="w-3.5 h-3.5" /> },
+    { id: "settings", label: "Settings", icon: <Settings className="w-3.5 h-3.5" /> },
+  ];
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -431,37 +619,37 @@ export default function CardEditor() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Minimal Header with URL and Copy/View buttons */}
+      {/* Compact Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-full mx-auto px-4">
-          <div className="flex items-center justify-between h-12">
-            <div className="flex items-center space-x-3">
-              <Link href="/dashboard" className="flex items-center text-gray-600 hover:text-gray-900 text-sm">
-                <ArrowLeft className="w-4 h-4 mr-1" />
+        <div className="max-w-full mx-auto px-2">
+          <div className="flex items-center justify-between h-10">
+            <div className="flex items-center space-x-2 flex-1">
+              <Link href="/dashboard" className="flex items-center text-gray-600 hover:text-gray-900 text-xs p-1">
+                <ArrowLeft className="w-3.5 h-3.5 mr-1" />
                 Back
               </Link>
-              <div className="text-lg font-semibold text-gray-900">CARD EDITOR</div>
-              <div className="text-xs text-gray-500">
+              <div className="text-sm font-semibold text-gray-900 truncate">CARD EDITOR</div>
+              <div className="text-xs text-gray-500 min-w-[60px]">
                 <AutoSaveIndicator />
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center">
               {shareUrl && (
-                <div className="flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-1.5">
-                  <div className="text-xs text-gray-700 truncate max-w-[120px]">{shareUrl}</div>
+                <div className="hidden md:flex items-center space-x-2 bg-gray-50 rounded px-2 py-1">
+                  <div className="text-xs text-gray-700 truncate max-w-[80px]">{shareUrl}</div>
                   <div className="flex items-center space-x-1">
                     <Button
                       size="sm"
                       onClick={copyShareUrl}
-                      className="bg-blue-500 hover:bg-blue-600 text-white rounded px-2 h-6"
+                      className="bg-blue-500 hover:bg-blue-600 text-white rounded px-1.5 h-5"
                     >
                       <Copy className="w-3 h-3" />
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => window.open(shareUrl, '_blank')}
-                      className="bg-orange-500 hover:bg-orange-600 text-white rounded px-2 h-6"
+                      className="bg-orange-500 hover:bg-orange-600 text-white rounded px-1.5 h-5"
                     >
                       <Eye className="w-3 h-3" />
                     </Button>
@@ -473,12 +661,309 @@ export default function CardEditor() {
         </div>
       </div>
 
-      {/* Main Editor Area */}
-      <div className="max-w-full mx-auto p-2">
-        <div className={`grid ${isPreviewExpanded ? 'grid-cols-1' : 'lg:grid-cols-4'} gap-2`}>
-          {/* Editor Panel - 3 columns when not expanded */}
-          <div className={`${isPreviewExpanded ? 'hidden' : 'lg:col-span-3'}`}>
-            <div className="bg-white rounded border border-gray-200 h-full">
+      {/* Mobile Layout */}
+      <div className="md:hidden">
+        {/* Mobile URL Bar - Compact */}
+        {shareUrl && (
+          <div className="fixed top-10 left-0 right-0 bg-white border-b border-gray-200 px-2 py-1 z-10">
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-gray-700 truncate flex-1 mr-1">{shareUrl}</div>
+              <div className="flex items-center space-x-0.5">
+                <Button
+                  size="sm"
+                  onClick={copyShareUrl}
+                  className="bg-blue-500 hover:bg-blue-600 text-white rounded px-1.5 h-5"
+                >
+                  <Copy className="w-3 h-3" />
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => window.open(shareUrl, '_blank')}
+                  className="bg-orange-500 hover:bg-orange-600 text-white rounded px-1.5 h-5"
+                >
+                  <Eye className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Preview - Full height with minimal spacing */}
+        <div className="h-[calc(100vh-6rem)] bg-white overflow-hidden">
+          {/* Mobile Status Bar - Compact */}
+          <div className="absolute top-0 left-0 right-0 h-4 bg-gray-900 flex items-center justify-between px-2 z-20">
+            <div className="text-white text-[8px]">12:29 AM</div>
+            <div className="flex items-center space-x-0.5">
+              <div className="w-1 h-1 bg-green-500 rounded-full"></div>
+              <div className="w-1 h-1 bg-yellow-500 rounded-full"></div>
+              <div className="w-1 h-1 bg-red-500 rounded-full"></div>
+            </div>
+          </div>
+
+          {/* Mobile Preview Content - No extra padding */}
+          <div className="h-full overflow-y-auto pt-4">
+            {(cardData as any).currentPreviewMode === "page" && getCurrentPageData() ? (
+              <PagePreview
+                pageData={getCurrentPageData()}
+                cardData={cardData}
+                elementSpacing={(cardData as any).elementSpacing || 16}
+                individualElementSpacing={(cardData as any).individualElementSpacing || {}}
+                onNavigatePage={handleNavigatePage}
+                onBackToCard={handleBackToCard}
+                hideBackButton={true}
+                fullFrame={true}
+                ultraCompact={true}
+                onBlockSelect={handleBlockSelect}
+              />
+            ) : (
+              <BusinessCardComponent
+                data={cardData}
+                isMobilePreview={true}
+                showViewButton={false}
+                onNavigatePage={handleNavigatePage}
+                showInternalShareButton={false}
+                fullFrame={true}
+                ultraCompact={true}
+                onBlockSelect={handleBlockSelect}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Editor Drawer - Compact */}
+        <div className={`
+          fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 rounded-t-lg shadow-lg
+          transition-transform duration-300 ease-in-out z-30
+          ${editorDrawerOpen ? 'translate-y-0' : 'translate-y-[calc(100%-2.5rem)]'}
+        `}>
+          {/* Compact Drawer Handle */}
+          <div 
+            className="flex items-center justify-between px-3 py-2 border-b border-gray-200 bg-white rounded-t-lg cursor-pointer"
+            onClick={toggleEditorDrawer}
+          >
+            <div className="flex items-center space-x-1">
+              {editorMode === "block" && selectedBlock ? (
+                <>
+                  <div className="p-1 bg-orange-50 rounded">
+                    {getBlockIcon(selectedBlock.type)}
+                  </div>
+                  <span className="text-xs font-medium text-gray-700 truncate max-w-[120px]">
+                    {getBlockTitle(selectedBlock)}
+                  </span>
+                </>
+              ) : (
+                <span className="text-xs font-medium text-gray-700">Close Editor</span>
+              )}
+            </div>
+            <div className="flex items-center">
+              {editorMode === "block" && selectedBlock && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleBackToFullEditor();
+                  }}
+                  className="text-gray-500 hover:text-gray-700 p-1 mr-1"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </Button>
+              )}
+              {editorDrawerOpen ? (
+                <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+              ) : (
+                <ChevronUp className="w-3.5 h-3.5 text-gray-500" />
+              )}
+            </div>
+          </div>
+
+          {/* Editor Tabs - Compact */}
+          {editorMode === "full" && (
+            <div className="flex border-b border-gray-200 bg-gray-50">
+              {editorTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveEditorTab(tab.id)}
+                  className={`
+                    flex-1 flex flex-col items-center justify-center py-2 px-1
+                    ${activeEditorTab === tab.id 
+                      ? 'bg-white text-orange-500' 
+                      : 'text-gray-500 hover:text-gray-700'
+                    }
+                  `}
+                >
+                  <div className="mb-0.5">{tab.icon}</div>
+                  <span className="text-[10px] font-medium">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Editor Content - Compact */}
+          <div className={`${editorMode === "block" ? 'h-[45vh]' : 'h-[50vh]'} overflow-y-auto`}>
+            <div className="p-3">
+              {editorMode === "block" && selectedBlock ? (
+                // Block-specific editor - Compact
+                <div className="space-y-3">
+                  {/* Profile Block Editor */}
+                  {selectedBlock.type === "profile" && (
+                    <div className="space-y-2">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-0.5">Full Name</label>
+                        <input
+                          type="text"
+                          value={selectedBlock.data.fullName || ""}
+                          onChange={(e) => updateBlockData(selectedBlock.id, { fullName: e.target.value })}
+                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
+                          placeholder="Your name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-0.5">Title</label>
+                        <input
+                          type="text"
+                          value={selectedBlock.data.title || ""}
+                          onChange={(e) => updateBlockData(selectedBlock.id, { title: e.target.value })}
+                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
+                          placeholder="Your title"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-0.5">Brand Color</label>
+                          <div className="flex items-center space-x-1">
+                            <input
+                              type="color"
+                              value={selectedBlock.data.brandColor || "#22c55e"}
+                              onChange={(e) => updateBlockData(selectedBlock.id, { brandColor: e.target.value })}
+                              className="w-6 h-6 rounded cursor-pointer"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-0.5">Accent Color</label>
+                          <div className="flex items-center space-x-1">
+                            <input
+                              type="color"
+                              value={selectedBlock.data.accentColor || "#16a34a"}
+                              onChange={(e) => updateBlockData(selectedBlock.id, { accentColor: e.target.value })}
+                              className="w-6 h-6 rounded cursor-pointer"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Contact Block Editors */}
+                  {(selectedBlock.type === "phone" || selectedBlock.type === "email" || 
+                    selectedBlock.type === "website" || selectedBlock.type === "location") && (
+                    <div className="space-y-2">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-0.5">
+                          {selectedBlock.type.charAt(0).toUpperCase() + selectedBlock.type.slice(1)}
+                        </label>
+                        <input
+                          type="text"
+                          value={selectedBlock.data.value || ""}
+                          onChange={(e) => updateBlockData(selectedBlock.id, { value: e.target.value })}
+                          className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
+                          placeholder={`Enter ${selectedBlock.type}`}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Default block editor for unsupported types */}
+                  {!["profile", "phone", "email", "website", "location"].includes(selectedBlock.type) && (
+                    <div className="text-center py-4">
+                      <div className="text-gray-400 mb-1">
+                        {getBlockIcon(selectedBlock.type)}
+                      </div>
+                      <p className="text-xs text-gray-600">Edit in full editor</p>
+                      <Button
+                        onClick={handleBackToFullEditor}
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 text-xs px-2 py-1"
+                      >
+                        Open Full Editor
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Compact FormBuilder for full editor
+                <FormBuilder
+                  cardData={cardData}
+                  onDataChange={(data) => {
+                    const updated = {
+                      ...(data as any),
+                      currentPreviewMode: (cardData as any).currentPreviewMode,
+                      currentSelectedPage: (cardData as any).currentSelectedPage,
+                    };
+
+                    setCardData(updated as any);
+
+                    if (!user) return;
+                    if (!hasHydratedRef.current) return;
+                    if (!params.id && !customUrlSlug && !updated.fullName && !updated.title) return;
+
+                    queueSave(updated as any, customUrlSlug);
+                  }}
+                  onSave={triggerSave}
+                  onGenerateQR={() => {}}
+                  onNavigationChange={handleNavigatePage}
+                  compact={true}
+                  fullFrame={true}
+                  ultraCompact={true}
+                  mobile={true}
+                  superCompact={true}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Publish Button - Fixed at bottom */}
+          <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-2">
+            <Button
+              onClick={handlePublish}
+              disabled={isPublishing || autoSaveStatus === "saving" || autoSaveStatus === "publishing"}
+              className={`
+                w-full py-2 rounded font-medium text-sm
+                ${isPublished 
+                  ? "bg-green-600 hover:bg-green-700 text-white" 
+                  : "bg-orange-500 hover:bg-orange-600 text-white"
+                }
+                ${isPublishing ? "opacity-70 cursor-not-allowed" : ""}
+              `}
+            >
+              {isPublishing ? (
+                <>
+                  <div className="animate-spin w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full mr-1.5"></div>
+                  Publishing...
+                </>
+              ) : isPublished ? (
+                <>
+                  <Globe className="w-3.5 h-3.5 mr-1.5" />
+                  Published
+                </>
+              ) : (
+                <>
+                  <Globe className="w-3.5 h-3.5 mr-1.5" />
+                  Publish Card
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Layout - Minimal changes */}
+      <div className="hidden md:block">
+        <div className="grid lg:grid-cols-4 gap-2 p-2">
+          <div className="lg:col-span-3">
+            <div className="bg-white rounded border border-gray-200">
               <div className="p-2">
                 <FormBuilder
                   cardData={cardData}
@@ -508,30 +993,16 @@ export default function CardEditor() {
             </div>
           </div>
 
-          {/* Preview Panel - 1 column when not expanded - CLEAN PREVIEW ONLY */}
-          <div className={`${isPreviewExpanded ? 'lg:col-span-4' : 'lg:col-span-1'} sticky top-2 h-[calc(100vh-4rem)]`}>
-            <div className="bg-white rounded border border-gray-200 h-full p-2">
-              {/* Mobile Preview Only - No View button at bottom */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded border border-gray-200">
               <div className="h-full flex flex-col">
-                {/* Mobile Preview Container */}
-                <div className="relative bg-white overflow-hidden rounded-lg border border-gray-200 flex-1 min-h-0"
+                <div className="relative bg-white overflow-hidden rounded border border-gray-200"
                   style={{ 
-                    maxWidth: '280px',
+                    maxWidth: '380px',
                     margin: '0 auto',
                     width: '100%'
                   }}>
-                  {/* Mobile Status Bar */}
-                  <div className="absolute top-0 left-0 right-0 h-5 bg-gray-900 flex items-center justify-between px-3 z-10">
-                    <div className="text-white text-[10px]">12:29 AM</div>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                      <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
-                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
-                    </div>
-                  </div>
-
-                  {/* Clean Business Card Content Only - NO VIEW BUTTON */}
-                  <div ref={cardRef} className="h-full overflow-y-auto pt-5">
+                  <div className="h-full overflow-y-auto">
                     {(cardData as any).currentPreviewMode === "page" && getCurrentPageData() ? (
                       <PagePreview
                         pageData={getCurrentPageData()}
@@ -556,9 +1027,6 @@ export default function CardEditor() {
                       />
                     )}
                   </div>
-
-                  {/* Mobile Bottom Indicator */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200"></div>
                 </div>
               </div>
             </div>

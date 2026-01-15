@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { BusinessCard } from "@shared/schema";
 
-type AutoSaveStatus = "idle" | "dirty" | "saving" | "saved" | "error";
+type AutoSaveStatus = "idle" | "dirty" | "saving" | "saved" | "error" | "publishing" | "published";
 
 interface AutoSaveContextType {
   status: AutoSaveStatus;
@@ -11,9 +11,11 @@ interface AutoSaveContextType {
   lastSavedCard: BusinessCard | null;
   error: string | null;
   cardId: string | null;
+  isPublished: boolean;
   setCardId: (id: string | null) => void;
   queueSave: (data: BusinessCard, customUrlSlug?: string) => void;
   saveNow: (data: BusinessCard, customUrlSlug?: string) => Promise<void>;
+  publishNow: (data: BusinessCard, customUrlSlug?: string) => Promise<BusinessCard>;
   forceSave: () => Promise<void>;
   reset: () => void;
 }
@@ -30,13 +32,13 @@ interface AutoSaveProviderProps {
  */
 function sanitizeCardForSave(input: any): Partial<BusinessCard> {
   // Deep clone to avoid mutating react state objects
-  const data = structuredClone ? structuredClone(input) : JSON.parse(JSON.stringify(input));
+  const data = JSON.parse(JSON.stringify(input));
 
   // Remove ALL server-managed fields
   const serverFields = [
     'id', 'userId', 'createdAt', 'updatedAt', 'deletedAt',
     'shareSlug', 'slug', 'views', 'analytics', 'lastViewedAt',
-    'lastSaved', 'lastSavedAt', 'published'
+    'lastSaved', 'lastSavedAt'
   ];
 
   serverFields.forEach(field => {
@@ -101,8 +103,10 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
   const [lastSavedCard, setLastSavedCard] = useState<BusinessCard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cardId, setCardId] = useState<string | null>(null);
+  const [isPublished, setIsPublished] = useState(false);
 
-  const pendingDataRef = useRef<{ data: BusinessCard; customUrlSlug?: string } | null>(null);
+  // Use a queue for pending saves instead of single ref
+  const pendingQueueRef = useRef<Array<{ data: BusinessCard; customUrlSlug?: string }>>([]);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isSavingRef = useRef(false);
   const saveAttemptRef = useRef(0);
@@ -112,10 +116,12 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
       data,
       customUrlSlug,
       currentCardId,
+      published = false,
     }: {
       data: BusinessCard;
       customUrlSlug?: string;
       currentCardId: string | null;
+      published?: boolean;
     }) => {
       saveAttemptRef.current += 1;
       const attempt = saveAttemptRef.current;
@@ -123,6 +129,7 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
       console.log(`[AutoSave] Save attempt ${attempt}`, {
         currentCardId,
         hasCustomUrl: !!customUrlSlug,
+        published,
         dataKeys: Object.keys(data)
       });
 
@@ -131,6 +138,7 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
       // Attach customUrl if provided
       const dataToSave: any = {
         ...cleaned,
+        published: published,
       };
 
       if (customUrlSlug) {
@@ -159,7 +167,8 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         method: currentCardId ? 'PUT' : 'POST',
         url: currentCardId ? `/api/business-cards/${currentCardId}` : '/api/business-cards',
         hasPages: finalData.pages.length,
-        hasPageElements: finalData.pageElements.length
+        hasPageElements: finalData.pageElements.length,
+        published: finalData.published
       });
 
       const result = currentCardId
@@ -168,21 +177,23 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
 
       console.log(`[AutoSave] Attempt ${attempt} - Success`, {
         newCardId: result?.id,
-        hasShareSlug: !!result?.shareSlug
+        hasShareSlug: !!result?.shareSlug,
+        published: result?.published
       });
 
       return result;
     },
 
-    onMutate: () => {
+    onMutate: (variables) => {
       isSavingRef.current = true;
-      setStatus("saving");
+      setStatus(variables.published ? "publishing" : "saving");
       setError(null);
     },
 
-    onSuccess: (savedCard) => {
+    onSuccess: (savedCard, variables) => {
       isSavingRef.current = false;
-      setStatus("saved");
+      setStatus(variables.published ? "published" : "saved");
+      setIsPublished(savedCard?.published || false);
       setLastSaved(new Date());
       setLastSavedCard(savedCard);
       setError(null);
@@ -200,24 +211,11 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         window.history.replaceState(null, "", `/card-editor/${savedCard.id}`);
       }
 
-      // If more changes came in while saving, save again
-      if (pendingDataRef.current) {
-        const pending = pendingDataRef.current;
-        pendingDataRef.current = null;
-        console.log('[AutoSave] More changes pending, saving again...');
-        setTimeout(() => queueSave(pending.data, pending.customUrlSlug), 300);
-        return;
-      }
-
-      // Auto-reset saved => idle after delay
-      setTimeout(() => {
-        if (status === "saved") {
-          setStatus("idle");
-        }
-      }, 2000);
+      // Process next item in queue if exists
+      processNextInQueue();
     },
 
-    onError: (err: any) => {
+    onError: (err: any, variables) => {
       isSavingRef.current = false;
       console.error('[AutoSave] Error:', err);
 
@@ -227,97 +225,108 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
       if (isMissingFields) {
         setStatus("dirty"); // Keep as dirty but don't show error
         setError(null);
+        // Still try to process next in queue
+        processNextInQueue();
         return;
       }
 
       setStatus("error");
       setError(msg);
 
-      // Retry after delay if we have pending data
+      // Retry after delay
       setTimeout(() => {
-        if (pendingDataRef.current) {
-          const pending = pendingDataRef.current;
-          pendingDataRef.current = null;
-          console.log('[AutoSave] Retrying after error...');
-          queueSave(pending.data, pending.customUrlSlug);
-        }
+        processNextInQueue();
       }, 3000);
     },
   });
 
-  const runDebouncedSave = useCallback(() => {
+  // Process the next item in the save queue
+  const processNextInQueue = useCallback(() => {
+    // If already saving, do nothing
+    if (isSavingRef.current) return;
+
+    // If queue is empty, return to idle
+    if (pendingQueueRef.current.length === 0) {
+      setStatus("idle");
+      return;
+    }
+
+    // Take the next item from queue
+    const nextItem = pendingQueueRef.current.shift();
+    if (!nextItem) return;
+
+    // Validate for new cards
+    const cleaned = sanitizeCardForSave(nextItem.data);
+    if (!cardId && !isCreatePayloadValid(cleaned, nextItem.customUrlSlug)) {
+      console.log('[AutoSave] Invalid create payload, skipping');
+      setStatus("dirty");
+      // Try next item
+      processNextInQueue();
+      return;
+    }
+
+    // Save this item
+    saveMutation.mutate({
+      data: nextItem.data,
+      customUrlSlug: nextItem.customUrlSlug,
+      currentCardId: cardId,
+      published: false, // Queue saves are always non-published
+    });
+  }, [cardId, saveMutation]);
+
+  // Start debounced queue processing
+  const startDebouncedSave = useCallback(() => {
     // Clear any existing timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
-    debounceTimerRef.current = setTimeout(async () => {
-      const pending = pendingDataRef.current;
-      if (!pending) {
-        console.log('[AutoSave] No pending data, skipping save');
-        return;
-      }
-
-      // If already saving, keep the pending data for later
-      if (isSavingRef.current) {
-        console.log('[AutoSave] Already saving, queuing for later');
-        return;
-      }
-
-      // For new cards, validate required fields
-      const cleaned = sanitizeCardForSave(pending.data);
-      if (!cardId && !isCreatePayloadValid(cleaned, pending.customUrlSlug)) {
-        console.log('[AutoSave] Invalid create payload, skipping');
-        setStatus("dirty");
-        return;
-      }
-
-      // Clear pending data before saving
-      const dataToSave = { ...pending };
-      pendingDataRef.current = null;
-
-      try {
-        await saveMutation.mutateAsync({
-          data: dataToSave.data,
-          customUrlSlug: dataToSave.customUrlSlug,
-          currentCardId: cardId,
-        });
-      } catch (error) {
-        console.error('[AutoSave] Debounced save failed:', error);
-      }
+    // Set new debounce timer
+    debounceTimerRef.current = setTimeout(() => {
+      processNextInQueue();
     }, 1200); // Increased debounce time
-  }, [cardId, saveMutation]);
+  }, [processNextInQueue]);
 
   const queueSave = useCallback(
     (data: BusinessCard, customUrlSlug?: string) => {
-      // Always update pending data with latest
-      pendingDataRef.current = { data, customUrlSlug };
+      // Add to queue
+      pendingQueueRef.current.push({ data, customUrlSlug });
 
-      // Update status if not already saving
-      if (status !== "saving") {
+      // Limit queue size to prevent memory issues
+      if (pendingQueueRef.current.length > 10) {
+        // Keep only the most recent 5 items
+        pendingQueueRef.current = pendingQueueRef.current.slice(-5);
+      }
+
+      // Update status if not already saving/saved
+      if (status !== "saving" && status !== "saved" && status !== "publishing") {
         setStatus("dirty");
       }
 
       // Start debounced save
-      runDebouncedSave();
+      startDebouncedSave();
     },
-    [status, runDebouncedSave]
+    [status, startDebouncedSave]
   );
 
   const saveNow = useCallback(
     async (data: BusinessCard, customUrlSlug?: string) => {
       console.log('[AutoSave] Manual save triggered');
 
-      // Cancel any pending debounced save
+      // Clear any pending debounced saves
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
         debounceTimerRef.current = null;
       }
 
-      // If already saving, queue this data for after current save
+      // Clear queue for manual save (we want immediate save)
+      pendingQueueRef.current = [];
+
+      // If already saving, wait for it to finish then save manually
       if (isSavingRef.current) {
-        console.log('[AutoSave] Already saving, queuing manual save');
-        pendingDataRef.current = { data, customUrlSlug };
+        console.log('[AutoSave] Already saving, will save after current');
+        // Queue this save to happen after current
+        pendingQueueRef.current.push({ data, customUrlSlug });
         setStatus("dirty");
         return;
       }
@@ -330,15 +339,14 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         return;
       }
 
-      // Clear any pending data
-      pendingDataRef.current = null;
-
       try {
-        await saveMutation.mutateAsync({
+        const result = await saveMutation.mutateAsync({
           data,
           customUrlSlug,
           currentCardId: cardId,
+          published: false,
         });
+        return result;
       } catch (error) {
         console.error('[AutoSave] Manual save failed:', error);
         throw error;
@@ -347,10 +355,62 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
     [cardId, saveMutation]
   );
 
+  const publishNow = useCallback(
+    async (data: BusinessCard, customUrlSlug?: string) => {
+      console.log('[AutoSave] Publish triggered');
+
+      // Clear any pending debounced saves
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+
+      // Clear queue for manual publish
+      pendingQueueRef.current = [];
+
+      // If already saving, wait for it to finish then publish
+      if (isSavingRef.current) {
+        console.log('[AutoSave] Already saving, will publish after current');
+        // Wait for current save to finish
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      // Validate for new cards
+      const cleaned = sanitizeCardForSave(data);
+      if (!cardId && !isCreatePayloadValid(cleaned, customUrlSlug)) {
+        console.log('[AutoSave] Publish validation failed');
+        throw new Error('Please provide either a custom URL or name and title to publish.');
+      }
+
+      try {
+        const result = await saveMutation.mutateAsync({
+          data,
+          customUrlSlug,
+          currentCardId: cardId,
+          published: true,
+        });
+        setIsPublished(true);
+        return result;
+      } catch (error) {
+        console.error('[AutoSave] Publish failed:', error);
+        throw error;
+      }
+    },
+    [cardId, saveMutation]
+  );
+
   const forceSave = useCallback(async () => {
-    const pending = pendingDataRef.current;
-    if (pending) {
-      await saveNow(pending.data, pending.customUrlSlug);
+    // Clear any pending timers
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+
+    // If queue has items, save the most recent one
+    if (pendingQueueRef.current.length > 0) {
+      const mostRecent = pendingQueueRef.current[pendingQueueRef.current.length - 1];
+      pendingQueueRef.current = [];
+      await saveNow(mostRecent.data, mostRecent.customUrlSlug);
     } else {
       console.log('[AutoSave] No pending data to force save');
     }
@@ -361,12 +421,13 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
     }
-    pendingDataRef.current = null;
+    pendingQueueRef.current = [];
     isSavingRef.current = false;
     saveAttemptRef.current = 0;
     setStatus("idle");
     setError(null);
     setCardId(null);
+    setIsPublished(false);
     setLastSavedCard(null);
     setLastSaved(null);
   }, []);
@@ -388,9 +449,11 @@ export function AutoSaveProvider({ children }: AutoSaveProviderProps) {
         lastSavedCard,
         error,
         cardId,
+        isPublished,
         setCardId,
         queueSave,
         saveNow,
+        publishNow,
         forceSave,
         reset,
       }}
