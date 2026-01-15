@@ -398,36 +398,70 @@ export default function CardEditor() {
 
   // Function to reorder elements (drag-drop)
   const handleReorderElements = (newOrder: string[]) => {
-    // Update order property based on new order
-    const updatedPageElements = cardData.pageElements.map((element: any) => {
-      const newIndex = newOrder.indexOf(element.id);
-      if (newIndex !== -1) {
-        return { ...element, order: newIndex };
-      }
-      return element;
+    // Use component state currentPageId for consistent page targeting
+    const activePageId = currentPageId || "home";
+    
+    // Create a map of new orders for visible elements
+    const orderMap = new Map<string, number>();
+    newOrder.forEach((id, index) => {
+      orderMap.set(id, index);
     });
+    
+    // Get max order from visible elements
+    const maxVisibleOrder = newOrder.length;
 
+    // Update pages array with new order values
+    let updatedCurrentPage: any = null;
     const updatedPages = cardData.pages.map((page: any) => {
-      if (page.id === "home") {
+      if (page.id === activePageId) {
+        // Update all elements: visible get new order, hidden get normalized order after visible
+        let hiddenOffset = 0;
         const updatedElements = page.elements.map((element: any) => {
-          const newIndex = newOrder.indexOf(element.id);
-          if (newIndex !== -1) {
-            return { ...element, order: newIndex };
+          if (orderMap.has(element.id)) {
+            return { ...element, order: orderMap.get(element.id) };
+          } else {
+            // Hidden element - place after all visible elements
+            const order = maxVisibleOrder + hiddenOffset;
+            hiddenOffset++;
+            return { ...element, order };
           }
-          return element;
         });
-        return {
+        
+        updatedCurrentPage = {
           ...page,
           elements: updatedElements.sort((a: any, b: any) => a.order - b.order)
         };
+        return updatedCurrentPage;
       }
       return page;
     });
 
+    // Create a set of element IDs that belong to the active page for efficient lookup
+    const activePageElementIds = new Set(updatedCurrentPage?.elements?.map((el: any) => el.id) || []);
+    
+    // Create a map of updated elements from the active page for quick lookup
+    const updatedElementsMap = new Map<string, any>();
+    (updatedCurrentPage?.elements || []).forEach((el: any) => {
+      updatedElementsMap.set(el.id, el);
+    });
+    
+    // Update pageElements surgically: only update active page elements, preserve others
+    const updatedPageElements = cardData.pageElements.map((element: any) => {
+      if (activePageElementIds.has(element.id)) {
+        // Replace with updated version from the active page
+        return updatedElementsMap.get(element.id) || element;
+      }
+      return element; // Preserve elements from other pages unchanged
+    });
+
     const updatedCardData = {
       ...cardData,
-      pageElements: updatedPageElements.sort((a: any, b: any) => a.order - b.order),
-      pages: updatedPages
+      pageElements: updatedPageElements,
+      pages: updatedPages,
+      // Only update currentSelectedPage for non-home pages to avoid breaking card view
+      ...(activePageId !== "home" && updatedCurrentPage 
+        ? { currentSelectedPage: updatedCurrentPage } 
+        : {})
     };
 
     setCardData(updatedCardData as any);
@@ -1322,7 +1356,7 @@ export default function CardEditor() {
 
             {sidebarView === "structure" && (
               <StructurePanel
-                elements={cardData.pageElements || []}
+                elements={getCurrentPageData()?.elements || cardData.pageElements || []}
                 selectedElementId={selectedBlock?.id}
                 onSelectElement={(element) => handleBlockSelect(element as BlockElement)}
                 onToggleVisibility={handleToggleVisibility}
