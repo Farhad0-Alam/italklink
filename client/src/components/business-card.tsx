@@ -96,6 +96,7 @@ interface BusinessCardProps {
   showViewButton?: boolean;
   onNavigatePage?: (pageId: string) => void;
   showInternalShareButton?: boolean;
+  onBlockSelect?: (block: any) => void;
 }
 
 export const BusinessCardComponent = forwardRef<
@@ -111,6 +112,7 @@ export const BusinessCardComponent = forwardRef<
       showViewButton = false,
       onNavigatePage,
       showInternalShareButton = true,
+      onBlockSelect,
     },
     ref,
   ) => {
@@ -1573,7 +1575,15 @@ export const BusinessCardComponent = forwardRef<
                   };
                   
                   return (
-                    <div key={element.id} className={`profile-section-element -mx-6 ${index === 0 ? '-mt-8' : 'mt-4'}`} data-testid="profile-section-element">
+                    <div 
+                      key={element.id} 
+                      className={`profile-section-element -mx-6 ${index === 0 ? '-mt-8' : 'mt-4'} ${onBlockSelect ? 'cursor-pointer hover:ring-2 hover:ring-orange-400 hover:ring-opacity-50 rounded transition-all' : ''}`}
+                      onClick={onBlockSelect ? (e) => {
+                        e.stopPropagation();
+                        onBlockSelect({ id: element.id, type: element.type, data: element.data });
+                      } : undefined}
+                      data-testid="profile-section-element"
+                    >
                       {/* Header with Cover Image, Profile Photo, and Logo */}
                       <div className="relative">
                         {/* Cover Image Section */}
@@ -1757,7 +1767,14 @@ export const BusinessCardComponent = forwardRef<
                 
                 // Render other elements normally
                 return (
-                  <div key={element.id} className={index > 0 ? 'mt-4' : ''}>
+                  <div 
+                    key={element.id} 
+                    className={`${index > 0 ? 'mt-4' : ''} ${onBlockSelect ? 'cursor-pointer hover:ring-2 hover:ring-orange-400 hover:ring-opacity-50 rounded transition-all' : ''}`}
+                    onClick={onBlockSelect ? (e) => {
+                      e.stopPropagation();
+                      onBlockSelect({ id: element.id, type: element.type, data: element.data });
+                    } : undefined}
+                  >
                     <PageElementRenderer
                       element={element}
                       isInteractive={isInteractive}

@@ -1132,8 +1132,7 @@ export default function CardEditor() {
                         showViewButton={false}
                         onNavigatePage={handleNavigatePage}
                         showInternalShareButton={false}
-                        fullFrame={true}
-                        ultraCompact={true}
+                        onBlockSelect={handleBlockSelect}
                       />
                     )}
                   </div>
