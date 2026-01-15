@@ -37,6 +37,43 @@ The platform utilizes Shadcn/ui (Radix UI) and Tailwind CSS for a modern, respon
 - **API Design**: Public APIs are provided for icons, element types, and plans.
 - **Commission System**: Automated 3-way split for shop orders (default: 50% seller, 30% affiliate, 20% platform).
 
+## Project Structure (Layered Architecture)
+
+The project follows a layered architecture organizing code by technical concern:
+
+```
+client/src/
+├── components/           # Reusable UI components
+│   ├── admin/           # Admin panel components
+│   ├── automation/      # Automation/tracking components
+│   ├── business-card/   # Business card components
+│   ├── crm/             # CRM components
+│   ├── form-builder/    # Form builder components
+│   ├── multi-page/      # Multi-page navigation components
+│   └── ui/              # Shadcn UI primitives
+├── hooks/               # Custom React hooks
+│   ├── useButtonTracking.ts
+│   ├── useCRM.ts
+│   ├── useMultiPage.ts
+│   └── use-*.ts
+├── lib/                 # Utilities and helpers
+│   ├── api/             # API utilities
+│   └── utils/           # Common utilities
+├── pages/               # Route pages
+│   ├── admin/           # Admin pages
+│   ├── auth/            # Authentication pages
+│   ├── dashboard/       # Dashboard pages
+│   ├── editor/          # Card editor pages
+│   └── shop/            # E-commerce pages
+├── types/               # TypeScript type definitions
+│   ├── business-card.ts
+│   ├── crm/
+│   ├── form-builder.ts
+│   └── multi-page/
+├── contexts/            # React contexts
+└── modules/             # Legacy re-exports (backward compatibility)
+```
+
 ## External Dependencies
 - **Cloud Hosting**: Replit
 - **Database**: PostgreSQL (Neon-backed)

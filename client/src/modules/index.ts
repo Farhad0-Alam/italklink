@@ -1,15 +1,14 @@
 /**
  * TalkLink Modules Index
- * Auto-generated module exports
+ * Re-exports for backward compatibility
  * 
- * This file allows you to import modules using:
- * import { ModuleName } from '@/modules';
+ * All modules have been migrated to the layered architecture:
+ * - Components: @/components/
+ * - Hooks: @/hooks/
+ * - Types: @/types/
  */
 
-// Main module exports for TalkLink
 export * from './business-cards';
-export * from './form-builder';
-export * from './digital-wallet';
-export * from './user-management';
-export * from './admin-panel';
+export * from './automation';
+export * from './crm';
 export * from './multi-page';

@@ -9,9 +9,9 @@ import {
   ContactsManager,
   DealsManager,
   TasksManager,
-  ActivitiesTimeline
-} from "@/modules/crm";
-import AutomationManager from "@/modules/crm/components/AutomationManager";
+  ActivitiesTimeline,
+  AutomationManager
+} from "@/components/crm";
 
 export default function CRM() {
   const [, setLocation] = useLocation();

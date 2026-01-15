@@ -30,7 +30,7 @@ import {
   FaBehance, FaDribbble, FaLinkedin, FaTwitter, FaFacebook, FaYoutube, FaGithub 
 } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
-import { useButtonTracking } from "@/modules/automation/useButtonTracking";
+import { useButtonTracking } from "@/hooks/useButtonTracking";
 
 // Helper function to get optimized image source
 const getOptimizedImageSrc = (

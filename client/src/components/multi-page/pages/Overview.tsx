@@ -1,6 +1,6 @@
 import { useParams } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
-import { BusinessCardComponent } from '@/modules/business-cards';
+import { BusinessCardComponent } from '@/components/business-card';
 import { BusinessCard } from '@shared/schema';
 
 export function Overview() {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigation } from '@/components/navigation';
-import { AutomationManager } from '@/modules/automation/AutomationManager';
+import { AutomationManager } from '@/components/automation';
 
 export default function Automation() {
   return (

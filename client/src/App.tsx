@@ -44,7 +44,7 @@ const Templates = lazy(() => import("./pages/templates"));
 const Appointments = lazy(() => import("./pages/appointments"));
 const Share = lazy(() => import("./pages/share").then(module => ({ default: module.Share })));
 const TemplatePreview = lazy(() => import("./pages/template-preview"));
-const Admin = lazy(() => import("./modules/admin-panel/components/AdminMain"));
+const Admin = lazy(() => import("./pages/admin/AdminMain"));
 const TemplateBuilderPage = lazy(() => import("./components/admin/TemplateBuilder"));
 const Pricing = lazy(() => import("./pages/pricing"));
 const Affiliate = lazy(() => import("./pages/affiliate"));
@@ -95,7 +95,7 @@ const BuyerRefunds = lazy(() => import("./pages/shop/buyer-refunds"));
 const SellerRefunds = lazy(() => import("./pages/shop/seller-refunds"));
 
 // Lazy load CardRoutes to prevent loading multi-page module eagerly
-const LazyCardRoutes = lazy(() => import("@/modules/multi-page").then(module => ({ default: module.CardRoutes })));
+const LazyCardRoutes = lazy(() => import("@/components/multi-page").then(module => ({ default: module.CardRoutes })));
 
 // Loading component for lazy-loaded routes
 const PageSuspense = ({ children }: { children: React.ReactNode }) => (

@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { decodeCardData, logEvent } from "@/lib/share";
 import { defaultCardData } from "@/lib/card-data";
 import { SEOHead } from "@/components/SEOHead";
-import { useButtonTracking } from "@/modules/automation/useButtonTracking";
+import { useButtonTracking } from "@/hooks/useButtonTracking";
 import { Share2, Copy, MessageCircle, Facebook, Twitter, Linkedin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 

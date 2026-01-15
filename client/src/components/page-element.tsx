@@ -20,7 +20,7 @@ import { TextChunkManager } from "@/components/TextChunkManager";
 import { VoiceAgentElement } from "@/components/VoiceAgentElement";
 import { VoiceAssistantCard } from "@/components/VoiceAssistantCard";
 import { MessageCircle } from "lucide-react";
-import { MenuPageElement } from "@/modules/multi-page/components/MenuPageElement";
+import { MenuPageElement } from "@/components/multi-page";
 import ARPreviewMindAR from "@/elements/ARPreviewMindAR";
 import { compileMind } from "@/lib/api/ar";
 import { PdfViewerButton } from "@/components/PdfViewerButton";

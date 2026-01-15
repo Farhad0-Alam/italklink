@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'wouter';
 import { MenuElement } from './MenuElement';
-import { BusinessCardComponent } from '@/modules/business-cards';
+import { BusinessCardComponent } from '@/components/business-card';
 import { useQuery } from '@tanstack/react-query';
 import { BusinessCard } from '@shared/schema';
 interface CardLayoutProps {
