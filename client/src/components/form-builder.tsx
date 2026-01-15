@@ -25,7 +25,7 @@ import { fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
 import { GradientBuilder, type GradientConfig } from "@/components/GradientBuilder";
-import { PageBuilder } from "@/modules/form-builder/components/PageBuilder";
+import { PageBuilder } from "@/components/form-builder/PageBuilder";
 import { ElementSelector } from "@/components/element-selector";
 import { useQuery } from "@tanstack/react-query";
 import {

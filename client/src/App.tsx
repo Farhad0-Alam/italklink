@@ -21,27 +21,34 @@ const Landing = lazy(() => import("./pages/landing"));
 const IconPreview = lazy(() => import("./pages/icon-preview"));
 
 // Lazy load auth pages - they're not needed until user navigates to them
-const Login = lazy(() => import("./pages/login"));
-const Register = lazy(() => import("./pages/register"));
-const Dashboard = lazy(() => import("./pages/dashboard"));
-const ForgotPassword = lazy(() => import("./pages/forgot-password"));
-const ResetPassword = lazy(() => import("./pages/reset-password"));
+const Login = lazy(() => import("./pages/auth/login"));
+const Register = lazy(() => import("./pages/auth/register"));
+const ForgotPassword = lazy(() => import("./pages/auth/forgot-password"));
+const ResetPassword = lazy(() => import("./pages/auth/reset-password"));
+
+// Lazy load dashboard pages
+const Dashboard = lazy(() => import("./pages/dashboard/dashboard"));
+const MyLinks = lazy(() => import("./pages/dashboard/my-links"));
+const Profile = lazy(() => import("./pages/dashboard/profile"));
+const Billing = lazy(() => import("./pages/dashboard/billing"));
+const Usage = lazy(() => import("./pages/dashboard/usage"));
+const Analytics = lazy(() => import("./pages/dashboard/analytics"));
+const CardAnalytics = lazy(() => import("./pages/dashboard/card-analytics"));
+const Uploads = lazy(() => import("./pages/dashboard/uploads"));
+
+// Lazy load editor pages
+const CardEditor = lazy(() => import("./pages/editor/card-editor"));
 
 // Lazy load all other pages to improve initial load performance
-const MyLinks = lazy(() => import("./pages/my-links"));
 const Templates = lazy(() => import("./pages/templates"));
 const Appointments = lazy(() => import("./pages/appointments"));
 const Share = lazy(() => import("./pages/share").then(module => ({ default: module.Share })));
 const TemplatePreview = lazy(() => import("./pages/template-preview"));
-const CardEditor = lazy(() => import("./pages/card-editor"));
 const Admin = lazy(() => import("./modules/admin-panel/components/AdminMain"));
 const TemplateBuilderPage = lazy(() => import("./components/admin/TemplateBuilder"));
 const Pricing = lazy(() => import("./pages/pricing"));
 const Affiliate = lazy(() => import("./pages/affiliate"));
-const Profile = lazy(() => import("./pages/profile"));
 const AccountSettings = lazy(() => import("./pages/account-settings"));
-const Billing = lazy(() => import("./pages/billing"));
-const Usage = lazy(() => import("./pages/usage"));
 const Help = lazy(() => import("./pages/help"));
 const Automation = lazy(() => import("./pages/automation"));
 const Availability = lazy(() => import("./pages/availability"));
@@ -50,12 +57,9 @@ const NotFound = lazy(() => import("@/pages/not-found"));
 const CRM = lazy(() => import("./pages/crm"));
 const BookingPage = lazy(() => import("./pages/booking"));
 const EmailTemplatesPage = lazy(() => import("./pages/EmailTemplatesPage"));
-const Analytics = lazy(() => import("./pages/analytics"));
-const CardAnalytics = lazy(() => import("./pages/card-analytics"));
 const VoiceAnalytics = lazy(() => import("./pages/VoiceAnalytics"));
 const VoiceAgentTest = lazy(() => import("./pages/VoiceAgentTest"));
 const TeamDashboard = lazy(() => import("./pages/TeamDashboard"));
-const Uploads = lazy(() => import("./pages/uploads"));
 const QrCodes = lazy(() => import("./pages/qr-codes"));
 const NfcManagement = lazy(() => import("./pages/nfc-management"));
 const EmailSignature = lazy(() => import("./pages/email-signature"));

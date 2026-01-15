@@ -22,7 +22,7 @@ import { VoiceAssistantCard } from "@/components/VoiceAssistantCard";
 import { MessageCircle } from "lucide-react";
 import { MenuPageElement } from "@/modules/multi-page/components/MenuPageElement";
 import ARPreviewMindAR from "@/elements/ARPreviewMindAR";
-import { compileMind } from "@/builder/api/ar";
+import { compileMind } from "@/lib/api/ar";
 import { PdfViewerButton } from "@/components/PdfViewerButton";
 import { SubscribeForm as SubscribeFormComponent } from "@/components/SubscribeForm";
 import { InstallButtonElement } from "@/components/InstallButtonElement";
