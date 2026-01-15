@@ -18,7 +18,7 @@ The platform utilizes Shadcn/ui (Radix UI) and Tailwind CSS for a modern, respon
 - **Backend**: Express.js with over 50 RESTful endpoints, multi-tenant role-based access control, CSRF protection, rate limiting, and session management. A WebSocket server supports real-time voice streaming.
 - **Database**: PostgreSQL with Drizzle ORM, managing over 20 tables. `pgvector` is used for vector-based knowledge retrieval in the RAG system.
 - **Core Features**:
-    - **Digital Business Card Builder**: Real-time live preview, 9+ customizable HTML templates, QR code generation, image export, custom URL slugs, advanced positioning, and font styling.
+    - **Digital Business Card Builder**: Elementor Pro-style editor with left sidebar showing Elements panel (categorized widgets), element-specific editor with Content/Design/Settings tabs, Structure/Navigator view, and Card Settings. Real-time live preview, 9+ customizable HTML templates, QR code generation, image export, custom URL slugs, advanced positioning, and font styling. Click-to-edit in preview highlights elements with orange ring.
     - **Appointment Booking System**: Public booking pages with templates, customizable event types, team scheduling, Google Calendar OAuth, Zoom meeting auto-creation, Stripe payment processing, and multi-channel notifications.
     - **CRM System**: Automatic lead capture, contact management with scoring, visual deal pipeline, task management, activity timelines, and team collaboration.
     - **Email Signature Generator**: Live preview editor with 9 HTML templates, full customization, and HTML export.

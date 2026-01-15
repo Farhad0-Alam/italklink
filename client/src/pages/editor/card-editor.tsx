@@ -13,9 +13,11 @@ import { AutoSaveIndicator } from "@/components/AutoSaveIndicator";
 import { useAutoSave } from "@/contexts/AutoSaveContext";
 import { ElementEditorTabs, EditorTabId } from "@/components/ElementEditorTabs";
 import { ContactContentPanel, ContactDesignPanel, ContactSettingsPanel } from "@/components/ContactEditorPanels";
-import { Copy, Share2, ArrowLeft, Eye, Globe, ChevronUp, ChevronDown, Settings, Layers, Palette, EyeOff, X, Edit2, Type, Phone, Mail, Globe as GlobeIcon, MapPin, MessageSquare, Link as LinkIcon, Image } from "lucide-react";
+import { ElementsPanel } from "@/components/ElementsPanel";
+import { StructurePanel } from "@/components/StructurePanel";
+import { Copy, Share2, ArrowLeft, Eye, Globe, ChevronUp, ChevronDown, Settings, Layers, Palette, EyeOff, X, Edit2, Type, Phone, Mail, Globe as GlobeIcon, MapPin, MessageSquare, Link as LinkIcon, Image, Plus, Sliders, ChevronLeft } from "lucide-react";
 import { Link } from "wouter";
-import type { BusinessCard } from "@shared/schema";
+import type { BusinessCard, PageElement } from "@shared/schema";
 
 interface CardEditorParams {
   id?: string;
@@ -41,6 +43,7 @@ export default function CardEditor() {
   const [isMobile, setIsMobile] = useState(false);
   const [selectedBlock, setSelectedBlock] = useState<BlockElement | null>(null);
   const [editorMode, setEditorMode] = useState<"full" | "block">("full");
+  const [sidebarView, setSidebarView] = useState<"elements" | "editor" | "structure" | "settings">("elements");
 
   const hasHydratedRef = useRef(false);
 
@@ -289,6 +292,82 @@ export default function CardEditor() {
     setSelectedBlock(block);
     setEditorMode("block");
     setEditorDrawerOpen(true);
+    setSidebarView("editor");
+    setBlockEditorTab("content");
+  };
+
+  // Function to go back to elements panel (clear selection)
+  const handleBackToElements = () => {
+    setSelectedBlock(null);
+    setEditorMode("full");
+    setSidebarView("elements");
+  };
+
+  // Function to add new element to the card
+  const handleAddElement = (element: PageElement) => {
+    const updatedPageElements = [...cardData.pageElements, element];
+    const updatedPages = cardData.pages.map((page: any) => {
+      if (page.id === "home") {
+        return {
+          ...page,
+          elements: [...page.elements, element]
+        };
+      }
+      return page;
+    });
+
+    const updatedCardData = {
+      ...cardData,
+      pageElements: updatedPageElements,
+      pages: updatedPages
+    };
+
+    setCardData(updatedCardData as any);
+
+    // Auto-save
+    if (user && hasHydratedRef.current) {
+      queueSave(updatedCardData as any, customUrlSlug);
+    }
+
+    // Select the newly added element
+    handleBlockSelect(element as BlockElement);
+  };
+
+  // Function to toggle element visibility (updates root-level visible property)
+  const handleToggleVisibility = (elementId: string, visible: boolean) => {
+    const updatedPageElements = cardData.pageElements.map((element: any) => {
+      if (element.id === elementId) {
+        return { ...element, visible };
+      }
+      return element;
+    });
+
+    const updatedPages = cardData.pages.map((page: any) => {
+      if (page.id === "home") {
+        return {
+          ...page,
+          elements: page.elements.map((element: any) => {
+            if (element.id === elementId) {
+              return { ...element, visible };
+            }
+            return element;
+          })
+        };
+      }
+      return page;
+    });
+
+    const updatedCardData = {
+      ...cardData,
+      pageElements: updatedPageElements,
+      pages: updatedPages
+    };
+
+    setCardData(updatedCardData as any);
+
+    if (user && hasHydratedRef.current) {
+      queueSave(updatedCardData as any, customUrlSlug);
+    }
   };
 
   // Function to update a specific block
@@ -1069,75 +1148,347 @@ export default function CardEditor() {
         </div>
       </div>
 
-      {/* Desktop Layout - Minimal changes */}
-      <div className="hidden md:block">
-        <div className="grid lg:grid-cols-4 gap-2 p-2">
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded border border-gray-200">
-              <div className="p-2">
-                <FormBuilder
-                  cardData={cardData}
-                  onDataChange={(data) => {
-                    const updated = {
-                      ...(data as any),
-                      currentPreviewMode: (cardData as any).currentPreviewMode,
-                      currentSelectedPage: (cardData as any).currentSelectedPage,
-                    };
-
-                    setCardData(updated as any);
-
-                    if (!user) return;
-                    if (!hasHydratedRef.current) return;
-                    if (!params.id && !customUrlSlug && !updated.fullName && !updated.title) return;
-
-                    queueSave(updated as any, customUrlSlug);
-                  }}
-                  onSave={triggerSave}
-                  onGenerateQR={() => {}}
-                  onNavigationChange={handleNavigatePage}
-                  compact={true}
-                  fullFrame={true}
-                  ultraCompact={true}
-                />
-              </div>
+      {/* Desktop Layout - Elementor Pro Style */}
+      <div className="hidden md:flex h-[calc(100vh-40px)]">
+        {/* Left Sidebar - Elementor Style */}
+        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+          {/* Sidebar Toolbar */}
+          <div className="flex items-center justify-between p-2 border-b border-gray-200 bg-gray-50">
+            <div className="flex items-center space-x-1">
+              {/* Add Element Button */}
+              <Button
+                variant={sidebarView === "elements" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => { setSidebarView("elements"); setSelectedBlock(null); }}
+                className={`h-8 w-8 p-0 ${sidebarView === "elements" ? 'bg-orange-500 hover:bg-orange-600 text-white' : ''}`}
+                title="Add Element"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+              
+              {/* Settings/Editor Button */}
+              <Button
+                variant={sidebarView === "editor" && selectedBlock ? "default" : "ghost"}
+                size="sm"
+                onClick={() => { if (selectedBlock) setSidebarView("editor"); }}
+                disabled={!selectedBlock}
+                className={`h-8 w-8 p-0 ${sidebarView === "editor" && selectedBlock ? 'bg-orange-500 hover:bg-orange-600 text-white' : ''}`}
+                title="Edit Element"
+              >
+                <Sliders className="w-4 h-4" />
+              </Button>
+              
+              {/* Structure/Navigator Button */}
+              <Button
+                variant={sidebarView === "structure" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setSidebarView("structure")}
+                className={`h-8 w-8 p-0 ${sidebarView === "structure" ? 'bg-orange-500 hover:bg-orange-600 text-white' : ''}`}
+                title="Structure / Navigator"
+              >
+                <Layers className="w-4 h-4" />
+              </Button>
+              
+              {/* Global Settings Button */}
+              <Button
+                variant={sidebarView === "settings" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setSidebarView("settings")}
+                className={`h-8 w-8 p-0 ${sidebarView === "settings" ? 'bg-orange-500 hover:bg-orange-600 text-white' : ''}`}
+                title="Card Settings"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="text-xs text-gray-500">
+              <AutoSaveIndicator />
             </div>
           </div>
 
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded border border-gray-200">
+          {/* Sidebar Content */}
+          <div className="flex-1 overflow-hidden">
+            {sidebarView === "elements" && (
+              <ElementsPanel onAddElement={handleAddElement} />
+            )}
+
+            {sidebarView === "structure" && (
+              <StructurePanel
+                elements={cardData.pageElements || []}
+                selectedElementId={selectedBlock?.id}
+                onSelectElement={(element) => handleBlockSelect(element as BlockElement)}
+                onToggleVisibility={handleToggleVisibility}
+                onClose={() => setSidebarView("elements")}
+              />
+            )}
+
+            {sidebarView === "editor" && selectedBlock && (
               <div className="h-full flex flex-col">
-                <div className="relative bg-white overflow-hidden rounded border border-gray-200"
-                  style={{ 
-                    maxWidth: '380px',
-                    margin: '0 auto',
-                    width: '100%'
-                  }}>
-                  <div className="h-full overflow-y-auto">
-                    {(cardData as any).currentPreviewMode === "page" && getCurrentPageData() ? (
-                      <PagePreview
-                        pageData={getCurrentPageData()}
-                        cardData={cardData}
-                        elementSpacing={(cardData as any).elementSpacing || 16}
-                        individualElementSpacing={(cardData as any).individualElementSpacing || {}}
-                        onNavigatePage={handleNavigatePage}
-                        onBackToCard={handleBackToCard}
-                        hideBackButton={true}
-                        fullFrame={true}
-                        ultraCompact={true}
-                      />
-                    ) : (
-                      <BusinessCardComponent
-                        data={cardData}
-                        isMobilePreview={true}
-                        showViewButton={false}
-                        onNavigatePage={handleNavigatePage}
-                        showInternalShareButton={false}
-                        onBlockSelect={handleBlockSelect}
-                      />
-                    )}
+                {/* Editor Header with Back Button */}
+                <div className="p-3 border-b border-gray-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleBackToElements}
+                      className="h-7 px-2 text-xs text-gray-600 hover:text-gray-900"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5 mr-1" />
+                      Back
+                    </Button>
+                    <span className="text-xs text-gray-500">Edit {getBlockTitle(selectedBlock)}</span>
                   </div>
                 </div>
+
+                {/* Element Editor Tabs */}
+                <ElementEditorTabs
+                  activeTab={blockEditorTab}
+                  onTabChange={setBlockEditorTab}
+                  className="border-b border-gray-200"
+                />
+
+                {/* Element Editor Content - Scrollable */}
+                <div className="flex-1 overflow-y-auto p-3">
+                  {/* Contact Section Editor */}
+                  {selectedBlock.type === "contactSection" && (
+                    <>
+                      {blockEditorTab === "content" && (
+                        <ContactContentPanel
+                          data={selectedBlock.data || {}}
+                          onChange={(data) => updateBlockData(selectedBlock.id, data)}
+                        />
+                      )}
+                      {blockEditorTab === "design" && (
+                        <ContactDesignPanel
+                          data={selectedBlock.data || {}}
+                          onChange={(data) => updateBlockData(selectedBlock.id, data)}
+                        />
+                      )}
+                      {blockEditorTab === "settings" && (
+                        <ContactSettingsPanel
+                          data={selectedBlock.data || {}}
+                          onChange={(data) => updateBlockData(selectedBlock.id, data)}
+                        />
+                      )}
+                    </>
+                  )}
+
+                  {/* Profile Block Editor */}
+                  {selectedBlock.type === "profile" && (
+                    <div className="space-y-3">
+                      {blockEditorTab === "content" && (
+                        <>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Full Name</label>
+                            <input
+                              type="text"
+                              value={selectedBlock.data.fullName || ""}
+                              onChange={(e) => updateBlockData(selectedBlock.id, { fullName: e.target.value })}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
+                              placeholder="Your name"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
+                            <input
+                              type="text"
+                              value={selectedBlock.data.title || ""}
+                              onChange={(e) => updateBlockData(selectedBlock.id, { title: e.target.value })}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
+                              placeholder="Your title"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Company</label>
+                            <input
+                              type="text"
+                              value={selectedBlock.data.company || ""}
+                              onChange={(e) => updateBlockData(selectedBlock.id, { company: e.target.value })}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
+                              placeholder="Your company"
+                            />
+                          </div>
+                        </>
+                      )}
+                      {blockEditorTab === "design" && (
+                        <>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Brand Color</label>
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="color"
+                                  value={selectedBlock.data.brandColor || "#22c55e"}
+                                  onChange={(e) => updateBlockData(selectedBlock.id, { brandColor: e.target.value })}
+                                  className="w-8 h-8 rounded cursor-pointer border border-gray-300"
+                                />
+                                <span className="text-xs text-gray-500">{selectedBlock.data.brandColor || "#22c55e"}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Accent Color</label>
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="color"
+                                  value={selectedBlock.data.accentColor || "#16a34a"}
+                                  onChange={(e) => updateBlockData(selectedBlock.id, { accentColor: e.target.value })}
+                                  className="w-8 h-8 rounded cursor-pointer border border-gray-300"
+                                />
+                                <span className="text-xs text-gray-500">{selectedBlock.data.accentColor || "#16a34a"}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-2 mt-3">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                id="showCoverImage"
+                                checked={selectedBlock.data.showCoverImage !== false}
+                                onChange={(e) => updateBlockData(selectedBlock.id, { showCoverImage: e.target.checked })}
+                                className="rounded border-gray-300"
+                              />
+                              <label htmlFor="showCoverImage" className="text-xs text-gray-700">Show Cover Image</label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                id="showProfilePhoto"
+                                checked={selectedBlock.data.showProfilePhoto !== false}
+                                onChange={(e) => updateBlockData(selectedBlock.id, { showProfilePhoto: e.target.checked })}
+                                className="rounded border-gray-300"
+                              />
+                              <label htmlFor="showProfilePhoto" className="text-xs text-gray-700">Show Profile Photo</label>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {blockEditorTab === "settings" && (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              id="profileEnabled"
+                              checked={selectedBlock.data.enabled !== false}
+                              onChange={(e) => updateBlockData(selectedBlock.id, { enabled: e.target.checked })}
+                              className="rounded border-gray-300"
+                            />
+                            <label htmlFor="profileEnabled" className="text-xs text-gray-700">Element Visible</label>
+                          </div>
+                          <p className="text-xs text-gray-500">Hide this element without deleting it</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Generic Element Editor */}
+                  {!["profile", "contactSection"].includes(selectedBlock.type) && (
+                    <div className="text-center py-6">
+                      <div className="text-gray-400 mb-2">
+                        {getBlockIcon(selectedBlock.type)}
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">Advanced editing for this element</p>
+                      <p className="text-xs text-gray-500">Edit options available in full editor mode</p>
+                    </div>
+                  )}
+                </div>
               </div>
+            )}
+
+            {sidebarView === "settings" && (
+              <div className="h-full flex flex-col">
+                <div className="p-3 border-b border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-900">Card Settings</h3>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  <FormBuilder
+                    cardData={cardData}
+                    onDataChange={(data) => {
+                      const updated = {
+                        ...(data as any),
+                        currentPreviewMode: (cardData as any).currentPreviewMode,
+                        currentSelectedPage: (cardData as any).currentSelectedPage,
+                      };
+
+                      setCardData(updated as any);
+
+                      if (!user) return;
+                      if (!hasHydratedRef.current) return;
+                      if (!params.id && !customUrlSlug && !updated.fullName && !updated.title) return;
+
+                      queueSave(updated as any, customUrlSlug);
+                    }}
+                    onSave={triggerSave}
+                    onGenerateQR={() => {}}
+                    onNavigationChange={handleNavigatePage}
+                    compact={true}
+                    fullFrame={true}
+                    ultraCompact={true}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar Footer - Publish Button */}
+          <div className="p-3 border-t border-gray-200 bg-gray-50">
+            <Button
+              onClick={handlePublish}
+              disabled={isPublishing || autoSaveStatus === "saving" || autoSaveStatus === "publishing"}
+              className={`
+                w-full py-2 rounded font-medium text-sm
+                ${isPublished 
+                  ? "bg-green-600 hover:bg-green-700 text-white" 
+                  : "bg-orange-500 hover:bg-orange-600 text-white"
+                }
+                ${isPublishing ? "opacity-70 cursor-not-allowed" : ""}
+              `}
+            >
+              {isPublishing ? (
+                <>
+                  <div className="animate-spin w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full mr-1.5"></div>
+                  Publishing...
+                </>
+              ) : isPublished ? (
+                <>
+                  <Globe className="w-3.5 h-3.5 mr-1.5" />
+                  Published
+                </>
+              ) : (
+                <>
+                  <Globe className="w-3.5 h-3.5 mr-1.5" />
+                  Publish Card
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Main Preview Area */}
+        <div className="flex-1 bg-gray-100 p-4 overflow-auto">
+          <div className="max-w-md mx-auto">
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+              {(cardData as any).currentPreviewMode === "page" && getCurrentPageData() ? (
+                <PagePreview
+                  pageData={getCurrentPageData()}
+                  cardData={cardData}
+                  elementSpacing={(cardData as any).elementSpacing || 16}
+                  individualElementSpacing={(cardData as any).individualElementSpacing || {}}
+                  onNavigatePage={handleNavigatePage}
+                  onBackToCard={handleBackToCard}
+                  hideBackButton={true}
+                  fullFrame={true}
+                  ultraCompact={true}
+                />
+              ) : (
+                <BusinessCardComponent
+                  data={cardData}
+                  isMobilePreview={true}
+                  showViewButton={false}
+                  onNavigatePage={handleNavigatePage}
+                  showInternalShareButton={false}
+                  onBlockSelect={handleBlockSelect}
+                />
+              )}
             </div>
           </div>
         </div>
