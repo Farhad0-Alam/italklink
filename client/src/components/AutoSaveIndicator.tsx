@@ -5,12 +5,23 @@ import { cn } from "@/lib/utils";
 interface AutoSaveIndicatorProps {
   className?: string;
   showText?: boolean;
+  isDirty?: boolean;
 }
 
-export function AutoSaveIndicator({ className, showText = true }: AutoSaveIndicatorProps) {
+export function AutoSaveIndicator({ className, showText = true, isDirty = false }: AutoSaveIndicatorProps) {
   const { status, lastSaved, error } = useAutoSave();
 
   const getStatusContent = () => {
+    // Show "Unsaved changes" when dirty (manual save mode like Elementor Pro)
+    if (isDirty && status !== "saving" && status !== "error") {
+      return {
+        icon: <Cloud className="w-4 h-4" />,
+        text: "Unsaved changes",
+        color: "text-amber-500",
+        bgColor: "bg-amber-50 dark:bg-amber-950",
+      };
+    }
+    
     switch (status) {
       case "saving":
         return {

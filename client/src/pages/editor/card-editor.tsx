@@ -46,9 +46,10 @@ export default function CardEditor() {
   const [sidebarView, setSidebarView] = useState<"elements" | "editor" | "structure" | "settings">("elements");
 
   const hasHydratedRef = useRef(false);
+  const isDirtyRef = useRef(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   const {
-    queueSave,
     saveNow,
     publishNow,
     setCardId: setAutoSaveCardId,
@@ -56,6 +57,16 @@ export default function CardEditor() {
     lastSavedCard,
     isPublished,
   } = useAutoSave();
+
+  const markDirty = () => {
+    isDirtyRef.current = true;
+    setIsDirty(true);
+  };
+
+  const clearDirty = () => {
+    isDirtyRef.current = false;
+    setIsDirty(false);
+  };
 
   const { data: user, isLoading: userLoading, error: userError } = useQuery({
     queryKey: ["/api/auth/user"],
@@ -82,6 +93,20 @@ export default function CardEditor() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Warn user before leaving with unsaved changes (like Elementor Pro)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirtyRef.current) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -324,9 +349,9 @@ export default function CardEditor() {
 
     setCardData(updatedCardData as any);
 
-    // Auto-save
+    // Mark as dirty (manual save on Publish)
     if (user && hasHydratedRef.current) {
-      queueSave(updatedCardData as any, customUrlSlug);
+      markDirty();
     }
 
     // Select the newly added element
@@ -365,8 +390,9 @@ export default function CardEditor() {
 
     setCardData(updatedCardData as any);
 
+    // Mark as dirty (manual save on Publish)
     if (user && hasHydratedRef.current) {
-      queueSave(updatedCardData as any, customUrlSlug);
+      markDirty();
     }
   };
 
@@ -416,9 +442,9 @@ export default function CardEditor() {
 
     setCardData(updatedCardData as any);
 
-    // Auto-save
+    // Mark as dirty (manual save on Publish)
     if (user && hasHydratedRef.current) {
-      queueSave(updatedCardData as any, customUrlSlug);
+      markDirty();
     }
   };
 
@@ -580,6 +606,7 @@ export default function CardEditor() {
 
       try {
         await saveNow(dataToSave, customUrlSlug);
+        clearDirty();
         toast({
           title: "Saved successfully",
           description: "Your card has been saved.",
@@ -596,7 +623,7 @@ export default function CardEditor() {
     [user, params.id, customUrlSlug, cardData, saveNow, toast]
   );
 
-  // Publish card
+  // Publish card (saves and publishes like Elementor Pro)
   const handlePublish = useCallback(async () => {
     if (!user) {
       toast({
@@ -621,7 +648,13 @@ export default function CardEditor() {
 
     setIsPublishing(true);
     try {
+      // Save all changes first, then publish (like Elementor Pro)
+      await saveNow(dataToSave, customUrlSlug);
       await publishNow(dataToSave, customUrlSlug);
+      
+      // Clear dirty state after successful save and publish
+      clearDirty();
+      
       toast({
         title: "Published successfully!",
         description: "Your card is now live and can be shared publicly.",
@@ -637,7 +670,7 @@ export default function CardEditor() {
     } finally {
       setIsPublishing(false);
     }
-  }, [user, params.id, customUrlSlug, cardData, publishNow, toast]);
+  }, [user, params.id, customUrlSlug, cardData, saveNow, publishNow, toast]);
 
   const copyShareUrl = async () => {
     if (!shareUrl) return;
@@ -712,7 +745,7 @@ export default function CardEditor() {
               </Link>
               <div className="text-sm font-semibold text-gray-900 truncate">CARD EDITOR</div>
               <div className="text-xs text-gray-500 min-w-[60px]">
-                <AutoSaveIndicator />
+                <AutoSaveIndicator isDirty={isDirty} />
               </div>
             </div>
 
@@ -742,12 +775,12 @@ export default function CardEditor() {
               {/* Publish Button - Top Right like Elementor */}
               <Button
                 onClick={handlePublish}
-                disabled={isPublishing || autoSaveStatus === "saving" || autoSaveStatus === "publishing"}
+                disabled={isPublishing}
                 className={`
                   hidden md:flex items-center px-3 py-1 rounded font-medium text-sm h-7
-                  ${isPublished 
+                  ${isPublished && !isDirty
                     ? "bg-green-600 hover:bg-green-700 text-white" 
-                    : "bg-green-500 hover:bg-green-600 text-white"
+                    : "bg-orange-500 hover:bg-orange-600 text-white"
                   }
                   ${isPublishing ? "opacity-70 cursor-not-allowed" : ""}
                 `}
@@ -1125,11 +1158,10 @@ export default function CardEditor() {
 
                     setCardData(updated as any);
 
-                    if (!user) return;
-                    if (!hasHydratedRef.current) return;
-                    if (!params.id && !customUrlSlug && !updated.fullName && !updated.title) return;
-
-                    queueSave(updated as any, customUrlSlug);
+                    // Mark as dirty (manual save on Publish)
+                    if (user && hasHydratedRef.current) {
+                      markDirty();
+                    }
                   }}
                   onSave={triggerSave}
                   onGenerateQR={() => {}}
@@ -1148,10 +1180,10 @@ export default function CardEditor() {
           <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-2">
             <Button
               onClick={handlePublish}
-              disabled={isPublishing || autoSaveStatus === "saving" || autoSaveStatus === "publishing"}
+              disabled={isPublishing}
               className={`
                 w-full py-2 rounded font-medium text-sm
-                ${isPublished 
+                ${isPublished && !isDirty
                   ? "bg-green-600 hover:bg-green-700 text-white" 
                   : "bg-orange-500 hover:bg-orange-600 text-white"
                 }
@@ -1233,7 +1265,7 @@ export default function CardEditor() {
             </div>
             
             <div className="text-xs text-gray-500">
-              <AutoSaveIndicator />
+              <AutoSaveIndicator isDirty={isDirty} />
             </div>
           </div>
 
@@ -1442,11 +1474,10 @@ export default function CardEditor() {
 
                       setCardData(updated as any);
 
-                      if (!user) return;
-                      if (!hasHydratedRef.current) return;
-                      if (!params.id && !customUrlSlug && !updated.fullName && !updated.title) return;
-
-                      queueSave(updated as any, customUrlSlug);
+                      // Mark as dirty (manual save on Publish)
+                      if (user && hasHydratedRef.current) {
+                        markDirty();
+                      }
                     }}
                     onSave={triggerSave}
                     onGenerateQR={() => {}}
