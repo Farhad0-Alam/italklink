@@ -164,6 +164,330 @@ const getElementTitle = (type: string) => {
   return titleMap[type] || type;
 };
 
+// Get default configuration for each element type
+const getDefaultElementConfig = (type: string, id: string): any => {
+  switch (type) {
+    case "heading":
+      return { 
+        text: "New Heading", 
+        level: "h2" as const, 
+        alignment: "center" as const,
+        size: "lg",
+        color: "#000000"
+      };
+    case "paragraph":
+      return { 
+        text: "Enter your text here...", 
+        alignment: "left" as const,
+        size: "base",
+        color: "#374151"
+      };
+    case "contactSection":
+      return { 
+        contacts: [
+          { 
+            id: generateFieldId(), 
+            label: "Phone", 
+            value: "+1-234-567-8900", 
+            icon: "fas fa-phone", 
+            type: "phone" as const 
+          },
+          { 
+            id: generateFieldId(), 
+            label: "Email", 
+            value: "hello@example.com", 
+            icon: "fas fa-envelope", 
+            type: "email" as const 
+          }
+        ],
+        layout: "vertical" as const,
+        showLabels: true
+      };
+    case "socialSection":
+      return { 
+        socials: [
+          { 
+            id: generateFieldId(), 
+            label: "LinkedIn", 
+            url: "https://linkedin.com/in/yourprofile", 
+            icon: "fab fa-linkedin", 
+            platform: "LinkedIn" 
+          }
+        ],
+        layout: "horizontal" as const,
+        size: "md",
+        showLabels: true
+      };
+    case "actionButtons":
+      return { 
+        showSaveContact: true,
+        showShare: true,
+        showDownload: true,
+        layout: "horizontal" as const
+      };
+    case "link":
+      return { 
+        text: "Click Here", 
+        url: "https://example.com", 
+        style: "button" as const,
+        variant: "primary" as const,
+        size: "md",
+        fullWidth: false
+      };
+    case "image":
+      return { 
+        src: "", 
+        alt: "Image",
+        width: "100%",
+        height: "auto",
+        borderRadius: "md",
+        shadow: "none"
+      };
+    case "video":
+      return { 
+        url: "", 
+        autoplay: false,
+        controls: true,
+        loop: false,
+        muted: true,
+        thumbnail: ""
+      };
+    case "profile":
+      return {
+        enabled: true,
+        showCoverImage: true,
+        showProfilePhoto: true,
+        showLogo: true,
+        showName: true,
+        showTitle: true,
+        showCompany: true,
+        showBio: true,
+        fullName: "",
+        title: "",
+        company: "",
+        bio: "",
+        brandColor: "#22c55e",
+        accentColor: "#16a34a",
+        layout: "classic" as const,
+        alignment: "center" as const
+      };
+    case "navigationMenu":
+      return {
+        items: [
+          { id: generateFieldId(), label: "Home", url: "#home", icon: "fas fa-home" },
+          { id: generateFieldId(), label: "About", url: "#about", icon: "fas fa-user" },
+          { id: generateFieldId(), label: "Contact", url: "#contact", icon: "fas fa-phone" }
+        ],
+        position: "top" as const,
+        layout: "horizontal" as const,
+        showIcons: true
+      };
+    case "accordion":
+      return {
+        items: [
+          { id: generateFieldId(), title: "Section 1", content: "Content for section 1" },
+          { id: generateFieldId(), title: "Section 2", content: "Content for section 2" }
+        ],
+        allowMultiple: false,
+        defaultOpen: false
+      };
+    case "imageSlider":
+      return {
+        images: [],
+        autoplay: true,
+        interval: 3000,
+        showArrows: true,
+        showDots: true,
+        height: "300px"
+      };
+    case "testimonials":
+      return {
+        testimonials: [],
+        layout: "grid" as const,
+        columns: 1,
+        showAvatars: true,
+        showStars: true
+      };
+    case "googleMaps":
+      return {
+        location: "New York, NY",
+        zoom: 12,
+        height: "300px",
+        showMarker: true,
+        showControls: true
+      };
+    case "aiChatbot":
+      return {
+        greeting: "Hello! How can I help you today?",
+        placeholder: "Type your message...",
+        position: "bottom-right" as const,
+        autoOpen: false,
+        showAvatar: true
+      };
+    case "ragKnowledge":
+      return {
+        knowledgeBaseId: "",
+        placeholder: "Ask a question about our services...",
+        position: "bottom-right" as const,
+        sources: [],
+        temperature: 0.7
+      };
+    case "voiceAgent":
+      return {
+        phoneNumber: "",
+        greeting: "Hello, how can I help you?",
+        language: "en" as const,
+        voice: "female" as const,
+        enabled: true
+      };
+    case "voiceAssistant":
+      return {
+        greeting: "Hello! I'm your voice assistant.",
+        language: "en" as const,
+        position: "bottom-right" as const,
+        autoStart: false,
+        showInterface: true
+      };
+    case "bookAppointment":
+      return {
+        calendarId: "",
+        service: "",
+        duration: 30,
+        timezone: "UTC",
+        confirmationMessage: "Your appointment has been booked!",
+        showCalendar: true
+      };
+    case "scheduleCall":
+      return {
+        calendarId: "",
+        duration: 30,
+        bufferTime: 5,
+        timezone: "UTC",
+        confirmationMessage: "Your call has been scheduled!"
+      };
+    case "meetingRequest":
+      return {
+        calendarId: "",
+        meetingTypes: [],
+        defaultDuration: 60,
+        timezone: "UTC",
+        requireApproval: false
+      };
+    case "availabilityDisplay":
+      return {
+        calendarId: "",
+        showBookButton: true,
+        showTimezone: true,
+        daysInAdvance: 30,
+        timezone: "UTC",
+        layout: "weekly" as const
+      };
+    case "shop":
+      return {
+        products: [],
+        layout: "grid" as const,
+        columns: 2,
+        showPrices: true,
+        showCart: true,
+        currency: "USD"
+      };
+    case "digitalWallet":
+      return {
+        wallets: [],
+        position: "bottom-right" as const,
+        autoShow: false,
+        currencies: ["USD"]
+      };
+    case "qrcode":
+      return {
+        url: "https://example.com",
+        size: 128,
+        color: "#000000",
+        backgroundColor: "#FFFFFF",
+        includeLogo: false,
+        logoSize: 30
+      };
+    case "pdfViewer":
+      return {
+        fileUrl: "",
+        height: "500px",
+        showToolbar: true,
+        showDownload: true,
+        showPrint: true
+      };
+    case "subscribeForm":
+      return {
+        placeholder: "Enter your email",
+        buttonText: "Subscribe",
+        successMessage: "Thank you for subscribing!",
+        listId: "",
+        doubleOptIn: false,
+        layout: "inline" as const
+      };
+    case "installButton":
+      return {
+        text: "Install App",
+        platform: "both" as const,
+        position: "bottom-right" as const,
+        showBadge: true,
+        delay: 0
+      };
+    case "arPreviewMindAR":
+      return {
+        modelUrl: "",
+        markerPattern: "",
+        camera: "user" as const,
+        scale: 1,
+        rotation: "0 0 0",
+        position: "0 0 0",
+        showControls: true
+      };
+    case "html":
+      return {
+        code: "<div>Your custom HTML here</div>",
+        height: "auto",
+        sanitize: true,
+        allowScripts: false
+      };
+    case "contactForm":
+      return {
+        fields: [
+          { id: generateFieldId(), type: "text" as const, label: "Name", required: true, placeholder: "Your name" },
+          { id: generateFieldId(), type: "email" as const, label: "Email", required: true, placeholder: "Your email" },
+          { id: generateFieldId(), type: "textarea" as const, label: "Message", required: false, placeholder: "Your message" }
+        ],
+        submitText: "Send Message",
+        successMessage: "Thank you for your message!",
+        errorMessage: "Something went wrong. Please try again.",
+        layout: "vertical" as const,
+        showLabels: true
+      };
+    default:
+      return {};
+  }
+};
+
+// Create default page element
+const createDefaultPageElement = (type: string): PageElement => {
+  const id = generateFieldId();
+  const uniqueOrder = Date.now() + Math.random();
+  const data = getDefaultElementConfig(type, id);
+
+  const baseElement: PageElement = {
+    id,
+    type,
+    order: uniqueOrder,
+    data
+  };
+
+  // Add visible property for specific elements
+  if (type === "profile") {
+    return { ...baseElement, visible: true };
+  }
+
+  return baseElement;
+};
+
 interface ElementsPanelProps {
   onAddElement: (element: PageElement) => void;
   onClose?: () => void;
@@ -220,69 +544,15 @@ export function ElementsPanel({ onAddElement, onClose }: ElementsPanelProps) {
 
   const handleAddElement = (type: string) => {
     if (isElementLocked(type)) return;
-    
-    const id = generateFieldId();
-    const uniqueOrder = Date.now() + Math.random();
-    let element: PageElement;
 
-    switch (type) {
-      case "heading":
-        element = { id, type: "heading", order: uniqueOrder, data: { text: "New Heading", level: "h2" as const, alignment: "center" as const } };
-        break;
-      case "paragraph":
-        element = { id, type: "paragraph", order: uniqueOrder, data: { text: "Enter your text here...", alignment: "left" as const } };
-        break;
-      case "contactSection":
-        element = { id, type: "contactSection", order: uniqueOrder, data: { contacts: [{ id: generateFieldId(), label: "Phone", value: "+1-234-567-8900", icon: "fas fa-phone", type: "phone" as const }] } };
-        break;
-      case "socialSection":
-        element = { id, type: "socialSection", order: uniqueOrder, data: { socials: [{ id: generateFieldId(), label: "LinkedIn", url: "https://linkedin.com/in/yourprofile", icon: "fab fa-linkedin", platform: "LinkedIn" }] } };
-        break;
-      case "actionButtons":
-        element = { id, type: "actionButtons", order: uniqueOrder, data: {} };
-        break;
-      case "link":
-        element = { id, type: "link", order: uniqueOrder, data: { text: "Click Here", url: "https://example.com", style: "button" as const } };
-        break;
-      case "image":
-        element = { id, type: "image", order: uniqueOrder, data: { src: "", alt: "Image" } };
-        break;
-      case "video":
-        element = { id, type: "video", order: uniqueOrder, data: { url: "", autoplay: false } };
-        break;
-      case "profile":
-        element = {
-          id,
-          type: "profile",
-          order: uniqueOrder,
-          visible: true,
-          data: {
-            enabled: true,
-            showCoverImage: true,
-            showProfilePhoto: true,
-            showLogo: true,
-            showName: true,
-            showTitle: true,
-            showCompany: true,
-            fullName: "",
-            title: "",
-            company: "",
-            brandColor: "#22c55e",
-            accentColor: "#16a34a",
-          }
-        };
-        break;
-      default:
-        element = { id, type, order: uniqueOrder, data: {} };
-    }
-
+    const element = createDefaultPageElement(type);
     onAddElement(element);
   };
 
   // Filter elements based on search
   const filteredCategories = useMemo(() => {
     if (!searchQuery.trim()) return elementCategories;
-    
+
     const query = searchQuery.toLowerCase();
     return elementCategories.map(category => ({
       ...category,
@@ -298,7 +568,7 @@ export function ElementsPanel({ onAddElement, onClose }: ElementsPanelProps) {
       {/* Header */}
       <div className="p-3 border-b border-gray-200">
         <h2 className="text-sm font-semibold text-gray-900 text-center mb-3">Elements</h2>
-        
+
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
@@ -335,7 +605,7 @@ export function ElementsPanel({ onAddElement, onClose }: ElementsPanelProps) {
                 {category.elements.map((type) => {
                   const IconComponent = getElementIcon(type);
                   const isLocked = isElementLocked(type);
-                  
+
                   return (
                     <button
                       key={type}
