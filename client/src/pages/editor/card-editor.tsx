@@ -716,7 +716,7 @@ export default function CardEditor() {
               </div>
             </div>
 
-            <div className="flex items-center">
+            <div className="flex items-center space-x-2">
               {shareUrl && (
                 <div className="hidden md:flex items-center space-x-2 bg-gray-50 rounded px-2 py-1">
                   <div className="text-xs text-gray-700 truncate max-w-[80px]">{shareUrl}</div>
@@ -738,6 +738,37 @@ export default function CardEditor() {
                   </div>
                 </div>
               )}
+              
+              {/* Publish Button - Top Right like Elementor */}
+              <Button
+                onClick={handlePublish}
+                disabled={isPublishing || autoSaveStatus === "saving" || autoSaveStatus === "publishing"}
+                className={`
+                  hidden md:flex items-center px-3 py-1 rounded font-medium text-sm h-7
+                  ${isPublished 
+                    ? "bg-green-600 hover:bg-green-700 text-white" 
+                    : "bg-green-500 hover:bg-green-600 text-white"
+                  }
+                  ${isPublishing ? "opacity-70 cursor-not-allowed" : ""}
+                `}
+              >
+                {isPublishing ? (
+                  <>
+                    <div className="animate-spin w-3 h-3 border-2 border-white border-t-transparent rounded-full mr-1.5"></div>
+                    Publishing...
+                  </>
+                ) : isPublished ? (
+                  <>
+                    <Globe className="w-3.5 h-3.5 mr-1.5" />
+                    Published
+                  </>
+                ) : (
+                  <>
+                    <Globe className="w-3.5 h-3.5 mr-1.5" />
+                    Publish
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </div>
@@ -1427,39 +1458,6 @@ export default function CardEditor() {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Sidebar Footer - Publish Button */}
-          <div className="p-3 border-t border-gray-200 bg-gray-50">
-            <Button
-              onClick={handlePublish}
-              disabled={isPublishing || autoSaveStatus === "saving" || autoSaveStatus === "publishing"}
-              className={`
-                w-full py-2 rounded font-medium text-sm
-                ${isPublished 
-                  ? "bg-green-600 hover:bg-green-700 text-white" 
-                  : "bg-orange-500 hover:bg-orange-600 text-white"
-                }
-                ${isPublishing ? "opacity-70 cursor-not-allowed" : ""}
-              `}
-            >
-              {isPublishing ? (
-                <>
-                  <div className="animate-spin w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full mr-1.5"></div>
-                  Publishing...
-                </>
-              ) : isPublished ? (
-                <>
-                  <Globe className="w-3.5 h-3.5 mr-1.5" />
-                  Published
-                </>
-              ) : (
-                <>
-                  <Globe className="w-3.5 h-3.5 mr-1.5" />
-                  Publish Card
-                </>
-              )}
-            </Button>
           </div>
         </div>
 
