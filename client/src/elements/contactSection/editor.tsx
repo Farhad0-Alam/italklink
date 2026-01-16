@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ElementEditorPanel, useElementEditorTabs } from "@/components/ElementEditorTabs";
 import { ContactContentPanel, ContactDesignPanel, ContactSettingsPanel } from "@/components/ContactEditorPanels";
 import { schemaToEditorContact, editorToSchemaContact } from "@/lib/element-adapters";
@@ -6,16 +6,29 @@ import { ElementEditorProps } from "../registry/types";
 
 export function ContactSectionEditor({ element, onUpdate }: ElementEditorProps) {
   const { activeTab, setActiveTab } = useElementEditorTabs("content");
-  const elementData = element.data || {};
+  const elementIdRef = useRef(element.id);
+  const isLocalUpdateRef = useRef(false);
+  
+  const [editorData, setEditorData] = useState(() => 
+    schemaToEditorContact(element.data || {})
+  );
 
-  // Convert schema format to editor format for the panels
-  const editorData = schemaToEditorContact(elementData);
+  useEffect(() => {
+    if (element.id !== elementIdRef.current) {
+      elementIdRef.current = element.id;
+      setEditorData(schemaToEditorContact(element.data || {}));
+    } else if (!isLocalUpdateRef.current && element.data) {
+      setEditorData(schemaToEditorContact(element.data));
+    }
+    isLocalUpdateRef.current = false;
+  }, [element.id, element.data]);
 
-  const handleChange = (updatedEditorData: any) => {
-    // Convert editor format back to schema format
+  const handleChange = useCallback((updatedEditorData: any) => {
+    isLocalUpdateRef.current = true;
+    setEditorData(updatedEditorData);
     const schemaData = editorToSchemaContact(updatedEditorData);
     onUpdate({ ...element, data: schemaData });
-  };
+  }, [element, onUpdate]);
 
   return (
     <div className="h-full">
