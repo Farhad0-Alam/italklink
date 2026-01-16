@@ -1,28 +1,48 @@
-import { ContactSectionEditor as ContactSectionEditorComponent } from "@/components/ContactSectionEditor";
+import { useState } from "react";
+import { ElementEditorPanel, useElementEditorTabs } from "@/components/ElementEditorTabs";
+import { ContactContentPanel, ContactDesignPanel, ContactSettingsPanel } from "@/components/ContactEditorPanels";
 import { schemaToEditorContact, editorToSchemaContact } from "@/lib/element-adapters";
 import { ElementEditorProps } from "../registry/types";
 
 export function ContactSectionEditor({ element, onUpdate }: ElementEditorProps) {
+  const { activeTab, setActiveTab } = useElementEditorTabs("content");
   const elementData = element.data || {};
 
-  const handleDataUpdate = (newData: any) => {
-    onUpdate({ ...element, data: { ...(element.data || {}), ...newData } });
+  // Convert schema format to editor format for the panels
+  const editorData = schemaToEditorContact(elementData);
+
+  const handleChange = (updatedEditorData: any) => {
+    // Convert editor format back to schema format
+    const schemaData = editorToSchemaContact(updatedEditorData);
+    onUpdate({ ...element, data: schemaData });
   };
 
-  const contacts = (elementData.contacts || []).map(schemaToEditorContact);
-  
   return (
-    <div className="mb-4">
-      <ContactSectionEditorComponent
-        contacts={contacts}
-        onChange={(updatedContacts) => {
-          const schemaContacts = updatedContacts.map(editorToSchemaContact);
-          handleDataUpdate({ contacts: schemaContacts });
-        }}
-        layout={elementData.layout || 'vertical'}
-        onLayoutChange={(layout) => handleDataUpdate({ layout })}
-        showLabels={elementData.showLabels !== false}
-        onShowLabelsChange={(show) => handleDataUpdate({ showLabels: show })}
+    <div className="h-full">
+      <ElementEditorPanel
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        elementType="contactSection"
+        elementTitle="Contact Info"
+        compact
+        contentPanel={
+          <ContactContentPanel 
+            data={editorData} 
+            onChange={handleChange} 
+          />
+        }
+        designPanel={
+          <ContactDesignPanel 
+            data={editorData} 
+            onChange={handleChange} 
+          />
+        }
+        settingsPanel={
+          <ContactSettingsPanel 
+            data={editorData} 
+            onChange={handleChange} 
+          />
+        }
       />
     </div>
   );
