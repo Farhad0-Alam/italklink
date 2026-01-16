@@ -9,7 +9,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { BusinessCardComponent } from "@/components/business-card";
 import { PagePreview } from "@/components/page-preview";
 import { FormBuilder } from "@/components/form-builder";
-import { AutoSaveIndicator } from "@/components/AutoSaveIndicator";
 import { useAutoSave } from "@/contexts/AutoSaveContext";
 import { ElementsPanel } from "@/components/ElementsPanel";
 import { StructurePanel } from "@/components/StructurePanel";
@@ -811,9 +810,6 @@ export default function CardEditor() {
                 Back
               </Link>
               <div className="text-sm font-semibold text-gray-900 truncate">CARD EDITOR</div>
-              <div className="text-xs text-gray-500 min-w-[60px]">
-                <AutoSaveIndicator isDirty={isDirty} />
-              </div>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -1163,10 +1159,6 @@ export default function CardEditor() {
               >
                 <Settings className="w-4 h-4" />
               </Button>
-            </div>
-            
-            <div className="text-xs text-gray-500">
-              <AutoSaveIndicator isDirty={isDirty} />
             </div>
           </div>
 
