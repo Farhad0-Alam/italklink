@@ -36,9 +36,7 @@ function ContactSectionRenderer({ element, isEditing, onUpdate, cardData }: Elem
   return (
     <div className="mb-4">
       <ContactLinksRenderer
-        contacts={elementData.contacts || []}
-        layout={elementData.layout || 'vertical'}
-        showLabels={elementData.showLabels !== false}
+        data={elementData}
         cardData={cardData}
       />
     </div>

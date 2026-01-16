@@ -24,6 +24,11 @@ interface ContactLinksRendererProps {
 }
 
 export function ContactLinksRenderer({ data, cardData }: ContactLinksRendererProps) {
+  // Guard against undefined data
+  if (!data) {
+    return null;
+  }
+  
   const {
     contacts = [],
     iconColor = "#9333ea",
