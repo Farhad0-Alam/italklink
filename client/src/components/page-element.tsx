@@ -299,7 +299,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
       return result;
     }
 
-    const oldFields: string[] = element.data?.fields || ["name", "email", "message"];
+    const oldFields: any[] = element.data?.fields || ["name", "email", "message"];
     const result: FieldConfig[] = [];
     const seenKeys = new Set<string>();
 
@@ -312,6 +312,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     });
 
     oldFields.forEach((fieldKey) => {
+      if (typeof fieldKey !== 'string') return;
       if (!seenKeys.has(fieldKey)) {
         const label = fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1);
         result.push({
