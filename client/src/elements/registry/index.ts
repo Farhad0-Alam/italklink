@@ -121,13 +121,19 @@ export function createPageElement(type: string) {
   const config = elementRegistry[type];
   const data = config?.defaultData() || {};
 
-  return {
+  const element: any = {
     id,
     type,
     order: uniqueOrder,
-    visible: true,
     data
   };
+
+  // Only set visible: true for profile elements (matches legacy behavior)
+  if (type === "profile") {
+    element.visible = true;
+  }
+
+  return element;
 }
 
 export function getElementRenderer(type: string) {

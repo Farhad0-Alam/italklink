@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { PageElement } from '@shared/schema';
-import { PageElementRenderer } from '@/components/page-element';
+import { PageElementRenderer } from '@/elements/PageElementRenderer';
 import { ElementSelector } from '@/components/element-selector';
 import { LockedFeature } from '@/components/LockedFeature';
 import { Switch } from '@/components/ui/switch';

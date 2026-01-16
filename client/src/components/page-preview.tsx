@@ -1,5 +1,5 @@
 import React from 'react';
-import { PageElementRenderer } from './page-element';
+import { PageElementRenderer } from '@/elements/PageElementRenderer';
 import { ArrowLeft, GripVertical } from 'lucide-react';
 import type { PageElement, BusinessCard } from '@shared/schema';
 import {

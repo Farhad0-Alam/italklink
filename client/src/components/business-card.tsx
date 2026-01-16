@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/collapsible";
 import { QRCodeSVG } from "qrcode.react";
 import { generateShareUrl } from "@/lib/share";
-import { PageElementRenderer } from "./page-element";
+import { PageElementRenderer } from "@/elements/PageElementRenderer";
 import { HeaderPreview } from "./header-builder/HeaderPreview";
 import { CoverImageSection } from "./CoverImageSection";
 import { defaultHeaderPreset } from "@/lib/header-schema";

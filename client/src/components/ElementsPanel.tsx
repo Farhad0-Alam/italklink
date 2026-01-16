@@ -5,6 +5,7 @@ import { generateFieldId } from "@/lib/card-data";
 import { PageElement } from "@shared/schema";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { Lock } from "lucide-react";
+import { createPageElement as createPageElementFromRegistry, getElementConfig } from "@/elements/registry";
 
 interface ElementType {
   type: string;
@@ -467,8 +468,15 @@ const getDefaultElementConfig = (type: string, id: string): any => {
   }
 };
 
-// Create default page element
+// Create default page element - uses registry if available, falls back to local config
 const createDefaultPageElement = (type: string): PageElement => {
+  // Try to use registry first
+  const registryConfig = getElementConfig(type);
+  if (registryConfig) {
+    return createPageElementFromRegistry(type) as PageElement;
+  }
+  
+  // Fallback to local configuration for unregistered element types
   const id = generateFieldId();
   const uniqueOrder = Date.now() + Math.random();
   const data = getDefaultElementConfig(type, id);

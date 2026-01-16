@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { QRCodeSVG } from "qrcode.react";
 import { generateShareUrl } from "@/lib/share";
-import { PageElementRenderer } from "@/components/page-element";
+import { PageElementRenderer } from "@/elements/PageElementRenderer";
 import DynamicHeaderRenderer from "./DynamicHeaderRenderer";
 import { Share2, Copy, Facebook, Twitter, Linkedin, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
