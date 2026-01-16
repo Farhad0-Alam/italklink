@@ -64,7 +64,11 @@ const defaultFieldConfig: Record<BuiltInFieldKey, FieldConfig> = {
   },
 };
 
-export function ContactFormRenderer({ element }: ElementRendererProps) {
+export function ContactFormRenderer({ element, isEditing, onUpdate, onDelete, onSave, isInteractive = true, cardData, onNavigatePage }: ElementRendererProps) {
+  if (isEditing) {
+    return null;
+  }
+
   const normalizeFieldConfigs = (): FieldConfig[] => {
     const saved = element.data?.fieldConfigs;
     const validFieldTypes = ["text", "email", "tel", "textarea", "date", "dropdown", "checkbox", "radio"];
@@ -252,7 +256,14 @@ export function ContactFormRenderer({ element }: ElementRendererProps) {
       const payload = {
         formData,
         formConfig: {
-          ...element.data,
+          title: element.data?.title,
+          successMessage,
+          errorMessage,
+          redirectUrl,
+          openRedirectNewTab,
+          enableHoneypot,
+          enableGDPR,
+          gdprText,
           googleSheetsEnabled,
           googleSheetsSheetId,
           googleSheetsTabName,
@@ -262,6 +273,8 @@ export function ContactFormRenderer({ element }: ElementRendererProps) {
           autoReplyEmailFieldKey,
           autoReplySubject,
           autoReplyMessage,
+          notifyAdminEmail: element.data?.notifyAdminEmail,
+          notifyAdminSubject: element.data?.notifyAdminSubject,
         },
         meta: includeMeta ? buildMeta() : undefined,
       };
