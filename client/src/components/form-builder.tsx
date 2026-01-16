@@ -25,8 +25,6 @@ import { fileToBase64, validateImageFile } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { getAvailableIcons, generateFieldId } from "@/lib/card-data";
 import { GradientBuilder, type GradientConfig } from "@/components/GradientBuilder";
-import { PageBuilder } from "@/components/form-builder/PageBuilder";
-import { ElementSelector } from "@/components/element-selector";
 import { useQuery } from "@tanstack/react-query";
 import {
   DndContext,
@@ -117,10 +115,7 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     refetchOnWindowFocus: false,
   });
 
-  const [builderMode, setBuilderMode] = useState<"card" | "page" | "theme" | "seo">("card");
-  const [selectedPageId, setSelectedPageId] = useState<string>("home");
-  const [activeDividerPosition, setActiveDividerPosition] = useState<"top" | "bottom">("top");
-  const [showElementSelector, setShowElementSelector] = useState(false);
+  const [builderMode, setBuilderMode] = useState<"theme" | "seo">("theme");
 
   const [collapsedSections, setCollapsedSections] = useState<{
     [key: string]: boolean;
@@ -282,19 +277,9 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
       ...allFormData,
       elementSpacing: elementSpacing ?? 16,
       currentPreviewMode: builderMode,
-      currentSelectedPage:
-        builderMode === "page" && selectedPageId
-          ? {
-              id: selectedPageId,
-              label:
-                ((pages as any[]) || []).find(
-                  (p: any) => p.id === selectedPageId,
-                )?.label || "Page",
-              elements: getPageElements(selectedPageId),
-            }
-          : null,
+      currentSelectedPage: null,
     };
-  }, [allFormData, elementSpacing, builderMode, selectedPageId, pages, getPageElements]);
+  }, [allFormData, elementSpacing, builderMode]);
 
   // Helper function to update elements for a specific page
   const updatePageElements = (pageId: string, elements: PageElement[]) => {
@@ -347,23 +332,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     return () => clearTimeout(timer);
   }, [enhancedCardData, elementSpacing, memoizedOnDataChange]);
 
-  // Auto-select first page when switching to page mode or when pages change
-  useEffect(() => {
-    if (builderMode === "page") {
-      const availablePages = (pages as any[]) || [];
-      const nonHomePages = availablePages.filter(
-        (page: any) => page.key !== "home",
-      );
-
-      if (
-        nonHomePages.length > 0 &&
-        (!selectedPageId || !nonHomePages.find((p) => p.id === selectedPageId))
-      ) {
-        setSelectedPageId(nonHomePages[0].id);
-      }
-    }
-  }, [builderMode, pages, selectedPageId]);
-
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
     field: "profilePhoto" | "logo" | "backgroundImage" | "ogImage",
@@ -404,26 +372,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
       <Card className="bg-slate-800 border-slate-700">
         <CardHeader className="sticky top-0 z-50 pb-4 bg-slate-800 border-b border-slate-700">
           <div className="flex items-center justify-between gap-4">
-            {/* Builder Mode Toggle */}
+            {/* Builder Mode Toggle - Theme and SEO only */}
             <div className="flex items-center bg-slate-700 rounded-lg p-1">
-              <Button
-                type="button"
-                variant={builderMode === "card" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => {
-                  setBuilderMode("card");
-                  onNavigationChange?.('home');
-                }}
-                className={`${
-                  builderMode === "card"
-                    ? "bg-orange-500 hover:bg-orange-600 text-white"
-                    : "text-gray-300 hover:text-white hover:bg-slate-600"
-                } transition-all duration-200`}
-                data-testid="button-card-mode"
-              >
-                <i className="fas fa-id-card mr-2"></i>
-                Card
-              </Button>
               <Button
                 type="button"
                 variant={builderMode === "theme" ? "default" : "ghost"}
@@ -455,20 +405,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
                 SEO
               </Button>
             </div>
-
-            {/* Add Element Button - visible in Card and Page modes */}
-            {(builderMode === "card" || builderMode === "page") && (
-              <Button
-                type="button"
-                onClick={() => setShowElementSelector(true)}
-                className="bg-talklink-500 hover:bg-talklink-600 text-white"
-                size="sm"
-                data-testid="button-add-element-header"
-              >
-                <i className="fas fa-plus mr-2"></i>
-                Add Element
-              </Button>
-            )}
           </div>
         </CardHeader>
 
@@ -4887,28 +4823,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
           </div>
         </CardContent>
       </Card>
-
-      {/* Element Selector Dialog */}
-      <ElementSelector
-        open={showElementSelector}
-        onOpenChange={setShowElementSelector}
-        onAddElement={(element: PageElement) => {
-          if (builderMode === "card") {
-            // Add to main card pageElements
-            const currentElements = form.watch("pageElements") || [];
-            const newElements = [...currentElements, element];
-            form.setValue("pageElements", newElements, { shouldDirty: true, shouldTouch: true });
-            // Notify parent immediately
-            const currentFormData = form.getValues();
-            onDataChange({ ...currentFormData, pageElements: newElements });
-          } else if (builderMode === "page" && selectedPageId) {
-            // Add to selected page's elements
-            const pageElements = getPageElements(selectedPageId);
-            const newElements = [...pageElements, element];
-            updatePageElements(selectedPageId, newElements);
-          }
-        }}
-      />
     </div>
   );
 };

@@ -1280,7 +1280,15 @@ export default function CardEditor() {
           {/* Sidebar Content */}
           <div className="flex-1 overflow-hidden">
             {sidebarView === "elements" && (
-              <ElementsPanel onAddElement={handleAddElement} />
+              <ElementsPanel 
+                onAddElement={handleAddElement}
+                pages={(cardData as any).pages || []}
+                selectedPageId={(cardData as any).currentSelectedPage?.id}
+                onSelectPage={handleSelectPage}
+                onAddPage={handleAddPage}
+                onDeletePage={handleDeletePage}
+                onRenamePage={handleRenamePage}
+              />
             )}
 
             {sidebarView === "structure" && (
@@ -1291,12 +1299,6 @@ export default function CardEditor() {
                 onToggleVisibility={handleToggleVisibility}
                 onReorderElements={handleReorderElements}
                 onClose={() => setSidebarView("elements")}
-                pages={(cardData as any).pages || []}
-                selectedPageId={(cardData as any).currentSelectedPage?.id}
-                onSelectPage={handleSelectPage}
-                onAddPage={handleAddPage}
-                onDeletePage={handleDeletePage}
-                onRenamePage={handleRenamePage}
               />
             )}
 
