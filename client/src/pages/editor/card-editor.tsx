@@ -11,8 +11,6 @@ import { PagePreview } from "@/components/page-preview";
 import { FormBuilder } from "@/components/form-builder";
 import { AutoSaveIndicator } from "@/components/AutoSaveIndicator";
 import { useAutoSave } from "@/contexts/AutoSaveContext";
-import { ElementEditorTabs, EditorTabId } from "@/components/ElementEditorTabs";
-import { ContactContentPanel, ContactDesignPanel, ContactSettingsPanel } from "@/components/ContactEditorPanels";
 import { ElementsPanel } from "@/components/ElementsPanel";
 import { StructurePanel } from "@/components/StructurePanel";
 import { getElementEditor } from "@/elements/registry";
@@ -40,7 +38,6 @@ export default function CardEditor() {
 
   const [editorDrawerOpen, setEditorDrawerOpen] = useState(false);
   const [activeEditorTab, setActiveEditorTab] = useState("content");
-  const [blockEditorTab, setBlockEditorTab] = useState<EditorTabId>("content");
   const [isMobile, setIsMobile] = useState(false);
   const [selectedBlock, setSelectedBlock] = useState<BlockElement | null>(null);
   const [editorMode, setEditorMode] = useState<"full" | "block">("full");
@@ -319,7 +316,6 @@ export default function CardEditor() {
     setEditorMode("block");
     setEditorDrawerOpen(true);
     setSidebarView("editor");
-    setBlockEditorTab("content");
   };
 
   // Function to go back to elements panel (clear selection)
@@ -1003,9 +999,9 @@ export default function CardEditor() {
             </div>
           </div>
 
-          {/* Editor Tabs - Sticky for mobile scrolling */}
-          <div className="sticky top-0 z-10 bg-white">
-            {editorMode === "full" ? (
+          {/* Editor Tabs - Sticky for mobile scrolling (only for full editor mode) */}
+          {editorMode === "full" && (
+            <div className="sticky top-0 z-10 bg-white">
               <div className="flex border-b border-gray-200 bg-gray-50">
                 {editorTabs.map((tab) => (
                   <button
@@ -1024,48 +1020,16 @@ export default function CardEditor() {
                   </button>
                 ))}
               </div>
-            ) : (
-              <ElementEditorTabs
-                activeTab={blockEditorTab}
-                onTabChange={setBlockEditorTab}
-                compact={true}
-                className="border-b border-gray-200"
-              />
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Editor Content - Compact */}
           <div className={`${editorMode === "block" ? 'h-[45vh]' : 'h-[50vh]'} overflow-y-auto`}>
             <div className="p-3">
               {editorMode === "block" && selectedBlock ? (
-                // Block-specific editor with tabs - consistent panel rendering
+                // Block-specific editor - dynamic from registry
                 <div className="space-y-3">
-                  {/* Contact Section Editor - separate panels for each tab */}
-                  {selectedBlock.type === "contactSection" && (
-                    <>
-                      {blockEditorTab === "content" && (
-                        <ContactContentPanel
-                          data={selectedBlock.data || {}}
-                          onChange={(data) => updateBlockData(selectedBlock.id, data)}
-                        />
-                      )}
-                      {blockEditorTab === "design" && (
-                        <ContactDesignPanel
-                          data={selectedBlock.data || {}}
-                          onChange={(data) => updateBlockData(selectedBlock.id, data)}
-                        />
-                      )}
-                      {blockEditorTab === "settings" && (
-                        <ContactSettingsPanel
-                          data={selectedBlock.data || {}}
-                          onChange={(data) => updateBlockData(selectedBlock.id, data)}
-                        />
-                      )}
-                    </>
-                  )}
-
-                  {/* Dynamic Element Editor from Registry (Mobile) */}
-                  {selectedBlock.type !== "contactSection" && (() => {
+                  {(() => {
                     const EditorComponent = getElementEditor(selectedBlock.type);
                     if (EditorComponent) {
                       return (
@@ -1247,41 +1211,9 @@ export default function CardEditor() {
                   </div>
                 </div>
 
-                {/* Element Editor Tabs */}
-                <ElementEditorTabs
-                  activeTab={blockEditorTab}
-                  onTabChange={setBlockEditorTab}
-                  className="border-b border-gray-200"
-                />
-
                 {/* Element Editor Content - Scrollable */}
-                <div className="flex-1 overflow-y-auto p-3">
-                  {/* Contact Section Editor */}
-                  {selectedBlock.type === "contactSection" && (
-                    <>
-                      {blockEditorTab === "content" && (
-                        <ContactContentPanel
-                          data={selectedBlock.data || {}}
-                          onChange={(data) => updateBlockData(selectedBlock.id, data)}
-                        />
-                      )}
-                      {blockEditorTab === "design" && (
-                        <ContactDesignPanel
-                          data={selectedBlock.data || {}}
-                          onChange={(data) => updateBlockData(selectedBlock.id, data)}
-                        />
-                      )}
-                      {blockEditorTab === "settings" && (
-                        <ContactSettingsPanel
-                          data={selectedBlock.data || {}}
-                          onChange={(data) => updateBlockData(selectedBlock.id, data)}
-                        />
-                      )}
-                    </>
-                  )}
-
-                  {/* Dynamic Element Editor from Registry */}
-                  {selectedBlock.type !== "contactSection" && (() => {
+                <div className="flex-1 overflow-y-auto">
+                  {(() => {
                     const EditorComponent = getElementEditor(selectedBlock.type);
                     if (EditorComponent) {
                       return (
@@ -1295,7 +1227,7 @@ export default function CardEditor() {
                       );
                     }
                     return (
-                      <div className="text-center py-6">
+                      <div className="text-center py-6 p-3">
                         <div className="text-gray-400 mb-2">
                           {getBlockIcon(selectedBlock.type)}
                         </div>
