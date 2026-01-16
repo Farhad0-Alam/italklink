@@ -1,61 +1,151 @@
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
+import { ElementEditorPanel, useElementEditorTabs } from "@/components/ElementEditorTabs";
+import { 
+  TypographyPanel, 
+  SpacingPanel, 
+  BackgroundPanel,
+  VisibilitySettingsPanel, 
+  AdvancedSettingsPanel,
+  AnimationPanel
+} from "@/components/SharedEditorPanels";
 import { ElementEditorProps } from "../registry/types";
 
-export function HeadingEditor({ element, onUpdate, cardData }: ElementEditorProps) {
-  const elementData = element.data || {};
+function HeadingContentPanel({ data, onChange }: { data: any; onChange: (data: any) => void }) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Heading Text</label>
+        <Input
+          value={data.text || ""}
+          onChange={(e) => onChange({ ...data, text: e.target.value })}
+          placeholder="Enter heading text"
+          className="text-sm"
+        />
+      </div>
 
-  const handleDataUpdate = (newData: any) => {
-    onUpdate({ ...element, data: { ...(element.data || {}), ...newData } });
-  };
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Heading Level</label>
+        <select
+          value={data.level || "h1"}
+          onChange={(e) => onChange({ ...data, level: e.target.value })}
+          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md"
+        >
+          <option value="h1">H1 - Main Heading</option>
+          <option value="h2">H2 - Section Heading</option>
+          <option value="h3">H3 - Subsection</option>
+          <option value="h4">H4 - Minor Heading</option>
+          <option value="h5">H5</option>
+          <option value="h6">H6</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Link URL (Optional)</label>
+        <Input
+          value={data.linkUrl || ""}
+          onChange={(e) => onChange({ ...data, linkUrl: e.target.value })}
+          placeholder="https://example.com"
+          className="text-sm"
+        />
+      </div>
+    </div>
+  );
+}
+
+function HeadingDesignPanel({ data, onChange, cardData }: { data: any; onChange: (data: any) => void; cardData?: any }) {
+  return (
+    <div className="space-y-6">
+      <div className="border-b border-gray-200 pb-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Typography</h4>
+        <TypographyPanel data={data} onChange={onChange} cardData={cardData} />
+      </div>
+
+      <div className="border-b border-gray-200 pb-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Spacing</h4>
+        <SpacingPanel data={data} onChange={onChange} />
+      </div>
+
+      <div>
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Background</h4>
+        <BackgroundPanel data={data} onChange={onChange} />
+      </div>
+    </div>
+  );
+}
+
+function HeadingSettingsPanel({ data, onChange }: { data: any; onChange: (data: any) => void }) {
+  return (
+    <div className="space-y-6">
+      <div className="border-b border-gray-200 pb-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Visibility</h4>
+        <VisibilitySettingsPanel data={data} onChange={onChange} />
+      </div>
+
+      <div className="border-b border-gray-200 pb-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Animation</h4>
+        <AnimationPanel data={data} onChange={onChange} />
+      </div>
+
+      <div>
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Advanced</h4>
+        <AdvancedSettingsPanel data={data} onChange={onChange} />
+      </div>
+    </div>
+  );
+}
+
+export function HeadingEditor({ element, onUpdate, cardData }: ElementEditorProps) {
+  const { activeTab, setActiveTab } = useElementEditorTabs("content");
+  const elementIdRef = useRef(element.id);
+  const isLocalUpdateRef = useRef(false);
+
+  const [editorData, setEditorData] = useState(() => element.data || {});
+
+  useEffect(() => {
+    if (element.id !== elementIdRef.current) {
+      elementIdRef.current = element.id;
+      setEditorData(element.data || {});
+    } else if (!isLocalUpdateRef.current && element.data) {
+      setEditorData(element.data);
+    }
+    isLocalUpdateRef.current = false;
+  }, [element.id, element.data]);
+
+  const handleChange = useCallback((updatedData: any) => {
+    isLocalUpdateRef.current = true;
+    setEditorData(updatedData);
+    onUpdate({ ...element, data: updatedData });
+  }, [element, onUpdate]);
 
   return (
-    <div className={`text-${elementData.alignment || 'left'} mb-4`}>
-      <div className="space-y-2">
-        <Input
-          value={elementData?.text || ''}
-          onChange={(e) => handleDataUpdate({ text: e.target.value })}
-          className="bg-slate-700 border-slate-600 text-white"
-          placeholder="Heading text"
-        />
-        <div className="flex gap-2">
-          <select
-            value={elementData?.level || 'h1'}
-            onChange={(e) => handleDataUpdate({ level: e.target.value })}
-            className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
-          >
-            <option value="h1">H1</option>
-            <option value="h2">H2</option>
-            <option value="h3">H3</option>
-          </select>
-          <select
-            value={elementData?.alignment || 'left'}
-            onChange={(e) => handleDataUpdate({ alignment: e.target.value })}
-            className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
-          >
-            <option value="left">Left</option>
-            <option value="center">Center</option>
-            <option value="right">Right</option>
-          </select>
-        </div>
-        <div>
-          <label className="text-xs text-gray-400 block mb-1">Text Color</label>
-          <input
-            type="color"
-            value={elementData?.color || cardData?.headingColor || "#0f0f0f"}
-            onChange={(e) => handleDataUpdate({ color: e.target.value })}
-            className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+    <div className="h-full">
+      <ElementEditorPanel
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        elementType="heading"
+        elementTitle="Heading"
+        compact
+        contentPanel={
+          <HeadingContentPanel 
+            data={editorData} 
+            onChange={handleChange} 
           />
-          {elementData?.color && (
-            <button
-              onClick={() => handleDataUpdate({ color: undefined })}
-              className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
-            >
-              <i className="fas fa-undo mr-1"></i>
-              Reset to Theme
-            </button>
-          )}
-        </div>
-      </div>
+        }
+        designPanel={
+          <HeadingDesignPanel 
+            data={editorData} 
+            onChange={handleChange}
+            cardData={cardData}
+          />
+        }
+        settingsPanel={
+          <HeadingSettingsPanel 
+            data={editorData} 
+            onChange={handleChange} 
+          />
+        }
+      />
     </div>
   );
 }

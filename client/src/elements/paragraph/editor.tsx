@@ -1,51 +1,139 @@
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { ElementEditorPanel, useElementEditorTabs } from "@/components/ElementEditorTabs";
+import { 
+  TypographyPanel, 
+  SpacingPanel, 
+  BackgroundPanel,
+  VisibilitySettingsPanel, 
+  AdvancedSettingsPanel,
+  AnimationPanel
+} from "@/components/SharedEditorPanels";
 import { ElementEditorProps } from "../registry/types";
 
-export function ParagraphEditor({ element, onUpdate, cardData }: ElementEditorProps) {
-  const elementData = element.data || {};
+function ParagraphContentPanel({ data, onChange }: { data: any; onChange: (data: any) => void }) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">Paragraph Text</label>
+        <Textarea
+          value={data.text || ""}
+          onChange={(e) => onChange({ ...data, text: e.target.value })}
+          placeholder="Enter your paragraph text here..."
+          className="min-h-[120px] text-sm"
+          rows={5}
+        />
+      </div>
 
-  const handleDataUpdate = (newData: any) => {
-    onUpdate({ ...element, data: { ...(element.data || {}), ...newData } });
-  };
+      <div>
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={data.preserveLineBreaks || false}
+            onChange={(e) => onChange({ ...data, preserveLineBreaks: e.target.checked })}
+            className="rounded border-gray-300 w-4 h-4"
+          />
+          Preserve Line Breaks
+        </label>
+        <p className="text-xs text-gray-500 mt-1 ml-6">Keep line breaks as entered</p>
+      </div>
+    </div>
+  );
+}
+
+function ParagraphDesignPanel({ data, onChange, cardData }: { data: any; onChange: (data: any) => void; cardData?: any }) {
+  return (
+    <div className="space-y-6">
+      <div className="border-b border-gray-200 pb-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Typography</h4>
+        <TypographyPanel data={data} onChange={onChange} cardData={cardData} />
+      </div>
+
+      <div className="border-b border-gray-200 pb-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Spacing</h4>
+        <SpacingPanel data={data} onChange={onChange} />
+      </div>
+
+      <div>
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Background</h4>
+        <BackgroundPanel data={data} onChange={onChange} />
+      </div>
+    </div>
+  );
+}
+
+function ParagraphSettingsPanel({ data, onChange }: { data: any; onChange: (data: any) => void }) {
+  return (
+    <div className="space-y-6">
+      <div className="border-b border-gray-200 pb-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Visibility</h4>
+        <VisibilitySettingsPanel data={data} onChange={onChange} />
+      </div>
+
+      <div className="border-b border-gray-200 pb-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Animation</h4>
+        <AnimationPanel data={data} onChange={onChange} />
+      </div>
+
+      <div>
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Advanced</h4>
+        <AdvancedSettingsPanel data={data} onChange={onChange} />
+      </div>
+    </div>
+  );
+}
+
+export function ParagraphEditor({ element, onUpdate, cardData }: ElementEditorProps) {
+  const { activeTab, setActiveTab } = useElementEditorTabs("content");
+  const elementIdRef = useRef(element.id);
+  const isLocalUpdateRef = useRef(false);
+
+  const [editorData, setEditorData] = useState(() => element.data || {});
+
+  useEffect(() => {
+    if (element.id !== elementIdRef.current) {
+      elementIdRef.current = element.id;
+      setEditorData(element.data || {});
+    } else if (!isLocalUpdateRef.current && element.data) {
+      setEditorData(element.data);
+    }
+    isLocalUpdateRef.current = false;
+  }, [element.id, element.data]);
+
+  const handleChange = useCallback((updatedData: any) => {
+    isLocalUpdateRef.current = true;
+    setEditorData(updatedData);
+    onUpdate({ ...element, data: updatedData });
+  }, [element, onUpdate]);
 
   return (
-    <div className={`text-${elementData.alignment || 'left'} mb-4`}>
-      <div className="space-y-2">
-        <Textarea
-          value={elementData?.text || ''}
-          onChange={(e) => handleDataUpdate({ text: e.target.value })}
-          className="bg-slate-700 border-slate-600 text-white"
-          placeholder="Paragraph text"
-          rows={3}
-        />
-        <select
-          value={elementData?.alignment || 'left'}
-          onChange={(e) => handleDataUpdate({ alignment: e.target.value })}
-          className="bg-slate-700 border-slate-600 text-white rounded px-2 py-1"
-        >
-          <option value="left">Left</option>
-          <option value="center">Center</option>
-          <option value="right">Right</option>
-        </select>
-        <div>
-          <label className="text-xs text-gray-400 block mb-1">Text Color</label>
-          <input
-            type="color"
-            value={elementData?.color || cardData?.paragraphColor || "#141414"}
-            onChange={(e) => handleDataUpdate({ color: e.target.value })}
-            className="w-full h-8 rounded cursor-pointer bg-slate-600 border border-slate-500"
+    <div className="h-full">
+      <ElementEditorPanel
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        elementType="paragraph"
+        elementTitle="Paragraph"
+        compact
+        contentPanel={
+          <ParagraphContentPanel 
+            data={editorData} 
+            onChange={handleChange} 
           />
-          {elementData?.color && (
-            <button
-              onClick={() => handleDataUpdate({ color: undefined })}
-              className="text-xs text-gray-400 hover:text-white transition-colors mt-1"
-            >
-              <i className="fas fa-undo mr-1"></i>
-              Reset to Theme
-            </button>
-          )}
-        </div>
-      </div>
+        }
+        designPanel={
+          <ParagraphDesignPanel 
+            data={editorData} 
+            onChange={handleChange}
+            cardData={cardData}
+          />
+        }
+        settingsPanel={
+          <ParagraphSettingsPanel 
+            data={editorData} 
+            onChange={handleChange} 
+          />
+        }
+      />
     </div>
   );
 }
