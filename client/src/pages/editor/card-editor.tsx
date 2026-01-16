@@ -41,6 +41,8 @@ export default function CardEditor() {
   const [selectedBlock, setSelectedBlock] = useState<BlockElement | null>(null);
   const [editorMode, setEditorMode] = useState<"full" | "block">("full");
   const [sidebarView, setSidebarView] = useState<"elements" | "editor" | "structure" | "settings">("elements");
+  const [sidebarWidth, setSidebarWidth] = useState(320);
+  const isResizingRef = useRef(false);
 
   const hasHydratedRef = useRef(false);
   const isDirtyRef = useRef(false);
@@ -104,6 +106,31 @@ export default function CardEditor() {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  // Sidebar resize handlers
+  const handleSidebarResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizingRef.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizingRef.current) return;
+      const newWidth = Math.min(Math.max(e.clientX, 240), 500);
+      setSidebarWidth(newWidth);
+    };
+    
+    const handleMouseUp = () => {
+      isResizingRef.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   }, []);
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -1110,8 +1137,16 @@ export default function CardEditor() {
 
       {/* Desktop Layout - Elementor Pro Style */}
       <div className="hidden md:flex h-[calc(100vh-40px)]">
-        {/* Left Sidebar - Elementor Style */}
-        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+        {/* Left Sidebar - Elementor Style with Resizable Width */}
+        <div 
+          className="bg-white border-r border-gray-200 flex flex-col relative"
+          style={{ width: sidebarWidth }}
+        >
+          {/* Resize Handle */}
+          <div
+            className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-orange-400 transition-colors z-10"
+            onMouseDown={handleSidebarResizeStart}
+          />
           {/* Sidebar Toolbar */}
           <div className="flex items-center justify-between p-2 border-b border-gray-200 bg-gray-50">
             <div className="flex items-center space-x-1">
