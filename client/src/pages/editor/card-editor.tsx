@@ -1219,23 +1219,23 @@ export default function CardEditor() {
       <div className="hidden md:flex h-[calc(100vh-40px)]">
         {/* Left Sidebar - Elementor Style with Resizable Width */}
         <div 
-          className="bg-white border-r border-gray-200 flex flex-col relative"
+          className="bg-slate-800 border-r border-slate-700 flex flex-col relative"
           style={{ width: sidebarWidth }}
         >
           {/* Resize Handle */}
           <div
-            className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-orange-400 transition-colors z-10"
+            className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-pink-500 transition-colors z-10"
             onMouseDown={handleSidebarResizeStart}
           />
           {/* Sidebar Toolbar */}
-          <div className="flex items-center justify-between p-2 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between p-2 border-b border-slate-700 bg-slate-900">
             <div className="flex items-center space-x-1">
               {/* Add Element Button */}
               <Button
                 variant={sidebarView === "elements" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => { setSidebarView("elements"); setSelectedBlock(null); }}
-                className={`h-8 w-8 p-0 ${sidebarView === "elements" ? 'bg-orange-500 hover:bg-orange-600 text-white' : ''}`}
+                className={`h-8 w-8 p-0 ${sidebarView === "elements" ? 'bg-pink-500 hover:bg-pink-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
                 title="Add Element"
               >
                 <Plus className="w-4 h-4" />
@@ -1247,7 +1247,7 @@ export default function CardEditor() {
                 size="sm"
                 onClick={() => { if (selectedBlock) setSidebarView("editor"); }}
                 disabled={!selectedBlock}
-                className={`h-8 w-8 p-0 ${sidebarView === "editor" && selectedBlock ? 'bg-orange-500 hover:bg-orange-600 text-white' : ''}`}
+                className={`h-8 w-8 p-0 ${sidebarView === "editor" && selectedBlock ? 'bg-pink-500 hover:bg-pink-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30'}`}
                 title="Edit Element"
               >
                 <Sliders className="w-4 h-4" />
@@ -1258,7 +1258,7 @@ export default function CardEditor() {
                 variant={sidebarView === "structure" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setSidebarView("structure")}
-                className={`h-8 w-8 p-0 ${sidebarView === "structure" ? 'bg-orange-500 hover:bg-orange-600 text-white' : ''}`}
+                className={`h-8 w-8 p-0 ${sidebarView === "structure" ? 'bg-pink-500 hover:bg-pink-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
                 title="Structure / Navigator"
               >
                 <Layers className="w-4 h-4" />
@@ -1269,7 +1269,7 @@ export default function CardEditor() {
                 variant={sidebarView === "settings" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setSidebarView("settings")}
-                className={`h-8 w-8 p-0 ${sidebarView === "settings" ? 'bg-orange-500 hover:bg-orange-600 text-white' : ''}`}
+                className={`h-8 w-8 p-0 ${sidebarView === "settings" ? 'bg-pink-500 hover:bg-pink-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
                 title="Card Settings"
               >
                 <Settings className="w-4 h-4" />
@@ -1303,25 +1303,25 @@ export default function CardEditor() {
             )}
 
             {sidebarView === "editor" && selectedBlock && (
-              <div className="h-full flex flex-col">
+              <div className="h-full flex flex-col bg-slate-800">
                 {/* Editor Header with Back Button */}
-                <div className="p-3 border-b border-gray-200">
+                <div className="p-3 border-b border-slate-700">
                   <div className="flex items-center justify-between mb-2">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={handleBackToElements}
-                      className="h-7 px-2 text-xs text-gray-600 hover:text-gray-900"
+                      className="h-7 px-2 text-xs text-slate-400 hover:text-white hover:bg-slate-700"
                     >
                       <ChevronLeft className="w-3.5 h-3.5 mr-1" />
                       Back
                     </Button>
-                    <span className="text-xs text-gray-500">Edit {getBlockTitle(selectedBlock)}</span>
+                    <span className="text-xs text-slate-400">Edit {getBlockTitle(selectedBlock)}</span>
                   </div>
                 </div>
 
                 {/* Element Editor Content - Scrollable */}
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto p-3">
                   {(() => {
                     const EditorComponent = getElementEditor(selectedBlock.type);
                     if (EditorComponent) {
@@ -1337,10 +1337,10 @@ export default function CardEditor() {
                     }
                     return (
                       <div className="text-center py-6 p-3">
-                        <div className="text-gray-400 mb-2">
+                        <div className="text-slate-500 mb-2">
                           {getBlockIcon(selectedBlock.type)}
                         </div>
-                        <p className="text-sm text-gray-600 mb-3">No editor available for this element</p>
+                        <p className="text-sm text-slate-400 mb-3">No editor available for this element</p>
                       </div>
                     );
                   })()}
@@ -1349,9 +1349,9 @@ export default function CardEditor() {
             )}
 
             {sidebarView === "settings" && (
-              <div className="h-full flex flex-col">
-                <div className="p-3 border-b border-gray-200">
-                  <h3 className="text-sm font-semibold text-gray-900">Card Settings</h3>
+              <div className="h-full flex flex-col bg-slate-800">
+                <div className="p-3 border-b border-slate-700">
+                  <h3 className="text-sm font-semibold text-white">Card Settings</h3>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                   <FormBuilder

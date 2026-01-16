@@ -612,17 +612,17 @@ export function ElementsPanel({
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-slate-800">
       {/* Header with Tabs */}
-      <div className="p-3 border-b border-gray-200">
+      <div className="p-3 border-b border-slate-700">
         {/* Tab Toggle */}
-        <div className="flex mb-3 bg-gray-100 rounded-lg p-0.5">
+        <div className="flex mb-3 bg-slate-900 rounded-lg p-0.5">
           <button
             onClick={() => setActiveTab("elements")}
             className={`flex-1 py-1.5 px-3 text-xs font-medium rounded-md transition-all ${
               activeTab === "elements"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-slate-700 text-white shadow-sm"
+                : "text-slate-400 hover:text-white"
             }`}
           >
             Elements
@@ -631,8 +631,8 @@ export function ElementsPanel({
             onClick={() => setActiveTab("pages")}
             className={`flex-1 py-1.5 px-3 text-xs font-medium rounded-md transition-all ${
               activeTab === "pages"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-slate-700 text-white shadow-sm"
+                : "text-slate-400 hover:text-white"
             }`}
           >
             Pages
@@ -642,13 +642,13 @@ export function ElementsPanel({
         {/* Search - only show in elements tab */}
         {activeTab === "elements" && (
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <input
               type="text"
               placeholder="Search Widget..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+              className="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-600 rounded bg-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
             />
           </div>
         )}
@@ -661,7 +661,7 @@ export function ElementsPanel({
             <div key={category.name} className="mb-3">
               <button
                 onClick={() => toggleCategory(category.name)}
-                className="flex items-center w-full text-left mb-2 text-xs font-semibold text-gray-600 hover:text-gray-900"
+                className="flex items-center w-full text-left mb-2 text-xs font-semibold text-slate-400 hover:text-white"
               >
                 {expandedCategories[category.name] ? (
                   <ChevronDown className="w-3 h-3 mr-1" />
@@ -685,18 +685,18 @@ export function ElementsPanel({
                         className={`
                           relative flex flex-col items-center justify-center p-3 rounded-lg border transition-all text-center
                           ${isLocked 
-                            ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed opacity-60' 
-                            : 'bg-white border-gray-200 hover:border-orange-400 hover:shadow-sm cursor-pointer'
+                            ? 'bg-slate-900 border-slate-700 text-slate-500 cursor-not-allowed opacity-60' 
+                            : 'bg-slate-700 border-slate-600 hover:border-pink-500 hover:shadow-sm cursor-pointer'
                           }
                         `}
                       >
                         {isLocked && (
                           <div className="absolute top-1 right-1">
-                            <Lock className="w-2.5 h-2.5 text-gray-400" />
+                            <Lock className="w-2.5 h-2.5 text-slate-500" />
                           </div>
                         )}
-                        <IconComponent className={`w-5 h-5 mb-1.5 ${isLocked ? 'text-gray-400' : 'text-gray-600'}`} />
-                        <span className={`text-[10px] font-medium leading-tight ${isLocked ? 'text-gray-400' : 'text-gray-700'}`}>
+                        <IconComponent className={`w-5 h-5 mb-1.5 ${isLocked ? 'text-slate-500' : 'text-slate-300'}`} />
+                        <span className={`text-[10px] font-medium leading-tight ${isLocked ? 'text-slate-500' : 'text-slate-200'}`}>
                           {getElementTitle(type)}
                         </span>
                       </button>
@@ -713,7 +713,7 @@ export function ElementsPanel({
           {onAddPage && (
             <button
               onClick={onAddPage}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-3 mb-3 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-3 mb-3 bg-pink-500 hover:bg-pink-600 text-white text-xs font-medium rounded-lg transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               Add New Page
@@ -723,7 +723,7 @@ export function ElementsPanel({
           {/* Pages List */}
           <div className="space-y-1.5">
             {pages.length === 0 ? (
-              <div className="text-center py-6 text-gray-500 text-xs">
+              <div className="text-center py-6 text-slate-400 text-xs">
                 <p>No pages yet.</p>
                 <p className="mt-1">Click "Add New Page" to create one.</p>
               </div>
@@ -738,18 +738,18 @@ export function ElementsPanel({
                     className={`
                       flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all
                       ${isSelected 
-                        ? "bg-orange-50 border-orange-300 ring-1 ring-orange-300" 
-                        : "bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                        ? "bg-slate-600 border-pink-500 ring-1 ring-pink-500" 
+                        : "bg-slate-700 border-slate-600 hover:border-slate-500 hover:bg-slate-600"
                       }
                     `}
                     onClick={() => onSelectPage?.(page.id)}
                   >
                     {/* Page Icon */}
-                    <div className={`w-7 h-7 rounded flex items-center justify-center ${isHome ? "bg-green-100" : "bg-blue-100"}`}>
+                    <div className={`w-7 h-7 rounded flex items-center justify-center ${isHome ? "bg-green-900/50" : "bg-blue-900/50"}`}>
                       {isHome ? (
-                        <Home className="w-3.5 h-3.5 text-green-600" />
+                        <Home className="w-3.5 h-3.5 text-green-400" />
                       ) : (
-                        <FileText className="w-3.5 h-3.5 text-blue-600" />
+                        <FileText className="w-3.5 h-3.5 text-blue-400" />
                       )}
                     </div>
 
@@ -769,12 +769,12 @@ export function ElementsPanel({
                             }
                           }}
                           autoFocus
-                          className="w-full px-1.5 py-0.5 text-xs border border-orange-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500"
+                          className="w-full px-1.5 py-0.5 text-xs border border-pink-500 rounded bg-slate-600 text-white focus:outline-none focus:ring-1 focus:ring-pink-500"
                           onClick={(e) => e.stopPropagation()}
                         />
                       ) : (
                         <span
-                          className="text-xs font-medium text-gray-800 truncate block"
+                          className="text-xs font-medium text-slate-200 truncate block"
                           onDoubleClick={(e) => {
                             if (!isHome) {
                               e.stopPropagation();
@@ -794,7 +794,7 @@ export function ElementsPanel({
                           e.stopPropagation();
                           onDeletePage(page.id);
                         }}
-                        className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                        className="p-1 text-slate-400 hover:text-red-400 hover:bg-red-900/30 rounded transition-colors"
                         title="Delete page"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -807,8 +807,8 @@ export function ElementsPanel({
           </div>
 
           {/* Help Text */}
-          <div className="mt-4 pt-3 border-t border-gray-100">
-            <p className="text-[10px] text-gray-400 leading-relaxed">
+          <div className="mt-4 pt-3 border-t border-slate-700">
+            <p className="text-[10px] text-slate-500 leading-relaxed">
               Select a page to edit its elements. Double-click a page name to rename it.
             </p>
           </div>

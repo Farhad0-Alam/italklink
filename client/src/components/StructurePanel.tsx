@@ -168,9 +168,9 @@ function SortableElementItem({
       <div
         className={`
           flex items-center gap-1 px-2 py-1.5 rounded cursor-pointer group
-          ${isSelected ? 'bg-orange-100 border border-orange-300' : 'hover:bg-gray-100'}
+          ${isSelected ? 'bg-slate-600 border border-pink-500' : 'hover:bg-slate-700'}
           ${!isVisible ? 'opacity-50' : ''}
-          ${isDragging ? 'opacity-50 bg-orange-50 shadow-lg' : ''}
+          ${isDragging ? 'opacity-50 bg-slate-600 shadow-lg' : ''}
         `}
         onClick={onSelect}
       >
@@ -182,12 +182,12 @@ function SortableElementItem({
                 e.stopPropagation();
                 onToggleExpanded();
               }}
-              className="p-0.5 hover:bg-gray-200 rounded"
+              className="p-0.5 hover:bg-slate-600 rounded"
             >
               {expandedElements[element.id] ? (
-                <ChevronDown className="w-3 h-3 text-gray-500" />
+                <ChevronDown className="w-3 h-3 text-slate-400" />
               ) : (
-                <ChevronRight className="w-3 h-3 text-gray-500" />
+                <ChevronRight className="w-3 h-3 text-slate-400" />
               )}
             </button>
           )}
@@ -197,17 +197,17 @@ function SortableElementItem({
         <div
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing p-0.5 hover:bg-gray-200 rounded"
+          className="cursor-grab active:cursor-grabbing p-0.5 hover:bg-slate-600 rounded"
           onClick={(e) => e.stopPropagation()}
         >
-          <GripVertical className="w-3 h-3 text-gray-400 hover:text-gray-600" />
+          <GripVertical className="w-3 h-3 text-slate-500 hover:text-slate-300" />
         </div>
 
         {/* Icon */}
-        <IconComponent className={`w-3.5 h-3.5 ${isSelected ? 'text-orange-600' : 'text-gray-500'}`} />
+        <IconComponent className={`w-3.5 h-3.5 ${isSelected ? 'text-pink-400' : 'text-slate-400'}`} />
 
         {/* Title */}
-        <span className={`flex-1 text-xs font-medium truncate ${isSelected ? 'text-orange-700' : 'text-gray-700'}`}>
+        <span className={`flex-1 text-xs font-medium truncate ${isSelected ? 'text-white' : 'text-slate-300'}`}>
           {getElementTitle(element.type, element.data)}
         </span>
 
@@ -218,12 +218,12 @@ function SortableElementItem({
               e.stopPropagation();
               onToggleVisibility(element.id, !isVisible);
             }}
-            className="p-0.5 opacity-0 group-hover:opacity-100 hover:bg-gray-200 rounded"
+            className="p-0.5 opacity-0 group-hover:opacity-100 hover:bg-slate-600 rounded"
           >
             {isVisible ? (
-              <Eye className="w-3 h-3 text-gray-500" />
+              <Eye className="w-3 h-3 text-slate-400" />
             ) : (
-              <EyeOff className="w-3 h-3 text-gray-400" />
+              <EyeOff className="w-3 h-3 text-slate-500" />
             )}
           </button>
         )}
@@ -235,7 +235,7 @@ function SortableElementItem({
           {element.data.contacts.map((contact: any, idx: number) => (
             <div
               key={contact.id || idx}
-              className="flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-50 text-xs text-gray-500"
+              className="flex items-center gap-1 px-2 py-1 rounded hover:bg-slate-700 text-xs text-slate-400"
             >
               <span className="w-4" />
               <Phone className="w-3 h-3" />
@@ -294,16 +294,16 @@ export function StructurePanel({
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-slate-800">
       {/* Header */}
-      <div className="p-3 border-b border-gray-200">
+      <div className="p-3 border-b border-slate-700">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-900">Structure</h2>
+          <h2 className="text-sm font-semibold text-white">Structure</h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-6 w-6 p-0"
+            className="h-6 w-6 p-0 text-slate-400 hover:text-white hover:bg-slate-700"
           >
             <X className="w-4 h-4" />
           </Button>
