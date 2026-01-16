@@ -20,8 +20,7 @@ export const paragraphConfig: ElementConfig = {
   defaultData: () => ({ 
     text: "Enter your text here...", 
     alignment: "left" as const,
-    size: "base",
-    color: "#374151"
+    size: "base"
   }),
   Renderer: ParagraphElementRenderer,
   Editor: ParagraphEditor

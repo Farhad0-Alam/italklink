@@ -21,8 +21,7 @@ export const headingConfig: ElementConfig = {
     text: "New Heading", 
     level: "h2" as const, 
     alignment: "center" as const,
-    size: "lg",
-    color: "#000000"
+    size: "lg"
   }),
   Renderer: HeadingElementRenderer,
   Editor: HeadingEditor
