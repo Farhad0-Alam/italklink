@@ -314,6 +314,9 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     });
 
     oldFields.forEach((fieldKey) => {
+      // Skip non-string values to prevent charAt errors
+      if (typeof fieldKey !== 'string' || !fieldKey) return;
+      
       if (!seenKeys.has(fieldKey)) {
         const label = fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1);
         result.push({
