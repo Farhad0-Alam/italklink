@@ -63,7 +63,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
     setShowInstructions
   } = useBusinessCardPWA(cardData || {} as BusinessCard);
 
-  const elementData = (element as InstallButtonElement).data || {};
+  const elementData = element ? (element as any).data || {} : {};
   
   // Element data takes priority, then legacy cardData.pwa* fallback for backward compatibility
   const data: InstallButtonData = {
@@ -82,7 +82,7 @@ export const InstallButtonElement = ({ element, isEditing, onUpdate, cardData }:
   };
 
   const handleDataUpdate = (updates: Partial<InstallButtonData>) => {
-    if (onUpdate) {
+    if (onUpdate && element) {
       const newData = { ...elementData, ...updates };
       onUpdate({
         ...element,
