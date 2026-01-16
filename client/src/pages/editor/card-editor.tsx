@@ -469,23 +469,20 @@ export default function CardEditor() {
     }
   };
 
-  // Function to update a specific block
+  // Function to update a specific block - replaces data entirely to ensure removals propagate
   const updateBlockData = (blockId: string, updatedData: any) => {
-    // Update in pageElements
+    // Update in pageElements - fully replace the data object
     const updatedPageElements = cardData.pageElements.map((element: any) => {
       if (element.id === blockId) {
         return {
           ...element,
-          data: {
-            ...element.data,
-            ...updatedData
-          }
+          data: updatedData
         };
       }
       return element;
     });
 
-    // Update in pages (for home page)
+    // Update in pages (for home page) - fully replace the data object
     const updatedPages = cardData.pages.map((page: any) => {
       if (page.id === "home") {
         return {
@@ -494,10 +491,7 @@ export default function CardEditor() {
             if (element.id === blockId) {
               return {
                 ...element,
-                data: {
-                  ...element.data,
-                  ...updatedData
-                }
+                data: updatedData
               };
             }
             return element;
