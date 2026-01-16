@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Eye, EyeOff, GripVertical, User, Type, Phone, Share2, Layers, Image, Video, FileText, MessageSquare, Layout, Map, Bot, Calendar, ShoppingBag, Link, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Eye, EyeOff, GripVertical, User, Type, Phone, Share2, Layers, Image, Video, FileText, MessageSquare, Layout, Map, Bot, Calendar, ShoppingBag, Link, X, Plus, Trash2, Copy, FileText as PageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DndContext,
@@ -27,6 +27,15 @@ interface PageElement {
   data?: any;
 }
 
+interface Page {
+  id: string;
+  key: string;
+  path: string;
+  label: string;
+  visible?: boolean;
+  elements?: PageElement[];
+}
+
 interface StructurePanelProps {
   elements: PageElement[];
   selectedElementId?: string;
@@ -34,6 +43,12 @@ interface StructurePanelProps {
   onToggleVisibility?: (elementId: string, visible: boolean) => void;
   onReorderElements?: (newOrder: string[]) => void;
   onClose: () => void;
+  pages?: Page[];
+  selectedPageId?: string;
+  onSelectPage?: (pageId: string) => void;
+  onAddPage?: () => void;
+  onDeletePage?: (pageId: string) => void;
+  onRenamePage?: (pageId: string, newLabel: string) => void;
 }
 
 const getElementIcon = (type: string) => {
@@ -239,8 +254,24 @@ function SortableElementItem({
   );
 }
 
-export function StructurePanel({ elements, selectedElementId, onSelectElement, onToggleVisibility, onReorderElements, onClose }: StructurePanelProps) {
+export function StructurePanel({ 
+  elements, 
+  selectedElementId, 
+  onSelectElement, 
+  onToggleVisibility, 
+  onReorderElements, 
+  onClose,
+  pages = [],
+  selectedPageId,
+  onSelectPage,
+  onAddPage,
+  onDeletePage,
+  onRenamePage
+}: StructurePanelProps) {
   const [expandedElements, setExpandedElements] = useState<Record<string, boolean>>({});
+  const [viewMode, setViewMode] = useState<"elements" | "pages">("elements");
+  const [editingPageId, setEditingPageId] = useState<string | null>(null);
+  const [editingLabel, setEditingLabel] = useState("");
 
   const sortedElements = [...elements].sort((a, b) => a.order - b.order);
 
@@ -277,54 +308,177 @@ export function StructurePanel({ elements, selectedElementId, onSelectElement, o
     }));
   };
 
+  const customPages = pages.filter(p => p.key !== "home");
+
+  const handleStartEdit = (page: Page) => {
+    setEditingPageId(page.id);
+    setEditingLabel(page.label);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingPageId && onRenamePage) {
+      onRenamePage(editingPageId, editingLabel);
+    }
+    setEditingPageId(null);
+    setEditingLabel("");
+  };
+
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Header */}
-      <div className="p-3 border-b border-gray-200 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-900">Structure</h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          className="h-6 w-6 p-0"
-        >
-          <X className="w-4 h-4" />
-        </Button>
-      </div>
-
-      {/* Elements Tree with DnD */}
-      <div className="flex-1 overflow-y-auto p-2">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={sortedElements.map(el => el.id)}
-            strategy={verticalListSortingStrategy}
+      <div className="p-3 border-b border-gray-200">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-sm font-semibold text-gray-900">Structure</h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-6 w-6 p-0"
           >
-            <div className="space-y-0.5">
-              {sortedElements.map((element) => (
-                <SortableElementItem
-                  key={element.id}
-                  element={element}
-                  isSelected={selectedElementId === element.id}
-                  expandedElements={expandedElements}
-                  onSelect={() => onSelectElement(element)}
-                  onToggleExpanded={() => toggleExpanded(element.id)}
-                  onToggleVisibility={onToggleVisibility}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
-
-        {sortedElements.length === 0 && (
-          <div className="text-center py-8 text-gray-500 text-xs">
-            No elements yet. Add elements from the sidebar.
-          </div>
-        )}
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+        
+        {/* View Mode Toggle */}
+        <div className="flex bg-gray-100 rounded-lg p-0.5">
+          <button
+            onClick={() => setViewMode("elements")}
+            className={`flex-1 text-xs py-1.5 px-3 rounded-md transition-colors ${
+              viewMode === "elements" 
+                ? "bg-white text-gray-900 shadow-sm" 
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Elements
+          </button>
+          <button
+            onClick={() => setViewMode("pages")}
+            className={`flex-1 text-xs py-1.5 px-3 rounded-md transition-colors ${
+              viewMode === "pages" 
+                ? "bg-white text-gray-900 shadow-sm" 
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Pages
+          </button>
+        </div>
       </div>
+
+      {/* Elements View */}
+      {viewMode === "elements" && (
+        <div className="flex-1 overflow-y-auto p-2">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={sortedElements.map(el => el.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-0.5">
+                {sortedElements.map((element) => (
+                  <SortableElementItem
+                    key={element.id}
+                    element={element}
+                    isSelected={selectedElementId === element.id}
+                    expandedElements={expandedElements}
+                    onSelect={() => onSelectElement(element)}
+                    onToggleExpanded={() => toggleExpanded(element.id)}
+                    onToggleVisibility={onToggleVisibility}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+
+          {sortedElements.length === 0 && (
+            <div className="text-center py-8 text-gray-500 text-xs">
+              No elements yet. Add elements from the sidebar.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Pages View */}
+      {viewMode === "pages" && (
+        <div className="flex-1 overflow-y-auto p-2">
+          {/* Add Page Button */}
+          {onAddPage && (
+            <Button
+              onClick={onAddPage}
+              size="sm"
+              className="w-full mb-3 bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Page
+            </Button>
+          )}
+
+          {/* Pages List */}
+          <div className="space-y-1">
+            {customPages.map((page) => (
+              <div
+                key={page.id}
+                className={`flex items-center justify-between p-2 rounded-lg border cursor-pointer transition-colors ${
+                  selectedPageId === page.id
+                    ? "bg-blue-50 border-blue-300"
+                    : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+                }`}
+                onClick={() => onSelectPage?.(page.id)}
+              >
+                <div className="flex items-center flex-1 min-w-0">
+                  <PageIcon className="w-4 h-4 text-gray-500 mr-2 flex-shrink-0" />
+                  {editingPageId === page.id ? (
+                    <input
+                      type="text"
+                      value={editingLabel}
+                      onChange={(e) => setEditingLabel(e.target.value)}
+                      onBlur={handleSaveEdit}
+                      onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
+                      className="flex-1 text-sm bg-white border border-gray-300 rounded px-2 py-0.5"
+                      autoFocus
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <span 
+                      className="text-sm text-gray-900 truncate"
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        handleStartEdit(page);
+                      }}
+                    >
+                      {page.label}
+                    </span>
+                  )}
+                </div>
+                
+                <div className="flex items-center space-x-1 ml-2">
+                  {onDeletePage && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeletePage(page.id);
+                      }}
+                      className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {customPages.length === 0 && (
+            <div className="text-center py-8 text-gray-500 text-xs">
+              No custom pages yet. Click "Add New Page" to create one.
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

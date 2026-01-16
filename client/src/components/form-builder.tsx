@@ -426,24 +426,6 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
               </Button>
               <Button
                 type="button"
-                variant={builderMode === "page" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => {
-                  setBuilderMode("page");
-                  onNavigationChange?.(selectedPageId);
-                }}
-                className={`${
-                  builderMode === "page"
-                    ? "bg-blue-500 hover:bg-blue-600 text-white"
-                    : "text-gray-300 hover:text-white hover:bg-slate-600"
-                } transition-all duration-200`}
-                data-testid="button-page-mode"
-              >
-                <i className="fas fa-sitemap mr-2"></i>
-                Page
-              </Button>
-              <Button
-                type="button"
                 variant={builderMode === "theme" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setBuilderMode("theme")}

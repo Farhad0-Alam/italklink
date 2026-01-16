@@ -541,6 +541,86 @@ export default function CardEditor() {
     }
   };
 
+  // Page management functions
+  const handleAddPage = () => {
+    const currentPages = (cardData as any).pages || [];
+    const pageNumber = currentPages.filter((p: any) => p.key !== "home").length + 1;
+    const newPageId = `page-${Date.now()}`;
+    const newPage = {
+      id: newPageId,
+      key: newPageId,
+      path: `page-${pageNumber}`,
+      label: `Page ${pageNumber}`,
+      visible: true,
+      elements: [],
+    };
+    
+    const updatedCardData = {
+      ...cardData,
+      pages: [...currentPages, newPage],
+      currentPreviewMode: "page",
+      currentSelectedPage: newPage
+    };
+    
+    setCardData(updatedCardData as any);
+    
+    if (user && hasHydratedRef.current) {
+      markDirty();
+    }
+  };
+
+  const handleDeletePage = (pageId: string) => {
+    const currentPages = (cardData as any).pages || [];
+    const updatedPages = currentPages.filter((p: any) => p.id !== pageId);
+    const currentSelectedPage = (cardData as any).currentSelectedPage;
+    
+    // If deleting the currently selected page, reset to home/card view
+    const isDeletingCurrentPage = currentSelectedPage?.id === pageId;
+    const homePage = updatedPages.find((p: any) => p.key === "home");
+    
+    const updatedCardData = {
+      ...cardData,
+      pages: updatedPages,
+      ...(isDeletingCurrentPage ? {
+        currentPreviewMode: "card",
+        currentSelectedPage: homePage || null
+      } : {})
+    };
+    
+    setCardData(updatedCardData as any);
+    
+    if (user && hasHydratedRef.current) {
+      markDirty();
+    }
+  };
+
+  const handleRenamePage = (pageId: string, newLabel: string) => {
+    const currentPages = (cardData as any).pages || [];
+    const updatedPages = currentPages.map((p: any) => 
+      p.id === pageId ? { ...p, label: newLabel } : p
+    );
+    
+    // Update currentSelectedPage if we're renaming it
+    const currentSelectedPage = (cardData as any).currentSelectedPage;
+    const updatedCurrentSelectedPage = currentSelectedPage?.id === pageId 
+      ? { ...currentSelectedPage, label: newLabel }
+      : currentSelectedPage;
+    
+    setCardData({
+      ...cardData,
+      pages: updatedPages,
+      currentSelectedPage: updatedCurrentSelectedPage
+    } as any);
+    
+    if (user && hasHydratedRef.current) {
+      markDirty();
+    }
+  };
+
+  const handleSelectPage = (pageId: string) => {
+    handleNavigatePage(pageId);
+  };
+
   // Function to get block icon based on type
   const getBlockIcon = (type: string) => {
     switch (type) {
@@ -1211,6 +1291,12 @@ export default function CardEditor() {
                 onToggleVisibility={handleToggleVisibility}
                 onReorderElements={handleReorderElements}
                 onClose={() => setSidebarView("elements")}
+                pages={(cardData as any).pages || []}
+                selectedPageId={(cardData as any).currentSelectedPage?.id}
+                onSelectPage={handleSelectPage}
+                onAddPage={handleAddPage}
+                onDeletePage={handleDeletePage}
+                onRenamePage={handleRenamePage}
               />
             )}
 

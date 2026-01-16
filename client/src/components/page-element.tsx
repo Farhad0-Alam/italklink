@@ -48,8 +48,6 @@ import { CSS } from '@dnd-kit/utilities';
 import { ContactLinksRenderer } from '@/components/ContactLinksRenderer';
 import { SocialLinksRenderer } from '@/components/SocialLinksRenderer';
 import { ContactSectionEditor } from '@/components/ContactSectionEditor';
-import { ElementEditorTabs } from '@/components/ElementEditorTabs';
-import { ContactContentPanel, ContactDesignPanel, ContactSettingsPanel } from '@/components/ContactEditorPanels';
 import { SocialSectionEditor } from '@/components/SocialSectionEditor';
 import {
   schemaToEditorContact,
@@ -314,9 +312,6 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
     });
 
     oldFields.forEach((fieldKey) => {
-      // Skip non-string values to prevent charAt errors
-      if (typeof fieldKey !== 'string' || !fieldKey) return;
-      
       if (!seenKeys.has(fieldKey)) {
         const label = fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1);
         result.push({
@@ -536,7 +531,7 @@ function ContactFormRenderer({ element, isEditing, handleDataUpdate }: any) {
         f.key === key ? { ...f, ...patch } : f
       );
       setLocalFieldConfigs(next);
-      
+
       // Sync to database - combine fieldConfigs and legacy fields in single update
       const fieldsLegacy = next.filter((f) => f.enabled).map((f) => f.key);
       handleDataUpdate({ fieldConfigs: next, fields: fieldsLegacy });
@@ -2142,7 +2137,6 @@ interface PageElementProps {
 export function PageElementRenderer({ element, isEditing = false, onUpdate, onDelete, onSave, isInteractive = true, cardData, onNavigatePage }: PageElementProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activeEditorTab, setActiveEditorTab] = useState<"content" | "design" | "settings">("content");
   const [voiceAgentSections, setVoiceAgentSections] = useState({
     basic: true,
     voice: false,
@@ -2690,33 +2684,10 @@ export function PageElementRenderer({ element, isEditing = false, onUpdate, onDe
 
           return (
             <div className="mb-6" key={`contact-${element.id}`}>
-              {/* Elementor Pro-style Content/Design/Settings tabs */}
-              <ElementEditorTabs
-                activeTab={activeEditorTab}
-                onTabChange={setActiveEditorTab}
-                compact={false}
-                className="mb-4"
+              <ContactSectionEditor
+                data={editorData}
+                onChange={handleEditorChange}
               />
-              
-              {/* Tab Content */}
-              {activeEditorTab === "content" && (
-                <ContactContentPanel
-                  data={editorData}
-                  onChange={handleEditorChange}
-                />
-              )}
-              {activeEditorTab === "design" && (
-                <ContactDesignPanel
-                  data={editorData}
-                  onChange={handleEditorChange}
-                />
-              )}
-              {activeEditorTab === "settings" && (
-                <ContactSettingsPanel
-                  data={editorData}
-                  onChange={handleEditorChange}
-                />
-              )}
             </div>
           );
         }
