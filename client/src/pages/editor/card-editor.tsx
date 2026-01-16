@@ -15,6 +15,7 @@ import { ElementEditorTabs, EditorTabId } from "@/components/ElementEditorTabs";
 import { ContactContentPanel, ContactDesignPanel, ContactSettingsPanel } from "@/components/ContactEditorPanels";
 import { ElementsPanel } from "@/components/ElementsPanel";
 import { StructurePanel } from "@/components/StructurePanel";
+import { getElementEditor } from "@/elements/registry";
 import { Copy, Share2, ArrowLeft, Eye, Globe, ChevronUp, ChevronDown, Settings, Layers, Palette, EyeOff, X, Edit2, Type, Phone, Mail, Globe as GlobeIcon, MapPin, MessageSquare, Link as LinkIcon, Image, Plus, Sliders, ChevronLeft } from "lucide-react";
 import { Link } from "wouter";
 import type { BusinessCard, PageElement } from "@shared/schema";
@@ -1063,166 +1064,29 @@ export default function CardEditor() {
                     </>
                   )}
 
-                  {/* Profile Block Editor with tabs */}
-                  {selectedBlock.type === "profile" && (
-                    <div className="space-y-2">
-                      {blockEditorTab === "content" && (
-                        <>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Full Name</label>
-                            <input
-                              type="text"
-                              value={selectedBlock.data.fullName || ""}
-                              onChange={(e) => updateBlockData(selectedBlock.id, { fullName: e.target.value })}
-                              className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
-                              placeholder="Your name"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Title</label>
-                            <input
-                              type="text"
-                              value={selectedBlock.data.title || ""}
-                              onChange={(e) => updateBlockData(selectedBlock.id, { title: e.target.value })}
-                              className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
-                              placeholder="Your title"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-0.5">Company</label>
-                            <input
-                              type="text"
-                              value={selectedBlock.data.company || ""}
-                              onChange={(e) => updateBlockData(selectedBlock.id, { company: e.target.value })}
-                              className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
-                              placeholder="Your company"
-                            />
-                          </div>
-                        </>
-                      )}
-                      {blockEditorTab === "design" && (
-                        <>
-                          <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <label className="block text-xs font-medium text-gray-700 mb-0.5">Brand Color</label>
-                              <div className="flex items-center space-x-1">
-                                <input
-                                  type="color"
-                                  value={selectedBlock.data.brandColor || "#22c55e"}
-                                  onChange={(e) => updateBlockData(selectedBlock.id, { brandColor: e.target.value })}
-                                  className="w-8 h-8 rounded cursor-pointer border border-gray-300"
-                                />
-                                <span className="text-xs text-gray-500">{selectedBlock.data.brandColor || "#22c55e"}</span>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-xs font-medium text-gray-700 mb-0.5">Accent Color</label>
-                              <div className="flex items-center space-x-1">
-                                <input
-                                  type="color"
-                                  value={selectedBlock.data.accentColor || "#16a34a"}
-                                  onChange={(e) => updateBlockData(selectedBlock.id, { accentColor: e.target.value })}
-                                  className="w-8 h-8 rounded cursor-pointer border border-gray-300"
-                                />
-                                <span className="text-xs text-gray-500">{selectedBlock.data.accentColor || "#16a34a"}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 mt-3">
-                            <input
-                              type="checkbox"
-                              id="showCoverImage"
-                              checked={selectedBlock.data.showCoverImage !== false}
-                              onChange={(e) => updateBlockData(selectedBlock.id, { showCoverImage: e.target.checked })}
-                              className="rounded border-gray-300"
-                            />
-                            <label htmlFor="showCoverImage" className="text-xs text-gray-700">Show Cover Image</label>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              id="showProfilePhoto"
-                              checked={selectedBlock.data.showProfilePhoto !== false}
-                              onChange={(e) => updateBlockData(selectedBlock.id, { showProfilePhoto: e.target.checked })}
-                              className="rounded border-gray-300"
-                            />
-                            <label htmlFor="showProfilePhoto" className="text-xs text-gray-700">Show Profile Photo</label>
-                          </div>
-                        </>
-                      )}
-                      {blockEditorTab === "settings" && (
-                        <>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              id="profileEnabled"
-                              checked={selectedBlock.data.enabled !== false}
-                              onChange={(e) => updateBlockData(selectedBlock.id, { enabled: e.target.checked })}
-                              className="rounded border-gray-300"
-                            />
-                            <label htmlFor="profileEnabled" className="text-xs text-gray-700">Element Visible</label>
-                          </div>
-                          <p className="text-xs text-gray-500">Hide this element without deleting it</p>
-                        </>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Contact Block Editors (phone, email, etc.) with tabs */}
-                  {(selectedBlock.type === "phone" || selectedBlock.type === "email" || 
-                    selectedBlock.type === "website" || selectedBlock.type === "location") && (
-                    <div className="space-y-2">
-                      {blockEditorTab === "content" && (
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-0.5">
-                            {selectedBlock.type.charAt(0).toUpperCase() + selectedBlock.type.slice(1)}
-                          </label>
-                          <input
-                            type="text"
-                            value={selectedBlock.data.value || ""}
-                            onChange={(e) => updateBlockData(selectedBlock.id, { value: e.target.value })}
-                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
-                            placeholder={`Enter ${selectedBlock.type}`}
-                          />
+                  {/* Dynamic Element Editor from Registry (Mobile) */}
+                  {selectedBlock.type !== "contactSection" && (() => {
+                    const EditorComponent = getElementEditor(selectedBlock.type);
+                    if (EditorComponent) {
+                      return (
+                        <EditorComponent
+                          element={selectedBlock}
+                          onUpdate={(updatedElement: any) => {
+                            updateBlockData(selectedBlock.id, updatedElement.data);
+                          }}
+                          cardData={cardData}
+                        />
+                      );
+                    }
+                    return (
+                      <div className="text-center py-4">
+                        <div className="text-gray-400 mb-1">
+                          {getBlockIcon(selectedBlock.type)}
                         </div>
-                      )}
-                      {blockEditorTab === "design" && (
-                        <div className="text-center py-4 text-gray-500 text-sm">
-                          Design options coming soon
-                        </div>
-                      )}
-                      {blockEditorTab === "settings" && (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            id="elementVisible"
-                            checked={selectedBlock.visible !== false}
-                            onChange={(e) => updateBlockData(selectedBlock.id, { visible: e.target.checked })}
-                            className="rounded border-gray-300"
-                          />
-                          <label htmlFor="elementVisible" className="text-xs text-gray-700">Element Visible</label>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Default block editor for unsupported types */}
-                  {!["profile", "phone", "email", "website", "location", "contactSection"].includes(selectedBlock.type) && (
-                    <div className="text-center py-4">
-                      <div className="text-gray-400 mb-1">
-                        {getBlockIcon(selectedBlock.type)}
+                        <p className="text-xs text-gray-600">No editor available</p>
                       </div>
-                      <p className="text-xs text-gray-600">Edit in full editor</p>
-                      <Button
-                        onClick={handleBackToFullEditor}
-                        variant="outline"
-                        size="sm"
-                        className="mt-2 text-xs px-2 py-1"
-                      >
-                        Open Full Editor
-                      </Button>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               ) : (
                 // Compact FormBuilder for full editor
@@ -1416,123 +1280,29 @@ export default function CardEditor() {
                     </>
                   )}
 
-                  {/* Profile Block Editor */}
-                  {selectedBlock.type === "profile" && (
-                    <div className="space-y-3">
-                      {blockEditorTab === "content" && (
-                        <>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Full Name</label>
-                            <input
-                              type="text"
-                              value={selectedBlock.data.fullName || ""}
-                              onChange={(e) => updateBlockData(selectedBlock.id, { fullName: e.target.value })}
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
-                              placeholder="Your name"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Title</label>
-                            <input
-                              type="text"
-                              value={selectedBlock.data.title || ""}
-                              onChange={(e) => updateBlockData(selectedBlock.id, { title: e.target.value })}
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
-                              placeholder="Your title"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Company</label>
-                            <input
-                              type="text"
-                              value={selectedBlock.data.company || ""}
-                              onChange={(e) => updateBlockData(selectedBlock.id, { company: e.target.value })}
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-transparent"
-                              placeholder="Your company"
-                            />
-                          </div>
-                        </>
-                      )}
-                      {blockEditorTab === "design" && (
-                        <>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="block text-xs font-medium text-gray-700 mb-1">Brand Color</label>
-                              <div className="flex items-center space-x-2">
-                                <input
-                                  type="color"
-                                  value={selectedBlock.data.brandColor || "#22c55e"}
-                                  onChange={(e) => updateBlockData(selectedBlock.id, { brandColor: e.target.value })}
-                                  className="w-8 h-8 rounded cursor-pointer border border-gray-300"
-                                />
-                                <span className="text-xs text-gray-500">{selectedBlock.data.brandColor || "#22c55e"}</span>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-xs font-medium text-gray-700 mb-1">Accent Color</label>
-                              <div className="flex items-center space-x-2">
-                                <input
-                                  type="color"
-                                  value={selectedBlock.data.accentColor || "#16a34a"}
-                                  onChange={(e) => updateBlockData(selectedBlock.id, { accentColor: e.target.value })}
-                                  className="w-8 h-8 rounded cursor-pointer border border-gray-300"
-                                />
-                                <span className="text-xs text-gray-500">{selectedBlock.data.accentColor || "#16a34a"}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="space-y-2 mt-3">
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                id="showCoverImage"
-                                checked={selectedBlock.data.showCoverImage !== false}
-                                onChange={(e) => updateBlockData(selectedBlock.id, { showCoverImage: e.target.checked })}
-                                className="rounded border-gray-300"
-                              />
-                              <label htmlFor="showCoverImage" className="text-xs text-gray-700">Show Cover Image</label>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                id="showProfilePhoto"
-                                checked={selectedBlock.data.showProfilePhoto !== false}
-                                onChange={(e) => updateBlockData(selectedBlock.id, { showProfilePhoto: e.target.checked })}
-                                className="rounded border-gray-300"
-                              />
-                              <label htmlFor="showProfilePhoto" className="text-xs text-gray-700">Show Profile Photo</label>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                      {blockEditorTab === "settings" && (
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              id="profileEnabled"
-                              checked={selectedBlock.data.enabled !== false}
-                              onChange={(e) => updateBlockData(selectedBlock.id, { enabled: e.target.checked })}
-                              className="rounded border-gray-300"
-                            />
-                            <label htmlFor="profileEnabled" className="text-xs text-gray-700">Element Visible</label>
-                          </div>
-                          <p className="text-xs text-gray-500">Hide this element without deleting it</p>
+                  {/* Dynamic Element Editor from Registry */}
+                  {selectedBlock.type !== "contactSection" && (() => {
+                    const EditorComponent = getElementEditor(selectedBlock.type);
+                    if (EditorComponent) {
+                      return (
+                        <EditorComponent
+                          element={selectedBlock}
+                          onUpdate={(updatedElement: any) => {
+                            updateBlockData(selectedBlock.id, updatedElement.data);
+                          }}
+                          cardData={cardData}
+                        />
+                      );
+                    }
+                    return (
+                      <div className="text-center py-6">
+                        <div className="text-gray-400 mb-2">
+                          {getBlockIcon(selectedBlock.type)}
                         </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Generic Element Editor */}
-                  {!["profile", "contactSection"].includes(selectedBlock.type) && (
-                    <div className="text-center py-6">
-                      <div className="text-gray-400 mb-2">
-                        {getBlockIcon(selectedBlock.type)}
+                        <p className="text-sm text-gray-600 mb-3">No editor available for this element</p>
                       </div>
-                      <p className="text-sm text-gray-600 mb-3">Advanced editing for this element</p>
-                      <p className="text-xs text-gray-500">Edit options available in full editor mode</p>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               </div>
             )}
