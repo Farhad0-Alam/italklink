@@ -29,7 +29,8 @@ const ELEMENT_TYPE_TO_ID: Record<string, number> = {
   image: 7,
   qrcode: 8,
   video: 9,
-  contactForm: 10,
+  textEditor: 10,
+  contactForm: 11,
   accordion: 11,
   imageSlider: 12,
   testimonials: 13,
@@ -61,7 +62,7 @@ const elementCategories = [
   },
   {
     name: "Basic",
-    elements: ["heading", "paragraph", "image", "video", "link"]
+    elements: ["heading", "paragraph", "textEditor", "image", "video", "link"]
   },
   {
     name: "Contact",
@@ -184,6 +185,16 @@ const getDefaultElementConfig = (type: string, id: string): any => {
         alignment: "left" as const,
         size: "base",
         color: "#374151"
+      };
+    case "textEditor":
+      return {
+        content: "<p>Add your text here. Click to edit.</p>",
+        alignment: "left" as const,
+        fontSize: 16,
+        fontWeight: "normal",
+        lineHeight: 1.6,
+        dropCap: false,
+        columns: 1
       };
     case "contactSection":
       return { 
