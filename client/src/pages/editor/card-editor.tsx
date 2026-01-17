@@ -1385,7 +1385,7 @@ export default function CardEditor() {
 
         {/* Main Preview Area */}
         <div className="flex-1 bg-gray-100 p-4 overflow-auto">
-          <div className="max-w-md mx-auto">
+          <div className="mx-auto" style={{ width: '375px' }}>
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
               {(cardData as any).currentPreviewMode === "page" && getCurrentPageData() ? (
                 <PagePreview
