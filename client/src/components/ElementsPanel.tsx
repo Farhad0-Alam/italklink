@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Layout, Type, Image, Video, Phone, Share2, Link, FileText, MessageSquare, Map, Bot, Calendar, ShoppingBag, Layers, ChevronDown, ChevronRight, Plus, User, Trash2, Home } from "lucide-react";
+import { Search, Layout, Type, Image, Video, Phone, Share2, Link, FileText, MessageSquare, Map, Bot, Calendar, ShoppingBag, Layers, ChevronDown, ChevronRight, Plus, User, Trash2, Home, AlignLeft } from "lucide-react";
 import { generateFieldId } from "@/lib/card-data";
 import { PageElement } from "@shared/schema";
 import { useUserPlan } from "@/hooks/useUserPlan";
@@ -95,6 +95,7 @@ const getElementIcon = (type: string) => {
     profile: User,
     heading: Type,
     paragraph: FileText,
+    textEditor: AlignLeft,
     image: Image,
     video: Video,
     link: Link,
@@ -133,6 +134,7 @@ const getElementTitle = (type: string) => {
     profile: "Profile Section",
     heading: "Heading",
     paragraph: "Paragraph",
+    textEditor: "Text Editor",
     image: "Image",
     video: "Video",
     link: "3D Button",

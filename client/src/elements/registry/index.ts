@@ -3,6 +3,7 @@ import { generateFieldId } from "@/lib/card-data";
 
 import headingConfig from "../heading";
 import paragraphConfig from "../paragraph";
+import textEditorConfig from "../textEditor";
 import profileConfig from "../profile";
 import linkConfig from "../link";
 import imageConfig from "../image";
@@ -36,6 +37,7 @@ import htmlConfig from "../html";
 export const elementRegistry: ElementRegistry = {
   heading: headingConfig,
   paragraph: paragraphConfig,
+  textEditor: textEditorConfig,
   profile: profileConfig,
   link: linkConfig,
   image: imageConfig,
@@ -74,7 +76,7 @@ export const elementCategories: { name: ElementCategory; elements: string[] }[] 
   },
   {
     name: "Basic",
-    elements: ["heading", "paragraph", "image", "video", "link"]
+    elements: ["heading", "paragraph", "textEditor", "image", "video", "link"]
   },
   {
     name: "Contact",
