@@ -13,7 +13,8 @@ import { useAutoSave } from "@/contexts/AutoSaveContext";
 import { ElementsPanel } from "@/components/ElementsPanel";
 import { StructurePanel } from "@/components/StructurePanel";
 import { getElementEditor } from "@/elements/registry";
-import { Copy, Share2, ArrowLeft, Eye, Globe, ChevronUp, ChevronDown, Settings, Layers, Palette, EyeOff, X, Edit2, Type, Phone, Mail, Globe as GlobeIcon, MapPin, MessageSquare, Link as LinkIcon, Image, Plus, Sliders, ChevronLeft } from "lucide-react";
+import { Copy, Share2, ArrowLeft, Eye, Globe, ChevronUp, ChevronDown, Settings, Layers, Palette, EyeOff, X, Edit2, Type, Phone, Mail, Globe as GlobeIcon, MapPin, MessageSquare, Link as LinkIcon, Image, Plus, Sliders, ChevronLeft, MoreHorizontal, Trash2 } from "lucide-react";
+import { ElementContextMenu, ElementClipboard } from "@/components/ElementContextMenu";
 import { Link } from "wouter";
 import type { BusinessCard, PageElement } from "@shared/schema";
 
@@ -278,6 +279,10 @@ export default function CardEditor() {
   const [customUrlSlug, setCustomUrlSlug] = useState<string>(customUrlFromTemplate || "");
   const [isPublishing, setIsPublishing] = useState(false);
 
+  // Clipboard for copy/paste element operations
+  const clipboardRef = useRef<ElementClipboard>({});
+  const [clipboard, setClipboard] = useState<ElementClipboard>({});
+
   useEffect(() => {
     if (params.id) {
       setAutoSaveCardId(params.id);
@@ -351,11 +356,12 @@ export default function CardEditor() {
     setSidebarView("elements");
   };
 
-  // Function to add new element to the card
+  // Function to add new element to the card (respects current page)
   const handleAddElement = (element: PageElement) => {
+    const activePageId = currentPageId || "home";
     const updatedPageElements = [...cardData.pageElements, element];
     const updatedPages = cardData.pages.map((page: any) => {
-      if (page.id === "home") {
+      if (page.id === activePageId) {
         return {
           ...page,
           elements: [...page.elements, element]
@@ -390,19 +396,17 @@ export default function CardEditor() {
       return element;
     });
 
+    // Update in all pages where the element exists
     const updatedPages = cardData.pages.map((page: any) => {
-      if (page.id === "home") {
-        return {
-          ...page,
-          elements: page.elements.map((element: any) => {
-            if (element.id === elementId) {
-              return { ...element, visible };
-            }
-            return element;
-          })
-        };
-      }
-      return page;
+      return {
+        ...page,
+        elements: page.elements.map((element: any) => {
+          if (element.id === elementId) {
+            return { ...element, visible };
+          }
+          return element;
+        })
+      };
     });
 
     const updatedCardData = {
@@ -495,6 +499,102 @@ export default function CardEditor() {
     }
   };
 
+  // Element context menu actions
+  const handleCopyElement = useCallback(() => {
+    if (!selectedBlock) return;
+    const elementToCopy = { ...selectedBlock };
+    clipboardRef.current = { element: elementToCopy };
+    setClipboard({ element: elementToCopy });
+    toast({ title: "Element copied", description: "Use Paste to add a copy" });
+  }, [selectedBlock, toast]);
+
+  const handleCopyStyle = useCallback(() => {
+    if (!selectedBlock) return;
+    const styleToCopy = { ...selectedBlock.data };
+    clipboardRef.current = { style: styleToCopy };
+    setClipboard({ style: styleToCopy });
+    toast({ title: "Style copied", description: "Use Paste to apply style to another element" });
+  }, [selectedBlock, toast]);
+
+  const handlePasteElement = useCallback(() => {
+    const clip = clipboardRef.current;
+    if (!clip.element && !clip.style) return;
+
+    if (clip.style && selectedBlock) {
+      // Paste style to selected element
+      const newData = { ...selectedBlock.data, ...clip.style };
+      updateBlockData(selectedBlock.id, newData);
+      toast({ title: "Style applied", description: "Style pasted to element" });
+    } else if (clip.element) {
+      // Duplicate the copied element
+      const newId = crypto.randomUUID ? crypto.randomUUID() : `el-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      const newElement = {
+        ...clip.element,
+        id: newId,
+        order: cardData.pageElements.length,
+      };
+      handleAddElement(newElement);
+      toast({ title: "Element pasted", description: "A copy of the element has been added" });
+    }
+  }, [selectedBlock, cardData.pageElements.length, toast]);
+
+  const handleDuplicateElement = useCallback(() => {
+    if (!selectedBlock) return;
+    const newId = crypto.randomUUID ? crypto.randomUUID() : `el-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const duplicatedElement = {
+      ...selectedBlock,
+      id: newId,
+      order: cardData.pageElements.length,
+    };
+    handleAddElement(duplicatedElement);
+    toast({ title: "Element duplicated", description: "A copy of the element has been added" });
+  }, [selectedBlock, cardData.pageElements.length, toast]);
+
+  const handleDeleteElement = useCallback(() => {
+    if (!selectedBlock) return;
+    const elementId = selectedBlock.id;
+
+    // Remove from pageElements
+    const updatedPageElements = cardData.pageElements.filter((el: any) => el.id !== elementId);
+
+    // Remove from pages
+    const updatedPages = cardData.pages.map((page: any) => ({
+      ...page,
+      elements: page.elements.filter((el: any) => el.id !== elementId),
+    }));
+
+    const updatedCardData = {
+      ...cardData,
+      pageElements: updatedPageElements,
+      pages: updatedPages,
+    };
+
+    setCardData(updatedCardData as any);
+    setSelectedBlock(null);
+    setEditorMode("full");
+    setSidebarView("elements");
+
+    if (user && hasHydratedRef.current) {
+      markDirty();
+    }
+
+    toast({ title: "Element deleted", description: "The element has been removed" });
+  }, [selectedBlock, cardData, user, toast]);
+
+  const handleLockElement = useCallback((locked: boolean) => {
+    if (!selectedBlock) return;
+    const newData = { ...selectedBlock.data, locked };
+    updateBlockData(selectedBlock.id, newData);
+    toast({ title: locked ? "Element locked" : "Element unlocked" });
+  }, [selectedBlock, toast]);
+
+  const handleAlignElement = useCallback((alignment: "left" | "center" | "right") => {
+    if (!selectedBlock) return;
+    const newData = { ...selectedBlock.data, containerAlignment: alignment };
+    updateBlockData(selectedBlock.id, newData);
+    toast({ title: `Aligned to ${alignment}` });
+  }, [selectedBlock, toast]);
+
   // Function to update a specific block - replaces data entirely to ensure removals propagate
   const updateBlockData = (blockId: string, updatedData: any) => {
     // Update in pageElements - fully replace the data object
@@ -508,23 +608,20 @@ export default function CardEditor() {
       return element;
     });
 
-    // Update in pages (for home page) - fully replace the data object
+    // Update in all pages where the element exists - fully replace the data object
     const updatedPages = cardData.pages.map((page: any) => {
-      if (page.id === "home") {
-        return {
-          ...page,
-          elements: page.elements.map((element: any) => {
-            if (element.id === blockId) {
-              return {
-                ...element,
-                data: updatedData
-              };
-            }
-            return element;
-          })
-        };
-      }
-      return page;
+      return {
+        ...page,
+        elements: page.elements.map((element: any) => {
+          if (element.id === blockId) {
+            return {
+              ...element,
+              data: updatedData
+            };
+          }
+          return element;
+        })
+      };
     });
 
     const updatedCardData = {
@@ -534,6 +631,11 @@ export default function CardEditor() {
     };
 
     setCardData(updatedCardData as any);
+
+    // Also update selectedBlock to reflect the changes immediately
+    if (selectedBlock && selectedBlock.id === blockId) {
+      setSelectedBlock({ ...selectedBlock, data: updatedData });
+    }
 
     // Mark as dirty (manual save on Publish)
     if (user && hasHydratedRef.current) {
@@ -1074,19 +1176,33 @@ export default function CardEditor() {
                 <span className="text-xs font-medium text-gray-700">Close Editor</span>
               )}
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-1">
               {editorMode === "block" && selectedBlock && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleBackToFullEditor();
-                  }}
-                  className="text-gray-500 hover:text-gray-700 p-1 mr-1"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </Button>
+                <>
+                  <ElementContextMenu
+                    element={selectedBlock}
+                    clipboard={clipboard}
+                    onCopy={handleCopyElement}
+                    onCopyStyle={handleCopyStyle}
+                    onPaste={handlePasteElement}
+                    onDuplicate={handleDuplicateElement}
+                    onDelete={handleDeleteElement}
+                    onLock={handleLockElement}
+                    onAlign={handleAlignElement}
+                    isLocked={selectedBlock.data?.locked}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBackToFullEditor();
+                    }}
+                    className="text-gray-500 hover:text-gray-700 p-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </Button>
+                </>
               )}
               {editorDrawerOpen ? (
                 <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
@@ -1304,7 +1420,7 @@ export default function CardEditor() {
 
             {sidebarView === "editor" && selectedBlock && (
               <div className="h-full flex flex-col bg-slate-800">
-                {/* Editor Header with Back Button */}
+                {/* Editor Header with Back Button and Context Menu */}
                 <div className="p-3 border-b border-slate-700">
                   <div className="flex items-center justify-between mb-2">
                     <Button
@@ -1316,7 +1432,21 @@ export default function CardEditor() {
                       <ChevronLeft className="w-3.5 h-3.5 mr-1" />
                       Back
                     </Button>
-                    <span className="text-xs text-slate-400">Edit {getBlockTitle(selectedBlock)}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-400">Edit {getBlockTitle(selectedBlock)}</span>
+                      <ElementContextMenu
+                        element={selectedBlock}
+                        clipboard={clipboard}
+                        onCopy={handleCopyElement}
+                        onCopyStyle={handleCopyStyle}
+                        onPaste={handlePasteElement}
+                        onDuplicate={handleDuplicateElement}
+                        onDelete={handleDeleteElement}
+                        onLock={handleLockElement}
+                        onAlign={handleAlignElement}
+                        isLocked={selectedBlock.data?.locked}
+                      />
+                    </div>
                   </div>
                 </div>
 
