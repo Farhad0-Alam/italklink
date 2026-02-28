@@ -118,6 +118,7 @@ import { pwaRouter } from './routes/pwa';
 import emailNotificationRoutes from './email-notification-routes';
 import { notificationScheduler } from './notification-scheduler';
 import { setupAnalyticsRoutes } from './analytics-routes';
+import databaseRoutes from './api/database';
 import { setupCalendarRoutes } from './calendar-routes';
 import { setupVideoMeetingRoutes } from './video-meeting-routes';
 import { setupWebhookRoutes, calendarSyncWorker } from './webhook-routes';
@@ -159,6 +160,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup admin routes
   app.use('/api/admin', adminRoutes);
+
+  // Setup database export routes
+  app.use('/api/database', databaseRoutes);
 
   // Setup shop routes
   app.use('/api/shop', shopRoutes);
